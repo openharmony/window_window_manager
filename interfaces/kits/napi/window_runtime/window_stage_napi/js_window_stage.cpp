@@ -1099,13 +1099,6 @@ napi_value JsWindowStage::OnSetSupportedWindowModes(napi_env env, napi_callback_
 
 napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info info)
 {
-    auto windowScene = windowScene_.lock();
-    if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "WindowScene is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-        return NapiGetUndefined(env);
-    }
-
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1146,10 +1139,15 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
 
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
-    auto asyncTask = [weakWindow = wptr(window), where, env, imgResourceId, pixelMap, imageFit, task = napiAsyncTask] {
-        auto window = weakWindow.promote();
+    auto asyncTask = [weakWindow = windowScene_, where, env, imgResourceId, pixelMap, imageFit, task = napiAsyncTask] {
+        auto windowScene = weakWindow.lock();
+        if (windowScene == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s windowScene is null", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        auto window = windowScene->GetMainWindow();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s window is nullptr", where);
             WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);
@@ -1177,19 +1175,17 @@ napi_value JsWindowStage::OnSetImageForRecent(napi_env env, napi_callback_info i
 
 napi_value JsWindowStage::OnRemoveImageForRecent(napi_env env, napi_callback_info info)
 {
-    auto windowScene = windowScene_.lock();
-    if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "WindowScene is null");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-        return NapiGetUndefined(env);
-    }
-
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto window = windowScene->GetMainWindow();
     const char* const where = __func__;
-    auto asyncTask = [weakWindow = wptr(window), where, env, task = napiAsyncTask] {
-        auto window = weakWindow.promote();
+    auto asyncTask = [weakWindow = windowScene_, where, env, task = napiAsyncTask] {
+        auto windowScene = weakWindow.lock();
+        if (windowScene == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s windowScene is null", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
+        }
+        auto window = windowScene->GetMainWindow();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s window is nullptr", where);
             WmErrorCode wmErroeCode = WM_JS_TO_ERROR_CODE_MAP.at(WMError::WM_ERROR_NULLPTR);

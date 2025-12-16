@@ -74,8 +74,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
-constexpr int32_t FORCE_SPLIT_MODE = 5;
-constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t API_VERSION_MOD = 1000;
@@ -2308,7 +2306,7 @@ void WindowSessionImpl::RegisterKeyFrameCallback()
     });
 }
 
-WSError WindowSessionImpl::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode>& rsKeyFrameNode)
+WSError WindowSessionImpl::LinkKeyFrameNode()
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     auto uiContent = GetUIContentSharedPtr();
@@ -2317,8 +2315,7 @@ WSError WindowSessionImpl::LinkKeyFrameNode(std::shared_ptr<RSWindowKeyFrameNode
         TLOGE(WmsLogTag::WMS_EVENT, "uiContent or session is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    RSAdapterUtil::SetRSUIContext(rsKeyFrameNode, GetRSUIContext(), true);
-    uiContent->LinkKeyFrameNode(rsKeyFrameNode);
+    uiContent->LinkKeyFrameNode();
     return WSError::WS_OK;
 }
 
@@ -2368,21 +2365,40 @@ WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
     return SingletonContainer::Get<WindowAdapter>().NotifyWatchFocusActiveChange(isActive);
 }
 
-void WindowSessionImpl::SetForceSplitEnable(AppForceLandscapeConfig& config)
+void WindowSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
 {
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
         return;
     }
-    bool isForceSplit = (config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE);
-    bool isRouter = (config.supportSplit_ == FORCE_SPLIT_MODE);
-    TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}u, isForceSplit: %{public}u, homePage: %{public}s, "
-        "supportSplit: %{public}d, isRouter: %{public}u, arkUIOptions: %{public}s, ignoreOrientation: %{public}d",
-        GetWindowId(), isForceSplit, config.homePage_.c_str(), config.supportSplit_, isRouter,
-        config.arkUIOptions_.c_str(), config.ignoreOrientation_);
-    uiContent->SetForceSplitConfig(config.arkUIOptions_);
-    uiContent->SetForceSplitEnable(isForceSplit, config.homePage_, isRouter, config.ignoreOrientation_);
+    TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, enableForceSplit: %{public}u",
+        enableForceSplit);
+    uiContent->SetForceSplitEnable(enableForceSplit);
+}
+
+void WindowSessionImpl::SetForceSplitConfig(const AppForceLandscapeConfig& config)
+{
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
+        return;
+    }
+    AppForceSplitConfig appForceSplitConfig;
+    SystemForceSplitConfig systemForceSplitConfig;
+    if (config.hasChanged_) {
+        if (config.containsAppConfig_) {
+            appForceSplitConfig.isRouter = config.isAppRouter_;
+            appForceSplitConfig.configJsonStr = config.appConfigJsonStr_;
+        } else if (config.containsSysConfig_) {
+            systemForceSplitConfig.isRouter = config.isSysRouter_;
+            systemForceSplitConfig.homePage = config.sysHomePage_;
+            systemForceSplitConfig.configJsonStr = config.sysConfigJsonStr_;
+        }
+    }
+    uiContent->SetForceSplitConfig(
+        config.containsSysConfig_ ? std::make_optional(systemForceSplitConfig) : std::nullopt,
+        config.containsAppConfig_ ? std::make_optional(appForceSplitConfig) : std::nullopt);
 }
 
 void WindowSessionImpl::SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
@@ -2461,7 +2477,11 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.supportSplit_ > 0) {
-        SetForceSplitEnable(config);
+        SetForceSplitConfig(config);
+    }
+    bool enableForceSplit = false;
+    if (GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
+        SetForceSplitConfigEnable(enableForceSplit);
     }
 
     uint32_t version = 0;
@@ -2552,7 +2572,8 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         WindowMode mode = GetWindowMode();
         bool decorVisible = mode == WindowMode::WINDOW_MODE_FLOATING ||
             mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
-            (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen());
+            (mode == WindowMode::WINDOW_MODE_FULLSCREEN && !property_->IsLayoutFullScreen() && !(IsAnco() &&
+            IsPcOrPadFreeMultiWindowMode()));
         TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d", decorVisible);
         if (windowSystemConfig_.freeMultiWindowSupport_) {
             auto isSubWindow = WindowHelper::IsSubWindow(GetType());
@@ -7500,7 +7521,8 @@ WMError WindowSessionImpl::UpdateStatusBarColorByColorMode(uint32_t& contentColo
 {
     SystemBarProperty statusBarProp = property_->GetSystemBarProperty().at(WindowType::WINDOW_TYPE_STATUS_BAR);
     if (static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(statusBarProp.settingFlag_) &
-        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING) {
+        static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) == SystemBarSettingFlag::COLOR_SETTING ||
+        systemBarSettingFlag_ == SystemBarSettingFlag::COLOR_SETTING) {
         TLOGD(WmsLogTag::WMS_IMMS, "user has set color");
         return WMError::WM_DO_NOTHING;
     }
@@ -8243,6 +8265,11 @@ void WindowSessionImpl::SetTouchEvent(int32_t touchType)
 }
 
 WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
+{
+    return WSError::WS_DO_NOTHING;
+}
+
+WSError WindowSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
 {
     return WSError::WS_DO_NOTHING;
 }

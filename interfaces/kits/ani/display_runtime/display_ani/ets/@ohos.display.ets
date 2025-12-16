@@ -26,6 +26,7 @@ const CUTO_ARRAY_LENGTH = 5;
 const CREASE_RECTS_LENGTH = 10;
 const DISPLAY_PHYSICAL_RESOLUTION_LENGTH = 15;
 const ERROR_INVALID_PARAM = 401;
+const ROUNDED_CORNER_LENGTH = 4;
 
 export interface Rect {
     left: long;
@@ -91,6 +92,26 @@ export class CutoutInfoImpl implements CutoutInfo {
     readonly boundingRects: Array<Rect>;
 
     readonly waterfallDisplayAreaRects: WaterfallDisplayAreaRects;
+}
+
+export interface RoundedCorner {
+    readonly type: CornerType;
+
+    readonly position: Position;
+
+    readonly radius: int;
+}
+
+export class RoundedCornerImpl implements RoundedCorner {
+    constructor() {
+        this.position = new PositionImpl();
+    }
+
+    readonly type: CornerType;
+
+    readonly position: Position;
+
+    readonly radius: int;
 }
 
 export interface FoldCreaseRegion {
@@ -244,6 +265,17 @@ export enum DisplaySourceMode {
     ALONE = 4
 }
 
+export enum CornerType {
+
+    TOP_LEFT = 0,
+
+    TOP_RIGHT = 1,
+
+    BOTTOM_RIGHT = 2,
+
+    BOTTOM_LEFT = 3
+}
+
 export interface Display {
     id: long;
 
@@ -294,6 +326,8 @@ export interface Display {
     getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void;
 
     getCutoutInfo(): Promise<CutoutInfo>;
+
+    getRoundedCorner(): Array<RoundedCorner>;
 
     getAvailableArea(): Promise<Rect>;
 
@@ -403,6 +437,16 @@ export class DisplayImpl implements Display {
         });
     }
 
+    getRoundedCorner(): Array<RoundedCorner> {
+        let res: Array<RoundedCorner> = new Array<RoundedCorner>(ROUNDED_CORNER_LENGTH);
+        for (let i = 0; i < res.length; i++) {
+            res[i] = new RoundedCornerImpl();
+        }
+        this.getRoundedCornerInternal(res);
+        minusRoundedCornerArray(res);
+        return res;
+    }
+
     hasImmersiveWindow(callback: AsyncCallback<boolean>): void {
         taskpool.execute((): boolean => {
             return this.hasImmersiveWindowInternal();
@@ -489,6 +533,7 @@ export class DisplayImpl implements Display {
     native getAvailableAreaInternal(rect: Rect): void;
     native getLiveCreaseRegionInternal(foldCreaseRegion: object):FoldCreaseRegion;
     native getCutoutInfoInternal(cutoutInfo: CutoutInfo): void;
+    native getRoundedCornerInternal(roundedCorner: Array<RoundedCorner>): void;
     native getDisplayCapabilityInternal(): string;
     native hasImmersiveWindowInternal(): boolean;
 
@@ -503,6 +548,12 @@ function minusRectArray(rectArr: Array<Rect>): void {
             rectArr.splice(i);
             break;
         }
+    }
+}
+
+function minusRoundedCornerArray(cornerArr: Array<RoundedCorner>): void {
+    if (cornerArr[0].radius == 0) {
+        cornerArr.splice(0);
     }
 }
 

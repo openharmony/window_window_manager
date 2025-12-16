@@ -3286,6 +3286,74 @@ HWTEST_F(SceneSessionManagerTest12, RecoverOutline, Function | SmallTest | Level
     ssm->OnRecoverStateChange(RecoverState::RECOVER_ENABLE_INPUT);
     EXPECT_EQ(false, ssm->needRecoverOutline_);
 }
+
+/**
+ * @tc.name: ReportWindowProfileInfosTest
+ * @tc.desc: ReportWindowProfileInfosTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, ReportWindowProfileInfosTest, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto isScreenLocked = ssm_->isScreenLocked_;
+    ssm_->isScreenLocked_ = true;
+    ssm_->ReportWindowProfileInfos();
+    ssm_->isScreenLocked_ = isScreenLocked;
+ 
+    SessionInfo sessionInfo;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
+    ssm_->isScreenLocked_ = false;
+    auto visibilityState = sceneSession->GetVisibilityState();
+    ASSERT_EQ(sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION), WSError::WS_OK);
+    ASSERT_EQ(sceneSession->GetVisibilityState(), WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
+    ssm_->ReportWindowProfileInfos();
+ 
+    auto state = sceneSession->GetSessionState();
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->ReportWindowProfileInfos();
+    sceneSession->SetSessionState(state);
+ 
+    ASSERT_EQ(sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION), WSError::WS_OK);
+    ssm_->ReportWindowProfileInfos();
+ 
+    for (int id = 0; id < 51; id++) {
+        ssm_->sceneSessionMap_.insert({ id, sceneSession });
+    }
+    ssm_->ReportWindowProfileInfos();
+}
+
+/**
+ * @tc.name: FillWindowProfileInfoTest
+ * @tc.desc: FillWindowProfileInfoTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, FillWindowProfileInfoTest, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.persistentId_ = 1;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto focusWindowId = static_cast<int32_t>(sceneSession->GetWindowId());
+    ssm_->FillWindowProfileInfo(sceneSession, focusWindowId);
+ 
+    focusWindowId = 0;
+    auto state = sceneSession->GetSessionState();
+    sceneSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    ssm_->FillWindowProfileInfo(sceneSession, focusWindowId);
+    sceneSession->SetSessionState(state);
+ 
+    auto visibilityState = sceneSession->GetVisibilityState();
+    ssm_->FillWindowProfileInfo(sceneSession, focusWindowId);
+ 
+    ASSERT_EQ(sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION), WSError::WS_OK);
+    ssm_->FillWindowProfileInfo(sceneSession, focusWindowId);
+ 
+    ASSERT_EQ(sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION), WSError::WS_OK);
+    ssm_->FillWindowProfileInfo(sceneSession, focusWindowId);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

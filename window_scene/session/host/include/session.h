@@ -122,6 +122,7 @@ using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistent
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
 using NotifyRestartAppFunc = std::function<void(const SessionInfo& info, int32_t callingPid)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
+using GetRsCmdBlockingCountFunc = std::function<int32_t()>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -297,7 +298,7 @@ public:
     bool CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surfaceNode) const;
     bool GetNeedUseBlurSnapshot() const;
     void UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo);
-    virtual bool GetIsPrivacyMode() const { return false; };
+    bool GetIsPrivacyMode() const { return property_->GetPrivacyMode(); };
     void SetSnapshotPrivacyMode(bool privacyMode) { snapshotPrivacyMode_.store(privacyMode); };
     bool GetSnapshotPrivacyMode() const;
     std::atomic<bool> snapshotPrivacyMode_ { false };
@@ -455,6 +456,7 @@ public:
     void ClearDialogVector();
     WSError NotifyDestroy();
     WSError NotifyAppForceLandscapeConfigUpdated();
+    WSError NotifyAppForceLandscapeConfigEnableUpdated();
     WSError NotifyCloseExistPipWindow();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
@@ -481,6 +483,7 @@ public:
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
+    bool GetWindowTouchableForMMI(DisplayId displayId) const;
     virtual WSError SetRSVisible(bool isVisible);
     bool GetRSVisible() const;
     WSError SetVisibilityState(WindowVisibilityState state);
@@ -749,6 +752,8 @@ public:
     WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
     WSError NotifyAppHookWindowInfoUpdated();
+    void NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason reason);
+    void SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func);
 
     /*
      * Screen Lock
@@ -780,6 +785,7 @@ public:
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
     void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
+    WSError UpdateBrightness(float brightness);
 
     /*
      * Window Pattern
@@ -988,6 +994,7 @@ protected:
     NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
+    GetRsCmdBlockingCountFunc getRsCmdBlockingCountFunc_;
     sptr<LayoutController> layoutController_ = nullptr;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     std::atomic<uint32_t> crossPlaneState_ = 0;

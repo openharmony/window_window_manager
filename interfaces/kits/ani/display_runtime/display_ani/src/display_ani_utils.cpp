@@ -131,6 +131,37 @@ void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysic
     }
 }
 
+void DisplayAniUtils::ConvertRoundedCorner(const std::vector<RoundedCorner>& roundedCornerArray,
+    ani_object arrayObj, ani_env *env)
+{
+    ani_int arrayObjLen;
+    env->Object_GetPropertyByName_Int(arrayObj, "length", &arrayObjLen);
+    for (uint32_t i = 0; i < roundedCornerArray.size() && i < static_cast<uint32_t>(arrayObjLen); i++) {
+        ani_ref obj;
+        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;", &obj, (ani_int)i);
+        env->Object_SetFieldByName_Ref(static_cast<ani_object>(obj), "<property>type",
+            DisplayAniUtils::CreateAniEnum(env, "@ohos.display.display.CornerType",
+            static_cast<ani_size>(roundedCornerArray[i].type)));
+
+        ani_object positionObj = CreatePositionObject(env);
+        if (positionObj == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Create position object failed");
+            return;
+        }
+        if (ANI_OK != env->Object_SetFieldByName_Long(positionObj, "<property>x", roundedCornerArray[i].position.x)) {
+            return;
+        }
+        if (ANI_OK != env->Object_SetFieldByName_Long(positionObj, "<property>y", roundedCornerArray[i].position.y)) {
+            return;
+        }
+        if (ANI_OK != env->Object_SetFieldByName_Ref(static_cast<ani_object>(obj), "<property>position", positionObj)) {
+            return;
+        }
+        env->Object_SetFieldByName_Int(static_cast<ani_object>(obj), "<property>radius",
+            roundedCornerArray[i].radius);
+    }
+}
+
 ani_enum_item DisplayAniUtils::CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index)
 {
     ani_enum enumType;

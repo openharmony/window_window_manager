@@ -3009,13 +3009,6 @@ public:
      * @return True means phone, pad or pc window, false means the opposite.
      */
     virtual bool IsPhonePadOrPcWindow() const { return false; }
-    
-    /**
-     * @brief Get target api version.
-     *
-     * @return API version.
-     */
-    virtual uint32_t GetTargetAPIVersion() const { return API_VERSION_INVALID; }
 
     /**
      * @brief Is pc window or pad free multi-window.
@@ -3365,6 +3358,17 @@ public:
      * @return WMError
      */
     virtual WMError SetSystemBarPropertyForPage(WindowType type, std::optional<SystemBarProperty> property)
+    {
+        return WMError::WM_OK;
+    }
+
+    /*
+     * @brief Set Status Bar Color For Page
+     *
+     * @param color Status Bar Color
+     * @return WMError
+     */
+    virtual WMError SetStatusBarColorForPage(const std::optional<uint32_t> color)
     {
         return WMError::WM_OK;
     }
@@ -4966,7 +4970,11 @@ public:
      *
      * @param rects Hot areas of anco window.
      */
-    static std::vector<Rect> GetAncoWindowHotAreas();
+    virtual std::vector<Rect> GetAncoWindowHotAreas()
+    {
+        std::vector<Rect> rectAreas;
+        return rectAreas;
+    }
 
     /**
      * @brief Check if the current device is in free window mode.

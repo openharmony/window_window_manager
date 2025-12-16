@@ -1178,6 +1178,24 @@ HWTEST_F(ScreenSessionManagerTest, SetPixelFormat, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRoundedCorner
+ * @tc.desc: GetRoundedCorner test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetRoundedCorner, TestSize.Level1)
+{
+    std::vector<RoundedCorner> roundedCorner;
+    int radius = 0;
+    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetRoundedCorner(0, radius));
+    ScreenId id = 0;
+    sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
+    ssm_->screenSessionMap_[id] = screenSession;
+    ASSERT_NE(nullptr, screenSession);
+    auto ret = ssm_->GetRoundedCorner(0, radius);
+    EXPECT_EQ(DMError::DM_OK, ret);
+}
+
+/**
  * @tc.name: GetSupportedHDRFormats
  * @tc.desc: GetSupportedHDRFormats test
  * @tc.type: FUNC
@@ -1193,6 +1211,25 @@ HWTEST_F(ScreenSessionManagerTest, GetSupportedHDRFormats, TestSize.Level1)
     ASSERT_NE(nullptr, screenSession);
     EXPECT_EQ(ssm_->GetSupportedHDRFormats(id, hdrFormats), screenSession->GetSupportedHDRFormats(hdrFormats));
 #endif
+}
+
+/**
+ * @tc.name: NotifyRSCoordination
+ * @tc.desc: NotifyRSCoordination
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyRSCoordination, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr) << "ScreenSessionManager instance is null";
+    ssm_->NotifyRSCoordination(true);
+    EXPECT_TRUE(g_logMsg.find("isEnterCoordination:1") != std::string::npos);
+    g_logMsg.clear();
+    ssm_->NotifyRSCoordination(false);
+    EXPECT_TRUE(g_logMsg.find("isEnterCoordination:0") != std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 }
 } // namespace Rosen

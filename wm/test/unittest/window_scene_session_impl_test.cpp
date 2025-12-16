@@ -2803,40 +2803,39 @@ HWTEST_F(WindowSceneSessionImplTest, SetWindowDelayRaiseEnabled, TestSize.Level1
 }
 
 /**
- * @tc.name: SetFollowParentMultiScreenPolicy01
- * @tc.desc: SetFollowParentMultiScreenPolicy test API below 23
+ * @tc.name: SetFollowParentMultiScreenPolicy
+ * @tc.desc: SetFollowParentMultiScreenPolicy test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy01, Function | SmallTest | Level2)
+HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy, Function | SmallTest | Level2)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
-    window->property_->SetWindowName("SetFollowParentMultiScreenPolicy01");
+    window->property_->SetWindowName("SetFollowParentMultiScreenPolicy");
     window->property_->SetPersistentId(0);
-    uint32_t version = 20;
-    window->SetTargetAPIVersion(version);
-    EXPECT_EQ(version, window->GetTargetAPIVersion());
 
     // Case 1: Invalid window
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->SetFollowParentMultiScreenPolicy(false));
     window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
+    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
 
     // Case 2: Phone window
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
+    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
+    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 
     // Case 3: Pad mainwindow with freeMultiWindow mode disable
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(true));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(false));
 
     // Case 4: Pad mainwindow with freeMultiWindow mode enable
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
@@ -2846,6 +2845,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy01, Functio
 
     // Case 5: Pad subwindow with freeMultiWindow mode enable
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
     EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
     
@@ -2860,67 +2861,6 @@ HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy01, Functio
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
 }
-
-/**
- * @tc.name: SetFollowParentMultiScreenPolicy02
- * @tc.desc: SetFollowParentMultiScreenPolicy test API above 23
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest, SetFollowParentMultiScreenPolicy02, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    window->property_->SetWindowName("SetFollowParentMultiScreenPolicy02");
-    window->property_->SetPersistentId(0);
-    uint32_t version = 23;
-    window->SetTargetAPIVersion(version);
-    EXPECT_EQ(version, window->GetTargetAPIVersion());
-
-    // Case 1: Invalid window
-    window->property_->SetPersistentId(1);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, window->SetFollowParentMultiScreenPolicy(false));
-
-    // Case 2: Pad mainwindow with freeMultiWindow mode disable
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(false));
-
-    // Case 3: Pad mainwindow with freeMultiWindow mode enable
-    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, window->SetFollowParentMultiScreenPolicy(false));
-
-    // Case 4: Pad subwindow with freeMultiWindow mode enable
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
-
-    // Case 5: PC subwindow
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
-
-    // Case 6: Phone subwindow
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(true));
-    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
-
-    // Case 7: Pc app in pad
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetPcAppInpadCompatibleMode(true);
-    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
-    EXPECT_EQ(WMError::WM_OK, window->SetFollowParentMultiScreenPolicy(false));
-}
-
 
 /**
  * @tc.name: CloseSpecificScene

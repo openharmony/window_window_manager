@@ -191,7 +191,7 @@ TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEv
         OH_Input_SetTouchEventWindowId(touchEvent, event.GetTargetWindowId());
         OH_Input_SetTouchEventDisplayId(touchEvent, event.GetTargetDisplayId());
         OH_Input_SetTouchEventGlobalX(touchEvent, item.GetGlobalX());
-        OH_Input_SetTouchEventGlobalX(touchEvent, item.GetGlobalY());
+        OH_Input_SetTouchEventGlobalY(touchEvent, item.GetGlobalY());
         bool res = filter(touchEvent);
         OH_Input_DestroyTouchEvent(&touchEvent);
         return res;

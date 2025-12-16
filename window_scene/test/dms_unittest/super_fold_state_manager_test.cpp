@@ -68,6 +68,7 @@ void SuperFoldStateManagerTest::SetUp()
 
 void SuperFoldStateManagerTest::TearDown()
 {
+    LOG_SetCallback(nullptr);
 }
 
 namespace {

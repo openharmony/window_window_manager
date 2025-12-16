@@ -1185,7 +1185,7 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTes
 HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTest | Level3)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        return;
+        GTEST_SKIP();
     }
 
     ASSERT_NE(ssm_, nullptr);
@@ -1244,7 +1244,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateScreenArea, Function | SmallTest | L
         DMRect screenArea = DMRect::NONE();
         ssm_->CalculateScreenArea(displayRegion, displayArea, screenRegion, screenArea);
         EXPECT_EQ(screenArea, displayArea);
-        return;
     }
 
     ASSERT_NE(ssm_, nullptr);
@@ -3039,6 +3038,31 @@ HWTEST_F(ScreenSessionManagerTest, GetBrightnessInfo, TestSize.Level1)
     EXPECT_NE(brightnessInfo.maxHeadroom, 0);
     EXPECT_NE(brightnessInfo.sdrNits, 0);
     GTEST_LOG_(INFO) << "GetBrightnessInfo end";
+}
+
+/**
+ * @tc.name: GetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetSupportsInput, TestSize.Level1)
+{
+    bool supportInput;
+    auto ret = ssm_->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: SetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetSupportsInput, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SetSupportsInput start";
+    bool supportInput = false;
+    auto ret = ssm_->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
 }
 
 /**

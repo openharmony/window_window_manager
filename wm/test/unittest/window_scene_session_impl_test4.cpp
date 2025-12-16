@@ -899,35 +899,6 @@ HWTEST_F(WindowSceneSessionImplTest4, SetSpecificBarProperty, TestSize.Level0)
 }
 
 /**
- * @tc.name: SetSystemBarPropertyForPage
- * @tc.desc: SetSystemBarPropertyForPage
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest4, SetSystemBarPropertyForPage, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetSystemBarPropertyForPage");
-    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    windowSceneSessionImpl->hostSession_ = session;
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetPersistentId(1);
-    windowSceneSessionImpl->property_ = property;
-    std::optional<SystemBarProperty> prop;
-    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
-    auto ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, ret);
-    windowSceneSessionImpl->state_ = WindowState::STATE_SHOWN;
-    windowSceneSessionImpl->SetWindowType(WindowType::SYSTEM_WINDOW_BASE);
-    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
-    windowSceneSessionImpl->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = windowSceneSessionImpl->SetSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, prop);
-    EXPECT_EQ(WMError::WM_OK, ret);
-}
-
-/**
  * @tc.name: GetSystemBarPropertyForPage
  * @tc.desc: GetSystemBarPropertyForPage
  * @tc.type: FUNC
@@ -1529,17 +1500,18 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
 
     KeyboardLayoutParams tmpParams;
     const Rect expected = {1, 2, 3, 4};
-    tmpParams.PortraitKeyboardRect_ = expected;
+    tmpParams.LandscapeKeyboardRect_ = expected;
 
+    window->property->SetRequestRect({0, 0, 0, 0});
     window->property_->SetKeyboardLayoutParams(tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_EQ(window->property_->windowRect_, expected);
+    ASSERT_NE(window->property_->requestRect_, expected);
 
     tmpParams.displayId_ = 0;
     displayInfo->screenId_ = 0;
     window->property_->AddKeyboardLayoutParams(0, tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_EQ(window->property_->windowRect_, expected);
+    ASSERT_EQ(window->property_->requestRect_, expected);
 }
 
 /**
