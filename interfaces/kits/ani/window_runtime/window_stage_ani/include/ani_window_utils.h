@@ -88,6 +88,10 @@ public:
     static ani_status GetPropertyBoolObject(ani_env* env, const char* propertyName, ani_object object, bool& result);
     static bool GetPropertyRectObject(ani_env* env, const char* propertyName,
         ani_object object, Rect& result);
+    static ani_status GetOptionalIntProperty(ani_env* env, const char* propertyName,
+        ani_object object, std::optional<int32_t>& optIntProp);
+    static ani_status GetOptionalEnumProperty(ani_env* env, const char* propertyName,
+        ani_object object, std::optional<uint32_t>& optEnumProp);
     static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetDoubleObject(ani_env* env, ani_object double_object, double& result);
     static ani_status GetBooleanObject(ani_env* env, ani_object boolean_object, bool& result);
