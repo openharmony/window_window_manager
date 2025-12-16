@@ -131,7 +131,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
     };
     auto event = [=] {
         std::shared_ptr<TaskScheduler> taskScheduler = ScreenSessionManager::GetInstance().GetPowerTaskScheduler();
-        if (taskScheduler != nullptr){
+        if (taskScheduler != nullptr) {
             taskScheduler->PostAsyncTask(task, "secondaryFoldStatusChange");
         }
     };
