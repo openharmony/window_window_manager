@@ -468,6 +468,8 @@ struct SessionInfo {
     std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
+    // only init when requestSceneSession from SCB
+    bool isAncoApplication_ = false;
     int32_t scenarios = 0;
     bool isPrelaunch_ = false;
 
@@ -1250,6 +1252,9 @@ enum class SnapShotRecoverType : uint32_t {
     EXIT_SPLIT_ON_BACKGROUND,
 };
 
+/**
+ * Adding or modifying enumeration values requires corresponding changes on the sceneboard side.
+ */
 enum class LifeCycleChangeReason {
     DEFAULT = 0,
 
@@ -1261,6 +1266,8 @@ enum class LifeCycleChangeReason {
     BACK_TO_DESKTOP,
 
     SCREEN_LOCK,
+
+    SCREEN_ROTATION,
 
     LAST_SCENE_TRANSFER,
 

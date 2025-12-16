@@ -850,13 +850,14 @@ WmErrorCode JsWindowManager::MinimizeAllParamParse(
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
-    if (argc > 1 && argv[1] != nullptr && GetType(env, argv[1]) == napi_number &&
-        errCode == WmErrorCode::WM_OK && !ConvertFromJsValue(env, argv[1], excludeWindowId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to excludeWindowId");
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
-    }
-    if (excludeWindowId < 0) {
-        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    if (argc > 1 && argv[1] != nullptr && GetType(env, argv[1]) == napi_number && errCode == WmErrorCode::WM_OK) {
+        if (!ConvertFromJsValue(env, argv[1], excludeWindowId)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to excludeWindowId");
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
+        if (excludeWindowId <= 0) {
+            return WmErrorCode::WM_ERROR_INVALID_PARAM;
+        }
     }
     return errCode;
 }
@@ -1000,7 +1001,7 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
     return NapiGetUndefined(env);
 }
 
-static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value callback, bool newApi)
+static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_value callback, bool newApi)
 {
     struct TopWindowInfoList {
         sptr<Window> window = nullptr;
@@ -1008,9 +1009,20 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
         int32_t errorCode = 0;
         std::string errMsg = "";
     };
+    void* contextPtr = nullptr;
+    std::shared_ptr<NativeReference> ctxRef = nullptr;
     std::shared_ptr<TopWindowInfoList> lists = std::make_shared<TopWindowInfoList>();
     bool isOldApi = GetAPI7Ability(env, lists->ability);
-    NapiAsyncTask::ExecuteCallback execute = [lists, isOldApi, newApi, contextPtr]() {
+
+    if (nativeContext && !isOldApi) {
+        // Note: Fix the stability problem, create context ref to ensure the lifecycle of the context.
+        napi_ref tmp = nullptr;
+        napi_create_reference(env, nativeContext, 1, &tmp);
+        ctxRef.reset(reinterpret_cast<NativeReference*>(tmp));
+
+        napi_unwrap(env, nativeContext, &contextPtr);
+    }
+    NapiAsyncTask::ExecuteCallback execute = [lists, isOldApi, newApi, contextPtr, ctxRef]() {
         if (lists == nullptr) {
             return;
         }
@@ -1079,16 +1091,13 @@ static napi_value GetTopWindowTask(void* contextPtr, napi_env env, napi_value ca
 napi_value JsWindowManager::OnGetTopWindow(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
-    WMError errCode = WMError::WM_OK;
     napi_value nativeContext = nullptr;
     napi_value nativeCallback = nullptr;
-    void* contextPtr = nullptr;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > 2) { // 2: maximum params num
         WLOGFE("Argc is invalid: %{public}zu", argc);
-        errCode = WMError::WM_ERROR_INVALID_PARAM;
     } else {
         if (argc > 0 && GetType(env, argv[0]) == napi_object) { // (context, callback?)
             nativeContext = argv[0];
@@ -1098,18 +1107,15 @@ napi_value JsWindowManager::OnGetTopWindow(napi_env env, napi_callback_info info
             nativeCallback = (argc == 0) ? nullptr :
                 (GetType(env, argv[0]) == napi_function ? argv[0] : nullptr);
         }
-        GetNativeContext(env, nativeContext, contextPtr, errCode);
     }
-    return GetTopWindowTask(contextPtr, env, nativeCallback, false);
+    return GetTopWindowTask(nativeContext, env, nativeCallback, false);
 }
 
 napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
-    WMError errCode = WMError::WM_OK;
     napi_value nativeContext = nullptr;
     napi_value nativeCallback = nullptr;
-    void* contextPtr = nullptr;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1118,18 +1124,10 @@ napi_value JsWindowManager::OnGetLastWindow(napi_env env, napi_callback_info inf
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getLastWindow]msg: Argc is invalid"));
         return NapiGetUndefined(env);
-    } else {
-        nativeContext = argv[0];
-        nativeCallback = (argc == 1) ? nullptr : argv[1];
-        GetNativeContext(env, nativeContext, contextPtr, errCode);
     }
-    if (errCode != WMError::WM_OK) {
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "[window][getLastWindow]"));
-        return NapiGetUndefined(env);
-    }
-
-    return GetTopWindowTask(contextPtr, env, nativeCallback, true);
+    nativeContext = argv[0];
+    nativeCallback = (argc == 1) ? nullptr : argv[1];
+    return GetTopWindowTask(nativeContext, env, nativeCallback, true);
 }
 
 /** @note @window.layout */

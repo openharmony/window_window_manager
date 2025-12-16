@@ -1568,6 +1568,7 @@ DmErrorCode GetVirtualScreenOptionFromJs(napi_env env, napi_value optionObject, 
     if (!ConvertFromJsValue(env, supportsFocus, option.supportsFocus_)) {
         TLOGE(WmsLogTag::DMS, "No supportsFocus parameter to convert");
     }
+    option.supportsInput_ = false;
     return DmErrorCode::DM_OK;
 }
 

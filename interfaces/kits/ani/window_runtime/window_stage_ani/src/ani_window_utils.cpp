@@ -1576,6 +1576,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
 {
     ani_object aniRect = CreateAniRectObject(env, windowPropertyInfo.windowRect);
     ani_object aniDrawableRect = CreateAniRectObject(env, windowPropertyInfo.drawableRect);
+    ani_object aniGlobalDisplayRect = CreateAniRectObject(env, windowPropertyInfo.globalDisplayRect);
     int windowType;
     if (NATIVE_JS_TO_WINDOW_TYPE_MAP.count(windowPropertyInfo.type) != 0) {
         windowType = static_cast<int>(NATIVE_JS_TO_WINDOW_TYPE_MAP.at(windowPropertyInfo.type));
@@ -1585,13 +1586,14 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
     ani_string aniWindowName;
     GetAniString(env, windowPropertyInfo.name, &aniWindowName);
     ani_object aniWindowsProperties = InitAniObjectByCreator(env, "@ohos.window.window.WindowPropertiesInternal",
-        "C{@ohos.window.window.Rect}C{@ohos.window.window.Rect}zzzzddzzzziilC{std.core.String}:",
+        "C{@ohos.window.window.Rect}C{@ohos.window.window.Rect}zzzzddzzzziilC{std.core.String}C{@ohos.window.window.Rect}",
+        ":",
         aniRect, aniDrawableRect, ani_boolean(windowPropertyInfo.isFullScreen),
         ani_boolean(windowPropertyInfo.isLayoutFullScreen), ani_boolean(windowPropertyInfo.isFocusable),
         ani_boolean(windowPropertyInfo.isTouchable), ani_float(windowPropertyInfo.brightness), ani_float(0),
         ani_boolean(windowPropertyInfo.isKeepScreenOn), ani_boolean(windowPropertyInfo.isPrivacyMode),
         ani_boolean(false),  ani_boolean(windowPropertyInfo.isTransparent), ani_int(windowType),
-        ani_int(windowPropertyInfo.id), ani_long(windowPropertyInfo.displayId), aniWindowName);
+        ani_int(windowPropertyInfo.id), ani_long(windowPropertyInfo.displayId), aniWindowName, aniGlobalDisplayRect);
     return aniWindowsProperties;
 }
 
@@ -2186,7 +2188,15 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
 {
     auto getAndAssign = [&, where = __func__](const char* name, uint32_t& field) -> ani_status {
         int value;
-        ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
+        ani_ref intValueObject;
+        ani_boolean isUndefined;
+        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &intValueObject);
+        env->Reference_IsUndefined(intValueObject, &isUndefined);
+        if (isUndefined) {
+            field = 0;
+            return ANI_OK;
+        }
+        ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
         if (ret == ANI_OK) {
             if (value >= 0) {
                 field = static_cast<uint32_t>(value);
@@ -2206,7 +2216,7 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
         env->Reference_IsUndefined(unitValueObject, &isUndefined);
         if (isUndefined) {
             field = PixelUnit::PX;
-            return ret;
+            return ANI_OK;
         }
         ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(unitValueObject), unitValue);
         if (ret == ANI_OK) {

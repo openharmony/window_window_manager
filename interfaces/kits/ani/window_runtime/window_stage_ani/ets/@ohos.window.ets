@@ -783,7 +783,10 @@ export enum WindowType {
     TYPE_SYSTEM_TOAST = 18,
     TYPE_DIVIDER = 19,
     TYPE_GLOBAL_SEARCH = 20,
-    TYPE_HANDWRITE = 21
+    TYPE_HANDWRITE = 21,
+    TYPE_DYNAMIC = 25,
+    TYPE_MUTISCREEN_COLLABORATION = 26,
+    TYPE_MAIN = 32,
 }
 
 export enum Orientation {
@@ -1071,273 +1074,22 @@ export class SystemBarPropertiesInternal implements SystemBarProperties {
  * @since 11
  */
 export interface WindowProperties {
-    /**
-     * The position and size of the window
-     *
-     * @type { Rect }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     */
-    /**
-     * The position and size of the window
-     *
-     * @type { Rect }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @crossplatform
-     * @since 10
-     */
-    /**
-     * The position and size of the window
-     *
-     * @type { Rect }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @crossplatform
-     * @atomicservice
-     * @since 11
-     */
     windowRect: Rect;
-
-    /**
-     * The position relative to the window and size of drawable area
-     *
-     * @type { Rect } 
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 11
-     */
-    /**
-     * The position relative to the window and size of drawable area
-     *
-     * @type { Rect } 
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     drawableRect: Rect;
-
-    /**
-     * Window type
-     *
-     * @type { WindowType }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     */
-    /**
-     * Window type
-     *
-     * @type { WindowType }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
+    globalDisplayRect?: Rect;
     type: WindowType;
-
-    /**
-     * Whether the window is displayed in full screen mode. The default value is false.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 6
-     */
-    /**
-     * Whether the window is displayed in full screen mode. The default value is false.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     isFullScreen: boolean;
-
-    /**
-     * Whether the window layout is in full screen mode(whether the window is immersive). The default value is false.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     */
-    /**
-     * Whether the window layout is in full screen mode(whether the window is immersive). The default value is false.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     isLayoutFullScreen: boolean;
-
-    /**
-     * Whether the window can gain focus. The default value is true
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     */
-    /**
-     * Whether the window can gain focus. The default value is true
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     focusable: boolean;
-
-    /**
-     * Whether the window is touchable. The default value is false
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     */
-    /**
-     * Whether the window is touchable. The default value is false
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     touchable: boolean;
-
-    /**
-     * Brightness value of window.
-     *
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 6
-     */
-    /**
-     * Brightness value of window.
-     *
-     * @type { double }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @crossplatform
-     * @since 10
-     */
-    /**
-     * Brightness value of window.
-     *
-     * @type { double }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @crossplatform
-     * @atomicservice
-     * @since 11
-     */
     brightness: double;
-
-    /**
-     * The dimbehind value of window.
-     *
-     * @type { number }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     * @deprecated since 9
-     */
     dimBehindValue: number;
-
-    /**
-     * Whether keep screen on.
-     *
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 6
-     */
-    /**
-     * Whether keep screen on.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @crossplatform
-     * @since 10
-     */
-    /**
-     * Whether keep screen on.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @crossplatform
-     * @atomicservice
-     * @since 11
-     */
     isKeepScreenOn: boolean;
-
-    /**
-     * Whether make window in privacy mode or not.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     */
-    /**
-     * Whether make window in privacy mode or not.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     isPrivacyMode: boolean;
-
-    /**
-     * Whether is round corner or not.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     * @deprecated since 9
-     */
     isRoundCorner: boolean;
-
-    /**
-     * Whether is transparent or not.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 7
-     */
-    /**
-     * Whether is transparent or not.
-     *
-     * @type { boolean }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     isTransparent: boolean;
-
-    /**
-     * Window id.
-     *
-     * @type { int }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @since 9
-     */
-    /**
-     * Window id.
-     *
-     * @type { int }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     id: int;
-
-    /**
-     * display id.
-     *
-     * @type { ?long }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 12
-     */
     displayId?: long;
-
-    /**
-     * window name.
-     *
-     * @type { ?string }
-     * @syscap SystemCapability.WindowManager.WindowManager.Core
-     * @atomicservice
-     * @since 18
-     */
     name?: string;
 }
 
@@ -1358,14 +1110,16 @@ export class WindowPropertiesInternal implements WindowProperties {
     id: int;
     displayId?: long;
     name?: string;
+    globalDisplayRect?: Rect;
 
     constructor(windowRect: Rect, drawableRect: Rect, isFullScreen: boolean, isLayoutFullScreen: boolean,
       focusable: boolean, touchable: boolean, brightness: double, dimBehindValue: number, isKeepScreenOn: boolean,
       isPrivacyMode: boolean, isRoundCorner: boolean, isTransparent: boolean, typeInternal: int, id: int,
-      displayId: long, name: string)
+      displayId: long, name: string, globalDisplayRect: Rect)
     {
       this.windowRect = windowRect;
       this.drawableRect = drawableRect;
+      this.globalDisplayRect = globalDisplayRect;
       this.isFullScreen = isFullScreen;
       this.isLayoutFullScreen = isLayoutFullScreen;
       this.focusable = focusable;
@@ -3216,7 +2970,7 @@ export class WindowInternal implements Window {
     private native getParentWindow(nativeObj: long): Window;
     private native setParentWindow(nativeObj: long, windowId: int): void;
     private native setContentAspectRatio(
-      nativeObj: long, ratio: number, isPersistent: boolean, needUpdateRect: boolean): void;
+      nativeObj: long, ratio: double, isPersistent: boolean, needUpdateRect: boolean): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
@@ -4459,7 +4213,7 @@ export class WindowInternal implements Window {
         });
     }
 
-    public setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
+    public setContentAspectRatio(ratio: double, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void> {
       return new Promise<void>(
         (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
           taskpool.execute((): void => {
@@ -5454,7 +5208,7 @@ export interface Window {
     bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>): Promise<void>;
     bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>,
       callback: AsyncCallback<void>): void;
-    setContentAspectRatio(ratio: number, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
+    setContentAspectRatio(ratio: double, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;

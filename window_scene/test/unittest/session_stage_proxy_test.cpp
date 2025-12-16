@@ -1048,14 +1048,8 @@ HWTEST_F(SessionStageProxyTest, ReadLittleStringVectorFromParcel, Function | Sma
 HWTEST_F(SessionStageProxyTest, LinkKeyFrameNode, Function | SmallTest | Level1)
 {
     ASSERT_TRUE(sessionStage_ != nullptr);
-    auto rsKeyFrameNode = RSWindowKeyFrameNode::Create();
-    ASSERT_NE(rsKeyFrameNode, nullptr);
-    WSError res = sessionStage_->LinkKeyFrameNode(rsKeyFrameNode);
+    WSError res = sessionStage_->LinkKeyFrameNode();
     ASSERT_EQ(WSError::WS_OK, res);
-
-    rsKeyFrameNode.reset();
-    res = sessionStage_->LinkKeyFrameNode(rsKeyFrameNode);
-    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, res);
 }
 
 /**
@@ -1287,6 +1281,34 @@ HWTEST_F(SessionStageProxyTest, UpdateIsShowDecorInFreeMultiWindow, TestSize.Lev
     MockMessageParcel::SetWriteBoolErrorFlag(true);
     ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow));
     MockMessageParcel::SetWriteStringErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: UpdateBrightness
+ * @tc.desc: Test UpdateBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, UpdateBrightness, TestSize.Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+    float brightness = 1.0f;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->UpdateBrightness(brightness));
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    EXPECT_EQ(WSError::WS_OK, sessionStage_->UpdateBrightness(brightness));
+    sptr<SessionStageProxy> sProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sProxy->UpdateBrightness(brightness));
+
+    auto remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMocker->sendRequestResult_ = 1;
+    sptr<SessionStageProxy> sessionStage = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage->UpdateBrightness(brightness));
+
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->UpdateBrightness(brightness));
     MockMessageParcel::ClearAllErrorFlag();
 }
 } // namespace

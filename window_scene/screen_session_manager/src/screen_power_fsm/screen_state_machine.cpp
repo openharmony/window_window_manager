@@ -145,7 +145,10 @@ bool ScreenStateMachine::DoScreenPowerOn(ScreenPowerEvent event, const ScreenPow
 bool ScreenStateMachine::DoSetScreenPower(ScreenPowerEvent event, const ScreenPowerInfoType& type)
 {
     auto params = std::get<std::pair<ScreenId, ScreenPowerStatus>>(type);
-    ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(params.first, params.second);
+    if (!ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(params.first, params.second)) {
+        TLOGW(WmsLogTag::DMS, "[ScreenPower FSM] Set Screen power status failed");
+        return false;
+    }
     ScreenStateMachine::GetInstance().SetCurrentPowerStatus(params.second);
     return true;
 }

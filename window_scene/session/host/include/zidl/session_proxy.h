@@ -137,6 +137,7 @@ public:
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
     WMError NotifySnapshotUpdate() override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
@@ -200,6 +201,7 @@ public:
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
     /**
      * Window Transition Animation For PC
