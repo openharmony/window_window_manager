@@ -962,7 +962,7 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_scaleMode, TestSize
     mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession2->GetPersistentId(), std::move(task2));
     ASSERT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession1->GetPersistentId()]);
     WSRect rect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
@@ -1036,7 +1036,7 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_compatMode, TestSiz
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToProportionalScale(true);
     mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     mainSession->callingPid_ = 1;
     subSession1->callingPid_ = 1;
     subSession2->callingPid_ = 2;
