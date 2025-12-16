@@ -87,8 +87,7 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    g_motionUnsubscribeCallbackPtr = 
-    (MotionUnsubscribeCallbackPtr)(dlsym(g_handle, "MotionUnsubscribeCallback"));
+    g_motionUnsubscribeCallbackPtr = (MotionUnsubscribeCallbackPtr)(dlsym(g_handle, "MotionUnsubscribeCallback"));
     const char* dlsymError = dlerror();
     if  (dlsymError) {
         TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
