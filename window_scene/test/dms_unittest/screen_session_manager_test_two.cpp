@@ -3221,6 +3221,116 @@ HWTEST_F(ScreenSessionManagerTest, CheckNeedNotifyTest, TestSize.Level1)
     result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
     EXPECT_TRUE(result);
 }
+
+/*
+ * @tc.name: AddVirtualScreenWhiteList01
+ * @tc.desc: Add valid missionIds to whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenWhiteList01, TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "AddVirtualScreenWhiteList01";
+    ScreenId virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    const std::vector<uint64_t> validMissionIds = {5, 10, 15, 20, 25};
+    DMError result = ssm_->AddVirtualScreenWhiteList(virtualScreenId, validMissionIds);
+
+    EXPECT_EQ(result, DMError::DM_OK);
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/*
+ * @tc.name: AddVirtualScreenWhiteList02
+ * @tc.desc: Add empty missionIds to whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenWhiteList02, TestSize.Level1)
+{
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "AddVirtualScreenWhiteList02";
+    ScreenId virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+
+    const std::vector<uint64_t> testMissionIds;
+    DMError result = ssm_->AddVirtualScreenWhiteList(virtualScreenId, testMissionIds);
+
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/*
+ * @tc.name: AddVirtualScreenWhiteList03
+ * @tc.desc: Add empty missionIds  or nullptr screenId to whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, AddVirtualScreenWhiteList03, TestSize.Level1)
+{
+    ScreenId virtualScreenId = SCREEN_ID_FULL;
+    const std::vector<uint64_t> testMissionIds = {5, 10, 15, 20, 25};
+    DMError result = ssm_->AddVirtualScreenWhiteList(virtualScreenId, testMissionIds);
+
+    EXPECT_EQ(result, DMError::DM_ERROR_INVALID_PARAM);
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/*
+ * @tc.name: RemoveVirtualScreenWhiteList01
+ * @tc.desc: Remove valid missionIds to whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenWhiteList01, TestSize.Level1)
+{
+    //  create virtual screen and add add missionIds
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "RemoveVirtualScreenWhiteList01";
+    ScreenId virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    const std::vector<uint64_t> addMissionIds = {5, 10, 15, 20, 25};
+    DMError addResult = ssm_->AddVirtualScreenWhiteList(virtualScreenId, addMissionIds);
+    ASSERT_EQ(addResult, DMError::DM_OK);
+
+    // remove missionIds
+    const std::vector<uint64_t> removeMissionIds = {5, 15};
+    DMError removeResult = ssm_->RemoveVirtualScreenWhiteList(virtualScreenId, removeMissionIds);
+    EXPECT_EQ(removeResult, DMError::DM_OK);
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/*
+ * @tc.name: RemoveVirtualScreenWhiteList02
+ * @tc.desc: Remove invalid screenId from whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenWhiteList02, TestSize.Level1)
+{
+    const std::vector<uint64_t> removeMissionIds = {5, 15};
+    DMError removeResult = ssm_->RemoveVirtualScreenWhiteList(SCREEN_ID_FULL, removeMissionIds);
+    EXPECT_EQ(removeResult, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: RemoveVirtualScreenWhiteList03
+ * @tc.desc: Remove empty missionIds from whitelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenWhiteList03, TestSize.Level1)
+{
+    //  create virtual screen and add add missionIds
+    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "RemoveVirtualScreenWhiteList03";
+    ScreenId virtualScreenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    const std::vector<uint64_t> addMissionIds = {5, 10, 15, 20, 25};
+    DMError addResult = ssm_->AddVirtualScreenWhiteList(virtualScreenId, addMissionIds);
+    ASSERT_EQ(addResult, DMError::DM_OK);
+
+    // remove missionIds
+    const std::vector<uint64_t> removeMissionIds;
+    DMError removeResult = ssm_->RemoveVirtualScreenWhiteList(virtualScreenId, removeMissionIds);
+    EXPECT_EQ(removeResult, DMError::DM_ERROR_INVALID_PARAM);
+    ssm_->DestroyVirtualScreen(virtualScreenId);
+}
 }
 }
 }
