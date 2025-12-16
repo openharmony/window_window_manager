@@ -3575,9 +3575,11 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uin
                 ~static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) |
                 static_cast<uint32_t>(newProperty.settingFlag_);
             nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
+            isAtomicServiceUseColor_ = false;
         } else {
             nowsystemBarPropertyMap_[type].contentColor_ = color.value();
             nowsystemBarPropertyMap_[type].settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
+            isAtomicServiceUseColor_ = true;
         }
         newProperty = nowsystemBarPropertyMap_[type];
     }
