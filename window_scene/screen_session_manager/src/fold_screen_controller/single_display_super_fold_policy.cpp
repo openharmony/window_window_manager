@@ -53,6 +53,12 @@ const std::string MAIN_TP = "1";
 const std::string MAIN_TP_OFF = "1,1";
 const std::string FULL_TP_OFF = "0,1";
 #endif
+
+static const std::map<FoldDisplayMode, DMDeviceStatus> DISPLAYMODE_DEVICESTATUS_MAPPING = {
+    {FoldDisplayMode::MAIN, DMDeviceStatus::STATUS_FOLDED},
+    {FoldDisplayMode::FULL, DMDeviceStatus::STATUS_EXPAND},
+    {FoldDisplayMode::GLOBAL_FULL, DMDeviceStatus::STATUS_GLOBAL_FULL}
+};
 } // namespace
 
 SingleDisplaySuperFoldPolicy::SingleDisplaySuperFoldPolicy(std::recursive_mutex& displayInfoMutex,

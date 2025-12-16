@@ -340,6 +340,11 @@ HWTEST_F(WindowManagerLiteTest, Test01, TestSize.Level1)
     ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res9);
     WMError res10 = instance_->UnregisterWMSConnectionChangedListener();
     ASSERT_EQ(WMError::WM_OK, res10);
+    sptr<IAllGroupInfoChangedListener> listener5 = nullptr;
+    WMError res11 = instance_->RegisterAllGroupInfoChangedListener(listener5);
+    WMError res12 = instance_->UnregisterAllGroupInfoChangedListener(listener5);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res11);
+    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, res12);
 }
 
 /**
@@ -716,6 +721,58 @@ HWTEST_F(WindowManagerLiteTest, UpdateScreenLockStatusForApp, TestSize.Level1)
     WMError expectRet = WindowAdapterLite::GetInstance(userId_).UpdateScreenLockStatusForApp(bundleName, isRelease);
     auto ret = instance_->UpdateScreenLockStatusForApp(bundleName, isRelease);
     EXPECT_EQ(ret, expectRet);
+}
+
+/**
+ * @tc.name: NotifyWindowPropertyChange01
+ * @tc.desc: check NotifyWindowPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyWindowPropertyChange01, TestSize.Level1)
+{
+    ASSERT_NE(instance_, nullptr);
+    uint32_t flags = static_cast<int32_t>(WindowInfoKey::MID_SCENE);
+    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::MID_SCENE, true}, {WindowInfoKey::WINDOW_ID, 0}});
+
+    auto oldInfoKeyMap = instance_->interestInfoMap_;
+    auto oldListeners = instance_->pImpl_->midSceneStatusChangeListeners_;
+    instance_->interestInfoMap_.clear();
+    instance_->pImpl_->midSceneStatusChangeListeners_.clear();
+
+    instance_->interestInfoMap_[WindowInfoKey::MID_SCENE] = 0;
+    instance_->interestInfoMap_[WindowInfoKey::VISIBILITY_STATE] = 3;
+    sptr<IWindowInfoChangedListener> listener = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    std::unordered_set<WindowInfoKey> interestInfo;
+    interestInfo.insert(WindowInfoKey::MID_SCENE);
+    interestInfo.insert(WindowInfoKey::VISIBILITY_STATE);
+    interestInfo.insert(WindowInfoKey::BUNDLE_NAME);
+    listener->SetInterestInfo(interestInfo);
+    std::unordered_set<int32_t> interestWindowIds;
+    interestWindowIds.insert({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+
+    auto ret = instance_->RegisterMidSceneChangedListener(nullptr);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ret = instance_->RegisterMidSceneChangedListener(listener);
+    EXPECT_NE(ret, WMError::WM_OK);
+    ret = instance_->RegisterMidSceneChangedListener(listener);
+    EXPECT_NE(ret, WMError::WM_OK);
+
+    instance_->NotifyWindowPropertyChange(flags, windowInfoList);
+
+    ret = instance_->UnregisterMidSceneChangedListener(nullptr);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
+    ret = instance_->UnregisterMidSceneChangedListener(listener);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    instance_->pImpl_->midSceneStatusChangeListeners_.emplace_back(nullptr);
+    sptr<IWindowInfoChangedListener> listener2 = sptr<TestWindowVisibilityStateListener>::MakeSptr();
+    ret = instance_->RegisterMidSceneChangedListener(listener2);
+    EXPECT_NE(ret, WMError::WM_OK);
+    instance_->NotifyWindowPropertyChange(flags, windowInfoList);
+
+    instance_->pImpl_->midSceneStatusChangeListeners_ = oldListeners;
+    instance_->interestInfoMap_ = oldInfoKeyMap;
 }
 
 /**

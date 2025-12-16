@@ -1055,6 +1055,25 @@ HWTEST_F(DisplayManagerAdapterTest, GetBrightnessInfo02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRoundedCorner
+ * @tc.desc: test GetRoundedCorner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetRoundedCorner, TestSize.Level1)
+{
+    std::vector<RoundedCorner> roundedCorner;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetRoundedCorner(roundedCorner, 0, 1100, 2400);
+    EXPECT_EQ(err, DMError::DM_OK);
+    auto screenSessionManagerServiceProxy =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    err = SingletonContainer::Get<DisplayManagerAdapter>().GetRoundedCorner(roundedCorner, 0, 1100, 2400);
+    EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxy;
+}
+
+/**
  * @tc.name: GetSupportsInput
  * @tc.desc: test success
  * @tc.type: FUNC

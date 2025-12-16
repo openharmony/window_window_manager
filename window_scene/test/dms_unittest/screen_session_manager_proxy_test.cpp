@@ -2324,6 +2324,49 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetBrightnessInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRoundedCorner
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetRoundedCorner, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    int radius;
+
+    // remote == nullptr
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy =  sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // WriteUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Pass all
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: GetSupportsInput
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2372,6 +2415,33 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetSupportsInput, TestSize.Level1)
     screenSessionManagerProxy->SetSupportsInput(0, supportInput);
     EXPECT_TRUE(logMsg.find("Write supportsInput failed") != std::string::npos);
     LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: GetRoundedCorner02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetRoundedCorner02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    int radius;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->GetRoundedCorner(0, radius);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->GetRoundedCorner(0, radius);
+    EXPECT_TRUE(logMsg.find("Write displayId failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
+
+    auto proxyNull = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = proxyNull->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
 }
 
 /**

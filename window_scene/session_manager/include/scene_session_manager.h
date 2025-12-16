@@ -641,6 +641,11 @@ public:
     WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease) override;
     void DealwithDrawingContentChange(const std::vector<std::pair<uint64_t, bool>>& drawingContentChangeInfo);
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
+    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
+        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
+    WMError RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags) override;
     WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) override;
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override;
@@ -652,7 +657,7 @@ public:
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
-    WMError NotifyBrightnessModeChange(const std::string& brightnessMode) override;
+    WMError NotifyBrightnessModeChange(const std::string& brightnessMode);
     void NotifyOnAttachToFrameNode(const sptr<Session>& session);
     WMError NotifyScreenshotEvent(ScreenshotEventType type) override;
     WMError UpdateSessionScreenshotAppEventListener(int32_t persistentId, bool haveListener);
@@ -662,6 +667,9 @@ public:
         const std::unordered_set<std::string>& privacyWindowTags) override;
     void UpdateSessionPrivacyForSuperFold(const sptr<SceneSession>& sceneSession, DisplayId displayId,
         std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
+    void RegisterBrightnessDataChangeListener();
+    void UnregisterBrightnessDataChangeListener();
+    void SubscribePowerManagerServiceSa();
 
     /*
      * Multi Window
@@ -1245,6 +1253,9 @@ private:
     void ProcessUIAbilityOnUserSwitch(bool isUserActive);
     void HandleUserSwitching(bool isUserActive);
     void HandleUserSwitched(bool isUserActive);
+    FlushWindowInfoTask CreateDelayedFlushWindowInfoToMMITask();
+    void StartDelayedFlushWindowInfoToMMITask();
+    void StopDelayedFlushWindowInfoToMMITask();
 
     /*
      * Window Recover
@@ -1403,7 +1414,10 @@ private:
      */
     static constexpr int32_t DEFAULT_USERID = -1;
     std::atomic<int32_t> currentUserId_ { DEFAULT_USERID };
-    bool isUserBackground_ = false; // Only accessed on SSM thread
+    std::atomic<bool> isUserBackground_ { false };
+
+    std::atomic<int32_t> flushWindowInfoCount_ { 0 };
+    std::atomic<bool> isDelayFlushWindowInfoMode_ { false };
 
     // displayRegionMap_ stores the screen display area for AccessibilityNotification,
     // the read and write operations must be performed in the same thread, current is in task thread.
@@ -1690,11 +1704,6 @@ private:
     void NotifyWindowPropertyChangeByWindowInfoKey(
         const sptr<SceneSession>& sceneSession, WindowInfoKey windowInfoKey);
     void NotifyWindowPropertyChange(ScreenId screenId);
-    WMError RegisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
-        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
-        uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
-    WMError RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags) override;
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
         std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowPropertyChangeInfo);
     WMError AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,

@@ -169,7 +169,6 @@ public:
         TRANS_ID_SET_SPECIFIC_WINDOW_ZINDEX,
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
         TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX,
-        TRANS_ID_NOTIFY_BRIGHTNESS_MODE_CHANGE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -429,8 +428,6 @@ public:
 
     virtual WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) { return WMError::WM_OK; }
-
-    virtual WMError NotifyBrightnessModeChange(const std::string& brightnessMode) { return WMError::WM_OK; }
 
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override { return WMError::WM_OK; }
 
