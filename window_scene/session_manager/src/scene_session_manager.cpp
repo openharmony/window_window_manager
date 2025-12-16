@@ -171,6 +171,11 @@ const std::string FB_PANEL_NAME = "Fb_panel";
 constexpr std::size_t MAX_APP_BOUND_TRAY_MAP_SIZE = 50;
 constexpr int32_t RS_CMD_BLOCKING_TIMEOUT_MS = 50;
 
+constexpr int32_t FLUSH_WINDOW_INFO_MAX_COUNT = 3;
+constexpr int32_t FLUSH_WINDOW_INFO_DELAY_INTERVAL = 2000;
+constexpr int32_t FLUSH_WINDOW_INFO_START_DELAY_INTERVAL = 1000;
+const std::string FLUSH_WINDOW_INFO_TASK_NAME = "DelayedFlushWindowInfoToMMITask";
+
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
     {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
@@ -5562,6 +5567,50 @@ void SceneSessionManager::ProcessUIAbilityOnUserSwitch(bool isUserActive)
     }
 }
 
+FlushWindowInfoTask SceneSessionManager::CreateDelayedFlushWindowInfoToMMITask() {
+    FlushWindowInfoTask task = [this]() {
+        if (isUserBackground_) {
+            isDelayFlushWindowInfoMode_ = false;
+            flushWindowInfoCount_ = 0;
+            TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI interrupt");
+            return;
+        }
+        flushWindowInfoCount_.fetch_add(1, std::memory_order_relaxed);
+        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI count: %{public}d", flushWindowInfoCount_.load());
+        FlushWindowInfoToMMI(true);
+
+        if (isDelayFlushWindowInfoMode_) {
+            if (flushWindowInfoCount_ >= FLUSH_WINDOW_INFO_MAX_COUNT) {
+                isDelayFlushWindowInfoMode_ = false;
+                flushWindowInfoCount_ = 0;
+                return;
+            }
+        }
+        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI add task");
+        auto nextTask = CreateDelayedFlushWindowInfoToMMITask();
+        PostFlushWindowInfoTask(std::move(nextTask), FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_DELAY_INTERVAL);
+    };
+    return task;
+}
+
+void SceneSessionManager::StartDelayedFlushWindowInfoToMMITask() {
+    flushWindowInfoCount_ = 0;
+    if (isDelayFlushWindowInfoMode_) {
+        TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI duplicate task");
+        return;
+    }
+    isDelayFlushWindowInfoMode_ = true;
+    auto task = CreateDelayedFlushWindowInfoToMMITask();
+    PostFlushWindowInfoTask(std::move(task), FLUSH_WINDOW_INFO_TASK_NAME, FLUSH_WINDOW_INFO_START_DELAY_INTERVAL);
+    TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI start task");
+}
+
+void SceneSessionManager::StopDelayedFlushWindowInfoToMMITask() {
+    flushWindowInfoCount_ = 0;
+    isDelayFlushWindowInfoMode_ = false;
+    TLOGNI(WmsLogTag::WMS_EVENT, "DelayedFlushWindowInfoToMMI stop task");
+}
+
 void SceneSessionManager::HandleUserSwitching(bool isUserActive)
 {
     // A brief screen freeze may occur when handling a switching event.
@@ -5578,10 +5627,12 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
         AbilityInfoManager::GetInstance().SetCurrentUserId(currentUserId_);
         // notify screenSessionManager to recover current user
         FlushWindowInfoToMMI(true);
+        StartDelayedFlushWindowInfoToMMITask();
         NotifyAllAccessibilityInfo();
         rsInterface_.AddVirtualScreenBlackList(INVALID_SCREEN_ID, skipSurfaceNodeIds_);
         UpdatePrivateStateAndNotifyForAllScreens();
     } else { // switch to another user
+        StopDelayedFlushWindowInfoToMMITask();
         SceneInputManager::GetInstance().FlushEmptyInfoToMMI();
         // minimized UI abilities when the user is switching and inactive
         ProcessUIAbilityOnUserSwitch(isUserActive);
