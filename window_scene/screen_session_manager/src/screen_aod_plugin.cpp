@@ -65,20 +65,12 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    int32_t cnt = 0;
-    int32_t retryTimes = 3;
-    const char* dlsymError = nullptr;
-    do {
-        cnt++;
-        g_isInAodFunc = reinterpret_cast<IsInAodFunc>(dlsym(g_handle, "IsInAod"));
-        dlsymError = dlerror();
-        if (dlsymError) {
-            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-            return false;
-        }
-        TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", PLUGIN_AOD_SO_PATH.c_str(), cnt);
-        usleep(SLEEP_TIME_US);
-    } while (!g_isInAodFunc && cnt < retryTimes);
+    g_isInAodFunc = reinterpret_cast<IsInAodFunc>(dlsym(g_handle, "IsInAod"));
+    const char* dlsymError = dlerror();
+    if (dlsymError) {
+        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+        return false;
+    }
     return g_isInAodFunc();
 }
 
@@ -88,21 +80,13 @@ __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    int32_t cnt = 0;
-    int32_t retryTimes = 3;
-    const char* dlsymError = nullptr;
-    do {
-        cnt++;
-        g_stopAodFunc = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "IsInAod"));
-        dlsymError = dlerror();
-        if (dlsymError) {
-            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-            return false;
-        }
-        TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", PLUGIN_AOD_SO_PATH.c_str(), cnt);
-        usleep(SLEEP_TIME_US);
-    } while (!g_stopAodFunc && cnt < retryTimes);
-    return g_stopAodFunc();
+    g_stopAodFunc = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "IsInAod"));
+    const char* dlsymError = dlerror();
+    if (dlsymError) {
+        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+        return false;
+    }
+    return g_stopAodFunc(status);
 }
 }
 }
