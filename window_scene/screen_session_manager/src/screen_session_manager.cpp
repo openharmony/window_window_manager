@@ -4708,8 +4708,8 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return false;
     }
-    TLOGI(WmsLogTag::DMS, "screen id:%{public}" PRIu64 ", state:%{public}u",
-        screenId, state);
+    TLOGI(WmsLogTag::DMS, "screen id:%{public}" PRIu64 ", state:%{public}u, reason:%{public}u",
+        screenId, state, reason);
 
     ScreenPowerStatus status;
     switch (state) {
@@ -4727,6 +4727,7 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
         }
     }
 
+    powerStateChangeReason_ = reason;
     CallRsSetScreenPowerStatusSync(screenId, status);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
@@ -5034,7 +5035,8 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
             }
             auto sourceMode = screenSession->GetSourceMode();
             if (status != ScreenPowerStatus::POWER_STATUS_ON &&
-                powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
+                (powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION ||
+                powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_APPCAST)) {
                 return;
             }
             if (sourceMode == ScreenSourceMode::SCREEN_UNIQUE &&
