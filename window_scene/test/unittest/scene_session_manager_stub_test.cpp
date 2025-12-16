@@ -2606,8 +2606,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecentPixelMap, TestSize.
     int32_t persistentId = 1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     data.WriteParcelable(pixelMap.get());
-    data.WriteUint32(static_cast<uint32_t>(imageFit));
-    data.WriteInt32(persistentId);
     int res = stub_->HandleSetImageForRecentPixelMap(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
@@ -2621,7 +2619,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetImageForRecentPixelMap, TestSize.
     opts.pixelFormat = Media::PixelFormat::RGBA_8888;
     opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
     int32_t stride = opts.size.width;
-    std::shared_ptr<Media::PixelMap> pixelMap1 = Media::PixelMap::Create(colors, colorsLength, offset, stride, opts);
+    pixelMap = Media::PixelMap::Create(colors, colorsLength, offset, stride, opts);
 
     data.WriteParcelable(pixelMap.get());
     res = stub_->HandleSetImageForRecentPixelMap(data, reply);
