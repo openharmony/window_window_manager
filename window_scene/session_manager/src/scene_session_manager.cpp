@@ -2663,15 +2663,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
             this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
         });
-        if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            MainSession* mainSessionPtr = static_cast<MainSession*>(sceneSession.GetRefPtr());
-            if (mainSessionPtr != nullptr) {
-                sptr<MainSession> mainSession = mainSessionPtr;
-                mainSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
-                    return this->GetAppForceLandscapeConfigEnable(bundleName);
-                });
-            }
-        }
+        RegisterForceSplitEnableListenerIfMainWindow(sceneSession);
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -19347,5 +19339,18 @@ WMError SceneSessionManager::GetJsonProfile(AppExecFwk::ProfileType profileType,
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterForceSplitEnableListenerIfMainWindow(const sptr<SceneSession>& sceneSession)
+{
+    if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        MainSession* mainSessionPtr = static_cast<MainSession*>(sceneSession.GetRefPtr());
+        if (mainSessionPtr != nullptr) {
+            sptr<MainSession> mainSession = mainSessionPtr;
+            mainSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
+                return this->GetAppForceLandscapeConfigEnable(bundleName);
+            });
+        }
+    }
 }
 } // namespace OHOS::Rosen

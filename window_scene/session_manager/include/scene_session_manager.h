@@ -1867,6 +1867,8 @@ private:
      */
     void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
     std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
+    void RegisterForceSplitEnableListenerIfMainWindow(const sptr<SceneSession>& sceneSession);
+
 };
 } // namespace OHOS::Rosen
 
