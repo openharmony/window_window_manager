@@ -149,10 +149,8 @@ ohos_static_library("libwmutil_static") {
   subsystem_name = "window"
 
   defines = []
-  if (!build_ohos_sdk) {
-    defines += [ "FRAME_TRACE_ENABLE" ]
-    external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 }
 
 ## Build libwmutil_base.so
@@ -285,10 +283,8 @@ ohos_shared_library("libwmutil") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
 
-  if (!build_ohos_sdk) {
-    defines += [ "FRAME_TRACE_ENABLE" ]
-    external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 }
 
 group("test") {

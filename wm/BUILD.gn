@@ -162,10 +162,8 @@ ohos_static_library("libwm_static") {
     external_deps += [ "accessibility:accessibility_common" ]
   }
 
-  if (!build_ohos_sdk) {
-    defines += [ "FRAME_TRACE_ENABLE" ]
-    external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
@@ -321,10 +319,8 @@ ohos_shared_library("libwm") {
     external_deps += [ "accessibility:accessibility_common" ]
   }
 
-  if (!build_ohos_sdk) {
-    defines += [ "FRAME_TRACE_ENABLE" ]
-    external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
@@ -408,10 +404,8 @@ ohos_shared_library("libwm_lite") {
     "samgr:samgr_proxy",
   ]
 
-  if (!build_ohos_sdk) {
-    defines += [ "FRAME_TRACE_ENABLE" ]
-    external_deps += [ "frame_aware_sched:frame_trace_intf" ]
-  }
+  defines += [ "FRAME_TRACE_ENABLE" ]
+  external_deps += [ "frame_aware_sched:frame_trace_intf" ]
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
