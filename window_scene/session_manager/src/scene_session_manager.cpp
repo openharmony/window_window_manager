@@ -16956,7 +16956,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
     }
 
     AppForceLandscapeConfig config;
-    {   
+    {
         std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
         if (appForceLandscapeMap_.count(bundleName)) {
             config = appForceLandscapeMap_[bundleName];
