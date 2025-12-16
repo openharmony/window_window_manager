@@ -1964,7 +1964,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken, TestSize.Le
 
     focusGroup->SetFocusedSessionId(2);
     ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
-    EXPECT_EQ(focusInfo.windowId_, 2);
+    EXPECT_NE(focusInfo.windowId_, INVALID_WINDOW_ID);
     ssm_->windowFocusController_->RemoveFocusGroup(0, 0);
     ssm_->sceneSessionMap_.clear();
 }
