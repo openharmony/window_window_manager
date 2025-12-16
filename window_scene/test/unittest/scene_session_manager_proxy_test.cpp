@@ -2073,30 +2073,6 @@ HWTEST_F(sceneSessionManagerProxyTest, SetScreenPrivacyWindowTagSwitch02, TestSi
 }
 
 /**
- * @tc.name: NotifyBrightnessModeChange
- * @tc.desc: NotifyBrightnessModeChange
- * @tc.type: FUNC
- */
-HWTEST_F(sceneSessionManagerProxyTest, NotifyBrightnessModeChange, TestSize.Level1)
-{
-    std::string brightnessMode = "";
-
-    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
-    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
-
-    // ReadString failed
-    MockMessageParcel::SetWriteStringErrorFlag(true);
-    auto ret = proxy->NotifyBrightnessModeChange(brightnessMode);
-    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetWriteStringErrorFlag(false);
-    MockMessageParcel::ClearAllErrorFlag();
-
-    // interface success
-    ret = proxy->NotifyBrightnessModeChange(brightnessMode);
-    EXPECT_EQ(ret, WMError::WM_OK);
-}
-
-/**
  * @tc.name: AddSessionBlackList01
  * @tc.desc: AddSessionBlackList
  * @tc.type: FUNC

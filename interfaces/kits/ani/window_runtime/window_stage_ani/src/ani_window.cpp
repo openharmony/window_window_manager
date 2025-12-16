@@ -54,7 +54,6 @@ namespace {
 static std::map<ani_ref, AniWindow*> g_localObjs;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
-constexpr int32_t API_VERSION_23 = 23;
 } // namespace
 static std::mutex g_aniWindowMap_mutex;
 static std::map<std::string, ani_ref> g_aniWindowMap;
@@ -293,6 +292,57 @@ ani_int AniWindow::OnGetPreferredOrientation(ani_env* env)
         "orientation=%{public}u", window->GetWindowId(), window->GetWindowName().c_str(),
         static_cast<uint32_t>(apiOrientation));
     return static_cast<ani_int>(apiOrientation);
+}
+
+ani_int AniWindow::ConvertOrientationAndRotation(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_int from, ani_int to, ani_int value)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        return aniWindow->OnConvertOrientationAndRotation(env, from, to, value);
+    } else {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return ANI_ERROR;
+    }
+}
+
+ani_int AniWindow::OnConvertOrientationAndRotation(ani_env* env, ani_int from, ani_int to, ani_int value)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return ANI_ERROR;
+    }
+    auto fromRotationInfoType = static_cast<RotationInfoType>(from);
+    if (fromRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        fromRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Invalid from RotationInfoType : %{public}d", from);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return ANI_ERROR;
+    }
+    auto toRotationInfoType = static_cast<RotationInfoType>(to);
+    if (toRotationInfoType < RotationInfoType::WINDOW_ORIENTATION ||
+        toRotationInfoType > RotationInfoType::DISPLAY_ROTATION) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Invalid to RotationInfoType : %{public}d", to);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return ANI_ERROR;
+    }
+    int32_t convertedValue;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        window->ConvertOrientationAndRotation(fromRotationInfoType, toRotationInfoType, value, convertedValue));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Window ConvertOrientationAndRotation falied");
+        AniWindowUtils::AniThrowError(env, ret);
+        return ANI_ERROR;
+    }
+    TLOGNI(WmsLogTag::WMS_ROTATION,
+           "[ANI] ConvertOrientationAndRotation end, Window [%{public}u, %{public}s] convertedValue=%{public}u",
+           window->GetWindowId(), window->GetWindowName().c_str(), convertedValue);
+    return static_cast<ani_int>(convertedValue);
 }
 
 void AniWindow::Opacity(ani_env* env, ani_object obj, ani_long nativeObj, ani_double opacity)
@@ -4061,9 +4111,7 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
 
     bool isForcible = false;
     if (!AniWindowUtils::CheckParaIsUndefined(env, forcible)) {
-        if ((windowToken_->GetTargetAPIVersion() >= API_VERSION_23 && !windowToken_->IsPhonePadOrPcWindow()) ||
-            (windowToken_->GetTargetAPIVersion() < API_VERSION_23 &&
-            !windowToken_->IsPcOrFreeMultiWindowCapabilityEnabled())) {
+        if (!windowToken_->IsPhonePadOrPcWindow()) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] device not support");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
@@ -6090,6 +6138,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetPreferredOrientation)},
         ani_native_function {"getPreferredOrientation", "l:i",
             reinterpret_cast<void *>(AniWindow::GetPreferredOrientation)},
+        ani_native_function {"convertOrientationAndRotation", "liii:i",
+            reinterpret_cast<void *>(AniWindow::ConvertOrientationAndRotation)},
         ani_native_function {"setWindowPrivacyModeSync", "JZ:V",
             reinterpret_cast<void *>(AniWindow::SetWindowPrivacyMode)},
         ani_native_function {"recoverSync", "J:V",

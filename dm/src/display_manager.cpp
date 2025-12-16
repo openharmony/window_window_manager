@@ -138,6 +138,8 @@ public:
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea);
     DMError GetBrightnessInfo(DisplayId dispalyId, ScreenBrightnessInfo& brightnessInfo);
+    DMError GetSupportsInput(DisplayId displayId, bool& supportsInput);
+    DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
     DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
     DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
     DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
@@ -2744,6 +2746,26 @@ DMError DisplayManager::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessI
 DMError DisplayManager::Impl::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().GetBrightnessInfo(displayId, brightnessInfo);
+}
+
+DMError DisplayManager::GetSupportsInput(DisplayId displayId, bool& supportsInput)
+{
+    return pImpl_->GetSupportsInput(displayId, supportsInput);
+}
+
+DMError DisplayManager::Impl::GetSupportsInput(DisplayId displayId, bool& supportsInput)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetSupportsInput(displayId, supportsInput);
+}
+
+DMError DisplayManager::SetSupportsInput(DisplayId displayId, bool supportsInput)
+{
+    return pImpl_->SetSupportsInput(displayId, supportsInput);
+}
+
+DMError DisplayManager::Impl::SetSupportsInput(DisplayId displayId, bool supportsInput)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().SetSupportsInput(displayId, supportsInput);
 }
 
 DMError DisplayManager::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position)

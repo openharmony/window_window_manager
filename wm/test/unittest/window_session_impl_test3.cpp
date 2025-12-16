@@ -163,34 +163,34 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowNoInteractionListener01, TestSize
 }
 
 /**
- * @tc.name: SetForceSplitEnable
- * @tc.desc: SetForceSplitEnable
+ * @tc.name: SetForceSplitConfig
+ * @tc.desc: SetForceSplitConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest3, SetForceSplitEnable, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest3, SetForceSplitConfig, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable start";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitConfig start";
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    window_ = GetTestWindowImpl("SetForceSplitEnable");
+    window_ = GetTestWindowImpl("SetForceSplitConfig");
     ASSERT_NE(window_, nullptr);
 
     int32_t FORCE_SPLIT_MODE = 5;
     int32_t NAV_FORCE_SPLIT_MODE = 6;
-    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
 
-    config = { FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    config = { FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", true, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    config = { NAV_FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
 
-    config = { NAV_FORCE_SPLIT_MODE, "MainPage", false, "ArkuiOptions", false };
-    window_->SetForceSplitEnable(config);
+    config = { NAV_FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
+    window_->SetForceSplitConfig(config);
     EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
     LOG_SetCallback(nullptr);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitEnable end";
+    GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitConfig end";
 }
 
 /**

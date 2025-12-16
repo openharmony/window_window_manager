@@ -67,6 +67,12 @@ void WindowManagerAgentLite::UpdatePiPWindowStateChanged(const std::string& bund
     SingletonContainer::Get<WindowManagerLite>().UpdatePiPWindowStateChanged(bundleName, isForeground);
 }
 
+void WindowManagerAgentLite::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
+    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+{
+    SingletonContainer::Get<WindowManagerLite>().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+}
+
 void WindowManagerAgentLite::NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
     WindowUpdateType type)
 {

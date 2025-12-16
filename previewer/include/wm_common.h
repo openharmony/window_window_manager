@@ -55,7 +55,6 @@ constexpr uint32_t MIN_BUTTON_ICON_SIZE = 16;
 constexpr uint32_t MAX_BUTTON_ICON_SIZE = 24;
 constexpr uint32_t MIN_BUTTON_BACKGROUND_CORNER_RADIUS = 4;
 constexpr uint32_t MAX_BUTTON_BACKGROUND_CORNER_RADIUS = 8;
-constexpr int32_t API_VERSION_INVALID = -1;
 constexpr int32_t MINIMUM_Z_LEVEL = -10000;
 constexpr int32_t MAXIMUM_Z_LEVEL = 10000;
 constexpr int32_t SPECIFIC_ZINDEX_INVALID = -1;
@@ -1238,6 +1237,14 @@ struct WindowLimits {
             1.0f,                              // vpRatio
             PixelUnit::VP                      // pixelUnit
         };
+    }
+
+    bool IsUninitialized() const
+    {
+        return (maxWidth_ == static_cast<uint32_t>(INT32_MAX) &&
+                maxHeight_ == static_cast<uint32_t>(INT32_MAX) &&
+                minWidth_ == 1 &&
+                minHeight_ == 1);
     }
 
     std::string ToString() const

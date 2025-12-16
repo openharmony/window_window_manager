@@ -103,6 +103,7 @@ using NotifyRestoreMainWindowFunc =
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using SetSkipEventOnCastPlusCallback = std::function<void(int32_t persistentId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
+using NotifyForceSplitEnableFunc = std::function<bool(const std::string& bundleName)>;
 using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
@@ -600,6 +601,7 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
+    void RegisterForceSplitEnableListener(const NotifyForceSplitEnableFunc& func);
 
     /*
      * Dialog Window
@@ -767,6 +769,7 @@ public:
         return systemConfig_.IsFreeMultiWindowMode();
     }
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
 
     // WMSPipeline-related: only accessed on SSM thread
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
@@ -899,6 +902,7 @@ public:
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
+    void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
     /*
      * Gesture Back
@@ -953,7 +957,6 @@ public:
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     bool IsDelayFocusChange();
-    virtual bool IsBlockingFocusWindowType() const;
 
     /*
      * Window Property
@@ -985,7 +988,6 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
-    bool GetIsPrivacyMode() const override { return isPrivacyMode_; };
     void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) override
     {
         std::lock_guard lock(appUseControlMapMutex_);
@@ -1398,6 +1400,7 @@ private:
     PiPTemplateInfo pipTemplateInfo_ = {};
 
     NotifyForceSplitFunc forceSplitFunc_;
+    NotifyForceSplitEnableFunc forceSplitEnableFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     WSRect lastSafeRect = { 0, 0, 0, 0 };
@@ -1432,6 +1435,9 @@ private:
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
     WSRect GetGlobalOrWinRect();
+    void NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(SessionEvent event);
+    bool ShouldNotifyWindowStatusChange(SessionEvent event) const;
+    void ExecuteWindowStatusChangeNotification(const char* where);
     WindowLimits GetWindowLimits() const;
 
     /*

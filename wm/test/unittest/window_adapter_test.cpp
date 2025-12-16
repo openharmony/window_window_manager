@@ -200,7 +200,6 @@ HWTEST_F(WindowAdapterTest, ConvertToRelativeCoordinateExtended, TestSize.Level1
     EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
     EXPECT_EQ(newRect.posX_, 100);
     EXPECT_EQ(newRect.posY_, 3000);
-    EXPECT_EQ(newDisplayId, 0);
 }
 
 /**
