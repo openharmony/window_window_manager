@@ -792,7 +792,7 @@ void Session::UpdateSessionTouchable(bool touchable)
 
 WSError Session::SetFocusable(bool isFocusable)
 {
-    WLOGFI("SetFocusable id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
     GetSessionProperty()->SetFocusable(isFocusable);
     if (isFocused_ && !GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::FOCUSABLE;
