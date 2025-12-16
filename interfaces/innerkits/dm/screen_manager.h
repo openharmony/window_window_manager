@@ -248,6 +248,24 @@ public:
     DMError RemoveVirtualScreenFromGroup(std::vector<ScreenId> screens);
 
     /**
+     * @brief Add virtual screen whitelist.
+     *
+     * @param screenId Screen id.
+     * @param missionIds mission ids.
+     * @return DM_OK means add success, others means add failed.
+     */
+    DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds);
+
+    /**
+     * @brief Remove virtual screen whitelist.
+     *
+     * @param screenId Screen id.
+     * @param missionIds mission ids.
+     * @return DM_OK means remove success, others means remove failed.
+     */
+    DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds);
+
+    /**
      * @brief Create virtual screen.
      *
      * @param option Indicates the options of the virtual screen.
