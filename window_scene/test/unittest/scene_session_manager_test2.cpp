@@ -1879,6 +1879,68 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFocusWindowInfoByAbilityToken_SACalling
+ * @tc.desc: Test function GetFocusWindowInfoByAbilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken_SACalling, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    FocusChangeInfo info;
+    sptr<IRemoteObject> toekn;
+    ssm_->GetFocusWindowInfoByAbilityToken(info, toekn);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    MockAccesstokenKit::MockIsSACalling(false);
+}
+
+/**
+ * @tc.name: GetFocusWindowInfoByAbilityToken
+ * @tc.desc: Test function GetFocusWindowInfoByAbilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "GetFocusWindowInfoByAbilityToken";
+    info.bundleName_ = "GetFocusWindowInfoByAbilityToken";
+    FocusChangeInfo focusInfo{};
+    sptr<IRemoteObject> toekn = sptr<IRemoteObjectMocker>::MakeSptr();
+
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession1 });
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    sceneSession1->SetAbilityToken(token);
+    sceneSession1->property_->SetDisplayId(DISPLAY_ID_INVALID);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    ssm_->windowFocusController_->AddFocusGroup(0, 0);
+    sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    sceneSession1->property_->SetPersistentId(2);
+    focusGroup->SetFocusedSessionId(1);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    focusGroup->SetFocusedSessionId(2);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    EXPECT_EQ(focusInfo.windowId_, 2);
+    ssm_->windowFocusController_->RemoveFocusGroup(0, 0);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: SetSessionLabel
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
