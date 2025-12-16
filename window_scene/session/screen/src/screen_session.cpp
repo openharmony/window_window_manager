@@ -560,6 +560,11 @@ uint32_t ScreenSession::GetValidWidth() const
     return property_.GetValidWidth();
 }
 
+float ScreenSession::GetVirtualPixelRatio() const
+{
+    return property_.GetVirtualPixelRatio();
+}
+
 void ScreenSession::SetPointerActiveWidth(uint32_t pointerActiveWidth)
 {
     property_.SetPointerActiveWidth(pointerActiveWidth);

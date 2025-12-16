@@ -206,6 +206,21 @@ HWTEST_F(WindowSessionTest, SetCompatibleModeProperty, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateBrightness
+ * @tc.desc: UpdateBrightness
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, UpdateBrightness, TestSize.Level1)
+{
+    session_->sessionStage_ = mockSessionStage_;
+    float brightness = 0.5f;
+    EXPECT_EQ(WSError::WS_OK, session_->UpdateBrightness(brightness));
+
+    session_->sessionStage_ = nullptr;
+    EXPECT_EQ(WSError::WS_OK, session_->UpdateBrightness(brightness));
+}
+
+/**
  * @tc.name: UpdateClientDisplayId01
  * @tc.desc: UpdateClientDisplayId
  * @tc.type: FUNC

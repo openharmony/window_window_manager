@@ -149,7 +149,6 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
-constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
@@ -440,7 +439,6 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         }
         auto parentSession = FindParentSessionByParentId(property_->GetParentPersistentId());
         if (parentSession != nullptr) {
-            SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
             property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         }
         PreProcessCreate();
@@ -1868,9 +1866,16 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
     }
     NotifyWindowStatusChange(GetWindowMode());
-    NotifyWindowStatusDidChange(GetWindowMode());
+    NotifyWindowStatusDidChangeAfterShowWindow();
     NotifyDisplayInfoChange(displayInfo);
     return ret;
+}
+
+void WindowSceneSessionImpl::NotifyWindowStatusDidChangeAfterShowWindow()
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyWindowStatusDidChangeAfterShowWindow();
 }
 
 sptr<DisplayInfo> WindowSceneSessionImpl::GetDisplayInfo() const
@@ -3575,9 +3580,11 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uin
                 ~static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) |
                 static_cast<uint32_t>(newProperty.settingFlag_);
             nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
+            isAtomicServiceUseColor_ = false;
         } else {
             nowsystemBarPropertyMap_[type].contentColor_ = color.value();
             nowsystemBarPropertyMap_[type].settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
+            isAtomicServiceUseColor_ = true;
         }
         newProperty = nowsystemBarPropertyMap_[type];
     }
@@ -5909,8 +5916,10 @@ WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMo
 
 bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode)
 {
+    bool isFreeMultiWindowMode = IsFreeMultiWindowMode();
+
     bool onlySupportSplitInFreeMultiWindow =
-        IsFreeMultiWindowMode() && mode == WindowMode::WINDOW_MODE_FLOATING &&
+        isFreeMultiWindowMode && mode == WindowMode::WINDOW_MODE_FLOATING &&
         (WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_PRIMARY) ||
          WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_SPLIT_SECONDARY)) &&
         !WindowHelper::IsWindowModeSupported(windowModeSupportType, WindowMode::WINDOW_MODE_FULLSCREEN);
@@ -5921,7 +5930,7 @@ bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowMod
                              mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
                              mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
     bool isAvailableDevice =
-        (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !IsFreeMultiWindowMode();
+        (windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPadWindow()) && !isFreeMultiWindowMode;
     if (isAvailableDevice && isMultiWindowMode) {
         return true;
     }
@@ -5930,7 +5939,14 @@ bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowMod
     bool isCompatibleWindow = mode == WindowMode::WINDOW_MODE_FLOATING ||
                               mode == WindowMode::WINDOW_MODE_FULLSCREEN;
     bool isDragScale = property_->IsAdaptToDragScale();
-    if (IsFreeMultiWindowMode() && isCompatibleWindow && isDragScale) {
+    if (isFreeMultiWindowMode && isCompatibleWindow && isDragScale) {
+        return true;
+    }
+
+    // the full screen mode must be supported in not pc window and not free multi window mode.
+    bool isSupportedFullScreen = !windowSystemConfig_.IsPcWindow() && !isFreeMultiWindowMode &&
+                                 mode == WindowMode::WINDOW_MODE_FULLSCREEN;
+    if (isSupportedFullScreen) {
         return true;
     }
     return false;
@@ -6625,8 +6641,7 @@ WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
         TLOGE(WmsLogTag::WMS_SUB, "This is PcAppInpad, not Suppored");
         return WMError::WM_OK;
     }
-    if ((GetTargetAPIVersion() >= API_VERSION_23 && !IsPhonePadOrPcWindow()) ||
-        (GetTargetAPIVersion() < API_VERSION_23 && !IsPcOrPadFreeMultiWindowMode())) {
+    if (!IsPhonePadOrPcWindow()) {
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -6651,6 +6666,13 @@ WMError WindowSceneSessionImpl::UseImplicitAnimation(bool useImplicit)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     return static_cast<WMError>(hostSession->UseImplicitAnimation(useImplicit));
+}
+
+WSError WindowSceneSessionImpl::UpdateBrightness(float brightness)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Wid: %{public}d, brightness: %{public}f", GetWindowId(), brightness);
+    property_->SetBrightness(brightness);
+    return WSError::WS_OK;
 }
 
 void WindowSceneSessionImpl::UpdateDensity()

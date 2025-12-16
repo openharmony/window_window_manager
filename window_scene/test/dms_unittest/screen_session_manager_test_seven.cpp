@@ -838,7 +838,7 @@ HWTEST_F(ScreenSessionManagerTest, TriggerFoldStatusChange01, TestSize.Level1)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        return;
+        GTEST_SKIP();
     }
     ASSERT_NE(ssm_, nullptr);
     FoldStatus foldStatus = FoldStatus::EXPAND;

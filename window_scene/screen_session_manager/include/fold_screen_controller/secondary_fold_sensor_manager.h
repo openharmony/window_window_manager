@@ -39,8 +39,6 @@ public:
     void SetSensorFoldStateManager(sptr<SensorFoldStateManager> sensorFoldStateManager);
     void RegisterPostureCallback();
     void RegisterHallCallback();
-    void UnRegisterPostureCallback();
-    void UnRegisterHallCallback();
     void HandlePostureData(const SensorEvent * const event);
     void HandleHallDataExt(const SensorEvent * const event);
     void PowerKeySetScreenActiveRect();

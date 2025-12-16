@@ -37,7 +37,6 @@ public:
             0, WindowAnimationCurve::LINEAR, {0.0f, 0.0f, 0.0f, 0.0f} },
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {}) override;
     WSError UpdateGlobalDisplayRectFromServer(const WSRect& rect, SizeChangeReason reason) override;
-    void UpdateDensity() override;
     WSError UpdateOrientation() override;
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     WSError HandleBackEvent() override;
@@ -122,6 +121,10 @@ public:
     WSError SendFbActionEvent(const std::string& action) override;
 
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
+
+    // Window Property
+    WSError UpdateBrightness(float brightness) override;
+    void UpdateDensity() override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
