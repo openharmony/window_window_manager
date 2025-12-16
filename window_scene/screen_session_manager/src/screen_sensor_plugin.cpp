@@ -22,6 +22,8 @@ namespace {
 }
 
 static void *g_handle = nullptr;
+MotionSubscribeCallbackPtr g_motionSubscribeCallbackPtr = nullptr;
+MotionUnsubscribeCallbackPtr g_motionUnsubscribeCallbackPtr = nullptr;
 
 bool LoadMotionSensor(void)
 {
@@ -52,6 +54,8 @@ void UnloadMotionSensor(void)
         dlclose(g_handle);
         g_handle = nullptr;
     }
+    g_motionSubscribeCallbackPtr = nullptr;
+    g_motionUnsubscribeCallbackPtr = nullptr;
 }
 
 __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, OnMotionChangedPtr callback)
@@ -64,13 +68,13 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    MotionSubscribeCallbackPtr func = (MotionSubscribeCallbackPtr)(dlsym(g_handle, "MotionSubscribeCallback"));
+    g_motionSubscribeCallbackPtr = (MotionSubscribeCallbackPtr)(dlsym(g_handle, "MotionSubscribeCallback"));
     const char* dlsymError = dlerror();
     if  (dlsymError) {
         TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
         return false;
     }
-    return func(motionType, callback);
+    return g_motionSubscribeCallbackPtr(motionType, callback);
 }
 
 __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType, OnMotionChangedPtr callback)
@@ -83,14 +87,14 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
-    MotionUnsubscribeCallbackPtr func =
-        (MotionUnsubscribeCallbackPtr)(dlsym(g_handle, "MotionUnsubscribeCallback"));
+    g_motionUnsubscribeCallbackPtr = 
+    (MotionUnsubscribeCallbackPtr)(dlsym(g_handle, "MotionUnsubscribeCallback"));
     const char* dlsymError = dlerror();
     if  (dlsymError) {
         TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
         return false;
     }
-    return func(motionType, callback);
+    return g_motionUnsubscribeCallbackPtr(motionType, callback);
 }
 }
 }
