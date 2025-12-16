@@ -2187,13 +2187,21 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
         int value;
         ani_ref intValueObject;
         ani_boolean isUndefined;
-        env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &intValueObject);
-        env->Reference_IsUndefined(intValueObject, &isUndefined);
+        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &intValueObject);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Object_GetPropertyByName_Ref failed for %{public}s", name);
+            return ret;
+        }
+        ret = env->Reference_IsUndefined(intValueObject, &isUndefined);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Reference_IsUndefined failed for %{public}s", name);
+            return ret;
+        }
         if (isUndefined) {
             field = 0;
             return ANI_OK;
         }
-        ani_status ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
+        ret = AniWindowUtils::GetPropertyIntObject(env, name, aniWindowLimits, value);
         if (ret == ANI_OK) {
             if (value >= 0) {
                 field = static_cast<uint32_t>(value);
@@ -2209,13 +2217,21 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
         uint32_t unitValue;
         ani_ref unitValueObject;
         ani_boolean isUndefined;
-        env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &unitValueObject);
-        env->Reference_IsUndefined(unitValueObject, &isUndefined);
+        ani_status ret = env->Object_GetPropertyByName_Ref(aniWindowLimits, name, &unitValueObject);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Object_GetPropertyByName_Ref failed for %{public}s", name);
+            return ret;
+        }
+        ret = env->Reference_IsUndefined(unitValueObject, &isUndefined);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Reference_IsUndefined failed for %{public}s", name);
+            return ret;
+        }
         if (isUndefined) {
             field = PixelUnit::PX;
             return ANI_OK;
         }
-        ani_status ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(unitValueObject), unitValue);
+        ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(unitValueObject), unitValue);
         if (ret == ANI_OK) {
             field = static_cast<PixelUnit>(unitValue);
         } else {
