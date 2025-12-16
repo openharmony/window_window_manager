@@ -18,6 +18,7 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "iremote_object_mocker.h"
 #include "libxml/parser.h"
 #include "libxml/tree.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -1889,8 +1890,8 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken_SACalling, T
     ssm_->sceneSessionMap_.clear();
     MockAccesstokenKit::MockIsSACalling(false);
     FocusChangeInfo info;
-    sptr<IRemoteObject> toekn;
-    ssm_->GetFocusWindowInfoByAbilityToken(info, toekn);
+    sptr<IRemoteObject> token;
+    ssm_->GetFocusWindowInfoByAbilityToken(info, token);
     EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
     MockAccesstokenKit::MockIsSACalling(false);
 }
@@ -1908,21 +1909,21 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken, TestSize.Le
     info.abilityName_ = "GetFocusWindowInfoByAbilityToken";
     info.bundleName_ = "GetFocusWindowInfoByAbilityToken";
     FocusChangeInfo focusInfo{};
-    sptr<IRemoteObject> toekn = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
 
     sptr<SceneSession> sceneSession = nullptr;
     ssm_->sceneSessionMap_.insert({ 1, sceneSession });
-    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
     EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
 
     sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ 2, sceneSession1 });
-    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
     EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
 
     sceneSession1->SetAbilityToken(token);
     sceneSession1->property_->SetDisplayId(DISPLAY_ID_INVALID);
-    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
     EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
 
     ssm_->windowFocusController_->AddFocusGroup(0, 0);
@@ -1930,11 +1931,11 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken, TestSize.Le
     auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
     sceneSession1->property_->SetPersistentId(2);
     focusGroup->SetFocusedSessionId(1);
-    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
     EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
 
     focusGroup->SetFocusedSessionId(2);
-    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, toekn);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
     EXPECT_EQ(focusInfo.windowId_, 2);
     ssm_->windowFocusController_->RemoveFocusGroup(0, 0);
     ssm_->sceneSessionMap_.clear();
