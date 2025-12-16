@@ -2663,7 +2663,11 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
             this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
         });
-        RegisterForceSplitEnableListenerIfMainWindow(sceneSession);
+        if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
+                return this->GetAppForceLandscapeConfigEnable(bundleName);
+            });
+        }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
         sceneSession->SetAppDragResizeType(dragResizeType);
@@ -16895,37 +16899,11 @@ void SceneSessionManager::RegisterConstrainedModalUIExtInfoListener()
     }
 }
 
-bool SceneSessionManager::IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig,
-    const AppForceLandscapeConfig& config)
-{
-    if (preconfig.mode_ != config.mode_ ||
-        preconfig.supportSplit_ != config.supportSplit_ ||
-        preconfig.ignoreOrientation_ != config.ignoreOrientation_ ||
-        preconfig.containsSysConfig_ != config.containsSysConfig_ ||
-        preconfig.containsAppConfig_ != config.containsAppConfig_ ) {
-        return false;
-    }
-    if (config.containsSysConfig_) {
-        if (preconfig.isSysRouter_ != config.isSysRouter_ ||
-            preconfig.sysHomePage_ != config.sysHomePage_ ||
-            preconfig.sysConfigJsonStr_ != config.sysConfigJsonStr_) {
-            return false;
-        }
-    }
-    if (config.containsAppConfig_) {
-        if (preconfig.isAppRouter_ != config.isAppRouter_ ||
-            preconfig.appConfigJsonStr_ != config.appConfigJsonStr_) {
-            return false;
-        }
-    }
-    return true;
-}
-
 WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundleName,
     AppForceLandscapeConfig& config)
 {
     if (bundleName.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
+        TLOGE(WmsLogTag::WMS_COMPAT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
     AppForceLandscapeConfig preConfig;
@@ -16936,11 +16914,11 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         } else {
             preConfig = {};
         }
-        config.hasChanged_ = !SceneSessionManager::IsSameForceSplitConfig(preConfig, config);
+        config.hasChanged_ = !AppForceLandscapeConfig::IsSameForceSplitConfig(preConfig, config);
         appForceLandscapeMap_[bundleName] = config;
     }
 
-    TLOGI(WmsLogTag::DEFAULT,
+    TLOGI(WmsLogTag::WMS_COMPAT,
         "bundleName:%{public}s, config:[mode_%{public}d, supportSplit_%{public}d, ignoreOrientation_%{public}d, "
         "containsSysConfig_%{public}d, isSysRouter_%{public}d, sysHomePage_%{public}s, sysConfigJsonStr_%{public}s, "
         "containsAppConfig_%{public}d, isAppRouter_%{public}d, appConfigJsonStr_%{public}s]",
@@ -16973,7 +16951,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
     const bool enableForceSplit)
 {
     if (bundleName.empty()) {
-        TLOGE(WmsLogTag::DEFAULT, "bundle name is empty");
+        TLOGE(WmsLogTag::WMS_COMPAT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
 
@@ -16983,8 +16961,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
         if (appForceLandscapeMap_.count(bundleName)) {
             config = appForceLandscapeMap_[bundleName];
         } else {
-            TLOGE(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
-            config = {};
+            TLOGI(WmsLogTag::WMS_COMPAT, "app: %{public}s, config not find", bundleName.c_str());
         }
         config.configEnable_ = enableForceSplit;
         appForceLandscapeMap_[bundleName] = config;
@@ -17001,7 +16978,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
             session->NotifyAppForceLandscapeConfigEnableUpdated();
         }
     }
-    TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s, enable:%{public}d", bundleName.c_str(), enableForceSplit);
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d", bundleName.c_str(), enableForceSplit);
     return WSError::WS_OK;
 }
 
@@ -17013,7 +16990,7 @@ AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const st
     std::shared_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
     if (appForceLandscapeMap_.empty() ||
         appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
-        TLOGD(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
+        TLOGD(WmsLogTag::WMS_COMPAT, "app: %{public}s, config not find", bundleName.c_str());
         return {};
     }
     return appForceLandscapeMap_[bundleName];
@@ -17027,10 +17004,10 @@ bool SceneSessionManager::GetAppForceLandscapeConfigEnable(const std::string& bu
     std::shared_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
     if (appForceLandscapeMap_.empty() ||
         appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
-        TLOGD(WmsLogTag::DEFAULT, "app: %{public}s, config not find", bundleName.c_str());
+        TLOGD(WmsLogTag::WMS_COMPAT, "app: %{public}s, config not find", bundleName.c_str());
         return false;
     }
-    TLOGI(WmsLogTag::DEFAULT, "bundleName:%{public}s, enable:%{public}d",
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d",
         bundleName.c_str(), appForceLandscapeMap_[bundleName].configEnable_);
     return appForceLandscapeMap_[bundleName].configEnable_;
 }
@@ -19339,18 +19316,5 @@ WMError SceneSessionManager::GetJsonProfile(AppExecFwk::ProfileType profileType,
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     return WMError::WM_OK;
-}
-
-void SceneSessionManager::RegisterForceSplitEnableListenerIfMainWindow(const sptr<SceneSession>& sceneSession)
-{
-    if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        MainSession* mainSessionPtr = static_cast<MainSession*>(sceneSession.GetRefPtr());
-        if (mainSessionPtr != nullptr) {
-            sptr<MainSession> mainSession = mainSessionPtr;
-            mainSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
-                return this->GetAppForceLandscapeConfigEnable(bundleName);
-            });
-        }
-    }
 }
 } // namespace OHOS::Rosen

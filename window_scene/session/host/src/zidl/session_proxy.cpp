@@ -2722,10 +2722,11 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
         TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<AppForceLandscapeConfig> replyConfig = reply.ReadParcelable<AppForceLandscapeConfig>();
@@ -2750,10 +2751,11 @@ WMError SessionProxy::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
         TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(
-        SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+    int sendCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed, code: %{public}d", sendCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!reply.ReadBool(enableForceSplit)) {

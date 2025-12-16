@@ -7756,10 +7756,10 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
     }
     std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
+        TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
         return;
     }
-    TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, enableForceSplit: %{public}u",
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u",
         enableForceSplit);
     uiContent->SetForceSplitEnable(enableForceSplit);
 }

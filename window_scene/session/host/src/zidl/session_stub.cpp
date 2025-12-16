@@ -2621,7 +2621,7 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
 
 int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "in");
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
     NotifyAppForceLandscapeConfigEnableUpdated();
     return ERR_NONE;
 }
