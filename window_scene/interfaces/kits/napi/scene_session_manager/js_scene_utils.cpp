@@ -924,6 +924,8 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
     napi_get_named_property(env, touchObject, "displayX", &jsDisplayX);
     napi_value jsDisplayY = nullptr;
     napi_get_named_property(env, touchObject, "displayY", &jsDisplayY);
+    napi_value jsPressure = nullptr;
+    napi_get_named_property(env, touchObject, "pressure", &jsPressure);
     int32_t id;
     if (!ConvertFromJsValue(env, jsId, id)) {
         WLOGFE("Failed to convert parameter to id");
@@ -957,6 +959,12 @@ bool ConvertPointerItemFromJs(napi_env env, napi_value touchObject, MMI::Pointer
         return false;
     }
     pointerItem.SetDisplayYPos(displayY * vpr);
+    double pressure;
+    if (!ConvertFromJsValue(env, jsPressure, pressure)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to pressure");
+        return false;
+    }
+    pointerItem.SetPressure(pressure);
     pointerEvent.AddPointerItem(pointerItem);
     return true;
 }
