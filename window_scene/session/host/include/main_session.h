@@ -86,7 +86,7 @@ public:
     bool IsFullScreenInForceSplit() override;
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
-    void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func);
+    void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
