@@ -561,6 +561,7 @@ public:
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
     DMError GetRoundedCorner(DisplayId displayId, int& radius) override;
+    std::shared_ptr<TaskScheduler> GetScreenPowerTaskScheduler();
 
     // Function used for displayConcurrentUserMap_ under concurrent scenario
     struct UserInfo {
@@ -887,7 +888,7 @@ private:
 
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
     sptr<ScreenCutoutController> screenCutoutController_;
-    sptr<FoldScreenController> foldScreenController_;
+    sptr<DMS::FoldScreenBaseController> foldScreenController_;
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
