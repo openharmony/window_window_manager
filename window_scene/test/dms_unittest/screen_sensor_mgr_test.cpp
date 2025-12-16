@@ -3,9 +3,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,18 +17,18 @@
 #include <hisysevent.h>
 #include <parameters.h>
 #include "gmock/gmock.h"
-#include
+#include <functional>
+#include "window_manager_hilog.h"
 #include "screen_session_manager.h"
 #include "sensor_agent.h"
 #include "sensor_agent_type.h"
-#include "window_manager_hilog.h"
 
 #define private public
 #define protected public
-#include "fold_screen_controller/secondary_fold_sensor_manager.h"
 #include "product_config.h"
 #include "screen_sensor_mgr.h"
 #include "sensor_fold_state_mgr.h"
+#include "fold_screen_controller/secondary_fold_sensor_manager.h"
 #undef private
 #undef protected
 
@@ -59,10 +59,7 @@ int32_t DeactivateSensor(int32_t sensorTypeId, const SensorUser* user)
 
 namespace {
 std::string g_logMsg;
-void MyLogCallback(const LogType type,
-                   const LogLevel level,
-                   const unsigned int domain,
-                   const char* tag,
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
                    const char* msg)
 {
     g_logMsg += msg;
@@ -93,11 +90,7 @@ public:
     void TearDown() override;
 };
 
-ScreenSessionManager* ssm_;
-void ScreenSensorMgrTest::SetUpTestCase()
-{
-    ssm_ = &ScreenSessionManager::GetInstance();
-}
+void ScreenSensorMgrTest::SetUpTestCase() {}
 
 void ScreenSensorMgrTest::TearDownTestCase() {}
 

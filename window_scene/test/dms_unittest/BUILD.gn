@@ -84,6 +84,10 @@ group("unittest") {
       ":ws_single_display_sensor_super_fold_state_manager_test",
       ":ws_super_fold_sensor_manager_test",
       ":ws_super_fold_state_manager_test",
+      ":ws_screen_sensor_mgr_test",
+      ":ws_sensor_fold_state_mgr_test",
+      ":ws_fold_screen_base_policy_test",
+      ":ws_fold_screen_base_controller_test",
     ]
   }
 
@@ -1340,6 +1344,102 @@ if (window_manager_fold_ability) {
     external_deps = test_external_deps
     external_deps += [ "init:libbegetutil" ]
   }
+
+  ohos_unittest("ws_screen_sensor_mgr_test") {
+    module_out_path = module_out_path
+
+    sources = [ "screen_sensor_mgr_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+    ]
+
+    external_deps = test_external_deps
+    external_deps += [
+      "hisysevent:libhisysevent",
+      "init:libbegetutil",
+      "sensor:sensor_interface_native",
+    ]
+
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
+  }
+
+  ohos_unittest("ws_sensor_fold_state_mgr_test") {
+    module_out_path = module_out_path
+
+    sources = [ "sensor_fold_state_mgr_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+    ]
+
+    external_deps = test_external_deps
+    external_deps += [
+      "hisysevent:libhisysevent",
+      "init:libbegetutil",
+      "sensor:sensor_interface_native",
+    ]
+
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
+  }
+
+  ohos_unittest("ws_fold_screen_base_policy_test") {
+    module_out_path = module_out_path
+
+    sources = [ "fold_screen_base_policy_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+    ]
+
+    external_deps = test_external_deps
+    external_deps += [
+      "hisysevent:libhisysevent",
+      "init:libbegetutil",
+      "sensor:sensor_interface_native",
+    ]
+
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
+  }
+
+  ohos_unittest("ws_fold_screen_base_controller_test") {
+    module_out_path = module_out_path
+
+    sources = [ "fold_screen_base_controller_test.cpp" ]
+
+    deps = [
+      ":ws_unittest_common",
+    ]
+
+    external_deps = test_external_deps
+    external_deps += [
+      "hisysevent:libhisysevent",
+      "init:libbegetutil",
+      "sensor:sensor_interface_native",
+    ]
+
+    defines = []
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.sensors_sensor)) {
+      external_deps += [ "sensor:sensor_interface_native" ]
+      defines += [ "SENSOR_ENABLE" ]
+    }
+  }
 }
 
 ## Build ws_unittest_common.a {{{
@@ -1354,6 +1454,8 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/window_scene/screen_session_manager_client/include",
+    "${window_base_path}/window_scene/screen_session_manager/infra/include/fold_screen",
+    "${window_base_path}/window_scene/screen_session_manager/infra/include/common",
     "${window_base_path}/window_scene/screen_session_manager/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",

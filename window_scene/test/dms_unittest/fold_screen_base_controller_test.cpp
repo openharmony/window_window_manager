@@ -17,24 +17,21 @@
 #include <hisysevent.h>
 #include <parameters.h>
 #include "gmock/gmock.h"
-#include
+#include <functional>
 #include "window_manager_hilog.h"
 
 #define private public
 #define protected public
-#include "fold_screen_base_controller.h"
 #include "fold_screen_base_policy.h"
-#include "product_config.h"
+#include "fold_screen_base_controller.h"
 #include "screen_session_manager.h"
+#include "product_config.h"
 #undef private
 #undef protected
 
 namespace {
 std::string g_logMsg;
-void MyLogCallback(const LogType type,
-                   const LogLevel level,
-                   const unsigned int domain,
-                   const char* tag,
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
                    const char* msg)
 {
     g_logMsg += msg;
@@ -264,7 +261,7 @@ HWTEST_F(FoldScreenBaseControllerTest, GetCurrentScreenIdTest, TestSize.Level1)
 HWTEST_F(FoldScreenBaseControllerTest, GetScreenSnapshotRectTest, TestSize.Level1)
 {
     auto controller = FoldScreenBaseController();
-    Drawing::Rect expectRect = { 0, 0, 0, 0 };
+    Drawing::Rect expectRect = {0, 0, 0, 0};
     Drawing::Rect getRect = controller.GetScreenSnapshotRect();
     EXPECT_EQ(expectRect, getRect);
 }

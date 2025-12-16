@@ -38,3 +38,5 @@ private:
 }  // namespace DMS
 }  // namespace Rosen
 }  // namespace OHOS
+
+#endif
