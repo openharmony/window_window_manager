@@ -3345,7 +3345,7 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_1, TestSize.Level1)
  * @tc.desc: normal function
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_3, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_2, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3355,6 +3355,25 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_3, TestSize.Level1)
     data.WriteUint64(0);
     uint32_t code = static_cast<uint32_t>(
         DisplayManagerMessage::TRANS_ID_SCREEN_SET_SUPPORTS_INPUT);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest155_3
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_3, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_GET_ROUNDED_CORNER);
     int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, 0);
 }

@@ -272,6 +272,7 @@ public:
     void SetValidWidth(uint32_t validWidth);
     uint32_t GetValidHeight() const;
     uint32_t GetValidWidth() const;
+    float GetVirtualPixelRatio() const;
     void SetRealHeight(uint32_t realHeight) { property_.SetScreenRealHeight(realHeight); }
     void SetRealWidth(uint32_t realWidth) { property_.SetScreenRealWidth(realWidth); }
 

@@ -233,6 +233,7 @@ const uint32_t SCREEN_STATE_MACHINE_REF_COUNT = 0;
 const uint32_t FREEZE_SCREEN_MAX_COUNT = 150;
 const uint32_t FREEZE_SCREEN_RETRY_DELAY_MS = 2000;
 const uint32_t UNFREEZE_SCREEN_DELAY_MS = 2000;
+const std::string REAL_DEVICE_RADIUS = system::GetParameter("const.product.real_device_radius", "");
 
 // based on the bundle_util
 // LCOV_EXCL_START
@@ -4091,6 +4092,44 @@ DMError ScreenSessionManager::SetSupportsInput(DisplayId displayId, bool support
         return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
     screenSession->SetSupportsInput(supportsInput);
+    return DMError::DM_OK;
+}
+
+static std::vector<int> GetDeviceRadiusFormConfig(float dpi)
+{
+    std::vector<int> result;
+    std::string token;
+    std::string radiusStr(REAL_DEVICE_RADIUS);
+    std::vector<std::string> radius = FoldScreenStateInternel::StringSplit(radiusStr, ',');
+    for (const auto& item : radius) {
+        float value = std::stof(item);
+        if (value > 0) {
+            int radiusPx = static_cast<int>(dpi * value); //conver radius vp to px
+            result.push_back(radiusPx);
+        } else {
+            break;
+        }
+    }
+    return result;
+}
+
+DMError ScreenSessionManager::GetRoundedCorner(DisplayId displayId, int& radius)
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    sptr<ScreenSession> screenSession = GetScreenSession(displayId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    auto deviceRadius = GetDeviceRadiusFormConfig(screenSession->GetVirtualPixelRatio());
+    if (deviceRadius.empty()) {
+        return DMError::DM_OK;
+    }
+    if (screenSession->GetPhyScreenId() == 0) {
+        radius = deviceRadius[0];
+    } else if (screenSession->GetPhyScreenId() == 5 && deviceRadius.size() > 1) {
+        radius = deviceRadius[1];
+    }
     return DMError::DM_OK;
 }
 
