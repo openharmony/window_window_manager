@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #ifndef FOLD_CREASE_REGION_CONTROLLER_H
 #define FOLD_CREASE_REGION_CONTROLLER_H
- 
+
 #include <refbase.h>
 #include "dm_common.h"
 #include "fold_screen_info.h"
 #include "wm_single_instance.h"
- 
+
 namespace OHOS::Rosen::DMS {
 class FoldCreaseRegionController : public RefBase {
 WM_DECLARE_SINGLE_INSTANCE_BASE(FoldCreaseRegionController)

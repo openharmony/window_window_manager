@@ -909,5 +909,12 @@ struct RoundedCorner {
     Position position;
     int radius;
 };
+
+enum class DisplayModeChangeReason : uint32_t {
+    DEFAULT = 0,
+    RECOVER,
+    INVALID,
+    SETMODE,
+};
 }
 #endif // OHOS_ROSEN_DM_COMMON_H
