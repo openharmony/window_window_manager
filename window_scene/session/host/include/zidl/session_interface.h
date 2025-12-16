@@ -149,6 +149,7 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+    virtual void NotifyWindowStatusDidChangeAfterShowWindow() {}
 
     /**
      * @brief Updates the window's rectangle in global coordinates from client-side state.

@@ -201,6 +201,7 @@ public:
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
     /**
      * Window Transition Animation For PC

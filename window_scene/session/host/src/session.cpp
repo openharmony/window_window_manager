@@ -1372,12 +1372,23 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         UpdateClientRectPosYAndDisplayId(updateRect);
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
+        NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(reason);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
     UpdatePointerArea(GetSessionRect());
     return WSError::WS_OK;
+}
+
+void Session::NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason reason)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    if (reason == SizeChangeReason::MAXIMIZE || reason == SizeChangeReason::MAXIMIZE_IN_IMPLICT) {
+        sessionStage_->NotifyLayoutFinishAfterWindowModeChange(GetWindowMode());
+    }
 }
 
 WSError Session::UpdateDensity()
