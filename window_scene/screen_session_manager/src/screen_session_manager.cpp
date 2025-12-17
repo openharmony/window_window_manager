@@ -4132,6 +4132,14 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
         return false;
     }
     TLOGI(WmsLogTag::DMS, "[UL_POWER]reason: %{public}u", reason);
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
+        TLOGI(WmsLogTag::DMS, "[UL_POWER]wakeup cannot start dream");
+        return false;
+    }
+    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
+        NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_END_DREAM, EventStatus::BEGIN, reason);
+        return BlockScreenWaitPictureFrameByCV(false);
+    }
     ScreenPowerInfoType type = reason;
     if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_INIT) {
         return DoWakeUpBegin(reason);
@@ -4140,14 +4148,6 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
         reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin reason: %{public}u", reason);
         return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::WAKEUP_BEGIN_ADVANCED, type);
-    }
-    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
-        TLOGI(WmsLogTag::DMS, "[UL_POWER]wakeup cannot start dream");
-        return false;
-    }
-    if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
-        NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_END_DREAM, EventStatus::BEGIN, reason);
-        return BlockScreenWaitPictureFrameByCV(false);
     }
     return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::WAKEUP_BEGIN, type);
 }
@@ -4194,10 +4194,6 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
         return false;
     }
     TLOGI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
-    ScreenPowerInfoType type = reason;
-    if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_INIT) {
-        return DoSuspendBegin(reason);
-    }
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_END_DREAM) {
         TLOGI(WmsLogTag::DMS, "[UL_POWER]suspend cannot end dream");
         return false;
@@ -4205,6 +4201,10 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
         NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_START_DREAM, EventStatus::BEGIN, reason);
         return BlockScreenWaitPictureFrameByCV(true);
+    }
+    ScreenPowerInfoType type = reason;
+    if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_INIT) {
+        return DoSuspendBegin(reason);
     }
     return ScreenStateMachine::GetInstance().HandlePowerStateChange(ScreenPowerEvent::SUSPEND_BEGIN, type);
 }
