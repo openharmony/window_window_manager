@@ -2935,11 +2935,11 @@ HWTEST_F(ScreenSessionManagerTest, HandleCastVirtualScreenMirrorRegion, TestSize
     ssm_->screenSessionMap_[51] = virtualSession;
     ssm_->screenSessionMap_[52] = internalSession;
     ret = ssm_->HandleCastVirtualScreenMirrorRegion();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     internalSession->SetRotation(Rotation::ROTATION_180);
     ret = ssm_->HandleCastVirtualScreenMirrorRegion();
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     internalSession->SetRotation(Rotation::ROTATION_270);
     ret = ssm_->HandleCastVirtualScreenMirrorRegion();
