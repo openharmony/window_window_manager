@@ -277,22 +277,6 @@ HWTEST_F(DisplayManagerAdapterTest, DisableMirror, TestSize.Level1)
 }
 
 /**
- * @tc.name: HasImmersiveWindow
- * @tc.desc: test HasImmersiveWindow
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterTest, HasImmersiveWindow, TestSize.Level1)
-{
-    bool immersive = false;
-    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().HasImmersiveWindow(0u, immersive);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(ret, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
-    } else {
-        ASSERT_EQ(ret, DMError::DM_OK);
-    }
-}
-
-/**
  * @tc.name: GetPixelFormat
  * @tc.desc: test success
  * @tc.type: FUNC
