@@ -45,8 +45,8 @@ public:
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyMidSceneStatusChange(const WindowInfoList& windowInfoList);
-    WindowInfoList GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-        const WindowInfoList& windowInfoList);
+    WindowInfoList GetWindowInfoListByInterestWindowIds(
+        const sptr<IWindowInfoChangedListener>& listener, const WindowInfoList& windowInfoList);
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, WindowInfoList& windowChangeInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
@@ -238,8 +238,8 @@ void WindowManagerLite::Impl::NotifyMidSceneStatusChange(const WindowInfoList& w
     }
 }
 
-WindowInfoList WindowManagerLite::Impl::GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-    const WindowInfoList& windowInfoList)
+WindowInfoList WindowManagerLite::Impl::GetWindowInfoListByInterestWindowIds(
+    const sptr<IWindowInfoChangedListener>& listener, const WindowInfoList& windowInfoList)
 {
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is nullptr");
