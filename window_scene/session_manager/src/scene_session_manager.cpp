@@ -7034,8 +7034,7 @@ void SceneSessionManager::GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focu
         focusInfo.uid_ = currSceneSession->GetCallingUid();
         focusInfo.windowType_ = currSceneSession->GetWindowType();
         focusInfo.abilityToken_ = currSceneSession->GetAbilityToken();
-        TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s get focus session info by ability token success, id: %{public}d ",
-            where, focusedSessionId);
+        TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s success, id: %{public}d ", where, focusedSessionId);
         return WSError::WS_OK;
     }, where);
 }
