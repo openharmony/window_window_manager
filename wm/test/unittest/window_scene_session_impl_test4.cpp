@@ -1502,7 +1502,7 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
     const Rect expected = {1, 2, 3, 4};
     tmpParams.LandscapeKeyboardRect_ = expected;
 
-    window->property->SetRequestRect({0, 0, 0, 0});
+    window->property_->SetRequestRect({0, 0, 0, 0});
     window->property_->SetKeyboardLayoutParams(tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
     ASSERT_NE(window->property_->requestRect_, expected);
