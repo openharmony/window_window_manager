@@ -25,6 +25,7 @@
 #include "fold_screen_state_internel.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
+#include "screen_sensor_plugin.h"
 #include "test_client.h"
 
 using namespace testing;
@@ -3231,15 +3232,11 @@ HWTEST_F(ScreenSessionManagerTest, CheckNeedNotifyTest, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, IsInAodTest, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    result = ssm_->IsInAod();
-    EXPECT_EQ(result, false);
-    result = ssm_->StopAod();
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(ssm_->IsInAod(), false);
+    EXPECT_EQ(ssm_->StopAod(), false);
     ssm_->LoadAodLib();
-    result = ssm_->IsInAod();
-    EXPECT_NE(result, false);
-    result = ssm_->StopAod();
-    EXPECT_NE(result, false);
+    EXPECT_NE(ssm_->IsInAod(), false);
+    EXPECT_NE(ssm_->StopAod(), false);
 }
 }
 }
