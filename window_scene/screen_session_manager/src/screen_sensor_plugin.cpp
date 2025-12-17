@@ -69,7 +69,8 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
         return false;
     }
     if (g_motionSubscribeCallbackPtr == nullptr) {
-        g_motionSubscribeCallbackPtr = reinterpret_cast<MotionSubscribeCallbackPtr>(dlsym(g_handle, "MotionSubscribeCallback"));
+        g_motionSubscribeCallbackPtr = reinterpret_cast<MotionSubscribeCallbackPtr>(
+            dlsym(g_handle, "MotionSubscribeCallback"));
     }
     const char* dlsymError = dlerror();
     if  (dlsymError) {
@@ -90,7 +91,8 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
         return false;
     }
     if (g_motionUnsubscribeCallbackPtr == nullptr) {
-        g_motionUnsubscribeCallbackPtr = reinterpret_cast<MotionUnsubscribeCallbackPtr>(dlsym(g_handle, "MotionUnsubscribeCallback"));
+        g_motionUnsubscribeCallbackPtr = reinterpret_cast<MotionUnsubscribeCallbackPtr>(dlsym(
+            g_handle, "MotionUnsubscribeCallback"));
     }
     const char* dlsymError = dlerror();
     if  (dlsymError) {
