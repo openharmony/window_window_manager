@@ -1046,7 +1046,7 @@ protected:
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
-    std::atomic<bool> pipActiveStatus_{false};
+    std::atomic<bool> pipActiveStatus_{true};
 
     /*
      * Window Layout

@@ -3732,7 +3732,7 @@ WMError SessionProxy::IsPiPActive(bool& status)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_PIP, "writeInterfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
