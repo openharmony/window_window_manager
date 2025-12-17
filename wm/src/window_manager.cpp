@@ -462,7 +462,7 @@ void WindowManager::Impl::NotifyDisplayIdChange(const WindowInfoList& windowInfo
 
 WindowInfoList WindowManager::Impl::GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
     const WindowInfoList& windowInfoList)
-{   
+{
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is nullptr");
         return windowInfoList;
