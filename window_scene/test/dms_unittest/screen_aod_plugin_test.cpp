@@ -42,7 +42,12 @@ public:
     void TearDown() override;
 };
 
-void IsInAodTest::SetUp() {}
+void IsInAodTest::SetUp()
+{
+    g_handle = nullptr;
+    g_isInAodFunc = nullptr;
+    g_stopAodFunc = nullptr;
+}
 
 void IsInAodTest::TearDown() {}
 
@@ -55,12 +60,15 @@ namespace {
  */
 HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod01, TestSize.Level0)
 {
-    g_handle = nullptr;
-    EXPECT_FALSE(IsInAod());
-    EXPECT_FALSE(StopAod(1));
+    bool result = IsInAod();
+    EXPECT_FALSE(result);
+    bool result = StopAod(1);
+    EXPECT_FALSE(result);
     LoadAodLib();
-    EXPECT_TRUE(IsInAod());
-    EXPECT_TRUE(StopAod(1));
+    bool result = IsInAod();
+    EXPECT_TRUE(result);
+    bool result = StopAod(1);
+    EXPECT_TRUE(result);
     UnloadAodLib();
 }
 }
