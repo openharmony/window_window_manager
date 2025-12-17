@@ -285,7 +285,7 @@ HWTEST_F(MultiScreenManagerTest, PhysicalScreenMirrorSwitch03, TestSize.Level1)
         {Rotation::ROTATION_0, false});
     EXPECT_EQ(ret, DMError::DM_OK);
     ret = MultiScreenManager::GetInstance().PhysicalScreenMirrorSwitch(0, screenIds, DMRect::NONE(),
-        {Rotation::ROTATION_0, false});
+        {Rotation::ROTATION_0, false}, true);
     EXPECT_EQ(ret, DMError::DM_OK);
 }
 
