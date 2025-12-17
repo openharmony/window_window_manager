@@ -2959,8 +2959,9 @@ HWTEST_F(WindowSceneSessionImplTest, RestoreMainWindow, TestSize.Level1)
     std::shared_ptr<AAFwk::WantParams> wantParams = std::shared_ptr<AAFwk::WantParams>();
     WMError res = window->RestoreMainWindow(wantParams);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-
     window->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    res = window->RestoreMainWindow(wantParams);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     sptr<WindowOption> parentOption = sptr<WindowOption>::MakeSptr();

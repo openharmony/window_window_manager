@@ -1101,7 +1101,8 @@ protected:
     /*
      * Float Window
      */
-    std::atomic<uint8_t> floatWindowDownEventCnt_ {0};
+    std::mutex floatWindowDownEventMutex_;
+    uint8_t floatWindowDownEventCnt_ {0};
 
     /*
      * PiP Window

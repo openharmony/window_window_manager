@@ -20,7 +20,6 @@
 #include <mutex>
 #include <shared_mutex>
 #include <vector>
-#include <any>
 
 #include <event_handler.h>
 

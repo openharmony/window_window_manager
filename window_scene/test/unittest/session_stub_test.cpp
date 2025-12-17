@@ -992,6 +992,15 @@ HWTEST_F(SessionStubTest, HandleRestoreFloatMainWindow, TestSize.Level1)
 
     auto result = session_->HandleRestoreFloatMainWindow(data, reply);
     ASSERT_EQ(result, ERR_INVALID_VALUE);
+
+    MessageParcel data1;
+    MessageParcel reply1;
+    MessageOption option;
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_MAIN_WINDOW);
+    EXPECT_EQ(sessionStub->ProcessRemoteRequest(code, data1, reply1, option), ERR_INVALID_VALUE);
 }
 
 /**
