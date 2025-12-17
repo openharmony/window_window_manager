@@ -66,7 +66,7 @@ public:
     void NotifyFloatingScaleChange(const WindowInfoList& windowInfoList);
     void NotifyMidSceneStatusChange(const WindowInfoList& windowInfoList);
     WindowInfoList GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-        const WindowInfoList& windowInfoList)
+        const WindowInfoList& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
@@ -464,7 +464,7 @@ WindowInfoList WindowManager::Impl::GetWindowInfoListByInterestWindowIds(sptr<IW
     const WindowInfoList& windowInfoList)
 {   
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE,, "listener is nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is nullptr");
         return windowInfoList;
     }
     auto interestWindowIds = listener->GetInterestWindowIds();
@@ -472,7 +472,8 @@ WindowInfoList WindowManager::Impl::GetWindowInfoListByInterestWindowIds(sptr<IW
         return windowInfoList;
     }
     WindowInfoList windowInfoListForNotify;
-    for (const auto& windowInfo : windowInfoList) {
+    for (const auto& iter : windowInfoList) {
+        auto windowInfo = iter;
         if (windowInfo.find(WindowInfoKey::WINDOW_ID) != windowInfo.end() &&
             interestWindowIds.find(std::get<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) !=
             interestWindowIds.end()) {
