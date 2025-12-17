@@ -99,10 +99,8 @@ group("unittest") {
     "window_immersive:window_immersive_avoid_area_test",
   ]
 
-  defines = []
   if (window_manager_feature_support_dmsfwk) {
      deps += [ ":ws_distributed_client_test" ]
-     defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK" ]
   }
 
   if (window_manager_use_sceneboard) {
