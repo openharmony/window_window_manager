@@ -58,11 +58,10 @@ SensorFoldStateMgr& SensorFoldStateMgr::GetInstance()
     return *instance_;
 }
 
-SensorFoldStateMgr::SensorFoldStateMgr()
+SensorFoldStateMgr::SensorFoldStateMgr() : taskProcessor_(1)
 {
     currentFoldStatus_ = {FoldStatus::UNKNOWN};
     foldAlgorithmStrategy_ = {0, 0};
-    taskProcessor_ = TaskSequenceProcess(1);
 }
 
 void SensorFoldStateMgr::HandleSensorEvent(const SensorStatus& sensorStatus)
