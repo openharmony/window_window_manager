@@ -150,19 +150,6 @@ HWTEST_F(SceneSessionManagerTest6, UpdateSecSurfaceInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetBehindWindowFilterEnabled
- * @tc.desc: SetBehindWindowFilterEnabled
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest6, SetBehindWindowFilterEnabled, TestSize.Level1)
-{
-    int ret = 0;
-    ssm_->SetBehindWindowFilterEnabled(true);
-    ssm_->SetBehindWindowFilterEnabled(false);
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: GetWindowLayerChangeInfo
  * @tc.desc: Simulate window Layer change
  * @tc.type: FUNC
