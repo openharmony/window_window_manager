@@ -224,7 +224,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
 
 void SensorFoldStateMgr::NotifyRunTaskSequence()
 {
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateManager::NotifyRunTaskSequence");
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateMgr::NotifyRunTaskSequence");
     taskProcessor_.Notify();
 }
 
