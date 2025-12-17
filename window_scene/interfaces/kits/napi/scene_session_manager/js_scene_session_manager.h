@@ -187,6 +187,7 @@ public:
      * PiP Window
      */
     static napi_value SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+    static napi_value SetIsPipEnabled(napi_env env, napi_callback_info info);
     static napi_value GetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info);
 
 private:
@@ -362,6 +363,7 @@ private:
     void OnStartPiPFailed(DisplayId displayId);
     void ProcessStartPiPFailedRegister();
     napi_value OnSetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+    napi_value OnSetIsPipEnabled(napi_env env, napi_callback_info info);
     napi_value OnGetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info);
 
     /*
