@@ -2818,7 +2818,6 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     screenSession1->SetIsCurrentInUse(true);
     screenSession1->SetScreenType(ScreenType::REAL);
     screenSession1->isInternal_ = true;
-
     sptr<ScreenSession> screenSession2 = new ScreenSession(52, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession2);
     screenSession2->SetIsCurrentInUse(true);
@@ -2832,12 +2831,11 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ssm_->GetInternalAndExternalSession(internalSession, externalSession);
     ASSERT_EQ(internalSession, screenSession1);
     ASSERT_EQ(externalSession, screenSession2);
-
     auto ret = ssm_->RecoveryResolutionEffect();
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         EXPECT_FALSE(ret);
         screenSession1->property_.UpdateScreenRotation(Rotation::ROTATION_90);
-        ret = ssm_->RecoveryResolutionEffect();        
+        ret = ssm_->RecoveryResolutionEffect();
         if (ssm_->GetSuperFoldStatus() != SuperFoldStatus::EXPANDED) {
             EXPECT_FALSE(ret);
         } else {
