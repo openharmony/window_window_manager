@@ -2864,6 +2864,60 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetInternalScreenResolutionEffect001
+ * @tc.desc: SetInternalScreenResolutionEffect001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetScreenType(ScreenType::REAL);
+
+    DMRect targetRect = {0, 10, 3120, 2080};
+    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect);
+    auto screenProperty = screenSession->GetScreenProperty();
+    EXPECT_EQ(screenProperty.GetBounds().rect_.width_, 3120);
+    EXPECT_EQ(screenProperty.GetBounds().rect_.height_, 2080);
+    EXPECT_EQ(screenProperty.GetMirrorWidth(), 3120);
+    EXPECT_EQ(screenProperty.GetMirrorHeight(), 2080);
+    EXPECT_EQ(screenProperty.GetValidWidth(), 3120);
+    EXPECT_EQ(screenProperty.GetValidHeight(), 2080);
+    EXPECT_EQ(screenProperty.GetInputOffsetY(), 10);
+
+    DMRect targetRect2 = {0, 10, 3120, 1755};
+    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect2);
+    screenProperty = screenSession->GetScreenProperty();
+    EXPECT_EQ(screenProperty.GetBounds().rect_.width_, 3120);
+    EXPECT_EQ(screenProperty.GetBounds().rect_.height_, 1755);
+    EXPECT_EQ(screenProperty.GetMirrorWidth(), 3120);
+    EXPECT_EQ(screenProperty.GetMirrorHeight(), 1755);
+    EXPECT_EQ(screenProperty.GetValidWidth(), 3120);
+    EXPECT_EQ(screenProperty.GetValidHeight(), 1755);
+    EXPECT_EQ(screenProperty.GetInputOffsetY(), 10);
+}
+
+/**
+ * @tc.name: SetInternalScreenResolutionEffect002
+ * @tc.desc: SetInternalScreenResolutionEffect002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    sptr<ScreenSession> screenSession = nullptr;
+    DMRect targetRect = {0, 10, 3120, 2080};
+    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect);
+    EXPECT_TRUE(g_errLog.find("internalSession null") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
  * @tc.name: SetExternalScreenResolutionEffect001
  * @tc.desc: SetExternalScreenResolutionEffect001
  * @tc.type: FUNC
