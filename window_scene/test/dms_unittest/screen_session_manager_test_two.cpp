@@ -3222,6 +3222,25 @@ HWTEST_F(ScreenSessionManagerTest, CheckNeedNotifyTest, TestSize.Level1)
     result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: IsInAodTest
+ * @tc.desc: IsInAodTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsInAodTest, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    result = ssm_->IsInAod();
+    EXPECT_EQ(result, false);
+    result = ssm_->StopAod();
+    EXPECT_EQ(result, false);
+    ssm_->LoadAodLib();
+    result = ssm_->IsInAod();
+    EXPECT_NE(result, false);
+    result = ssm_->StopAod();
+    EXPECT_NE(result, false);
+}
 }
 }
 }
