@@ -6813,8 +6813,8 @@ WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
     NotifyDisplayInfoChange();
     if (displayIdChanged) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
-        NotifyDmsDisplayMove(to);
         NotifyDisplayIdChange(displayId);
+        NotifyDmsDisplayMove(displayId);
     }
     return WSError::WS_OK;
 }
