@@ -44,12 +44,15 @@ public:
 
 void IsInAodTest::SetUp()
 {
-    g_handle = nullptr;
-    g_isInAodFunc = nullptr;
-    g_stopAodFunc = nullptr;
+    g_handle = dlopen(nullptr, RTLD_LAZY);
 }
 
-void IsInAodTest::TearDown() {}
+void IsInAodTest::TearDown()
+{
+    if (g_handle) {
+        dlclose(g_handle);
+    }
+}
 
 namespace {
 
