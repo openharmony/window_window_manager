@@ -645,12 +645,11 @@ WMError PictureInPictureControllerBase::IsPiPActive(bool& status)
     if (curState_ != PiPWindowState::STATE_STARTED) {
         return WMError::WM_OK;
     }
-    sptr<WindowSessionImpl> windowSessionImpl = WindowSessionImpl::GetWindowWithId(mainWindowId_);
-    if (windowSessionImpl == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "windowId not found.");
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "window is nullptr.");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
-    WMError ret = windowSessionImpl->IsPiPActive(status);
+    WMError ret = window_->IsPiPActive(status);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "get switch error.");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;

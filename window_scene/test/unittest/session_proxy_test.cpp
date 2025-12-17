@@ -573,6 +573,41 @@ HWTEST_F(SessionProxyTest, SetPipParentWindowId, Function | SmallTest | Level2)
 }
 
 /**
+ * @tc.name: IsPiPActive
+ * @tc.desc: sessionStub sessionStubTest
+ * @tc.type: FUNC
+ * @tc.require: #I6JLSI
+ */
+HWTEST_F(SessionProxyTest, IsPiPActive, Function | SmallTest | Level2)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+
+    bool status = false;
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(sessionProxy->IsPiPActive(status), WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(nullProxy->IsPiPActive(status), WMError::WM_ERROR_IPC_FAILED);
+
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(failProxy->IsPiPActive(status), WMError::WM_ERROR_IPC_FAILED);
+
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    EXPECT_EQ(okProxy->IsPiPActive(status), WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    EXPECT_EQ(okProxy->IsPiPActive(status), WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadBoolErrorFlag(false);
+    EXPECT_EQ(okProxy->IsPiPActive(status), WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetWindowAnchorInfo
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
