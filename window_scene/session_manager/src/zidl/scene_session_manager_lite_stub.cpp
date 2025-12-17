@@ -696,7 +696,7 @@ int SceneSessionManagerLiteStub::HandleGetFocusSessionInfo(MessageParcel& data, 
     }
     FocusChangeInfo focusInfo;
     GetFocusWindowInfo(focusInfo, displayId);
-    TLOGI(WmsLogTag::WMS_FOCUS, "start reply");
+    TLOGNI(WmsLogTag::WMS_FOCUS, "reply");
     reply.WriteParcelable(&focusInfo);
     return ERR_NONE;
 }
@@ -1106,9 +1106,9 @@ int SceneSessionManagerLiteStub::HandleGetWindowModeType(MessageParcel& data, Me
 {
     WindowModeType windowModeType = Rosen::WindowModeType::WINDOW_MODE_OTHER;
     WMError errCode = GetWindowModeType(windowModeType);
-    WLOGFI("run HandleGetWindowModeType, windowModeType:%{public}d!", static_cast<int32_t>(windowModeType));
+    TLOGD(WmsLogTag::DEFAULT, "run, windowModeType:%{public}d!", static_cast<int32_t>(windowModeType));
     if (!reply.WriteUint32(static_cast<int32_t>(windowModeType))) {
-        WLOGE("Failed to WriteBool");
+        TLOGE(WmsLogTag::DEFAULT, "Failed to WriteBool");
         return ERR_INVALID_DATA;
     }
     reply.WriteInt32(static_cast<int32_t>(errCode));

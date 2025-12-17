@@ -2612,10 +2612,10 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
 
 void SceneSession::NotifyPropertyWhenConnect()
 {
-    WLOGFI("Notify property when connect.");
+    TLOGI(WmsLogTag::DEFAULT, "In");
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        TLOGD(WmsLogTag::DEFAULT, "id: %{public}d property is nullptr", persistentId_);
         return;
     }
     NotifySessionFocusableChange(property->GetFocusable());
