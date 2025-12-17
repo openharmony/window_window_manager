@@ -1455,7 +1455,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusWindowInfoByAbilityToken, Te
 
     token = sptr<IRemoteObjectMocker>::MakeSptr();
     data.WriteRemoteObject(token);
-    int res = stub_->HandleGetFocusWindowInfoByAbilityToken(data, reply);
+    res = stub_->HandleGetFocusWindowInfoByAbilityToken(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
 
