@@ -2926,7 +2926,7 @@ HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect001, TestSiz
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetRSScreenId(51);
- 
+
     DMRect targetRect1 = {0, 10, 3120, 2080};
     ssm_->curResolutionEffectEnable_ = false;
     ssm_->SetExternalScreenResolutionEffect(screenSession, targetRect1);
@@ -2935,7 +2935,7 @@ HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect001, TestSiz
     EXPECT_EQ(screenProperty.GetMirrorHeight(), 2080);
     DMRect expectedRect1 = {0, 0, 0, 0};
     EXPECT_EQ(screenSession->GetMirrorScreenRegion().second, expectedRect1);
- 
+
     sptr<ScreenSession> phyScreenSession = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, phyScreenSession);
     phyScreenSession->SetRSScreenId(51);
