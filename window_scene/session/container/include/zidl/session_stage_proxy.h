@@ -110,6 +110,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
     WSError NotifyAppHookWindowInfoUpdated() override;
     WSError CloseSpecificScene() override;
 
