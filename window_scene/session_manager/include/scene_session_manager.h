@@ -703,7 +703,9 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
+    WMError GetIsPipEnabled(bool& isPipEnabled) override;
     void SetPiPSettingSwitchStatus(bool switchStatus);
+    void SetIsPipEnabled(bool isPipEnabled);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
     bool GetPipDeviceCollaborationPolicy(int32_t screenId);
     WMError SetPipEnableByScreenId(int32_t screenId, bool enabled);
