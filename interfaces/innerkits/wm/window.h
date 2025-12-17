@@ -2718,7 +2718,7 @@ public:
      * @brief Restores the main window of current window to foreground.
      * Only TYPE_FLOAT can use this interface, when the main window in the background
      * need to be moved to foreground after the TYPE_FLOAT window is clicked
-     * 
+     *
      * @return WMError
      */
     virtual WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)

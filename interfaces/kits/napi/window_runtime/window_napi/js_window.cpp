@@ -9814,13 +9814,14 @@ napi_value JsWindow::OnRestoreMainWindow(napi_env env, napi_callback_info info)
         napi_value wantValue = argv[INDEX_ZERO];
         if (wantValue != nullptr && !AppExecFwk::UnwrapWantParams(env, wantValue, wantParams)) {
             TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameters to wantParameters");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
-                "This window manager service works abnormally.");
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                "Failed to convert parameters to wantParameters.");
         }
     }
 
-    std::shared_ptr<AAFwk::WantParams> parameters = std::make_shared<AAFwk::WantParams>(wantParams);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     wptr<Window> windowToken(windowToken_);
+    std::shared_ptr<AAFwk::WantParams> parameters = std::make_shared<AAFwk::WantParams>(wantParams);
     NapiAsyncTask::ExecuteCallback execute = [windowToken, errCodePtr, parameters] {
         if (errCodePtr == nullptr || parameters == nullptr) {
             return;
@@ -9830,7 +9831,7 @@ napi_value JsWindow::OnRestoreMainWindow(napi_env env, napi_callback_info info)
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = ConvertErrorToCode(window->RestoreMainWindow(parameters));
+        *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(window->RestoreMainWindow(parameters));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr, parameters](napi_env env, NapiAsyncTask& task, int32_t status) {

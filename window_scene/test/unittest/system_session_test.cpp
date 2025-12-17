@@ -1113,18 +1113,18 @@ HWTEST_F(SystemSessionTest, NotifyRestoreFloatMainWindowCallback, Function | Sma
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
 
-    AAFwk::WantParams wantParams;
-    wantParams.SetParam("NotifyRestoreFloatMainWindowCallback", OHOS::AAFwk::String::Box("100"));
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+    wantParams->SetParam("NotifyRestoreFloatMainWindowCallback", OHOS::AAFwk::String::Box("100"));
     
     systemSession->SetRestoreFloatMainWindowCallback(nullptr);
     EXPECT_EQ(systemSession->restoreFloatMainWindowFunc_, nullptr);
     systemSession->NotifyRestoreFloatMainWindow(wantParams);
 
     string res;
-    auto func_ = [&res] (const AAFwk::WantParams& wantParams) {
-        res = wantParams.ToString();
+    auto func = [&res](const std::shared_ptr<AAFwk::WantParams>& wantParameters) {
+        res = wantParameters->ToString();
     };
-    systemSession->SetRestoreFloatMainWindowCallback(func_);
+    systemSession->SetRestoreFloatMainWindowCallback(func);
     systemSession->NotifyRestoreFloatMainWindow(wantParams);
     EXPECT_EQ(res, "{\"NotifyRestoreFloatMainWindowCallback\":\"100\"}");
 }
@@ -1144,6 +1144,11 @@ HWTEST_F(SystemSessionTest, RestoreFloatMainWindow, Function | SmallTest | Level
     std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_MEDIA);
+    systemSession->SetSessionProperty(property);
+    EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_OPERATION);
+    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+    systemSession->SetSessionProperty(property);
 
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid() + 1));
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
@@ -1160,11 +1165,11 @@ HWTEST_F(SystemSessionTest, RestoreFloatMainWindow, Function | SmallTest | Level
         return false;
     });
 
-    systemSession->floatWindowDownEventCnt_.store(0);
+    systemSession->floatWindowDownEventCnt_ = 0;
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
-    systemSession->floatWindowDownEventCnt_.store(2);
+    systemSession->floatWindowDownEventCnt_ = 2;
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_OK);
-    EXPECT_EQ(systemSession->floatWindowDownEventCnt_.load(), 0);
+    EXPECT_EQ(systemSession->floatWindowDownEventCnt_, 0);
 }
 
 /**

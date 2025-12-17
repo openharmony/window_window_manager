@@ -2857,7 +2857,7 @@ export class WindowInternal implements Window {
     private native hideSync(nativeObj: long): void;
     private native createSubWindowWithOptionsSync(nativeObj: long, name: string, options: SubWindowOptions): Window;
     private native restore(nativeObj: long): void;
-    private native restoreMainWindow(nativeObj: long, wantParameters?: object): void;
+    private native restoreMainWindow(nativeObj: long, wantParameters?: Record<string, object>): void;
 
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(nativeObj: long): ESValue;
@@ -3073,9 +3073,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.restoreMainWindow(this.nativeObj, wantParameters);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });

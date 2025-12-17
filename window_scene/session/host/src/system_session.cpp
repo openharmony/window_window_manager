@@ -665,24 +665,25 @@ void SystemSession::SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloati
 
 void SystemSession::SetRestoreFloatMainWindowCallback(NotifyRestoreFloatMainWindowFunc&& func)
 {
-    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
-        TLOGI(WmsLogTag::WMS_SYSTEM, "Register Callback RestoreFloatMainWindow");
-        auto session = weakThis.promote();
-        if (!session || !func) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session or func dont exists", where);
-            return;
-        }
-        session->restoreFloatMainWindowFunc_ = std::move(func);
-    }, __func__);
+    PostTask(
+        [weakThis = wptr(this), func = std::move(func), where = __func__] {
+            TLOGI(WmsLogTag::WMS_SYSTEM, "Register Callback RestoreFloatMainWindow");
+            auto session = weakThis.promote();
+            if (!session || !func) {
+                TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session or func dont exists", where);
+                return;
+            }
+            session->restoreFloatMainWindowFunc_ = std::move(func);
+        }, __func__);
 }
 
 WMError SystemSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters)
 {
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    // if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL)) {
-    //     TLOGNE(WmsLogTag::WMS_SYSTEM, "Check floating ball permission failed");
-    //     return WMError::WM_ERROR_INVALID_PERMISSION;
-    // }
+    if (GetWindowType() != WindowType::WINDOW_TYPE_FLOAT) {
+        TLOGNE(WmsLogTag::WMS_SYSTEM, "Check window type failed");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     return PostSyncTask([weakThis = wptr(this), callingPid, wantParameters, where = __func__, state = state_.load()]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -705,13 +706,16 @@ WMError SystemSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantP
             TLOGE(WmsLogTag::WMS_SYSTEM, "current window is at recent state");
             return WMError::WM_ERROR_START_ABILITY_FAILED;
         }
-        if (session->floatWindowDownEventCnt_.load() == 0) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "%{public}s no enough click, deny", where);
-            return WMError::WM_ERROR_INVALID_CALLING;
+        {
+            std::lock_guard<std::mutex> lock(session->floatWindowDownEventMutex_);
+            if (session->floatWindowDownEventCnt_ == 0) {
+                TLOGE(WmsLogTag::WMS_SYSTEM, "%{public}s no enough click, deny", where);
+                return WMError::WM_ERROR_INVALID_CALLING;
+            }
+            session->floatWindowDownEventCnt_ = 0;
         }
         TLOGI(WmsLogTag::WMS_SYSTEM, "%{public}s restore float main window", where);
-        session->NotifyRestoreFloatMainWindow(*wantParameters);
-        session->floatWindowDownEventCnt_.store(0);
+        session->NotifyRestoreFloatMainWindow(wantParameters);
         return WMError::WM_OK;
     });
 }
@@ -719,19 +723,20 @@ WMError SystemSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantP
 void SystemSession::NotifyRestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "Notify RestoreFloatingBallMainwindow");
-    PostTask([weakThis = wptr(this), wantParameters, where = __func__] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
-            return;
-        }
-        if (session->restoreFloatMainWindowFunc_) {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "restoreFloatMainWindowFunc");
-            session->restoreFloatMainWindowFunc_(wantParameters);
-        } else {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "%{public}s restoreFloatMainWindowFunc Func is null", where);
-        }
-    }, __func__);
+    PostTask(
+        [weakThis = wptr(this), wantParameters, where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
+                return;
+            }
+            if (session->restoreFloatMainWindowFunc_) {
+                TLOGI(WmsLogTag::WMS_SYSTEM, "restoreFloatMainWindowFunc");
+                session->restoreFloatMainWindowFunc_(wantParameters);
+            } else {
+                TLOGW(WmsLogTag::WMS_SYSTEM, "%{public}s restoreFloatMainWindowFunc Func is null", where);
+            }
+        }, __func__);
 }
 
 void SystemSession::RegisterGetSCBEnterRecentFunc(GetSCBEnterRecentFunc&& callback)

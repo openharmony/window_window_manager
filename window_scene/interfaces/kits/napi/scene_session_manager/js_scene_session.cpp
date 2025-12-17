@@ -1142,7 +1142,7 @@ void JsSceneSession::ProcessRestoreFloatMainWindowRegister()
         return;
     }
     const char* const funcName = __func__;
-    session->SetRestoreFloatMainWindowCallback([weakThis = wptr(this), funcName] 
+    session->SetRestoreFloatMainWindowCallback([weakThis = wptr(this), funcName]
         (const std::shared_ptr<AAFwk::WantParams>& wantParameters) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {

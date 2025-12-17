@@ -527,7 +527,7 @@ private:
     void OnWindowShadowEnableChange(bool isEnabled);
     void OnTitleAndDockHoverShowChange(bool isTitleHoverShown = true, bool isDockHoverShown = true);
     void RestoreMainWindow(bool isAppSupportPhoneInPc, int32_t callingPid, uint32_t callingToken);
-    void RestoreFloatMainWindow(const AAFwk::WantParams& wantParameters);
+    void RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters);
     void NotifyFrameLayoutFinish();
     void ProcessPrivacyModeChangeRegister();
     void NotifyPrivacyModeChange(bool isPrivacyMode);
