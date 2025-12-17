@@ -67,11 +67,11 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
     }
     if (g_isInAodFunc == nullptr) {
         g_isInAodFunc = reinterpret_cast<IsInAodFunc>(dlsym(g_handle, "IsInAod"));
-    }
-    const char* dlsymError = dlerror();
-    if (dlsymError) {
-        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-        return false;
+        const char* dlsymError = dlerror();
+        if (dlsymError) {
+            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+            return false;
+        }
     }
     return g_isInAodFunc();
 }
@@ -84,11 +84,11 @@ __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
     }
     if (g_stopAodFunc == nullptr) {
         g_stopAodFunc = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "StopAod"));
-    }
-    const char* dlsymError = dlerror();
-    if (dlsymError) {
-        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-        return false;
+        const char* dlsymError = dlerror();
+        if (dlsymError) {
+            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+            return false;
+        }
     }
     return g_stopAodFunc(status);
 }
