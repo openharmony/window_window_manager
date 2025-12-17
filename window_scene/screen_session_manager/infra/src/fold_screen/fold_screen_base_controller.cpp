@@ -91,6 +91,26 @@ void FoldScreenBaseController::LockDisplayStatus(bool locked)
     FoldScreenBasePolicy::GetInstance().LockDisplayStatus(locked);
 }
 
+DMError FoldScreenBaseController::ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus)
+{
+    return FoldScreenBasePolicy::GetInstance().SetFoldStatusAndLockControl(true, targetFoldStatus);
+}
+
+DMError FoldScreenBaseController::RestorePhysicalFoldStatus()
+{
+    return FoldScreenBasePolicy::GetInstance().SetFoldStatusAndLockControl(false, FoldStatus::UNKNOWN);
+}
+
+bool FoldScreenBaseController::GetPhysicalFoldLockFlag() const
+{
+    return FoldScreenBasePolicy::GetInstance().GetPhysicalFoldLockFlag();
+}
+
+FoldStatus FoldScreenBaseController::GetPhysicalFoldStatus() const
+{
+    return FoldScreenBasePolicy::GetInstance().GetPhysicalFoldStatus();
+}
+
 FoldDisplayMode FoldScreenBaseController::GetDisplayMode()
 {
     return FoldScreenBasePolicy::GetInstance().GetScreenDisplayMode();

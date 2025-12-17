@@ -44,6 +44,10 @@ public:
     virtual FoldCreaseRegion GetLiveCreaseRegion() const;
     virtual ScreenId GetCurrentScreenId();
     virtual void LockDisplayStatus(bool locked);
+    virtual DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus);
+    virtual DMError RestorePhysicalFoldStatus();
+    virtual bool GetPhysicalFoldLockFlag() const;
+    virtual FoldStatus GetPhysicalFoldStatus() const;
     virtual void SetOnBootAnimation(bool onBootAnimation);
     virtual void UpdateForPhyScreenPropertyChange();
     virtual void ExitCoordination();

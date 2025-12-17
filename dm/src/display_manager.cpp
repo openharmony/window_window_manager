@@ -25,6 +25,7 @@
 #include "dm_common.h"
 #include "screen_manager.h"
 #include "singleton_delegator.h"
+#include "sys_cap_util.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
@@ -95,6 +96,8 @@ public:
     void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     void SetFoldStatusLocked(bool locked);
     DMError SetFoldStatusLockedFromJs(bool locked);
+    DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldstatus);
+    DMError RestorePhysicalFoldStatus();
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     DMError RegisterDisplayListener(sptr<IDisplayListener> listener);
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
@@ -1255,6 +1258,30 @@ void DisplayManager::Impl::SetFoldStatusLocked(bool locked)
 DMError DisplayManager::Impl::SetFoldStatusLockedFromJs(bool locked)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetFoldStatusLockedFromJs(locked);
+}
+
+DMError DisplayManager::ForceSetFoldStatusAndLock(FoldStatus targetFoldstatus)
+{
+    TLOGI(WmsLogTag::DMS, "BoundName: %{public}s, pid: %{public}d", SysCapUtil::GetBundleName().c_str(),
+        IPCSkleton::GetCallingPid());
+    return pImpl_->ForceSetFoldStatusAndLock(targetFoldstatus);
+}
+
+DMError DisplayManager::Impl::ForceSetFoldStatusAndLock(FoldStatus targetFoldstatus)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().ForceSetFoldStatusAndLock(targetFoldstatus);
+}
+
+DMError DisplayManager::RestorePhysicalFoldStatus()
+{
+    TLOGI(WmsLogTag::DMS, "BoundName: %{public}s, pid: %{public}d", SysCapUtil::GetBundleName().c_str(),
+        IPCSkleton::GetCallingPid());
+    return pImpl_->RestorePhysicalFoldStatus();
+}
+
+DMError DisplayManager::Impl::RestorePhysicalFoldStatus()
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().RestorePhysicalFoldStatus();
 }
 
 sptr<FoldCreaseRegion> DisplayManager::GetCurrentFoldCreaseRegion()

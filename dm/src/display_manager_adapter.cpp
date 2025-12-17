@@ -1266,6 +1266,28 @@ DMError DisplayManagerAdapter::SetFoldStatusLockedFromJs(bool locked)
     return DMError::DM_OK;
 }
 
+DMError DisplayManagerAdapter::ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->ForceSetFoldStatusAndLock(targetFoldStatus);
+    }
+
+    return DMError::DM_OK;
+}
+
+DMError DisplayManagerAdapter::RestorePhysicalFoldStatus()
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->RestorePhysicalFoldStatus();
+    }
+
+    return DMError::DM_OK;
+}
+
 sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()
 {
     INIT_PROXY_CHECK_RETURN(nullptr);

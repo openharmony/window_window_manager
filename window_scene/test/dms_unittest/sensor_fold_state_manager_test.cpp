@@ -152,6 +152,27 @@ HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange3, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSensorChange5
+ * @tc.desc: HandleSensorChange5
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateManagerTest, HandleSensorChange5, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SensorFoldStateManager mgr = SensorFoldStateManager();
+    FoldStatus nextState = FoldStatus::FOLDED;
+    float angle = 0.0f;
+    sptr<FoldScreenPolicy> foldScreenPolicy = sptr<FoldScreenPolicy>::MakeSptr();
+    auto wasFoldStatus = mgr.GetCurrentState();
+    std::atomic<bool> wasPhysicalFoldLockFlag = foldScreenPolicy->GetPhysicalFoldLockFlag();
+    foldScreenPolicy->SetPhysicalFoldLockFlag(true);
+    mgr.HandleSensorChange(nextState, angle, foldScreenPolicy);
+    EXPECT_TRUE(g_errLog.find("Fold status is locked") != std::string::npos);
+    foldScreenPolicy->SetPhysicalFoldLockFlag(wasPhysicalFoldLockFlag);
+}
+
+/**
  * @tc.name: ReportNotifyFoldStatusChange
  * @tc.desc: ReportNotifyFoldStatusChange
  * @tc.type: FUNC
