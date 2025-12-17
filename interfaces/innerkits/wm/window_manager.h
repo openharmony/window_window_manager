@@ -1059,7 +1059,7 @@ public:
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
 
     /**
-     * @brief Get focus window.
+     * @brief Get focus window info.
      *
      * @param focusInfo Focus window info.
      * @param abilityToken Ability token.
