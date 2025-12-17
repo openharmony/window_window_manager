@@ -99,6 +99,8 @@ public:
     virtual void SetDisplayScale(ScreenId screenId, float scaleX, float scaleY, float pivotX, float pivotY);
     virtual void SetFoldStatusLocked(bool locked);
     virtual DMError SetFoldStatusLockedFromJs(bool locked);
+    virtual DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus);
+    virtual DMError RestorePhysicalFoldStatus();
     virtual sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     virtual DMError GetLiveCreaseRegion(FoldCreaseRegion& region);
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,

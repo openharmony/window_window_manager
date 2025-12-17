@@ -249,6 +249,8 @@ public:
 
     virtual void SetFoldStatusLocked(bool locked) {}
     virtual DMError SetFoldStatusLockedFromJs(bool locked) { return DMError::DM_OK; }
+    virtual DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus) { return DMError::DM_OK; }
+    virtual DMError RestorePhysicalFoldStatus() { return DMError::DM_OK; }
     virtual void SetFoldStatusExpandAndLocked(bool locked) {}
 
     virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }

@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "screen_session_manager/include/fold_screen_controller/single_display_super_fold_policy.h"
 
@@ -118,6 +119,24 @@ HWTEST_F(SingleDisplaySuperFoldPolicyTest, GetCurrentFoldCreaseRegion, TestSize.
     sptr<FoldCreaseRegion> foldCreaseRegion;
     foldCreaseRegion = policy.GetCurrentFoldCreaseRegion();
     EXPECT_EQ(policy.currentFoldCreaseRegion_, foldCreaseRegion);
+}
+
+/**
+ * @tc.name: GetSupportedFoldStatus
+ * @tc.desc: GetSupportedFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySuperFoldPolicyTest, GetSupportedFoldStatus, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplaySuperFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    EXPECT_THAT(policy.GetSupportedFoldStatus(),
+        UnorderedElementsAre(
+            FoldStatus::EXPAND,
+            FoldStatus::FOLDED,
+            FoldStatus::HALF_FOLD));
 }
 
 /**
@@ -244,6 +263,38 @@ HWTEST_F(SingleDisplaySuperFoldPolicyTest, GetModeMatchStatus, TestSize.Level1)
     policy.currentFoldStatus_ = FoldStatus::UNKNOWN;
     displayMode = policy.GetModeMatchStatus();
     EXPECT_EQ(FoldDisplayMode::UNKNOWN, displayMode);
+}
+
+/**
+ * @tc.name: GetTargetModeMatchStatus
+ * @tc.desc: test function : GetTargetModeMatchStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySuperFoldPolicyTest, GetTargetModeMatchStatus, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplaySuperFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    FoldStatus targetFoldStatus = FoldStatus::EXPAND;
+    FoldDisplayMode ret = policy.GetTargetModeMatchStatus(targetFoldStatus);
+    EXPECT_EQ(FoldDisplayMode::FULL, ret);
+
+    targetFoldStatus = FoldStatus::FOLDED;
+    ret = policy.GetTargetModeMatchStatus(targetFoldStatus);
+    EXPECT_EQ(FoldDisplayMode::MAIN, ret);
+
+    targetFoldStatus = FoldStatus::HALF_FOLD;
+    ret = policy.GetTargetModeMatchStatus(targetFoldStatus);
+    EXPECT_EQ(FoldDisplayMode::FULL, ret);
+
+    targetFoldStatus = FoldStatus::UNKNOWN;
+    ret = policy.GetTargetModeMatchStatus(targetFoldStatus);
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN, ret);
+
+    targetFoldStatus = FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND;
+    ret = policy.GetTargetModeMatchStatus(targetFoldStatus);
+    EXPECT_EQ(FoldDisplayMode::UNKNOWN, ret);
 }
 
 /**
