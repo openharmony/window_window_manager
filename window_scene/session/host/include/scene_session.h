@@ -432,6 +432,7 @@ public:
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
+    virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
 
     /*
      * PC Window
@@ -601,7 +602,6 @@ public:
     void NotifySessionForeground(uint32_t reason, bool withAnimation);
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits);
     void RegisterForceSplitListener(const NotifyForceSplitFunc& func);
-    void RegisterForceSplitEnableListener(const NotifyForceSplitEnableFunc& func);
 
     /*
      * Dialog Window
@@ -769,7 +769,6 @@ public:
         return systemConfig_.IsFreeMultiWindowMode();
     }
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
-    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
 
     // WMSPipeline-related: only accessed on SSM thread
     virtual void SyncScenePanelGlobalPosition(bool needSync) {}
@@ -1400,7 +1399,6 @@ private:
     PiPTemplateInfo pipTemplateInfo_ = {};
 
     NotifyForceSplitFunc forceSplitFunc_;
-    NotifyForceSplitEnableFunc forceSplitEnableFunc_;
     UpdatePrivateStateAndNotifyFunc updatePrivateStateAndNotifyFunc_;
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     WSRect lastSafeRect = { 0, 0, 0, 0 };

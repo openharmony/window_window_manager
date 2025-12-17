@@ -188,7 +188,8 @@ private:
     // Compatible Mode
     int HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply);
-    
+    int HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply);
+
     int HandleRestartApp(MessageParcel& data, MessageParcel& reply);
 
     // Window Event

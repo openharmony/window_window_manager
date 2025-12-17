@@ -863,6 +863,31 @@ struct AppForceLandscapeConfig : public Parcelable {
         }
         return config.release();
     }
+
+    static bool IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig, const AppForceLandscapeConfig& config)
+    {
+        if (preconfig.mode_ != config.mode_ ||
+            preconfig.supportSplit_ != config.supportSplit_ ||
+            preconfig.ignoreOrientation_ != config.ignoreOrientation_ ||
+            preconfig.containsSysConfig_ != config.containsSysConfig_ ||
+            preconfig.containsAppConfig_ != config.containsAppConfig_) {
+            return false;
+        }
+        if (config.containsSysConfig_) {
+            if (preconfig.isSysRouter_ != config.isSysRouter_ ||
+                preconfig.sysHomePage_ != config.sysHomePage_ ||
+                preconfig.sysConfigJsonStr_ != config.sysConfigJsonStr_) {
+                return false;
+            }
+        }
+        if (config.containsAppConfig_) {
+            if (preconfig.isAppRouter_ != config.isAppRouter_ ||
+                preconfig.appConfigJsonStr_ != config.appConfigJsonStr_) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 struct SystemSessionConfig : public Parcelable {
