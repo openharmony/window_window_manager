@@ -437,12 +437,12 @@ uint64_t PictureInPictureControllerBase::GetSurfaceId() const
 
 void PictureInPictureControllerBase::SetStateChangeReason(PiPStateChangeReason reason)
 {
-stateChangeReason_ = reason;
+    stateChangeReason_ = reason;
 }
 
 PiPStateChangeReason PictureInPictureControllerBase::GetStateChangeReason() const
 {
-return stateChangeReason_;
+    return stateChangeReason_;
 }
 
 void PictureInPictureControllerBase::ActiveStatusChange(bool status)
