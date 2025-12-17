@@ -560,6 +560,8 @@ public:
     void NotifyAodOpCompletion(AodOP operation, int32_t result) override;
     void DoAodExitAndSetPower(ScreenId screenId, ScreenPowerStatus status);
     void DoAodExitAndSetPowerAllOff();
+    DMError GetRoundedCorner(DisplayId displayId, int& radius) override;
+    std::shared_ptr<TaskScheduler> GetScreenPowerTaskScheduler();
     bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
     void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
 
@@ -888,7 +890,7 @@ private:
 
     sptr<SessionDisplayPowerController> sessionDisplayPowerController_;
     sptr<ScreenCutoutController> screenCutoutController_;
-    sptr<FoldScreenController> foldScreenController_;
+    sptr<DMS::FoldScreenBaseController> foldScreenController_;
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };

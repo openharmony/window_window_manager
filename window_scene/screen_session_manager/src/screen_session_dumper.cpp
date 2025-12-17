@@ -32,6 +32,8 @@
 #include "fold_screen_state_internel.h"
 #include "window_helper.h"
 #include "fold_screen_controller/secondary_fold_sensor_manager.h"
+#include "screen_sensor_mgr.h"
+#include "fold_screen_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -1008,7 +1010,7 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
     }
     int hallVal = stoi(tokens[DUMPER_PARAM_INDEX_ONE]);
     int postureVal = stoi(tokens[DUMPER_PARAM_INDEX_TWO]);
-    FoldScreenSensorManager::ExtHallData hallData = {
+    DMS::ExtHallData hallData = {
         .flag = (1 << 1),
         .hall = hallVal,
     };
@@ -1017,14 +1019,20 @@ void ScreenSessionDumper::SetHallAndPostureValue(std::string input)
     };
     SensorEvent hallEvent = {
         .data = reinterpret_cast<uint8_t *>(&hallData),
-        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
+        .dataLen = sizeof(DMS::ExtHallData),
     };
     SensorEvent postureEvent = {
         .data = reinterpret_cast<uint8_t *>(&postureData),
         .dataLen = sizeof(PostureData),
     };
-    FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
-    FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
+    if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
+        DMS::ScreenSensorMgr::GetInstance().HandleHallData(&hallEvent);
+        DMS::ScreenSensorMgr::GetInstance().HandlePostureData(&postureEvent);
+    } else {
+        FoldScreenSensorManager::GetInstance().HandleHallData(&hallEvent);
+        FoldScreenSensorManager::GetInstance().HandlePostureData(&postureEvent);
+    }
+    
     TLOGI(WmsLogTag::DMS, "mock posture: %{public}d, hall: %{public}d ", postureVal, hallVal);
 #endif
 }
@@ -1044,8 +1052,8 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
                 SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
                 SuperFoldSensorManager::GetInstance().RegisterHallCallback();
             } else {
-                FoldScreenSensorManager::GetInstance().RegisterHallCallback();
-                FoldScreenSensorManager::GetInstance().RegisterPostureCallback();
+                DMS::ScreenSensorMgr::GetInstance().RegisterHallCallback();
+                DMS::ScreenSensorMgr::GetInstance().RegisterPostureCallback();
                 ScreenSensorConnector::SubscribeRotationSensor();
             }
         } else {
@@ -1053,8 +1061,8 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
                 SuperFoldSensorManager::GetInstance().UnregisterPostureCallback();
                 SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
             } else {
-                FoldScreenSensorManager::GetInstance().UnRegisterHallCallback();
-                FoldScreenSensorManager::GetInstance().UnRegisterPostureCallback();
+                DMS::ScreenSensorMgr::GetInstance().UnRegisterHallCallback();
+                DMS::ScreenSensorMgr::GetInstance().UnRegisterPostureCallback();
                 ScreenSensorConnector::UnsubscribeRotationSensor();
             }
         }
@@ -1260,23 +1268,23 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
         TLOGW(WmsLogTag::DMS, "GetPostureAndHall failed");
         return;
     }
-    FoldScreenSensorManager::ExtHallData hallData = {
+    DMS::ExtHallData hallData = {
         .flag = HALL_EXT_DATA_FLAG,
         .hall = halls[0],
         .hallAb = halls[1],
     };
-    FoldScreenSensorManager::PostureDataSecondary postureData = {
+    DMS::PostureDataSecondary postureData = {
         .postureBc = postures[0],
         .postureAb = postures[1],
         .postureAbAnti = postures[DUMPER_PARAM_INDEX_TWO],
     };
     SensorEvent hallEvent = {
         .data = reinterpret_cast<uint8_t *>(&hallData),
-        .dataLen = sizeof(FoldScreenSensorManager::ExtHallData),
+        .dataLen = sizeof(DMS::ExtHallData),
     };
     SensorEvent postureEvent = {
         .data = reinterpret_cast<uint8_t *>(&postureData),
-        .dataLen = sizeof(FoldScreenSensorManager::PostureDataSecondary),
+        .dataLen = sizeof(DMS::PostureDataSecondary),
     };
     TLOGI(WmsLogTag::DMS, "mock secondary sensor: %{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(postures, ANGLE_STR).c_str(),

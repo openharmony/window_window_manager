@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "fold_crease_region_controller.h"
 #include <parameters.h>
 #include "session/screen/include/screen_session.h"
@@ -68,10 +68,10 @@ std::vector<DMRect> FoldCreaseRegionController::GetFoldCreaseRegionRect(bool isV
 void FoldCreaseRegionController::GetFoldCreaseRect(bool isVertical,
     const std::vector<int32_t>& foldRect, std::vector<DMRect>& foldCreaseRect) const
 {
-    int32_t liveCreaseRegionPosX; // live Crease Region PosX
-    int32_t liveCreaseRegionPosY; // live Crease Region PosY
-    uint32_t liveCreaseRegionPosWidth; // live Crease Region PosWidth
-    uint32_t liveCreaseRegionPosHeight; // live Crease Region PosHeight
+    int32_t liveCreaseRegionPosX;
+    int32_t liveCreaseRegionPosY;
+    uint32_t liveCreaseRegionPosWidth;
+    uint32_t liveCreaseRegionPosHeight;
     if (isVertical) {
         TLOGI(WmsLogTag::DMS, "the current FoldCreaseRect is vertical");
         liveCreaseRegionPosX = foldRect[RECT_POS_X_INDEX];

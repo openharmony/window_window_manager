@@ -23,13 +23,13 @@
 #include "fold_screen_controller/fold_screen_state_machine.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "fold_screen_info.h"
- 
+
 namespace OHOS::Rosen::DMS {
 class FoldScreenBaseController : public RefBase {
 public:
     FoldScreenBaseController();
     virtual ~FoldScreenBaseController();
- 
+
     virtual void BootAnimationFinishPowerInit();
     virtual void SetDisplayMode(const FoldDisplayMode displayMode);
     virtual void RecoverDisplayMode();

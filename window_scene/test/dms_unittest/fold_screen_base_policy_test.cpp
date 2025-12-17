@@ -17,24 +17,21 @@
 #include <hisysevent.h>
 #include <parameters.h>
 #include "gmock/gmock.h"
-#include
-#include "fold_screen_base_controller.h"
-#include "screen_session_manager.h"
+#include <functional>
 #include "window_manager_hilog.h"
+#include "screen_session_manager.h"
+#include "fold_screen_base_controller.h"
 
 #define private public
 #define protected public
-#include "fold_crease_region_controller.h"
 #include "fold_screen_base_policy.h"
+#include "fold_crease_region_controller.h"
 #undef private
 #undef protected
 
 namespace {
 std::string g_logMsg;
-void MyLogCallback(const LogType type,
-                   const LogLevel level,
-                   const unsigned int domain,
-                   const char* tag,
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
                    const char* msg)
 {
     g_logMsg += msg;
@@ -168,6 +165,7 @@ HWTEST_F(FoldScreenBasePolicyTest, ReportFoldDisplayModeChangeTest, TestSize.Lev
 
     FoldScreenBasePolicy::GetInstance().ReportFoldDisplayModeChange(FoldDisplayMode::FULL);
     EXPECT_TRUE(g_logMsg.find("ReportFoldDisplayModeChange displayMode: 1") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -177,10 +175,13 @@ HWTEST_F(FoldScreenBasePolicyTest, ReportFoldDisplayModeChangeTest, TestSize.Lev
  */
 HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeToMainOnBootAnimationTest, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto screenSession = sptr<ScreenSession>::MakeSptr();
 
     FoldScreenBasePolicy::GetInstance().ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
     EXPECT_EQ(5, FoldScreenBasePolicy::GetInstance().screenId_);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -190,10 +191,13 @@ HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeToMainOnBootAnimationT
  */
 HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeToFullOnBootAnimationTest, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto screenSession = sptr<ScreenSession>::MakeSptr();
 
     FoldScreenBasePolicy::GetInstance().ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
     EXPECT_EQ(0, FoldScreenBasePolicy::GetInstance().screenId_);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -236,6 +240,7 @@ HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeTest, TestSize.Level1)
 
     FoldScreenBasePolicy::GetInstance().ChangeScreenDisplayMode(FoldDisplayMode::FULL, true);
     EXPECT_TRUE(g_logMsg.find("force change displayMode") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -285,8 +290,11 @@ HWTEST_F(FoldScreenBasePolicyTest, GetAllCreaseRegionTest, TestSize.Level1)
  */
 HWTEST_F(FoldScreenBasePolicyTest, GetCurrentFoldCreaseRegionTest, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     auto ret = FoldCreaseRegionController::GetInstance().GetCurrentFoldCreaseRegion();
     EXPECT_TRUE(ret != nullptr);
+    LOG_SetCallback(nullptr);
 }
 
 }
