@@ -65,8 +65,8 @@ public:
     void NotifyWindowModeChangeForPropertyChange(const WindowInfoList& windowInfoList);
     void NotifyFloatingScaleChange(const WindowInfoList& windowInfoList);
     void NotifyMidSceneStatusChange(const WindowInfoList& windowInfoList);
-    WindowInfoList GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-        const WindowInfoList& windowInfoList);
+    WindowInfoList GetWindowInfoListByInterestWindowIds(
+        const sptr<IWindowInfoChangedListener>& listener, const WindowInfoList& windowInfoList);
     void NotifyWindowStyleChange(WindowStyleType type);
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
