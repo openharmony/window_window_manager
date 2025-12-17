@@ -340,6 +340,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetUIEffectControllerAliveInUI);
     BindNativeFunction(env, exportObj, "setPiPSettingSwitchStatus", moduleName,
         JsSceneSessionManager::SetPiPSettingSwitchStatus);
+    BindNativeFunction(env, exportObj, "setIsPipEnabled", moduleName,
+        JsSceneSessionManager::SetIsPipEnabled);
     BindNativeFunction(env, exportObj, "applyFeatureConfig", moduleName,
         JsSceneSessionManager::ApplyFeatureConfig);
     BindNativeFunction(env, exportObj, "notifySessionTransferToTargetScreenEvent", moduleName,
@@ -5650,6 +5652,35 @@ napi_value JsSceneSessionManager::OnSetPiPSettingSwitchStatus(napi_env env, napi
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().SetPiPSettingSwitchStatus(switchStatus);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SetIsPipEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "in");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetIsPipEnabled(env, info) : nullptr;
+}
+ 
+napi_value JsSceneSessionManager::OnSetIsPipEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isPipEnabled  = false;
+    if (!ConvertFromJsValue(env, argv[0], isPipEnabled )) {
+        TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to isPipEnabled ");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    SceneSessionManager::GetInstance().SetIsPipEnabled(isPipEnabled);
     return NapiGetUndefined(env);
 }
 
