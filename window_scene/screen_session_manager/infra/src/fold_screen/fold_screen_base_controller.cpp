@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include "fold_screen_base_controller.h"
 #include "sensor_fold_state_mgr.h"
 #include "screen_sensor_mgr.h"
@@ -144,7 +144,7 @@ ScreenId FoldScreenBaseController::GetCurrentScreenId()
 void FoldScreenBaseController::BootAnimationFinishPowerInit()
 {
     FoldScreenBasePolicy::GetInstance().BootAnimationFinishPowerInit();
-    FoldScreenBasePolicy::GetInstance().currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
+    FoldScreenBasePolicy::GetInstance().SetCurrentDisplayMode(FoldDisplayMode::UNKNOWN);
 }
 
 void FoldScreenBaseController::SetOnBootAnimation(bool onBootAnimation)

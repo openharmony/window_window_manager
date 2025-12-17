@@ -1185,7 +1185,7 @@ HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay1, Function | SmallTes
 HWTEST_F(ScreenSessionManagerTest, CalculateRotatedDisplay2, Function | SmallTest | Level3)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        return;
+        GTEST_SKIP();
     }
 
     ASSERT_NE(ssm_, nullptr);
@@ -1244,7 +1244,6 @@ HWTEST_F(ScreenSessionManagerTest, CalculateScreenArea, Function | SmallTest | L
         DMRect screenArea = DMRect::NONE();
         ssm_->CalculateScreenArea(displayRegion, displayArea, screenRegion, screenArea);
         EXPECT_EQ(screenArea, displayArea);
-        return;
     }
 
     ASSERT_NE(ssm_, nullptr);

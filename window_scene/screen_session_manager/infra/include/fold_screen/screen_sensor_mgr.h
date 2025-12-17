@@ -59,7 +59,7 @@ protected:
     virtual SensorStatus GetSensorStatus(DmsSensorType updateSensorType);
     void NotifyFoldAngleChanged();
     bool checkCurrentPostureAndHall();
-    template
+    template <typename T>
     T* GetSensorData(const SensorEvent* const event);
 
     std::vector<float> angle_;

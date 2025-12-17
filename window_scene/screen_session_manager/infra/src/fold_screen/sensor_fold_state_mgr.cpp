@@ -48,7 +48,7 @@ std::chrono::time_point<std::chrono::system_clock> g_lastUpdateTime = std::chron
 SensorFoldStateMgr& SensorFoldStateMgr::GetInstance()
 {
     static std::mutex singletonMutex_;
-    static SensorFoldStateMgr* instance_;
+    static SensorFoldStateMgr* instance_ = nullptr;
     if (instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(singletonMutex_);
         if (instance_ == nullptr) {
@@ -210,7 +210,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
 
     FoldScreenBasePolicy::GetInstance().SetFoldStatus(globalFoldStatus_);
     ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(globalFoldStatus_);
-    if (FoldScreenBasePolicy::GetInstance().lockDisplayStatus_ != true) {
+    if (!FoldScreenBasePolicy::GetInstance().GetLockDisplayStatus()) {
         FoldScreenBasePolicy::GetInstance().SendSensorResult(globalFoldStatus_);
     }
 }
@@ -341,7 +341,7 @@ bool SensorFoldStateMgr::IsSupportTentMode()
 bool SensorFoldStateMgr::CheckInputSensorStatus(const SensorStatus& sensorStatus)
 {
     if (sensorStatus.axis_.size() != DEFAULT_AXIS_SIZE) {
-        TLOGI(WmsLogTag::DMS, "invalid sensor status, axis size: %{public}lu", sensorStatus.axis_.size());
+        TLOGI(WmsLogTag::DMS, "invalid sensor status, axis size: %{public}u", sensorStatus.axis_.size());
         return false;
     }
     return true;
