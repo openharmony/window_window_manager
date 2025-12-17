@@ -1455,6 +1455,13 @@ void ScreenSession::SetRotationAndScreenRotationOnly(Rotation rotation)
     property_.SetRotationAndScreenRotationOnly(rotation);
 }
 
+void ScreenSession::SetOrientationMatchRotation(Rotation rotation, FoldDisplayMode displayMode)
+{
+    auto curOrientation = CalcDeviceOrientationWithBounds(rotation, displayMode, property_.GetBounds());
+    property_.SetDisplayOrientation(curOrientation);
+    property_.SetDeviceOrientation(curOrientation);
+}
+
 void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 {
     property_.SetScreenRequestedOrientation(orientation);
@@ -3326,18 +3333,13 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
     }
 
     property_.SetRotation(screenProperty.GetRotation());
-    property_.UpdateScreenRotation(screenProperty.GetScreenRotation());
-    property_.UpdateDeviceRotation(screenProperty.GetDeviceRotation());
     property_.SetBounds(screenProperty.GetBounds());
     property_.SetDpiPhyBounds(screenProperty.GetPhyWidth(), screenProperty.GetPhyHeight());
     property_.SetPhyBounds(screenProperty.GetPhyBounds());
-    property_.SetBounds(screenProperty.GetBounds());
 
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         property_.SetDeviceOrientation(screenProperty.GetDeviceOrientation());
-        property_.SetScreenRotation(screenProperty.GetScreenRotation());
         property_.SetDisplayOrientation(screenProperty.GetDisplayOrientation());
-        property_.SetDeviceOrientation(screenProperty.GetDeviceOrientation());
         property_.SetScreenAreaOffsetY(screenProperty.GetScreenAreaOffsetY());
         property_.SetScreenAreaHeight(screenProperty.GetScreenAreaHeight());
     }
