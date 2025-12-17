@@ -44,13 +44,11 @@ public:
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
-    void NotifyMidSceneStatusChange(
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyMidSceneStatusChange(const WindowInfoList& windowInfoList);
     bool IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+        const WindowInfoList& windowInfoList);
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
-        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
-        std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowChangeInfos);
+        const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, WindowInfoList& windowChangeInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
         windowDrawingContentInfos);
     void NotifyWindowModeChange(WindowModeType type);
@@ -217,7 +215,7 @@ void WindowManagerLite::Impl::NotifyWindowVisibilityStateChanged(
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is null");
             continue;
         }
-        std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowChangeInfos;
+        WindowInfoList windowChangeInfos;
         PackWindowChangeInfo(listener->GetInterestInfo(), windowVisibilityInfos, windowChangeInfos);
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Notify WindowVisibilityState to caller, info size: %{public}zu",
             windowChangeInfos.size());
@@ -225,8 +223,7 @@ void WindowManagerLite::Impl::NotifyWindowVisibilityStateChanged(
     }
 }
 
-void WindowManagerLite::Impl::NotifyMidSceneStatusChange(
-    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+void WindowManagerLite::Impl::NotifyMidSceneStatusChange(const WindowInfoList& windowInfoList)
 {
     std::vector<sptr<IWindowInfoChangedListener>> midSceneStatusChangeListeners;
     {
@@ -241,7 +238,7 @@ void WindowManagerLite::Impl::NotifyMidSceneStatusChange(
 }
 
 bool WindowManagerLite::Impl::IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+    const WindowInfoList& windowInfoList)
 {
     auto interestWindowIds = listener->GetInterestWindowIds();
     if (interestWindowIds.empty()) {
@@ -259,8 +256,7 @@ bool WindowManagerLite::Impl::IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoC
 }
 
 void WindowManagerLite::Impl::PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
-    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos,
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowChangeInfos)
+    const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, WindowInfoList& windowChangeInfos)
 {
     for (const auto& info : windowVisibilityInfos) {
         std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowChangeInfo;
@@ -697,8 +693,7 @@ WMError WindowManagerLite::UnregisterMidSceneChangedListener(const sptr<IWindowI
     return ret;
 }
 
-void WindowManagerLite::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+void WindowManagerLite::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "lite flags=%{public}u", propertyDirtyFlags);
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::MID_SCENE)) {

@@ -304,8 +304,8 @@ void SessionManagerAgentController::NotifyWindowSystemBarPropertyChange(
     }
 }
 
-void SessionManagerAgentController::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+void SessionManagerAgentController::NotifyWindowPropertyChange(
+    uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList)
 {
     for (const auto& agent : smAgentContainer_.GetAgentsByType(
         WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_PROPERTY)) {
