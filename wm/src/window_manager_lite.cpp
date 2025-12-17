@@ -45,8 +45,8 @@ public:
     void NotifyWindowVisibilityInfoChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyWindowVisibilityStateChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos);
     void NotifyMidSceneStatusChange(const WindowInfoList& windowInfoList);
-    bool IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
-        const WindowInfoList& windowInfoList);
+    WindowInfoList GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
+        const WindowInfoList& windowInfoList)
     void PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
         const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfos, WindowInfoList& windowChangeInfos);
     void NotifyWindowDrawingContentInfoChanged(const std::vector<sptr<WindowDrawingContentInfo>>&
@@ -231,28 +231,33 @@ void WindowManagerLite::Impl::NotifyMidSceneStatusChange(const WindowInfoList& w
         midSceneStatusChangeListeners = midSceneStatusChangeListeners_;
     }
     for (auto& listener : midSceneStatusChangeListeners) {
-        if (listener != nullptr && !IsNeedToSkipForInterestWindowIds(listener, windowInfoList)) {
-            listener->OnWindowInfoChanged(windowInfoList);
+        WindowInfoList windowInfoListForNotify = GetWindowInfoListByInterestWindowIds(listener, windowInfoList);
+        if (listener != nullptr && !windowInfoListForNotify.empty()) {
+            listener->OnWindowInfoChanged(windowInfoListForNotify);
         }
     }
 }
 
-bool WindowManagerLite::Impl::IsNeedToSkipForInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
+WindowInfoList WindowManagerLite::Impl::GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
     const WindowInfoList& windowInfoList)
-{
+{   
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE,, "listener is nullptr");
+        return windowInfoList;
+    }
     auto interestWindowIds = listener->GetInterestWindowIds();
     if (interestWindowIds.empty()) {
-        return false;
+        return windowInfoList;
     }
-    for (const auto& item : windowInfoList) {
-        auto windowInfo = item;
+    WindowInfoList windowInfoListForNotify;
+    for (const auto& windowInfo : windowInfoList) {
         if (windowInfo.find(WindowInfoKey::WINDOW_ID) != windowInfo.end() &&
             interestWindowIds.find(std::get<uint32_t>(windowInfo[WindowInfoKey::WINDOW_ID])) !=
             interestWindowIds.end()) {
-            return false;
+            windowInfoListForNotify.emplace_back(windowInfo);
         }
     }
-    return true;
+    return windowInfoListForNotify;
 }
 
 void WindowManagerLite::Impl::PackWindowChangeInfo(const std::unordered_set<WindowInfoKey>& interestInfo,
