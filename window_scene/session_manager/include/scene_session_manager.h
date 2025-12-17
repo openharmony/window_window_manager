@@ -259,7 +259,6 @@ public:
         std::vector<AppExecFwk::JsonProfileInfo>& jsonProfileInfos);
     WMError GetJsonProfile(AppExecFwk::ProfileType profileType, const std::string& bundleName,
         const std::string& moduleName, int32_t userId, std::string& profileInfo);
-    bool IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig, const AppForceLandscapeConfig& config) const;
 
     /*
      * Window Recover
@@ -1873,6 +1872,7 @@ private:
      */
     void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
     std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
+    void RegisterForceSplitEnableListenerIfMainWindow(const sptr<SceneSession>& sceneSession);
 };
 } // namespace OHOS::Rosen
 

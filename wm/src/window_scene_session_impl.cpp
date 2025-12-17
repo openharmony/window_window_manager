@@ -7737,12 +7737,30 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
+    WindowType winType = GetType();
     bool enableForceSplit = false;
-    if (GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
+    if (WindowHelper::IsMainWindow(winType) &&
+        GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
         SetForceSplitConfigEnable(enableForceSplit);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
+}
+
+void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
+{
+    WindowType winType = GetType();
+    if (!WindowHelper::IsMainWindow(winType)) {
+        return;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u",
+        enableForceSplit);
+    uiContent->SetForceSplitEnable(enableForceSplit);
 }
 
 WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
