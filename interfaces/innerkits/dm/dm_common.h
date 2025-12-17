@@ -544,7 +544,7 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     KEYBOARD_OFF,
     SYSTEM_KEYBOARD_ON,
     SYSTEM_KEYBOARD_OFF,
-    RESOLUITION_EFFECT_CHANGE,
+    RESOLUTION_EFFECT_CHANGE,
     INVALID,
 };
 
