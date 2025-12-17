@@ -5150,7 +5150,7 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!windowSystemConfig_.IsPcWindow()) {
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
