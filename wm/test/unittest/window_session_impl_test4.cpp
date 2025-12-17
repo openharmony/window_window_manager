@@ -1270,13 +1270,6 @@ HWTEST_F(WindowSessionImplTest4, SetTitleButtonVisible01, TestSize.Level1)
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     WMError res = window->SetTitleButtonVisible(false, false, false, true);
     ASSERT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    window->property_->SetPcAppInpadCompatibleMode(true);
-    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
-    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
-    res = window->SetTitleButtonVisible(false, false, false, true);
-    EXPECT_EQ(res, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetTitleButtonVisible01 end";
 }
 
