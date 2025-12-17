@@ -110,8 +110,7 @@ private:
 
 class TestWindowVisibilityStateListener : public IWindowInfoChangedListener {
 public:
-    void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+    void OnWindowInfoChanged(const WindowInfoList& windowInfoList) override
     {
         WLOGI("TestWindowUpdateListener");
     };
@@ -732,7 +731,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyWindowPropertyChange01, TestSize.Level1)
 {
     ASSERT_NE(instance_, nullptr);
     uint32_t flags = static_cast<int32_t>(WindowInfoKey::MID_SCENE);
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    WindowInfoList windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::MID_SCENE, true}, {WindowInfoKey::WINDOW_ID, 0}});
 
     auto oldInfoKeyMap = instance_->interestInfoMap_;

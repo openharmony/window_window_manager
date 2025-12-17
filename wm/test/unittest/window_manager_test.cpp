@@ -131,7 +131,7 @@ public:
 class TestWindowDisplayIdChangeListener : public IWindowInfoChangedListener {
 public:
     void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+        const WindowInfoList& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowDisplayIdChangeListener");
     };
@@ -140,7 +140,7 @@ public:
 class TestWindowGlobalRectChangedListener : public IWindowInfoChangedListener {
 public:
     void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+        const WindowInfoList& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowGlobalRectChangedListener");
     };
@@ -2271,7 +2271,7 @@ HWTEST_F(WindowManagerTest, UnregisterFloatingScaleChangedListener, Function | S
  */
 HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
 {
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    WindowInfoList windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
 
     auto& windowManager = WindowManager::GetInstance();
@@ -2350,7 +2350,7 @@ HWTEST_F(WindowManagerTest, UnregisterMidSceneChangedListener, Function | SmallT
  */
 HWTEST_F(WindowManagerTest, NotifyMidSceneStatusChange01, TestSize.Level1)
 {
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    WindowInfoList windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::MID_SCENE, true}});
 
     auto& windowManager = WindowManager::GetInstance();
@@ -2431,7 +2431,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListenerForPropertyChange
  */
 HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Level1)
 {
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    WindowInfoList windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
 
     auto& windowManager = WindowManager::GetInstance();

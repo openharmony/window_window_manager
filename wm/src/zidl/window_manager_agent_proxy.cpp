@@ -544,8 +544,7 @@ void WindowManagerAgentProxy::UpdatePiPWindowStateChanged(const std::string& bun
     }
 }
 
-void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+void WindowManagerAgentProxy::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList)
 {
     MessageParcel data;
     MessageParcel reply;

@@ -45,8 +45,7 @@ public:
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) override;
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) override;
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) override {}
-    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override;
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList) override;
     void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo) override;
 };
 } // namespace Rosen
