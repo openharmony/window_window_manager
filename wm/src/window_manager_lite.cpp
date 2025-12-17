@@ -240,7 +240,7 @@ void WindowManagerLite::Impl::NotifyMidSceneStatusChange(const WindowInfoList& w
 
 WindowInfoList WindowManagerLite::Impl::GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
     const WindowInfoList& windowInfoList)
-{   
+{
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is nullptr");
         return windowInfoList;
