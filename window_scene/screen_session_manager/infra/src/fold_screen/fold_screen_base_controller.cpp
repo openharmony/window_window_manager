@@ -221,5 +221,8 @@ void FoldScreenBaseController::SetIsClearingBootAnimation(bool isClearingBootAni
     FoldScreenBasePolicy::GetInstance().SetIsClearingBootAnimation(isClearingBootAnimation);
 }
 
-void FoldScreenBaseController::NotifyRunSensorFoldStateManager() {}
+void FoldScreenBaseController::NotifyRunSensorFoldStateManager()
+{
+    
+}
 } // namespace OHOS::Rosen

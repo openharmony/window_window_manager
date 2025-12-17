@@ -62,6 +62,7 @@ SensorFoldStateMgr::SensorFoldStateMgr()
 {
     currentFoldStatus_ = {FoldStatus::UNKNOWN};
     foldAlgorithmStrategy_ = {0, 0};
+    taskProcessor_ = TaskSequenceProcess(1);
 }
 
 void SensorFoldStateMgr::HandleSensorEvent(const SensorStatus& sensorStatus)
@@ -196,23 +197,35 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
         TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
     }
-    if (globalFoldStatus_ == nextStatus) {
-        TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", globalFoldStatus_);
-        return;
+    auto task = [=] {
+        if (globalFoldStatus_ == nextStatus) {
+            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", globalFoldStatus_);
+            return;
+        }
+        TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", globalFoldStatus_, nextStatus);
+        ReportNotifyFoldStatusChange((int32_t)nextStatus);
+        PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+
+        NotifyReportFoldStatusToScb((int32_t)nextStatus);
+
+        globalFoldStatus_ = nextStatus;
+
+        FoldScreenBasePolicy::GetInstance().SetFoldStatus(globalFoldStatus_);
+        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(globalFoldStatus_);
+        if (!FoldScreenBasePolicy::GetInstance().GetLockDisplayStatus()) {
+            FoldScreenBasePolicy::GetInstance().SendSensorResult(globalFoldStatus_);
+        }
     }
-    TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", globalFoldStatus_, nextStatus);
-    ReportNotifyFoldStatusChange((int32_t)nextStatus);
-    PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+    TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
+        .taskInfo = task};
+    taskProcessor_.Push(eventInfo);
+    taskProcessor_.Notify();
+}
 
-    NotifyReportFoldStatusToScb((int32_t)nextStatus);
-
-    globalFoldStatus_ = nextStatus;
-
-    FoldScreenBasePolicy::GetInstance().SetFoldStatus(globalFoldStatus_);
-    ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(globalFoldStatus_);
-    if (!FoldScreenBasePolicy::GetInstance().GetLockDisplayStatus()) {
-        FoldScreenBasePolicy::GetInstance().SendSensorResult(globalFoldStatus_);
-    }
+void SensorFoldStateMgr::NotifyRunTaskSequence()
+{
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateManager::NotifyRunTaskSequence");
+    taskProcessor_.Notify();
 }
 
 void SensorFoldStateMgr::UpdateFoldAlgorithmStrategy(const std::vector<ScreenAxis>& axis)
