@@ -5825,7 +5825,6 @@ void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
             }
         }
     }
-    NotifyDmsDisplayMove(to);
 }
  
 void WindowSessionImpl::NotifyDmsDisplayMove(DisplayId to)
