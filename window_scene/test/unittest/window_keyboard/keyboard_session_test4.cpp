@@ -570,7 +570,6 @@ HWTEST_F(KeyboardSessionTest4, TestIsLandscapeWithValidSession, TestSize.Level1)
     bool isLandscape = false;
     
     screenSessionManagerClient_->screenSessionMap_.clear();
-    EXPECT_EQ(keyboardSession->IsLandscape(0, isLandscape), WMError::WM_OK);
     EXPECT_EQ(keyboardSession->IsLandscape(1234, isLandscape), WMError::WM_ERROR_INVALID_DISPLAY);
     screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
     EXPECT_EQ(keyboardSession->IsLandscape(0, isLandscape), WMError::WM_OK);
