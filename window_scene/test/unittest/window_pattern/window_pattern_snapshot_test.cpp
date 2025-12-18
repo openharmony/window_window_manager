@@ -1321,13 +1321,13 @@ HWTEST_F(WindowPatternSnapshotTest, ClearSnapshotPersistence, TestSize.Level1)
     info.bundleName_ = "ClearSnapshotPersistence";
     sptr<MainSession> pMainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     pMainSession->scenePersistence_ = nullptr;
-    pMainSession->ClearSnapshotPersistence(info);
+    pMainSession->ClearSnapshotPersistence();
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
     sptr<ScenePersistence> scenePersistence =
         sptr<ScenePersistence>::MakeSptr(info.bundleName_, pMainSession->GetPersistentId());
     pMainSession->scenePersistence_ = scenePersistence;
-    pMainSession->ClearSnapshotPersistence(info);
+    pMainSession->ClearSnapshotPersistence();
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 }
 
