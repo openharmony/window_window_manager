@@ -2740,7 +2740,11 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1
         EXPECT_FALSE(ret);
         screenSession1->property_.UpdateScreenRotation(Rotation::ROTATION_90);
         ret = ssm_->HandleResolutionEffectChange();
-        EXPECT_TRUE(ret);
+        if (ssm_->GetSuperFoldStatus() != SuperFoldStatus::EXPANDED) {
+            EXPECT_FALSE(ret);
+        } else {
+            EXPECT_TRUE(ret);
+        }
     } else {
         EXPECT_TRUE(ret);
     }
@@ -2830,31 +2834,37 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ASSERT_EQ(externalSession, screenSession2);
 
     auto ret = ssm_->RecoveryResolutionEffect();
-    EXPECT_TRUE(ret);
-
-    ssm_->curResolutionEffectEnable_ = true;
-    ret = ssm_->RecoveryResolutionEffect();
-    EXPECT_TRUE(ret);
-    EXPECT_FALSE(ssm_->curResolutionEffectEnable_);
-    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.width_,
-        screenSession1->GetScreenProperty().GetScreenRealWidth());
-    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.height_,
-        screenSession1->GetScreenProperty().GetScreenRealHeight());
-    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorWidth(),
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        EXPECT_FALSE(ret);
+        screenSession1->property_.UpdateScreenRotation(Rotation::ROTATION_90);
+        ret = ssm_->RecoveryResolutionEffect();
+        EXPECT_EQ(!ret, ssm_->GetSuperFoldStatus() != SuperFoldStatus::EXPANDED);
+    } else {
+        EXPECT_TRUE(ret);
+        ssm_->curResolutionEffectEnable_ = true;
+        ret = ssm_->RecoveryResolutionEffect();
+        EXPECT_TRUE(ret);
+        EXPECT_FALSE(ssm_->curResolutionEffectEnable_);
+        EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.width_,
             screenSession1->GetScreenProperty().GetScreenRealWidth());
-    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorHeight(),
+        EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.height_,
             screenSession1->GetScreenProperty().GetScreenRealHeight());
+        EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorWidth(),
+            screenSession1->GetScreenProperty().GetScreenRealWidth());
+        EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorHeight(),
+            screenSession1->GetScreenProperty().GetScreenRealHeight());
+    }
     ssm_->curResolutionEffectEnable_ = false;
     ssm_->screenSessionMap_.erase(51);
     ssm_->screenSessionMap_.erase(52);
 }
 
 /**
- * @tc.name: SetInternalScreenResolutionEffect
- * @tc.desc: SetInternalScreenResolutionEffect
+ * @tc.name: SetInternalScreenResolutionEffect001
+ * @tc.desc: SetInternalScreenResolutionEffect001
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect001, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
 
@@ -2872,37 +2882,92 @@ HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect, TestSize.L
     EXPECT_EQ(screenProperty.GetValidWidth(), 3120);
     EXPECT_EQ(screenProperty.GetValidHeight(), 2080);
     EXPECT_EQ(screenProperty.GetInputOffsetY(), 10);
+
+    DMRect targetRect2 = {0, 10, 3120, 1755};
+    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect2);
+    screenProperty = screenSession->GetScreenProperty();
+    EXPECT_EQ(screenProperty.GetBounds().rect_.width_, 3120);
+    EXPECT_EQ(screenProperty.GetBounds().rect_.height_, 1755);
+    EXPECT_EQ(screenProperty.GetMirrorWidth(), 3120);
+    EXPECT_EQ(screenProperty.GetMirrorHeight(), 1755);
+    EXPECT_EQ(screenProperty.GetValidWidth(), 3120);
+    EXPECT_EQ(screenProperty.GetValidHeight(), 1755);
+    EXPECT_EQ(screenProperty.GetInputOffsetY(), 10);
 }
 
 /**
- * @tc.name: SetExternalScreenResolutionEffect
- * @tc.desc: SetExternalScreenResolutionEffect
+ * @tc.name: SetInternalScreenResolutionEffect002
+ * @tc.desc: SetInternalScreenResolutionEffect002
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect002, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
 
+    sptr<ScreenSession> screenSession = nullptr;
+    DMRect targetRect = {0, 10, 3120, 2080};
+    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect);
+    EXPECT_TRUE(g_errLog.find("internalSession null") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: SetExternalScreenResolutionEffect001
+ * @tc.desc: SetExternalScreenResolutionEffect001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+ 
     sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetRSScreenId(51);
 
     DMRect targetRect1 = {0, 10, 3120, 2080};
+    ssm_->curResolutionEffectEnable_ = false;
     ssm_->SetExternalScreenResolutionEffect(screenSession, targetRect1);
     auto screenProperty = screenSession->GetScreenProperty();
     EXPECT_EQ(screenProperty.GetMirrorWidth(), 3120);
     EXPECT_EQ(screenProperty.GetMirrorHeight(), 2080);
+    DMRect expectedRect1 = {0, 0, 0, 0};
+    EXPECT_EQ(screenSession->GetMirrorScreenRegion().second, expectedRect1);
 
     sptr<ScreenSession> phyScreenSession = new ScreenSession(51, ScreenProperty(), 0);
     ASSERT_NE(nullptr, phyScreenSession);
     phyScreenSession->SetRSScreenId(51);
     ssm_->physicalScreenSessionMap_[51] = phyScreenSession;
+    ssm_->curResolutionEffectEnable_ = true;
     DMRect targetRect2 = {0, 10, 3120, 1755};
     ssm_->SetExternalScreenResolutionEffect(screenSession, targetRect2);
     auto physcreenProperty = screenSession->GetScreenProperty();
     EXPECT_EQ(physcreenProperty.GetMirrorWidth(), 3120);
     EXPECT_EQ(physcreenProperty.GetMirrorHeight(), 1755);
+    EXPECT_EQ(screenSession->GetMirrorScreenRegion().second, targetRect2);
+ 
+    ssm_->physicalScreenSessionMap_.erase(51);
+    ssm_->curResolutionEffectEnable_ = false;
+}
+ 
+/**
+ * @tc.name: SetExternalScreenResolutionEffect002
+ * @tc.desc: SetExternalScreenResolutionEffect002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+ 
+    sptr<ScreenSession> screenSession = nullptr;
+    DMRect targetRect = {0, 10, 3120, 2080};
+    ssm_->SetExternalScreenResolutionEffect(screenSession, targetRect);
+    EXPECT_TRUE(g_errLog.find("externalSession null") != std::string::npos);
+    g_errLog.clear();
 }
 
 /**
