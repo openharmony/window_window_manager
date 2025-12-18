@@ -66,7 +66,6 @@ public:
     virtual void NotifyRunSensorFoldStateManager();
 private:
     std::vector<FoldCreaseRegionItem> foldCreaseRegionItems_;
-    sptr<SensorFoldStateMgr> sensorFoldStateManager_;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_BASE_CONTROLLER_H
