@@ -5674,7 +5674,7 @@ napi_value JsSceneSessionManager::OnSetIsPipEnabled(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     bool isPipEnabled  = false;
-    if (!ConvertFromJsValue(env, argv[0], isPipEnabled )) {
+    if (!ConvertFromJsValue(env, argv[0], isPipEnabled)) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to convert parameter to isPipEnabled ");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
