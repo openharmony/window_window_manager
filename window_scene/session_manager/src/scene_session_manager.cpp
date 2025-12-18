@@ -2289,7 +2289,7 @@ void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             sceneSessionMapCopy = sceneSessionMap_;
         }
-        for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
             if (sceneSession == nullptr) {
                 TLOGE(WmsLogTag::WMS_LIFE, "session is null");
                 continue;
