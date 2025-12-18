@@ -89,7 +89,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Exec01, TestSize.Level0)
 HWTEST_F(TaskSequenceProcessTest, ATC_Finish01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(1);
-    process.taskRunningFlag_.store(true)
+    process.taskRunningFlag_.store(true);
     process.Finish();
     EXPECT_EQ(process.taskRunningFlag_.load(), false);
 }
