@@ -2168,6 +2168,27 @@ HWTEST_F(WindowSessionImplTest5, GetPiPSettingSwitchStatus, Function | SmallTest
 }
 
 /**
+@tc.name: GetIsPipEnabled
+@tc.desc: GetIsPipEnabled
+@tc.type: FUNC
+*/
+HWTEST_F(WindowSessionImplTest5, GetIsPipEnabled, Function | SmallTest | Level2)
+{
+    sptr option = sptr::MakeSptr();
+    option->SetWindowName("GetIsPipEnabled");
+    sptr window = sptr::MakeSptr(option);
+    bool isPipEnabled = false;
+    WMError retCode = window->GetIsPipEnabled(isPipEnabled);
+    ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr session = sptr::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    window->GetIsPipEnabled(isPipEnabled);
+}
+
+/**
  * @tc.name: OnPointDown
  * @tc.desc: OnPointDown
  * @tc.type: FUNC
