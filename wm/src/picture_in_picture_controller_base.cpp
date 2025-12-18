@@ -606,7 +606,7 @@ WMError PictureInPictureControllerBase::UnregisterListener(std::vector<sptr<T>>&
 void PictureInPictureControllerBase::GetPipPossible(bool& pipPossible)
 {
     bool isPipEnabledFlag;
-    SingletonContainer::Get().GetIsPipEnabled(isPipEnabledFlag);
+    SingletonContainer::Get<WindowAdapter>().GetIsPipEnabled(isPipEnabledFlag);
     pipPossible = isPipEnabledFlag;
     return;
 }
