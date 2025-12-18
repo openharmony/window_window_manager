@@ -479,15 +479,25 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NullptrScreenSessio
 */
 HWTEST_F(SuperFoldStateManagerTest, RefreshMirrorRegionInner_NormalCase, TestSize.Level1)
 {
-    ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
-    SuperFoldStateManager superFoldStateManager;
+    SuperFoldStateManager& superFoldStateManager = SuperFoldStateManager::GetInstance();
     superFoldStateManager.SetCurrentStatus(SuperFoldStatus::UNKNOWN);
-    sptr<ScreenSession> mainScreenSession = ssm_.GetOrCreateScreenSession(0);
+    ScreenSessionConfig config = {
+        .screenId = 0,
+        .rsId = 0,
+        .defaultScreenId = 0,
+        .name = "",
+        .property = ScreenProperty{},
+    };
+    sptr<ScreenSession> mainScreenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ssm_.screenSessionMap_[0] = mainScreenSession;
     ScreenProperty mainScreenProperty;
     mainScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
     mainScreenSession->SetScreenProperty(mainScreenProperty);
  
-    sptr<ScreenSession> secondarySession = ssm_.GetOrCreateScreenSession(1);
+    config.screenId = 1;
+    config.rsId = 1;
+    sptr<ScreenSession> secondarySession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
+    ssm_.screenSessionMap_[1] = secondarySession;
     superFoldStateManager.SetCurrentStatus(SuperFoldStatus::EXPANDED);
     ScreenProperty secondaryScreenProperty;
     secondaryScreenProperty.bounds_.rect_ = { 0, 0, 100, 100 };
@@ -504,7 +514,7 @@ HWTEST_F(SuperFoldStateManagerTest, RefreshExternalRegion_ShouldReturnOk_WhenNoE
 {
     ONLY_FOR_SUPERFOLD_DISPLAY_DEVICE
     ssm_.SetIsPhysicalExtendScreenConnected(false);
-    SuperFoldStateManager superFoldStateManager;
+    SuperFoldStateManager& superFoldStateManager = SuperFoldStateManager::GetInstance();
     DMError result = superFoldStateManager.RefreshExternalRegion();
     ssm_.SetIsPhysicalExtendScreenConnected(true);
  
