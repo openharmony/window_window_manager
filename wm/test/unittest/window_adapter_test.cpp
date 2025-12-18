@@ -1404,10 +1404,9 @@ HWTEST_F(WindowAdapterTest, GetPiPSettingSwitchStatus, TestSize.Level1)
 }
 
 /**
-
-@tc.name: GetIsPipEnabled
-@tc.desc: WindowAdapter/GetIsPipEnabled
-@tc.type: FUNC
+ *@tc.name: GetIsPipEnabled
+ *@tc.desc: WindowAdapter/GetIsPipEnabled
+ *@tc.type: FUNC
 */
 HWTEST_F(WindowAdapterTest, GetIsPipEnabled, TestSize.Level1)
 {
