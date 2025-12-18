@@ -5887,6 +5887,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
     info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
     info.persistentId_ = abilitySessionInfo->persistentId;
+    info.specifiedReason_ = static_cast<SpecifiedReason>(abilitySessionInfo->specifiedReason);
     info.callerPersistentId_ = session->GetPersistentId();
     info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
@@ -5904,7 +5905,6 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     info.needClearInNotShowRecent_ = abilitySessionInfo->needClearInNotShowRecent;
     info.appInstanceKey_ = abilitySessionInfo->instanceKey;
-    info.isFromIcon_ = abilitySessionInfo->isFromIcon;
     info.isPcOrPadEnableActivation_ = session->IsPcOrPadEnableActivation();
     info.canStartAbilityFromBackground_ = abilitySessionInfo->canStartAbilityFromBackground;
     info.isFoundationCall_ = isFoundationCall;
@@ -5950,16 +5950,16 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.startAnimationOptions = abilitySessionInfo->windowCreateParams->animationParams;
     }
     info.isPrelaunch_ = abilitySessionInfo->isPrelaunch;
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s, "
-        "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
-        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
-        "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
-        "supportedWindowModes.size:%{public}zu, requestId:%{public}d, "
-        "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d, "
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s,"
+        "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d,"
+        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d,"
+        "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s,"
+        "supportedWindowModes.size:%{public}zu, requestId:%{public}d,"
+        "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d,"
         "reuseDelegatorWindow:%{public}d, startWindowType:%{public}d, isPrelaunch:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
-        info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
+        info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(),
         info.supportedWindowModes.size(), info.requestId,
         info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
         info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight,
