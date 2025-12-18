@@ -1668,7 +1668,7 @@ private:
     std::mutex lastSystemBarPropertyMapMutex_;
     std::unordered_map<WindowType, SystemBarProperty> lastSystemBarPropertyMap_;
     bool GetLSState() const { return isLSState_; }
-    void SetLSState(bool isLSSate) { isLSState_ = isLSSate; }
+    void SetLSState(bool isLSState) { isLSState_ = isLSState; }
     bool isLSState_ = false;
 
     struct SessionInfoList {
