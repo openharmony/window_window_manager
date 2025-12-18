@@ -2968,7 +2968,7 @@ uint32_t Session::GetBackgroundColor() const
     return COLOR_WHITE;
 }
 
-void Session::RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId)
+void Session::RenameSnapshotFromOldPersistentId(int32_t oldPersistentId)
 {
     auto task = [weakThis = wptr(this), oldPersistentId, where = __func__]() {
         auto session = weakThis.promote();
@@ -5311,7 +5311,6 @@ void Session::RecoverImageForRecent()
         ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(persistentId_),
             persistentImageFit_, ScenePersistentStorageType::MAXIMIZE_STATE);
     }
-    return;
 }
 
 void Session::SetPersistentImageFit(int32_t imageFit)
