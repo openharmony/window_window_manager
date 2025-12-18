@@ -243,8 +243,12 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleTitleAndDockHoverShowChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG):
             return HandleGetAppForceLandscapeConfig(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE):
+            return HandleGetAppForceLandscapeConfigEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO):
             return HandleGetAppHookWindowInfoFromServer(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_STATUS_AFTER_SHOW_WINDOW):
+            return HandleNotifyWindowStatusDidChangeAfterShowWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
@@ -1926,8 +1930,31 @@ int SessionStub::HandleGetAppForceLandscapeConfig(MessageParcel& data, MessagePa
     TLOGD(WmsLogTag::DEFAULT, "called");
     AppForceLandscapeConfig config;
     WMError ret = GetAppForceLandscapeConfig(config);
-    reply.WriteParcelable(&config);
+    if (!reply.WriteParcelable(&config)) {
+        TLOGE(WmsLogTag::DEFAULT, "write config failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::DEFAULT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
     reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleGetAppForceLandscapeConfigEnable(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "called");
+    bool enableForceSplit = false;
+    WMError ret = GetAppForceLandscapeConfigEnable(enableForceSplit);
+    if (!reply.WriteBool(enableForceSplit)) {
+        TLOGE(WmsLogTag::DEFAULT, "write enableForceSplit failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::DEFAULT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1944,6 +1971,13 @@ int SessionStub::HandleGetAppHookWindowInfoFromServer(MessageParcel& data, Messa
         TLOGE(WmsLogTag::WMS_LAYOUT, "write ret failed");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyWindowStatusDidChangeAfterShowWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    NotifyWindowStatusDidChangeAfterShowWindow();
     return ERR_NONE;
 }
 
@@ -2600,6 +2634,13 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    NotifyAppForceLandscapeConfigEnableUpdated();
     return ERR_NONE;
 }
 

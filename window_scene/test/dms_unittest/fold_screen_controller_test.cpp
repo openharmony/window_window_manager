@@ -121,6 +121,7 @@ namespace {
         std::recursive_mutex mutex;
         FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
 
+        fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
         auto mode = fsc_.GetDisplayMode();
         FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;

@@ -2279,6 +2279,37 @@ HWTEST_F(SessionProxyTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyWindowStatusDidChangeAfterShowWindow, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyWindowStatusDidChangeAfterShowWindow start";
+    logMsg.clear();
+    LOG_SetCallBack(MyLogCallback);
+
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+
+    auto sProxy = sptr<MockIRemoteObject>::MakeSptr(nullptr);
+    sProxy->NotifyWindowStatusDidChangeAfterShowWindow();
+    EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
+
+    sProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sProxy->NotifyWindowStatusDidChangeAfterShowWindow();
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    mockRemote->SetRequestResult(ERR_INVALID_DATA);
+    sProxy->NotifyWindowStatusDidChangeAfterShowWindow();
+    EXPECT_TRUE(logMsg.find("SendRequest failed") != std::string::npos);
+
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyWindowStatusDidChangeAfterShowWindow end";
+}
+
+/**
  * @tc.name: TestSetContentAspectRatio
  * @tc.desc: Test SetContentAspectRatio behavior in various IPC scenarios
  * @tc.type: FUNC
@@ -2427,6 +2458,69 @@ HWTEST_F(SessionProxyTest, RestartApp, TestSize.Level3)
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_OK, okProxy->RestartApp(want));
     MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated
+ * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyAppForceLandscapeConfigEnableUpdated start";
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated();
+    ASSERT_EQ(res, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SessionProxyTest: NotifyAppForceLandscapeConfigEnableUpdated end";
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated01
+ * @tc.desc: ShouldReturnIpcFailed_WhenWriteInterfaceTokenFails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated01, TestSize.Level1)
+{
+    auto iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    ASSERT_NE(sProxy, nullptr);
+    
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated();
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated02
+ * @tc.desc: NotifyAppForceLandscapeConfigEnableUpdated_ShouldReturnIpcFailed_WhenRemoteIsNull
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated02, TestSize.Level1)
+{
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    ASSERT_NE(sProxy, nullptr);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated();
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated03
+ * @tc.desc: ShouldReturnIpcFailed_WhenSendRequestFails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated03, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    auto sProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    ASSERT_NE(sProxy, nullptr);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated();
+    EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 }
 } // namespace
 } // namespace Rosen

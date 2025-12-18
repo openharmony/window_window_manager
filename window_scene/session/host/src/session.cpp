@@ -792,7 +792,7 @@ void Session::UpdateSessionTouchable(bool touchable)
 
 WSError Session::SetFocusable(bool isFocusable)
 {
-    WLOGFI("SetFocusable id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
+    TLOGI(WmsLogTag::WMS_FOCUS, "id: %{public}d, focusable: %{public}d", GetPersistentId(), isFocusable);
     GetSessionProperty()->SetFocusable(isFocusable);
     if (isFocused_ && !GetFocusable()) {
         FocusChangeReason reason = FocusChangeReason::FOCUSABLE;
@@ -931,6 +931,19 @@ bool Session::GetSystemTouchable() const
     return forceTouchable_ && systemTouchable_ && GetTouchable();
 }
 
+bool Session::GetWindowTouchableForMMI(DisplayId displayId) const
+{
+    bool isTouchable = true;
+    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (screenSession != nullptr) {
+        if (!screenSession->IsTouchEnabled() || !GetSystemTouchable() ||
+            !GetForegroundInteractiveStatus()) {
+            isTouchable = false;
+        }
+    }
+    return isTouchable;
+}
+
 bool Session::IsSystemActive() const
 {
     return isSystemActive_;
@@ -1017,6 +1030,14 @@ void Session::SetAbilityToken(sptr<IRemoteObject> token)
 sptr<IRemoteObject> Session::GetAbilityToken() const
 {
     return abilityToken_;
+}
+
+WSError Session::UpdateBrightness(float brightness)
+{
+    if (sessionStage_) {
+        sessionStage_->UpdateBrightness(brightness);
+    }
+    return WSError::WS_OK;
 }
 
 WSError Session::SetBrightness(float brightness)
@@ -1351,12 +1372,23 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         UpdateClientRectPosYAndDisplayId(updateRect);
         sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
         SetClientRect(rect);
+        NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(reason);
         RectCheckProcess();
     } else {
         WLOGFE("sessionStage_ is nullptr");
     }
     UpdatePointerArea(GetSessionRect());
     return WSError::WS_OK;
+}
+
+void Session::NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason reason)
+{
+    if (!sessionStage_) {
+        return;
+    }
+    if (reason == SizeChangeReason::MAXIMIZE || reason == SizeChangeReason::MAXIMIZE_IN_IMPLICT) {
+        sessionStage_->NotifyLayoutFinishAfterWindowModeChange(GetWindowMode());
+    }
 }
 
 WSError Session::UpdateDensity()
@@ -2872,10 +2904,11 @@ bool Session::GetNeedUseBlurSnapshot() const
     bool snapshotPrivacyMode = GetSnapshotPrivacyMode();
     ControlInfo controlInfo;
     bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
-    bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && controlInfo.isNeedControl);
+    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && isAppUseControl);
     if (needUseBlurSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, snapshotPrivacyMode: %{public}d, "
-            "isAppLock: %{public}d", persistentId_, isPrivacyMode, snapshotPrivacyMode, controlInfo.isNeedControl);
+            "isAppLock: %{public}d", persistentId_, isPrivacyMode, snapshotPrivacyMode, isAppUseControl);
     }
     return needUseBlurSnapshot;
 }
@@ -2905,9 +2938,10 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
     if (type != ControlAppType::APP_LOCK) {
         return;
     }
-    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, controlInfo.isNeedControl);
-    isAppLockControl_.store(controlInfo.isNeedControl);
-    if (controlInfo.isNeedControl) {
+    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, isAppUseControl);
+    isAppLockControl_.store(isAppUseControl);
+    if (isAppUseControl) {
         if (IsPersistentImageFit()) {
             NotifyAddSnapshot(false, false, false);
             return;
@@ -2978,6 +3012,16 @@ void Session::SetBufferNameForPixelMap(const char* functionName, const std::shar
     pixelMap->SetMemoryName(functionNameStr + '_' + std::to_string(GetPersistentId()));
 }
 
+void Session::SetPreloadingStartingWindow(bool preloading)
+{
+    preloadingStartingWindow_.store(preloading);
+}
+
+bool Session::GetPreloadingStartingWindow()
+{
+    return preloadingStartingWindow_.load();
+}
+
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
     bool updateSnapshot, LifeCycleChangeReason reason)
 {
@@ -3036,7 +3080,6 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             session->NotifyUpdateSnapshotWindow();
         }
         session->SetHasSnapshot(key, rotate);
-        session->scenePersistence_->ResetSnapshotCache();
         Task saveSnapshotCallback = []() {};
         if (!needCacheSnapshot) {
             std::lock_guard lock(session->saveSnapshotCallbackMutex_);
@@ -3346,6 +3389,11 @@ bool Session::UpdateWindowModeSupportType(const std::shared_ptr<AppExecFwk::Abil
         return true;
     }
     return false;
+}
+
+void Session::SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func)
+{
+    getRsCmdBlockingCountFunc_ = func;
 }
 
 void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
@@ -4950,7 +4998,13 @@ void Session::SetIsMidScene(bool isMidScene)
 
 bool Session::GetIsMidScene() const
 {
-    return isMidScene_;
+    if (isMidScene_) {
+        return true;
+    }
+    if (GetParentSession() == nullptr) {
+        return false;
+    }
+    return GetParentSession()->GetIsMidScene();
 }
 
 void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
@@ -4977,7 +5031,7 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
         return nullptr;
     }
     auto key = GetScreenSnapshotStatus();
-    return scenePersistence_->IsSavingSnapshot(key, freeMultiWindow_.load()) ? GetSnapshot() :
+    return scenePersistence_->IsSavingSnapshot() ? GetSnapshot() :
         scenePersistence_->GetLocalSnapshotPixelMap(oriScale, newScale, key, freeMultiWindow_.load());
 }
 
@@ -5155,13 +5209,7 @@ WindowMetaInfo Session::GetWindowMetaInfoForWindowInfo() const
     auto property = GetSessionProperty();
     windowMetaInfo.isPrivacyMode = property->GetPrivacyMode() || property->GetSystemPrivacyMode();
     auto displayId = property->GetDisplayId();
-    auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (screenSession != nullptr) {
-        if (!screenSession->IsTouchEnabled() || !GetSystemTouchable() ||
-            !GetForegroundInteractiveStatus()) {
-            windowMetaInfo.isTouchable = false;
-        }
-    }
+    windowMetaInfo.isTouchable = GetWindowTouchableForMMI(displayId);
     TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, %{public}d", windowMetaInfo.windowId,
         windowMetaInfo.isTouchable);
     return windowMetaInfo;

@@ -58,12 +58,11 @@ void MainSession::OnFirstStrongRef(const void* objectId)
     // OnFirstStrongRef is overridden in the parent class IPCObjectStub,
     // so its parent implementation must be invoked here to avoid IPC communication issues.
     SceneSession::OnFirstStrongRef(objectId);
-    
+
     moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(this));
     if (specificCallback_ != nullptr && specificCallback_->onWindowInputPidChangeCallback_ != nullptr) {
         moveDragController_->SetNotifyWindowPidChangeCallback(specificCallback_->onWindowInputPidChangeCallback_);
     }
-    SetMoveDragCallback();
     std::string key = GetRatioPreferenceKey();
     if (!key.empty()) {
         if (ScenePersistentStorage::HasKey(key, ScenePersistentStorageType::ASPECT_RATIO)) {
@@ -73,7 +72,6 @@ void MainSession::OnFirstStrongRef(const void* objectId)
                   "init aspectRatio, bundleName:%{public}s, key:%{public}s, value:%{public}f",
                   sessionInfo_.bundleName_.c_str(), key.c_str(), aspectRatio);
             Session::SetAspectRatio(aspectRatio);
-            moveDragController_->SetAspectRatio(aspectRatio);
         }
     }
 }
@@ -649,9 +647,30 @@ bool MainSession::RestoreAspectRatio(float ratio)
         return false;
     }
     Session::SetAspectRatio(ratio);
-    if (moveDragController_) {
-        moveDragController_->SetAspectRatio(ratio);
-    }
     return true;
+}
+
+WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
+{
+    if (forceSplitEnableFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "forceSplitEnableFunc_ is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
+    return WMError::WM_OK;
+}
+
+WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated()
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
+}
+
+void MainSession::RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func)
+{
+    forceSplitEnableFunc_ = std::move(func);
 }
 } // namespace OHOS::Rosen

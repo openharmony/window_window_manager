@@ -282,7 +282,7 @@ void SecondaryDisplayFoldPolicy::CloseCoordinationScreen()
         return;
     }
     TLOGI(WmsLogTag::DMS, "Close Coordination Screen current mode=%{public}d", currentDisplayMode_);
-
+    ScreenSessionManager::GetInstance().NotifyRSCoordination(false);
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
 
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);
@@ -297,7 +297,7 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayModeToCoordination()
         return;
     }
     TLOGI(WmsLogTag::DMS, "change displaymode to coordination current mode=%{public}d", currentDisplayMode_);
-
+    ScreenSessionManager::GetInstance().NotifyRSCoordination(true);
     ScreenSessionManager::GetInstance().SetCoordinationFlag(true);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::CONNECTED);
 
@@ -383,6 +383,7 @@ void SecondaryDisplayFoldPolicy::ExitCoordination()
         TLOGW(WmsLogTag::DMS, "ExitCoordination skipped, current coordination flag is false");
         return;
     }
+    ScreenSessionManager::GetInstance().NotifyRSCoordination(false);
     ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
     AddOrRemoveDisplayNodeToTree(SCREEN_ID_MAIN, REMOVE_DISPLAY_NODE);
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::DISCONNECTED);
@@ -552,16 +553,18 @@ void SecondaryDisplayFoldPolicy::HandlePropertyChange(sptr<ScreenSession> screen
     if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
         bool firstSCBConnect = ScreenSessionManager::GetInstance().GetFirstSCBConnect();
         screenSession->UpdatePropertyByFoldControl(ScreenProperty, displayMode, firstSCBConnect);
-        auto oldScreenProperty = screenSession->GetScreenProperty();
-        if (displayMode == FoldDisplayMode::MAIN) {
-            screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
-        }
+
         if (isNeedNotifyFoldProperty) {
-            screenSession->PropertyChange(oldScreenProperty, reason);
+            screenSession->PropertyChange(screenSession->GetScreenProperty(), reason);
         } else {
             TLOGI(WmsLogTag::DMS, "PropertyChange...set displayModeChangeStatus");
             SetSecondaryDisplayModeChangeStatus(false);
         }
+
+        if (displayMode == FoldDisplayMode::MAIN) {
+            screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
+        }
+
         TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
             screenSession->GetScreenProperty().GetBounds().rect_.width_,
             screenSession->GetScreenProperty().GetBounds().rect_.height_);

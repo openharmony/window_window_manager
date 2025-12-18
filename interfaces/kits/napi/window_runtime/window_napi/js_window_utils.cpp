@@ -1638,6 +1638,20 @@ napi_value RotationChangeTypeInit(napi_env env)
     return objValue;
 }
 
+napi_value RotationInfoTypeInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "WINDOW_ORIENTATION",
+        CreateJsValue(env, static_cast<uint32_t>(RotationInfoType::WINDOW_ORIENTATION)));
+    napi_set_named_property(env, objValue, "DISPLAY_ORIENTATION",
+        CreateJsValue(env, static_cast<uint32_t>(RotationInfoType::DISPLAY_ORIENTATION)));
+    napi_set_named_property(env, objValue, "DISPLAY_ROTATION",
+        CreateJsValue(env, static_cast<uint32_t>(RotationInfoType::DISPLAY_ROTATION)));
+    return objValue;
+}
+
 napi_value RectTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);

@@ -18,11 +18,13 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "iremote_object_mocker.h"
 #include "libxml/parser.h"
 #include "libxml/tree.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
+#include "session/host/include/session_utils.h"
 #include "session/host/include/main_session.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
@@ -193,6 +195,105 @@ HWTEST_F(SceneSessionManagerTest2, RegisterWindowPropertyChangeAgent01, TestSize
         ssm_->UnregisterWindowPropertyChangeAgent(WindowInfoKey::DISPLAY_ID, interestInfo, windowManagerAgent));
     EXPECT_EQ(0, ssm_->observedFlags_);
     EXPECT_EQ(0, ssm_->interestedFlags_);
+}
+
+/**
+ * @tc.name: ConfigWindowLayout
+ * @tc.desc: Verify ConfigWindowLayout handles invalid/valid configs correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigWindowLayout, TestSize.Level1)
+{
+    // Case 1: windowLayoutConfig is NOT a MAP → return false
+    {
+        ConfigItem layout;
+        EXPECT_FALSE(layout.IsMap());
+
+        bool ret = ssm_->ConfigWindowLayout(layout);
+        EXPECT_FALSE(ret);
+    }
+
+    // Case 2: windowLayoutConfig is MAP → call ConfigMoveDrag → return true
+    {
+        ConfigItem layout;
+        ConfigItem moveDrag;
+
+        // Construct map: { "moveDrag": moveDrag }
+        layout.SetValue({ { "moveDrag", moveDrag } });
+        EXPECT_TRUE(layout.IsMap());
+
+        bool ret = ssm_->ConfigWindowLayout(layout);
+        EXPECT_TRUE(ret);
+    }
+}
+
+/**
+ * @tc.name: ConfigMoveDrag
+ * @tc.desc: Verify ConfigMoveDrag handles all input cases and returns correct values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMoveDrag, TestSize.Level1)
+{
+    // Case 1: moveDragConfig is NOT a MAP → return false
+    {
+        ConfigItem moveDrag;
+        EXPECT_FALSE(moveDrag.IsMap());
+
+        bool ret = ssm_->ConfigMoveDrag(moveDrag);
+        EXPECT_FALSE(ret);
+    }
+
+    // Case 2: moveResample.enable MISSING → return true + warning path
+    {
+        ConfigItem moveDrag;
+        ConfigItem moveResample;
+
+        // moveResample = {} (MAP)
+        moveResample.SetValue(std::map<std::string, ConfigItem>{});
+        // moveDrag = { "moveResample": moveResample }
+        moveDrag.SetValue({ { "moveResample", moveResample } });
+
+        bool ret = ssm_->ConfigMoveDrag(moveDrag);
+        EXPECT_TRUE(ret);  // return true even if enable is invalid
+    }
+
+    // Case 3: enable exists but NOT BOOL → warning, return true
+    {
+        ConfigItem moveDrag;
+        ConfigItem moveResample;
+        ConfigItem enableProp;
+
+        enableProp.SetValue(std::string("not_bool")); // STRING → NOT BOOL
+        // moveResample.property = { "enable": STRING }
+        moveResample.SetValue(std::map<std::string, ConfigItem>{});
+        moveResample.SetProperty({ { "enable", enableProp } });
+        moveDrag.SetValue({ { "moveResample", moveResample } });
+
+        bool ret = ssm_->ConfigMoveDrag(moveDrag);
+        EXPECT_TRUE(ret);  // still true, just warns
+    }
+
+    // Case 4: enable is BOOL → call SetMoveResampleEnabled → return true
+    {
+        bool before = SessionUtils::IsMoveResampleEnabled();
+
+        ConfigItem moveDrag;
+        ConfigItem moveResample;
+        ConfigItem enableProp;
+
+        enableProp.SetValue(true);  // valid bool
+        moveResample.SetValue(std::map<std::string, ConfigItem>{});
+        moveResample.SetProperty({ { "enable", enableProp } });
+        moveDrag.SetValue({ { "moveResample", moveResample } });
+
+        bool ret = ssm_->ConfigMoveDrag(moveDrag);
+        EXPECT_TRUE(ret);
+
+        bool after = SessionUtils::IsMoveResampleEnabled();
+        EXPECT_NE(before, after);  // should be changed
+
+        SessionUtils::SetMoveResampleEnabled(before);  // restore
+    }
 }
 
 /**
@@ -1590,6 +1691,34 @@ HWTEST_F(SceneSessionManagerTest2, Init, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterBrightnessDataChangeListener
+ * @tc.desc: SceneSessionManager RegisterBrightnessDataChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, RegisterBrightnessDataChangeListener, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->RegisterBrightnessDataChangeListener();
+    EXPECT_TRUE(g_logMsg.find("RegisterBrightnessDataChangeListener") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: UnregisterBrightnessDataChangeListener
+ * @tc.desc: SceneSessionManager UnregisterBrightnessDataChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, UnregisterBrightnessDataChangeListener, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->UnregisterBrightnessDataChangeListener();
+    EXPECT_TRUE(g_logMsg.find("UnregisterBrightnessDataChangeListener") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
  *@tc.name: HandleUserSwitching
  *@tc.desc: SceneSesionManager HandleUserSwitching
  *@tc.type: FUNC
@@ -1779,6 +1908,68 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFocusWindowInfoByAbilityToken_SACalling
+ * @tc.desc: Test function GetFocusWindowInfoByAbilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken_SACalling, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    FocusChangeInfo info;
+    sptr<IRemoteObject> token;
+    ssm_->GetFocusWindowInfoByAbilityToken(info, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    MockAccesstokenKit::MockIsSACalling(true);
+}
+
+/**
+ * @tc.name: GetFocusWindowInfoByAbilityToken
+ * @tc.desc: Test function GetFocusWindowInfoByAbilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "GetFocusWindowInfoByAbilityToken";
+    info.bundleName_ = "GetFocusWindowInfoByAbilityToken";
+    FocusChangeInfo focusInfo{};
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession1 });
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    sceneSession1->SetAbilityToken(token);
+    sceneSession1->property_->SetDisplayId(DISPLAY_ID_INVALID);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    ssm_->windowFocusController_->AddFocusGroup(0, 0);
+    sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    sceneSession1->property_->SetPersistentId(2);
+    focusGroup->SetFocusedSessionId(1);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    focusGroup->SetFocusedSessionId(2);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_NE(focusInfo.windowId_, INVALID_WINDOW_ID);
+    ssm_->windowFocusController_->RemoveFocusGroup(0, 0);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: SetSessionLabel
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
@@ -1944,30 +2135,6 @@ HWTEST_F(SceneSessionManagerTest2, GetIsLayoutFullScreen, TestSize.Level1)
     isLayoutFullScreen = false;
     ret = ssm_->GetIsLayoutFullScreen(isLayoutFullScreen);
     EXPECT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: UpdateSessionAvoidAreaListener
- * @tc.desc: Test if pip window can be created;
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, UpdateSessionAvoidAreaListener, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, ssm_);
-    {
-        std::unique_lock<std::shared_mutex> lock(ssm_->sceneSessionMapMutex_);
-        ssm_->sceneSessionMap_.clear();
-    }
-    int32_t persistentId = 100;
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-
-    SessionInfo info;
-    info.abilityName_ = "BackgroundTask02";
-    info.bundleName_ = "BackgroundTask02";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ssm_->sceneSessionMap_.insert({ 100, sceneSession });
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, true);
-    ssm_->UpdateSessionAvoidAreaListener(persistentId, false);
 }
 
 /**

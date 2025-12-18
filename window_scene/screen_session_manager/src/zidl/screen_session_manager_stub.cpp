@@ -264,6 +264,44 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_SUPPORTS_INPUT: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            bool supportsInput;
+            DMError ret = GetSupportsInput(displayId, supportsInput);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+                break;
+            }
+            if (ret != DMError::DM_OK) {
+                break;
+            }
+            if (!reply.WriteFloat(supportsInput)) {
+                TLOGE(WmsLogTag::DMS, "write supportsInput failed!");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_SET_SUPPORTS_INPUT: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            bool supportsInput = data.ReadBool();
+            DMError ret = SetSupportsInput(displayId, supportsInput);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_GET_ROUNDED_CORNER: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            int radius;
+            DMError ret = GetRoundedCorner(displayId, radius);
+            if (!reply.WriteInt32(radius)) {
+                TLOGE(WmsLogTag::DMS, "write radius failed!");
+                ret = DMError::DM_ERROR_IPC_FAILED;
+            }
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_CREATE_VIRTUAL_SCREEN: {
             std::string name = data.ReadString();
             uint32_t width = data.ReadUint32();
@@ -367,6 +405,30 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             DMError errCode = RemoveVirtualScreenBlockList(persistentIds);
             reply.WriteInt32(static_cast<int32_t>(errCode));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_WHITE_LIST: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<uint64_t> missionIds;
+            if (!data.ReadUInt64Vector(&missionIds)) {
+                TLOGE(WmsLogTag::DMS, "AddWhitelist::fail to receive missionIds from proxy");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
+                break;
+            }
+            DMError result = AddVirtualScreenWhiteList(screenId, missionIds);
+            reply.WriteUint32(static_cast<uint32_t>(result));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_WHITE_LIST: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<uint64_t> missionIds;
+            if (!data.ReadUInt64Vector(&missionIds)) {
+                TLOGE(WmsLogTag::DMS, "RemoveWhitelist::fail to receive missionIds from proxy");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
+                break;
+            }
+            DMError result = RemoveVirtualScreenWhiteList(screenId, missionIds);
+            reply.WriteUint32(static_cast<uint32_t>(result));
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {

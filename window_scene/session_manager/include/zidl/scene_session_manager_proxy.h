@@ -59,6 +59,8 @@ public:
         const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError SetGestureNavigationEnabled(bool enable) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    void GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo,
+        const sptr<IRemoteObject>& abilityToken) override;
     void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {};
     WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) override;
@@ -160,7 +162,6 @@ public:
     WMError RemoveSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds) override;
     WMError SetScreenPrivacyWindowTagSwitch(
         uint64_t screenId, const std::vector<std::string>& privacyWindowTags, bool enable) override;
-    WMError NotifyBrightnessModeChange(const std::string& brightnessMode) override;
     WMError IsPcWindow(bool& isPcWindow) override;
     WMError IsFreeMultiWindow(bool& isPcWindow) override;
     WMError IsPcOrPadFreeMultiWindowMode(bool& isPcOrPadFreeMultiWindowMode) override;

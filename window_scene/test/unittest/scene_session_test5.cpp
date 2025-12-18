@@ -381,9 +381,14 @@ HWTEST_F(SceneSessionTest5, SetSurfaceBounds01, TestSize.Level1)
     session->surfaceNode_ = nullptr;
     WSRect preRect = { 20, 20, 800, 800 };
     WSRect rect = { 30, 30, 900, 900 };
+    session->SetGetRsCmdBlockingCountFunc([] {
+        return 1;
+    });
     session->SetSessionRect(preRect);
     session->SetSurfaceBounds(rect, false);
-
+    session->SetGetRsCmdBlockingCountFunc([] {
+        return 0;
+    });
     session->surfaceNode_ = surfaceNode;
     session->SetSurfaceBounds(rect, false);
     EXPECT_EQ(preRect, session->GetSessionRect());
@@ -1037,6 +1042,10 @@ HWTEST_F(SceneSessionTest5, KeyFrameNotifyFilter, Function | SmallTest | Level2)
     EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, SizeChangeReason::DRAG_END), false);
     session->keyFrameAnimating_ = true;
     EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    session->keyFrameAnimating_ = false;
+    session->keyFrameCloneNode_ = nullptr;
+    EXPECT_EQ(session->KeyFrameNotifyFilter(rectNew, reason), true);
+    session->keyFrameCloneNode_ = RSWindowKeyFrameNode::Create();
     // for same rect
     session->keyFrameAnimating_ = false;
     session->lastKeyFrameRect_ = rect;
@@ -1096,6 +1105,69 @@ HWTEST_F(SceneSessionTest5, KeyFrameAnimateEnd, Function | SmallTest | Level2)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     EXPECT_EQ(session->KeyFrameAnimateEnd(), WSError::WS_OK);
+}
+
+/**
+ * @tc.name: No
+ * @tc.desc: SetDragKeyFramePolicy function01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetDragKeyFramePolicy, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "keyframe";
+    info.bundleName_ = "keyframe";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
+    KeyFramePolicy keyFramePolicy;
+    session->keyFramePolicy_.stopping_ = true;
+    // running
+    session->keyFramePolicy_.running_ = true;
+    session->keyFramePolicy_.dragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    session->moveDragController_ = nullptr;
+    session->SetAppDragResizeType(DragResizeType::RESIZE_WHEN_DRAG_END);
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    EXPECT_EQ(session->GetKeyFramePolicy().dragResizeType_, keyFramePolicy.dragResizeType_);
+    EXPECT_EQ(session->GetKeyFramePolicy().interval_, keyFramePolicy.interval_);
+    EXPECT_EQ(session->GetKeyFramePolicy().distance_, keyFramePolicy.distance_);
+    EXPECT_EQ(session->GetKeyFramePolicy().animationDuration_, keyFramePolicy.animationDuration_);
+    EXPECT_EQ(session->GetKeyFramePolicy().animationDelay_, keyFramePolicy.animationDelay_);
+    // enable during resize
+    session->keyFramePolicy_.running_ = false;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    keyFramePolicy.dragResizeType_ = DragResizeType::RESIZE_KEY_FRAME;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    session->moveDragController_ = moveDragController;
+    session->moveDragController_->isStartDrag_ = false;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    session->moveDragController_->isStartDrag_ = true;
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, true);
+    session->SetAppDragResizeType(DragResizeType::RESIZE_TYPE_UNDEFINED);
+    session->SetDragKeyFramePolicy(keyFramePolicy);
+    EXPECT_EQ(session->GetKeyFramePolicy().stopping_, false);
+}
+
+/**
+ * @tc.name: NotifyServerToUpdateRect_KeyFrame
+ * @tc.desc: NotifyServerToUpdateRect_KeyFrame test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, NotifyServerToUpdateRect_KeyFrame, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "keyframe";
+    info.bundleName_ = "keyframe";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->foregroundInteractiveStatus_.store(true);
+    SessionUIParam uiParam;
+    session->keyFramePolicy_.running_ = true;
+    EXPECT_EQ(session->NotifyServerToUpdateRect(uiParam, SizeChangeReason::UNDEFINED), false);
 }
 
 /**
@@ -1917,6 +1989,7 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
     session->SetSessionRect(preRect);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->keyFramePolicy_.running_ = true;
+    session->keyFrameCloneNode_ = RSWindowKeyFrameNode::Create();
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG_MOVE);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->HandleMoveDragSurfaceBounds(rect, globalRect, SizeChangeReason::DRAG);
@@ -2147,7 +2220,7 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer01, TestSize.Level1)
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     mainSession->GetLayoutController()->SetSessionRect(rect);
@@ -2169,7 +2242,7 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer02, TestSize.Level1)
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 200, 200, 200, 200 };
-    WSRect resultRect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 400, 400 };
     float scaleX = 2.0f;
     float scaleY = 2.0f;
     mainSession->GetLayoutController()->SetSessionRect(rect);
@@ -2243,7 +2316,7 @@ HWTEST_F(SceneSessionTest5, HookStartMoveRect, TestSize.Level1)
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect preRect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
@@ -2276,7 +2349,7 @@ HWTEST_F(SceneSessionTest5, CompatibilityModeWindowScaleTransfer, TestSize.Level
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect preRect = { 100, 100, 400, 400 };
     WSRect noChangeRect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     bool isScale = true;

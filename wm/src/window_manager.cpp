@@ -1845,6 +1845,12 @@ void WindowManager::GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId dis
     WindowAdapter::GetInstance(userId_).GetFocusWindowInfo(focusInfo, displayId);
 }
 
+void WindowManager::GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo,
+    const sptr<IRemoteObject>& abilityToken)
+{
+    WindowAdapter::GetInstance(userId_).GetFocusWindowInfoByAbilityToken(focusInfo, abilityToken);
+}
+
 void WindowManager::OnWMSConnectionChanged(int32_t userId, int32_t screenId, bool isConnected) const
 {
     if (isConnected) {
@@ -2809,6 +2815,13 @@ void WindowManager::RegisterGetJSWindowCallback(GetJSWindowObjFunc&& getJSWindow
 
 void WindowManager::NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo)
 {
+    {
+        std::shared_lock<std::shared_mutex> lock(pImpl_->listenerMutex_);
+        if (pImpl_->windowLifeCycleListener_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "window destroyed listener is nullptr");
+            return;
+        }
+    }
     void* jsWindowNapiValue = nullptr;
     if (getJSWindowObjFunc_ != nullptr) {
         TLOGI(WmsLogTag::WMS_LIFE, "window name: %{public}s, window id: %{public}d", lifeCycleInfo.windowName.c_str(),

@@ -941,6 +941,43 @@ void SceneSessionManagerProxy::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Di
     }
 }
 
+void SceneSessionManagerProxy::GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo,
+    const sptr<IRemoteObject>& abilityToken)
+{
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "AbilityToken is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteRemoteObject(abilityToken)) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Write abilityToken failed");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN), data, reply, option) !=
+        ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "SendRequest failed");
+        return;
+    }
+    sptr<FocusChangeInfo> info = reply.ReadParcelable<FocusChangeInfo>();
+    if (info) {
+        focusInfo = *info;
+    } else {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Info is null");
+    }
+}
+
 WSError SceneSessionManagerProxy::SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label)
 {
     WLOGFI("run SceneSessionManagerProxy::SetSessionLabel");
@@ -3441,40 +3478,6 @@ WMError SceneSessionManagerProxy::SetScreenPrivacyWindowTagSwitch(
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(ret);
-}
-
-WMError SceneSessionManagerProxy::NotifyBrightnessModeChange(const std::string& brightnessMode)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write token failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteString(brightnessMode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write brightnessMode failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_BRIGHTNESS_MODE_CHANGE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
