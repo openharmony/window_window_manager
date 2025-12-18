@@ -1688,7 +1688,7 @@ HWTEST_F(WindowManagerLiteTest, GetInstanceMulti, TestSize.Level1)
 
 /**
  * @tc.name: GetWindowInfoListByInterestWindowIds_NullListener
- * @tc.desc: listener 为 nullptr 时直接返回原列表
+ * @tc.desc: GetWindowInfoListByInterestWindowIds_NullListener
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_NullListener, Function | SmallTest | Level2)
@@ -1704,12 +1704,12 @@ HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_NullListene
 
 /**
  * @tc.name: GetWindowInfoListByInterestWindowIds_EmptyInterestIds
- * @tc.desc: InterestWindowIds 为空时返回原列表
+ * @tc.desc: GetWindowInfoListByInterestWindowIds_EmptyInterestIds
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_EmptyInterestIds, Function | SmallTest | Level2)
 {
-    auto listener = sptr<TestInterestWindowIdsListener>::MakeSptr(); // 不设置兴趣窗口
+    auto listener = sptr<TestInterestWindowIdsListener>::MakeSptr();
     WindowInfoList windowInfoList;
     std::unordered_map<WindowInfoKey, WindowChangeInfoType> info;
     info.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1));
@@ -1721,7 +1721,7 @@ HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_EmptyIntere
 
 /**
  * @tc.name: GetWindowInfoListByInterestWindowIds_FilterMatch
- * @tc.desc: 只返回匹配兴趣窗口 ID 的项
+ * @tc.desc: GetWindowInfoListByInterestWindowIds_FilterMatch
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_FilterMatch, Function | SmallTest | Level2)
