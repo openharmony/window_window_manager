@@ -264,6 +264,19 @@ HWTEST_F(SensorFoldStateMgrTest, HandleSensorEventTest10, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("current state: 2, next state: 1.") != std::string::npos);
 }
 
+/**
+ * @tc.name: NotifyRunTaskSequence
+ * @tc.desc: NotifyRunTaskSequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, NotifyRunTaskSequence01, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SensorFoldStateMgr::GetInstance().NotifyRunTaskSequence();
+    EXPECT_TRUE(g_logMsg.find("TaskSequenceProcess") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 }
 }
 } // namespace Rosen
