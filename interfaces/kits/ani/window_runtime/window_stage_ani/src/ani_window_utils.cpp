@@ -2240,14 +2240,12 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
         if (ret != ANI_OK) {
             return ret;
         }
-        if (!optValue) {
+        if (!optValue || *optValue < 0) {
             field = 0;
-        } else if (*optValue >= 0) {
-            field = static_cast<uint32_t>(*optValue);
-        } else {
-            field = 0;
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Invalid negative value for %{public}s", where, name);
+            TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s: [ANI] Use default parameters for %{public}s", where, name);
+            return ANI_OK;
         }
+        field = static_cast<uint32_t>(*optValue);
         return ANI_OK;
     };
 
