@@ -191,7 +191,7 @@ void JsPiPWindowListener::OnActiveStatusChange(bool status)
             TLOGE(WmsLogTag::WMS_SYSTEM, "js callback is null");
             return;
         }
-        napi_value argv[] = {CreateJsValue(env, static_cast<int32_t>(status))};
+        napi_value argv[] = {CreateJsValue(env, status)};
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
