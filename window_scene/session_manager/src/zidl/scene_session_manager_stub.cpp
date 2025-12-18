@@ -274,6 +274,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRemoveSessionBlackList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_SWITCH_STATUS):
             return HandleGetPiPSettingSwitchStatus(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_IS_PIP_ENABLED):
+            return HandleGetIsPipEnabled(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_WINDOW_PROPERTY_CHANGE_FLAG):
             return HandleRecoverWindowPropertyChangeFlag(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_MINIMIZE_ALL_WINDOW):
@@ -2656,6 +2658,21 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetIsPipEnabled(MessageParcel& data, MessageParcel& reply)
+{
+bool isPipEnabled = false;
+WMError errCode = GetIsPipEnabled(isPipEnabled);
+if (!reply.WriteBool(isPipEnabled)) {
+TLOGE(WmsLogTag::WMS_PIP, "Write isPipEnabled fail.");
+return ERR_INVALID_DATA;
+}
+if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+TLOGE(WmsLogTag::WMS_PIP, "Write errCode fail.");
+return ERR_INVALID_DATA;
+}
+return ERR_NONE;
 }
 
 int SceneSessionManagerStub::HandleUpdateOutline(MessageParcel& data, MessageParcel& reply)
