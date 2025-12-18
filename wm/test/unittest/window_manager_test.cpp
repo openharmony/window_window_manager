@@ -2442,6 +2442,9 @@ HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Le
 {
     WindowInfoList windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, 1}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, 2}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, 3}});
 
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->windowModeChangeListeners_.clear();
@@ -2452,6 +2455,14 @@ HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Le
 
     auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
 
+    windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->windowModeChangeListeners_.push_back(listener);
+    windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 3);
+
+    listener->SetInterestWindowIds({ 9 });
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
 }
