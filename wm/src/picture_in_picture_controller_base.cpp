@@ -98,7 +98,7 @@ WMError PictureInPictureControllerBase::ShowPictureInPictureWindow(StartPipType 
             TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
-        listener->OnPreparePictureInPictureStart(this->GetStateChangeReason());
+        listener->OnPreparePictureInPictureStart(GetStateChangeReason());
         listener->OnPreparePictureInPictureStart(controllerId_);
     }
     SetUIContent();
@@ -203,7 +203,7 @@ WMError PictureInPictureControllerBase::StopPictureInPicture(bool destroyWindow,
             TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
-        listener->OnPreparePictureInPictureStop(this->GetStateChangeReason());
+        listener->OnPreparePictureInPictureStop(GetStateChangeReason());
         listener->OnPreparePictureInPictureStop(controllerId_);
     }
     if (!destroyWindow) {
@@ -214,7 +214,7 @@ WMError PictureInPictureControllerBase::StopPictureInPicture(bool destroyWindow,
             TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
-            listener->OnPictureInPictureStop(this->GetStateChangeReason());
+            listener->OnPictureInPictureStop(GetStateChangeReason());
             listener->OnPictureInPictureStop(controllerId_);
         }
         PictureInPictureManager::RemoveActiveController(weakRef_);
@@ -276,7 +276,7 @@ WMError PictureInPictureControllerBase::DestroyPictureInPictureWindow()
             TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
-        listener->OnPictureInPictureStop(this->GetStateChangeReason());
+        listener->OnPictureInPictureStop(GetStateChangeReason());
         listener->OnPictureInPictureStop(controllerId_);
     }
     curState_ = PiPWindowState::STATE_STOPPED;
@@ -385,13 +385,13 @@ void PictureInPictureControllerBase::PreRestorePictureInPicture()
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
     curState_ = PiPWindowState::STATE_RESTORING;
-    this->SetStateChangeReason(PiPStateChangeReason::PANEL_ACTION_RESTORE);
+    SetStateChangeReason(PiPStateChangeReason::PANEL_ACTION_RESTORE);
     for (auto& listener : pipLifeCycleListeners_) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
-        listener->OnRestoreUserInterface(this->GetStateChangeReason());
+        listener->OnRestoreUserInterface(GetStateChangeReason());
         listener->OnRestoreUserInterface(controllerId_);
     }
 }
@@ -465,7 +465,7 @@ void PictureInPictureControllerBase::OnPictureInPictureStart()
             TLOGE(WmsLogTag::WMS_PIP, "one lifecycle listener is nullptr");
             continue;
         }
-        listener->OnPictureInPictureStart(this->GetStateChangeReason());
+        listener->OnPictureInPictureStart(GetStateChangeReason());
         listener->OnPictureInPictureStart(controllerId_);
     }
 }
