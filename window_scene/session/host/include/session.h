@@ -1000,7 +1000,13 @@ protected:
      * Window Layout
      */
     static bool isBackgroundUpdateRectNotifyEnabled_;
-    RequestVsyncFunc requestNextVsyncFunc_;
+
+    /**
+     * @brief Vsync service entry used to schedule callbacks on vsync and
+     *        query display vsync information (e.g. VSync period or FPS).
+     */
+    std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
+
     WSRect lastLayoutRect_; // rect saved when go background
     WSRect layoutRect_;     // rect of root view
     NotifySessionRectChangeFunc sessionRectChangeFunc_;

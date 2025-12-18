@@ -911,6 +911,8 @@ ohos_unittest("ws_scene_session_manager_supplement_test") {
 ohos_unittest("ws_scene_session_test") {
   module_out_path = module_out_path
 
+  include_dirs = [ "${window_base_path}/wm/test/mock" ]
+
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
     "scene_session_test.cpp",
@@ -1012,6 +1014,7 @@ ohos_unittest("ws_move_drag_controller_test") {
 
   include_dirs = [
     "${window_base_path}/window_scene/session/host/include",
+    "${window_base_path}/wm/test/mock",
   ]
 
   sources = [

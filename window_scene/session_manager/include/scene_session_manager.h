@@ -943,6 +943,7 @@ private:
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
     bool ConfigWindowLayout(const WindowSceneConfig::ConfigItem& windowLayoutConfig);
     bool ConfigMoveDrag(const WindowSceneConfig::ConfigItem& moveDragConfig);
+    bool ConfigMoveResample(const WindowSceneConfig::ConfigItem& moveResampleConfig);
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
@@ -1610,7 +1611,7 @@ private:
     std::shared_mutex appHookWindowInfoMapMutex_;
     std::unordered_map<std::string, HookWindowInfo> appHookWindowInfoMap_;
     void InitVsyncStation();
-    void RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession);
+    void BindVsyncStation(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
     void UpdateSessionWithFoldStateChange(DisplayId displayId, SuperFoldStatus status, SuperFoldStatus prevStatus);
     void ConfigSingleHandCompatibleMode(const WindowSceneConfig::ConfigItem& configItem);
