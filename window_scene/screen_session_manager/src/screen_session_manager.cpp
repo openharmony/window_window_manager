@@ -6200,6 +6200,89 @@ DMError ScreenSessionManager::RemoveVirtualScreenBlockList(const std::vector<int
     return DMError::DM_OK;
 }
 
+DMError ValidateParameters(ScreenId screenId, const std::vector<uint64_t>& missionIds, const char* logPrefix)
+{
+    if (screenId == INVALID_SCREEN_ID) {
+        TLOGE(WmsLogTag::DMS, "%{public}s::screenId is invalid", logPrefix);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (missionIds.empty()) {
+        TLOGE(WmsLogTag::DMS, "%{public}s::missionIds is empty", logPrefix);
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    TLOGI(WmsLogTag::DMS, "%{public}s::screenId:%{public}" PRIu64, logPrefix, screenId);
+    return DMError::DM_OK;
+}
+
+void LogMissionIds(ScreenId screenId, const std::vector<uint64_t>& ids, const char* prefix)
+{
+    std::ostringstream oss;
+    oss << prefix << "[" << screenId << "]: ";
+    for (auto val : ids) {
+        oss << val << " ";
+    }
+    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+}
+
+DMError ScreenSessionManager::AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+{
+    auto err = ValidateParameters(screenId, missionIds, "AddWhiteList");
+    if (err != DMError::DM_OK) {
+        return err;
+    }
+    auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
+    TLOGI(WmsLogTag::DMS, "AddWhiteList::rsId:%{public}" PRIu64, rsId);
+
+    LogMissionIds(screenId, missionIds, "AddWhiteList::Get from ScreenRecord: missionIds");
+    std::vector<uint64_t> surfaceNodeIds = ProcessMissionIdsToSurfaceNodeIds(missionIds);
+    LogMissionIds(screenId, surfaceNodeIds, "AddWhiteList::Transfer to RS: surfaceNodeIds");
+    if (surfaceNodeIds.empty()) {
+        TLOGE(WmsLogTag::DMS, "AddWhiteList::surfaceNodeIds is empty");
+    }
+    TLOGI(WmsLogTag::DMS, "AddWhiteList::surfaceNodeIds size Add: %{public}ud", static_cast<uint32_t>(surfaceNodeIds.size()));
+
+    int32_t rsErrCode = rsInterface_.AddVirtualScreenWhiteList(rsId, surfaceNodeIds);
+    TLOGI(WmsLogTag::DMS, "AddWhiteList::rsErrCode:%{public}d", rsErrCode);
+    return (rsErrCode == static_cast<int32_t>(DMError::DM_OK)) ? DMError::DM_OK : DMError::DM_ERROR_INVALID_PARAM;
+}
+
+DMError ScreenSessionManager::RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+{
+    auto err = ValidateParameters(screenId, missionIds, "RemoveWhiteList");
+    if (err != DMError::DM_OK) {
+        return err;
+    }
+    auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
+    TLOGI(WmsLogTag::DMS, "RemoveWhiteList::rsId:%{public}" PRIu64, rsId);
+    LogMissionIds(screenId, missionIds, "RemoveWhiteList::Get from ScreenRecord: missionIds");
+
+    std::vector<uint64_t> surfaceNodeIds = ProcessMissionIdsToSurfaceNodeIds(missionIds);
+    LogMissionIds(screenId, surfaceNodeIds, "RemoveWhiteList::Transfer to RS: surfaceNodeIds");
+    if (surfaceNodeIds.empty()) {
+        TLOGE(WmsLogTag::DMS, "AddWhiteList::surfaceNodeIds is empty");
+    }
+
+    TLOGI(WmsLogTag::DMS, "surfaceNodeIds size Remove: %{public}ud", static_cast<uint32_t>(surfaceNodeIds.size()));
+    int32_t rsErrCode = rsInterface_.RemoveVirtualScreenWhiteList(rsId, surfaceNodeIds);
+    TLOGI(WmsLogTag::DMS, "RemoveWhiteList::rsErrCode:%{public}d", rsErrCode);
+    return (rsErrCode == static_cast<int32_t>(DMError::DM_OK)) ? DMError::DM_OK : DMError::DM_ERROR_INVALID_PARAM;
+}
+
+std::vector<uint64_t> ScreenSessionManager::ProcessMissionIdsToSurfaceNodeIds(const std::vector<uint64_t>& missionIds)
+{
+    if (missionIds.empty()) {
+        return {};
+    }
+    auto clientProxy = GetClientProxy();
+    if (clientProxy) {
+        std::vector<uint64_t> surfaceNodeIds;
+        std::vector<uint64_t> missionIdsCopy = missionIds;
+        clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(missionIdsCopy, surfaceNodeIds);
+        return surfaceNodeIds;
+    }
+    return {};
+}
+
 DMError ScreenSessionManager::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
