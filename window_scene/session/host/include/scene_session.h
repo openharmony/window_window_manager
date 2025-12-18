@@ -103,6 +103,7 @@ using NotifyRestoreMainWindowFunc =
 using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t surfaceNodeId, bool isSkip)>;
 using SetSkipEventOnCastPlusCallback = std::function<void(int32_t persistentId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
+using NotifyForceSplitEnableFunc = std::function<bool(const std::string& bundleName)>;
 using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
@@ -432,6 +433,7 @@ public:
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
+    virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
 
     /*
      * PC Window
@@ -833,8 +835,55 @@ public:
     void ResetDirtyDragFlags();
     void ResetSizeChangeReasonIfDirty();
     void SetRequestNextVsyncFunc(RequestVsyncFunc&& func);
-    void OnNextVsyncReceivedWhenDrag(const WSRect& globalRect,
-        bool isGlobal, bool needFlush, bool needSetBoundsNextVsync);
+
+    /**
+     * @brief Request a vsync event for drag operation.
+     *
+     * @param globalRect The global rectangle of the window.
+     * @param isGlobal Whether the rect is in global coordinates.
+     * @param needFlush Whether a surface flush is required.
+     * @param needSetBoundsNextVsync Whether to set bounds on the next vsync.
+     */
+    void RequestNextVsyncWhenDrag(
+        const WSRect& globalRect, bool isGlobal, bool needFlush, bool needSetBoundsNextVsync);
+
+    /**
+     * @brief Handle the vsync event for drag operation.
+     *
+     * @param globalRect The global rectangle of the window.
+     * @param isGlobal Whether the rect is in global coordinates.
+     * @param needFlush Whether a surface flush is required.
+     * @param needSetBoundsNextVsync Whether to set bounds on the next vsync.
+     */
+    void OnNextVsyncReceivedWhenDrag(
+        const WSRect& globalRect, bool isGlobal, bool needFlush, bool needSetBoundsNextVsync);
+
+    /**
+     * @brief Request a move-resample operation to run on the next vsync.
+     *
+     * @param isGlobal Whether to compute the target rect in global coordinates.
+     * @param needFlush Whether a surface flush is required.
+     */
+    void RequestMoveResampleOnNextVsync(bool isGlobal, bool needFlush);
+
+    /**
+     * @brief Handle a move-resample triggered by a vsync event.
+     *
+     * @param vsyncTimeUs Vsync timestamp in microseconds.
+     * @param isGlobal Whether to compute the target rect in global coordinates.
+     * @param needFlush Whether a surface flush is required.
+     */
+    void OnVsyncMoveResample(int64_t vsyncTimeUs, bool isGlobal, bool needFlush);
+
+    /**
+     * @brief Perform move-resample and apply the updated target rect.
+     *
+     * @param vsyncTimeUs Vsync timestamp in microseconds.
+     * @param isGlobal Whether to compute the target rect in global coordinates.
+     * @param needFlush Whether a surface flush is required.
+     */
+    void ApplyMoveResample(int64_t vsyncTimeUs, bool isGlobal, bool needFlush);
+
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
     bool SetFrameGravity(Gravity gravity);
     WSError GetCrossAxisState(CrossAxisState& state) override;
@@ -853,6 +902,7 @@ public:
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
+    void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
     /*
      * Gesture Back
@@ -907,7 +957,6 @@ public:
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     bool IsDelayFocusChange();
-    virtual bool IsBlockingFocusWindowType() const;
 
     /*
      * Window Property
@@ -939,7 +988,10 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
-    bool GetIsPrivacyMode() const override { return isPrivacyMode_; };
+    bool GetIsPrivacyMode() const override
+    {
+        return GetSessionProperty()->GetPrivacyMode() || combinedExtWindowFlags_.privacyModeFlag;
+    };
     void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) override
     {
         std::lock_guard lock(appUseControlMapMutex_);
@@ -966,7 +1018,6 @@ public:
 
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
-    void SetMoveDragCallback();
     std::string GetRatioPreferenceKey();
     WSError NotifyClientToUpdateRectTask(const std::string& updateReason, std::shared_ptr<RSTransaction> rsTransaction);
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
@@ -1052,7 +1103,11 @@ protected:
      * Window Layout
      */
     NotifyDefaultDensityEnabledFunc onDefaultDensityEnabledFunc_;
+
+    friend class MoveDragController;
     sptr<MoveDragController> moveDragController_ = nullptr;
+    std::atomic<bool> canRequestMoveResampleVsync_ = true;
+
     std::mutex displayIdSetDuringMoveToMutex_;
     std::set<uint64_t> displayIdSetDuringMoveTo_;
     NotifyFollowParentRectFunc followParentRectFunc_ = nullptr;
@@ -1177,13 +1232,15 @@ private:
      * Move Drag
      */
     virtual void HandleMoveDragSurfaceNode(SizeChangeReason reason);
-    void OnMoveDragCallback(SizeChangeReason reason);
+    void OnMoveDragCallback(SizeChangeReason reason,
+                            TargetRectUpdateState state = TargetRectUpdateState::UPDATED_DIRECTLY);
     bool DragResizeWhenEndFilter(SizeChangeReason reason);
     void HandleMoveDragEvent(SizeChangeReason reason);
     bool IsDragResizeScale(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
     WSError InitializeMoveInputBar();
-    void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason);
+    void HandleMoveDragSurfaceBounds(WSRect& rect, WSRect& globalRect, SizeChangeReason reason,
+                                     TargetRectUpdateState state = TargetRectUpdateState::UPDATED_DIRECTLY);
     void HandleMoveDragEnd(WSRect& rect, SizeChangeReason reason);
     void WindowScaleTransfer(WSRect& rect, float scaleX, float scaleY);
     bool IsCompatibilityModeScale(float scaleX, float scaleY);
@@ -1197,7 +1254,37 @@ private:
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);
-    void RunAfterNVsyncs(uint32_t vsyncCount, Task&& task);
+
+    /**
+     * @brief Request a one-shot vsync callback.
+     *
+     * Schedules the specified VsyncCallback to be invoked on the next vsync signal.
+     *
+     * @param vsyncCallback Callback object to be invoked on the next vsync.
+     */
+    void RequestNextVsync(std::shared_ptr<VsyncCallback> vsyncCallback);
+
+    /**
+     * @brief Run the given callback on the next vsync.
+     *
+     * Wraps the provided function into a VsyncCallback and schedules it
+     * to be executed when the next vsync occurs.
+     *
+     * @param callback Callable object to be executed on the next vsync.
+     */
+    void RunOnNextVsync(OnCallback&& callback);
+
+    /**
+     * @brief Run the given callback after a specified number of vsync signals.
+     *
+     * The callback is invoked on the N-th vsync following this call.
+     * Equivalent to @ref RunOnNextVsync when @p vsyncCount is 1.
+     *
+     * @param vsyncCount Number of vsync intervals to wait before invoking the callback.
+     * @param callback Callable object to be executed on the N-th vsync.
+     */
+    void RunAfterNVsyncs(uint32_t vsyncCount, OnCallback&& callback);
+
     void RestoreGravityWhenDragEnd();
 
     /*
@@ -1352,6 +1439,10 @@ private:
     virtual void RemoveSurfaceNodeFromScreen() {}
     void SetParentRect();
     WSRect GetGlobalOrWinRect();
+    void NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(SessionEvent event);
+    bool ShouldNotifyWindowStatusChange(SessionEvent event) const;
+    void ExecuteWindowStatusChangeNotification(const char* where);
+    WindowLimits GetWindowLimits() const;
 
     /*
      * Window Decor

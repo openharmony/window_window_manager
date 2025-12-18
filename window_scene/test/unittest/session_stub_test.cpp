@@ -23,6 +23,7 @@
 #include "mock/mock_session_stage.h"
 #include "mock/mock_session_stub.h"
 #include "mock/mock_window_event_channel.h"
+#include "mock_message_parcel.h"
 #include "parcel/accessibility_event_info_parcel.h"
 #include "session/host/include/zidl/session_ipc_interface_code.h"
 #include "session/host/include/zidl/session_stub.h"
@@ -891,6 +892,20 @@ HWTEST_F(SessionStubTest, HandleRequestFocus, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     auto res = session_->HandleRequestFocus(data, reply);
     ASSERT_EQ(0, res);
+}
+
+/**
+ * @tc.name: HandleNotifyWindowStatusDidChangeAfterShowWindow
+ * @tc.desc: sessionStub HandleNotifyWindowStatusDidChangeAfterShowWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyWindowStatusDidChangeAfterShowWindow, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleNotifyWindowStatusDidChangeAfterShowWindow(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
 }
 
 /**

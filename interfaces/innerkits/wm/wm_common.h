@@ -1738,6 +1738,19 @@ enum class PiPControlType : uint32_t {
     END,
 };
 
+/**
+ * @brief Enumerates picture in picture state change reason.
+ */
+enum class PiPStateChangeReason : int32_t {
+    REQUEST_START = 0,
+    AUTO_START = 1,
+    REQUEST_DELETE = 2,
+    PANEL_ACTION_DELETE = 3,
+    DRAG_DELETE = 4,
+    PANEL_ACTION_RESTORE = 5,
+    OTHER = 6,
+};
+
 struct PiPControlStatusInfo {
     PiPControlType controlType;
     PiPControlStatus status;
@@ -1972,6 +1985,14 @@ struct WindowLimits {
             1.0f,                              // vpRatio
             PixelUnit::VP                      // pixelUnit
         };
+    }
+
+    bool IsUninitialized() const
+    {
+        return (maxWidth_ == static_cast<uint32_t>(INT32_MAX) &&
+                maxHeight_ == static_cast<uint32_t>(INT32_MAX) &&
+                minWidth_ == 1 &&
+                minHeight_ == 1);
     }
 
     std::string ToString() const
@@ -3473,6 +3494,26 @@ enum class CompatibleStyleMode : uint32_t {
     LANDSCAPE_2_3 = 4,
     // split aspect ratio
     LANDSCAPE_SPLIT = 5,
+};
+
+struct StateChangeOption {
+    int32_t parentPersistentId_ = 0;
+    WindowState newState_ = WindowState::STATE_INITIAL;
+    uint32_t reason_ = 0;
+    bool withAnimation_ = false;
+    bool withFocus_ = false;
+    bool waitAttach_ = false;
+    bool isFromInnerkits_ = false;
+    bool waitDetach_ = false;
+
+    StateChangeOption(int32_t parentPersistentId, WindowState newState)
+        : parentPersistentId_(parentPersistentId), newState_(newState) {}
+
+    StateChangeOption(int32_t parentPersistentId, WindowState newState, uint32_t reason, bool withAnimation,
+        bool withFocus, bool waitAttach, bool isFromInnerkits, bool waitDetach)
+        : parentPersistentId_(parentPersistentId), newState_(newState), reason_(reason),
+          withAnimation_(withAnimation), withFocus_(withFocus), waitAttach_(waitAttach),
+          isFromInnerkits_(isFromInnerkits), waitDetach_(waitDetach) {}
 };
 }
 }

@@ -122,6 +122,7 @@ using NotifyClearSubSessionFunc = std::function<void(const int32_t subPersistent
 using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const OutlineStyleParams& outlineStyleParams)>;
 using NotifyRestartAppFunc = std::function<void(const SessionInfo& info, int32_t callingPid)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
+using GetRsCmdBlockingCountFunc = std::function<int32_t()>;
 class ILifecycleListener {
 public:
     virtual void OnActivation() {}
@@ -481,6 +482,7 @@ public:
     void SetForceTouchable(bool touchable);
     virtual void SetSystemTouchable(bool touchable);
     bool GetSystemTouchable() const;
+    bool GetWindowTouchableForMMI(DisplayId displayId) const;
     virtual WSError SetRSVisible(bool isVisible);
     bool GetRSVisible() const;
     WSError SetVisibilityState(WindowVisibilityState state);
@@ -749,6 +751,8 @@ public:
     WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
     WSError NotifyAppHookWindowInfoUpdated();
+    void NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason reason);
+    void SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func);
 
     /*
      * Screen Lock
@@ -780,6 +784,7 @@ public:
     void SetPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ = dirtyFlags; }
     void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
+    WSError UpdateBrightness(float brightness);
 
     /*
      * Window Pattern
@@ -807,6 +812,8 @@ public:
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
     void SetBufferNameForPixelMap(const char* functionName, const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void SetPreloadingStartingWindow(bool preloading);
+    bool GetPreloadingStartingWindow();
     std::atomic<bool> freeMultiWindow_ { false };
 
     /*
@@ -988,6 +995,7 @@ protected:
     NotifyUpdateFloatingBallFunc updateFloatingBallFunc_;
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
+    GetRsCmdBlockingCountFunc getRsCmdBlockingCountFunc_;
     sptr<LayoutController> layoutController_ = nullptr;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     std::atomic<uint32_t> crossPlaneState_ = 0;
@@ -1224,6 +1232,7 @@ private:
      */
     std::atomic<bool> isSnapshotBlur_ { false };
     std::atomic<bool> isAppLockControl_ { false };
+    std::atomic<bool> preloadingStartingWindow_ { false };
     bool borderUnoccupied_ = false;
     uint32_t GetBackgroundColor() const;
 

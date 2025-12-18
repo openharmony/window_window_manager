@@ -169,6 +169,7 @@ public:
     bool GetDefaultDensityEnabled() override;
     WMError HideNonSecureWindows(bool shouldHide) override;
     void UpdateDensity() override;
+    WSError UpdateBrightness(float brightness) override;
     WSError UpdateOrientation() override;
     WMError GetTargetOrientationConfigInfo(Orientation targetOrientation,
         const std::map<Rosen::WindowType, Rosen::SystemBarProperty>& targetProperties,
@@ -180,7 +181,9 @@ public:
     WMError AdjustKeyboardLayout(const KeyboardLayoutParams params) override;
     WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height) override;
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
+    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
 
     /*
      * Sub Window
@@ -232,6 +235,7 @@ public:
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
+    void SetForceSplitConfigEnable(bool enableForceSplit) override;
 
     /*
      * Free Multi Window
@@ -325,6 +329,9 @@ public:
     WMError SetFullScreen(bool status) override;
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
+    WMError SetStatusBarColorForPage(const std::optional<uint32_t> color) override;
+    bool isAtomicServiceUseColor_ = false;
+
     /*
      * Window Pattern
      */
@@ -468,6 +475,7 @@ private:
     void ApplyCustomRatioConstraints(const WindowLimits& customizedLimits, double& maxRatio, double& minRatio);
     void RecalculateSizeLimitsWithRatios(WindowLimits& limits, WindowLimits& limitsVP, double maxRatio,
         double minRatio, PixelUnit pixelUnit);
+    void NotifyWindowStatusDidChangeAfterShowWindow();
 
     /*
      * PC Window Layout
@@ -494,8 +502,9 @@ private:
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
     WMError UpdateSystemBarPropertyForPage(WindowType type,
         const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
-    std::mutex systemBarPropertyForPageMapMutex_;
-    std::unordered_map<WindowType, std::optional<SystemBarProperty>> systemBarPropertyForPageMap_;
+    WMError updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty);
+    std::mutex nowsystemBarPropertyMapMutex_;
+    std::unordered_map<WindowType, SystemBarProperty> nowsystemBarPropertyMap_;
 
     /*
      * Window Animation

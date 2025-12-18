@@ -1393,9 +1393,10 @@ HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, TestSize.Level1)
 {
-    int32_t focusedSession = ssm_->GetFocusedSessionId();
+    int32_t focusedSession = ssm_->GetFocusedSessionId(DISPLAY_ID_INVALID);
     EXPECT_EQ(focusedSession, INVALID_SESSION_ID);
     int32_t persistentId = INVALID_SESSION_ID;
+    ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     WSError result01 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
     persistentId = 10086;
@@ -1609,7 +1610,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotify, TestSize.Level1)
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 0);
+    EXPECT_EQ(privacyBundleList[displayId].size(), 0);
 }
 
 /**
@@ -1628,7 +1629,7 @@ HWTEST_F(SceneSessionManagerTest3, UpdatePrivateStateAndNotifyForAllScreens, Tes
     auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 0);
+    EXPECT_EQ(privacyBundleList[displayId].size(), 0);
 }
 
 /**
@@ -1653,23 +1654,23 @@ HWTEST_F(SceneSessionManagerTest3, GerPrivacyBundleListOneWindow, TestSize.Level
     sceneSession->GetSessionProperty()->isPrivacyMode_ = false;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 0);
+    EXPECT_EQ(privacyBundleList[0].size(), 0);
 
     sceneSession->GetSessionProperty()->isPrivacyMode_ = true;
     sceneSession->state_ = SessionState::STATE_BACKGROUND;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 0);
+    EXPECT_EQ(privacyBundleList[0].size(), 0);
 
     sceneSession->GetSessionProperty()->isPrivacyMode_ = true;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(0, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 1);
+    EXPECT_EQ(privacyBundleList[0].size(), 1);
 
     privacyBundleList.clear();
     ssm_->GetSceneSessionPrivacyModeBundles(1, privacyBundleList);
-    EXPECT_EQ(privacyBundleList.size(), 0);
+    EXPECT_EQ(privacyBundleList[1].size(), 0);
 }
 
 /**
@@ -1938,25 +1939,6 @@ HWTEST_F(SceneSessionManagerTest3, ConfigSingleHandCompatibleMode, TestSize.Leve
     configItem.SetValue({ { "test", configItem } });
     ssm_->ConfigSingleHandCompatibleMode(configItem);
     EXPECT_EQ(ssm_->singleHandCompatibleModeConfig_.enabled, configItem.boolValue_);
-}
-
-/**
- * @tc.name: UpdateRootSceneAvoidArea
- * @tc.desc: call UpdateRootSceneAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, UpdateRootSceneAvoidArea, TestSize.Level1)
-{
-    EXPECT_NE(ssm_, nullptr);
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "testbundleName";
-    sessionInfo.abilityName_ = "testabilityName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    ssm_->rootSceneSession_->specificCallback_ = nullptr;
-    ssm_->UpdateRootSceneAvoidArea();
-    auto res = ssm_->rootSceneSession_->GetPersistentId();
-    EXPECT_NE(res, 0);
 }
 
 /**

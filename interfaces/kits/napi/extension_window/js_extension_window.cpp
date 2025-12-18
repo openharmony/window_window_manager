@@ -583,7 +583,8 @@ static void LoadContentTask(std::shared_ptr<NativeReference> contentStorage, std
     sptr<Window> windowImpl = win->GetWindow();
     WMError ret;
     if (isLoadedByName) {
-        ret = windowImpl->SetUIContentByName(contextUrl, env, nativeStorage);
+        ret = windowImpl->NapiSetUIContentByName(contextUrl, env, nativeStorage,
+            BackupAndRestoreType::NONE, parentToken);
     } else {
         ret = windowImpl->NapiSetUIContent(contextUrl, env, nativeStorage, BackupAndRestoreType::NONE, parentToken);
     }
@@ -1369,11 +1370,18 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
             "[window][createSubWindowWithOptions]msg: Insufficient system permissions"));
         return NapiGetUndefined(env);
     }
+    bool followCreatorLifecycle = false;
+    if (argc >= ARG_COUNT_THREE && GetType(env, argv[INDEX_TWO]) != napi_undefined &&
+        !ConvertFromJsValue(env, argv[INDEX_TWO], followCreatorLifecycle)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert followCreatorLifecycle parameter to bool");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    option->SetFollowCreatorLifecycle(followCreatorLifecycle);
     option->SetParentId(hostWindowId_);
     const char* const where = __func__;
-    napi_value lastParam = (argv[2] != nullptr && GetType(env, argv[2]) == napi_function) ? argv[2] : nullptr;
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [where, extensionWindow = extensionWindow_, windowName = std::move(windowName),
         windowOption = option, env, task = napiAsyncTask]() mutable {
         auto extWindow = extensionWindow->GetWindow();

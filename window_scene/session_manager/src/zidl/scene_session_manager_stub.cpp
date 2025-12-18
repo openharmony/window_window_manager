@@ -67,6 +67,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleUnregisterWindowPropertyChangeAgent(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO):
             return HandleGetFocusSessionInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN):
+            return HandleGetFocusWindowInfoByAbilityToken(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_LABEL):
             return HandleSetSessionLabel(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SESSION_ICON):
@@ -220,8 +222,6 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleRemoveSkipSelfWhenShowOnVirtualScreenList(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_WINDOW_TAG_SWITCH):
             return HandleSetScreenPrivacyWindowTagSwitch(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_NOTIFY_BRIGHTNESS_MODE_CHANGE):
-            return HandleNotifyBrightnessModeChange(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_PC_WINDOW):
             return HandleIsPcWindow(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_IS_FREE_MULTI_WINDOW):
@@ -635,6 +635,20 @@ int SceneSessionManagerStub::HandleGetFocusSessionInfo(MessageParcel& data, Mess
         return ERR_INVALID_DATA;
     }
     GetFocusWindowInfo(focusInfo, displayId);
+    reply.WriteParcelable(&focusInfo);
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetFocusWindowInfoByAbilityToken(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "Run");
+    sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
+    if (!abilityToken) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "AbilityToken is null.");
+        return ERR_INVALID_DATA;
+    }
+    FocusChangeInfo focusInfo;
+    GetFocusWindowInfoByAbilityToken(focusInfo, abilityToken);
     reply.WriteParcelable(&focusInfo);
     return ERR_NONE;
 }
@@ -2080,22 +2094,6 @@ int SceneSessionManagerStub::HandleSetScreenPrivacyWindowTagSwitch(MessageParcel
     }
 
     WMError errCode = SetScreenPrivacyWindowTagSwitch(screenId, privacyWindowTags, enable);
-    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleNotifyBrightnessModeChange(MessageParcel& data, MessageParcel& reply)
-{
-    std::string brightnessMode = "";
-    if (!data.ReadString(brightnessMode)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read brightnessMode failed.");
-        return ERR_INVALID_DATA;
-    }
-
-    WMError errCode = NotifyBrightnessModeChange(brightnessMode);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail.");
         return ERR_INVALID_DATA;

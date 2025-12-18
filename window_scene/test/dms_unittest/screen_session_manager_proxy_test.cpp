@@ -2324,6 +2324,219 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetBrightnessInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRoundedCorner
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetRoundedCorner, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    int radius;
+
+    // remote == nullptr
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy =  sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(proxy, nullptr);
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // WriteUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Pass all
+    ret = proxy->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_IPC_FAILED);
+}
+
+/**
+ * @tc.name: GetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetSupportsInput, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool supportInput;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->GetSupportsInput(0, supportInput);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->GetSupportsInput(0, supportInput);
+    EXPECT_TRUE(logMsg.find("Write displayId failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetSupportsInput
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetSupportsInput, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    bool supportInput = true;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->SetSupportsInput(0, supportInput);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->SetSupportsInput(0, supportInput);
+    EXPECT_TRUE(logMsg.find("Write displayId failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    screenSessionManagerProxy->SetSupportsInput(0, supportInput);
+    EXPECT_TRUE(logMsg.find("Write supportsInput failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: GetRoundedCorner02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetRoundedCorner02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    int radius;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->GetRoundedCorner(0, radius);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->GetRoundedCorner(0, radius);
+    EXPECT_TRUE(logMsg.find("Write displayId failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
+
+    auto proxyNull = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = proxyNull->GetRoundedCorner(0, radius);
+    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetSupportsInput01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetSupportsInput01, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    bool supportInput;
+
+    // remote == nullptr
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = proxy->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy =  sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(DMError::DM_ERROR_NULLPTR, ret);
+    ret = proxy->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // WriteUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = proxy->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Pass all
+    ret = proxy->GetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+}
+
+/**
+ * @tc.name: SetSupportsInput01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, SetSupportsInput01, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    bool supportInput = false;
+
+    // remote == nullptr
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = proxy->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy =  sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(DMError::DM_ERROR_NULLPTR, ret);
+    ret = proxy->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // WriteUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = proxy->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+
+    // WriteBool failed
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = proxy->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Pass all
+    ret = proxy->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+}
+
+/**
  * @tc.name: SetOrientation
  * @tc.desc: SetOrientation
  * @tc.type: FUNC

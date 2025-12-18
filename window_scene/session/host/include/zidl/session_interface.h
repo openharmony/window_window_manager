@@ -149,6 +149,7 @@ public:
         bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
         const RectAnimationConfig& rectAnimationConfig = {}) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
+    virtual void NotifyWindowStatusDidChangeAfterShowWindow() {}
 
     /**
      * @brief Updates the window's rectangle in global coordinates from client-side state.
@@ -379,8 +380,8 @@ public:
 
     /**
      * @brief get is pip active
-     * 
-     * @return WSError 
+     *
+     * @return WSError
      */
     virtual WMError IsPiPActive(bool& status) { return WMError::WM_OK; }
 
@@ -419,6 +420,7 @@ public:
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
+    virtual WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) { return WMError::WM_OK; }
     virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
@@ -681,6 +683,11 @@ public:
     }
 
     virtual WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want)
+    {
+        return WSError::WS_OK;
+    }
+    
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated()
     {
         return WSError::WS_OK;
     }
