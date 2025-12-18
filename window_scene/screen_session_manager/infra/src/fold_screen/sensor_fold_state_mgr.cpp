@@ -215,9 +215,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
             FoldScreenBasePolicy::GetInstance().SendSensorResult(globalFoldStatus_);
         }
     };
-    TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
-        .task = task};
-    taskProcessor_.Push(eventInfo);
+    taskProcessor_.PushToQueue(task);
 }
 
 void SensorFoldStateMgr::FinishTaskSequence()

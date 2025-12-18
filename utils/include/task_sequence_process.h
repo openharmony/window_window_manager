@@ -25,14 +25,15 @@ class TaskSequenceProcess {
 public:
     explicit TaskSequenceProcess(uint32_t maxQueueSize);
     ~TaskSequenceProcess();
-    void Push(const std::function<void()>& task);
+    void PushToQueue(const std::function<void()>& task);
+    void Notify();
     void Finish();
 private:
     uint32_t maxQueueSize_ {1};
     std::atomic<bool> taskRunningFlag_ {false};
-    std::queue<TaskSequenceEventInfo> taskQueue_;
+    std::queue<std::function<void()>> taskQueue_;
     std::mutex queueMutex_;
-    std::function<void()> Pop();
+    std::function<void()> PopFromQueue();
 };
 } //namespace OHOS::Rosen
 #endif
