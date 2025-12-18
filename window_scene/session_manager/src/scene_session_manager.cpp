@@ -12294,10 +12294,10 @@ void SceneSessionManager::DealwithVisibilityChange(const std::vector<std::pair<u
     ProcessWindowModeType();
 #ifdef MEMMGR_WINDOW_ENABLE
     if (memMgrWindowInfos.size() != 0) {
-        TLOGND(WmsLogTag::WMS_ATTRIBUTE, "Notify memMgrWindowInfos changed start");
-        taskScheduler_ ->AddExportTask("notifyMemMgr", [memMgrWindowInfos = std::move(memMgrWindowInfos)]() {
+        taskScheduler_ ->PostTask([memMgrWindowInfos = std::move(memMgrWindowInfos)]() {
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "memMgrWindowInfos size: %{public}zu", memMgrWindowInfos.size());
             Memory::MemMgrClient::GetInstance().OnWindowVisibilityChanged(memMgrWindowInfos);
-        });
+        }, "notifyMemMgr");
     }
 #endif
 }
