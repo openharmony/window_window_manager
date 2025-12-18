@@ -1698,10 +1698,12 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     HandlePhysicalMirrorConnect(screenSession, phyMirrorEnable);
     ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     if (phyMirrorEnable || (IsConcurrentUser() && screenId != SCREEN_ID_DEFAULT)) {
-        NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+        sptr<ScreenSession> internalSession = GetScreenSession(SCREEN_ID_DEFAULT);
+        TLOGW(WmsLogTag::DMS, "HandleScreenConnectEven. SCreenId: %{public}" PRIu64, internalSession->GetScreenId());
+        NotifyScreenConnected(internalSession->ConvertToScreenInfo());
         // when display add, need wait update available area, ensure display info is accurate
         WaitUpdateAvailableAreaForPc();
-        NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
+        NotifyDisplayCreate(internalSession->ConvertToDisplayInfo());
     }
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
 }
@@ -5112,6 +5114,20 @@ void ScreenSessionManager::RecoverMultiScreenRelativePosition(ScreenId screenId)
         return;
     }
     auto info = multiScreenInfoMap[serialNumber];
+    sptr<ScreenSession> internalSession = GetInternalScreenSession();
+    if(internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "internalSession is nullptr!");
+        return;
+    }
+    if(info.isExtendMain) {
+        TLOGI(WmsLogTag::DMS, "extend screen is main");
+        info.mainScreenOption.screenId_ = screenSession->GetRSScreenId();
+        info.secondaryScreenOption.screenId_ = internalSession->GetRSScreenId();
+    } else {
+        TLOGI(WmsLogTag::DMS, "extend screen is not main");
+        info.mainScreenOption.screenId_ = internalSession->GetRSScreenId();
+        info.secondaryScreenOption.screenId_ = screenSession->GetRSScreenId();
+    }
     auto ret = SetMultiScreenRelativePosition(info.mainScreenOption, info.secondaryScreenOption);
     if (ret != DMError::DM_OK) {
         SetMultiScreenDefaultRelativePosition();
@@ -11515,8 +11531,7 @@ DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPosition
         TLOGE(WmsLogTag::DMS, "ScreenSession is null");
         return DMError::DM_ERROR_NULLPTR;
     }
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-        !MultiScreenManager::GetInstance().AreScreensTouching(firstScreenSession, secondScreenSession,
+    if (!MultiScreenManager::GetInstance().AreScreensTouching(firstScreenSession, secondScreenSession,
         mainScreenOptions, secondScreenOption)) {
         const std::string errMsg = "Options incorrect";
         ReportRelativePositionChangeEvent(mainScreenOptions, secondScreenOption, errMsg);     
