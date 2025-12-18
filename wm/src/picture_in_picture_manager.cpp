@@ -20,6 +20,7 @@
 #include "window_manager_hilog.h"
 #include "window_scene_session_impl.h"
 #include "scene_board_judgement.h"
+#include "window_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
