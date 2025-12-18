@@ -565,6 +565,8 @@ public:
     void DoAodExitAndSetPowerAllOff();
     DMError GetRoundedCorner(DisplayId displayId, int& radius) override;
     std::shared_ptr<TaskScheduler> GetScreenPowerTaskScheduler();
+    bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
+    void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
 
     // Function used for displayConcurrentUserMap_ under concurrent scenario
     struct UserInfo {
@@ -1013,8 +1015,6 @@ private:
 
     std::unordered_map<ScreenId, std::pair<ScreenId, ScreenCombination>> screenCastInfoMap_;
     std::shared_mutex screenCastInfoMapMutex_;
-    bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
-    void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
     void ChangeMirrorScreenConfig(const sptr<ScreenSessionGroup>& group,
         const DMRect& mainScreenRegion, sptr<ScreenSession>& screen);
     void InitRotationCorrectionMap(std::string displayModeCorrectionConfig);
