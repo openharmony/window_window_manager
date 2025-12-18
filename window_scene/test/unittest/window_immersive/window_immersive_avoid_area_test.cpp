@@ -52,6 +52,8 @@ void WindowImmersiveAvoidAreaTest::SetUpTestCase()
 {
     ssm_ = new SceneSessionManager();
     ssm_->Init();
+    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
+    ssm_->rootSceneSession_->property_ = sptr<WindowSessionProperty>::MakeSptr();
 }
 
 void WindowImmersiveAvoidAreaTest::TearDownTestCase()
@@ -449,17 +451,19 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, GetScaleInLSState, TestSize.Level0)
     ASSERT_NE(sceneSession, nullptr);
     float scaleX = 1;
     float scaleY = 1;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->layoutController_ = sptr<LayoutController>::MakeSptr(property);
     sceneSession->SetScale(-1, -1, -1, -1);
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     sceneSession->GetScaleInLSState(scaleX, scaleY);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession->GetScaleInLSState(scaleX, scaleY);
-    sceneSession->specificCallback_ = sptr<SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sceneSession->GetScaleInLSState(scaleX, scaleY);
-    sceneSession->specificCallback_->onGetLSState_ = []() { return false; }
+    sceneSession->specificCallback_->onGetLSState_ = []() { return false; };
     sceneSession->GetScaleInLSState(scaleX, scaleY);
-    sceneSession->specificCallback_->onGetLSState_ = []() { return true; }
+    sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
     sceneSession->GetScaleInLSState(scaleX, scaleY);
     sceneSession->SetScale(1, -1, -1, -1);
     sceneSession->GetScaleInLSState(scaleX, scaleY);
@@ -477,8 +481,10 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidAreaForLSStateChange, TestSize
     ssm_->UpdateAvoidAreaForLSStateChange(1, 1);
     ssm_->sceneSessionMap_.clear();
     ssm_->UpdateAvoidAreaForLSStateChange(1, 2);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    SessionInfo sessionInfo1;
+    SessionInfo sessionInfo2;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo1, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     sceneSession2->property_ = sptr<WindowSessionProperty>::MakeSptr();
