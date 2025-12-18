@@ -1487,6 +1487,7 @@ private:
     std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
     bool pipSwitchStatus_ = true;
+    bool pipIsPipEnabled_ = false;
     std::shared_mutex screenPipEnabledMapLock_;
     std::unordered_map<int32_t, bool> screenPipEnabledMap_;
     std::shared_mutex pipChgListenerMapMutex_;
