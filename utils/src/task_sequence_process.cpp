@@ -28,38 +28,43 @@ TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize)
     }
 TaskSequenceProcess::~TaskSequenceProcess() = default;
 
-void TaskSequenceProcess::Notify()
+std::function<void()> TaskSequenceProcess:PopFromQueue()
 {
-    std::lock_guard<std::mutex> lock(queueMutex_);
     if (!taskRunningFlag_.load() && !taskQueue_.empty()) {
-        TaskSequenceEventInfo task = taskQueue_.front();
+        std::lock_guard<std::mutex> lock(queueMutex_);
+        std::function<void()> task = taskQueue_.front();
         taskQueue_.pop();
         taskRunningFlag_.store(true);
-        Exec(task);
-    } else if (taskRunningFlag_.load()) {
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess notify task but full");
-    } else TLOGI(WmsLogTag::DMS, "TaskSequenceProcess queue is empty");
+        return task;
+    } else {
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not pop");
+    return;
+    }
 }
 
-void TaskSequenceProcess::Push(const TaskSequenceEventInfo& eventInfo)
+void TaskSequenceProcess::PushToQueue(const std::function<void()>& task)
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess push");
     std::lock_guard<std::mutex> lock(queueMutex_);
     if (taskQueue_.size() >= maxQueueSize_) {
         taskQueue_.pop();
     }
-    taskQueue_.push(eventInfo);
-    Notify();
+    taskQueue_.push(task);
+}
+
+void TaskSequenceProcess::Notify()
+{
+    std::function<void()> taskToDo = PopFromQueue();
+    if (taskToDo) {
+        taskToDo();
+    } else {
+        TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not execute");
+    }
 }
 
 void TaskSequenceProcess::Finish()
 {
     taskRunningFlag_.store(false);
     Notify();
-}
-
-void TaskSequenceProcess::Exec(const TaskSequenceEventInfo& task)
-{
-    task.task();
 }
 } // namespace OHOS::Rosen
