@@ -1699,9 +1699,12 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     if (phyMirrorEnable || (IsConcurrentUser() && screenId != SCREEN_ID_DEFAULT)) {
         NotifyScreenConnected(screenSession->ConvertToScreenInfo());
+        sptr<ScreenSession> internalSession = GetScreenSessionByRsId(SCREEN_ID_DEFAULT);
+        TLOGE(WmsLogTag::DMS, "HandleScreenConnectEven. SCreenId: %{public}" PRIu64, internalSession->GetScreenId());
+        NotifyScreenConnected(internalSession->ConvertToScreenInfo());
         // when display add, need wait update available area, ensure display info is accurate
         WaitUpdateAvailableAreaForPc();
-        NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
+        NotifyDisplayCreate(internalSession->ConvertToDisplayInfo());
     }
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
 }
