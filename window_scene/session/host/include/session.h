@@ -292,7 +292,7 @@ public:
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
-    void RenameSnapshotFromOldPersistentId(const int32_t& oldPersistentId);
+    void RenameSnapshotFromOldPersistentId(int32_t oldPersistentId);
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
         std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);

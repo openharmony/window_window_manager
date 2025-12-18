@@ -1280,13 +1280,13 @@ HWTEST_F(WindowPatternSnapshotTest, RecoverSnapshotPersistence, TestSize.Level1)
     info.abilityName_ = "RecoverSnapshotPersistence";
     info.bundleName_ = "RecoverSnapshotPersistence";
     sptr<MainSession> pMainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    sceneSession->scenePersistence_ = nullptr;
+    pMainSession->scenePersistence_ = nullptr;
     pMainSession->RecoverSnapshotPersistence(info);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
     sptr<ScenePersistence> scenePersistence =
         sptr<ScenePersistence>::MakeSptr(info.bundleName_, pMainSession->GetPersistentId());
-    sceneSession->scenePersistence_ = scenePersistence;
+    pMainSession->scenePersistence_ = scenePersistence;
     pMainSession->RecoverSnapshotPersistence(info);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
@@ -1320,13 +1320,13 @@ HWTEST_F(WindowPatternSnapshotTest, ClearSnapshotPersistence, TestSize.Level1)
     info.abilityName_ = "ClearSnapshotPersistence";
     info.bundleName_ = "ClearSnapshotPersistence";
     sptr<MainSession> pMainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    sceneSession->scenePersistence_ = nullptr;
+    pMainSession->scenePersistence_ = nullptr;
     pMainSession->ClearSnapshotPersistence(info);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
     sptr<ScenePersistence> scenePersistence =
         sptr<ScenePersistence>::MakeSptr(info.bundleName_, pMainSession->GetPersistentId());
-    sceneSession->scenePersistence_ = scenePersistence;
+    pMainSession->scenePersistence_ = scenePersistence;
     pMainSession->ClearSnapshotPersistence(info);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 }
