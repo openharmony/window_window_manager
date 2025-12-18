@@ -3075,8 +3075,8 @@ HWTEST_F(SceneSessionManagerTest12, GetIsPipEnabled, Function | SmallTest | Leve
     EXPECT_EQ(ret, WMError::WM_OK);
 
     ssm_->SetIsPipEnabled(false);
-    ret = ssm_->GetIsPipEnabled(isPipEnabled );
-    EXPECT_NE(isPipEnabled , true);
+    ret = ssm_->GetIsPipEnabled(isPipEnabled);
+    EXPECT_NE(isPipEnabled, true);
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 
