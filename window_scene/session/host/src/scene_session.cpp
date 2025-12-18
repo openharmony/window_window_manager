@@ -2721,6 +2721,7 @@ void SceneSession::CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoi
         float(avoidAreaCenterX);
     float res2 = float(avoidAreaCenterY) + float(rect.height_) / float(rect.width_) *
         float(avoidAreaCenterX) - float(rect.height_);
+    CalculateAvoidAreaByScale(avoidAreaRect);
     if (res1 < 0) {
         if (res2 < 0) {
             avoidArea.topRect_ = avoidAreaRect;
@@ -3192,6 +3193,42 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
+void SceneSession::GetScaleInLSState(float& scaleX, float& scaleY)
+{
+    if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN || specificCallback_ ||
+        specificCallback_->onGetLSState_ || specificCallback_->onGetLSState_) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win: %{public}d, not in LS state", GetPersistentId());
+        return;
+    }
+    constexpr float INVALID_SCALE = 0;
+    if (GetScaleY() <= INVALID_SCALE || GetScaleY() <= INVALID_SCALE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win: %{public}d, invalid scale", GetPersistentId());
+        return;
+    }
+    scaleX = GetScaleX();
+    scaleY = GetScaleY();
+}
+
+void SceneSession::CalculateWindowRectByScale(WSRect& winRect)
+{
+    float scaleX = 1;
+    float scaleY = 1;
+    GetScaleInLSState(scaleX, scaleY);
+    winRect.width_ * = scaleX_;
+    winRect.height_ * = scaleY;
+}
+
+void SceneSession::CalculateAvoidAreaByScale(Rect& avoidAreaRect)
+{
+    float scaleX = 1;
+    float scaleY = 1;
+    GetScaleInLSState(scaleX, scaleY);
+    avoidAreaRect.posX_ = std::ceil(avoidAreaRect.posX_ / scaleX);
+    avoidAreaRect.posY_ = std::ceil(avoidAreaRect.posY_ / scaleY);
+    avoidAreaRect.width_ = std::ceil(avoidAreaRect.width_ / scaleX);
+    avoidAreaRect.height_ = std::ceil(avoidAreaRect.height_ / scaleY);
+}
+
 AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect, bool ignoreVisibility)
 {
     if (!CheckGetAvoidAreaAvailable(type)) {
@@ -3200,6 +3237,7 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
 
     AvoidArea avoidArea;
     WSRect sessionRect = rect.IsEmpty() ? GetSessionRect() : rect;
+    CalculateWindowRectByScale(sessionRect);
     switch (type) {
         case AvoidAreaType::TYPE_SYSTEM: {
             GetSystemAvoidArea(sessionRect, avoidArea, ignoreVisibility);
@@ -8773,6 +8811,7 @@ bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, fl
     } else {
         WLOGFE("sessionStage is nullptr");
     }
+    HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END);
     return true;
 }
 
