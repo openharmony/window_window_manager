@@ -1336,5 +1336,16 @@ enum class SendTouchAction : uint32_t {
     ACTION_NORMAL = 0,
     ACTION_NOT_RECEIVE_PULL_CANCEL = 1,
 };
+
+/**
+ * @brief Sidebar blur type
+ */
+enum class SidebarBlurType : uint32_t {
+    NONE = 0,
+    INITIAL,
+    DEFAULT_FLOAT,
+    DEFAULT_MAXIMIZE,
+    END,
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

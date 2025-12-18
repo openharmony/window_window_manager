@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
+#include <modifier/rs_property.h>
+
 #include "window_session_impl.h"
 #include "window_manager.h"
 #include "screen_manager.h"
@@ -198,6 +200,8 @@ public:
     WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
     WMError UseImplicitAnimation(bool useImplicit) override;
     bool IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError AddSidebarBlur() override;
+    WSError SetSidebarBlurStyleWithType(SidebarBlurType type) override;
 
     /*
      * PC Window Layout
@@ -626,6 +630,17 @@ private:
      * Window Decor
      */
     WMError GrayOutMaximizeButton(bool isGrayOut);
+
+    /*
+     * PC Window Sidebar Blur
+     */
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurRadiusValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurSaturationValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurBrightnessValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
+    void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
+    void ModifySidebarBlurProperty(bool isDark, SidebarBlurType type);
+    void UpdateSidebarBlurStyleWhenColorModeChange();
 };
 } // namespace Rosen
 } // namespace OHOS
