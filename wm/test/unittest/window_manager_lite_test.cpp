@@ -235,7 +235,7 @@ HWTEST_F(WindowManagerLiteTest, NotifyMidSceneStatusChange01, TestSize.Level1)
     windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
     windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
 
-    auto& windowManager = WindowManager::GetInstance();
+    auto& windowManager = WindowManagerLite::GetInstance();
     windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
     windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
 
