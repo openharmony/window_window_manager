@@ -3479,7 +3479,7 @@ napi_value JsSceneSessionManager::OnNotifyStatusBarShowStatus(napi_env env, napi
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::OnNotifyStateChange(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnNotifyLSStateChange(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
