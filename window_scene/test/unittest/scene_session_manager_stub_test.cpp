@@ -2853,12 +2853,9 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetPiPSettingSwitchStatus, Function 
 }
 
 /**
-
-@tc.name: HandleGetIsPipEnabled
-
-@tc.desc: test HandleGetIsPipEnabled
-
-@tc.type: FUNC
+ *@tc.name: HandleGetIsPipEnabled
+ *@tc.desc: test HandleGetIsPipEnabled
+ *@tc.type: FUNC
 */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetIsPipEnabled, Function | SmallTest | Level2)
 {
