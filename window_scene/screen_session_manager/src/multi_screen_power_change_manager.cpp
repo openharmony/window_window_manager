@@ -285,7 +285,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalExtendChange(sptr<
             ScreenPowerStatus::POWER_STATUS_OFF);
         CallRsSetScreenPowerStatusSyncToOn(innerScreen->GetRSScreenId());
     };
-    ScreenSessionManager::Getinstance().GetPowerTaskScheduler()->PostTask(rsSetScreenPowerStatustask,"rsInterface_.SetScreenPowerStatus task");
+    ScreenSessionManager::GetInstance().GetPowerTaskScheduler()->PostTask(rsSetScreenPowerStatustask,"rsInterface_.SetScreenPowerStatus task");
     TLOGW(WmsLogTag::DMS, "inner main and external extend to external main end.");
     return DMError::DM_OK;
 }
