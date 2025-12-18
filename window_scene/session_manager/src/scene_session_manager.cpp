@@ -452,6 +452,7 @@ void SceneSessionManager::Init()
     RegisterAppListener();
     openDebugTrace_ = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
+    bool trayAppForeground = system::GetParameter("persist.window.tray_foreground", "") == "true";
 
     // window recover
     RegisterSessionRecoverStateChangeListener();
@@ -3628,7 +3629,7 @@ bool SceneSessionManager::IsPcSceneSessionLifecycle(const sptr<SceneSession>& sc
         (isPcAppInLargeScreenDevice && !isScreenLock && !systemConfig_.IsPhoneWindow())) {
         return true;
     }
-    bool trayAppForeground = system::GetParameter("persist.window.tray_foreground", "") == "true";
+    
     if (trayAppForeground && isPcAppInLargeScreenDevice) {
         TLOGI(WmsLogTag::WMS_PC, "isPcAppInPad check trayApp success");
         return true;
@@ -9111,7 +9112,6 @@ void SceneSessionManager::SetScreenLocked(const bool isScreenLocked)
         NotifyPiPWindowVisibleChange(isScreenLocked);
     }, __func__);
     NotifySessionScreenLockedChange(isScreenLocked);
-    bool trayAppForeground = system::GetParameter("persist.window.tray_foreground", "") == "true";
     if (trayAppForeground) {
         SchedulePcAppInPadLifecycle(isScreenLocked);
     }
