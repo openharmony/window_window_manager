@@ -61,7 +61,7 @@ PictureInPictureManager::~PictureInPictureManager()
 bool PictureInPictureManager::IsSupportPiP()
 {
     bool IsSupportPiPFlag;
-    SingletonContainer::Get().GetIsPipEnabled(IsSupportPiPFlag);
+    SingletonContainer::Get<WindowAdapter>().GetIsPipEnabled(IsSupportPiPFlag);
     return IsSupportPiPFlag;
 }
 
