@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef TASKSEQUENCEPROCESS_H
-#define TASKSEQUENCEPROCESS_H
+#ifndef TASK_SEQUENCE_PROCESS_H
+#define TASK_SEQUENCE_PROCESS_H
 #include <mutex>
 #include <queue>
 #include <atomic>
