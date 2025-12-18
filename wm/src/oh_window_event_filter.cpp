@@ -177,7 +177,7 @@ TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEv
         }
         auto actionIter = touchEventActionMap.find(event.GetPointerAction());
         if (actionIter == touchEventActionMap.end()) {
-            TLOGNE(WmsLogTag::WMS_EVENT, "find touch event action fail");
+            TLOGNI(WmsLogTag::WMS_EVENT, "unknown touch type");
             OH_Input_DestroyTouchEvent(&touchEvent);
             return false;
         }
