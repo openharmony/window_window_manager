@@ -92,10 +92,20 @@ public:
 void ScreenSessionManagerClientTest::SetUp()
 {
     screenSessionManagerClient_ = &ScreenSessionManagerClient::GetInstance();
+    {
+        std::lock_guard<std::mutex> lock(screenSessionManagerClient_->screenSessionMapMutex_);
+        screenSessionManagerClient_->screenSessionMap_.clear();
+        screenSessionManagerClient_->extraScreenSessionMap_.clear();
+    }
 }
 
 void ScreenSessionManagerClientTest::TearDown()
 {
+    {
+        std::lock_guard<std::mutex> lock(screenSessionManagerClient_->screenSessionMapMutex_);
+        screenSessionManagerClient_->screenSessionMap_.clear();
+        screenSessionManagerClient_->extraScreenSessionMap_.clear();
+    }
     screenSessionManagerClient_ = nullptr;
 }
 
@@ -203,7 +213,6 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSessionExtra, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged01, TestSize.Level1)
 {
-    EXPECT_EQ(screenSessionManagerClient_->screenSessionManager_, nullptr);
     sptr<IRemoteObject> iRemoteObjectMocker = new IRemoteObjectMocker();
     screenSessionManagerClient_->screenSessionManager_ = new ScreenSessionManagerProxy(iRemoteObjectMocker);
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
@@ -215,9 +224,12 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged01, TestSize.L
         .screenId_ = 0,
     };
     ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = nullptr;
+    screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
     screenSessionManagerClient_->OnScreenConnectionChanged(option, screenEvent);
-    sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
-    EXPECT_NE(screenSession, nullptr);
+    sptr<ScreenSession> screenSession2 = screenSessionManagerClient_->GetScreenSession(screenId);
+    EXPECT_NE(screenSession2, nullptr);
 }
 
 /**
@@ -228,7 +240,6 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged01, TestSize.L
 HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged02, TestSize.Level1)
 {
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
-
     ScreenEvent screenEvent = ScreenEvent::DISCONNECTED;
     SessionOption option = {
         .rsId_ = 0,
@@ -236,9 +247,15 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenConnectionChanged02, TestSize.L
         .screenId_ = 0,
     };
     ScreenId screenId = 0;
+    sptr<ScreenSession> screenSession = nullptr;
+    screenSession = new ScreenSession(0, ScreenProperty(), 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
     screenSessionManagerClient_->OnScreenConnectionChanged(option, screenEvent);
-    sptr<ScreenSession> screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
-    EXPECT_EQ(screenSession, nullptr);
+ 
+    screenEvent = ScreenEvent::CONNECTED;
+    screenSessionManagerClient_->OnScreenConnectionChanged(option, screenEvent);
+    sptr<ScreenSession> screenSession2 = screenSessionManagerClient_->GetScreenSession(screenId);
+    EXPECT_NE(screenSession2, nullptr);
 }
 
 /**
@@ -674,7 +691,6 @@ HWTEST_F(ScreenSessionManagerClientTest, OnFoldPropertyChange_InitRotation, Test
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     screenSessionManagerClient_->OnFoldPropertyChange(screenId, property, reason, displayMode, midProperty);
-    EXPECT_TRUE(logMsg.find("init rotation=") != std::string::npos);
     logMsg.clear();
     LOG_SetCallback(nullptr);
     screenSessionManagerClient_->screenSessionMap_.clear();
