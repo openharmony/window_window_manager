@@ -452,7 +452,7 @@ void SceneSessionManager::Init()
     RegisterAppListener();
     openDebugTrace_ = std::atoi((system::GetParameter("persist.sys.graphic.openDebugTrace", "0")).c_str()) != 0;
     isKeyboardPanelEnabled_ = system::GetParameter("persist.sceneboard.keyboardPanel.enabled", "1")  == "1";
-    bool isTrayAppForeground_ = system::GetParameter("persist.window.tray_foreground", "") == "true";
+    isTrayAppForeground_ = system::GetParameter("persist.window.tray_foreground", "") == "true";
 
     // window recover
     RegisterSessionRecoverStateChangeListener();
