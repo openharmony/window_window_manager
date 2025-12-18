@@ -4244,7 +4244,9 @@ napi_value JsSceneSessionManager::OnHandleTrayAppChange(napi_env env, napi_callb
     std::string item;
     std::vector<std::string> trayAppList;
     while (std::getline(trayAppListStream, item, '|')) {
-        if (!item.empty()) trayAppList.push_back(item);
+        if (!item.empty())  {
+            trayAppList.push_back(item);
+        }
     }
     SceneSessionManager::GetInstance().SetTrayAppList(std::move(trayAppList));
     return NapiGetUndefined(env);
