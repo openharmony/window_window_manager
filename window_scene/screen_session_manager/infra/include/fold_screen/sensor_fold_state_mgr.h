@@ -35,7 +35,6 @@ class SensorFoldStateMgr {
     DISALLOW_COPY_AND_MOVE(SensorFoldStateMgr);
 
 public:
-    SensorFoldStateMgr();
     static SensorFoldStateMgr& GetInstance();
     void HandleSensorEvent(const SensorStatus& sensorStatus);
     void RegisterApplicationStateObserver();
@@ -43,6 +42,7 @@ public:
     void NotifyRunTaskSequence();
 
 protected:
+    SensorFoldStateMgr();
     FoldStatus GetNextFoldStatus(const SensorStatus& sensorStatus);
     virtual FoldStatus GetNextFoldStatusByAxis(
         const ScreenAxis& axis, FoldStatus currentStatus, int32_t algorithmStrategy);
