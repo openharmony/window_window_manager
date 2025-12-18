@@ -605,8 +605,9 @@ WMError PictureInPictureControllerBase::UnregisterListener(std::vector<sptr<T>>&
 
 void PictureInPictureControllerBase::GetPipPossible(bool& pipPossible)
 {
-    const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "");
-    pipPossible = multiWindowUIType == "HandsetSmartWindow" || multiWindowUIType == "TabletSmartWindow";
+    bool isPipEnabledFlag;
+    SingletonContainer::Get().GetIsPipEnabled(isPipEnabledFlag);
+    pipPossible = isPipEnabledFlag;
     return;
 }
 
