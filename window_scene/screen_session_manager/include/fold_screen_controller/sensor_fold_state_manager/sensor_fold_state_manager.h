@@ -43,7 +43,7 @@ public:
     virtual void RegisterApplicationStateObserver();
     void ClearState(sptr<FoldScreenPolicy> foldScreenPolicy);
     bool IsTentMode();
-    void NotifyRunTaskSequence();
+    void FinishTaskSequence();
 protected:
     virtual FoldStatus HandleSecondaryOneStep(FoldStatus currentStatus, FoldStatus nextStatus,
         const std::vector<float>& previousAngles, const std::vector<uint16_t>& previousHalls) { return nextStatus; }

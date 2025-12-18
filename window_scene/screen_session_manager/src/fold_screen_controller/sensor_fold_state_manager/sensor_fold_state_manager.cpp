@@ -73,7 +73,6 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
         .taskInfo = task};
     taskProcessor_.Push(eventInfo);
-    taskProcessor_.Notify();
 }
 
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
@@ -138,13 +137,12 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
     TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
         .taskInfo = event};
     taskProcessor_.Push(eventInfo);
-    taskProcessor_.Notify();
 }
 
-void SensorFoldStateManager::NotifyRunTaskSequence()
+void SensorFoldStateManager::FinishTaskSequence()
 {
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateManager::NotifyRunTaskSequence");
-    taskProcessor_.Notify();
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateManager::FinishTaskSequence");
+    taskProcessor_.Finish();
 }
 
 void SensorFoldStateManager::ProcessNotifyFoldStatusChange(FoldStatus currentStatus, FoldStatus nextStatus,
