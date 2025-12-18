@@ -680,6 +680,19 @@ DMError ScreenManager::RemoveVirtualScreenFromGroup(std::vector<ScreenId> screen
     return DMError::DM_OK;
 }
 
+DMError ScreenManager::AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+{
+    DMError errCode = SingletonContainer::Get<ScreenManagerAdapter>().AddVirtualScreenWhiteList(screenId, missionIds);
+    return errCode;
+}
+
+DMError ScreenManager::RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+{
+    DMError errCode = SingletonContainer::Get<ScreenManagerAdapter>().RemoveVirtualScreenWhiteList(screenId,
+        missionIds);
+    return errCode;
+}
+
 ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
 {
     return pImpl_->CreateVirtualScreen(option);

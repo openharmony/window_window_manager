@@ -1393,9 +1393,10 @@ HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, TestSize.Level1)
 {
-    int32_t focusedSession = ssm_->GetFocusedSessionId();
+    int32_t focusedSession = ssm_->GetFocusedSessionId(DISPLAY_ID_INVALID);
     EXPECT_EQ(focusedSession, INVALID_SESSION_ID);
     int32_t persistentId = INVALID_SESSION_ID;
+    ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     WSError result01 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
     EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
     persistentId = 10086;

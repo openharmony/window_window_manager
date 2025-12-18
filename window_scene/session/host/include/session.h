@@ -298,7 +298,7 @@ public:
     bool CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surfaceNode) const;
     bool GetNeedUseBlurSnapshot() const;
     void UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo);
-    bool GetIsPrivacyMode() const { return property_->GetPrivacyMode(); };
+    virtual bool GetIsPrivacyMode() const { return false; };
     void SetSnapshotPrivacyMode(bool privacyMode) { snapshotPrivacyMode_.store(privacyMode); };
     bool GetSnapshotPrivacyMode() const;
     std::atomic<bool> snapshotPrivacyMode_ { false };
@@ -456,7 +456,6 @@ public:
     void ClearDialogVector();
     WSError NotifyDestroy();
     WSError NotifyAppForceLandscapeConfigUpdated();
-    WSError NotifyAppForceLandscapeConfigEnableUpdated();
     WSError NotifyCloseExistPipWindow();
 
     void SetSessionFocusableChangeListener(const NotifySessionFocusableChangeFunc& func);
@@ -813,6 +812,8 @@ public:
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
     void SetBufferNameForPixelMap(const char* functionName, const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void SetPreloadingStartingWindow(bool preloading);
+    bool GetPreloadingStartingWindow();
     std::atomic<bool> freeMultiWindow_ { false };
 
     /*
@@ -1231,6 +1232,7 @@ private:
      */
     std::atomic<bool> isSnapshotBlur_ { false };
     std::atomic<bool> isAppLockControl_ { false };
+    std::atomic<bool> preloadingStartingWindow_ { false };
     bool borderUnoccupied_ = false;
     uint32_t GetBackgroundColor() const;
 

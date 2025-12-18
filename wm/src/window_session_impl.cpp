@@ -74,8 +74,9 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
+constexpr int32_t FORCE_SPLIT_MODE = 5;
+constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
-constexpr int32_t API_VERSION_23 = 23;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 50;
 constexpr uint32_t INVALID_TARGET_API_VERSION = 0;
@@ -2329,12 +2330,8 @@ WSError WindowSessionImpl::SetStageKeyFramePolicy(const KeyFramePolicy& keyFrame
 WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
-    if (!windowSystemConfig_.IsPcWindow()) {
-        // isolate on api 23
-        if (GetTargetAPIVersion() < API_VERSION_23 ||
-            (GetTargetAPIVersion() >= API_VERSION_23 && !IsPhonePadOrPcWindow())) {
-            return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-        }
+    if (!IsPhonePadOrPcWindow()) {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "only main window is valid");
@@ -2346,8 +2343,8 @@ WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFrameP
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
 
-    if (GetTargetAPIVersion() >= API_VERSION_23 && IsPhonePadOrPcWindow()) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ignore phone or pad window type");
+    if (!IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ignore not pc window type");
         return WMError::WM_OK;
     }
     WSError errorCode = hostSession->SetDragKeyFramePolicy(keyFramePolicy);
@@ -2363,18 +2360,6 @@ WMError WindowSessionImpl::NotifyWatchFocusActiveChange(bool isActive)
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return SingletonContainer::Get<WindowAdapter>().NotifyWatchFocusActiveChange(isActive);
-}
-
-void WindowSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
-{
-    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
-    if (uiContent == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "uiContent is null!");
-        return;
-    }
-    TLOGI(WmsLogTag::DEFAULT, "SetForceSplitEnable, enableForceSplit: %{public}u",
-        enableForceSplit);
-    uiContent->SetForceSplitEnable(enableForceSplit);
 }
 
 void WindowSessionImpl::SetForceSplitConfig(const AppForceLandscapeConfig& config)
@@ -2478,10 +2463,11 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.supportSplit_ > 0) {
         SetForceSplitConfig(config);
-    }
-    bool enableForceSplit = false;
-    if (GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit);
+        bool enableForceSplit = false;
+        if ((config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) &&
+            GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
+                SetForceSplitConfigEnable(enableForceSplit);
+        }
     }
 
     uint32_t version = 0;
@@ -5159,7 +5145,7 @@ WSError WindowSessionImpl::SendContainerModalEvent(const std::string& eventName,
 
 WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor)
 {
-    if (!windowSystemConfig_.IsPcWindow()) {
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_WINDOW_TRANSPARENT) &&
@@ -5825,7 +5811,6 @@ void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
             }
         }
     }
-    NotifyDmsDisplayMove(to);
 }
  
 void WindowSessionImpl::NotifyDmsDisplayMove(DisplayId to)

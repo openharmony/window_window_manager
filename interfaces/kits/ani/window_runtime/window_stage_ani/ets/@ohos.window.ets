@@ -39,6 +39,7 @@ export type WindowWillCloseCallback<T, V = void> = (data: T) => V;
 const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 const WM_ERROR_INVALID_PARAM = 401;
+const WM_ERROR_ILLEGAL_PARAM = 1300016;
 declare type WindowAnimationCurveParam = Array<number>;
 
 namespace window {
@@ -3436,6 +3437,10 @@ export class WindowInternal implements Window {
     }
 
     public setDragKeyFramePolicy(keyFramePolicy: KeyFramePolicy): Promise<KeyFramePolicy> {
+      if ((keyFramePolicy.interval ?? 1) <= 0 || (keyFramePolicy.distance ?? 1) < 0 ||
+          (keyFramePolicy.animationDelay ?? 1) < 0 || (keyFramePolicy.animationDuration ?? 1) < 0) {
+        throw new BusinessError(WM_ERROR_ILLEGAL_PARAM, new Error('Static invalid param!'));
+      }
       return new Promise<KeyFramePolicy>((resolve: (value: KeyFramePolicy) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute(() => {
           return this.setDragKeyFramePolicy(this.nativeObj, keyFramePolicy);
@@ -5334,6 +5339,7 @@ export function setNativeObj(nativeObject: long):void {
 
 native function getLastWindowSync(nativeObj: long, ctx: BaseContext): Window;
 native function minimizeAllSync(nativeObj: long, id: long): void;
+native function minimizeAllWithExclusionSync(nativeObj: long, displayId: long, excludeWindowId: int): void;
 native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
@@ -5507,6 +5513,18 @@ export function minimizeAll(id: long, callback: AsyncCallback<void>): void {
     }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
     });
+}
+
+export function minimizeAllWithExclusion(displayId: long, excludeWindowId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          minimizeAllWithExclusionSync(nativeObj, displayId, excludeWindowId);
+      }).then((ret: NullishType) => {
+          resolve(undefined);
+      }).catch((err: NullishType) => {
+          reject(err as BusinessError);
+      });
+  });
 }
 
 export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLayoutInfo>> {

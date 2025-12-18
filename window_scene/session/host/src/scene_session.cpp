@@ -2612,10 +2612,10 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
 
 void SceneSession::NotifyPropertyWhenConnect()
 {
-    WLOGFI("Notify property when connect.");
+    TLOGI(WmsLogTag::DEFAULT, "In");
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        TLOGD(WmsLogTag::DEFAULT, "id: %{public}d property is nullptr", persistentId_);
         return;
     }
     NotifySessionFocusableChange(property->GetFocusable());
@@ -8100,11 +8100,6 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
-void SceneSession::RegisterForceSplitEnableListener(const NotifyForceSplitEnableFunc& func)
-{
-    forceSplitEnableFunc_ = func;
-}
-
 void SceneSession::RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func)
 {
     if (!func) {
@@ -8176,15 +8171,6 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
         return WMError::WM_ERROR_NULLPTR;
     }
     config = forceSplitFunc_(sessionInfo_.bundleName_);
-    return WMError::WM_OK;
-}
-
-WMError SceneSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    if (forceSplitEnableFunc_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
     return WMError::WM_OK;
 }
 

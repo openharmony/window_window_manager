@@ -649,4 +649,28 @@ bool MainSession::RestoreAspectRatio(float ratio)
     Session::SetAspectRatio(ratio);
     return true;
 }
+
+WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
+{
+    if (forceSplitEnableFunc_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "forceSplitEnableFunc_ is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
+    return WMError::WM_OK;
+}
+
+WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated()
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
+}
+
+void MainSession::RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func)
+{
+    forceSplitEnableFunc_ = std::move(func);
+}
 } // namespace OHOS::Rosen

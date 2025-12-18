@@ -1474,7 +1474,7 @@ WSError SessionStageProxy::NotifyPiPActiveStatusChange(bool status)
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteBool(static_cast<int32_t>(status))) {
+    if (!data.WriteBool(status)) {
         TLOGE(WmsLogTag::WMS_PIP, "Write state failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -2346,20 +2346,20 @@ WSError SessionStageProxy::NotifyAppForceLandscapeConfigEnableUpdated()
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_SCB, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_SCB, "remote is null");
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_ENABLE_UPDATED),
         data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_SCB, "SendRequest failed");
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return WSError::WS_OK;
