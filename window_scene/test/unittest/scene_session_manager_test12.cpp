@@ -3050,6 +3050,41 @@ HWTEST_F(SceneSessionManagerTest12, GetPiPSettingSwitchStatus, Function | SmallT
 }
 
 /**
+
+@tc.name: SetIsPipEnabled
+@tc.desc: test function : SetIsPipEnabled
+@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest12, SetIsPipEnabled, Function | SmallTest | Level2)
+{
+ssm_->SetIsPipEnabled(true);
+EXPECT_EQ(ssm_->pipIsPipEnabled_ , true);
+ssm_->SetIsPipEnabled(false);
+EXPECT_EQ(ssm_->pipIsPipEnabled_ , false);
+}
+/**
+
+@tc.name: GetIsPipEnabled
+
+@tc.desc: test function : GetIsPipEnabled
+
+@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerTest12, GetIsPipEnabled, Function | SmallTest | Level2)
+{
+bool isPipEnabled = false;
+ssm_->SetIsPipEnabled(true);
+WMError ret = ssm_->GetIsPipEnabled(isPipEnabled );
+EXPECT_EQ(isPipEnabled , true);
+EXPECT_EQ(ret, WMError::WM_OK);
+
+ssm_->SetIsPipEnabled(false);
+ret = ssm_->GetIsPipEnabled(isPipEnabled );
+EXPECT_NE(isPipEnabled , true);
+EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: UpdateScreenLockState
  * @tc.desc: test function : UpdateScreenLockState
  * @tc.type: FUNC
