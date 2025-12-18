@@ -19039,13 +19039,13 @@ WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
 
 void SceneSessionManager::SetIsPipEnabled(bool isPipEnabled)
 {
-pipIsPipEnabled_ = isPipEnabled;
+    pipIsPipEnabled_ = isPipEnabled;
 }
 
 WMError SceneSessionManager::GetIsPipEnabled(bool& isPipEnabled)
 {
-isPipEnabled = pipIsPipEnabled_;
-return WMError::WM_OK;
+    isPipEnabled = pipIsPipEnabled_;
+    return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::SetPipEnableByScreenId(int32_t screenId, bool isEnabled)
