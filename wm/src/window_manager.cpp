@@ -460,7 +460,7 @@ void WindowManager::Impl::NotifyDisplayIdChange(const WindowInfoList& windowInfo
     }
 }
 
-WindowInfoList WindowManager::Impl::GetWindowInfoListByInterestWindowIds(sptr<IWindowInfoChangedListener> listener,
+WindowInfoList WindowManager::Impl::GetWindowInfoListByInterestWindowIds(const sptr<IWindowInfoChangedListener>& listener,
     const WindowInfoList& windowInfoList)
 {
     if (listener == nullptr) {
