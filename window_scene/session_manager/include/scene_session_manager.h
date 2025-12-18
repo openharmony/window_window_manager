@@ -899,6 +899,7 @@ protected:
 private:
     std::atomic<bool> enterRecent_ { false };
     bool isKeyboardPanelEnabled_ = false;
+    bool isTrayAppForeground_ = false;
     std::unordered_map<std::string, ConvertSystemConfigFunc> convertConfigMap_;
     static sptr<SceneSessionManager> CreateInstance();
     static inline bool isNotCurrentScreen(sptr<SceneSession> sceneSession, ScreenId screenId)
