@@ -2662,17 +2662,17 @@ int SceneSessionManagerStub::HandleGetPiPSettingSwitchStatus(MessageParcel& data
 
 int SceneSessionManagerStub::HandleGetIsPipEnabled(MessageParcel& data, MessageParcel& reply)
 {
-bool isPipEnabled = false;
-WMError errCode = GetIsPipEnabled(isPipEnabled);
-if (!reply.WriteBool(isPipEnabled)) {
-TLOGE(WmsLogTag::WMS_PIP, "Write isPipEnabled fail.");
-return ERR_INVALID_DATA;
-}
-if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-TLOGE(WmsLogTag::WMS_PIP, "Write errCode fail.");
-return ERR_INVALID_DATA;
-}
-return ERR_NONE;
+    bool isPipEnabled = false;
+    WMError errCode = GetIsPipEnabled(isPipEnabled);
+    if (!reply.WriteBool(isPipEnabled)) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write isPipEnabled fail.");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_PIP, "Write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
 }
 
 int SceneSessionManagerStub::HandleUpdateOutline(MessageParcel& data, MessageParcel& reply)
