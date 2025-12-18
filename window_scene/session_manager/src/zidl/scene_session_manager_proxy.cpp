@@ -4316,7 +4316,7 @@ WMError SceneSessionManagerProxy::GetIsPipEnabled(bool& isPipEnabled)
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_PIP, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
-        }
+    }
     sptr remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Remote is null");
@@ -4338,7 +4338,7 @@ WMError SceneSessionManagerProxy::GetIsPipEnabled(bool& isPipEnabled)
         return WMError::WM_ERROR_IPC_FAILED;
     }
     isPipEnabled = status;
-    return static_cast(ret);
+    return static_cast<WMError>(ret);
 }
 
 WMError SceneSessionManagerProxy::UpdateOutline(const sptr<IRemoteObject>& remoteObject,
