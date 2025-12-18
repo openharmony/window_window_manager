@@ -2904,7 +2904,7 @@ bool Session::CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surface
     if (scenePersistence_ == nullptr) {
         return false;
     }
-    if (isPersistentImageFit_.load()) {
+    if (IsPersistentImageFit()) {
         return false;
     }
     auto key = GetSessionSnapshotStatus();
@@ -2927,7 +2927,7 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, controlInfo.isNeedControl);
     isAppLockControl_.store(controlInfo.isNeedControl);
     if (controlInfo.isNeedControl) {
-        if (isPersistentImageFit_.load()) {
+        if (IsPersistentImageFit()) {
             NotifyAddSnapshot(false, false, false);
             return;
         }
@@ -3263,7 +3263,7 @@ void Session::InitSnapshotCapacity()
 
 bool Session::SupportSnapshotAllSessionStatus() const
 {
-    return (!isPersistentImageFit_.load() && (capacity_ != defaultCapacity));
+    return (!IsPersistentImageFit() && (capacity_ != defaultCapacity));
 }
 
 SnapshotStatus Session::GetScreenSnapshotStatus() const

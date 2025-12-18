@@ -2885,11 +2885,11 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             sessionInfo.abilityName_.c_str(), sessionInfo.appIndex_, sessionInfo.windowType_,
             static_cast<uint32_t>(sessionInfo.isSystem_), static_cast<uint32_t>(sessionInfo.isPersistentRecover_));
         sptr<SceneSession> sceneSession = CreateSceneSession(sessionInfo, property);
-        sceneSession->RecoverSnapshotPersistence(sessionInfo);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
+        sceneSession->RecoverSnapshotPersistence(sessionInfo);
         if (sessionInfo.isAbilityHook_) {
             auto session = GetHookedSessionByModuleName(sessionInfo);
             if (session) {
@@ -3895,6 +3895,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     if (sceneSession != nullptr) {
         RemovePreLoadStartingWindowFromMap(sceneSession->GetSessionInfo());
         sceneSession->ClearLifeCycleTask();
+        sceneSession->ClearSnapshotPersistence();
     } else {
         TLOGW(WmsLogTag::WMS_PATTERN, "session is nullptr id: %{public}d", persistentId);
     }

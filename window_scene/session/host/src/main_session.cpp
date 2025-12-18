@@ -41,7 +41,6 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
 
 MainSession::~MainSession()
 {
-    ClearSnapshotPersistence();
     WLOGD("~MainSession, id: %{public}d", GetPersistentId());
 }
 
@@ -236,6 +235,9 @@ bool MainSession::IsExitSplitOnBackground() const
 
 void MainSession::RecoverSnapshotPersistence(const SessionInfo& info)
 {
+    if (scenePersistence_ == nullptr) {
+        return;
+    }
     if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
@@ -247,25 +249,32 @@ void MainSession::RecoverSnapshotPersistence(const SessionInfo& info)
         }
         RecoverImageForRecent();
     } else {
-        auto task = [weakThis = wptr(this)]() {
-            auto session = weakThis.promote();
-            session->ClearSnapshotPersistence();
-        };
-        auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
-        std::string taskName = "ClearSnapshotPersistence" + std::to_string(GetPersistentId());
-        snapshotFfrtHelper->CancelTask(taskName);
-        snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
+        ClearSnapshotPersistence();
     }
 }
 
 void MainSession::ClearSnapshotPersistence()
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", GetPersistentId());
-    DeletePersistentImageFit();
-    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
-        DeleteHasSnapshot(screenStatus);
+    if (scenePersistence_ == nullptr) {
+        return;
     }
-    DeleteHasSnapshotFreeMultiWindow();
+    auto task = [weakThis = wptr(this), where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "%{public}s, session %{public}d nullptr", where, session->GetPersistentId());
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s, %{public}d", where, session->GetPersistentId());
+        session->DeletePersistentImageFit();
+        for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
+            session->DeleteHasSnapshot(screenStatus);
+        }
+        session->DeleteHasSnapshotFreeMultiWindow();
+    };
+    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
+    std::string taskName = "ClearSnapshotPersistence" + std::to_string(GetPersistentId());
+    snapshotFfrtHelper->CancelTask(taskName);
+    snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
 }
 
 void MainSession::NotifyClientToUpdateInteractive(bool interactive)

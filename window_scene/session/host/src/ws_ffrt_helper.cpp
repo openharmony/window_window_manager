@@ -58,7 +58,6 @@ public:
                 auto ret = ffrtQueue->cancel(iter->second);
                 if (ret != 0) {
                     TLOGI(WmsLogTag::DEFAULT, "Failed, name=%{public}s, ret=%{public}d", taskName.c_str(), ret);
-                    ffrtQueue->wait(iter->second);
                 }
             }
             taskMap_.erase(iter);
