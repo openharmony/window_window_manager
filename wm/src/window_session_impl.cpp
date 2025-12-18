@@ -8963,6 +8963,15 @@ WMError WindowSessionImpl::GetPiPSettingSwitchStatus(bool& switchStatus) const
     return SingletonContainer::Get<WindowAdapter>().GetPiPSettingSwitchStatus(switchStatus);
 }
 
+WMError WindowSessionImpl::GetIsPipEnabled(bool& isPipEnabled) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_PIP, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return SingletonContainer::Get().GetIsPipEnabled(isPipEnabled);
+}
+
 WMError WindowSessionImpl::SetPipParentWindowId(uint32_t windowId) const
 {
     TLOGI(WmsLogTag::WMS_PIP, "ParentWindowId:%{public}u", windowId);
