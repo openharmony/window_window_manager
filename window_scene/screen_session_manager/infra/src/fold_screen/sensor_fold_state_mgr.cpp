@@ -216,15 +216,14 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
         }
     };
     TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
-        .taskInfo = task};
+        .task = task};
     taskProcessor_.Push(eventInfo);
-    taskProcessor_.Notify();
 }
 
-void SensorFoldStateMgr::NotifyRunTaskSequence()
+void SensorFoldStateMgr::FinishTaskSequence()
 {
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateMgr::NotifyRunTaskSequence");
-    taskProcessor_.Notify();
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateMgr::FinishTaskSequence");
+    taskProcessor_.Finish();
 }
 
 void SensorFoldStateMgr::UpdateFoldAlgorithmStrategy(const std::vector<ScreenAxis>& axis)

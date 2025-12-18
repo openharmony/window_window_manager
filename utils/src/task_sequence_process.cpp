@@ -31,14 +31,11 @@ TaskSequenceProcess::~TaskSequenceProcess() = default;
 void TaskSequenceProcess::Notify()
 {
     std::lock_guard<std::mutex> lock(queueMutex_);
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess taskRunningFlag_: %{public}d, taskQueue.empty(): %{public}d",
-        taskRunningFlag_.load(), taskQueue_.empty());
     if (!taskRunningFlag_.load() && !taskQueue_.empty()) {
         TaskSequenceEventInfo task = taskQueue_.front();
         taskQueue_.pop();
         taskRunningFlag_.store(true);
         Exec(task);
-        taskRunningFlag_.store(false);
     } else if (taskRunningFlag_.load()) {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess notify task but full");
     } else TLOGI(WmsLogTag::DMS, "TaskSequenceProcess queue is empty");
@@ -46,24 +43,23 @@ void TaskSequenceProcess::Notify()
 
 void TaskSequenceProcess::Push(const TaskSequenceEventInfo& eventInfo)
 {
-    std::lock_guard<std::mutex> lock(queueMutex_);
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess push");
+    std::lock_guard<std::mutex> lock(queueMutex_);
     if (taskQueue_.size() >= maxQueueSize_) {
         taskQueue_.pop();
     }
     taskQueue_.push(eventInfo);
+    Notify();
 }
 
-void TaskSequenceProcess::SetTaskRunningFlag(bool flag)
+void TaskSequenceProcess::Finish()
 {
-    taskRunningFlag_.store(flag);
+    taskRunningFlag_.store(false);
+    Notify();
 }
 
 void TaskSequenceProcess::Exec(const TaskSequenceEventInfo& task)
 {
-    if (task.taskInfo) {
-        task.taskInfo();
-    }
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess execute task finish");
+    task.task();
 }
 } // namespace OHOS::Rosen

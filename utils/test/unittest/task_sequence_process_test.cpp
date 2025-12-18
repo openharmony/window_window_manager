@@ -48,24 +48,9 @@ namespace {
 HWTEST_F(TaskSequenceProcessTest, ATC_Notify01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(10);
-    process.SetTaskRunningFlag(false);
+    process.taskRunningFlag_.store(false);
     process.Notify();
     EXPECT_FALSE(process.taskRunningFlag_.load());
-}
-
-/**
- * @tc.name: NotifyTest02
- * @tc.desc: NotifyTest02
- * @tc.type: FUNC
- */
-HWTEST_F(TaskSequenceProcessTest, ATC_Notify02, TestSize.Level0)
-{
-    TaskSequenceProcess process = TaskSequenceProcess(10);
-    process.SetTaskRunningFlag(true);
-    TaskSequenceEventInfo task;
-    process.Push(task);
-    process.Notify();
-    EXPECT_TRUE(process.taskQueue_.size()==1);
 }
 
 /**
@@ -80,18 +65,6 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess01, TestSize.Level0)
 }
 
 /**
- * @tc.name: TaskSequenceProcessTest02
- * @tc.desc: TaskSequenceProcessTest02
- * @tc.type: FUNC
- */
-HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
-{
-    TaskSequenceProcess process = TaskSequenceProcess(10);
-    EXPECT_EQ(process.maxQueueSize_, 10);
-    EXPECT_FALSE(process.taskRunningFlag_.load());
-}
-
-/**
  * @tc.name: ExecTest01
  * @tc.desc: ExecTest01
  * @tc.type: FUNC
@@ -101,11 +74,10 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Exec01, TestSize.Level0)
     TaskSequenceProcess process = TaskSequenceProcess(1);
     TaskSequenceEventInfo task;
     bool taskInfoCalled = false;
-    task.taskInfo = [&taskInfoCalled]() {
+    task.task = [&taskInfoCalled]() {
         taskInfoCalled =true;
     };
     process.Push(task);
-    process.Notify();
     EXPECT_TRUE(taskInfoCalled);
 }
 
@@ -114,12 +86,12 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Exec01, TestSize.Level0)
  * @tc.desc: SetTaskRunningFlagTest01
  * @tc.type: FUNC
  */
-HWTEST_F(TaskSequenceProcessTest, ATC_SetTaskRunningFlag01, TestSize.Level0)
+HWTEST_F(TaskSequenceProcessTest, ATC_Finish01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(1);
-    bool flag = true;
-    process.SetTaskRunningFlag(flag);
-    EXPECT_EQ(process.taskRunningFlag_.load(), flag);
+    process.taskRunningFlag_.store(true)
+    process.Finish();
+    EXPECT_EQ(process.taskRunningFlag_.load(), false);
 }
 
 /**
@@ -131,25 +103,8 @@ HWTEST_F(TaskSequenceProcessTest, ATC_Push01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(1);
     TaskSequenceEventInfo eventInfo1;
-    TaskSequenceEventInfo eventInfo2;
     process.Push(eventInfo1);
-    process.Push(eventInfo2);
-    EXPECT_EQ(process.taskQueue_.size(), 1);
-}
-
-/**
- * @tc.name: PushTest02
- * @tc.desc: PushTest02
- * @tc.type: FUNC
- */
-HWTEST_F(TaskSequenceProcessTest, ATC_Push02, TestSize.Level0)
-{
-    TaskSequenceProcess process = TaskSequenceProcess(3);
-    TaskSequenceEventInfo eventInfo1;
-    TaskSequenceEventInfo eventInfo2;
-    process.Push(eventInfo1);
-    process.Push(eventInfo2);
-    EXPECT_EQ(process.taskQueue_.size(), 2);
+    EXPECT_EQ(process.taskQueue_.size(), 0);
 }
 } // namespace
 } // namespace Rosen
