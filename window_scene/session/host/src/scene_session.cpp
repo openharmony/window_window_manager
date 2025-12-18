@@ -3201,7 +3201,7 @@ void SceneSession::GetScaleInLSState(float& scaleX, float& scaleY) const
         return;
     }
     constexpr float INVALID_SCALE = 0;
-    if (GetScaleY() <= INVALID_SCALE || GetScaleY() <= INVALID_SCALE) {
+    if (GetScaleX() <= INVALID_SCALE || GetScaleY() <= INVALID_SCALE) {
         TLOGE(WmsLogTag::WMS_IMMS, "win: %{public}d, invalid scale", GetPersistentId());
         return;
     }
