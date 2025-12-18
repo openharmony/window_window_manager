@@ -269,11 +269,11 @@ HWTEST_F(SensorFoldStateMgrTest, HandleSensorEventTest10, TestSize.Level1)
  * @tc.desc: NotifyRunTaskSequence
  * @tc.type: FUNC
  */
-HWTEST_F(SensorFoldStateMgrTest, NotifyRunTaskSequence01, TestSize.Level0)
+HWTEST_F(SensorFoldStateMgrTest, FinishTaskSequence, TestSize.Level0)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    SensorFoldStateMgr::GetInstance().NotifyRunTaskSequence();
+    SensorFoldStateMgr::GetInstance().FinishTaskSequence();
     EXPECT_TRUE(g_logMsg.find("TaskSequenceProcess") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
