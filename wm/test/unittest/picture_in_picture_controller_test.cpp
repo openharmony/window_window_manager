@@ -1471,6 +1471,23 @@ HWTEST_F(PictureInPictureControllerTest, GetNavigationController, TestSize.Level
         sptr<MockPictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     EXPECT_EQ(nullptr, pipControl->GetNavigationController(""));
 }
+
+/**
+ * @tc.name: GetStateChangeReason
+ * @tc.desc: GetStateChangeReason/SetStateChangeReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureControllerTest, GetStateChangeReason, TestSize.Level1)
+{
+    sptr<MockWindow> mw = new MockWindow();
+    sptr<PipOption> option = new PipOption();
+    sptr<Window> window_;
+    sptr<Window> window;
+    sptr<PictureInPictureController> pipControl = new PictureInPictureController(option, mw, 100, nullptr);
+ 
+    pipControl->SetStateChangeReason(PiPStateChangeReason::REQUEST_DELETE);
+    ASSERT_EQ(PiPStateChangeReason::REQUEST_DELETE, pipControl->GetStateChangeReason());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
