@@ -178,8 +178,26 @@ HWTEST_F(ScreenManagerTest, MakeExpand_002, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     std::vector<ExpandOption> options = {};
     ScreenId expansionId = SCREEN_ID_INVALID;
-    ScreenManager::GetInstance().MakeExpand(options, expansionId);
-    ASSERT_TRUE(g_logMsg.find("make expand failed") != std::string::npos);
+    DMError error = ScreenManager::GetInstance().MakeExpand(options, expansionId);
+    ASSERT_EQ(error, DMError::DM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: MakeExpand_003
+ * @tc.desc: Makepand with empty ExpandOption.size() > MAX_SCREEN_SIZE, return SCREEN_ID_INVALID
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, MakeExpand_003, TestSize.Level1)
+{
+    std::vector<ExpandOption> options = {};
+    for (uint32_t i = 0; i < 33; ++i){ // MAX_SCREEN_SIZE + 1
+        ExpandOption option;
+        option.screenId_ = i;
+        option.emplace_back(option);
+    }
+    ScreenId screenGroupId;
+    DMError error = ScreenManager::GetInstance().MakeExpand(options, screenGroupId);
+    EXPECT_EQ(error, DMError::DM_ERROR_INVALID_PARAM)
 }
 
 /**

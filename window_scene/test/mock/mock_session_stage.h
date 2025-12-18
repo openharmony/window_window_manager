@@ -98,6 +98,7 @@ public:
     MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
     MOCK_METHOD1(UpdateIsShowDecorInFreeMultiWindow, WSError(bool isShow));
+    MOCK_METHOD1(UpdateBrightness, WSError(float brightness));
 };
 } // namespace Rosen
 } // namespace OHOS

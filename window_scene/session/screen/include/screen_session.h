@@ -129,6 +129,7 @@ public:
     Rotation GetRotation() const;
     void SetRotation(Rotation rotation);
     void SetRotationAndScreenRotationOnly(Rotation rotation);
+    void SetOrientationMatchRotation(Rotation rotation, FoldDisplayMode displayMode);
     void SetScreenRequestedOrientation(Orientation orientation);
     Orientation GetScreenRequestedOrientation() const;
     void SetUpdateToInputManagerCallback(std::function<void(float)> updateToInputManagerCallback);
@@ -272,6 +273,7 @@ public:
     void SetValidWidth(uint32_t validWidth);
     uint32_t GetValidHeight() const;
     uint32_t GetValidWidth() const;
+    float GetVirtualPixelRatio() const;
     void SetRealHeight(uint32_t realHeight) { property_.SetScreenRealHeight(realHeight); }
     void SetRealWidth(uint32_t realWidth) { property_.SetScreenRealWidth(realWidth); }
 

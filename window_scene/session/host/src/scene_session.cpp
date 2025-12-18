@@ -961,6 +961,53 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
     }
 }
 
+void SceneSession::NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(SessionEvent event)
+{
+    if (!ShouldNotifyWindowStatusChange(event)) {
+        return;
+    }
+    constexpr uint32_t timesToWaitForVsyncs = 2;
+    RunAfterNVsyncs(timesToWaitForVsyncs, [weakSession = wptr(this), where = __func__](int64_t, int64_t) {
+        auto session = weakSession.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
+        }
+
+        session->ExecuteWindowStatusChangeNotification(where);
+    });
+}
+
+bool SceneSession::ShouldNotifyWindowStatusChange(SessionEvent event) const
+{
+    const auto currentMode = GetWindowMode();
+    bool isDockAutoHide = onGetIsDockAutoHideFunc_ ? onGetIsDockAutoHideFunc_() : false;
+
+    return (event == SessionEvent::EVENT_MAXIMIZE &&
+            currentMode == WindowMode::WINDOW_MODE_FULLSCREEN &&
+            isDockAutoHide);
+}
+
+void SceneSession::ExecuteWindowStatusChangeNotification(const char* where)
+{
+    PostTask([weakSession = wptr(this), where] {
+        auto session = weakSession.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
+        }
+
+        if (!session->sessionStage_) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: sessionStage is null", where);
+            return;
+        }
+
+        session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: Notify completed, windowId: %{public}d",
+            where, session->GetPersistentId());
+    }, __func__);
+}
+
 WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam& param)
 {
     PostTask([weakThis = wptr(this), event, param, where = __func__] {
@@ -970,6 +1017,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
+        session->NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(event);
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
         bool proportionalScale = property->IsAdaptToProportionalScale();
@@ -2564,10 +2612,10 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
 
 void SceneSession::NotifyPropertyWhenConnect()
 {
-    WLOGFI("Notify property when connect.");
+    TLOGI(WmsLogTag::DEFAULT, "In");
     auto property = GetSessionProperty();
     if (property == nullptr) {
-        WLOGFD("id: %{public}d property is nullptr", persistentId_);
+        TLOGD(WmsLogTag::DEFAULT, "id: %{public}d property is nullptr", persistentId_);
         return;
     }
     NotifySessionFocusableChange(property->GetFocusable());
@@ -8052,11 +8100,6 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
-void SceneSession::RegisterForceSplitEnableListener(const NotifyForceSplitEnableFunc& func)
-{
-    forceSplitEnableFunc_ = func;
-}
-
 void SceneSession::RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func)
 {
     if (!func) {
@@ -8131,15 +8174,6 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return WMError::WM_OK;
 }
 
-WMError SceneSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    if (forceSplitEnableFunc_ == nullptr) {
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
-    return WMError::WM_OK;
-}
-
 WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
 {
     return PostSyncTask([weakThis = wptr(this), &hookWindowInfo, where = __func__]() -> WMError {
@@ -8154,6 +8188,27 @@ WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowI
         }
         hookWindowInfo = session->getHookWindowInfoFunc_(session->GetSessionInfo().bundleName_);
         return WMError::WM_OK;
+    }, __func__);
+}
+
+void SceneSession::NotifyWindowStatusDidChangeAfterShowWindow()
+{
+    PostTask([weakSession = wptr(this), where = __func__] {
+        auto session = weakSession.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
+        }
+        constexpr uint32_t timesToWaitForVsyncs = 2;
+        session->RunAfterNVsyncs(timesToWaitForVsyncs, [weakSession, where](int64_t, int64_t) {
+            auto session = weakSession.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+                return;
+            }
+
+            session->ExecuteWindowStatusChangeNotification(where);
+            });
     }, __func__);
 }
 
