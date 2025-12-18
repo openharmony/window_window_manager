@@ -3101,7 +3101,7 @@ napi_value JsSceneSessionManager::OnSendTouchEvent(napi_env env, napi_callback_i
         return NapiGetUndefined(env);
     }
     uint32_t identity = static_cast<uint32_t>(SendTouchAction::ACTION_NORMAL);
-    if (argc == ARGC_THREE && !ConvertFromJsValue(env, argv[ARGC_TWO], zIndex)) {
+    if (argc == ARGC_THREE && !ConvertFromJsValue(env, argv[ARGC_TWO], identity)) {
         TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to identity");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
