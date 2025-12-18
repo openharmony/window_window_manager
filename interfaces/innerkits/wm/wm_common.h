@@ -1738,6 +1738,19 @@ enum class PiPControlType : uint32_t {
     END,
 };
 
+/**
+ * @brief Enumerates picture in picture state change reason.
+ */
+enum class PiPStateChangeReason : int32_t {
+    REQUEST_START = 0,
+    AUTO_START = 1,
+    REQUEST_DELETE = 2,
+    PANEL_ACTION_DELETE = 3,
+    DRAG_DELETE = 4,
+    PANEL_ACTION_RESTORE = 5,
+    OTHER = 6,
+};
+
 struct PiPControlStatusInfo {
     PiPControlType controlType;
     PiPControlStatus status;
