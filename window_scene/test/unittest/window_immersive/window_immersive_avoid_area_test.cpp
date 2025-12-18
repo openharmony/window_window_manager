@@ -403,6 +403,91 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, NotifyNextAvoidRectInfo_02, TestSize.Leve
     ASSERT_EQ(nextSystemBarAvoidAreaRectInfo.second, landspaceRect);
     ssm_->sceneSessionMap_.clear();
 }
+
+/*
+ * @tc.name: CalculateAvoidAreaByScale
+ * @tc.desc: SceneSesion test CalculateAvoidAreaByScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImmersiveAvoidAreaTest, CalculateAvoidAreaByScale, TestSize.Level0)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testbundleName";
+    sessionInfo.abilityName_ = "testabilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    Rect avoidAreaRect = { 0, 0, 0, 0 };
+    sceneSession->CalculateAvoidAreaByScale(avoidAreaRect);
+}
+
+/*
+ * @tc.name: CalculateWindowRectByScale
+ * @tc.desc: SceneSesion test CalculateWindowRectByScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImmersiveAvoidAreaTest, CalculateWindowRectByScale, TestSize.Level0)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testbundleName";
+    sessionInfo.abilityName_ = "testabilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    WSRect winRect= { 0, 0, 0, 0 };
+    sceneSession->CalculateWindowRectByScale(winRect);
+}
+/*
+ * @tc.name: GetScaleInLSState
+ * @tc.desc: SceneSesion test GetScaleInLSState
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImmersiveAvoidAreaTest, GetScaleInLSState, TestSize.Level0)
+{
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "testbundleName";
+    sessionInfo.abilityName_ = "testabilityName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    float scaleX = 1;
+    float scaleY = 1;
+    sceneSession->SetScale(-1, -1, -1, -1);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    sceneSession->GetScaleInLSState(scaleX, scaleY);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->GetScaleInLSState(scaleX, scaleY);
+    sceneSession->specificCallback_ = sptr<SpecificSessionCallback>::MakeSptr();
+    sceneSession->GetScaleInLSState(scaleX, scaleY);
+    sceneSession->specificCallback_->onGetLSState_ = []() { return false; }
+    sceneSession->GetScaleInLSState(scaleX, scaleY);
+    sceneSession->specificCallback_->onGetLSState_ = []() { return true; }
+    sceneSession->GetScaleInLSState(scaleX, scaleY);
+    sceneSession->SetScale(1, -1, -1, -1);
+    sceneSession->GetScaleInLSState(scaleX, scaleY);
+    sceneSession->SetScale(1, 1, -1, -1);
+    sceneSession->GetScaleInLSState(scaleX, scaleY);
+}
+/**
+ * @tc.name: UpdateAvoidAreaForLSStateChange
+ * @tc.desc: SceneSesionManager test UpdateAvoidAreaForLSStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidAreaForLSStateChange, TestSize.Level0)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->UpdateAvoidAreaForLSStateChange(1, 1);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->UpdateAvoidAreaForLSStateChange(1, 2);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession2->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession2->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->sceneSessionMap_.insert({ 2, nullptr });
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession2 });
+    ssm_->UpdateAvoidAreaForLSStateChange(1, 2);
+}
 }
 }
 }
