@@ -53,6 +53,7 @@ bool WriteAbilitySessionInfoBasic(MessageParcel& data, sptr<AAFwk::SessionInfo> 
         !data.WriteInt64(abilitySessionInfo->uiAbilityId) ||
         !data.WriteInt32(abilitySessionInfo->callingTokenId) ||
         !data.WriteInt32(abilitySessionInfo->requestId) ||
+        !data.WriteInt32(abilitySessionInfo->specifiedReason) ||
         !data.WriteBool(abilitySessionInfo->reuse) ||
         !data.WriteParcelable(abilitySessionInfo->processOptions.get())) {
         return false;
@@ -508,10 +509,6 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(abilitySessionInfo->isFromIcon)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromIcon failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
     if (abilitySessionInfo->startWindowOption) {
         if (!data.WriteBool(true) || !data.WriteParcelable(abilitySessionInfo->startWindowOption.get())) {
             TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Write startWindowOption failed");
@@ -706,10 +703,6 @@ WSError SessionProxy::WriteOneSessionInfoPart(MessageParcel& data, const sptr<AA
     }
     if (!data.WriteString(abilitySessionInfo->instanceKey)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write instanceKey failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(abilitySessionInfo->isFromIcon)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write isFromIcon failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     auto size = abilitySessionInfo->supportWindowModes.size();
