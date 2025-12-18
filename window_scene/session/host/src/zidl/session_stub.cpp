@@ -73,6 +73,10 @@ int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> ab
         TLOGE(WmsLogTag::WMS_LIFE, "Read requestId failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadInt32(abilitySessionInfo->specifiedReason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read specifiedReason failed.");
+        return ERR_INVALID_DATA;
+    }
     if (!data.ReadBool(abilitySessionInfo->reuse)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read reuse failed.");
         return ERR_INVALID_DATA;
@@ -852,10 +856,6 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
         return ERR_INVALID_DATA;
     }
-    if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
-        return ERR_INVALID_DATA;
-    }
     bool hasStartWindowOption = false;
     if (!data.ReadBool(hasStartWindowOption)) {
         TLOGE(WmsLogTag::WMS_STARTUP_PAGE, "Read hasStartWindowOption failed.");
@@ -990,10 +990,6 @@ int SessionStub::ReadOneAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::Sess
     if (!data.ReadString(abilitySessionInfo->instanceKey)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read instanceKey failed.");
         return ERR_INVALID_VALUE;
-    }
-    if (!data.ReadBool(abilitySessionInfo->isFromIcon)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Read isFromIcon failed.");
-        return ERR_INVALID_DATA;
     }
     uint32_t size = data.ReadUint32();
     if (size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE) {

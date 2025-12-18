@@ -381,6 +381,12 @@ enum class StartWindowType : uint32_t {
     REMOVE_NODE_INVISIBLE,
 };
 
+enum class SpecifiedReason : int32_t {
+    DEFAULT = 0,
+    BY_SCB,
+    FROM_RENCENT,
+};
+
 struct AtomicServiceInfo {
     std::string appNameInfo_ = "";
     std::string eyelashRingIcon_ = "";
@@ -407,7 +413,6 @@ struct SessionInfo {
     sptr<IRemoteObject> rootToken_ = nullptr;
     uint64_t screenId_ = -1;
     bool isPersistentRecover_ = false;
-    bool isFromIcon_ = false;
     AtomicServiceInfo atomicServiceInfo_;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
@@ -468,6 +473,7 @@ struct SessionInfo {
     std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
+    SpecifiedReason specifiedReason_ = SpecifiedReason::DEFAULT;
     // only init when requestSceneSession from SCB
     bool isAncoApplication_ = false;
     int32_t scenarios = 0;
