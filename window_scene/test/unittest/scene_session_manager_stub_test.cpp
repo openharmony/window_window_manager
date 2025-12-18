@@ -2862,13 +2862,13 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetPiPSettingSwitchStatus, Function 
 */
 HWTEST_F(SceneSessionManagerStubTest, HandleGetIsPipEnabled, Function | SmallTest | Level2)
 {
-MessageParcel data;
-MessageParcel reply;
-bool isPipEnabled = false;
-data.WriteBool(isPipEnabled);
-
-int res = stub_->HandleGetIsPipEnabled(data, reply);
-EXPECT_EQ(res, ERR_NONE);
+    MessageParcel data;
+    MessageParcel reply;
+    bool isPipEnabled = false;
+    data.WriteBool(isPipEnabled);
+    
+    int res = stub_->HandleGetIsPipEnabled(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 
 /**
