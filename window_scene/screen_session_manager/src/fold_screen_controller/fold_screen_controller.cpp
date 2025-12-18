@@ -155,7 +155,7 @@ void FoldScreenController::SetDisplayMode(const FoldDisplayMode displayMode)
 void FoldScreenController::NotifyRunSensorFoldStateManager()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess FoldScreenController::NotifyRunSensorFoldStateManager");
-    sensorFoldStateManager_->NotifyRunTaskSequence();
+    sensorFoldStateManager_->FinishTaskSequence();
 }
 
 void FoldScreenController::RecoverDisplayMode()
