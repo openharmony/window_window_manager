@@ -131,6 +131,7 @@ using GetKeyboardOccupiedAreaWithRotationCallback =
     std::function<void(int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)>;
 using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
     std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
+using GetLSStateFunc = std::std::function<bool()>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
@@ -161,6 +162,7 @@ using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 
+
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
     uint32_t callingTokenId { 0 };
@@ -187,6 +189,7 @@ public:
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
         GetNextAvoidAreaRectInfoFunc onGetNextAvoidAreaRectInfo_;
+        GetLSStateFunc onGetLSState_;
         OnOutsideDownEvent onOutsideDownEvent_;
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
@@ -1209,6 +1212,8 @@ private:
     void GetKeyboardAvoidAreaByRotation(Rotation rotation, const WSRect& rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByRotation(Rotation rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
+    void CalculateWindowRectByScale(WSRect& winRect);
+    void CalculateAvoidAreaByScale(Rect& avoidAreaRect);
 
     /*
      * Window Lifecycle

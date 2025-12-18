@@ -166,6 +166,7 @@ public:
     static napi_value SetMaximizeFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value NotifyLSStateChange(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 
@@ -300,6 +301,7 @@ private:
     napi_value OnSetMaximizeFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnNotifyLSStateChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 

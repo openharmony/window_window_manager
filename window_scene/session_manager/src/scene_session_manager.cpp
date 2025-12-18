@@ -2072,6 +2072,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
+    specificCb->onGetLSState_ = [this]() {
+        return this->GetLSState();
+    };
     specificCb->onOutsideDownEvent_ = [this](int32_t x, int32_t y) {
         this->OnOutsideDownEvent(x, y);
     };
@@ -13063,6 +13066,26 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
         sceneSession->SetIsStatusBarVisible(isVisible);
     }, __func__);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::UpdateAvoidAreaForLSStateChange(int32_t curState, int32_t preState)
+{
+    if (curState == preState) {
+        return;
+    }
+    constexpr int32_t NON_LS_STATE = 0;
+    SetLSState(curState > NON_LS_STATE);
+    TLOGI(WmsLogTag::WMS_IMMS, "curState %{public}d, preState %{public}d", curState, preState);
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto& iter : sceneSessionMap_) {
+            auto session = iter.second;
+            if (session == nullptr || !IsSessionVisibleForeground(session)) {
+                continue;
+            }
+            session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END);
+        }
+    }
 }
 
 void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible)
