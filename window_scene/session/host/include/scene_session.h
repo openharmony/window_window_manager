@@ -1213,6 +1213,7 @@ private:
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
     void CalculateWindowRectByScale(WSRect& winRect);
     void CalculateAvoidAreaByScale(Rect& avoidAreaRect) const;
+    void GetScaleInLSState(float& scaleX, float& scaleY);
 
     /*
      * Window Lifecycle
