@@ -2283,7 +2283,11 @@ void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
   void SceneSessionManager::SchedulePcAppInPadLifecycle(bool isBackground)
 {
     auto task = [this, isBackground] {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMapCopy = sceneSessionMap_;
+        }
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession == nullptr) {
                 TLOGE(WmsLogTag::WMS_LIFE, "session is null");
