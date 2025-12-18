@@ -70,9 +70,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
             foldScreenPolicy->SendSensorResult(mState_);
         }
     };
-    TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
-        .task = task};
-    taskProcessor_.Push(eventInfo);
+    taskProcessor_.PushToQueue(task);
 }
 
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
@@ -134,9 +132,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             taskScheduler->PostAsyncTask(task, "secondaryFoldStatusChange");
         }
     };
-    TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
-        .task = event};
-    taskProcessor_.Push(eventInfo);
+    taskProcessor_.PushToQueue(task);
 }
 
 void SensorFoldStateManager::FinishTaskSequence()
