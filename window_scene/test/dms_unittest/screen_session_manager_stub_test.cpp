@@ -3379,6 +3379,44 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_3, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest156
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest156, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_WHITE_LIST);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequest157
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest157, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_WHITE_LIST);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: ProcSetPrimaryDisplaySystemDpi
  * @tc.desc: normal function, TRANS_ID_SET_PRIMARY_DISPLAY_SYSTEM_DPI test
  * @tc.type: FUNC

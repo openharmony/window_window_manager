@@ -1440,6 +1440,26 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusSessionInfo1, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleGetFocusWindowInfoByAbilityToken
+ * @tc.desc: test HandleGetFocusWindowInfoByAbilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleGetFocusWindowInfoByAbilityToken, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> token = nullptr;
+    data.WriteRemoteObject(token);
+    int res = stub_->HandleGetFocusWindowInfoByAbilityToken(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    token = sptr<IRemoteObjectMocker>::MakeSptr();
+    data.WriteRemoteObject(token);
+    res = stub_->HandleGetFocusWindowInfoByAbilityToken(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetFocusSessionElement
  * @tc.desc: test HandleGetFocusSessionElement
  * @tc.type: FUNC

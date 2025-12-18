@@ -680,6 +680,11 @@ public:
         return WSError::WS_OK;
     }
     
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated()
+    {
+        return WSError::WS_OK;
+    }
+    
     /*
      * Window event
      */

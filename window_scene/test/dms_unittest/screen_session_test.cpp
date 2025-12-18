@@ -36,6 +36,11 @@ namespace {
     {
     g_errLog = msg;
     }
+    void MyLogCallbackWithAllLog(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_errLog += msg;
+    }
 }
 
 class MockScreenChangeListener : public IScreenChangeListener {
@@ -5041,7 +5046,7 @@ HWTEST_F(ScreenSessionTest, UpdateScbScreenPropertyForSuperFlod, TestSize.Level1
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         GTEST_SKIP();
     }
-    LOG_SetCallback(MyLogCallback);
+    LOG_SetCallback(MyLogCallbackWithAllLog);
     g_errLog.clear();
     ScreenProperty property;
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, property, 0);

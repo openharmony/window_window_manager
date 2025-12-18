@@ -5572,7 +5572,7 @@ WMError WindowSceneSessionImpl::SetWindowShadowEnabled(bool isEnabled)
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "This is PcAppInPad, not supported");
         return WMError::WM_OK;
     }
-    if (!windowSystemConfig_.IsPcWindow()) {
+    if (!windowSystemConfig_.IsPcWindow() && !windowSystemConfig_.IsPadWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (IsWindowSessionInvalid()) {
@@ -6814,6 +6814,7 @@ WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
     if (displayIdChanged) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
         NotifyDisplayIdChange(displayId);
+        NotifyDmsDisplayMove(displayId);
     }
     return WSError::WS_OK;
 }
@@ -7737,12 +7738,30 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
+    WindowType winType = GetType();
     bool enableForceSplit = false;
-    if (GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
+    if (WindowHelper::IsMainWindow(winType) &&
+        GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
         SetForceSplitConfigEnable(enableForceSplit);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
+}
+
+void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
+{
+    WindowType winType = GetType();
+    if (!WindowHelper::IsMainWindow(winType)) {
+        return;
+    }
+    std::shared_ptr<Ace::UIContent> uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u",
+        enableForceSplit);
+    uiContent->SetForceSplitEnable(enableForceSplit);
 }
 
 WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)

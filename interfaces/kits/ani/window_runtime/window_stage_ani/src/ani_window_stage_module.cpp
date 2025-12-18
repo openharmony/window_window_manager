@@ -134,6 +134,8 @@ std::array g_functions = {
         "lC{std.core.String}:C{@ohos.window.window.Window}",
         reinterpret_cast<void *>(AniWindowManager::FindWindow)},
     ani_native_function {"minimizeAllSync", "ll:", reinterpret_cast<void *>(AniWindowManager::MinimizeAll)},
+    ani_native_function {"minimizeAllWithExclusionSync", "lli:",
+        reinterpret_cast<void *>(AniWindowManager::MinimizeAllWithExclusion)},
     ani_native_function {"destroyAniExtConfig", nullptr, reinterpret_cast<void *>(AniExtensionWindowConfig::Finalizer)},
 };
 
