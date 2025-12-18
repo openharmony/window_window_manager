@@ -22,6 +22,7 @@
 #include <string_ex.h>
 #include <unique_fd.h>
 #include <unordered_set>
+#include <cmath>
 #include "input_manager.h"
 
 #include <hitrace_meter.h>
@@ -4103,7 +4104,7 @@ static std::vector<int> GetDeviceRadiusFormConfig(float dpi)
     for (const auto& item : radius) {
         float value = std::stof(item);
         if (value > 0) {
-            int radiusPx = static_cast<int>(dpi * value); //conver radius vp to px
+            int radiusPx = static_cast<int>(std::ceil(dpi * value)); //convert radius vp to px
             result.push_back(radiusPx);
         } else {
             break;

@@ -1186,7 +1186,7 @@ HWTEST_F(ScreenSessionManagerTest, GetRoundedCorner, TestSize.Level1)
 {
     std::vector<RoundedCorner> roundedCorner;
     int radius = 0;
-    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetRoundedCorner(0, radius));
+    EXPECT_EQ(DMError::DM_OK, ssm_->GetRoundedCorner(0, radius));
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
