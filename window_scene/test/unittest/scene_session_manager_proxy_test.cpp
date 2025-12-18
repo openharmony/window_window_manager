@@ -423,6 +423,61 @@ HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFocusWindowInfoByAbilityToken
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfoByAbilityToken, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerProxy> proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    FocusChangeInfo focusInfo{};
+    sptr<IRemoteObject> token = nullptr;
+    proxy->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    
+    token = sptr<IRemoteObjectMocker>::MakeSptr();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    proxy->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(true);
+    proxy->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    proxy->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    proxy->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: GetFocusWindowInfoByAbilityToken_NullRemote
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfoByAbilityToken_NullRemote, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = nullptr;
+    sptr<SceneSessionManagerProxy> proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+
+    FocusChangeInfo focusInfo{};
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+    proxy->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+}
+
+/**
  * @tc.name: SetSessionIcon
  * @tc.desc: normal function
  * @tc.type: FUNC
