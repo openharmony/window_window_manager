@@ -78,7 +78,7 @@ HWTEST_F(SceneSessionManagerTest, IsPcSceneSessionLifecycle1, Function | SmallTe
     EXPECT_TRUE(ret);
 }
 
-  /**
+/**
  * @tc.name: IsPcSceneSessionLifecycle2
  * @tc.desc: pc app in pad
  * @tc.type: FUNC
