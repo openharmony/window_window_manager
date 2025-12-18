@@ -5664,8 +5664,8 @@ napi_value JsSceneSessionManager::SetIsPipEnabled(napi_env env, napi_callback_in
  
 napi_value JsSceneSessionManager::OnSetIsPipEnabled(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = { nullptr };
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_PIP, "Argc is invalid: %{public}zu", argc);
