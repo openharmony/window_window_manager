@@ -3193,7 +3193,7 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
-void SceneSession::GetScaleInLSState(float& scaleX, float& scaleY)
+void SceneSession::GetScaleInLSState(float& scaleX, float& scaleY) const
 {
     if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN || specificCallback_ ||
         specificCallback_->onGetLSState_ || specificCallback_->onGetLSState_) {
@@ -3214,11 +3214,11 @@ void SceneSession::CalculateWindowRectByScale(WSRect& winRect)
     float scaleX = 1;
     float scaleY = 1;
     GetScaleInLSState(scaleX, scaleY);
-    winRect.width_ * = scaleX_;
-    winRect.height_ * = scaleY;
+    winRect.width_ *= scaleX;
+    winRect.height_ *= scaleY;
 }
 
-void SceneSession::CalculateAvoidAreaByScale(Rect& avoidAreaRect)
+void SceneSession::CalculateAvoidAreaByScale(Rect& avoidAreaRect) const
 {
     float scaleX = 1;
     float scaleY = 1;
