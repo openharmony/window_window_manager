@@ -962,7 +962,7 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_scaleMode, TestSize
     mainSession->RegisterNotifySurfaceBoundsChangeFunc(subSession2->GetPersistentId(), std::move(task2));
     ASSERT_NE(nullptr, mainSession->notifySurfaceBoundsChangeFuncMap_[subSession1->GetPersistentId()]);
     WSRect rect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
@@ -1036,7 +1036,7 @@ HWTEST_F(MainSessionTest, NotifySubAndDialogFollowRectChange_compatMode, TestSiz
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToProportionalScale(true);
     mainSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     mainSession->callingPid_ = 1;
     subSession1->callingPid_ = 1;
     subSession2->callingPid_ = 2;
@@ -1121,6 +1121,118 @@ HWTEST_F(MainSessionTest, IsExitSplitOnBackgroundRecover, TestSize.Level1)
     session->UpdateWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     session->isExitSplitOnBackground_ = true;
     EXPECT_EQ(session->IsExitSplitOnBackgroundRecover(), true);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfigEnable01
+ * @tc.desc: Test GetAppForceLandscapeConfigEnable when forceSplitEnableFunc_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, GetAppForceLandscapeConfigEnable01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "testMainSession1";
+    info.moduleName_ = "testMainSession2";
+    info.bundleName_ = "testMainSession3";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    
+    bool enableForceSplit = false;
+    WMError res = session->GetAppForceLandscapeConfigEnable(enableForceSplit);
+    EXPECT_EQ(res, WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: GetAppForceLandscapeConfigEnable02
+ * @tc.desc: Test GetAppForceLandscapeConfigEnable when forceSplitEnableFunc_ is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, GetAppForceLandscapeConfigEnable02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "testMainSession1";
+    info.moduleName_ = "testMainSession2";
+    info.bundleName_ = "testBundle";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    
+    bool expectedEnable = true;
+    session->RegisterForceSplitEnableListener(
+        [expectedEnable](const std::string& bundleName) {
+            return expectedEnable;
+        });
+    
+    bool enableForceSplit = false;
+    WMError res = session->GetAppForceLandscapeConfigEnable(enableForceSplit);
+    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_EQ(enableForceSplit, expectedEnable);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated01
+ * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated when sessionStage_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "testMainSession1";
+    info.moduleName_ = "testMainSession2";
+    info.bundleName_ = "testMainSession3";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->sessionStage_ = nullptr;
+    
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated();
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated02
+ * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated when sessionStage_ is set
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "testMainSession1";
+    info.moduleName_ = "testMainSession2";
+    info.bundleName_ = "testMainSession3";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated();
+    EXPECT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RegisterForceSplitEnableListener
+ * @tc.desc: Test RegisterForceSplitEnableListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, RegisterForceSplitEnableListener, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "testMainSession1";
+    info.moduleName_ = "testMainSession2";
+    info.bundleName_ = "testBundle";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    
+    bool callbackCalled = false;
+    bool callbackResult = true;
+    session->RegisterForceSplitEnableListener(
+        [&callbackCalled, callbackResult](const std::string& bundleName) {
+            callbackCalled = true;
+            return callbackResult;
+        });
+    
+    bool enableForceSplit = false;
+    WMError res = session->GetAppForceLandscapeConfigEnable(enableForceSplit);
+    EXPECT_EQ(res, WMError::WM_OK);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(enableForceSplit, callbackResult);
 }
 } // namespace
 } // namespace Rosen

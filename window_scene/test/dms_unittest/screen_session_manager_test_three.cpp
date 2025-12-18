@@ -818,11 +818,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen, TestSize.Level1)
         screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
     }
     ssm_->NotifyCreatedScreen(screenSession);
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        EXPECT_TRUE(g_logMsg.find("super fold device, change by rotation.") == std::string::npos);
-    } else {
-        EXPECT_FALSE(g_logMsg.find("super fold device, change by rotation.") == std::string::npos);
-    }
+    EXPECT_TRUE(g_logMsg.find("super fold device, change by rotation.") == std::string::npos);
 }
 
 /**
@@ -857,7 +853,7 @@ HWTEST_F(ScreenSessionManagerTest, SetPrimaryDisplaySystemDpi, Function | SmallT
 HWTEST_F(ScreenSessionManagerTest, HandleSwitchPcMode, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!IS_SUPPORT_PC_MODE) {
+    if (IS_SUPPORT_PC_MODE) {
         bool isPcDevice = ssm_->HandleSwitchPcMode();
         ASSERT_EQ(isPcDevice, g_isPcDevice);
         GTEST_SKIP();
@@ -964,7 +960,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenOffsetFeatureTest, Function | SmallT
 HWTEST_F(ScreenSessionManagerTest, InitSecondaryDisplayPhysicalParams, TestSize.Level1)
 {
     if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        return;
+        GTEST_SKIP();
     }
     ASSERT_NE(ssm_, nullptr);
     ssm_->InitSecondaryDisplayPhysicalParams();

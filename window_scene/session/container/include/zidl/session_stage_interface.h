@@ -289,6 +289,7 @@ public:
     virtual WSError NotifyAppForceLandscapeConfigEnableUpdated() = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
+    virtual WSError UpdateBrightness(float brightness) = 0;
 
     /**
      * @brief Send fb event to client.

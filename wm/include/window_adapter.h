@@ -116,6 +116,7 @@ public:
     virtual void SetMaximizeMode(MaximizeMode maximizeMode);
     virtual MaximizeMode GetMaximizeMode();
     virtual void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
+    virtual void GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo, const sptr<IRemoteObject>& abilityToken);
     virtual WMError UpdateSessionAvoidAreaListener(int32_t persistentId, bool haveListener);
     virtual WMError UpdateSessionTouchOutsideListener(int32_t& persistentId, bool haveListener);
     virtual WMError NotifyWindowExtensionVisibilityChange(int32_t pid, int32_t uid, bool visible);
@@ -272,8 +273,8 @@ private:
     void WindowManagerAndSessionRecover();
     void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
-    uint32_t observedFlags_;
-    uint32_t interestedFlags_;
+    uint32_t observedFlags_ = 0;
+    uint32_t interestedFlags_ = 0;
     std::string appWatermarkName_;
     std::unordered_map<WindowType, int32_t> specificZIndexMap_;
 

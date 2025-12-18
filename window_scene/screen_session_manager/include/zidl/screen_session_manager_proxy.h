@@ -251,6 +251,7 @@ public:
         bool enable) override;
     void NotifySwitchUserAnimationFinish() override;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
+    DMError GetRoundedCorner(DisplayId displayId, int& radius) override;
 
 private:
     static inline BrokerDelegator<ScreenSessionManagerProxy> delegator_;

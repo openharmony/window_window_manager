@@ -1500,17 +1500,18 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
 
     KeyboardLayoutParams tmpParams;
     const Rect expected = {1, 2, 3, 4};
-    tmpParams.PortraitKeyboardRect_ = expected;
+    tmpParams.LandscapeKeyboardRect_ = expected;
 
+    window->property_->SetRequestRect({0, 0, 0, 0});
     window->property_->SetKeyboardLayoutParams(tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_EQ(window->property_->windowRect_, expected);
+    ASSERT_NE(window->property_->requestRect_, expected);
 
     tmpParams.displayId_ = 0;
     displayInfo->screenId_ = 0;
     window->property_->AddKeyboardLayoutParams(0, tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_EQ(window->property_->windowRect_, expected);
+    ASSERT_EQ(window->property_->requestRect_, expected);
 }
 
 /**
@@ -2243,6 +2244,33 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor01, TestSize.Level1
     activeColor = "rgb#00000000";
     res = window->SetWindowContainerColor(activeColor, inactiveColor);
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetWindowContainerColor02
+ * @tc.desc: SetWindowContainerColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, SetWindowContainerColor02, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetBundleName("SetWindowContainerColor");
+    option->SetWindowName("SetWindowContainerColor");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    std::string activeColor = "#00000000";
+    std::string inactiveColor = "#FF000000";
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    auto res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
+    window->containerColorList_.insert("SetWindowContainerColor");
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    res = window->SetWindowContainerColor(activeColor, inactiveColor);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**

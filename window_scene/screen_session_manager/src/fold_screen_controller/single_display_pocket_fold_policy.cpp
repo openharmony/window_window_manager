@@ -531,15 +531,15 @@ void SingleDisplayPocketFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession>
     if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
         ScreenProperty property = screenSession->UpdatePropertyByFoldControl(screenProperty_);
         ScreenSessionManager::GetInstance().OnBeforeScreenPropertyChange(currentFoldStatus_);
-        screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
         screenSession->PropertyChange(property, reason);
         TLOGI(WmsLogTag::DMS, "screenBounds : width_= %{public}f, height_= %{public}f",
             screenSession->GetScreenProperty().GetBounds().rect_.width_,
             screenSession->GetScreenProperty().GetBounds().rect_.height_);
+        screenSession->SetRotationAndScreenRotationOnly(Rotation::ROTATION_0);
         ScreenSessionManager::GetInstance().NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
             DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
     } else {
-        screenSession->NotifyFoldPropertyChange(screenProperty_, reason, FoldDisplayMode::UNKNOWN);
+        screenSession->NotifyFoldPropertyChange(screenProperty_, reason, GetScreenDisplayMode());
     }
 }
 

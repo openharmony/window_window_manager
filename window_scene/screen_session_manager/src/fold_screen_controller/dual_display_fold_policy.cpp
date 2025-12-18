@@ -514,7 +514,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayModeOnBootAnimation(sptr<ScreenSe
             screenSession->GetScreenProperty().GetBounds().rect_.width_,
             screenSession->GetScreenProperty().GetBounds().rect_.height_);
     } else {
-        screenSession->NotifyFoldPropertyChange(screenProperty_, reason, FoldDisplayMode::UNKNOWN);
+        screenSession->NotifyFoldPropertyChange(screenProperty_, reason, GetScreenDisplayMode());
     }
     screenId_ = screenId;
 }

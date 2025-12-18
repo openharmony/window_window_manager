@@ -245,6 +245,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAppForceLandscapeConfigEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO):
             return HandleGetAppHookWindowInfoFromServer(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_STATUS_AFTER_SHOW_WINDOW):
+            return HandleNotifyWindowStatusDidChangeAfterShowWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
             return HandleSetDialogSessionBackGestureEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT):
@@ -1954,6 +1956,13 @@ int SessionStub::HandleGetAppHookWindowInfoFromServer(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifyWindowStatusDidChangeAfterShowWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    NotifyWindowStatusDidChangeAfterShowWindow();
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_DIALOG, "called");
@@ -2607,6 +2616,13 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    NotifyAppForceLandscapeConfigEnableUpdated();
     return ERR_NONE;
 }
 

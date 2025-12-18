@@ -2220,7 +2220,7 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer01, TestSize.Level1)
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     mainSession->GetLayoutController()->SetSessionRect(rect);
@@ -2242,7 +2242,7 @@ HWTEST_F(SceneSessionTest5, WindowScaleTransfer02, TestSize.Level1)
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect rect = { 200, 200, 200, 200 };
-    WSRect resultRect = { 100, 100, 400, 400 };
+    WSRect resultRect = { 200, 200, 400, 400 };
     float scaleX = 2.0f;
     float scaleY = 2.0f;
     mainSession->GetLayoutController()->SetSessionRect(rect);
@@ -2316,7 +2316,7 @@ HWTEST_F(SceneSessionTest5, HookStartMoveRect, TestSize.Level1)
     info.screenId_ = 0;
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect preRect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     mainSession->SetScale(scaleX, scaleY, 0.5f, 0.5f);
@@ -2349,7 +2349,7 @@ HWTEST_F(SceneSessionTest5, CompatibilityModeWindowScaleTransfer, TestSize.Level
     sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     WSRect preRect = { 100, 100, 400, 400 };
     WSRect noChangeRect = { 100, 100, 400, 400 };
-    WSRect resultRect = { 200, 200, 200, 200 };
+    WSRect resultRect = { 100, 100, 200, 200 };
     float scaleX = 0.5f;
     float scaleY = 0.5f;
     bool isScale = true;
