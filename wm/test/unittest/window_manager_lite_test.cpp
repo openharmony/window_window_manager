@@ -68,6 +68,27 @@ public:
     void OnWindowVisibilityChanged(const std::vector<sptr<WindowVisibilityInfo>>& windowVisibilityInfo) override {};
 };
 
+class MockWindowInfoChangedListener : public IWindowInfoChangedListener {
+public:
+    int32_t count_ = 0;
+
+    void OnWindowInfoChanged(const std::vector<std::unordered_map<WindowInfoKey,
+        WindowChangeInfoType>>& windowInfoList) override
+    {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "MockWindowInfoChangedListener");
+        ++count_;
+    };
+};
+
+class TestInterestWindowIdsListener : public IWindowInfoChangedListener {
+public:
+    void OnWindowInfoChanged(const WindowInfoList& windowInfoList) override
+    {
+        received_ = windowInfoList;
+    }
+    WindowInfoList received_;
+};
+
 class IWMSConnectionChangedListenerSon : public IWMSConnectionChangedListener {
 public:
     void OnConnected(int32_t userId, int32_t screenId) override {};
@@ -199,6 +220,40 @@ HWTEST_F(WindowManagerLiteTest, NotifyAccessibilityWindowInfo, TestSize.Level1)
     lite.pImpl_->NotifyAccessibilityWindowInfo(infos, type);
 
     LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: NotifyMidSceneStatusChange01
+ * @tc.desc: check NotifyMidSceneStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, NotifyMidSceneStatusChange01, TestSize.Level1)
+{
+    WindowInfoList windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::MID_SCENE, true}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+
+    windowManager.pImpl_->midSceneStatusChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+
+    auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
+
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->midSceneStatusChangeListeners_.push_back(listener);
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+
+    listener->SetInterestWindowIds({ 9 });
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
 }
 
 /**
@@ -1630,6 +1685,63 @@ HWTEST_F(WindowManagerLiteTest, GetInstanceMulti, TestSize.Level1)
     instance_ = &WindowManagerLite::GetInstance(userId_);
     ASSERT_NE(nullptr, instance);
 }
+
+/**
+ * @tc.name: GetWindowInfoListByInterestWindowIds_NullListener
+ * @tc.desc: listener 为 nullptr 时直接返回原列表
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_NullListener, Function | SmallTest | Level2)
+{
+    WindowInfoList windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info;
+    info.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1));
+    windowInfoList.emplace_back(info);
+
+    auto result = instance_->pImpl_->GetWindowInfoListByInterestWindowIds(nullptr, windowInfoList);
+    EXPECT_EQ(windowInfoList, result);
+}
+
+/**
+ * @tc.name: GetWindowInfoListByInterestWindowIds_EmptyInterestIds
+ * @tc.desc: InterestWindowIds 为空时返回原列表
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_EmptyInterestIds, Function | SmallTest | Level2)
+{
+    auto listener = sptr<TestInterestWindowIdsListener>::MakeSptr(); // 不设置兴趣窗口
+    WindowInfoList windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info;
+    info.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1));
+    windowInfoList.emplace_back(info);
+
+    auto result = instance_->pImpl_->GetWindowInfoListByInterestWindowIds(listener, windowInfoList);
+    EXPECT_EQ(windowInfoList, result);
+}
+
+/**
+ * @tc.name: GetWindowInfoListByInterestWindowIds_FilterMatch
+ * @tc.desc: 只返回匹配兴趣窗口 ID 的项
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerLiteTest, GetWindowInfoListByInterestWindowIds_FilterMatch, Function | SmallTest | Level2)
+{
+    auto listener = sptr<TestInterestWindowIdsListener>::MakeSptr();
+    listener->AddInterestWindowId(1);
+
+    WindowInfoList windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info1;
+    info1.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1));
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info2;
+    info2.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2));
+    windowInfoList.emplace_back(info1);
+    windowInfoList.emplace_back(info2);
+
+    auto result = instance_->pImpl_->GetWindowInfoListByInterestWindowIds(listener, windowInfoList);
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(info1, result.front());
+}
+
 
 /**
  * @tc.name: GetDisplayIdByWindowId
