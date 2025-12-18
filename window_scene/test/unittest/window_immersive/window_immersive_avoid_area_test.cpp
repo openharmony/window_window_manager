@@ -131,7 +131,6 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateRootSceneSessionAvoidArea, TestSize
 {
     ASSERT_NE(nullptr, ssm_);
     int32_t persistentId = 1;
-    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ASSERT_NE(nullptr, ssm_->rootSceneSession_);
     bool needUpdate = false;
     ssm_->UpdateRootSceneSessionAvoidArea(persistentId, needUpdate);
@@ -303,7 +302,6 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidArea_01, TestSize.Level1)
     int32_t persistentId = 0;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->UpdateAvoidArea(persistentId);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -326,7 +324,6 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidArea_02, TestSize.Level1)
     int32_t persistentId = 0;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->UpdateAvoidArea(persistentId);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest7";
@@ -349,7 +346,6 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidArea_03, TestSize.Level1)
     int32_t persistentId = 0;
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
-    ssm_->rootSceneSession_ = sptr<RootSceneSession>::MakeSptr();
     ssm_->UpdateAvoidArea(persistentId);
 }
 
@@ -453,7 +449,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, GetScaleInLSState, TestSize.Level0)
     float scaleY = 1;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->layoutController_ = sptr<LayoutController>::MakeSptr(property);
-    sceneSession->SetScale(-1, -1, -1, -1);
+    sceneSession->Session::SetScale(-1, -1, -1, -1);
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     sceneSession->GetScaleInLSState(scaleX, scaleY);
@@ -465,9 +461,9 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, GetScaleInLSState, TestSize.Level0)
     sceneSession->GetScaleInLSState(scaleX, scaleY);
     sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
     sceneSession->GetScaleInLSState(scaleX, scaleY);
-    sceneSession->SetScale(1, -1, -1, -1);
+    sceneSession->Session::SetScale(1, -1, -1, -1);
     sceneSession->GetScaleInLSState(scaleX, scaleY);
-    sceneSession->SetScale(1, 1, -1, -1);
+    sceneSession->Session::SetScale(1, 1, -1, -1);
     sceneSession->GetScaleInLSState(scaleX, scaleY);
 }
 /**
