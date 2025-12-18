@@ -1945,7 +1945,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetPiPSettingSwitchStatus, TestSize.Level
 
 HWTEST_F(sceneSessionManagerProxyTest, GetIsPipEnabled, TestSize.Level1)
 {
-    auto tempProxy = sptr::MakeSptr(nullptr);
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     bool isPipEnabled = false;
     
     // remote == nullptr
