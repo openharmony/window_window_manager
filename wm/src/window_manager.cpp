@@ -464,7 +464,7 @@ WindowInfoList WindowManager::Impl::GetWindowInfoListByInterestWindowIds(
     const sptr<IWindowInfoChangedListener>& listener, const WindowInfoList& windowInfoList)
 {
     if (listener == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is nullptr"); 
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "listener is nullptr");
         return windowInfoList;
     }
     auto interestWindowIds = listener->GetInterestWindowIds();
