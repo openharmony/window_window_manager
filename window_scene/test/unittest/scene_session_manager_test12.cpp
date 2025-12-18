@@ -3057,9 +3057,9 @@ HWTEST_F(SceneSessionManagerTest12, GetPiPSettingSwitchStatus, Function | SmallT
 HWTEST_F(SceneSessionManagerTest12, SetIsPipEnabled, Function | SmallTest | Level2)
 {
     ssm_->SetIsPipEnabled(true);
-    EXPECT_EQ(ssm_->pipIsPipEnabled_ , true);
+    EXPECT_EQ(ssm_->pipIsPipEnabled_, true);
     ssm_->SetIsPipEnabled(false);
-    EXPECT_EQ(ssm_->pipIsPipEnabled_ , false);
+    EXPECT_EQ(ssm_->pipIsPipEnabled_, false);
 }
 /**
  *@tc.name: GetIsPipEnabled
@@ -3070,8 +3070,8 @@ HWTEST_F(SceneSessionManagerTest12, GetIsPipEnabled, Function | SmallTest | Leve
 {
     bool isPipEnabled = false;
     ssm_->SetIsPipEnabled(true);
-    WMError ret = ssm_->GetIsPipEnabled(isPipEnabled );
-    EXPECT_EQ(isPipEnabled , true);
+    WMError ret = ssm_->GetIsPipEnabled(isPipEnabled);
+    EXPECT_EQ(isPipEnabled, true);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     ssm_->SetIsPipEnabled(false);
