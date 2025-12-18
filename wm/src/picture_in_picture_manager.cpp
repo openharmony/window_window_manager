@@ -59,7 +59,9 @@ PictureInPictureManager::~PictureInPictureManager()
 
 bool PictureInPictureManager::IsSupportPiP()
 {
-    return SceneBoardJudgement::IsSceneBoardEnabled();
+    bool IsSupportPiPFlag;
+    SingletonContainer::Get().GetIsPipEnabled(IsSupportPiPFlag);
+    return IsSupportPiPFlag;
 }
 
 bool PictureInPictureManager::ShouldAbortPipStart()
@@ -312,7 +314,9 @@ void PictureInPictureManager::DoActiveStatusChangeEvent(bool status)
 
 bool PictureInPictureManager::GetPipEnabled()
 {
-    return true;
+    bool isPipEnabled = false;
+    SingletonContainer::Get<WindowAdapter>().GetIsPipEnabled(isPipEnabled);
+    return isPipEnabled;
 }
 
 }
