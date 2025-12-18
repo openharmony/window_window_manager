@@ -20,10 +20,7 @@
 #include "product_config.h"
 
 namespace OHOS::Rosen::DMS {
-FoldScreenBaseController::FoldScreenBaseController()
-{
-    sensorFoldStateManager_ = new SensorFoldStateMgr();
-}
+FoldScreenBaseController::FoldScreenBaseController() {}
 
 FoldScreenBaseController::~FoldScreenBaseController()
 {
@@ -227,6 +224,6 @@ void FoldScreenBaseController::SetIsClearingBootAnimation(bool isClearingBootAni
 void FoldScreenBaseController::NotifyRunSensorFoldStateManager()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess FoldScreenBaseController::NotifyRunSensorFoldStateManager");
-    sensorFoldStateManager_->NotifyRunTaskSequence();
+    DMS::SensorFoldStateMgr::GetInstance().NotifyRunTaskSequence();
 }
 } // namespace OHOS::Rosen

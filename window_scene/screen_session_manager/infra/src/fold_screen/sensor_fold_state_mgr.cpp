@@ -214,7 +214,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
         if (!FoldScreenBasePolicy::GetInstance().GetLockDisplayStatus()) {
             FoldScreenBasePolicy::GetInstance().SendSensorResult(globalFoldStatus_);
         }
-    }
+    };
     TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
         .taskInfo = task};
     taskProcessor_.Push(eventInfo);
