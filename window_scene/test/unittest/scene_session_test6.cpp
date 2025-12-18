@@ -2043,6 +2043,107 @@ HWTEST_F(SceneSessionTest6, TestRequestMoveResampleOnNextVsync, TestSize.Level1)
     session->RequestMoveResampleOnNextVsync(false, false);
     EXPECT_FALSE(called);
 }
+
+/**
+ * @tc.name: AddSidebarBlur1
+ * @tc.desc: AddSidebarBlur
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, AddSidebarBlur1, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    g_errlog.clear();
+    LOG_SetCallback(ScreenSessionLogCallback);
+    session->AddSidebarBlur();
+    EXPECT_TRUE(g_errlog.find("sessionStage is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+ 
+/**
+ * @tc.name: AddSidebarBlur2
+ * @tc.desc: AddSidebarBlur
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, AddSidebarBlur2, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = sessionStageMocker;
+    EXPECT_CALL(*sessionStageMocker, AddSidebarBlur()).Times(1);
+    session->AddSidebarBlur();
+}
+ 
+/**
+ * @tc.name: SetSidebarBlur1
+ * @tc.desc: SetSidebarBlur
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSidebarBlur1, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    g_errlog.clear();
+    LOG_SetCallback(ScreenSessionLogCallback);
+    session->SetSidebarBlur(false,false);
+    EXPECT_TRUE(g_errlog.find("sessionStage is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+ 
+/**
+ * @tc.name: SetSidebarBlur2
+ * @tc.desc: SetSidebarBlur
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSidebarBlur2, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = sessionStageMocker;
+ 
+    EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::NONE)).Times(2);
+    session->SetSidebarBlur(false,false);
+    session->SetSidebarBlur(false,true);
+    EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::INITIAL)).Times(1);
+    session->SetSidebarBlur(true,false);
+    EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::DEFAULT_FLOAT)).Times(1);
+    session->SetSidebarBlur(true,true);
+}
+ 
+/**
+ * @tc.name: SetSidebarBlurMaximize1
+ * @tc.desc: SetSidebarBlurMaximize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSidebarBlurMaximize1, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    g_errlog.clear();
+    LOG_SetCallback(ScreenSessionLogCallback);
+    session->SetSidebarBlurMaximize(false);
+    EXPECT_TRUE(g_errlog.find("sessionStage is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+ 
+/**
+ * @tc.name: SetSidebarBlurMaximize2
+ * @tc.desc: SetSidebarBlurMaximize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetSidebarBlurMaximize2, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = sessionStageMocker;
+    EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::DEFAULT_FLOAT)).Times(1);
+    session->SetSidebarBlurMaximize(false);
+    EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::DEFAULT_MAXIMIZE)).Times(1);
+    session->SetSidebarBlurMaximize(true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -310,6 +310,25 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) = 0;
+
+    /**
+     * @brief App window sidebar blur.
+     *
+     * add window siderBar blur effect.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError AddSidebarBlur() { return WSError::WS_DO_NOTHING; }
+ 
+    /**
+     * @brief Set sidebar blur style with type.
+     *
+     * Set sidebar blur style with type.
+     *
+     * @param type Indicates the action type.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetSidebarBlurStyleWithType(SidebarBlurType type) { return WSError::WS_DO_NOTHING; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
