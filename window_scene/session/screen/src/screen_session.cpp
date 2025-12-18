@@ -800,16 +800,9 @@ void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenP
         return;
     }
     auto screenBounds = eventPara.GetBounds();
-    screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
-    screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
-    screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
-    screenProperty.SetMirrorWidth(eventPara.GetMirrorWidth());
-    screenProperty.SetMirrorHeight(eventPara.GetMirrorHeight());
     TLOGI(WmsLogTag::DMS, "bounds after change: %{public}f, %{public}f",
         screenBounds.rect_.width_, screenBounds.rect_.height_);
     screenProperty.SetBounds(screenBounds);
-    screenProperty.SetValidHeight(screenBounds.rect_.height_);
-    screenProperty.SetValidWidth(screenBounds.rect_.width_);
 }
 
 void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
@@ -1033,7 +1026,7 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
             HandleSystemKeyboardOffPropertyChange(screenProperty, currentState, isKeyboardOn);
             break;
         }
-        case SuperFoldStatusChangeEvents::RESOLUITION_EFFECT_CHANGE: {
+        case SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE: {
             TLOGI(WmsLogTag::DMS, "handle resolution effect change");
             HandleResolutionEffectPropertyChange(screenProperty, eventPara);
             break;

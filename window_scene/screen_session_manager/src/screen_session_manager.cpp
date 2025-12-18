@@ -3122,15 +3122,16 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
         RecoveryResolutionEffect();
         return false;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
-        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
-        return false;
-    }
     bool effectFlag = false;
     ScreenSettingHelper::GetResolutionEffect(effectFlag, externalSession->GetSerialNumber());
     uint32_t targetWidth = 0;
     uint32_t targetHeight = 0;
     CalculateTargetResolution(internalSession, externalSession, effectFlag, targetWidth, targetHeight);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && (IsVertical(internalSession->GetRotation()) ||
+        GetSuperFoldStatus() != SuperFoldStatus::EXPANDED)){
+        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice status not support");
+        return false;
+    }
     if (targetWidth != 0 && targetHeight != 0) {
         SetResolutionEffect(internalSession->GetScreenId(), targetWidth, targetHeight);
     }
@@ -3224,8 +3225,9 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGE(WmsLogTag::DMS, "internalSession null");
         return false;
     }
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && IsVertical(internalSession->GetRotation())) {
-        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice Vertical");
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && (IsVertical(internalSession->GetRotation()) ||
+        GetSuperFoldStatus() != SuperFoldStatus::EXPANDED)){
+        TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice status not support");
         return false;
     }
     auto internalProperty = internalSession->GetScreenProperty();
@@ -3255,14 +3257,12 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     // Setting the display area of the internal screen
     auto oldProperty = internalSession->GetScreenProperty();
     internalSession->UpdatePropertyByResolution(targetRect);
+    auto newProperty = internalSession->GetScreenProperty();
+    newProperty.SetPropertyChangeReason("resolutionEffectChange");
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        auto newProperty = internalSession->GetScreenProperty();
-        newProperty.SetPropertyChangeReason("resolutionEffectChange");
-        newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUITION_EFFECT_CHANGE);
-        internalSession->PropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE);
-    } else {
-        internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+        newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
     }
+    internalSession->PropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE);
     if (oldProperty.GetScreenAreaWidth() != targetRect.width_ ||
         oldProperty.GetScreenAreaHeight() != targetRect.height_) {
         NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
