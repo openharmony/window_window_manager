@@ -71,7 +71,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         }
     };
     TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
-        .taskInfo = task};
+        .task = task};
     taskProcessor_.Push(eventInfo);
 }
 
@@ -135,7 +135,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
         }
     };
     TaskSequenceEventInfo eventInfo = TaskSequenceEventInfo{
-        .taskInfo = event};
+        .task = event};
     taskProcessor_.Push(eventInfo);
 }
 
