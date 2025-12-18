@@ -280,10 +280,12 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalExtendChange(sptr<
     MultiScreenChangeUtils::ScreenConnectionChange(ssmClient, externalScreen, ScreenEvent::DISCONNECTED);
 
     /* step9: inner screen change */
-    ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreen->GetRSScreenId(),
-        ScreenPowerStatus::POWER_STATUS_OFF);
-    CallRsSetScreenPowerStatusSyncToOn(innerScreen->GetRSScreenId());
-
+    auto rsSetScreenPowerStatustask = [=] {
+        ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreen->GetRSScreenId(),
+            ScreenPowerStatus::POWER_STATUS_OFF);
+        CallRsSetScreenPowerStatusSyncToOn(innerScreen->GetRSScreenId());
+    };
+    ScreenSessionManager::Getinstance().GetPowerTaskScheduler().PostTask(rsSetScreenPowerStatustask,"rsInterface_.SetScreenPowerStatus task");
     TLOGW(WmsLogTag::DMS, "inner main and external extend to external main end.");
     return DMError::DM_OK;
 }
