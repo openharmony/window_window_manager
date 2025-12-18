@@ -1474,7 +1474,7 @@ WSError SessionStageProxy::NotifyPiPActiveStatusChange(bool status)
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
-    if (!data.WriteBool(static_cast<int32_t>(status))) {
+    if (!data.WriteBool(status)) {
         TLOGE(WmsLogTag::WMS_PIP, "Write state failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
