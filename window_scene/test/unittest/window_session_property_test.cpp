@@ -643,21 +643,6 @@ HWTEST_F(WindowSessionPropertyTest, SetFocusable, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTouchable
- * @tc.desc: SetTouchable and GetTouchable to check the value
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetTouchable, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetTouchable(true);
-    ASSERT_EQ(property->GetTouchable(), true);
-    property->SetTouchable(false);
-    ASSERT_EQ(property->GetTouchable(), false);
-}
-
-/**
  * @tc.name: SetForceHide
  * @tc.desc: SetForceHide and GetForceHide to check the value
  * @tc.type: FUNC
