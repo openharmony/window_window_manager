@@ -5395,7 +5395,7 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
         bool isUIEProc = AAFwk::UIExtensionUtils::IsUIExtension(info.extensionType_);
         int32_t hostWindowId = windowId;
         if (isUIEProc && uiContent) {
-            hostWindowId = uiContent->GetHostWindowId(uiContent->GetInstanceId());
+            hostWindowId = uiContent->GetUIContentWindowID(uiContent->GetInstanceId());
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start. id: %{public}d, "
               "isUIEProc: %{public}d, hostWindowId: %{public}d", windowId, isUIEProc, hostWindowId);
