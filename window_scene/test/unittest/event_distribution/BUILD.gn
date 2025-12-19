@@ -237,3 +237,105 @@ ohos_unittest("ws_session_stub_event_test") {
     "ipc:ipc_single",
   ]
 }
+
+ohos_unittest("ws_session_event_test") {
+  module_out_path = module_out_path
+
+  configs =
+      [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
+
+  sources = [
+    "../../mock/mock_message_parcel.cpp",
+    "session_event_test.cpp",
+  ]
+
+  defines = [ "ENABLE_MOCK_READ_INT32" ]
+
+  deps = [
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+    ws_unittest_common,
+  ]
+
+  external_deps = [
+    "ability_runtime:mission_info",
+    "ability_runtime:session_handler",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+  ]
+}
+
+ohos_unittest("ws_window_node_event_test") {
+  module_out_path = module_out_path
+
+  configs =
+      [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
+
+  sources = [
+    "../../mock/mock_message_parcel.cpp",
+    "window_node_event_test.cpp",
+  ]
+
+  defines = [ "ENABLE_MOCK_READ_INT32" ]
+
+  deps = [
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+    ws_unittest_common,
+  ]
+
+  external_deps = [
+    "ability_runtime:mission_info",
+    "ability_runtime:session_handler",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+  ]
+}
+
+ohos_unittest("ws_window_session_property_event_test") {
+  module_out_path = module_out_path
+
+  configs =
+      [ "${window_base_path}/window_scene/session:ui_effect_public_config" ]
+
+  sources = [
+    "../../mock/mock_message_parcel.cpp",
+    "window_session_property_event_test.cpp",
+  ]
+
+  defines = [ "ENABLE_MOCK_READ_INT32" ]
+
+  deps = [
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+    ws_unittest_common,
+  ]
+
+  external_deps = [
+    "ability_runtime:mission_info",
+    "ability_runtime:session_handler",
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "ffrt:libffrt",
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:window_animation",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+  ]
+}
