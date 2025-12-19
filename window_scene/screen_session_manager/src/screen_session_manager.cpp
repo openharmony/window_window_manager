@@ -12782,12 +12782,12 @@ void ScreenSessionManager::SetDisplayRegionAndAreaFixed(Rotation rotation, DMRec
 {
     switch (rotation) {
         case Rotation::ROTATION_0:
-            displayRegion.posX_ = screenParams[FULL_STATUS_OFFSET_X];
-            displayAreaFixed.posX_ += screenParams[FULL_STATUS_OFFSET_X];
+            displayRegion.posX_ = screenParams_[FULL_STATUS_OFFSET_X];
+            displayAreaFixed.posX_ += screenParams_[FULL_STATUS_OFFSET_X];
             break;
         case Rotation::ROTATION_90:
-            displayRegion.posY_ = screenParams[FULL_STATUS_OFFSET_X];
-            displayAreaFixed.posY_ += screenParams[FULL_STATUS_OFFSET_X];
+            displayRegion.posY_ = screenParams_[FULL_STATUS_OFFSET_X];
+            displayAreaFixed.posY_ += screenParams_[FULL_STATUS_OFFSET_X];
             break;
         default:
             break;
