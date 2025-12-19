@@ -340,6 +340,8 @@ HWTEST_F(SceneSessionManagerTest6, DealwithVisibilityChange01, TestSize.Level0)
     ssm_->DealwithVisibilityChange(visibilityChangeInfos, currVisibleData);
     ASSERT_EQ(sceneSession1->GetRSVisible(), true);
     ASSERT_EQ(sceneSession2->GetRSVisible(), false);
+    ssm_->taskScheduler_ ->PostAsyncTaskToExportHandler([]() {}, "testNotifyMemMgr");
+    ssm_->taskScheduler_ ->PostAsyncTaskToExportHandler([]() {}, "testNotifyMemMgr", 100);
 }
 
 /**
