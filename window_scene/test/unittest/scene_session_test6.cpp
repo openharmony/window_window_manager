@@ -2086,7 +2086,7 @@ HWTEST_F(SceneSessionTest6, SetSidebarBlur1, Function | SmallTest | Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     g_errlog.clear();
     LOG_SetCallback(ScreenSessionLogCallback);
-    session->SetSidebarBlur(false,false);
+    session->SetSidebarBlur(false, false);
     EXPECT_TRUE(g_errlog.find("sessionStage is null") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
@@ -2104,12 +2104,12 @@ HWTEST_F(SceneSessionTest6, SetSidebarBlur2, Function | SmallTest | Level1)
     session->sessionStage_ = sessionStageMocker;
  
     EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::NONE)).Times(2);
-    session->SetSidebarBlur(false,false);
-    session->SetSidebarBlur(false,true);
+    session->SetSidebarBlur(false, false);
+    session->SetSidebarBlur(false, true);
     EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::INITIAL)).Times(1);
-    session->SetSidebarBlur(true,false);
+    session->SetSidebarBlur(true, false);
     EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::DEFAULT_FLOAT)).Times(1);
-    session->SetSidebarBlur(true,true);
+    session->SetSidebarBlur(true, true);
 }
  
 /**
