@@ -173,8 +173,6 @@ ScreenCache<int32_t, std::string> g_uidVersionMap(MAP_SIZE, NO_EXIST_BUNDLE_MANE
 const int32_t SCREEN_SCAN_TYPE = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
 constexpr int32_t SCAN_TYPE_VERTICAL = 1;
 constexpr uint32_t ROTATION_MOD = 4;
-// F state offset
-constexpr uint32_t FULL_STATUS_OFFSET_X = 1136;
 
 #ifdef WM_MULTI_SCREEN_ENABLE
 const ScreenId SCREEN_ID_OUTER_ONLY = 0;
@@ -201,15 +199,19 @@ const std::string SCREEN_NAME_EXTEND = "ExtendedDisplay";
 const std::string SCREEN_NAME_CAST = "CastEngine";
 const std::set<std::string> INDIVIDUAL_SCREEN_GROUP_SET = {"CeliaView", "DevEcoViewer", "Cooperation-multi", "HwCast_AppModeDisplay"};
 
-constexpr int32_t MAIN_STATUS_WIDTH_INDEX = 0;
-constexpr int32_t FULL_STATUS_WIDTH_INDEX = 1;
-constexpr int32_t GLOBAL_FULL_STATUS_WIDTH_INDEX = 2;
-constexpr int32_t SCREEN_HEIGHT_INDEX = 3;
+const int32_t MAIN_STATUS_WIDTH = 0;
+const int32_t MAIN_STATUS_HEIGHT = 1;
+const int32_t FULL_STATUS_WIDTH = 2;
+const int32_t FULL_STATUS_HEIGHT = 3;
+const int32_t GLOBAL_FULL_STATUS_WIDTH = 4;
+const int32_t SCREEN_HEIGHT = 5;
+const int32_t FULL_STATUS_OFFSET_X = 6;
+const int32_t FULL_STATUS_OFFSET_Y = 7;
+const int32_t GLOBAL_FULL_STATUS_OFFSET_Y = 8;
+
 constexpr int32_t STATUS_PARAM_VALID_INDEX = 4;
 constexpr uint32_t MAIN_STATUS_DEFAULT_WIDTH = 1008;
 constexpr uint32_t SCREEN_DEFAULT_HEIGHT = 2232;
-constexpr int32_t SECONDARY_FULL_OFFSET = 1136;
-constexpr int32_t SECONDARY_FULL_STATUS_WIDTH = 2048;
 
 const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 const std::string DISPLAYMODE_CORRECTION = system::GetParameter("const.dms.rotation_correction", "");
@@ -3715,7 +3717,6 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
     property.SetPhysicalTouchBounds(GetConfigCorrectionByDisplayMode(GetFoldDisplayMode()));
-    property.SetInputOffsetY();
     property.SetCurrentOffScreenRendering(false);
     property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
     property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
@@ -3737,7 +3738,7 @@ RRect ScreenSessionManager::GetScreenBounds(ScreenId screenId, RSScreenModeInfo&
             TLOGE(WmsLogTag::DMS, "invalid param num, use default");
             return RRect({ 0, 0, MAIN_STATUS_DEFAULT_WIDTH, SCREEN_DEFAULT_HEIGHT }, 0.0f, 0.0f);
         }
-        return RRect({ 0, 0, screenParams_[MAIN_STATUS_WIDTH_INDEX], screenParams_[SCREEN_HEIGHT_INDEX] }, 0.0f, 0.0f);
+        return RRect({ 0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[MAIN_STATUS_HEIGHT] }, 0.0f, 0.0f);
     }
     return RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
 }
@@ -10332,11 +10333,11 @@ void ScreenSessionManager::HandleScreenRotationAndBoundsWhenSetClient(sptr<Scree
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         FoldDisplayMode displayMode = GetFoldDisplayMode();
         if (displayMode == FoldDisplayMode::FULL) {
-            boundaryOffset = SECONDARY_FULL_OFFSET;
-            phyWidth = SECONDARY_FULL_STATUS_WIDTH;
+            boundaryOffset = screenParams_[FULL_STATUS_OFFSET_X];
+            phyWidth = screenParams_[FULL_STATUS_WIDTH];
         } else if (displayMode == FoldDisplayMode::MAIN) {
-            phyWidth = MAIN_STATUS_DEFAULT_WIDTH;
-            phyHeight = SCREEN_DEFAULT_HEIGHT;
+            phyWidth = screenParams_[MAIN_STATUS_WIDTH];
+            phyHeight = screenParams_[MAIN_STATUS_HEIGHT];
         }
     }
     TLOGI(WmsLogTag::DMS, "phyWidth:%{public}f, phyHeight:%{public}f, localRotation:%{public}u",
@@ -11065,8 +11066,10 @@ void ScreenSessionManager::InitSecondaryDisplayPhysicalParams()
     for (auto &resolution : resolutions) {
         if (FoldDisplayMode::MAIN == resolution.foldDisplayMode_) {
             screenParams_.push_back(resolution.physicalWidth_);
+            screenParams_.push_back(resolution.physicalHeight_);
         } else if (FoldDisplayMode::FULL == resolution.foldDisplayMode_) {
             screenParams_.push_back(resolution.physicalWidth_);
+            screenParams_.push_back(resolution.physicalHeight_);
         } else if (FoldDisplayMode::GLOBAL_FULL == resolution.foldDisplayMode_) {
             screenParams_.push_back(resolution.physicalWidth_);
             screenParams_.push_back(resolution.physicalHeight_);
@@ -11078,12 +11081,19 @@ void ScreenSessionManager::InitSecondaryDisplayPhysicalParams()
         TLOGE(WmsLogTag::DMS, "invalid param num");
         return;
     }
-    screenParams_.push_back(screenParams_[GLOBAL_FULL_STATUS_WIDTH_INDEX] - screenParams_[FULL_STATUS_WIDTH_INDEX]);
+    // M mode offsetX
+    screenParams_.push_back(screenParams_[GLOBAL_FULL_STATUS_WIDTH] - screenParams_[FULL_STATUS_WIDTH]);
+    // M mode offsetY
+    screenParams_.push_back(screenParams_[MAIN_STATUS_HEIGHT] - screenParams_[FULL_STATUS_HEIGHT]);
+    // G mode offsetY
+    screenParams_.push_back(screenParams_[MAIN_STATUS_HEIGHT] - screenParams_[SCREEN_HEIGHT]);
     TLOGI(WmsLogTag::DMS,
         "PhysicalResolution : mainStatusWidth_= %{public}d, fullStatusWidth_= %{public}d, gloablFullStatusWidth_="
-        "%{public}d, screenHeight_= %{public}d",
-          screenParams_[MAIN_STATUS_WIDTH_INDEX], screenParams_[FULL_STATUS_WIDTH_INDEX],
-          screenParams_[GLOBAL_FULL_STATUS_WIDTH_INDEX], screenParams_[SCREEN_HEIGHT_INDEX]);
+        "%{public}d, screenHeight_= %{public}d, m_offsetX= %{public}d, m_offsetY= %{public}d, g_offsetY= %{public}d,",
+        screenParams_[MAIN_STATUS_WIDTH], screenParams_[FULL_STATUS_WIDTH],
+        screenParams_[GLOBAL_FULL_STATUS_WIDTH], screenParams_[SCREEN_HEIGHT],
+        screenParams_[FULL_STATUS_OFFSET_X], screenParams_[FULL_STATUS_OFFSET_Y],
+        screenParams_[GLOBAL_FULL_STATUS_OFFSET_Y]);
 }
 
 nlohmann::ordered_json ScreenSessionManager::GetCapabilityJson(FoldStatus foldStatus, FoldDisplayMode displayMode,
@@ -12772,12 +12782,12 @@ void ScreenSessionManager::SetDisplayRegionAndAreaFixed(Rotation rotation, DMRec
 {
     switch (rotation) {
         case Rotation::ROTATION_0:
-            displayRegion.posX_ = FULL_STATUS_OFFSET_X;
-            displayAreaFixed.posX_ += FULL_STATUS_OFFSET_X;
+            displayRegion.posX_ = screenParams_[FULL_STATUS_OFFSET_X];
+            displayAreaFixed.posX_ += screenParams_[FULL_STATUS_OFFSET_X];
             break;
         case Rotation::ROTATION_90:
-            displayRegion.posY_ = FULL_STATUS_OFFSET_X;
-            displayAreaFixed.posY_ += FULL_STATUS_OFFSET_X;
+            displayRegion.posY_ = screenParams_[FULL_STATUS_OFFSET_X];
+            displayAreaFixed.posY_ += screenParams_[FULL_STATUS_OFFSET_X];
             break;
         default:
             break;
