@@ -945,6 +945,11 @@ void SceneSessionManager::ConfigFreeMultiWindow()
         item = freeMultiWindowConfig["windowEffect"];
         if (item.IsMap()) {
             ConfigWindowEffect(item, systemConfig_.freeMultiWindowConfig_.appWindowSceneConfig_);
+        } else {
+            item = config["windowEffect"];
+            if (item.IsMap()) {
+                ConfigWindowEffect(item, systemConfig_.freeMultiWindowConfig_.appWindowSceneConfig_);
+            }
         }
     }
 }
