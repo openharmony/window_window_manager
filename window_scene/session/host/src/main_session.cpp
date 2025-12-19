@@ -34,16 +34,7 @@ MainSession::MainSession(const SessionInfo& info, const sptr<SpecificSessionCall
     : SceneSession(info, specificCallback)
 {
     scenePersistence_ = sptr<ScenePersistence>::MakeSptr(info.bundleName_, GetPersistentId(), capacity_);
-    if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
-        // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
-        scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
-    }
     pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(this), GetPersistentId());
-    auto isPersistentImageFit = ScenePersistentStorage::HasKey(
-        "SetImageForRecent_" + std::to_string(GetPersistentId()), ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (isPersistentImageFit) {
-        scenePersistence_->SetHasSnapshot(true);
-    }
 
     WLOGFD("Create MainSession");
 }
@@ -240,6 +231,50 @@ void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
 bool MainSession::IsExitSplitOnBackground() const
 {
     return isExitSplitOnBackground_;
+}
+
+void MainSession::RecoverSnapshotPersistence(const SessionInfo& info)
+{
+    if (scenePersistence_ == nullptr) {
+        return;
+    }
+    if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
+        // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
+        scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
+        RenameSnapshotFromOldPersistentId(info.persistentId_);
+    }
+    if (info.isPersistentRecover_) {
+        if (HasSnapshot()) {
+            TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", GetPersistentId());
+        }
+        RecoverImageForRecent();
+    } else {
+        ClearSnapshotPersistence();
+    }
+}
+
+void MainSession::ClearSnapshotPersistence()
+{
+    if (scenePersistence_ == nullptr) {
+        return;
+    }
+    auto task = [weakThis = wptr(this), where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_PATTERN, "%{public}s, session %{public}d nullptr", where, session->GetPersistentId());
+            return;
+        }
+        TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s, %{public}d", where, session->GetPersistentId());
+        session->DeletePersistentImageFit();
+        for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
+            session->DeleteHasSnapshot(screenStatus);
+        }
+        session->DeleteHasSnapshotFreeMultiWindow();
+    };
+    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
+    std::string taskName = "ClearSnapshotPersistence" + std::to_string(GetPersistentId());
+    snapshotFfrtHelper->CancelTask(taskName);
+    snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
 }
 
 void MainSession::NotifyClientToUpdateInteractive(bool interactive)
