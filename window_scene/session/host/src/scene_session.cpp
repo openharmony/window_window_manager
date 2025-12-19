@@ -5865,14 +5865,20 @@ static void SetAtomicServiceInfo(SessionInfo& sessionInfo)
 #ifdef ACE_ENGINE_PLUGIN_PATH
     AtomicServiceInfo* atomicServiceInfo = AtomicServiceBasicEnginePlugin::GetInstance().
         GetParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
-    if (atomicServiceInfo != nullptr) {
-        sessionInfo.atomicServiceInfo_.appNameInfo_ = atomicServiceInfo->GetAppName();
-        sessionInfo.atomicServiceInfo_.circleIcon_ = atomicServiceInfo->GetCircleIcon();
-        sessionInfo.atomicServiceInfo_.eyelashRingIcon_ = atomicServiceInfo->GetEyelashRingIcon();
-        sessionInfo.atomicServiceInfo_.deviceTypes_ = atomicServiceInfo->GetDeviceTypes();
-        sessionInfo.atomicServiceInfo_.resizable_ = atomicServiceInfo->GetResizable();
-        sessionInfo.atomicServiceInfo_.supportWindowMode_ = atomicServiceInfo->GetSupportWindowMode();
+    if (atomicServiceInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get atomicService info failed, bundleName:%{public}s.",
+            sessionInfo.bundleName_.c_str());
+        AtomicServiceBasicEnginePlugin::GetInstance().ReleaseData();
+        return;
     }
+    sessionInfo.atomicServiceInfo_.appNameInfo_ = atomicServiceInfo->GetAppName();
+    sessionInfo.atomicServiceInfo_.circleIcon_ = atomicServiceInfo->GetCircleIcon();
+    sessionInfo.atomicServiceInfo_.eyelashRingIcon_ = atomicServiceInfo->GetEyelashRingIcon();
+    sessionInfo.atomicServiceInfo_.deviceTypes_ = atomicServiceInfo->GetDeviceTypes();
+    sessionInfo.atomicServiceInfo_.resizable_ = atomicServiceInfo->GetResizable();
+    sessionInfo.atomicServiceInfo_.supportWindowMode_ = atomicServiceInfo->GetSupportWindowMode();
+    TLOGI(WmsLogTag::WMS_LIFE, "Get atomicService info success, bundleName:%{public}s.",
+        sessionInfo.bundleName_.c_str());
     AtomicServiceBasicEnginePlugin::GetInstance().ReleaseData();
 #endif
 }
