@@ -1682,7 +1682,15 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
         TLOGE(WmsLogTag::DMS, "Read node surfaceNodesList failed");
         return;
     }
-    option.isCaptureFullOfScreen_ = static_cast<bool>(data.ReadBool());
+    if (!data.ReadFloat(option.scaleX_) || !data.ReadFloat(option.scaleY_)) {
+        TLOGE(WmsLogTag::DMS, "Read scale failed");
+        return;
+    }
+    if (!data.ReadInt32(option.rect.posX_) || !data.ReadInt32(option.rect.posY_) ||
+        !data.ReadUint32(option.rect.width_) || !data.ReadUint32(option.rect.height_)) {
+        TLOGE(WmsLogTag::DMS, "Read rect failed");
+        return;
+    }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());
