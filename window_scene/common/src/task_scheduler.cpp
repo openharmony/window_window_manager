@@ -31,11 +31,7 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
 
 void TaskScheduler::PostAsyncTaskToExportHandler(Task&& task, const std::string& name, int64_t delayTime)
 {
-    if (exportHandler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "export handler is null");
-        return;
-    }
-    if (delayTime == 0 && exportHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
+    if (exportHandler_ == nullptr || delayTime == 0 && exportHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:%s", name.c_str());
         task();
         return;
