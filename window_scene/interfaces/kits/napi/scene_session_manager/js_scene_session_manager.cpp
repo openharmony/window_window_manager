@@ -350,6 +350,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetPipDeviceCollaborationPolicy);
     BindNativeFunction(env, exportObj, "notifySupportRotationChange", moduleName,
         JsSceneSessionManager::NotifySupportRotationChange);
+    BindNativeFunction(env, exportObj, "setTrayAppListInfo", moduleName,
+        JsSceneSessionManager::SetTrayAppListInfo);
     BindNativeFunction(env, exportObj, "getAllJsonProfile", moduleName,
         JsSceneSessionManager::GetAllJsonProfile);
     BindNativeFunction(env, exportObj, "getJsonProfile", moduleName,
@@ -1339,6 +1341,13 @@ napi_value JsSceneSessionManager::SetIsDockAutoHide(napi_env env, napi_callback_
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetIsDockAutoHide(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SetTrayAppListInfo(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnHandleTrayAppChange(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::GetFreeMultiWindowConfig(napi_env env, napi_callback_info info)
@@ -4210,6 +4219,36 @@ napi_value JsSceneSessionManager::OnSetIsDockAutoHide(napi_env env, napi_callbac
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().ConfigDockAutoHide(isDockAutoHide);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnHandleTrayAppChange(napi_env env, napi_callback_info info)
+{
+    size_t argc = DEFAULT_ARG_COUNT;
+    napi_value argv[DEFAULT_ARG_COUNT] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string trayAppListStr = "";
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], trayAppListStr)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to trayAppList");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::stringstream trayAppListStream(trayAppListStr);
+    std::string item;
+    std::vector<std::string> trayAppList;
+    while (std::getline(trayAppListStream, item, '|')) {
+        if (!item.empty())  {
+            trayAppList.push_back(item);
+        }
+    }
+    SceneSessionManager::GetInstance().SetTrayAppList(std::move(trayAppList));
     return NapiGetUndefined(env);
 }
 
