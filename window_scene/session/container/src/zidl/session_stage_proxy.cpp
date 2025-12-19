@@ -2522,7 +2522,7 @@ WSError SessionStageProxy::AddSidebarBlur()
     }
     return WSError::WS_OK;
 }
- 
+
 WSError SessionStageProxy::SetSidebarBlurStyleWithType(SidebarBlurType type)
 {
     MessageParcel data;
