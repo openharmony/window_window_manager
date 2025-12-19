@@ -4613,6 +4613,12 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetDisplaySnapshotWi
         TLOGE(WmsLogTag::DMS, "Write displayId or isNeedNotify or isNeedPointer failed");
         return nullptr;
     }
+    if (!data.WriteFloat(captureOption.scaleX_) || !data.WriteFloat(captureOption.scaleY_) ||
+        !data.WriteInt32(captureOption.rect.posX_) || !data.WriteInt32(captureOption.rect.posY_) ||
+        !data.WriteUint32(captureOption.rect.width_) || !data.WriteUint32(captureOption.rect.height_)) {
+        TLOGE(WmsLogTag::DMS, "Write scale or rect failed");
+        return nullptr;
+    }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_SNAPSHOT_WITH_OPTION),
         data, reply, option) != ERR_NONE) {
         TLOGW(WmsLogTag::DMS, "SendRequest failed");

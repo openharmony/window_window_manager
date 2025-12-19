@@ -2744,6 +2744,288 @@ HWTEST_F(DisplayManagerTest, ShouldReturnNullptrWhenScreenshotCaptureFailes, Tes
 }
 
 /**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_001
+ * @tc.desc: Test GetScreenshotWithOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_001, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 0, 0, 100, 100 };
+    Media::Size size = { 200, 200 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+    auto checkResult = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(checkResult, false);
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_002
+ * @tc.desc: Test screenshot capture success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_002, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 0, 0, 0, 0 };
+    Media::Size size = { 50, 50 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+    auto checkResult = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(checkResult, false);
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_003
+ * @tc.desc: Test screenshot capture success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_003, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 10, 10, 400, 400 };
+    Media::Size size = { 200, 200 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+    auto checkResult = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(checkResult, true);
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_004
+ * @tc.desc: Test screenshot capture failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_004, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 10, 10, 0, 400 };
+    Media::Size size = { 200, 200 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+    auto checkResult = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(checkResult, false);
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_005
+ * @tc.desc: Test screenshot capture failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_005, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 10, 10, 400, 0 };
+    Media::Size size = { 200, 200 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+    auto checkResult = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(checkResult, false);
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_006
+ * @tc.desc: Test screenshot capture failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_006, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { -1, 0, 400, 400 };
+    Media::Size size = { 200, 200 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+    rect = { 0, -1, 400, 400 };
+    result = DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+    rect = { -1, -1, 400, 400 };
+    result = DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_007
+ * @tc.desc: Test screenshot capture failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_007, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 0, 0, 400, 400 };
+    Media::Size size = { 50000, 0 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+    size = { 0, 50000 };
+    result = DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+    size = { 50000, 50000 };
+    result = DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_GetScreenshotWithOption_008
+ * @tc.desc: Test screenshot capture failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_GetScreenshotWithOption_008, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 10, 10, 400, 400 };
+    Media::Size size = { 800, 800 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOption(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOption_CheckUseGpuScreenshotWithOption_001
+ * @tc.desc: Test CheckUseGpuScreenshotWithOption true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOption_CheckUseGpuScreenshotWithOption_001, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 0, 10, 400, 400 };
+    Media::Size size = { 400, 400 };
+    auto result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, true);
+    rect = { 10, 0, 400, 400 };
+    result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, true);
+    rect = { 0, 0, 400, 400 };
+    result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, true);
+    rect = { 0, 0, 0, 400 };
+    result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, false);
+    rect = { 0, 0, 400, 0 };
+    result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, false);
+    rect = { 0, 0, 400, 400 };
+    size = { 0, 400 };
+    result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, false);
+    size = { 400, 0 };
+    result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, false);
+    size = { 0, 0 };
+    result = DisplayManager::GetInstance().CheckUseGpuScreenshotWithOption(rect, size);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOptionUseGpu_GetScreenshotWithOptionUseGpu_001
+ * @tc.desc: Test GetScreenshotWithOptionUseGpu
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOptionUseGpu_GetScreenshotWithOptionUseGpu_001, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 10, 10, 400, 400 };
+    Media::Size size = { 200, 200 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOptionUseGpu(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+}
+
+/**
+ * @tc.name: GetScreenshotWithOptionUseGpu_GetScreenshotWithOptionUseGpu_002
+ * @tc.desc: Test GetScreenshotWithOptionUseGpu
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetScreenshotWithOptionUseGpu_GetScreenshotWithOptionUseGpu_002, TestSize.Level1)
+{
+    CaptureOption captureOption;
+    Media::Rect rect = { 10, 10, 400, 400 };
+    Media::Size size = { 800, 800 };
+    int rotation = 0;
+    captureOption.displayId_ = 0;
+    captureOption.isCaptureFullOfScreen_ = false;
+    captureOption.isNeedNotify_ = false;
+    DmErrorCode errorCode;
+
+    auto result =
+        DisplayManager::GetInstance().GetScreenshotWithOptionUseGpu(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result, nullptr);
+    rect = { -1, 10, 800, 800 };
+    result =
+        DisplayManager::GetInstance().GetScreenshotWithOptionUseGpu(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+    rect = { 10, -1, 800, 800 };
+    result =
+        DisplayManager::GetInstance().GetScreenshotWithOptionUseGpu(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+    rect = { -1, -1, 800, 800 };
+    result =
+        DisplayManager::GetInstance().GetScreenshotWithOptionUseGpu(captureOption, rect, size, rotation, &errorCode);
+    EXPECT_EQ(result->GetWidth(), size.width);
+    EXPECT_EQ(result->GetHeight(), size.height);
+}
+
+/**
  * @tc.name: GetScreenHDRshotWithOption_ShouldReturnNull_WhenDisplayIdInvalid
  * @tc.desc: Test GetScreenHDRshotWithOption function when display is idInvalid
  * @tc.type: FUNC
