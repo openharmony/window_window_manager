@@ -351,7 +351,7 @@ HWTEST_F(ScreenSensorMgrTest, UnRegisterHallCallbackTest02, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     ScreenSensorMgr::GetInstance().UnRegisterHallCallback();
-    EXPECT_TRUE(g_logMsg.find("UnRegisterHallCallback failed") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("unregister hall sensor failed") != std::string::npos);
 }
 
 /**
