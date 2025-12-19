@@ -7974,24 +7974,23 @@ WSError WindowSceneSessionImpl::AddSidebarBlur()
         TLOGE(WmsLogTag::WMS_PC, "handler is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    handler_->PostTask([weakThis = wptr(this), where = __func__] {
-        auto window = weakThis.promote();
-        if (!window) {
-            TLOGNE(WmsLogTag::WMS_PC, "%{public}s: window is nullptr", where);
-            return;
-        }
-        if (!window->surfaceNode_) {
-            TLOGNE(WmsLogTag::WMS_PC, "%{public}s: surfaceNode is null", where);
-            return;
-        }
-        auto rsNodeTemp = RSAdapterUtil::GetRSNode(window->GetRSUIContext(), window->surfaceNode_->GetId());
-        TLOGNI(WmsLogTag::WMS_PC, "%{public}s: GetRSNode", where);
-        TLOGNI(WmsLogTag::WMS_PC, "%{public}s: rsNodeTemp is null=%{public}d", where, (rsNodeTemp == nullptr));
-        if (rsNodeTemp) {
-            bool isDark = (window->colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-            window->AddRSNodeModifier(isDark, rsNodeTemp);
-        }
-    }, __func__);
+    handler_->PostTask(
+        [weakThis = wptr(this), where = __func__] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_PC, "%{public}s: window is nullptr", where);
+                return;
+            }
+            if (!window->surfaceNode_) {
+                TLOGNE(WmsLogTag::WMS_PC, "%{public}s: surfaceNode is null", where);
+                return;
+            }
+            auto rsNodeTemp = RSAdapterUtil::GetRSNode(window->GetRSUIContext(), window->surfaceNode_->GetId());
+            if (rsNodeTemp) {
+                bool isDark = (window->colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+                window->AddRSNodeModifier(isDark, rsNodeTemp);
+            }
+        }, __func__);
     return WSError::WS_OK;
 }
  
@@ -8030,20 +8029,21 @@ WSError WindowSceneSessionImpl::SetSidebarBlurStyleWithType(SidebarBlurType type
         TLOGE(WmsLogTag::WMS_PC, "handler is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    handler_->PostTask([weakThis = wptr(this), type, where = __func__] {
-        auto window = weakThis.promote();
-        if (!window) {
-            TLOGNE(WmsLogTag::WMS_PC, "%{public}s: window is nullptr", where);
-            return;
-        }
-        if (!window->blurRadiusValue_ || !window->blurSaturationValue_ || !window->blurBrightnessValue_ ||
-            !window->blurMaskColorValue_) {
-            TLOGNW(WmsLogTag::WMS_PC, "%{public}s: RSAnimatableProperty is null", where);
-            return;
-        }
-        bool isDark = (window->colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-        window->ModifySidebarBlurProperty(isDark, type);
-    }, __func__);
+    handler_->PostTask(
+        [weakThis = wptr(this), type, where = __func__] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_PC, "%{public}s: window is nullptr", where);
+                return;
+            }
+            if (!window->blurRadiusValue_ || !window->blurSaturationValue_ || !window->blurBrightnessValue_ ||
+                !window->blurMaskColorValue_) {
+                TLOGNW(WmsLogTag::WMS_PC, "%{public}s: RSAnimatableProperty is null", where);
+                return;
+            }
+            bool isDark = (window->colorMode_ == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+            window->ModifySidebarBlurProperty(isDark, type);
+        }, __func__);
     return WSError::WS_OK;
 }
  
