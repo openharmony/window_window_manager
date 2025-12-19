@@ -131,7 +131,7 @@ public:
 class TestWindowDisplayIdChangeListener : public IWindowInfoChangedListener {
 public:
     void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+        const WindowInfoList& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowDisplayIdChangeListener");
     };
@@ -140,7 +140,7 @@ public:
 class TestWindowGlobalRectChangedListener : public IWindowInfoChangedListener {
 public:
     void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) override
+        const WindowInfoList& windowInfoList) override
     {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "TestWindowGlobalRectChangedListener");
     };
@@ -273,6 +273,15 @@ class TestWMSListener : public IWMSConnectionChangedListener {
 public:
     void OnConnected(int32_t userId, int32_t screenId) override {}
     void OnDisconnected(int32_t userId, int32_t screenId) override {}
+};
+
+class TestInterestWindowIdsListener : public IWindowInfoChangedListener {
+public:
+    void OnWindowInfoChanged(const WindowInfoList& windowInfoList) override
+    {
+        received_ = windowInfoList;
+    }
+    WindowInfoList received_;
 };
 
 class WindowManagerTest : public testing::Test {
@@ -2271,8 +2280,11 @@ HWTEST_F(WindowManagerTest, UnregisterFloatingScaleChangedListener, Function | S
  */
 HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
 {
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
-    windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
+    WindowInfoList windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, static_cast<uint64_t>(5)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
 
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->floatingScaleChangeListeners_.clear();
@@ -2285,6 +2297,14 @@ HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
 
     windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->floatingScaleChangeListeners_.push_back(listener);
+    windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+
+    listener->SetInterestWindowIds({ 9 });
+    windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
 }
 
 /**
@@ -2350,8 +2370,11 @@ HWTEST_F(WindowManagerTest, UnregisterMidSceneChangedListener, Function | SmallT
  */
 HWTEST_F(WindowManagerTest, NotifyMidSceneStatusChange01, TestSize.Level1)
 {
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
+    WindowInfoList windowInfoList;
     windowInfoList.push_back({{WindowInfoKey::MID_SCENE, true}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
 
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
@@ -2366,6 +2389,10 @@ HWTEST_F(WindowManagerTest, NotifyMidSceneStatusChange01, TestSize.Level1)
     EXPECT_EQ(listener->count_, 0);
 
     windowManager.pImpl_->midSceneStatusChangeListeners_.push_back(listener);
+    windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+
+    listener->SetInterestWindowIds({ 9 });
     windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
     EXPECT_EQ(listener->count_, 1);
 }
@@ -2431,13 +2458,16 @@ HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListenerForPropertyChange
  */
 HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Level1)
 {
-    std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>> windowInfoList;
-    windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, 5}});
+    WindowInfoList windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, static_cast<uint64_t>(5)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
 
     auto& windowManager = WindowManager::GetInstance();
     windowManager.pImpl_->windowModeChangeListeners_.clear();
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
-
+ 
     windowManager.pImpl_->windowModeChangeListeners_.push_back(nullptr);
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
 
@@ -2445,6 +2475,48 @@ HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Le
 
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->windowModeChangeListeners_.push_back(listener);
+    windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+
+    listener->SetInterestWindowIds({ 9 });
+    windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+}
+
+/**
+ * @tc.name: NotifyDisplayIdChange
+ * @tc.desc: check NotifyDisplayIdChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyDisplayIdChange, TestSize.Level1)
+{
+    WindowInfoList windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::DISPLAY_ID, static_cast<uint64_t>(5)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->windowDisplayIdChangeListeners_.clear();
+    windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
+ 
+    windowManager.pImpl_->windowDisplayIdChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
+
+    auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
+
+    windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->windowDisplayIdChangeListeners_.push_back(listener);
+    windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+
+    listener->SetInterestWindowIds({ 9 });
+    windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
 }
 
 /**
@@ -2929,6 +3001,62 @@ HWTEST_F(WindowManagerTest, UnregisterWindowSupportRotationListener, Function | 
 
     instance_->pImpl_->windowSupportRotationListenerAgent_ = oldWindowManagerAgent;
     instance_->pImpl_->windowSupportRotationListeners_ = oldListeners;
+}
+
+/**
+ * @tc.name: GetWindowInfoListByInterestWindowIds_NullListener
+ * @tc.desc: GetWindowInfoListByInterestWindowIds_NullListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowInfoListByInterestWindowIds_NullListener, Function | SmallTest | Level2)
+{
+    WindowInfoList windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info;
+    info.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1));
+    windowInfoList.emplace_back(info);
+
+    auto result = mockInstance_->pImpl_->GetWindowInfoListByInterestWindowIds(nullptr, windowInfoList);
+    EXPECT_EQ(windowInfoList, result);
+}
+
+/**
+ * @tc.name: GetWindowInfoListByInterestWindowIds_EmptyInterestIds
+ * @tc.desc: GetWindowInfoListByInterestWindowIds_EmptyInterestIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowInfoListByInterestWindowIds_EmptyInterestIds, Function | SmallTest | Level2)
+{
+    auto listener = sptr<TestInterestWindowIdsListener>::MakeSptr();
+    WindowInfoList windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info;
+    info.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1));
+    windowInfoList.emplace_back(info);
+
+    auto result = mockInstance_->pImpl_->GetWindowInfoListByInterestWindowIds(listener, windowInfoList);
+    EXPECT_EQ(windowInfoList, result);
+}
+
+/**
+ * @tc.name: GetWindowInfoListByInterestWindowIds_FilterMatch
+ * @tc.desc: GetWindowInfoListByInterestWindowIds_FilterMatch
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetWindowInfoListByInterestWindowIds_FilterMatch, Function | SmallTest | Level2)
+{
+    auto listener = sptr<TestInterestWindowIdsListener>::MakeSptr();
+    listener->AddInterestWindowId(1);
+
+    WindowInfoList windowInfoList;
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info1;
+    info1.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1));
+    std::unordered_map<WindowInfoKey, WindowChangeInfoType> info2;
+    info2.emplace(WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2));
+    windowInfoList.emplace_back(info1);
+    windowInfoList.emplace_back(info2);
+
+    auto result = mockInstance_->pImpl_->GetWindowInfoListByInterestWindowIds(listener, windowInfoList);
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(info1, result.front());
 }
 
 /**
