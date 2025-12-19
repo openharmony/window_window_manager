@@ -60,9 +60,9 @@ PictureInPictureManager::~PictureInPictureManager()
 
 bool PictureInPictureManager::IsSupportPiP()
 {
-    bool IsSupportPiPFlag;
-    SingletonContainer::Get<WindowAdapter>().GetIsPipEnabled(IsSupportPiPFlag);
-    return IsSupportPiPFlag;
+    bool isSupportPiPFlag;
+    SingletonContainer::Get<WindowAdapter>().GetIsPipEnabled(isSupportPiPFlag);
+    return isSupportPiPFlag;
 }
 
 bool PictureInPictureManager::ShouldAbortPipStart()
