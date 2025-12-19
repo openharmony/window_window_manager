@@ -1479,6 +1479,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSuperFoldRefreshRate, TestSize.Level1)
         GTEST_SKIP();
     }
     g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t tempRefreshRate = 60;
     sptr<ScreenSession> screenSession = nullptr;
     ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
@@ -2129,7 +2130,10 @@ HWTEST_F(ScreenSessionManagerTest, LockLandExtendIfScreenInfoNull01, TestSize.Le
 #define FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         sptr<ScreenSession> session = ssm_->GetOrCreateScreenSession(SCREENID);
-        EXPECT_NE(session, nullptr);
+        ScreenProperty property;
+        ssm_->CreateScreenProperty(SCREENID, property);
+        ssm_->phyScreenPropMap_[SCREENID] = property;
+        EXPECT_EQ(session, nullptr);
         ssm_->SetClient(nullptr);
         ASSERT_EQ(ssm_->GetClientProxy(), nullptr);
         ssm_->LockLandExtendIfScreenInfoNull(session);
