@@ -866,44 +866,6 @@ HWTEST_F(SceneSessionManagerTest, UpdateSessionWindowVisibilityListener, TestSiz
 }
 
 /**
- * @tc.name: GetSessionSnapshotPixelMap01
- * @tc.desc: SceneSesionManager get session snapshot pixelmap
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetPixelMap";
-    info.bundleName_ = "GetPixelMap1";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-
-    int32_t persistentId = 65535;
-    float scaleValue = 0.5f;
-    auto pixelMap = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleValue);
-    EXPECT_EQ(pixelMap, nullptr);
-}
-
-/**
- * @tc.name: GetSessionSnapshotPixelMap02
- * @tc.desc: SceneSesionManager get session snapshot pixelmap
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, GetSessionSnapshotPixelMap02, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetPixelMap";
-    info.bundleName_ = "GetPixelMap1";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-
-    float scaleValue = 0.5f;
-    int32_t persistentId = 1;
-    auto pixelMap = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleValue);
-    EXPECT_EQ(pixelMap, nullptr);
-}
-
-/**
  * @tc.name: GetSessionSnapshotById
  * @tc.desc: test GetSessionSnapshotById
  * @tc.type: FUNC

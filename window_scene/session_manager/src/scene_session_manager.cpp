@@ -3038,6 +3038,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             TLOGNE(WmsLogTag::WMS_LIFE, "sceneSession is nullptr!");
             return sceneSession;
         }
+        sceneSession->RecoverSnapshotPersistence(sessionInfo);
         if (sessionInfo.isAbilityHook_) {
             auto session = GetHookedSessionByModuleName(sessionInfo);
             if (session) {
@@ -4051,6 +4052,7 @@ void SceneSessionManager::EraseSceneSessionMapById(int32_t persistentId)
     if (sceneSession != nullptr) {
         RemovePreLoadStartingWindowFromMap(sceneSession->GetSessionInfo());
         sceneSession->ClearLifeCycleTask();
+        sceneSession->ClearSnapshotPersistence();
     } else {
         TLOGW(WmsLogTag::WMS_PATTERN, "session is nullptr id: %{public}d", persistentId);
     }
@@ -14896,14 +14898,12 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
     }
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetSessionSnapshotPixelMap(%d )", persistentId);
-    auto isPersistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
 
     bool isPc = systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode();
     bool useCurWindow = (snapshotNode == SnapshotNodeType::DEFAULT_NODE) ?
         isPc : (snapshotNode == SnapshotNodeType::LEASH_NODE) ? false : true;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    if (needSnapshot && !isPersistentImageFit) {
+    if (needSnapshot && !sceneSession->IsPersistentImageFit()) {
         pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow);
     }
     if (!pixelMap) {
@@ -17902,6 +17902,7 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
 
 WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId)
 {
+    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
@@ -17933,13 +17934,16 @@ WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit 
     }
     sceneSession->SaveSnapshot(true, true, pixelMap);
     scenePersistence->SetHasSnapshot(true);
-    ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId), static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
+    ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId),
+        static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
+    sceneSession->SetPersistentImageFit(static_cast<int32_t>(imageFit));
     return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
     ImageFit imageFit, int32_t persistentId)
 {
+    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
@@ -17971,11 +17975,13 @@ WMError SceneSessionManager::SetImageForRecentPixelMap(const std::shared_ptr<Med
     scenePersistence->SetHasSnapshot(true);
     ScenePersistentStorage::Insert("SetImageForRecent_" + std::to_string(persistentId),
         static_cast<int32_t>(imageFit), ScenePersistentStorageType::MAXIMIZE_STATE);
+    sceneSession->SetPersistentImageFit(static_cast<int32_t>(imageFit));
     return WMError::WM_OK;
 }
 
 WMError SceneSessionManager::RemoveImageForRecent(int32_t persistentId)
 {
+    TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
@@ -17993,18 +17999,6 @@ WMError SceneSessionManager::RemoveImageForRecent(int32_t persistentId)
     sceneSession->ResetSnapshot();
     sceneSession->DeletePersistentImageFit();
     return WMError::WM_OK;
-}
-
-bool SceneSessionManager::GetPersistentImageFit(int32_t persistentId, int32_t& imageFit)
-{
-    auto persistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(persistentId),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
-    if (persistentImageFit) {
-        ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(persistentId),
-            imageFit, ScenePersistentStorageType::MAXIMIZE_STATE);
-        return true;
-    }
-    return false;
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetPixelMap(uint32_t resourceId,
