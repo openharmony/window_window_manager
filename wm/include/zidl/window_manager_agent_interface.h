@@ -67,8 +67,7 @@ public:
     virtual void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info) = 0;
     virtual void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty) = 0;
     virtual void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground) = 0;
-    virtual void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) = 0;
+    virtual void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList) = 0;
     virtual void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo) = 0;
 };
 } // namespace Rosen
