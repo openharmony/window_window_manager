@@ -8086,16 +8086,16 @@ void WindowSceneSessionImpl::ModifySidebarBlurProperty(bool isDark, SidebarBlurT
             blurRadiusValue_->Set(isDark ? SIDEBAR_DEFAULT_RADIUS_DARK : SIDEBAR_DEFAULT_RADIUS_LIGHT);
             blurSaturationValue_->Set(isDark ? SIDEBAR_DEFAULT_SATURATION_DARK : SIDEBAR_DEFAULT_SATURATION_LIGHT);
             blurBrightnessValue_->Set(isDark ? SIDEBAR_DEFAULT_BRIGHTNESS_DARK : SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(
-                Rosen::RSColor::FromArgbInt(isDark ? SIDEBAR_DEFAULT_MASKCOLOR_DARK : SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
+            blurMaskColorValue_->Set( Rosen::RSColor::FromArgbInt(
+                isDark ? SIDEBAR_DEFAULT_MASKCOLOR_DARK : SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
             break;
         }
         case SidebarBlurType::DEFAULT_MAXIMIZE: {
             blurRadiusValue_->Set(isDark ? SIDEBAR_MAXIMIZE_RADIUS_DARK : SIDEBAR_MAXIMIZE_RADIUS_LIGHT);
             blurSaturationValue_->Set(isDark ? SIDEBAR_MAXIMIZE_SATURATION_DARK : SIDEBAR_MAXIMIZE_SATURATION_LIGHT);
             blurBrightnessValue_->Set(isDark ? SIDEBAR_MAXIMIZE_BRIGHTNESS_DARK : SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(
-                Rosen::RSColor::FromArgbInt(isDark ? SIDEBAR_MAXIMIZE_MASKCOLOR_DARK : SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT));
+            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(
+                isDark ? SIDEBAR_MAXIMIZE_MASKCOLOR_DARK : SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT));
             break;
         }
         default:
