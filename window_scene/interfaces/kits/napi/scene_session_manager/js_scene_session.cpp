@@ -6291,8 +6291,6 @@ napi_value JsSceneSession::OnNotifyPipOcclusionChange(napi_env env, napi_callbac
     // Maybe expand with session visibility&state change
     SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded, WINDOW_SCREEN_LOCK_PREFIX,
                                                           session->keepScreenLock_);
-    SceneSessionManager::GetInstance().HandleKeepScreenOn(session, !occluded, VIEW_SCREEN_LOCK_PREFIX,
-                                                          session->viewKeepScreenLock_);
     return NapiGetUndefined(env);
 }
 
