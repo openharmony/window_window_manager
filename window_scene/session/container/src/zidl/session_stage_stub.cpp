@@ -1385,14 +1385,14 @@ int SessionStageStub::HandleUpdateBrightness(MessageParcel& data, MessageParcel&
     }
     return ERR_NONE;
 }
- 
+
 int SessionStageStub::HandleAddSidebarBlur(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PC, "in");
     AddSidebarBlur();
     return ERR_NONE;
 }
- 
+
 int SessionStageStub::HandleSetSidebarBlurStyleWithType(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_DECOR, "called!");

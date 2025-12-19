@@ -319,7 +319,7 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError AddSidebarBlur() { return WSError::WS_DO_NOTHING; }
- 
+
     /**
      * @brief Set sidebar blur style with type.
      *
