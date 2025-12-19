@@ -7969,7 +7969,7 @@ bool WindowSceneSessionImpl::IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& p
 
 WSError WindowSceneSessionImpl::AddSidebarBlur()
 {
-    TLOGI(WmsLogTag::WMS_PC, "in, 111,persistentId=%{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_PC, "in, persistentId=%{public}d", GetPersistentId());
     if (handler_ == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "handler is nullptr");
         return WSError::WS_ERROR_NULLPTR;
