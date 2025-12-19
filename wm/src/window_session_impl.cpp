@@ -5399,7 +5399,7 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
         }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start. id: %{public}d, "
               "isUIEProc: %{public}d, hostWindowId: %{public}d", windowId, isUIEProc, hostWindowId);
-        if (MiscServices::InputMethodController::GetInstance() && !isBrokerCall && !isUIEProc) {
+        if (MiscServices::InputMethodController::GetInstance()) {
             MiscServices::InputMethodController::GetInstance()->RequestHideInput(static_cast<uint32_t>(hostWindowId));
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
