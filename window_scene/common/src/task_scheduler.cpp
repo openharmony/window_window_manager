@@ -32,7 +32,8 @@ std::shared_ptr<AppExecFwk::EventHandler> TaskScheduler::GetEventHandler()
 void TaskScheduler::PostAsyncTaskToExportHandler(Task&& task, const std::string& name, int64_t delayTime)
 {
     if (exportHandler_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "export handler is null");
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "export handler is null");
+        task();
         return;
     }
     if (delayTime == 0 && exportHandler_->GetEventRunner()->IsCurrentRunnerThread()) {
