@@ -322,9 +322,10 @@ bool ScreenSessionManagerClient::OnFoldPropertyChange(ScreenId screenId, const S
         screenProperty.SetDeviceOrientation(deviceOrientation);
         screenProperty.SetScreenAreaOffsetY(property.GetScreenAreaOffsetY());
         screenProperty.SetScreenAreaHeight(property.GetScreenAreaHeight());
+        screenProperty.SetScreenAreaWidth(property.GetScreenAreaWidth());
+        screenProperty.SetInputOffset(property.GetInputOffsetX(), property.GetInputOffsetY());
     }
     screenProperty.SetPhysicalTouchBounds(screenSession->GetRotationCorrection(displayMode));
-    screenProperty.SetInputOffsetY();
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         screenProperty.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
         screenProperty.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
