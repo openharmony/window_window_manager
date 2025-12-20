@@ -55,6 +55,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     auto task = [=] {
         if (mState_ == nextState) {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
+            taskProcessor_.FinishTask();
             return;
         }
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
@@ -70,7 +71,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
             foldScreenPolicy->SendSensorResult(mState_);
         }
     };
-    taskProcessor_.PushToQueue(task);
+    taskProcessor_.AddTask(task);
 }
 
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
@@ -110,6 +111,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
         auto policy = weakPolicy.promote();
         if (manager == nullptr || policy == nullptr) {
             TLOGNE(WmsLogTag::DMS, "sensorFoldStateManager or foldScreenPolicy is nullptr.");
+            taskProcessor_.FinishTask();
             return;
         }
         FoldStatus currentState = FoldStatus::UNKNOWN;
@@ -132,13 +134,13 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             taskScheduler->PostAsyncTask(task, "secondaryFoldStatusChange");
         }
     };
-    taskProcessor_.PushToQueue(task);
+    taskProcessor_.AddTask(event);
 }
 
 void SensorFoldStateManager::FinishTaskSequence()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateManager::FinishTaskSequence");
-    taskProcessor_.Finish();
+    taskProcessor_.FinishTask();
 }
 
 void SensorFoldStateManager::ProcessNotifyFoldStatusChange(FoldStatus currentStatus, FoldStatus nextStatus,

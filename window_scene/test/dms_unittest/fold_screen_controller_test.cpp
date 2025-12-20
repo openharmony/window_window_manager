@@ -810,6 +810,7 @@ namespace {
         fsc_.NotifyRunSensorFoldStateManager();
         EXPECT_TRUE(g_errLog.find("TaskSequenceProcess") != std::string::npos);
         LOG_SetCallback(nullptr);
+        g_errLog.clear();
     }
 }
 } // namespace Rosen
