@@ -5382,20 +5382,24 @@ void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag, int32_t windowId)
+static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboardFlag,
+    const std::shared_ptr<Ace::UIContent>& uiContent, int32_t windowId)
 {
     if (!isNeedKeyboard && !keepKeyboardFlag) {
 #ifdef IMF_ENABLE
-        auto callingUid = IPCSkeleton::GetCallingUid();
-        bool isBrokerCall = callingUid == ANCO_SERVICE_BROKER_UID;
         auto pid = IPCSkeleton::GetCallingRealPid();
         AppExecFwk::RunningProcessInfo info;
         DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->GetRunningProcessInfoByPid(pid, info);
         bool isUIEProc = AAFwk::UIExtensionUtils::IsUIExtension(info.extensionType_);
+        int32_t hostWindowId = windowId;
+        if (isUIEProc && uiContent) {
+            hostWindowId = uiContent->GetUIContentWindowID(uiContent->GetInstanceId());
+        }
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard start. id: %{public}d, "
-              "isBrokerCall: %{public}d, isUIEProc: %{public}d", windowId, isBrokerCall, isUIEProc);
-        if (MiscServices::InputMethodController::GetInstance() && !isBrokerCall && !isUIEProc) {
-            MiscServices::InputMethodController::GetInstance()->RequestHideInput(static_cast<uint32_t>(windowId));
+              "isUIEProc: %{public}d, hostWindowId: %{public}d", windowId, isUIEProc, hostWindowId);
+        auto inputMethodController = MiscServices::InputMethodController::GetInstance();
+        if (inputMethodController) {
+            inputMethodController->RequestHideInput(static_cast<uint32_t>(hostWindowId));
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
 #endif
@@ -5415,7 +5419,8 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
             return;
         }
         bool isNeedKeyboard = false;
-        if (auto uiContent = window->GetUIContentSharedPtr()) {
+        auto uiContent = window->GetUIContentSharedPtr();
+        if (uiContent) {
             // isNeedKeyboard is set by arkui and indicates whether the window needs a keyboard or not.
             isNeedKeyboard = uiContent->NeedSoftKeyboard();
         }
@@ -5424,7 +5429,7 @@ void WindowSessionImpl::NotifyUIContentFocusStatus()
         int32_t windowId = window->GetPersistentId();
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "id: %{public}d, isNeedKeyboard: %{public}d, keepKeyboardFlag: %{public}d",
             windowId, isNeedKeyboard, keepKeyboardFlag);
-        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag, windowId);
+        RequestInputMethodCloseKeyboard(isNeedKeyboard, keepKeyboardFlag, uiContent, windowId);
     };
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SetOnWindowFocused(task);

@@ -68,7 +68,7 @@ void WindowManagerAgentLite::UpdatePiPWindowStateChanged(const std::string& bund
 }
 
 void WindowManagerAgentLite::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-    const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList)
+    const WindowInfoList& windowInfoList)
 {
     SingletonContainer::Get<WindowManagerLite>().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
 }

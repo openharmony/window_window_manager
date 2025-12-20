@@ -99,6 +99,8 @@ public:
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
     MOCK_METHOD1(UpdateIsShowDecorInFreeMultiWindow, WSError(bool isShow));
     MOCK_METHOD1(UpdateBrightness, WSError(float brightness));
+    MOCK_METHOD0(AddSidebarBlur, WSError(void));
+    MOCK_METHOD1(SetSidebarBlurStyleWithType, WSError(SidebarBlurType type));
 };
 } // namespace Rosen
 } // namespace OHOS

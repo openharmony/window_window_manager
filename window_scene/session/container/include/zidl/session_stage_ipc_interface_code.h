@@ -108,6 +108,9 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_ACTIVE_STATUS_CHANGE,
     // Brightness
     TRANS_ID_UPDATE_BRIGHTNESS,
+    // Side bar blur
+    TRANS_ID_ADD_SIDEBAR_BLUR,
+    TRANS_ID_SET_SIDEBAR_BLUR_STYLE,
 };
 }   // namespace Rosen
 }   // namespace OHOS

@@ -1558,6 +1558,56 @@ HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConfigFreeMultiWindow2
+ * @tc.desc: call ConfigFreeMultiWindow2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowTest2, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<radius>40</radius>"
+        "<alpha>1</alpha>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>20</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
+        "<freeMultiWindow enable=\"true\">"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    // freeMultiWindow windowEffect
+    auto windowEffect = ssm_->systemConfig_.freeMultiWindowConfig_.appWindowSceneConfig_;
+    
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.alpha_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.offsetX_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.offsetY_, 2);
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.radius_, 40);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.alpha_, 0);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.offsetX_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.offsetY_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.radius_, 20);
+}
+
+/**
  * @tc.name: LoadFreeMultiWindowConfigTest
  * @tc.desc: call LoadFreeMultiWindowConfig
  * @tc.type: FUNC

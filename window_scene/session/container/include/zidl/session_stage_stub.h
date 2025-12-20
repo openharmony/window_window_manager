@@ -112,6 +112,8 @@ private:
     int HandleSendFbActionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateIsShowDecorInFreeMultiWindow(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateBrightness(MessageParcel& data, MessageParcel& reply);
+    int HandleAddSidebarBlur(MessageParcel& data, MessageParcel& reply);
+    int HandleSetSidebarBlurStyleWithType(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

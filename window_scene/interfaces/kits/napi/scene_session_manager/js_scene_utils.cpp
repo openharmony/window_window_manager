@@ -407,6 +407,19 @@ bool IsJsIsRotatableUndefined(napi_env env, napi_value jsIsRotatable, SessionInf
     return true;
 }
 
+bool IsJsSpecifiedReasonUndefined(napi_env env, napi_value jsSpecifiedReason, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsSpecifiedReason) != napi_undefined) {
+        int32_t specifiedReason = static_cast<int32_t>(SpecifiedReason::BY_SCB);
+        if (!ConvertFromJsValue(env, jsSpecifiedReason, specifiedReason)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to specifiedReason");
+            return false;
+        }
+        sessionInfo.specifiedReason_ = static_cast<SpecifiedReason>(specifiedReason);
+    }
+    return true;
+}
+
 bool IsJsProcessOptionUndefined(napi_env env, napi_value jsProcessOption, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsProcessOption) != napi_undefined) {
@@ -584,6 +597,8 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
     napi_get_named_property(env, jsObject, "isAbilityHook", &jsIsAbilityHook);
     napi_value jsRequestId = nullptr;
     napi_get_named_property(env, jsObject, "requestId", &jsRequestId);
+    napi_value jsSpecifiedReason = nullptr;
+    napi_get_named_property(env, jsObject, "specifiedReason", &jsRequestId);
     napi_value jsIsAncoApplication = nullptr;
     napi_get_named_property(env, jsObject, "isAncoApplication", &jsIsAncoApplication);
     if (!IsJsBundleNameUndefind(env, jsBundleName, sessionInfo)) {
@@ -606,6 +621,7 @@ bool ConvertSessionInfoName(napi_env env, napi_value jsObject, SessionInfo& sess
         !IsJsWindowInputTypeUndefind(env, jsWindowInputType, sessionInfo) ||
         !IsJsIsAbilityHookUndefind(env, jsIsAbilityHook, sessionInfo) ||
         !IsJsRequestIdUndefind(env, jsRequestId, sessionInfo) ||
+        !IsJsSpecifiedReasonUndefined(env, jsSpecifiedReason, sessionInfo) ||
         !IsJsIsAncoApplicationUndefind(env, jsIsAncoApplication, sessionInfo)) {
         return false;
     }
@@ -1604,6 +1620,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
         CreateJsValue(env, sessionInfo.isBackTransition_));
     napi_set_named_property(env, objValue, "requestId",
         CreateJsValue(env, sessionInfo.requestId));
+    napi_set_named_property(env, objValue, "specifiedReason",
+        CreateJsValue(env, sessionInfo.specifiedReason_));
     napi_set_named_property(env, objValue, "needClearInNotShowRecent",
         CreateJsValue(env, sessionInfo.needClearInNotShowRecent_));
     if (sessionInfo.processOptions != nullptr) {
@@ -1612,7 +1630,7 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
     }
     napi_set_named_property(env, objValue, "errorReason",
         CreateJsValue(env, sessionInfo.errorReason));
-    napi_set_named_property(env, objValue, "isFromIcon", CreateJsValue(env, sessionInfo.isFromIcon_));
+
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
