@@ -416,8 +416,8 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, GetScaleInLSState, TestSize.Level0)
     ASSERT_NE(sceneSession, nullptr);
     float scaleX = 1;
     float scaleY = 1;
-    WSRect winRect = { 0, 0, 0, 0};
-    Rect avoidAreaRect = { 0, 0, 0, 0};
+    WSRect winRect = { 0, 0, 0, 0 };
+    Rect avoidAreaRect = { 0, 0, 0, 0 };
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->layoutController_ = sptr<LayoutController>::MakeSptr(property);
     sceneSession->Session::SetScale(-1, -1, -1, -1);
