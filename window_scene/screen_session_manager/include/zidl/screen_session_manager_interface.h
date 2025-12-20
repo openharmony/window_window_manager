@@ -66,6 +66,15 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+
+    virtual DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+    {
+        return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
@@ -173,6 +182,7 @@ public:
     virtual bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) { return false; }
     virtual ScreenPowerState GetScreenPower(ScreenId dmsScreenId) { return ScreenPowerState::INVALID_STATE; }
     virtual ScreenPowerState GetScreenPower() { return ScreenPowerState::INVALID_STATE; }
+    virtual void SyncScreenPowerState(ScreenPowerState state) { }
     virtual bool SetDisplayState(DisplayState state) { return false; }
     virtual DisplayState GetDisplayState(DisplayId displayId) {return DisplayState::UNKNOWN; }
     virtual bool TryToCancelScreenOff() { return false; }
@@ -390,6 +400,8 @@ public:
         ScreenId& screenId, DMRect& screenArea) { return DMError::DM_OK; }
     virtual DMError GetBrightnessInfo(DisplayId displayId,
         ScreenBrightnessInfo& brightnessInfo) { return DMError::DM_OK; }
+    virtual DMError GetSupportsInput(DisplayId displayId, bool& supportsInput) { return DMError::DM_OK; };
+    virtual DMError SetSupportsInput(DisplayId displayId, bool supportsInput) { return DMError::DM_OK; };
     virtual DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) { return DMError::DM_OK; }
     virtual DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,
         bool enable) { return DMError::DM_OK; }
@@ -399,6 +411,7 @@ public:
     {
         return DMError::DM_OK;
     }
+    virtual DMError GetRoundedCorner(DisplayId displayId, int& radius) { return DMError::DM_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -113,6 +113,7 @@ napi_value JsPipController::OnStartPictureInPicture(napi_env env, napi_callback_
                 "JsPipController::OnStartPictureInPicture failed."));
             return;
         }
+        pipController->SetStateChangeReason(PiPStateChangeReason::REQUEST_START);
         WMError errCode = pipController->StartPictureInPicture(StartPipType::USER_START);
         if (errCode != WMError::WM_OK) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),
@@ -147,6 +148,7 @@ napi_value JsPipController::OnStopPictureInPicture(napi_env env, napi_callback_i
                 "JsPipController::OnStopPictureInPicture failed."));
             return;
         }
+        pipController->SetStateChangeReason(PiPStateChangeReason::REQUEST_DELETE);
         WMError errCode = pipController->StopPictureInPictureFromClient();
         if (errCode != WMError::WM_OK) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WM_JS_TO_ERROR_CODE_MAP.at(errCode)),

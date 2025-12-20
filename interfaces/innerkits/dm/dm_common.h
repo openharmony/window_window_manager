@@ -125,6 +125,7 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_START_DREAM = 49,
     STATE_CHANGE_REASON_END_DREAM = 50,
     STATE_CHANGE_REASON_SYNCHRONIZE_POWER_STATE = 51,
+    STATE_CHANGE_REASON_APPCAST = 52,
     STATE_CHANGE_REASON_REMOTE = 100,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
@@ -252,9 +253,20 @@ enum class DmErrorCode : int32_t {
  * @brief Enumerates the aod operation
  */
 enum class AodOP {
-    ENTER,
-    EXIT,
+    ENTER_START,
+    ENTER_FINISH,
+    EXIT_START,
+    EXIT_FINISH,
     AOD_OP_MAX
+};
+
+/**
+ * @brief Enumerates TentMode.
+ */
+enum class TentMode : uint32_t {
+    UNKNOWN,
+    TENT_MODE,
+    HOVER,
 };
 
 /**
@@ -400,6 +412,25 @@ enum class Orientation : uint32_t {
 };
 
 /**
+ * @brief Rotation info type
+ */
+enum class RotationInfoType : uint32_t {
+    WINDOW_ORIENTATION = 0,
+    DISPLAY_ORIENTATION = 1,
+    DISPLAY_ROTATION = 2,
+};
+
+/**
+ * @brief Window Orientaion
+ */
+enum class WindowOrientation : uint32_t {
+    PORTRAIT = 0,
+    LANDSCAPE_INVERTED,
+    PORTRAIT_INVERTED,
+    LANDSCAPE,
+};
+
+/**
  * @brief Enumerates display orientations.
  */
 enum class DisplayOrientation : uint32_t {
@@ -408,6 +439,20 @@ enum class DisplayOrientation : uint32_t {
     PORTRAIT_INVERTED,
     LANDSCAPE_INVERTED,
     UNKNOWN,
+};
+
+const std::map<DisplayOrientation, WindowOrientation> DISPLAY_TO_WINDOW_MAP{
+    { DisplayOrientation::PORTRAIT, WindowOrientation::PORTRAIT },
+    { DisplayOrientation::LANDSCAPE, WindowOrientation::LANDSCAPE_INVERTED },
+    { DisplayOrientation::PORTRAIT_INVERTED, WindowOrientation::PORTRAIT_INVERTED },
+    { DisplayOrientation::LANDSCAPE_INVERTED, WindowOrientation::LANDSCAPE },
+};
+
+const std::map<WindowOrientation, DisplayOrientation> WINDOW_TO_DISPLAY_MAP{
+    { WindowOrientation::PORTRAIT, DisplayOrientation::PORTRAIT },
+    { WindowOrientation::LANDSCAPE, DisplayOrientation::LANDSCAPE_INVERTED },
+    { WindowOrientation::PORTRAIT_INVERTED, DisplayOrientation::PORTRAIT_INVERTED },
+    { WindowOrientation::LANDSCAPE_INVERTED, DisplayOrientation::LANDSCAPE },
 };
 
 /**
@@ -500,6 +545,7 @@ enum class SuperFoldStatusChangeEvents : uint32_t {
     KEYBOARD_OFF,
     SYSTEM_KEYBOARD_ON,
     SYSTEM_KEYBOARD_OFF,
+    RESOLUTION_EFFECT_CHANGE,
     INVALID,
 };
 
@@ -844,6 +890,32 @@ struct RelativePosition {
 struct RotationOption {
     Rotation rotation_ = Rotation::ROTATION_0;
     bool needSetRotation_ = false;
+};
+
+/**
+ * @brief Corner type
+ */
+enum class CornerType : int32_t {
+    TOP_LEFT = 0,
+    TOP_RIGHT = 1,
+    BOTTOM_RIGHT = 2,
+    BOTTOM_LEFT = 3
+};
+
+/**
+ * @brief Rounded corner
+ */
+struct RoundedCorner {
+    CornerType type;
+    Position position;
+    int radius;
+};
+
+enum class DisplayModeChangeReason : uint32_t {
+    DEFAULT = 0,
+    RECOVER,
+    INVALID,
+    SETMODE,
 };
 }
 #endif // OHOS_ROSEN_DM_COMMON_H

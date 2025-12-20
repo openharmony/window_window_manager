@@ -107,6 +107,31 @@ void InitSceneSession(sptr<SceneSession>& sceneSession, int32_t pid, int windowI
 }
 
 /**
+ * @tc.name: StartDelayedFlushWindowInfoToMMITask
+ * @tc.desc: StartDelayedFlushWindowInfoToMMITask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, StartDelayedFlushWindowInfoToMMITask, TestSize.Level1)
+{
+    ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ssm_->isDelayFlushWindowInfoMode_ = true;
+    ssm_->HandleUserSwitching(false);
+    EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_, false);
+    ssm_->isDelayFlushWindowInfoMode_ = true;
+    ssm_->HandleUserSwitching(true);
+    EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_, true);
+    ssm_->isUserBackground_ = true;
+    ssm_->isDelayFlushWindowInfoMode_ = false;
+    ssm_->HandleUserSwitching(true);
+    EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_, true);
+    sleep(2);
+    ssm_->isUserBackground_ = false;
+    ssm_->isDelayFlushWindowInfoMode_ = false;
+    ssm_->HandleUserSwitching(true);
+    EXPECT_EQ(ssm_->isDelayFlushWindowInfoMode_, true);
+}
+
+/**
  * @tc.name: GetWindowInfoWithoutParentWindowAndStateActive
  * @tc.desc: windowInfo without parent window and state active
  * @tc.type: FUNC
@@ -846,6 +871,58 @@ HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForLockCursorInDrag, Te
     EXPECT_TRUE(session->IsDragZooming());
     manager_->UpdateWindowFlagsForLockCursor(session, windowInfo);
     EXPECT_EQ(windowInfo.flags, 0);
+}
+
+/**
+ * @tc.name: UpdateWindowFlagsForReceiveDragEventEnabled
+ * @tc.desc: UpdateWindowFlagsForReceiveDragEventEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForReceiveDragEventEnabled, TestSize.Level2)
+{
+    MMI::WindowInfo windowInfo;
+    manager_->UpdateWindowFlagsForReceiveDragEventEnabled(nullptr, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->persistentId_ = 5;
+    session->SetSessionInfoAdvancedFeatureFlag(100, false);
+    session->GetSessionInfoAdvancedFeatureFlag(100);
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, false);
+    manager_->UpdateWindowFlagsForReceiveDragEventEnabled(session, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    windowInfo.flags = 0;
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, true);
+    manager_->UpdateWindowFlagsForReceiveDragEventEnabled(session, windowInfo);
+    EXPECT_NE(windowInfo.flags, 0);
+}
+
+/**
+ * @tc.name: UpdateWindowFlagsForWindowSeparation
+ * @tc.desc: UpdateWindowFlagsForWindowSeparation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionDirtyManagerTest2, UpdateWindowFlagsForWindowSeparation, TestSize.Level2)
+{
+    MMI::WindowInfo windowInfo;
+    manager_->UpdateWindowFlagsForReceiveDragEventEnabled(nullptr, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->persistentId_ = 5;
+    session->SetSessionInfoAdvancedFeatureFlag(100, false);
+    session->GetSessionInfoAdvancedFeatureFlag(100);
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, false);
+    manager_->UpdateWindowFlagsForWindowSeparation(session, windowInfo);
+    EXPECT_EQ(windowInfo.flags, 0);
+
+    windowInfo.flags = 0;
+    session->SetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, true);
+    manager_->UpdateWindowFlagsForWindowSeparation(session, windowInfo);
+    EXPECT_NE(windowInfo.flags, 0);
 }
 } // namespace
 } // namespace Rosen

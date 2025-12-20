@@ -560,6 +560,11 @@ uint32_t ScreenSession::GetValidWidth() const
     return property_.GetValidWidth();
 }
 
+float ScreenSession::GetVirtualPixelRatio() const
+{
+    return property_.GetVirtualPixelRatio();
+}
+
 void ScreenSession::SetPointerActiveWidth(uint32_t pointerActiveWidth)
 {
     property_.SetPointerActiveWidth(pointerActiveWidth);
@@ -688,7 +693,6 @@ void ScreenSession::UpdatePropertyByActiveModeChange()
         property_.SetPhyBounds(screeBounds);
         property_.SetBounds(screeBounds);
         property_.SetAvailableArea({0, 0, mode->width_, mode->height_});
-        property_.SetInputOffsetY();
         property_.SetScreenRealWidth(mode->width_);
         property_.SetScreenRealHeight(mode->height_);
         property_.SetScreenRealPPI();
@@ -739,6 +743,7 @@ ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& 
         property_.SetDeviceOrientation(deviceOrientation);
         property_.SetScreenAreaOffsetY(updatedProperty.GetScreenAreaOffsetY());
         property_.SetScreenAreaHeight(updatedProperty.GetScreenAreaHeight());
+        property_.SetScreenAreaWidth(updatedProperty.GetScreenAreaWidth());
     }
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     return property_;
@@ -769,12 +774,6 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
 
 void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
 {
-    auto rectWithRotaion = rect;
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
-        (property_.GetScreenRotation() == Rotation::ROTATION_90 ||
-        property_.GetScreenRotation() == Rotation::ROTATION_270)) {
-        std::swap(rectWithRotaion.width_, rectWithRotaion.height_);
-    }
     auto screenBounds = property_.GetBounds();
     screenBounds.rect_.left_ = rect.posX_;
     screenBounds.rect_.top_ = rect.posY_;
@@ -782,8 +781,8 @@ void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
     screenBounds.rect_.height_ = rect.height_;
     property_.SetBounds(screenBounds);
     // Determine whether the touch is in a valid area.
-    property_.SetValidWidth(rectWithRotaion.width_);
-    property_.SetValidHeight(rectWithRotaion.height_);
+    property_.SetValidWidth(rect.width_);
+    property_.SetValidHeight(rect.height_);
     property_.SetInputOffset(rect.posX_, rect.posY_);
     // It is used to calculate the original screen size
     property_.SetScreenAreaWidth(rect.width_);
@@ -791,6 +790,19 @@ void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
     // It is used to calculate the effective area of the inner screen for cursor
     property_.SetMirrorWidth(rect.width_);
     property_.SetMirrorHeight(rect.height_);
+}
+
+void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty,
+    const ScreenProperty& eventPara)
+{
+    if (screenProperty.GetRsId() != 0) {
+        TLOGI(WmsLogTag::DMS, "no need handle");
+        return;
+    }
+    auto screenBounds = eventPara.GetBounds();
+    TLOGI(WmsLogTag::DMS, "bounds after change: %{public}f, %{public}f",
+        screenBounds.rect_.width_, screenBounds.rect_.height_);
+    screenProperty.SetBounds(screenBounds);
 }
 
 void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
@@ -981,6 +993,7 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
     // back server for post processs of screen change
     screenProperty.SetSuperFoldStatusChangeEvent(changeEvent);
     screenProperty.SetIsDestroyDisplay(eventPara.GetIsFakeInUse());
+    screenProperty.SetPropertyChangeReason(eventPara.GetPropertyChangeReason());
 
     switch (changeEvent) {
         case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
@@ -1011,6 +1024,11 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
         case SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF: {
             TLOGI(WmsLogTag::DMS, "handle system keyboard off");
             HandleSystemKeyboardOffPropertyChange(screenProperty, currentState, isKeyboardOn);
+            break;
+        }
+        case SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE: {
+            TLOGI(WmsLogTag::DMS, "handle resolution effect change");
+            HandleResolutionEffectPropertyChange(screenProperty, eventPara);
             break;
         }
         default:
@@ -1212,7 +1230,6 @@ void ScreenSession::SetSecurity(bool isSecurity)
 void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
 {
     property_.SetPhysicalTouchBounds(GetRotationCorrection(foldDisplayMode));
-    property_.SetInputOffsetY();
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         property_.SetValidHeight(property_.GetBounds().rect_.GetHeight());
         property_.SetValidWidth(property_.GetBounds().rect_.GetWidth());
@@ -1430,6 +1447,13 @@ void ScreenSession::SetRotationAndScreenRotationOnly(Rotation rotation)
     property_.SetRotationAndScreenRotationOnly(rotation);
 }
 
+void ScreenSession::SetOrientationMatchRotation(Rotation rotation, FoldDisplayMode displayMode)
+{
+    auto curOrientation = CalcDeviceOrientationWithBounds(rotation, displayMode, property_.GetBounds());
+    property_.SetDisplayOrientation(curOrientation);
+    property_.SetDeviceOrientation(curOrientation);
+}
+
 void ScreenSession::SetScreenRequestedOrientation(Orientation orientation)
 {
     property_.SetScreenRequestedOrientation(orientation);
@@ -1586,7 +1610,35 @@ Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode fo
     DisplayOrientation displayOrientation = CalcOrientationToDisplayOrientation(orientation);
     return CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
 }
- 
+
+RRect ScreenSession::CalcBoundsInRotationZero()
+{
+    Rotation deviceRotation = property_.GetDeviceRotation();
+    RRect bounds = property_.GetBounds();
+    if (!IsVertical(deviceRotation)) {
+        uint32_t width = bounds.rect_.GetWidth();
+        bounds.rect_.width_ = bounds.rect_.GetHeight();
+        bounds.rect_.height_ = width;
+    }
+    return bounds;
+}
+
+RRect ScreenSession::CalcBoundsByRotation(Rotation rotation)
+{
+    Rotation deviceRotation = property_.GetDeviceRotation();
+    RRect bounds = property_.GetBounds();
+    if (!IsVertical(deviceRotation) && !IsVertical(rotation)) {
+        return bounds;
+    }
+    if (IsVertical(deviceRotation) && IsVertical(rotation)) {
+        return bounds;
+    }
+    uint32_t width = bounds.rect_.GetWidth();
+    bounds.rect_.width_ = bounds.rect_.GetHeight();
+    bounds.rect_.height_ = width;
+    return bounds;
+}
+
 bool ScreenSession::IsVertical(Rotation rotation) const
 {
     return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
@@ -1627,12 +1679,11 @@ Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displ
             SECONDARY_ROTATION_MOD) % SECONDARY_ROTATION_MOD;
         displayRotation = static_cast<DisplayOrientation>(temp);
     } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
-        bool isLandscapeScreen = boundsInRotationZero.rect_.GetWidth() > boundsInRotationZero.rect_.GetHeight();
-        if (isLandscapeScreen) {
-            uint32_t temp = (static_cast<uint32_t>(displayRotation) - ROTATION_90 +
-                SECONDARY_ROTATION_MOD) % SECONDARY_ROTATION_MOD;
-            displayRotation = static_cast<DisplayOrientation>(temp);
-        }
+        displayRotation =
+            GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_90));
+    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() && foldDisplayMode == FoldDisplayMode::FULL) {
+        displayRotation =
+            GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_270));
     }
     Rotation rotation = Rotation::ROTATION_0;
     switch (displayRotation) {
@@ -1658,6 +1709,18 @@ Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displ
     }
     AddRotationCorrection(rotation, foldDisplayMode);
     return rotation;
+}
+
+DisplayOrientation ScreenSession::GetTargetOrientationWithBounds(
+    DisplayOrientation displayRotation, const RRect& boundsInRotationZero, uint32_t rotationOffset)
+{
+    bool isLandscapeScreen = boundsInRotationZero.rect_.GetWidth() > boundsInRotationZero.rect_.GetHeight();
+    if (isLandscapeScreen) {
+        uint32_t temp = (static_cast<uint32_t>(displayRotation) - rotationOffset + SECONDARY_ROTATION_MOD) %
+            SECONDARY_ROTATION_MOD;
+        displayRotation = static_cast<DisplayOrientation>(temp);
+    }
+    return displayRotation;
 }
 
 DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
@@ -3206,10 +3269,11 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.SetDeviceOrientation(deviceOrientation);
         screenProperty.SetScreenAreaOffsetY(eventPara.GetScreenAreaOffsetY());
         screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
+        screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
+        screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
         TLOGI(WmsLogTag::DMS, "ProcPropertyChange : Orientation= %{public}u", deviceOrientation);
     }
     screenProperty.SetPhysicalTouchBounds(GetRotationCorrection(eventPara.GetDisplayMode()));
-    screenProperty.SetInputOffsetY();
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         screenProperty.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
         screenProperty.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
@@ -3220,26 +3284,40 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.GetBounds().rect_.width_, screenProperty.GetBounds().rect_.height_);
 }
 
+void ScreenSession::UpdateScbScreenPropertyForSuperFlod(const ScreenProperty& screenProperty)
+{
+    SuperFoldStatusChangeEvents changeEvent = screenProperty.GetSuperFoldStatusChangeEvent();
+    property_.SetIsFakeInUse(screenProperty.GetIsFakeInUse());
+    property_.SetIsDestroyDisplay(screenProperty.GetIsDestroyDisplay());
+    if (changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_ON ||
+        changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_OFF) {
+        property_.SetValidHeight(screenProperty.GetValidHeight());
+        property_.SetValidWidth(screenProperty.GetValidWidth());
+        property_.SetScreenAreaHeight(screenProperty.GetScreenAreaHeight());
+        TLOGI(WmsLogTag::DMS, "handle keyboard on and keyboard succ");
+    } else if (changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON ||
+            changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF) {
+        property_.SetPointerActiveWidth(screenProperty.GetPointerActiveWidth());
+        property_.SetPointerActiveHeight(screenProperty.GetPointerActiveHeight());
+        TLOGI(WmsLogTag::DMS, "handle system keyboard on and system keyboard succ");
+    } else {
+        auto screenBounds = screenProperty.GetBounds();
+        property_.SetBounds(screenBounds);
+        property_.SetValidHeight(screenProperty.GetValidHeight());
+        property_.SetValidWidth(screenProperty.GetValidWidth());
+    }
+    TLOGI(WmsLogTag::DMS,"Property back to server : ValidWidth= %{public}d, ValidHeight= %{public}d, "
+        "ScreenAreaHeight= %{public}d, PointerActiveWidth= %{public}d, PointerActiveHeight= %{public}d",
+        property_.GetValidWidth(), property_.GetValidHeight(), property_.GetScreenAreaHeight(),
+        property_.GetPointerActiveWidth(), property_.GetPointerActiveHeight());
+}
+
 void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screenProperty)
 {
     std::lock_guard<std::mutex> lock(propertyMutex_);
 
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        SuperFoldStatusChangeEvents changeEvent = screenProperty.GetSuperFoldStatusChangeEvent();
-        property_.SetIsFakeInUse(screenProperty.GetIsFakeInUse());
-        property_.SetIsDestroyDisplay(screenProperty.GetIsDestroyDisplay());
-        if (changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_ON ||
-            changeEvent == SuperFoldStatusChangeEvents::KEYBOARD_OFF) {
-            property_.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
-            property_.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());
-            property_.SetScreenAreaHeight(screenProperty.GetScreenAreaHeight());
-            TLOGI(WmsLogTag::DMS, "handle keyboard on and keyboard succ");
-        } else if (changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON ||
-                   changeEvent == SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF) {
-            property_.SetPointerActiveWidth(screenProperty.GetPointerActiveWidth());
-            property_.SetPointerActiveHeight(screenProperty.GetPointerActiveHeight());
-            TLOGI(WmsLogTag::DMS, "handle system keyboard on and system keyboard succ");
-        }
+        UpdateScbScreenPropertyForSuperFlod(screenProperty);
         TLOGI(WmsLogTag::DMS,
               "ProcPropertyChange After: width_= %{public}f, height_= %{public}f",
               screenProperty.GetBounds().rect_.width_,
@@ -3251,13 +3329,10 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
     property_.SetBounds(screenProperty.GetBounds());
     property_.SetDpiPhyBounds(screenProperty.GetPhyWidth(), screenProperty.GetPhyHeight());
     property_.SetPhyBounds(screenProperty.GetPhyBounds());
-    property_.SetBounds(screenProperty.GetBounds());
 
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         property_.SetDeviceOrientation(screenProperty.GetDeviceOrientation());
-        property_.SetScreenRotation(screenProperty.GetScreenRotation());
         property_.SetDisplayOrientation(screenProperty.GetDisplayOrientation());
-        property_.SetDeviceOrientation(screenProperty.GetDeviceOrientation());
         property_.SetScreenAreaOffsetY(screenProperty.GetScreenAreaOffsetY());
         property_.SetScreenAreaHeight(screenProperty.GetScreenAreaHeight());
     }
@@ -3273,6 +3348,16 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
           "ProcPropertyChange After: width_= %{public}f, height_= %{public}f",
           property_.GetBounds().rect_.width_,
           property_.GetBounds().rect_.height_);
+}
+
+ScreenId ScreenSession::GetPhyScreenId()
+{
+    return phyScreenId_;
+}
+
+void ScreenSession::SetPhyScreenId(ScreenId screenId)
+{
+    phyScreenId_ = screenId;
 }
 
 bool ScreenSession::GetSupportsFocus() const

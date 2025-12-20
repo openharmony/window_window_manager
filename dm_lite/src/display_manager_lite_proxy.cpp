@@ -734,6 +734,34 @@ ScreenPowerState DisplayManagerLiteProxy::GetScreenPower()
 #endif
 }
 
+void DisplayManagerLiteProxy::SyncScreenPowerState(ScreenPowerState state)
+{
+#ifdef SCENE_BOARD_ENABLED
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(state))) {
+        TLOGE(WmsLogTag::DMS, "Write power state failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SYNC_SCREEN_POWER_STATE),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "SendRequest failed");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "Sync power state success");
+#endif
+}
+
 bool DisplayManagerLiteProxy::SetDisplayState(DisplayState state)
 {
 #ifdef SCENE_BOARD_ENABLED

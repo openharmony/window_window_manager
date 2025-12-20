@@ -36,6 +36,8 @@ enum class ScreenPropertyChangeReason : uint32_t {
     SUPER_FOLD_STATUS_CHANGE,
     VIRTUAL_PIXEL_RATIO_CHANGE,
     ACCESS_INFO_CHANGE,
+    FOLD_SCREEN_EXPAND_SWITCH_USER,
+    FOLD_SCREEN_FOLDING_SWITCH_USER,
 };
 class ScreenProperty {
 public:
@@ -221,7 +223,6 @@ public:
 
     int32_t GetInputOffsetY() const;
 
-    void SetInputOffsetY();
     void SetInputOffset(int32_t x, int32_t y);
     void SetMirrorWidth(uint32_t mirrorWidth);
     uint32_t GetMirrorWidth() const;
