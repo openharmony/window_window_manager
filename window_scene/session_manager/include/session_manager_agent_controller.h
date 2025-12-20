@@ -52,8 +52,7 @@ public:
     void NotifyWindowPidVisibilityChanged(const sptr<WindowPidVisibilityInfo>& info);
     void NotifyWindowSystemBarPropertyChange(WindowType type, const SystemBarProperty& systemBarProperty);
     void UpdatePiPWindowStateChanged(const std::string& bundleName, bool isForeground);
-    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList);
     void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo);
 
 private:

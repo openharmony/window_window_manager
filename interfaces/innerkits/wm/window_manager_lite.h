@@ -391,8 +391,7 @@ public:
      * @param windowInfoList the changed window info list.
      * @return WM_OK means notify success, others means notify failed.
      */
-    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList);
 
     /**
      * @brief Register window info change callback.

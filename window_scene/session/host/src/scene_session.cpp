@@ -556,8 +556,7 @@ WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const 
 
 WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeReason reason)
 {
-    auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
+    auto needSaveSnapshot = !isPersistentImageFit_.load();
     PostTask([weakThis = wptr(this), isSaveSnapshot, needSaveSnapshot, reason, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -685,8 +684,7 @@ WSError SceneSession::Disconnect(bool isFromClient, const std::string& identityT
 
 WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
 {
-    auto needSaveSnapshot = !ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
+    auto needSaveSnapshot = !isPersistentImageFit_.load();
     PostTask([weakThis = wptr(this), isFromClient, isSaveSnapshot, needSaveSnapshot, where = __func__]()
         THREAD_SAFETY_GUARD(SCENE_GUARD) {
         auto session = weakThis.promote();
@@ -5865,14 +5863,20 @@ static void SetAtomicServiceInfo(SessionInfo& sessionInfo)
 #ifdef ACE_ENGINE_PLUGIN_PATH
     AtomicServiceInfo* atomicServiceInfo = AtomicServiceBasicEnginePlugin::GetInstance().
         GetParamsFromAtomicServiceBasicEngine(sessionInfo.bundleName_);
-    if (atomicServiceInfo != nullptr) {
-        sessionInfo.atomicServiceInfo_.appNameInfo_ = atomicServiceInfo->GetAppName();
-        sessionInfo.atomicServiceInfo_.circleIcon_ = atomicServiceInfo->GetCircleIcon();
-        sessionInfo.atomicServiceInfo_.eyelashRingIcon_ = atomicServiceInfo->GetEyelashRingIcon();
-        sessionInfo.atomicServiceInfo_.deviceTypes_ = atomicServiceInfo->GetDeviceTypes();
-        sessionInfo.atomicServiceInfo_.resizable_ = atomicServiceInfo->GetResizable();
-        sessionInfo.atomicServiceInfo_.supportWindowMode_ = atomicServiceInfo->GetSupportWindowMode();
+    if (atomicServiceInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Get atomicService info failed, bundleName:%{public}s.",
+            sessionInfo.bundleName_.c_str());
+        AtomicServiceBasicEnginePlugin::GetInstance().ReleaseData();
+        return;
     }
+    sessionInfo.atomicServiceInfo_.appNameInfo_ = atomicServiceInfo->GetAppName();
+    sessionInfo.atomicServiceInfo_.circleIcon_ = atomicServiceInfo->GetCircleIcon();
+    sessionInfo.atomicServiceInfo_.eyelashRingIcon_ = atomicServiceInfo->GetEyelashRingIcon();
+    sessionInfo.atomicServiceInfo_.deviceTypes_ = atomicServiceInfo->GetDeviceTypes();
+    sessionInfo.atomicServiceInfo_.resizable_ = atomicServiceInfo->GetResizable();
+    sessionInfo.atomicServiceInfo_.supportWindowMode_ = atomicServiceInfo->GetSupportWindowMode();
+    TLOGI(WmsLogTag::WMS_LIFE, "Get atomicService info success, bundleName:%{public}s.",
+        sessionInfo.bundleName_.c_str());
     AtomicServiceBasicEnginePlugin::GetInstance().ReleaseData();
 #endif
 }
@@ -5887,6 +5891,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     int32_t appCloneIndex = abilitySessionInfo->want.GetIntParam(APP_CLONE_INDEX, 0);
     info.appIndex_ = appCloneIndex == 0 ? abilitySessionInfo->want.GetIntParam(DLP_INDEX, 0) : appCloneIndex;
     info.persistentId_ = abilitySessionInfo->persistentId;
+    info.specifiedReason_ = static_cast<SpecifiedReason>(abilitySessionInfo->specifiedReason);
     info.callerPersistentId_ = session->GetPersistentId();
     info.callerBundleName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     info.callerAbilityName_ = abilitySessionInfo->want.GetStringParam(AAFwk::Want::PARAM_RESV_CALLER_ABILITY_NAME);
@@ -5904,7 +5909,6 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.isBackTransition_ = abilitySessionInfo->isBackTransition;
     info.needClearInNotShowRecent_ = abilitySessionInfo->needClearInNotShowRecent;
     info.appInstanceKey_ = abilitySessionInfo->instanceKey;
-    info.isFromIcon_ = abilitySessionInfo->isFromIcon;
     info.isPcOrPadEnableActivation_ = session->IsPcOrPadEnableActivation();
     info.canStartAbilityFromBackground_ = abilitySessionInfo->canStartAbilityFromBackground;
     info.isFoundationCall_ = isFoundationCall;
@@ -5950,16 +5954,16 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.startAnimationOptions = abilitySessionInfo->windowCreateParams->animationParams;
     }
     info.isPrelaunch_ = abilitySessionInfo->isPrelaunch;
-    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s, "
-        "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d, "
-        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d, "
-        "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s, isFromIcon:%{public}d, "
-        "supportedWindowModes.size:%{public}zu, requestId:%{public}d, "
-        "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d, "
+    TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s,"
+        "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d,"
+        "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d,"
+        "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s,"
+        "supportedWindowModes.size:%{public}zu, requestId:%{public}d,"
+        "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d,"
         "reuseDelegatorWindow:%{public}d, startWindowType:%{public}d, isPrelaunch:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
-        info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(), info.isFromIcon_,
+        info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(),
         info.supportedWindowModes.size(), info.requestId,
         info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
         info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight,
@@ -8625,10 +8629,8 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
 
 void SceneSession::NotifyAddOrRemoveSnapshotWindow(bool interactive)
 {
-    auto needSaveSnapshot = ScenePersistentStorage::HasKey("SetImageForRecent_" + std::to_string(GetPersistentId()),
-        ScenePersistentStorageType::MAXIMIZE_STATE);
     // persistent imageFit exist, add snapshot when interactive is false.
-    if (needSaveSnapshot) {
+    if (isPersistentImageFit_.load()) {
         TLOGI(WmsLogTag::WMS_PATTERN, "Add or remove static image from window, interactive:%{public}d", interactive);
         PostTask([weakThis = wptr(this), interactive, where = __func__] {
             auto session = weakThis.promote();
@@ -9257,32 +9259,12 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
 
 void SceneSession::AddSidebarBlur()
 {
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+    TLOGI(WmsLogTag::WMS_PC,"in");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_PC, "sessionStage is null");
         return;
     }
-    if (blurRadiusValue_ && blurSaturationValue_ && blurBrightnessValue_ && blurMaskColorValue_) {
-        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty has value");
-        return;
-    }
-    auto rsNodeTemp = RSAdapterUtil::GetRSNode(GetRSUIContext(), surfaceNode->GetId());
-    if (rsNodeTemp) {
-        std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
-        AbilityRuntime::Context::GetApplicationContext();
-        if (appContext == nullptr) {
-            TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
-            return;
-        }
-        std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-        if (config == nullptr) {
-            TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
-            return;
-        }
-        std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-        AddRSNodeModifier(isDark, rsNodeTemp);
-    }
+    sessionStage_->AddSidebarBlur();
 }
 
 void SceneSession::SetSessionGetTargetOrientationConfigInfoCallback(
@@ -9568,112 +9550,17 @@ std::map<Rosen::WindowType, Rosen::SystemBarProperty>& SceneSession::GetCurrentS
     return currentSystemBarProperty_;
 }
 
-void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode)
-{
-    if (!rsNode) {
-        TLOGE(WmsLogTag::WMS_PC, "rsNode is nullptr");
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_PC, "isDark: %{public}d", isDark);
-    if (isDark) {
-        blurRadiusValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_RADIUS_DARK);
-        blurSaturationValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_SATURATION_DARK);
-        blurBrightnessValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
-        blurMaskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
-            Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
-    } else {
-        blurRadiusValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_RADIUS_LIGHT);
-        blurSaturationValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_SATURATION_LIGHT);
-        blurBrightnessValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
-        blurMaskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
-            Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
-    }
-
-    auto modifier = std::make_shared<Rosen::ModifierNG::RSBehindWindowFilterModifier>();
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_RADIUS, blurRadiusValue_);
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_SATURATION, blurSaturationValue_);
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_BRIGHTNESS, blurBrightnessValue_);
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_MASK_COLOR, blurMaskColorValue_);
-    rsNode->AddModifier(modifier);
-}
-
 void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation)
 {
     TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isNeedAnimation: %{public}d",
         isDefaultSidebarBlur, isNeedAnimation);
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_PC, "sessionStage is null");
         return;
     }
-    if (!blurRadiusValue_ || !blurSaturationValue_ || !blurBrightnessValue_ || !blurMaskColorValue_) {
-        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty is null");
-        return;
-    }
-
-    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
-        AbilityRuntime::Context::GetApplicationContext();
-    if (appContext == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
-        return;
-    }
-    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-    if (config == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
-        return;
-    }
-    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    ModifyRSAnimatableProperty(isDefaultSidebarBlur, isDark, isNeedAnimation);
-}
-
-void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation)
-{
-    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isDark: %{public}d, isNeedAnimation: %{public}d",
-        isDefaultSidebarBlur, isDark, isNeedAnimation);
-    // sidebar animation duration
-    constexpr int32_t duration = 150;
-    if (isDefaultSidebarBlur) {
-        auto rsUIContext = GetRSUIContext();
-        AutoRSTransaction trans(rsUIContext);
-        if (isNeedAnimation) {
-            Rosen::RSAnimationTimingProtocol timingProtocol;
-            timingProtocol.SetDuration(duration);
-            timingProtocol.SetDirection(true);
-            timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
-            timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
-            RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
-        }
-        if (isDark) {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_DARK);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_DARK);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
-        } else {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_LIGHT);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_LIGHT);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
-        }
-        if (isNeedAnimation) {
-            RSNode::CloseImplicitAnimation(rsUIContext);
-        }
-    } else {
-        blurRadiusValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
-        blurSaturationValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
-        blurBrightnessValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
-        if (isDark) {
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_SNAPSHOT_MASKCOLOR_DARK));
-        } else {
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT));
-        }
-    }
+    SidebarBlurType type = isDefaultSidebarBlur ?
+        (isNeedAnimation ? SidebarBlurType::DEFAULT_FLOAT : SidebarBlurType::INITIAL) : SidebarBlurType::NONE;
+    sessionStage_->SetSidebarBlurStyleWithType(type);
 }
 
 void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
@@ -9928,70 +9815,12 @@ void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFu
 void SceneSession::SetSidebarBlurMaximize(bool isMaximize)
 {
     TLOGI(WmsLogTag::WMS_PC, "isMaximize: %{public}d", isMaximize);
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_PC, "sessionStage is null");
         return;
     }
-    if (!blurRadiusValue_ || !blurSaturationValue_ || !blurBrightnessValue_ || !blurMaskColorValue_) {
-        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty is null");
-        return;
-    }
-
-    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
-        AbilityRuntime::Context::GetApplicationContext();
-    if (appContext == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
-        return;
-    }
-    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-    if (config == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
-        return;
-    }
-    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    ModifyRSAnimatablePropertyMaximize(isMaximize, isDark);
-}
-
-void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark)
-{
-    TLOGI(WmsLogTag::WMS_PC, "isMaximize: %{public}d, isDark: %{public}d", isMaximize, isDark);
-    // sidebar maximize animation duration
-    constexpr int32_t duration = 150;
-    Rosen::RSAnimationTimingProtocol timingProtocol;
-    timingProtocol.SetDuration(duration);
-    timingProtocol.SetDirection(true);
-    timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
-    timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
-    auto rsUIContext = GetRSUIContext();
-    RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
-    if (isMaximize) {
-        if (isDark) {
-            blurRadiusValue_->Set(SIDEBAR_MAXIMIZE_RADIUS_DARK);
-            blurSaturationValue_->Set(SIDEBAR_MAXIMIZE_SATURATION_DARK);
-            blurBrightnessValue_->Set(SIDEBAR_MAXIMIZE_BRIGHTNESS_DARK);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_MAXIMIZE_MASKCOLOR_DARK));
-        } else {
-            blurRadiusValue_->Set(SIDEBAR_MAXIMIZE_RADIUS_LIGHT);
-            blurSaturationValue_->Set(SIDEBAR_MAXIMIZE_SATURATION_LIGHT);
-            blurBrightnessValue_->Set(SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT));
-        }
-    } else {
-        if (isDark) {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_DARK);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_DARK);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
-        } else {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_LIGHT);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_LIGHT);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
-        }
-    }
-    RSNode::CloseImplicitAnimation(rsUIContext);
+    sessionStage_->SetSidebarBlurStyleWithType(isMaximize ? SidebarBlurType::DEFAULT_MAXIMIZE :
+        SidebarBlurType::DEFAULT_FLOAT);
 }
 
 void SceneSession::SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func)

@@ -30,9 +30,6 @@ constexpr int32_t TRUNCATE_THREE_DECIMALS = 1000;
 constexpr float SECONDARY_ROTATION_90 = 90.0F;
 constexpr float SECONDARY_ROTATION_270 = 270.0F;
 constexpr float SECONDARY_ROTATION_360 = 360.0F;
-constexpr int32_t SECONDARY_FULL_OFFSETY = 1136;
-constexpr int32_t FULL_STATUS_WIDTH = 2048;
-constexpr int32_t SCREEN_HEIGHT = 2232;
 constexpr float EPSILON = 1e-6f;
 constexpr float PPI_TO_DPI = 1.6f;
 }
@@ -671,22 +668,6 @@ int32_t ScreenProperty::GetInputOffsetX() const
 int32_t ScreenProperty::GetInputOffsetY() const
 {
     return inputOffsetY_;
-}
-
-static inline bool IsWidthHeightMatch(float width, float height, float targetWidth, float targetHeight)
-{
-    return (width == targetWidth && height == targetHeight) || (width == targetHeight && height == targetWidth);
-}
-
-void ScreenProperty::SetInputOffsetY()
-{
-    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
-        return;
-    }
-    inputOffsetX_ = 0;
-    if (IsWidthHeightMatch(bounds_.rect_.GetWidth(), bounds_.rect_.GetHeight(), FULL_STATUS_WIDTH, SCREEN_HEIGHT)) {
-        inputOffsetX_ = SECONDARY_FULL_OFFSETY;
-    }
 }
 
 void ScreenProperty::SetInputOffset(int32_t x, int32_t y)
