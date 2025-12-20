@@ -96,10 +96,6 @@ std::array g_methods = {
         reinterpret_cast<void *>(AniWindowStage::RegisterWindowCallback)},
     ani_native_function {"offSync", nullptr,
         reinterpret_cast<void *>(AniWindowStage::UnregisterWindowCallback)},
-    ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
-        reinterpret_cast<void *>(AniWindowStage::NativeTransferStatic)},
-    ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
-        reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
     ani_native_function {"setImageForRecentSync", "lX{C{std.core.Long}C{@ohos.multimedia.image.image.PixelMap}}i:",
         reinterpret_cast<void *>(AniWindowStage::SetImageForRecent)},
     ani_native_function {"removeImageForRecentSync", "l:",
@@ -116,6 +112,12 @@ std::array g_methods = {
         reinterpret_cast<void *>(AniWindowStage::SetSupportedWindowModesWithGrayOutMaximizeButton)},
 };
 
+std::array s_methods = {
+    ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
+        reinterpret_cast<void *>(AniWindowStage::NativeTransferStatic)},
+    ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
+        reinterpret_cast<void *>(AniWindowStage::NativeTransferDynamic)},
+};
 std::array g_functions = {
     ani_native_function {"CreateWindowStage", "l:C{@ohos.window.window.WindowStageInternal}",
         reinterpret_cast<void *>(WindowStageCreate)},
@@ -125,7 +127,7 @@ std::array g_functions = {
     ani_native_function {"getAllMainWindowInfo", "l:C{std.core.Array}",
         reinterpret_cast<void *>(AniWindowManager::GetAllMainWindowInfo)},
     ani_native_function {"getMainWindowSnapshot",
-        "lC{escompat.Array}C{@ohos.window.window.WindowSnapshotConfiguration}:C{std.core.Array}",
+        "lC{std.core.Array}C{@ohos.window.window.WindowSnapshotConfiguration}:C{std.core.Array}",
         reinterpret_cast<void *>(AniWindowManager::GetMainWindowSnapshot)},
     ani_native_function {"createWindowSync",
         "lC{@ohos.window.window.Configuration}:C{@ohos.window.window.Window}",
@@ -155,6 +157,13 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
     for (auto method : g_methods) {
         if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
+    }
+    for (auto method : s_methods) {
+        if ((ret = env->Class_BindStaticNativeMethods(cls, &method, 1u)) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
                 ret, method.name, method.signature);
             return ANI_NOT_FOUND;
