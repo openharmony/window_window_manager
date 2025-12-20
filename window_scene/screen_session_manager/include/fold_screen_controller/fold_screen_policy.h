@@ -48,6 +48,7 @@ public:
     virtual void ExitCoordination();
     virtual void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command);
     virtual FoldDisplayMode GetModeMatchStatus() { return FoldDisplayMode::UNKNOWN; }
+    virtual FoldDisplayMode GetModeMatchStatus(FoldStatus targetFoldStatus) { return FoldDisplayMode::UNKNOWN; }
     virtual void BootAnimationFinishPowerInit() {};
     virtual void ChangeOnTentMode(FoldStatus currentState);
     virtual void ChangeOffTentMode();

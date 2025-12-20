@@ -407,6 +407,30 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             reply.WriteInt32(static_cast<int32_t>(errCode));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_ADD_VIRTUAL_SCREEN_WHITE_LIST: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<uint64_t> missionIds;
+            if (!data.ReadUInt64Vector(&missionIds)) {
+                TLOGE(WmsLogTag::DMS, "AddWhitelist::fail to receive missionIds from proxy");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
+                break;
+            }
+            DMError result = AddVirtualScreenWhiteList(screenId, missionIds);
+            reply.WriteUint32(static_cast<uint32_t>(result));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_WHITE_LIST: {
+            ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
+            std::vector<uint64_t> missionIds;
+            if (!data.ReadUInt64Vector(&missionIds)) {
+                TLOGE(WmsLogTag::DMS, "RemoveWhitelist::fail to receive missionIds from proxy");
+                reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
+                break;
+            }
+            DMError result = RemoveVirtualScreenWhiteList(screenId, missionIds);
+            reply.WriteUint32(static_cast<uint32_t>(result));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::shared_ptr<Media::PixelMap> privacyMaskImg{nullptr};

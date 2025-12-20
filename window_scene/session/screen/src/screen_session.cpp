@@ -693,7 +693,6 @@ void ScreenSession::UpdatePropertyByActiveModeChange()
         property_.SetPhyBounds(screeBounds);
         property_.SetBounds(screeBounds);
         property_.SetAvailableArea({0, 0, mode->width_, mode->height_});
-        property_.SetInputOffsetY();
         property_.SetScreenRealWidth(mode->width_);
         property_.SetScreenRealHeight(mode->height_);
         property_.SetScreenRealPPI();
@@ -744,6 +743,7 @@ ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& 
         property_.SetDeviceOrientation(deviceOrientation);
         property_.SetScreenAreaOffsetY(updatedProperty.GetScreenAreaOffsetY());
         property_.SetScreenAreaHeight(updatedProperty.GetScreenAreaHeight());
+        property_.SetScreenAreaWidth(updatedProperty.GetScreenAreaWidth());
     }
     UpdateTouchBoundsAndOffset(foldDisplayMode);
     return property_;
@@ -800,16 +800,9 @@ void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenP
         return;
     }
     auto screenBounds = eventPara.GetBounds();
-    screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
-    screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
-    screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
-    screenProperty.SetMirrorWidth(eventPara.GetMirrorWidth());
-    screenProperty.SetMirrorHeight(eventPara.GetMirrorHeight());
     TLOGI(WmsLogTag::DMS, "bounds after change: %{public}f, %{public}f",
         screenBounds.rect_.width_, screenBounds.rect_.height_);
     screenProperty.SetBounds(screenBounds);
-    screenProperty.SetValidHeight(screenBounds.rect_.height_);
-    screenProperty.SetValidWidth(screenBounds.rect_.width_);
 }
 
 void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
@@ -1033,7 +1026,7 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
             HandleSystemKeyboardOffPropertyChange(screenProperty, currentState, isKeyboardOn);
             break;
         }
-        case SuperFoldStatusChangeEvents::RESOLUITION_EFFECT_CHANGE: {
+        case SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE: {
             TLOGI(WmsLogTag::DMS, "handle resolution effect change");
             HandleResolutionEffectPropertyChange(screenProperty, eventPara);
             break;
@@ -1237,7 +1230,6 @@ void ScreenSession::SetSecurity(bool isSecurity)
 void ScreenSession::UpdateTouchBoundsAndOffset(FoldDisplayMode foldDisplayMode)
 {
     property_.SetPhysicalTouchBounds(GetRotationCorrection(foldDisplayMode));
-    property_.SetInputOffsetY();
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         property_.SetValidHeight(property_.GetBounds().rect_.GetHeight());
         property_.SetValidWidth(property_.GetBounds().rect_.GetWidth());
@@ -3277,10 +3269,11 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.SetDeviceOrientation(deviceOrientation);
         screenProperty.SetScreenAreaOffsetY(eventPara.GetScreenAreaOffsetY());
         screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
+        screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
+        screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
         TLOGI(WmsLogTag::DMS, "ProcPropertyChange : Orientation= %{public}u", deviceOrientation);
     }
     screenProperty.SetPhysicalTouchBounds(GetRotationCorrection(eventPara.GetDisplayMode()));
-    screenProperty.SetInputOffsetY();
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
         screenProperty.SetValidHeight(screenProperty.GetBounds().rect_.GetHeight());
         screenProperty.SetValidWidth(screenProperty.GetBounds().rect_.GetWidth());

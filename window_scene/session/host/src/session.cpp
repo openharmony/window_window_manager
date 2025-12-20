@@ -131,8 +131,6 @@ Session::Session(const SessionInfo& info) : sessionInfo_(info)
 Session::~Session()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d", GetPersistentId());
-    DeletePersistentImageFit();
-    DeleteHasSnapshot();
     if (mainHandler_) {
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode_),
                                 shadowSurfaceNode = std::move(shadowSurfaceNode_),
@@ -2904,10 +2902,11 @@ bool Session::GetNeedUseBlurSnapshot() const
     bool snapshotPrivacyMode = GetSnapshotPrivacyMode();
     ControlInfo controlInfo;
     bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
-    bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && controlInfo.isNeedControl);
+    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && isAppUseControl);
     if (needUseBlurSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, snapshotPrivacyMode: %{public}d, "
-            "isAppLock: %{public}d", persistentId_, isPrivacyMode, snapshotPrivacyMode, controlInfo.isNeedControl);
+            "isAppLock: %{public}d", persistentId_, isPrivacyMode, snapshotPrivacyMode, isAppUseControl);
     }
     return needUseBlurSnapshot;
 }
@@ -2937,9 +2936,10 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
     if (type != ControlAppType::APP_LOCK) {
         return;
     }
-    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, controlInfo.isNeedControl);
-    isAppLockControl_.store(controlInfo.isNeedControl);
-    if (controlInfo.isNeedControl) {
+    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, isAppUseControl);
+    isAppLockControl_.store(isAppUseControl);
+    if (isAppUseControl) {
         if (IsPersistentImageFit()) {
             NotifyAddSnapshot(false, false, false);
             return;
@@ -2981,6 +2981,30 @@ uint32_t Session::GetBackgroundColor() const
     return COLOR_WHITE;
 }
 
+void Session::RenameSnapshotFromOldPersistentId(int32_t oldPersistentId)
+{
+    auto task = [weakThis = wptr(this), oldPersistentId, where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s session is nullptr", where);
+            return;
+        }
+        std::map<std::string, std::string> renameMap;
+        auto id = session->GetPersistentId();
+        renameMap["SetImageForRecent_" + std::to_string(oldPersistentId)] = "SetImageForRecent_" + std::to_string(id);
+        renameMap[session->GetSnapshotPersistentKey(oldPersistentId)] = session->GetSnapshotPersistentKey(id);
+        for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
+            renameMap[session->GetSnapshotPersistentKey(oldPersistentId, screenStatus)] =
+                session->GetSnapshotPersistentKey(id, screenStatus);
+        }
+        ScenePersistentStorage::RenameKeys(renameMap, ScenePersistentStorageType::MAXIMIZE_STATE);
+    };
+    auto snapshotFfrtHelper = scenePersistence_->GetSnapshotFfrtHelper();
+    std::string taskName = "RenameSnapshotFromOldPersistentId" + std::to_string(persistentId_);
+    snapshotFfrtHelper->CancelTask(taskName);
+    snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
+}
+
 void Session::ResetSnapshot()
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", persistentId_);
@@ -3008,6 +3032,16 @@ void Session::SetBufferNameForPixelMap(const char* functionName, const std::shar
 {
     std::string functionNameStr = (functionName != nullptr) ? functionName : "unknown";
     pixelMap->SetMemoryName(functionNameStr + '_' + std::to_string(GetPersistentId()));
+}
+
+void Session::SetPreloadingStartingWindow(bool preloading)
+{
+    preloadingStartingWindow_.store(preloading);
+}
+
+bool Session::GetPreloadingStartingWindow()
+{
+    return preloadingStartingWindow_.load();
 }
 
 void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media::PixelMap> persistentPixelMap,
@@ -3086,14 +3120,14 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
     snapshotFfrtHelper->SubmitTask(std::move(task), taskName);
 }
 
-std::string Session::GetSnapshotPersistentKey()
+std::string Session::GetSnapshotPersistentKey(int32_t id)
 {
-    return "Snapshot_" + sessionInfo_.bundleName_ + "_" + std::to_string(persistentId_);
+    return "Snapshot_" + sessionInfo_.bundleName_ + "_" + std::to_string(id);
 }
 
-std::string Session::GetSnapshotPersistentKey(SnapshotStatus key)
+std::string Session::GetSnapshotPersistentKey(int32_t id, SnapshotStatus key)
 {
-    return "Snapshot_" + sessionInfo_.bundleName_ + "_"+ std::to_string(persistentId_) + "_" + std::to_string(key);
+    return "Snapshot_" + sessionInfo_.bundleName_ + "_"+ std::to_string(id) + "_" + std::to_string(key);
 }
 
 void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
@@ -3104,11 +3138,11 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
     }
     if (freeMultiWindow_.load()) {
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(), EncodeSnapShotRecoverValue(rotate),
+        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(persistentId_), EncodeSnapShotRecoverValue(rotate),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     } else {
         scenePersistence_->SetHasSnapshot(true, key);
-        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(key),
+        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(persistentId_, key),
             EncodeSnapShotRecoverValue(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
 }
@@ -3248,13 +3282,6 @@ void Session::InitSnapshotCapacity()
     if (scenePersistence_) {
         scenePersistence_->SetSnapshotCapacity(capacity_);
     }
-}
-
-bool Session::IsPersistentImageFit() const
-{
-    auto isPersistentImageFit = Rosen::ScenePersistentStorage::HasKey(
-        "SetImageForRecent_" + std::to_string(GetPersistentId()), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
-    return isPersistentImageFit;
 }
 
 bool Session::SupportSnapshotAllSessionStatus() const
@@ -5291,12 +5318,28 @@ void Session::DeletePersistentImageFit()
         "SetImageForRecent_" + std::to_string(GetPersistentId()), Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     if (isPersistentImageFit) {
         TLOGI(WmsLogTag::WMS_PATTERN, "delete persistent ImageFit");
+        isPersistentImageFit_.store(false);
         Rosen::ScenePersistentStorage::Delete("SetImageForRecent_" + std::to_string(GetPersistentId()),
             Rosen::ScenePersistentStorageType::MAXIMIZE_STATE);
     }
-    if (scenePersistence_) {
-        scenePersistence_->ClearSnapshotPath();
+}
+
+void Session::RecoverImageForRecent()
+{
+    auto isPersistentImageFit = ScenePersistentStorage::HasKey("SetImageForRecent_" +
+        std::to_string(persistentId_), ScenePersistentStorageType::MAXIMIZE_STATE);
+    if (isPersistentImageFit) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", persistentId_);
+        isPersistentImageFit_.store(true);
+        ScenePersistentStorage::Get("SetImageForRecent_" + std::to_string(persistentId_),
+            persistentImageFit_, ScenePersistentStorageType::MAXIMIZE_STATE);
     }
+}
+
+void Session::SetPersistentImageFit(int32_t imageFit)
+{
+    persistentImageFit_ = imageFit;
+    isPersistentImageFit_.store(true);
 }
 
 void Session::SetGlobalDisplayRect(const WSRect& rect)

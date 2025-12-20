@@ -1263,7 +1263,7 @@ DMError DisplayManager::Impl::SetFoldStatusLockedFromJs(bool locked)
 DMError DisplayManager::ForceSetFoldStatusAndLock(FoldStatus targetFoldstatus)
 {
     TLOGI(WmsLogTag::DMS, "BoundName: %{public}s, pid: %{public}d", SysCapUtil::GetBundleName().c_str(),
-        IPCSkleton::GetCallingPid());
+        IPCSkeleton::GetCallingPid());
     return pImpl_->ForceSetFoldStatusAndLock(targetFoldstatus);
 }
 
@@ -1275,7 +1275,7 @@ DMError DisplayManager::Impl::ForceSetFoldStatusAndLock(FoldStatus targetFoldsta
 DMError DisplayManager::RestorePhysicalFoldStatus()
 {
     TLOGI(WmsLogTag::DMS, "BoundName: %{public}s, pid: %{public}d", SysCapUtil::GetBundleName().c_str(),
-        IPCSkleton::GetCallingPid());
+        IPCSkeleton::GetCallingPid());
     return pImpl_->RestorePhysicalFoldStatus();
 }
 

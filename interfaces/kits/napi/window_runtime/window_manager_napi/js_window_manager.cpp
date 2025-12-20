@@ -111,6 +111,12 @@ napi_value JsWindowManager::MinimizeAll(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnMinimizeAll(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::MinimizeAllWithExclusion(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnMinimizeAllWithExclusion(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::ToggleShownStateForAllAppWindows(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -900,6 +906,20 @@ napi_value JsWindowManager::OnMinimizeAll(napi_env env, napi_callback_info info)
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
     }
     return result;
+}
+
+napi_value JsWindowManager::OnMinimizeAllWithExclusion(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[NAPI]");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 2 || argv[1] == nullptr || GetType(env, argv[1]) != napi_number) {
+        TLOGE(WmsLogTag::WMS_LIFE, "JsWindowManager::OnMinimizeAllWithExclusion failed, Invalidate params.");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return NapiGetUndefined(env);
+    }
+    return OnMinimizeAll(env, info);
 }
 
 napi_value JsWindowManager::OnToggleShownStateForAllAppWindows(napi_env env, napi_callback_info info)
@@ -2089,6 +2109,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getLastWindow", moduleName, JsWindowManager::GetLastWindow);
     BindNativeFunction(env, exportObj, "getSnapshot", moduleName, JsWindowManager::GetSnapshot);
     BindNativeFunction(env, exportObj, "minimizeAll", moduleName, JsWindowManager::MinimizeAll);
+    BindNativeFunction(env, exportObj, "minimizeAllWithExclusion", moduleName,
+        JsWindowManager::MinimizeAllWithExclusion);
     BindNativeFunction(env, exportObj, "toggleShownStateForAllAppWindows", moduleName,
         JsWindowManager::ToggleShownStateForAllAppWindows);
     BindNativeFunction(env, exportObj, "setWindowLayoutMode", moduleName, JsWindowManager::SetWindowLayoutMode);

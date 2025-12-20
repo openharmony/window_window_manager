@@ -451,6 +451,26 @@ DMError ScreenManagerAdapter::RemoveVirtualScreenBlockList(const std::vector<int
     return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
+DMError ScreenManagerAdapter::AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->AddVirtualScreenWhiteList(screenId, missionIds);
+    }
+    TLOGE(WmsLogTag::DMS, "Device not support");
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
+DMError ScreenManagerAdapter::RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->RemoveVirtualScreenWhiteList(screenId, missionIds);
+    }
+    TLOGE(WmsLogTag::DMS, "Device not support");
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 DMError ScreenManagerAdapter::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
@@ -1274,7 +1294,7 @@ DMError DisplayManagerAdapter::ForceSetFoldStatusAndLock(FoldStatus targetFoldSt
         return screenSessionManagerServiceProxy_->ForceSetFoldStatusAndLock(targetFoldStatus);
     }
 
-    return DMError::DM_OK;
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 DMError DisplayManagerAdapter::RestorePhysicalFoldStatus()
@@ -1285,7 +1305,7 @@ DMError DisplayManagerAdapter::RestorePhysicalFoldStatus()
         return screenSessionManagerServiceProxy_->RestorePhysicalFoldStatus();
     }
 
-    return DMError::DM_OK;
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
 sptr<FoldCreaseRegion> DisplayManagerAdapter::GetCurrentFoldCreaseRegion()

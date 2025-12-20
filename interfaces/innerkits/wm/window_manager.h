@@ -48,6 +48,7 @@ using SystemBarRegionTints = std::vector<SystemBarRegionTint>;
 using GetJSWindowObjFunc = std::function<void*(const std::string& windowName)>;
 using WindowChangeInfoType = std::variant<int32_t, uint32_t, int64_t, uint64_t, std::string, float, Rect, WindowMode,
     WindowVisibilityState, bool>;
+using WindowInfoList = std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>;
 
 struct VisibleWindowNumInfo {
     uint32_t displayId;
@@ -285,8 +286,7 @@ public:
      *
      * @param windowInfoList
      */
-    virtual void OnWindowInfoChanged(
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList) = 0;
+    virtual void OnWindowInfoChanged(const WindowInfoList& windowInfoList) = 0;
 
     void SetInterestInfo(const std::unordered_set<WindowInfoKey>& interestInfo) { interestInfo_ = interestInfo; }
     const std::unordered_set<WindowInfoKey>& GetInterestInfo() const { return interestInfo_; }
@@ -917,8 +917,7 @@ public:
      * @param windowInfoList the changed window info list.
      * @return WM_OK means notify success, others means notify failed.
      */
-    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags,
-        const std::vector<std::unordered_map<WindowInfoKey, WindowChangeInfoType>>& windowInfoList);
+    void NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList);
 
     /**
      * @brief Minimize all app window.
@@ -1057,6 +1056,15 @@ public:
      * @return FocusChangeInfo object about focus window.
      */
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID);
+
+    /**
+     * @brief Get focus window info.
+     *
+     * @param focusInfo Focus window info.
+     * @param abilityToken Ability token.
+     * @return FocusChangeInfo object about focus window.
+     */
+    void GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo, const sptr<IRemoteObject>& abilityToken);
 
     /**
      * @brief Dump all session info

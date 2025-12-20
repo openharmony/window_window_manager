@@ -134,6 +134,9 @@ public:
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
     DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
+    DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
+    DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
+    std::vector<uint64_t> ProcessMissionIdsToSurfaceNodeIds(const std::vector<uint64_t>& missionIds);
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override;
@@ -566,6 +569,8 @@ public:
     void DoAodExitAndSetPowerAllOff();
     DMError GetRoundedCorner(DisplayId displayId, int& radius) override;
     std::shared_ptr<TaskScheduler> GetScreenPowerTaskScheduler();
+    bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
+    void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
 
     // Function used for displayConcurrentUserMap_ under concurrent scenario
     struct UserInfo {
@@ -1014,8 +1019,6 @@ private:
 
     std::unordered_map<ScreenId, std::pair<ScreenId, ScreenCombination>> screenCastInfoMap_;
     std::shared_mutex screenCastInfoMapMutex_;
-    bool HasSameScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
-    void SetScreenCastInfo(ScreenId screenId, ScreenId castScreenId, ScreenCombination screenCombination);
     void ChangeMirrorScreenConfig(const sptr<ScreenSessionGroup>& group,
         const DMRect& mainScreenRegion, sptr<ScreenSession>& screen);
     void InitRotationCorrectionMap(std::string displayModeCorrectionConfig);

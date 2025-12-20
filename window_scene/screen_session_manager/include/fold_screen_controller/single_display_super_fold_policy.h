@@ -43,7 +43,6 @@ public:
     FoldDisplayMode GetModeMatchStatus(FoldStatus targetFoldStatus) override;
     void SetIsClearingBootAnimation(bool isClearingBootAnimation) override;
     void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems) const override;
-    const std::unordered_set<FoldStatus>& GetSupportedFoldStatus() const override;
 private:
     bool CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);

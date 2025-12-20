@@ -1246,14 +1246,9 @@ HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest03, TestSize.Leve
     const int32_t uId = 32;
     SessionInfo sessionInfo_;
     sessionInfo_.bundleName_ = "BundleName";
-    sessionInfo_.abilityName_ = "AbilityName";
-    sessionInfo_.moduleName_ = "ModuleName";
+    sessionInfo_.abilityName_ = "";
+    sessionInfo_.moduleName_ = "";
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
-    EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
-        .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {
-            bundleInfo.hapModuleInfos = {};
-            return 0;
-        });
     ssm_->bundleMgr_ = bundleMgrMocker;
 
     auto res = ssm_->QueryAbilityInfoFromBMS(
@@ -1271,8 +1266,8 @@ HWTEST_F(SceneSessionManagerTest11, QueryAbilityInfoFromBMSTest04, TestSize.Leve
     const int32_t uId = 32;
     SessionInfo sessionInfo_;
     sessionInfo_.bundleName_ = "BundleName";
-    sessionInfo_.abilityName_ = "AbilityName";
-    sessionInfo_.moduleName_ = "ModuleName";
+    sessionInfo_.abilityName_ = "";
+    sessionInfo_.moduleName_ = "";
     sptr<IBundleMgrMocker> bundleMgrMocker = sptr<IBundleMgrMocker>::MakeSptr();
     EXPECT_CALL(*bundleMgrMocker, GetBundleInfoV9(_, _, _, _))
         .WillOnce([](const std::string& bundleName, int32_t flags, AppExecFwk::BundleInfo& bundleInfo, int32_t userId) {

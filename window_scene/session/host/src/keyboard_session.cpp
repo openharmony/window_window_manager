@@ -661,18 +661,12 @@ void KeyboardSession::HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeRe
 // Use focused session id when calling session id is invalid.
 void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessionId)
 {
-    const auto focusedSessionId = static_cast<uint32_t>(GetFocusedSessionId());
     if (const auto callingSession = GetSceneSession(callingSessionId)) {
         GetSessionProperty()->SetCallingSessionId(callingSessionId);
-        // callingSession 合法时，并且当下面两个条件同时满足时；替换 callingSessionId 为 focusedSessionId
-        if (!(GetDisplayId() != callingSession->GetDisplayId() && callingSessionId != focusedSessionId)) {
-            // 有条件不满足，保持 callingSessionId 不变，直接返回
-            TLOGI(WmsLogTag::WMS_KEYBOARD, "continue using callingSession id: %{public}d", callingSessionId);
-            return;
-        }
+        return;
     }
 
-    // 进行替换
+    const auto focusedSessionId = static_cast<uint32_t>(GetFocusedSessionId());
     if (GetSceneSession(focusedSessionId) == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Focused session is null, id: %{public}d", focusedSessionId);
     } else {

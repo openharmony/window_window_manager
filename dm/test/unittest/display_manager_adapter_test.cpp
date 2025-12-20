@@ -790,23 +790,6 @@ HWTEST_F(DisplayManagerAdapterTest, ForceSetFoldStatusAndLock, TestSize.Level1)
 }
 
 /**
- * @tc.name: ForceSetFoldStatusAndLock
- * @tc.desc: ForceSetFoldStatusAndLock test
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerAdapterTest, ForceSetFoldStatusAndLock, TestSize.Level1)
-{
-    if (!DisplayManagerAdapter::GetInstance().IsFoldable) {
-        GTEST_SKIP();
-    }
-    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
-        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
-    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
-    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
-    EXPECT_EQ(ret, DMError::DM_OK);
-}
-
-/**
  * @tc.name: SetScreenSkipProtectedWindow
  * @tc.desc: SetScreenSkipProtectedWindow test
  * @tc.type: FUNC

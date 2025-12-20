@@ -292,13 +292,14 @@ public:
     std::shared_ptr<Media::PixelMap> Snapshot(
         bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
     void ResetSnapshot();
+    void RenameSnapshotFromOldPersistentId(int32_t oldPersistentId);
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
         std::shared_ptr<Media::PixelMap> persistentPixelMap = nullptr, bool updateSnapshot = false,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     bool CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surfaceNode) const;
     bool GetNeedUseBlurSnapshot() const;
     void UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo);
-    bool GetIsPrivacyMode() const { return property_->GetPrivacyMode(); };
+    virtual bool GetIsPrivacyMode() const { return false; };
     void SetSnapshotPrivacyMode(bool privacyMode) { snapshotPrivacyMode_.store(privacyMode); };
     bool GetSnapshotPrivacyMode() const;
     std::atomic<bool> snapshotPrivacyMode_ { false };
@@ -791,8 +792,11 @@ public:
      */
     void SetBorderUnoccupied(bool borderUnoccupied = false);
     bool GetBorderUnoccupied() const;
-    bool IsPersistentImageFit() const;
+    bool IsPersistentImageFit() const { return isPersistentImageFit_.load(); };
+    void SetPersistentImageFit(int32_t imageFit);
+    int32_t GetPersistentImageFit() const { return persistentImageFit_; };
     void DeletePersistentImageFit();
+    void RecoverImageForRecent();
     bool SupportSnapshotAllSessionStatus() const;
     bool SupportCacheLockedSessionSnapshot() const;
     void ResetLockedCacheSnapshot();
@@ -804,15 +808,21 @@ public:
     bool HasSnapshotFreeMultiWindow();
     bool HasSnapshot(SnapshotStatus key);
     bool HasSnapshot();
+    virtual void RecoverSnapshotPersistence(const SessionInfo& info) {};
+    virtual void ClearSnapshotPersistence() {};
     void SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate);
-    std::string GetSnapshotPersistentKey();
-    std::string GetSnapshotPersistentKey(SnapshotStatus key);
+    std::string GetSnapshotPersistentKey(int32_t id);
+    std::string GetSnapshotPersistentKey(int32_t id, SnapshotStatus key);
     void DeleteHasSnapshot();
     void DeleteHasSnapshot(SnapshotStatus key);
     void DeleteHasSnapshotFreeMultiWindow();
     void SetFreeMultiWindow();
     void SetBufferNameForPixelMap(const char* functionName, const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void SetPreloadingStartingWindow(bool preloading);
+    bool GetPreloadingStartingWindow();
     std::atomic<bool> freeMultiWindow_ { false };
+    std::atomic<bool> isPersistentImageFit_ { false };
+    std::atomic<int32_t> persistentImageFit_ = 0;
 
     /*
      * Specific Window
@@ -1230,6 +1240,7 @@ private:
      */
     std::atomic<bool> isSnapshotBlur_ { false };
     std::atomic<bool> isAppLockControl_ { false };
+    std::atomic<bool> preloadingStartingWindow_ { false };
     bool borderUnoccupied_ = false;
     uint32_t GetBackgroundColor() const;
 

@@ -1214,6 +1214,21 @@ HWTEST_F(ScreenSessionManagerTest, GetSupportedHDRFormats, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestNotifyRunSensorFoldStateManager
+ * @tc.desc: TestNotifyRunSensorFoldStateManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestNotifyRunSensorFoldStateManager, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->foldScreenController_->NotifyRunSensorFoldStateManager();
+    EXPECT_TRUE(g_logMsg.find("NotifyRunSensorFoldStateManager") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    g_logMsg.clear();
+}
+
+/*
  * @tc.name: NotifyRSCoordination
  * @tc.desc: NotifyRSCoordination
  * @tc.type: FUNC

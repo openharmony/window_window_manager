@@ -48,11 +48,13 @@ constexpr uint16_t FIRST_DATA = 0;
 constexpr uint16_t SECOND_DATA = 1;
 constexpr uint16_t THIRD_DATA = 2;
 const int32_t MAIN_STATUS_WIDTH = 0;
-const int32_t FULL_STATUS_WIDTH = 1;
-const int32_t GLOBAL_FULL_STATUS_WIDTH = 2;
-const int32_t SCREEN_HEIGHT = 3;
-const int32_t FULL_STATUS_OFFSET_X = 4;
-const int32_t PARAMS_VECTOR_SIZE = 5;
+const int32_t MAIN_STATUS_HEIGHT = 1;
+const int32_t FULL_STATUS_WIDTH = 2;
+const int32_t FULL_STATUS_HEIGHT = 3;
+const int32_t GLOBAL_FULL_STATUS_WIDTH = 4;
+const int32_t SCREEN_HEIGHT = 5;
+const int32_t FULL_STATUS_OFFSET_X = 6;
+const int32_t PARAMS_VECTOR_SIZE = 7;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(SecondaryFoldSensorManager);
 
@@ -250,17 +252,20 @@ void SecondaryFoldSensorManager::PowerKeySetScreenActiveRect()
     }
     uint32_t x = 0;
     uint32_t y = 0;
-    uint32_t width = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT];
+    uint32_t width = 0;
     uint32_t height = 0;
     {
         std::lock_guard<std::recursive_mutex> lock_mode(foldScreenPolicy_->displayModeMutex_);
         if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::FULL) {
             y = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_OFFSET_X];
             height = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_WIDTH];
+            width = foldScreenPolicy_->GetScreenParams()[FULL_STATUS_HEIGHT];
         } else if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::MAIN) {
             height = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_WIDTH];
+            width = foldScreenPolicy_->GetScreenParams()[MAIN_STATUS_HEIGHT];
         } else if (foldScreenPolicy_->lastDisplayMode_ == FoldDisplayMode::GLOBAL_FULL) {
             height = foldScreenPolicy_->GetScreenParams()[GLOBAL_FULL_STATUS_WIDTH];
+            width = foldScreenPolicy_->GetScreenParams()[SCREEN_HEIGHT];
         } else {
             TLOGW(WmsLogTag::DMS, "displayMode[%{public}u] unknown.", foldScreenPolicy_->lastDisplayMode_);
             return;

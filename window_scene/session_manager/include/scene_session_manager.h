@@ -336,6 +336,8 @@ public:
     void RequestAllAppSessionUnfocus();
     WSError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId) override;
     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
+    void GetFocusWindowInfoByAbilityToken(FocusChangeInfo& focusInfo,
+        const sptr<IRemoteObject>& abilityToken) override;
     void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override;
     WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
@@ -421,10 +423,14 @@ public:
     WMError ShiftAppWindowPointerEvent(int32_t sourcePersistentId, int32_t targetPersistentId,
         int32_t fingerId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
+    WSError StartOrMinimizePcAppInPadUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isBackground);
+    std::vector<std::string> trayAppList_;
     WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
     void RegisterVirtualPixelChangeCallback(NotifyVirtualPixelChangeFunc&& func);
     NotifyVirtualPixelChangeFunc onVirtualPixelChangeCallback_;
     void ConfigDockAutoHide(bool isDockAutoHide);
+    void SchedulePcAppInPadLifecycle(bool isBackground);
+    void SetTrayAppList(std::vector<std::string>&& trayAppList);
 
     /*
      * Sub Window
@@ -874,7 +880,6 @@ public:
     WSError RegisterSaveSnapshotFunc(const sptr<SceneSession>& sceneSession);
     std::shared_ptr<Media::PixelMap> GetPixelMap(uint32_t resourceId,
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo, bool needCrop = false);
-    bool GetPersistentImageFit(int32_t persistentId, int32_t& imageFit);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
     void ConfigSupportSnapshotAllSessionStatus();
@@ -903,6 +908,7 @@ protected:
 private:
     std::atomic<bool> enterRecent_ { false };
     bool isKeyboardPanelEnabled_ = false;
+    bool isTrayAppForeground_ = false;
     std::unordered_map<std::string, ConvertSystemConfigFunc> convertConfigMap_;
     static sptr<SceneSessionManager> CreateInstance();
     static inline bool isNotCurrentScreen(sptr<SceneSession> sceneSession, ScreenId screenId)

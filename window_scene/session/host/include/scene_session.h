@@ -449,14 +449,11 @@ public:
     void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
     void CloneWindow(NodeId surfaceNodeId, bool needOffScreen);
     void AddSidebarBlur();
-    void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
     void SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation);
-    void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation);
     void SaveLastDensity();
     virtual bool IsFollowParentMultiScreenPolicy() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
     void SetSidebarBlurMaximize(bool isMaximize);
-    void ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark);
     void RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func);
     WSError UseImplicitAnimation(bool useImplicit) override;
 
@@ -987,6 +984,10 @@ public:
     */
     void NotifyWindowAttachStateListenerRegistered(bool registered) override;
     WMError NotifySnapshotUpdate() override;
+    bool GetIsPrivacyMode() const override
+    {
+        return GetSessionProperty()->GetPrivacyMode() || combinedExtWindowFlags_.privacyModeFlag;
+    };
     void SetAppControlInfo(ControlAppType type, ControlInfo controlInfo) override
     {
         std::lock_guard lock(appUseControlMapMutex_);
@@ -1599,14 +1600,6 @@ private:
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
     NotifySnapshotSkipChangeFunc onSnapshotSkipChangeFunc_;
-
-    /*
-     * PC Window Sidebar Blur
-     */
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurRadiusValue_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurSaturationValue_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurBrightnessValue_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
 
    /*
     * Window Lifecycle

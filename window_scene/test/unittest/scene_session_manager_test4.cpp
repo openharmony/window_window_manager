@@ -1293,39 +1293,6 @@ HWTEST_F(SceneSessionManagerTest4, AddOrRemoveSecureSession02, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSessionSnapshotPixelMap
- * @tc.desc: GetSessionSnapshotPixelMap
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest4, GetSessionSnapshotPixelMap, TestSize.Level1)
-{
-    ASSERT_NE(ssm_, nullptr);
-    SessionInfo info;
-    info.abilityName_ = "GetPixelMap";
-    info.bundleName_ = "GetPixelMap1";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->SetSessionState(SessionState::STATE_ACTIVE);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
-    int32_t persistentId = 1;
-    float scaleParam = 0.5f;
-    auto result = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleParam);
-    EXPECT_EQ(result, nullptr);
-
-    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
-    std::string bundleName = "testBundleName";
-    int32_t testpersistentId = 1;
-    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, testpersistentId);
-    ASSERT_NE(sceneSession->scenePersistence_, nullptr);
-    struct RSSurfaceNodeConfig config;
-    sceneSession->surfaceNode_ = RSSurfaceNode::Create(config);
-    ASSERT_NE(sceneSession->surfaceNode_, nullptr);
-    sceneSession->bufferAvailable_ = true;
-    result = ssm_->GetSessionSnapshotPixelMap(persistentId, scaleParam);
-    EXPECT_EQ(result, nullptr);
-}
-
-/**
  * @tc.name: HandleHideNonSystemFloatingWindows
  * @tc.desc: HandleHideNonSystemFloatingWindows
  * @tc.type: FUNC
