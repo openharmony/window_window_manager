@@ -25,7 +25,6 @@
 #include "fold_screen_state_internel.h"
 #include "mock/mock_accesstoken_kit.h"
 #include "window_manager_hilog.h"
-#include "screen_sensor_plugin.h"
 #include "test_client.h"
 
 using namespace testing;
