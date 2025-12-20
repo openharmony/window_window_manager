@@ -240,4 +240,10 @@ void FoldScreenBaseController::SetIsClearingBootAnimation(bool isClearingBootAni
 {
     FoldScreenBasePolicy::GetInstance().SetIsClearingBootAnimation(isClearingBootAnimation);
 }
+
+void FoldScreenBaseController::NotifyRunSensorFoldStateManager()
+{
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess FoldScreenBaseController::NotifyRunSensorFoldStateManager");
+    DMS::SensorFoldStateMgr::GetInstance().FinishTaskSequence();
+}
 } // namespace OHOS::Rosen

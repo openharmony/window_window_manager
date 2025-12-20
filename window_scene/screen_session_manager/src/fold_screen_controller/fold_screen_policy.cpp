@@ -93,7 +93,7 @@ FoldStatus FoldScreenPolicy::GetForceFoldStatus() const
     return forceFoldStatus_.load(std::memory_order_relaxed);
 }
 
-void FoldScreenPolicy::SetFoldLockFlagAndFoldStatus(bool physicalFoldLockFlag, FoldStatus targetFoldStatus);
+void FoldScreenPolicy::SetFoldLockFlagAndFoldStatus(bool physicalFoldLockFlag, FoldStatus targetFoldStatus)
 {
     TLOGI(WmsLogTag::DMS, "Set physicalFoldLockFlag as %{public}d, forceFoldStatus as %{public}d",
         physicalFoldLockFlag, targetFoldStatus);
@@ -147,6 +147,13 @@ void FoldScreenPolicy::ClearState()
 {
     currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     currentFoldStatus_ = FoldStatus::UNKNOWN;
+}
+
+void FoldScreenPolicy::SetFoldStatus(FoldStatus foldStatus)
+{
+    TLOGI(WmsLogTag::DMS, "SetFoldStatus: %{public}d", foldStatus);
+    currentFoldStatus_ = foldStatus;
+    lastFoldStatus_ = foldStatus;
 }
 
 void FoldScreenPolicy::ExitCoordination() {};

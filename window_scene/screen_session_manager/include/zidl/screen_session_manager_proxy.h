@@ -83,6 +83,13 @@ public:
 
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
 
+    template <DisplayManagerMessage TRANS_ID_WHITELIST>
+    DMError SendVirtualScreenWhiteListRequest(ScreenId screenId, const std::vector<uint64_t>& missionIds);
+
+    DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
+
+    DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
+
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
 

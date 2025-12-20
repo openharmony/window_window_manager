@@ -784,7 +784,7 @@ FoldDisplayMode FoldScreenBasePolicy::GetModeMatchStatus(FoldStatus targetFoldSt
     return displayMode;
 }
 
-void FoldScreenBasePolicy::SetFoldLockFlagAndFoldStatus(bool physicalFoldLockFlag, FoldStatus targetFoldStatus);
+void FoldScreenBasePolicy::SetFoldLockFlagAndFoldStatus(bool physicalFoldLockFlag, FoldStatus targetFoldStatus)
 {
     TLOGI(WmsLogTag::DMS, "Set physicalFoldLockFlag as %{public}d, forceFoldStatus as %{public}d",
         physicalFoldLockFlag, targetFoldStatus);

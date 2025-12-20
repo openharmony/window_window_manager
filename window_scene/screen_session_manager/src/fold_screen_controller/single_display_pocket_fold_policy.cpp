@@ -156,7 +156,6 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
     TLOGI(WmsLogTag::DMS,
         "start change displaymode: %{public}d, reason: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
         displayMode, reason, getFoldingElapsedMs());
-
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "default screenSession is null");
@@ -176,17 +175,11 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
         lastDisplayMode_ = displayMode;
     }
     if (!ScreenSessionManager::GetInstance().GetTentMode()) {
-        if (displayMode == FoldDisplayMode::MAIN) {
-            TLOGI(WmsLogTag::DMS, "Set device status to STATUS_FOLDED");
-            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED));
-            system::SetParameter("persist.dms.device.status",
-                std::to_string(static_cast<uint32_t>(DMDeviceStatus::STATUS_FOLDED)));
-        } else {
-            TLOGI(WmsLogTag::DMS, "Set device status to UNKNOWN");
-            SetDeviceStatus(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN));
-            system::SetParameter("persist.dms.device.status",
-                std::to_string(static_cast<uint32_t>(DMDeviceStatus::UNKNOWN)));
-        }
+        TLOGI(WmsLogTag::DMS, "Set device status to %{public}s",
+            displayMode == FoldDisplayMode::MAIN ? "STATUS_FOLDED" : "UNKNOWN");
+        auto status = displayMode == FoldDisplayMode::MAIN ? DMDeviceStatus::STATUS_FOLDED : DMDeviceStatus::UNKNOWN;
+        SetDeviceStatus(static_cast<uint32_t>(status));
+        system::SetParameter("persist.dms.device.status", std::to_string(static_cast<uint32_t>(status)));
     }
     ChangeScreenDisplayModeProc(screenSession, displayMode, reason);
     {
@@ -315,10 +308,7 @@ void SingleDisplayPocketFoldPolicy::UpdateForPhyScreenPropertyChange()
     TLOGI(WmsLogTag::DMS, "CurrentScreen(%{public}" PRIu64 ")", screenId_);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     if (currentDisplayMode_ != displayMode) {
-        DMError ret = ManageScreenDisplayModeChange(displayMode);
-        if (ret == DMError::DM_ERROR_FOLDSTATUS_LOCKED) {
-            TLOGW(WmsLogTag::DMS, "Fold status locked, unsupport change display mode");
-        }
+        ChangeScreenDisplayMode(displayMode);
     }
 }
 

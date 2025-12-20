@@ -223,7 +223,6 @@ public:
 
     int32_t GetInputOffsetY() const;
 
-    void SetInputOffsetY();
     void SetInputOffset(int32_t x, int32_t y);
     void SetMirrorWidth(uint32_t mirrorWidth);
     uint32_t GetMirrorWidth() const;

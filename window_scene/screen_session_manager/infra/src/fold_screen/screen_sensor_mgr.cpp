@@ -110,7 +110,7 @@ void ScreenSensorMgr::UnRegisterHallCallback()
         registerHall_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
     } else {
-        TLOGE(WmsLogTag::DMS, "unRegister hall sensor failed with ret: %{public}d", ret);
+        TLOGE(WmsLogTag::DMS, "unregister hall sensor failed with ret: %{public}d", ret);
     }
 }
 

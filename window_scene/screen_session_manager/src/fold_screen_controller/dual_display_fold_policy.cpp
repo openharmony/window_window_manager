@@ -359,10 +359,7 @@ void DualDisplayFoldPolicy::UpdateForPhyScreenPropertyChange()
     TLOGI(WmsLogTag::DMS, "currentScreen(%{public}" PRIu64 ")", screenId_);
     FoldDisplayMode displayMode = GetModeMatchStatus();
     if (currentDisplayMode_ != displayMode) {
-        DMError ret = ManageScreenDisplayModeChange(displayMode);
-        if (ret == DMError::DM_ERROR_FOLDSTATUS_LOCKED) {
-            TLOGW(WmsLogTag::DMS, "Fold status locked, unsupport change display mode");
-        }
+        ChangeScreenDisplayMode(displayMode);
     }
 }
 

@@ -18,6 +18,7 @@
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
 #include "interfaces/include/ws_common.h"
+#include "iremote_object_mocker.h"
 #include "libxml/parser.h"
 #include "libxml/tree.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -1557,6 +1558,56 @@ HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConfigFreeMultiWindow2
+ * @tc.desc: call ConfigFreeMultiWindow2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigFreeMultiWindowTest2, TestSize.Level1)
+{
+    ssm_->systemConfig_.freeMultiWindowConfig_.defaultDragResizeType_ = DragResizeType::RESIZE_TYPE_UNDEFINED;
+    std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<windowEffect>"
+        "<appWindows>"
+        "<shadow>"
+        "<focused>"
+        "<elevation>0</elevation>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>2</offsetY>"
+        "<radius>40</radius>"
+        "<alpha>1</alpha>"
+        "</focused>"
+        "<unfocused>"
+        "<elevation>0</elevation>"
+        "<color>#000000</color>"
+        "<offsetX>1</offsetX>"
+        "<offsetY>1</offsetY>"
+        "<alpha>0</alpha>"
+        "<radius>20</radius>"
+        "</unfocused>"
+        "</shadow>"
+        "</appWindows>"
+        "</windowEffect>"
+        "<freeMultiWindow enable=\"true\">"
+        "</freeMultiWindow>"
+        "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
+    ssm_->ConfigFreeMultiWindow();
+    // freeMultiWindow windowEffect
+    auto windowEffect = ssm_->systemConfig_.freeMultiWindowConfig_.appWindowSceneConfig_;
+    
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.alpha_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.offsetX_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.offsetY_, 2);
+    EXPECT_FLOAT_EQ(windowEffect.focusedShadow_.radius_, 40);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.alpha_, 0);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.offsetX_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.offsetY_, 1);
+    EXPECT_FLOAT_EQ(windowEffect.unfocusedShadow_.radius_, 20);
+}
+
+/**
  * @tc.name: LoadFreeMultiWindowConfigTest
  * @tc.desc: call LoadFreeMultiWindowConfig
  * @tc.type: FUNC
@@ -1904,6 +1955,68 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfo2, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ 0, sceneSession });
     ssm_->GetFocusWindowInfo(fcinfo);
+}
+
+/**
+ * @tc.name: GetFocusWindowInfoByAbilityToken_SACalling
+ * @tc.desc: Test function GetFocusWindowInfoByAbilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken_SACalling, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::MockIsSACalling(false);
+    FocusChangeInfo info;
+    sptr<IRemoteObject> token;
+    ssm_->GetFocusWindowInfoByAbilityToken(info, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    MockAccesstokenKit::MockIsSACalling(true);
+}
+
+/**
+ * @tc.name: GetFocusWindowInfoByAbilityToken
+ * @tc.desc: Test function GetFocusWindowInfoByAbilityToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo info;
+    info.abilityName_ = "GetFocusWindowInfoByAbilityToken";
+    info.bundleName_ = "GetFocusWindowInfoByAbilityToken";
+    FocusChangeInfo focusInfo{};
+    sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
+
+    sptr<SceneSession> sceneSession = nullptr;
+    ssm_->sceneSessionMap_.insert({ 1, sceneSession });
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({ 2, sceneSession1 });
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    sceneSession1->SetAbilityToken(token);
+    sceneSession1->property_->SetDisplayId(DISPLAY_ID_INVALID);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    ssm_->windowFocusController_->AddFocusGroup(0, 0);
+    sceneSession1->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    auto focusGroup = ssm_->windowFocusController_->GetFocusGroup(DEFAULT_DISPLAY_ID);
+    sceneSession1->property_->SetPersistentId(2);
+    focusGroup->SetFocusedSessionId(1);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+
+    focusGroup->SetFocusedSessionId(2);
+    ssm_->GetFocusWindowInfoByAbilityToken(focusInfo, token);
+    EXPECT_NE(focusInfo.windowId_, INVALID_WINDOW_ID);
+    ssm_->windowFocusController_->RemoveFocusGroup(0, 0);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**
