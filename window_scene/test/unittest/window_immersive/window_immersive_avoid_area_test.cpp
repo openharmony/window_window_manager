@@ -403,22 +403,6 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, NotifyNextAvoidRectInfo_02, TestSize.Leve
 }
 
 /*
- * @tc.name: CalculateAvoidAreaByScale
- * @tc.desc: SceneSesion test CalculateAvoidAreaByScale
- * @tc.type: FUNC
- */
-HWTEST_F(WindowImmersiveAvoidAreaTest, CalculateAvoidAreaByScale, TestSize.Level0)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "testbundleName";
-    sessionInfo.abilityName_ = "testabilityName";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    Rect avoidAreaRect = { 0, 0, 0, 0 };
-    sceneSession->CalculateAvoidAreaByScale(avoidAreaRect);
-}
-
-/*
  * @tc.name: GetScaleInLSState
  * @tc.desc: SceneSesion test GetScaleInLSState
  * @tc.type: FUNC
@@ -432,26 +416,28 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, GetScaleInLSState, TestSize.Level0)
     ASSERT_NE(sceneSession, nullptr);
     float scaleX = 1;
     float scaleY = 1;
+    WSRect winRect = { 0, 0, 0, 0};
+    Rect avoidAreaRect = { 0, 0, 0, 0};
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->layoutController_ = sptr<LayoutController>::MakeSptr(property);
     sceneSession->Session::SetScale(-1, -1, -1, -1);
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
-    EXPECT_EQ(GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    EXPECT_EQ(GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
     sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_EQ(GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
     sceneSession->specificCallback_->onGetLSState_ = []() { return false; };
-    EXPECT_EQ(GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
+    EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
     sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
-    EXPECT_EQ(GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
     sceneSession->Session::SetScale(1, -1, -1, -1);
-    EXPECT_EQ(GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
     sceneSession->CalculateWindowRectByScale(winRect);
     sceneSession->CalculateAvoidAreaByScale(avoidAreaRect);
     sceneSession->Session::SetScale(1, 1, -1, -1);
-    EXPECT_EQ(GetScaleInLSState(scaleX, scaleY), WSError::WS_OK);
+    EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_OK);
     sceneSession->CalculateWindowRectByScale(winRect);
     sceneSession->CalculateAvoidAreaByScale(avoidAreaRect);
 }
