@@ -27,10 +27,10 @@ TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize)
     }
 TaskSequenceProcess::~TaskSequenceProcess() = default;
 
-std::function<void()> TaskSequenceProcess:PopFromQueue()
+std::function<void()> TaskSequenceProcess::PopFromQueue()
 {
     std::lock_guard<std::mutex> lock(queueMutex_);
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess taskQueue_.size(): %{public}u", taskQueue_.size());
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess taskQueue_.size(): %{public}zu", taskQueue_.size());
     if (taskQueue_.empty()) {
         TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not pop");
         return std::function<void()>();
