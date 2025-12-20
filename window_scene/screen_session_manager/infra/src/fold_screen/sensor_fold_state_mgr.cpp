@@ -196,11 +196,11 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
         TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
     }
-    if (globalFoldStatus_ == nextStatus) {
-        TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", globalFoldStatus_);
-        return;
-    }
     auto task = [=] {
+        if (globalFoldStatus_ == nextStatus) {
+            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", globalFoldStatus_);
+            return;
+        }
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", globalFoldStatus_, nextStatus);
         ReportNotifyFoldStatusChange((int32_t)nextStatus);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
@@ -221,7 +221,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
 void SensorFoldStateMgr::FinishTaskSequence()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateMgr::FinishTaskSequence");
-    taskProcessor_.Finish();
+    taskProcessor_.FinishTask();
 }
 
 void SensorFoldStateMgr::UpdateFoldAlgorithmStrategy(const std::vector<ScreenAxis>& axis)
