@@ -422,6 +422,7 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     napi_value WindowStatusTypeInit(napi_env env);
     napi_value RectChangeReasonInit(napi_env env);
     napi_value RotationChangeTypeInit(napi_env env);
+    napi_value RotationInfoTypeInit(napi_env env);
     napi_value RectTypeInit(napi_env env);
     napi_value AnimationTypeInit(napi_env env);
     napi_value WindowTransitionTypeInit(napi_env env);

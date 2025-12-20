@@ -83,6 +83,33 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     DisplayAniUtils::ConvertWaterArea(waterfallDisplayAreaRects, static_cast<ani_object>(waterfallObj), env);
 }
 
+void DisplayAni::GetRoundedCorner(ani_env* env, ani_object obj, ani_object roundedCornerObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] start");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+    if (display == nullptr) {
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "Invalid display or screen.");
+        return;
+    }
+    std::vector<RoundedCorner> roundedCorner;
+    auto errCode = display->GetRoundedCorner(roundedCorner);
+    if (errCode != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Display get rounded corner failed.");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Display get rounded corner failed.");
+        return;
+    }
+    if (roundedCorner.empty()) {
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,
+            "This display manager service works abnormally.");
+    } else {
+        DisplayAniUtils::ConvertRoundedCorner(roundedCorner, roundedCornerObj, env);
+    }
+}
+
 ani_string DisplayAni::GetDisplayCapability(ani_env* env)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] Start");
@@ -533,6 +560,8 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
             reinterpret_cast<void *>(DisplayAni::RegisterCallback)},
         ani_native_function {"syncOff", nullptr,
             reinterpret_cast<void *>(DisplayAni::UnRegisterCallback)},
+        ani_native_function {"getRoundedCornerInternal", nullptr,
+            reinterpret_cast<void *>(DisplayAni::GetRoundedCorner)},
     };
     auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
     if (ret != ANI_OK) {

@@ -62,6 +62,10 @@ constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 constexpr uint32_t ADVANCED_FEATURE_BIT_MAX = 32;
 constexpr uint32_t ADVANCED_FEATURE_BIT_LOCK_CURSOR = 0x00;
 constexpr uint32_t ADVANCED_FEATURE_BIT_CURSOR_FOLLOW_MOVEMENT = 0x01;
+constexpr uint32_t ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED = 0x02;
+constexpr uint32_t ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT = 0x03;
+
+constexpr int32_t DECIMAL_BASE = 10;
 
 enum class WSError : int32_t {
     WS_OK = 0,
@@ -171,6 +175,7 @@ enum CollaboratorType : int32_t {
     DEFAULT_TYPE = 0,
     RESERVE_TYPE,
     OTHERS_TYPE,
+    REDIRECT_TYPE,
 };
 
 enum AncoSceneState: int32_t {
@@ -376,6 +381,12 @@ enum class StartWindowType : uint32_t {
     REMOVE_NODE_INVISIBLE,
 };
 
+enum class SpecifiedReason : int32_t {
+    DEFAULT = 0,
+    BY_SCB,
+    FROM_RENCENT,
+};
+
 struct AtomicServiceInfo {
     std::string appNameInfo_ = "";
     std::string eyelashRingIcon_ = "";
@@ -402,7 +413,6 @@ struct SessionInfo {
     sptr<IRemoteObject> rootToken_ = nullptr;
     uint64_t screenId_ = -1;
     bool isPersistentRecover_ = false;
-    bool isFromIcon_ = false;
     AtomicServiceInfo atomicServiceInfo_;
 
     mutable std::shared_ptr<AAFwk::Want> want = nullptr; // want for ability start
@@ -463,6 +473,9 @@ struct SessionInfo {
     std::string label_ = "";
     StartWindowType startWindowType_ = StartWindowType::DEFAULT;
     bool isSetStartWindowType_ = false;
+    SpecifiedReason specifiedReason_ = SpecifiedReason::DEFAULT;
+    // only init when requestSceneSession from SCB
+    bool isAncoApplication_ = false;
     int32_t scenarios = 0;
     bool isPrelaunch_ = false;
 
@@ -506,6 +519,11 @@ struct SessionInfo {
      * Window Rotation
      */
     int32_t currentRotation_ = 0;
+
+    /*
+     * Compatible Mode
+     */
+    std::string compatibleModePage = "";
 
     AAFwk::Want GetWantSafely() const
     {
@@ -713,6 +731,18 @@ struct WSRectT {
     inline bool IsInvalid() const
     {
         return IsEmpty() || LessOrEqual(width_, 0) || LessOrEqual(height_, 0);
+    }
+
+    /**
+     * @brief Create a new rectangle offset by (dx, dy).
+     *
+     * @param dx The offset in the x direction.
+     * @param dy The offset in the y direction.
+     * @return A new WSRectT<T> instance with updated position.
+     */
+    WSRectT<T> WithOffset(T dx, T dy) const
+    {
+        return { posX_ + dx, posY_ + dy, width_, height_ };
     }
 
     /**
@@ -997,7 +1027,7 @@ struct DeviceScreenConfig {
 
 struct SceneAnimationConfig : public Parcelable {
     std::shared_ptr<RSTransaction> rsTransaction_ = nullptr;
-    int32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
+    uint32_t animationDuration_ = ROTATE_ANIMATION_DURATION;
     uint32_t animationDelay_ = 0;
     WindowAnimationCurve animationCurve_ = WindowAnimationCurve::LINEAR;
     std::array<float, ANIMATION_PARAM_SIZE> animationParam_ = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -1006,7 +1036,7 @@ struct SceneAnimationConfig : public Parcelable {
 
     SceneAnimationConfig(
         std::shared_ptr<RSTransaction> rsTransaction,
-        int32_t animationDuration,
+        uint32_t animationDuration,
         uint32_t animationDelay,
         WindowAnimationCurve animationCurve,
         const std::array<float, ANIMATION_PARAM_SIZE>& animationParam)
@@ -1022,7 +1052,7 @@ struct SceneAnimationConfig : public Parcelable {
         if (!parcel.WriteBool(hasTransaction)) {
             return false;
         }
-        if (!parcel.WriteInt32(animationDuration_)) {
+        if (!parcel.WriteUint32(animationDuration_)) {
             return false;
         }
         if (!parcel.WriteUint32(animationDelay_)) {
@@ -1043,12 +1073,12 @@ struct SceneAnimationConfig : public Parcelable {
     {
         auto config = new SceneAnimationConfig();
         bool hasTransaction = false;
-        int32_t animationDuration;
+        uint32_t animationDuration;
         uint32_t animationDelay;
         uint32_t animationCurveValue;
         std::array<float, ANIMATION_PARAM_SIZE> animationParam;
         if (!parcel.ReadBool(hasTransaction) ||
-            !parcel.ReadInt32(animationDuration) ||
+            !parcel.ReadUint32(animationDuration) ||
             !parcel.ReadUint32(animationDelay) ||
             !parcel.ReadUint32(animationCurveValue)) {
             delete config;
@@ -1223,6 +1253,14 @@ enum class SnapshotNodeType : uint32_t {
     APP_NODE,
 };
 
+enum class SnapShotRecoverType : uint32_t {
+    ROTATE = 0,
+    EXIT_SPLIT_ON_BACKGROUND,
+};
+
+/**
+ * Adding or modifying enumeration values requires corresponding changes on the sceneboard side.
+ */
 enum class LifeCycleChangeReason {
     DEFAULT = 0,
 
@@ -1234,6 +1272,8 @@ enum class LifeCycleChangeReason {
     BACK_TO_DESKTOP,
 
     SCREEN_LOCK,
+
+    SCREEN_ROTATION,
 
     LAST_SCENE_TRANSFER,
 
@@ -1280,6 +1320,14 @@ enum class SessionRecoverState : uint32_t {
     SESSION_RECOVER_STATE_END,
 };
 
+/**
+ * @brief Set specific window zIndex reason
+ */
+enum class SetSpecificZIndexReason : uint32_t {
+    SET = 0,
+    RESET = 1,
+};
+
 enum class CrossPlaneState : uint32_t {
     UNDEFINED = 0,
     CROSS_DEFAULT_PLANE,
@@ -1288,6 +1336,22 @@ enum class CrossPlaneState : uint32_t {
     CROSS_VIRTUAL_CREASE_PLANE,
     CROSS_VIRTUAL_PLANE,
     CROSS_ALL_PLANE,
+};
+
+enum class SendTouchAction : uint32_t {
+    ACTION_NORMAL = 0,
+    ACTION_NOT_RECEIVE_PULL_CANCEL = 1,
+};
+
+/**
+ * @brief Sidebar blur type
+ */
+enum class SidebarBlurType : uint32_t {
+    NONE = 0,
+    INITIAL,
+    DEFAULT_FLOAT,
+    DEFAULT_MAXIMIZE,
+    END,
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

@@ -40,6 +40,9 @@ static void ConvertWaterArea(WaterfallDisplayAreaRects waterfallDisplayAreaRects
 static void ConvertDisplayPhysicalResolution(std::vector<DisplayPhysicalResolution> &displayPhysicalArray,
     ani_object arrayObj, ani_env *env);
 
+static void ConvertRoundedCorner(const std::vector<RoundedCorner>& roundedCornerArray,
+    ani_object arrayObj, ani_env *env);
+
 static ani_enum_item CreateAniEnum(ani_env* env, const char* enum_descriptor, ani_size index);
 
 static ani_status CvtDisplay(sptr<Display> display, ani_env* env, ani_object obj);

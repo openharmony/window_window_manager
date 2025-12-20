@@ -68,6 +68,7 @@ group("unittest") {
   }
   if (window_manager_use_sceneboard) {
     deps += [
+      ":wm_compatible_mode_window_session_impl_test",
       ":wm_oh_window_pip_test",
       ":wm_oh_window_test",
       ":wm_web_picture_in_picture_controller_interface_test",
@@ -297,6 +298,17 @@ ohos_unittest("wm_window_session_impl_test5") {
     ":wm_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
   ]
+
+  external_deps = test_external_deps
+  external_deps += [ "init:libbegetutil" ]
+}
+
+ohos_unittest("wm_compatible_mode_window_session_impl_test") {
+  module_out_path = module_out_path
+
+  sources = [ "compatible_mode_window_session_impl_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
 
   external_deps = test_external_deps
   external_deps += [ "init:libbegetutil" ]

@@ -88,7 +88,7 @@ public:
 
     void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent);
 
-    void AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
+    void AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds, const DMRect& rect);
     void ClearMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
 
 private:
@@ -151,7 +151,11 @@ private:
     void ModifyMirrorScreenVisibleRect(SuperFoldStatus preState, SuperFoldStatus curState);
     // virtual keyboard change
     void ModifyMirrorScreenVisibleRect(bool isTpKeyBoardOn);
-    std::vector<ScreenId> mirrorScreenIds_;
+    void ModifyMirrorScreenVisibleRectInner(const OHOS::Rect& rsRect, std::vector<DisplayId>& displayIds);
+    std::vector<DisplayId> CalculateReCordingDisplayIds(const OHOS::Rect& nextRect);
+
+    std::map<ScreenId, OHOS::Rect> mirrorScreenVisibleRectMap_;
+
     std::mutex mirrorScreenIdsMutex_;
 
     uint32_t GetFoldCreaseHeight() const;

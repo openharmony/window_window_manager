@@ -233,6 +233,12 @@ auto SceneInputManager::GetFullWindowInfoList() ->
     return sceneSessionDirty_->GetFullWindowInfoList();
 }
 
+void SceneInputManager::UpdateHotAreas(const sptr<SceneSession>& sceneSession,
+    std::vector<MMI::Rect>& touchHotAreas, std::vector<MMI::Rect>& pointerHotAreas) const
+{
+    sceneSessionDirty_->UpdateHotAreas(sceneSession, touchHotAreas, pointerHotAreas);
+}
+
 std::vector<MMI::ScreenInfo> SceneInputManager::ConstructScreenInfos(
     std::map<ScreenId, ScreenProperty>& screensProperties)
 {

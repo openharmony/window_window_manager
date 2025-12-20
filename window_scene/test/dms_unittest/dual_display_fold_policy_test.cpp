@@ -29,6 +29,14 @@ namespace {
 constexpr uint32_t SLEEP_TIME_US = 500000;
 const std::string DUAL_DISPLAY_FOLD_POLICY_TEST = "DualDisplayFoldPolicyTest";
 }
+namespace {
+    std::string g_errLog;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+    g_errLog = msg;
+    }
+}
 
 class DualDisplayFoldPolicyTest : public testing::Test {
 public:
@@ -300,9 +308,11 @@ namespace {
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-        dualDisplayFoldPolicy.ReportFoldDisplayModeChange(FoldDisplayMode::FULL);
+        FoldDisplayMode expectMode = FoldDisplayMode::FULL;
+        dualDisplayFoldPolicy.ReportFoldDisplayModeChange(expectMode);
         FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        EXPECT_FALSE(g_errLog.find("Write HiSysEvent error, ret: %{public}d") !=
+                    std::string::npos);
     }
 
     /**
@@ -314,11 +324,11 @@ namespace {
     {
         std::recursive_mutex mutex;
         DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
+        FoldDisplayMode originalmode = ssm_.GetFoldDisplayMode();
         int32_t offScreen = 0;
         int32_t onScreen = 1;
         dualDisplayFoldPolicy.ReportFoldStatusChangeBegin(offScreen, onScreen);
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
+        ASSERT_FALSE(g_errLog.find("ReportFoldStatusChangeBegin Write HiSusEvent error") != std::string::npos);
     }
 
     /**
@@ -353,23 +363,6 @@ namespace {
         dualDisplayFoldPolicy.screenPowerTaskScheduler_ = std::make_shared<TaskScheduler>(threadName);
         dualDisplayFoldPolicy.ChangeScreenDisplayModeOnBootAnimation(screenSession, screenId);
         ASSERT_EQ(screenId, dualDisplayFoldPolicy.screenId_);
-    }
-
-    /**
-     * @tc.name: AddOrRemoveDisplayNodeToTree
-     * @tc.desc: AddOrRemoveDisplayNodeToTree
-     * @tc.type: FUNC
-     */
-    HWTEST_F(DualDisplayFoldPolicyTest, AddOrRemoveDisplayNodeToTree, TestSize.Level1)
-    {
-        std::recursive_mutex mutex;
-        DualDisplayFoldPolicy dualDisplayFoldPolicy(mutex, std::shared_ptr<TaskScheduler>());
-        sptr<ScreenSession> screenSession = new ScreenSession();
-        ScreenId screenId = 0;
-        int32_t command = 1;
-        dualDisplayFoldPolicy.AddOrRemoveDisplayNodeToTree(screenId, command);
-        FoldDisplayMode mode = ssm_.GetFoldDisplayMode();
-        ASSERT_EQ(mode, ssm_.GetFoldDisplayMode());
     }
 
     /**

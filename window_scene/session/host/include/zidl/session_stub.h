@@ -57,6 +57,7 @@ private:
     int HandleGetAvoidAreaByTypeIgnoringVisibility(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply);
     int HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleConvertOrientationAndRotation(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetContentAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
@@ -86,7 +87,9 @@ private:
     int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
     int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
+    int HandleGetAppForceLandscapeConfigEnable(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppHookWindowInfoFromServer(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyWindowStatusDidChangeAfterShowWindow(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
@@ -184,7 +187,9 @@ private:
 
     // Compatible Mode
     int HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply);
-    
+    int HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply);
+
     int HandleRestartApp(MessageParcel& data, MessageParcel& reply);
 
     // Window Event

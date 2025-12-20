@@ -49,6 +49,7 @@ public:
     void NotifyScreenMagneticStateChanged(bool isMagneticState) override {};
     void NotifyScreenModeChange(const std::vector<sptr<ScreenInfo>>& screenInfos) override {};
     void NotifyAbnormalScreenConnectChange(ScreenId screenId) override {};
+    void NotifyRecordingDisplayChanged(const std::vector<DisplayId>& displayIds) override {};
     void NotifyBrightnessInfoChanged(ScreenId screenId, const ScreenBrightnessInfo& info) override {};
 };
 }

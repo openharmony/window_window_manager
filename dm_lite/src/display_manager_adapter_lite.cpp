@@ -344,6 +344,22 @@ ScreenPowerState ScreenManagerAdapterLite::GetScreenPower()
     return displayManagerServiceProxy_->GetScreenPower();
 }
 
+void ScreenManagerAdapterLite::SyncScreenPowerState(ScreenPowerState state)
+{
+    if (IsScreenLessDevice()) {
+        TLOGI(WmsLogTag::DMS, "screenless device");
+        return;
+    }
+    INIT_PROXY_CHECK_RETURN();
+
+    if (displayManagerServiceProxy_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "null proxy object");
+        return;
+    }
+    displayManagerServiceProxy_->SyncScreenPowerState(state);
+    TLOGI(WmsLogTag::DMS, "sync power state success");
+}
+
 DMError ScreenManagerAdapterLite::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

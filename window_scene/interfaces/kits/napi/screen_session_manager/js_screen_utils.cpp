@@ -131,6 +131,10 @@ napi_value JsScreenUtils::CreateJsScreenPropertyChangeReason(napi_env env)
         static_cast<int32_t>(ScreenPropertyChangeReason::ACCESS_INFO_CHANGE)));
     napi_set_named_property(env, objValue, "VIRTUAL_PIXEL_RATIO_CHANGE", CreateJsValue(env,
         static_cast<int32_t>(ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE)));
+    napi_set_named_property(env, objValue, "FOLD_SCREEN_EXPAND_SWITCH_USER", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::FOLD_SCREEN_EXPAND_SWITCH_USER)));
+    napi_set_named_property(env, objValue, "FOLD_SCREEN_FOLDING_SWITCH_USER", CreateJsValue(env,
+        static_cast<int32_t>(ScreenPropertyChangeReason::FOLD_SCREEN_FOLDING_SWITCH_USER)));
     return objValue;
 }
 

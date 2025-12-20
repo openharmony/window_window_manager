@@ -123,6 +123,10 @@ public:
     virtual DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo);
     virtual bool SetVirtualScreenAsDefault(ScreenId screenId);
     virtual DisplayId GetPrimaryDisplayId();
+    virtual DMError GetSupportsInput(DisplayId displayId, bool& supportsInput);
+    virtual DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
+    virtual DMError GetRoundedCorner(std::vector<RoundedCorner>& roundedCorner, DisplayId displayId,
+        int32_t width, int32_t height);
     
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
@@ -137,6 +141,8 @@ public:
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     virtual DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
     virtual DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
+    virtual DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds);
+    virtual DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds);
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg);
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation);

@@ -90,6 +90,7 @@ private:
     void TriggerSecondaryFoldStatus(const std::string &valueStr);
     void SetDuringCallState(std::string input);
     bool IsDeveloperModeCommand();
+    void ShowCurrentLcdStatus(ScreenId screenId);
 private:
     int fd_;
     std::vector<std::string> params_;
