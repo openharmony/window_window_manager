@@ -199,6 +199,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
     auto task = [=] {
         if (globalFoldStatus_ == nextStatus) {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", globalFoldStatus_);
+            taskProcessor_.FinishTask();
             return;
         }
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", globalFoldStatus_, nextStatus);
@@ -215,7 +216,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
             FoldScreenBasePolicy::GetInstance().SendSensorResult(globalFoldStatus_);
         }
     };
-    taskProcessor_.PushToQueue(task);
+    taskProcessor_.AddTask(task);
 }
 
 void SensorFoldStateMgr::FinishTaskSequence()

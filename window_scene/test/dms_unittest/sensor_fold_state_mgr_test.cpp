@@ -276,6 +276,7 @@ HWTEST_F(SensorFoldStateMgrTest, FinishTaskSequence, TestSize.Level0)
     SensorFoldStateMgr::GetInstance().FinishTaskSequence();
     EXPECT_TRUE(g_logMsg.find("TaskSequenceProcess") != std::string::npos);
     LOG_SetCallback(nullptr);
+    g_logMsg.clear();
 }
 }
 }

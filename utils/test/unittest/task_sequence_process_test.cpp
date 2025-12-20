@@ -41,19 +41,6 @@ void TaskSequenceProcessTest::TearDown() {}
 namespace {
 
 /**
- * @tc.name: NotifyTest01
- * @tc.desc: NotifyTest01
- * @tc.type: FUNC
- */
-HWTEST_F(TaskSequenceProcessTest, ATC_Notify01, TestSize.Level0)
-{
-    TaskSequenceProcess process = TaskSequenceProcess(10);
-    process.taskRunningFlag_.store(false);
-    process.Notify();
-    EXPECT_FALSE(process.taskRunningFlag_.load());
-}
-
-/**
  * @tc.name: TaskSequenceProcessTest01
  * @tc.desc: TaskSequenceProcessTest01
  * @tc.type: FUNC
@@ -64,18 +51,48 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess01, TestSize.Level0)
     EXPECT_EQ(process.maxQueueSize_, 1);
 }
 
+/**
+ * @tc.name: TaskSequenceProcessTest02
+ * @tc.desc: TaskSequenceProcessTest02
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
+{
+    TaskSequenceProcess process = TaskSequenceProcess(10);
+    EXPECT_EQ(process.maxQueueSize_, 10);
+}
 
 /**
  * @tc.name: SetTaskRunningFlagTest01
  * @tc.desc: SetTaskRunningFlagTest01
  * @tc.type: FUNC
  */
-HWTEST_F(TaskSequenceProcessTest, ATC_Finish01, TestSize.Level0)
+HWTEST_F(TaskSequenceProcessTest, ATC_AddTask01, TestSize.Level0)
 {
     TaskSequenceProcess process = TaskSequenceProcess(1);
-    process.taskRunningFlag_.store(true);
-    process.Finish();
-    EXPECT_EQ(process.taskRunningFlag_.load(), false);
+    bool taskCallback =  false;
+    std::function<void()> task = [&taskCallback]() {
+        taskCallback =true;
+    };
+    process.AddTask(task);
+    EXPECT_TRUE(taskCallback);
+}
+
+/**
+ * @tc.name: SetTaskRunningFlagTest01
+ * @tc.desc: SetTaskRunningFlagTest01
+ * @tc.type: FUNC
+ */
+HWTEST_F(TaskSequenceProcessTest, ATC_FinishTask01, TestSize.Level0)
+{
+    TaskSequenceProcess process = TaskSequenceProcess(1);
+    bool taskCallback =  false;
+    std::function<void()> task = [&taskCallback]() {
+        taskCallback =true;
+    };
+    process.taskQueue_.push(task);
+    process.FinishTask();
+    EXPECT_TRUE(taskCallback);
 }
 } // namespace
 } // namespace Rosen
