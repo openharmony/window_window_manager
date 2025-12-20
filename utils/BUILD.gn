@@ -221,6 +221,7 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader.cpp",
     "src/surface_reader_handler_impl.cpp",
     "src/sys_cap_util.cpp",
+    "src/task_sequence_process.cpp",
     "src/typec_port_info.cpp",
     "src/vsync_station.cpp",
     "src/window_frame_trace_impl.cpp",
