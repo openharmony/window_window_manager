@@ -13073,8 +13073,8 @@ void SceneSessionManager::UpdateAvoidAreaForLSStateChange(int32_t curState, int3
     if (curState == preState) {
         return;
     }
-    constexpr int32_t NON_LS_STATE = 0;
-    SetLSState(curState > NON_LS_STATE);
+    constexpr int32_t nonLSState = 0;
+    SetLSState(curState > nonLSState);
     TLOGI(WmsLogTag::WMS_IMMS, "curState %{public}d, preState %{public}d", curState, preState);
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);

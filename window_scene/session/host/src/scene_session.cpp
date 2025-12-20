@@ -3195,13 +3195,14 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
 
 void SceneSession::GetScaleInLSState(float& scaleX, float& scaleY) const
 {
-    if (GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN || !specificCallback_ ||
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN || GetIsMidScene() ||
+        !specificCallback_ ||
         !specificCallback_->onGetLSState_ || !specificCallback_->onGetLSState_()) {
         TLOGD(WmsLogTag::WMS_IMMS, "win: %{public}d, not in LS state", GetPersistentId());
         return;
     }
-    constexpr float INVALID_SCALE = 0;
-    if (GetScaleX() <= INVALID_SCALE || GetScaleY() <= INVALID_SCALE) {
+    constexpr float invalidScale = 0;
+    if (GetScaleX() <= invalidScale || GetScaleY() <= invalidScale) {
         TLOGE(WmsLogTag::WMS_IMMS, "win: %{public}d, invalid scale", GetPersistentId());
         return;
     }
