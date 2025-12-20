@@ -1681,7 +1681,7 @@ Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displ
     } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
         displayRotation =
             GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_90));
-    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() && foldDisplayMode == FoldDisplayMode::FULL) {
+    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         displayRotation =
             GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_270));
     }
@@ -1810,8 +1810,7 @@ DisplayOrientation ScreenSession::CalcDeviceOrientationWithBounds(Rotation rotat
         rotation = static_cast<Rotation>(temp);
     } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
         rotation = GetTargetRotationWithBounds(rotation, bounds, static_cast<uint32_t>(ROTATION_90));
-    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() &&
-        foldDisplayMode == FoldDisplayMode::FULL) {
+    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         rotation = GetTargetRotationWithBounds(rotation, bounds, static_cast<uint32_t>(ROTATION_270));
     }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
