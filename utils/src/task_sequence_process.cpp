@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,7 @@ void TaskSequenceProcess::ExecTask()
         TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not execute");
         return;
     }
+    taskRunningFlag_.store(true);
     task();
 }
 
@@ -68,5 +69,6 @@ void TaskSequenceProcess::AddTask(const std::function<void()>& task)
 void TaskSequenceProcess::FinishTask()
 {
     ExecTask();
+    taskRunningFlag_.store(false);
 }
 } // namespace OHOS::Rosen
