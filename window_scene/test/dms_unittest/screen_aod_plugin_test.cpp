@@ -28,8 +28,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "screen_session_manager.h"
-#include "screen_sensor_plugin.h"
+#include "screen_aod_plugin.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,7 +43,7 @@ public:
 
 void IsInAodTest::SetUp()
 {
-    g_handle = dlopen(nullptr, RTLD_LAZY);
+     static void *g_handle = dlopen(nullptr, RTLD_LAZY);
 }
 
 void IsInAodTest::TearDown()
