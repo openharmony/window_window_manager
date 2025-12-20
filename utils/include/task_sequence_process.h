@@ -31,6 +31,7 @@ private:
     uint32_t maxQueueSize_ {1};
     std::queue<std::function<void()>> taskQueue_;
     std::mutex queueMutex_;
+    std::atomic<bool> taskRunningFlag_ {false};
     std::function<void()> PopFromQueue();
     void PushToQueue(const std::function<void()>& task);
     void ExecTask();
