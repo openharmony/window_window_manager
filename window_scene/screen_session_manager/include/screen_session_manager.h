@@ -193,6 +193,16 @@ public:
     void NotifyDisplayDestroy(DisplayId displayId);
     void NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, ScreenId screenId, sptr<ScreenSession> screenSession);
     void NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event);
+    void CalculateStartWhenTransferState(sptr<ScreenSession> staticSession, sptr<ScreenSession> dynamicSession,
+        uint32_t borderingAreaPercent);
+    void AdjustTheBorderingAreaPercent(uint32_t adjacentPercent, uint32_t length, uint32_t& adjacentStart);
+    void HandleStaticOnLeft(MultiScreenPositionOptions& staticScreenOptions,
+        MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t dynamicWidth,
+            uint32_t staticHeight, uint32_t dynamicHeight);
+    void HandleStaticOnRight(MultiScreenPositionOptions& staticScreenOptions,
+        MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t staticHeight,
+            uint32_t staticWidth, uint32_t dynamicHeight);
+    void GetStaticAndDynamicSession();
 
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
@@ -317,7 +327,6 @@ public:
     bool IsLapTopLidOpen() const;
     void SetLapTopLidOpenStatus(bool isLapTopLidOpen);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
-    void UnlockStateMachineInExtendAndVirtualScreen(ScreenId screenId);
     bool GetIsPhysicalExtendScreenConnected();
     void SetIsPhysicalExtendScreenConnected(bool isExtendScreenConnected);
     void SetExpandAndHorizontalLocked(bool isLocked);
@@ -681,6 +690,7 @@ private:
         const std::string& serialNumber);
     bool CheckResolutionMode(std::map<std::string, SupportedScreenModes> resolutionMap,
         const std::string& serialNumber);
+    bool CheckPercent(std::map<std::string, uint32_t> percentMap, const std::string& serialNumber);
     void SetExtendedScreenFallbackPlanEvent(int32_t res);
     void SetInnerScreenFallbackPlan(sptr<ScreenSession> screenSession);
     int32_t GetCurrentInUseScreenNumber();
@@ -746,6 +756,8 @@ private:
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
+    void LogPositions(const std::string& positions, const MultiScreenPositionOptions& mainScreenOptions,
+            const MultiScreenPositionOptions& secondScreenOptions);
     void RecoverMultiScreenRelativePosition(ScreenId screenId);
     void HandleSuperFoldStatusLocked(bool isLocked);
     void SetDisplayRegionAndAreaFixed(Rotation rotation, DMRect& displayRegion, DMRect& displayAreaFixed);
@@ -1006,6 +1018,8 @@ private:
     bool IsSupportCoordination();
     void RegisterSettingExtendScreenDpiObserver();
     void SetExtendScreenDpi();
+    void RegisterSettingBorderingAreaPercentObserver();
+    void SetBorderingAreaPercent();
     bool HandleSwitchPcMode();
     void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
     void SetScreenNameWhenSwitchMode(const sptr<ScreenSession>& screenSession, bool isSwitchToPcMode);
