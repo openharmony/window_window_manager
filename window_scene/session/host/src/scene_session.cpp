@@ -3193,27 +3193,30 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
-void SceneSession::GetScaleInLSState(float& scaleX, float& scaleY) const
+WSError SceneSession::GetScaleInLSState(float& scaleX, float& scaleY) const
 {
     if (GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN || GetIsMidScene() ||
         !specificCallback_ || !specificCallback_->onGetLSState_ || !specificCallback_->onGetLSState_()) {
         TLOGD(WmsLogTag::WMS_IMMS, "win: %{public}d, not in LS state", GetPersistentId());
-        return;
+        return WSError::WS_DO_NOTHING;
     }
     constexpr float invalidScale = 0;
     if (GetScaleX() <= invalidScale || GetScaleY() <= invalidScale) {
         TLOGE(WmsLogTag::WMS_IMMS, "win: %{public}d, invalid scale", GetPersistentId());
-        return;
+        return WSError::WS_ERROR_INVALID_PARAM;
     }
     scaleX = GetScaleX();
     scaleY = GetScaleY();
+    return WSError::WS_OK;
 }
 
 void SceneSession::CalculateWindowRectByScale(WSRect& winRect)
 {
     float scaleX = 1;
     float scaleY = 1;
-    GetScaleInLSState(scaleX, scaleY);
+    if (GetScaleInLSState(scaleX, scaleY) != WSError::WS_OK) {
+        return;
+    }
     winRect.width_ *= scaleX;
     winRect.height_ *= scaleY;
 }
@@ -3222,7 +3225,9 @@ void SceneSession::CalculateAvoidAreaByScale(Rect& avoidAreaRect) const
 {
     float scaleX = 1;
     float scaleY = 1;
-    GetScaleInLSState(scaleX, scaleY);
+    if (GetScaleInLSState(scaleX, scaleY) != WSError::WS_OK) {
+        return;
+    }
     avoidAreaRect.posX_ = std::ceil(avoidAreaRect.posX_ / scaleX);
     avoidAreaRect.posY_ = std::ceil(avoidAreaRect.posY_ / scaleY);
     avoidAreaRect.width_ = std::ceil(avoidAreaRect.width_ / scaleX);
