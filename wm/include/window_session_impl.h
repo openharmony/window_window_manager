@@ -709,6 +709,7 @@ protected:
     void WriteKeyboardInfoToWant(AAFwk::Want& want, const KeyboardPanelInfo& keyboardPanelInfo) const;
     void ReadKeyboardInfoFromWant(const AAFwk::Want& want, KeyboardPanelInfo& keyboardPanelInfo) const;
     static std::set<sptr<WindowSessionImpl>>& GetWindowExtensionSessionSet();
+    void RecoverExtension();
 
     /*
      * Sub Window
