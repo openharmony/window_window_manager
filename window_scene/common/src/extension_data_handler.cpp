@@ -68,7 +68,8 @@ DataHandlerErr DataHandler::RegisterDataConsumer(SubSystemId subSystemId, DataCo
     std::lock_guard lock(mutex_);
     if (consumers_.find(subSystemId) != consumers_.end()) {
         // A consumer already exists for this subSystemId
-        TLOGW(WmsLogTag::WMS_UIEXT, "Consumer already exists for subSystemId: %{public}hhu", subSystemId);
+        TLOGE(WmsLogTag::WMS_UIEXT, "Consumer already exists for subSystemId: %{public}hhu", subSystemId);	
+        return DataHandlerErr::DUPLICATE_REGISTRATION;
     }
     consumers_.emplace(subSystemId, std::move(callback));
     return DataHandlerErr::OK;
