@@ -1262,6 +1262,7 @@ WSError WindowExtensionSessionImpl::UpdateSessionViewportConfigInner(const Sessi
         TLOGW(WmsLogTag::WMS_UIEXT, "uiContent is null!");
         return WSError::WS_ERROR_NULLPTR;
     }
+    virtualPixelRatio_ = config.density_;
     uiContent->UpdateViewportConfig(viewportConfig, WindowSizeChangeReason::UNDEFINED, nullptr, lastAvoidAreaMap_);
     return WSError::WS_OK;
 }
