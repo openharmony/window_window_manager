@@ -52,12 +52,11 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
     }
+    if (mState_ == nextState) {
+        TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
+        return;
+    }
     auto task = [=] {
-        if (mState_ == nextState) {
-            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
-            taskProcessor_.FinishTask();
-            return;
-        }
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
         ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
@@ -111,7 +110,6 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
         auto policy = weakPolicy.promote();
         if (manager == nullptr || policy == nullptr) {
             TLOGNE(WmsLogTag::DMS, "sensorFoldStateManager or foldScreenPolicy is nullptr.");
-            taskProcessor_.FinishTask();
             return;
         }
         FoldStatus currentState = FoldStatus::UNKNOWN;
