@@ -196,7 +196,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
         TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
         return;
     }
-    auto task = [=] {
+    auto task = [this] {
         if (globalFoldStatus_ == nextStatus) {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", globalFoldStatus_);
             taskProcessor_.FinishTask();
