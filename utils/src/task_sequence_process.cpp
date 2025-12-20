@@ -23,28 +23,25 @@ TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize)
         if (maxQueueSize_ <= 0) {
             maxQueueSize_ = 1;
         }
-        taskRunningFlag_.store(false);
         TLOGI(WmsLogTag::DMS, "TaskSequenceProcess created with maxQueueSize: %{public}u", maxQueueSize_);
     }
 TaskSequenceProcess::~TaskSequenceProcess() = default;
 
 std::function<void()> TaskSequenceProcess:PopFromQueue()
 {
-    if (!taskRunningFlag_.load() && !taskQueue_.empty()) {
-        std::lock_guard<std::mutex> lock(queueMutex_);
-        std::function<void()> task = taskQueue_.front();
-        taskQueue_.pop();
-        taskRunningFlag_.store(true);
-        return task;
-    } else {
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not pop");
-    return;
+    std::lock_guard<std::mutex> lock(queueMutex_);
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess taskQueue_.size(): %{public}u", taskQueue_.size());
+    if (taskQueue_.empty()) {
+        TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not pop");
+        return std::function<void()>();
     }
+    std::function<void()> task = taskQueue_.front();
+    taskQueue_.pop();
+    return task;
 }
 
 void TaskSequenceProcess::PushToQueue(const std::function<void()>& task)
 {
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess push");
     std::lock_guard<std::mutex> lock(queueMutex_);
     if (taskQueue_.size() >= maxQueueSize_) {
         taskQueue_.pop();
@@ -52,19 +49,24 @@ void TaskSequenceProcess::PushToQueue(const std::function<void()>& task)
     taskQueue_.push(task);
 }
 
-void TaskSequenceProcess::Notify()
+void TaskSequenceProcess::ExecTask()
 {
-    std::function<void()> taskToDo = PopFromQueue();
-    if (taskToDo) {
-        taskToDo();
-    } else {
+    std::function<void()> task = PopFromQueue();
+    if (!task) {
         TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not execute");
+        return;
     }
+    task();
 }
 
-void TaskSequenceProcess::Finish()
+void TaskSequenceProcess::AddTask(const std::function<void()>& task)
 {
-    taskRunningFlag_.store(false);
-    Notify();
+    PushToQueue(task);
+    ExecTask();
+}
+
+void TaskSequenceProcess::FinishTask()
+{
+    ExecTask();
 }
 } // namespace OHOS::Rosen
