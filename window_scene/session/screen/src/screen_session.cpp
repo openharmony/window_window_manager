@@ -683,7 +683,7 @@ void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffse
     property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
 }
 
-void SetBorderingAreaPercent(uint32_t borderingAreaPercent)
+void ScreenSession::SetBorderingAreaPercent(uint32_t borderingAreaPercent)
 {
     borderingAreaPercent_ = borderingAreaPercent;
 }
