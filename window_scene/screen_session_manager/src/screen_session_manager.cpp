@@ -2633,6 +2633,7 @@ void ScreenSessionManager:: ReportRelativePositionChangeEvent(MultiScreenPositio
 
 void ScreenSessionManager::GetStaticAndDynamicSession()
 {
+    TLOGI(WmsLogTag::DMS, "enter");
     sptr<ScreenSession> mainScreenSession = GetScreenSessionByRsId(SCREEN_ID_FULL);
     if (mainScreenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "mainScreenSession is nullptr");
@@ -2735,26 +2736,26 @@ void ScreenSessionManager::HandleStaticOnLeft(MultiScreenPositionOptions& static
     uint32_t dynamicScreenStartY = dynamicScreenOption.startY_;
     std::string positions;
     if (dynamicScreenStartX == 0 && dynamicScreenStartY == staticHeight) {
-        positions = "";
+        positions = "sStart:[0, 0], dStart:[0, dSY == sH]";
         LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
         return;
     } else if (dynamicScreenStartX > 0 && dynamicScreenStartY == staticHeight && dynamicScreenStartX != staticWidth) {
-        positions = "";
+        positions = "sStart:[0, any], dStart:[0 < dSX < sW, dSY = sH]";
         LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
         return;
     } else if (staticScreenStartY == 0 && dynamicScreenStartX == staticWidth) {
-        positions = "";
+        positions = "sStart:[0, 0], dStart:[dSX == sW, dSY > 0]";
         LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
         return;
     } else if (staticScreenStartY > 0 && dynamicScreenStartX == staticWidth) {
-        positions = "";
+        positions = "sStart:[0, 0 < sSY], dStart:[dSX == sW, dSY == 0]]";
         AdjustTheBorderingAreaPercent(adjacentPercentage, dynamicHeight, staticScreenStartY);
     } else if (staticScreenStartY >0 && dynamicScreenStartX < staticWidth && dynamicScreenStartX > 0) {
-        positions = "";
+        positions = "sStart:[0, 0 < sSY], dStart:[0 < dSX < sW, dSY == 0]";
         staticScreenStartY = dynamicHeight;
         AdjustTheBorderingAreaPercent(adjacentPercentage, staticWidth, dynamicScreenStartX);
     } else if (dynamicScreenStartX == 0 && dynamicScreenStartY == 0) {
-        positions = "";
+        positions = "sStart:[0, 0 < sSY], dStart:[0, 0]";
         staticScreenStartY = dynamicHeight;
     } else {
         positions = "other case";
@@ -2776,16 +2777,16 @@ void ScreenSessionManager::HandleStaticOnRight(MultiScreenPositionOptions& stati
     uint32_t dynamicScreenStartY = dynamicScreenOption.startY_;
     std::string positions;
     if (dynamicScreenStartY == 0 && dynamicScreenStartX == 0) {
-        positions = "";
+        positions = "dStart:[0, 0], sStart:[0 < ssX, 0 < ssY]";
         staticScreenStartX = dynamicWidth;
         AdjustTheBorderingAreaPercent(adjacentPercentage, dynamicHeight, staticScreenStartY);
     } else if (dynamicScreenStartY > 0 && dynamicScreenStartX == 0 && dynamicScreenStartY != staticHeight &&
         staticScreenStartY == 0) {
-        positions = "";
+        positions = "dStart:[0, 0 < dSY < sH], sStart:[sSX == dW, 0]";
         staticScreenStartX = dynamicWidth;
         AdjustTheBorderingAreaPercent(adjacentPercentage, staticHeight, dynamicScreenStartY);
     } else if (dynamicScreenStartY == staticHeight && dynamicScreenStartX ==0 && staticScreenStartY == 0) {
-        positions = "";
+        positions = "dStart:[0, dSY == sH], sStart:[0, ssX < dW]";
         AdjustTheBorderingAreaPercent(adjacentPercentage, dynamicWidth, staticScreenStartX);
     } else {
         positions = "other case";
@@ -11543,6 +11544,15 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         return DMError::DM_OK;
     }
     SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
+    sptr<ScreenSession> secondaryScreenSession = GetScreenSessionByRsId(secondaryScreenId);
+    if (secondaryScreenSession != nullptr && secondaryScreenSession->GetIsExtendVirtual() == false) {
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            SetIsExtendModelocked(screenMode == MultiScreenMode::SCREEN_EXTEND);
+        }
+        if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
+            SetExpandAndHorizontalLocked(true);
+        }
+    }
     auto combination = screenMode == MultiScreenMode::SCREEN_MIRROR ?
         ScreenCombination::SCREEN_MIRROR : ScreenCombination::SCREEN_EXPAND;
     SetScreenCastInfo(secondaryScreenId, mainScreenId, combination);
@@ -12500,17 +12510,18 @@ void ScreenSessionManager::SetBorderingAreaPercent()
     for (const auto& sessionIt : screenSessionMapCopy) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
-            TLOGE(WmsLogTag::DMS, "screenSession is nullptr, screenId:%{public}" PRIu64"", sessionIt.first);
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
             continue;
         }
         if (screenSession->GetIsExtendVirtual() == false) {
-            TLOGE(WmsLogTag::DMS, "screen is not extend virtual, screenId:%{public}" PRIu64"", sessionIt.first);
+            TLOGE(WmsLogTag::DMS, "is not extend virtual!");
             continue;
         }
         std::string serialNumber = screenSession->GetSerialNumber();
         if (CheckPercent(borderingAreaPercentMap, serialNumber)) {
             uint32_t borderingAreaPercent = borderingAreaPercentMap[serialNumber];
-            TLOGE(WmsLogTag::DMS, "get borderingAreaPercent:%{public}u", borderingAreaPercent);
+            screenSession->SetBorderingAreaPercent(borderingAreaPercent);
+            TLOGE(WmsLogTag::DMS, "get setting bordering area percent is:%{public}u", borderingAreaPercent);
         }
     }
 }
