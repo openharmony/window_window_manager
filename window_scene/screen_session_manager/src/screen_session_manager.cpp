@@ -7730,7 +7730,7 @@ bool ScreenSessionManager::IsFakeDisplayExist()
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(DisplayId displayId, bool isUseDma,
-    bool isCaptureFullOfScreen, const std::vector<NodeId>& surfaceNodesList)
+    bool isCaptureFullOfScreen, const std::vector<NodeId>& surfaceNodesList, SnapshotScaleInfo scaleInfo)
 {
     DisplayId realDisplayId = displayId;
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && displayId == DISPLAY_ID_FAKE) {
@@ -7750,6 +7750,9 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     RSSurfaceCaptureConfig config;
     config.isHdrCapture = false;
     config.useDma = isUseDma;
+    config.scaleX = scaleInfo.scaleX;
+    config.scaleY = scaleInfo.scaleY;
+    config.mainScreenRect = scaleInfo.rect;
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
         SuperFoldPolicy::GetInstance().IsNeedSetSnapshotRect(displayId)) {
@@ -7935,7 +7938,12 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
     if ((Permission::IsSystemCalling() && (Permission::CheckCallingPermission(SCREEN_CAPTURE_PERMISSION) ||
         Permission::CheckCallingPermission(CUSTOM_SCREEN_RECORDING_PERMISSION))) || SessionPermission::IsShellCall()) {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
-        auto res = GetScreenSnapshot(option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_);
+        Drawing::Rect rect = { static_cast<float>(option.rect.posX_), static_cast<float>(option.rect.posY_),
+            static_cast<float>(option.rect.posX_ + option.rect.width_),
+            static_cast<float>(option.rect.posY_ + option.rect.height_) };
+        SnapshotScaleInfo scaleInfo = {option.scaleX_, option.scaleY_, rect};
+        auto res = GetScreenSnapshot(option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_,
+            scaleInfo);
         if (res != nullptr) {
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");

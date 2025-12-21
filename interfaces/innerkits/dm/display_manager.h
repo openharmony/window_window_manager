@@ -1019,7 +1019,9 @@ private:
     std::mutex displayOperateMutex_;
     DisplayId GetCallingAbilityDisplayId();
     std::vector<std::pair<wptr<IRemoteObject>, DisplayId>> displayIdList_ {};
-
+    bool CheckUseGpuScreenshotWithOption(const Media::Rect &rect, const Media::Size &size);
+    std::shared_ptr<Media::PixelMap> GetScreenshotWithOptionUseGpu(const CaptureOption& captureOption,
+        const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode = nullptr);
     class Impl;
     std::recursive_mutex mutex_;
     sptr<Impl> pImpl_;
