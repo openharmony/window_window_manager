@@ -2651,7 +2651,7 @@ void ScreenSessionManager::GetStaticAndDynamicSession()
             TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
             continue;
         }
-        if (screenSession->GetIsExtendVirtual()) {
+        if (tempScreenSession->GetIsExtendVirtual()) {
             secondarySession = tempScreenSession;
             break;
         }
@@ -2732,8 +2732,8 @@ void ScreenSessionManager::HandleStaticOnLeft(MultiScreenPositionOptions& static
 {
     uint32_t staticScreenStartX = staticScreenOptions.startX_;
     uint32_t staticScreenStartY = staticScreenOptions.startY_;
-    uint32_t dynamicScreenStartX = dynamicScreenOption.startX_;
-    uint32_t dynamicScreenStartY = dynamicScreenOption.startY_;
+    uint32_t dynamicScreenStartX = dynamicScreenOptions.startX_;
+    uint32_t dynamicScreenStartY = dynamicScreenOptions.startY_;
     std::string positions;
     if (dynamicScreenStartX == 0 && dynamicScreenStartY == staticHeight) {
         positions = "sStart:[0, 0], dStart:[0, dSY == sH]";
@@ -2763,7 +2763,7 @@ void ScreenSessionManager::HandleStaticOnLeft(MultiScreenPositionOptions& static
         return;
     }
     staticScreenOptions.startY_ = staticScreenStartY;
-    dynamicScreenOption.startX_ = dynamicScreenStartX;
+    dynamicScreenOptions.startX_ = dynamicScreenStartX;
     LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
 }
 
@@ -2773,8 +2773,8 @@ void ScreenSessionManager::HandleStaticOnRight(MultiScreenPositionOptions& stati
 {
     uint32_t staticScreenStartX = staticScreenOptions.startX_;
     uint32_t staticScreenStartY = staticScreenOptions.startY_;
-    uint32_t dynamicScreenStartX = dynamicScreenOption.startX_;
-    uint32_t dynamicScreenStartY = dynamicScreenOption.startY_;
+    uint32_t dynamicScreenStartX = dynamicScreenOptions.startX_;
+    uint32_t dynamicScreenStartY = dynamicScreenOptions.startY_;
     std::string positions;
     if (dynamicScreenStartY == 0 && dynamicScreenStartX == 0) {
         positions = "dStart:[0, 0], sStart:[0 < ssX, 0 < ssY]";
@@ -2795,7 +2795,7 @@ void ScreenSessionManager::HandleStaticOnRight(MultiScreenPositionOptions& stati
     }
     staticScreenOptions.startX_ = staticScreenStartX;
     staticScreenOptions.startY_ = staticScreenStartY;
-    dynamicScreenOption.startY_ = dynamicScreenStartY;
+    dynamicScreenOptions.startY_ = dynamicScreenStartY;
     LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
 }
 
@@ -2811,7 +2811,7 @@ void ScreenSessionManager::LogPositions(const std::string& positions, const Mult
 {
     TLOGI(WmsLogTag::DMS, "%{public}s, static ID:%{public}" PRIu64",sX:%{public}u, sY:%{public}u"
         "dynamic ID:%{public}" PRIu64",sX:%{public}u, sY:%{public}u",
-        positions.c_str, mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
+        positions.c_str(), mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
         secondScreenOptions.screenId_, secondScreenOptions.startX_, secondScreenOptions.startY_);
 }
 
