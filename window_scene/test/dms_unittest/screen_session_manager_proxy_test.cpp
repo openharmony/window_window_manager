@@ -1957,6 +1957,77 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetPrimaryDisplayInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplaySnapshotWithOption01
+ * @tc.desc: GetDisplaySnapshotWithOption test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshotWithOption01, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    CaptureOption option;
+    option.displayId_ = 0;
+    DmErrorCode errorCode = DmErrorCode::DM_OK;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    auto res = screenSessionManagerProxy->GetDisplaySnapshotWithOption(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    res = screenSessionManagerProxy->GetDisplaySnapshotWithOption(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("Write displayId or isNeedNotify or isNeedPointer failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    res = screenSessionManagerProxy->GetDisplaySnapshotWithOption(option, &errorCode);
+    EXPECT_EQ(res, nullptr);
+}
+
+
+/**
+ * @tc.name: GetDisplaySnapshotWithOption02
+ * @tc.desc: GetDisplaySnapshotWithOption test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplaySnapshotWithOption02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerProxy != nullptr);
+
+    CaptureOption option;
+    option.displayId_ = 0;
+    DmErrorCode errorCode = DmErrorCode::DM_OK;
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteFloatErrorFlag(true);
+    auto res = screenSessionManagerProxy->GetDisplaySnapshotWithOption(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("Write scale or rect failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = screenSessionManagerProxy->GetDisplaySnapshotWithOption(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("Write scale or rect failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    res = screenSessionManagerProxy->GetDisplaySnapshotWithOption(option, &errorCode);
+    EXPECT_TRUE(logMsg.find("Write scale or rect failed") != std::string::npos);
+    EXPECT_EQ(res, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    res = screenSessionManagerProxy->GetDisplaySnapshotWithOption(option, &errorCode);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
  * @tc.name: SetScreenSkipProtectedWindow
  * @tc.desc: SetScreenSkipProtectedWindow test
  * @tc.type: FUNC

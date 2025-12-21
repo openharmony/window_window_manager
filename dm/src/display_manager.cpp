@@ -2652,21 +2652,31 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
 std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const CaptureOption& captureOption,
     const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode)
 {
-    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOption, errorCode);
-    if (screenShot == nullptr) {
-        TLOGE(WmsLogTag::DMS, "set snapshot with option failed!");
+    sptr<DisplayInfo> displayInfo =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(captureOption.displayId_);
+    if (displayInfo == nullptr) {
+        TLOGW(WmsLogTag::DMS, "display null id : %{public}" PRIu64 " ", captureOption.displayId_);
         return nullptr;
     }
     // check parameters
-    int32_t oriHeight = screenShot->GetHeight();
-    int32_t oriWidth = screenShot->GetWidth();
+    int32_t oriHeight = displayInfo->GetHeight();
+    int32_t oriWidth = displayInfo->GetWidth();
     if (!pImpl_->CheckRectValid(rect, oriHeight, oriWidth)) {
-        TLOGE(WmsLogTag::DMS, "rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d",
-            rect.left, rect.top, rect.width, rect.height);
+        TLOGE(WmsLogTag::DMS,
+              "rect invalid! left %{public}d, top %{public}d, w %{public}d, h %{public}d, oriHeight %{public}d, "
+              "oriWidth %{public}d", rect.left, rect.top, rect.width, rect.height, oriHeight, oriWidth);
         return nullptr;
     }
     if (!pImpl_->CheckSizeValid(size, oriHeight, oriWidth)) {
-        TLOGE(WmsLogTag::DMS, "size invalid! w %{public}d, h %{public}d", rect.width, rect.height);
+        TLOGE(WmsLogTag::DMS, "size invalid! w %{public}d, h %{public}d", size.width, size.height);
+        return nullptr;
+    }
+    if (CheckUseGpuScreenshotWithOption(rect, size)) {
+        return GetScreenshotWithOptionUseGpu(captureOption, rect, size, rotation, errorCode);
+    }
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOption, errorCode);
+    if (screenShot == nullptr) {
+        TLOGE(WmsLogTag::DMS, "set snapshot with option failed!");
         return nullptr;
     }
     // create crop dest pixelmap
@@ -2682,6 +2692,35 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOption(const C
     }
     std::shared_ptr<Media::PixelMap> dstScreenshot(pixelMap.release());
     return dstScreenshot;
+}
+
+bool DisplayManager::CheckUseGpuScreenshotWithOption(const Media::Rect &rect, const Media::Size &size)
+{
+    if (rect.width == 0 || rect.height == 0) {
+        return false;
+    }
+    if (rect.left >= 0 && rect.top >= 0 && rect.width > 0 && rect.height > 0 && size.width > 0 && size.height > 0 &&
+        size.width <= rect.width && size.height <= rect.height) {
+        return true;
+    }
+    return false;
+}
+
+std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshotWithOptionUseGpu(const CaptureOption& captureOption,
+    const Media::Rect &rect, const Media::Size &size, int rotation, DmErrorCode* errorCode)
+{
+    CaptureOption captureOptionTmp = captureOption;
+    DMRect dmRect = { rect.left, rect.top, rect.width, rect.height };
+    captureOptionTmp.rect = dmRect;
+    if (rect.width > 0 && rect.height > 0) {
+        captureOptionTmp.scaleX_ = static_cast<float>(size.width) / static_cast<float>(rect.width);
+        captureOptionTmp.scaleY_ = static_cast<float>(size.height) / static_cast<float>(rect.height);
+    }
+    std::shared_ptr<Media::PixelMap> screenShot = GetScreenshotWithOption(captureOptionTmp, errorCode);
+    if (screenShot == nullptr) {
+        TLOGE(WmsLogTag::DMS, "set snapshot with option failed!");
+    }
+    return screenShot;
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshotWithOption(

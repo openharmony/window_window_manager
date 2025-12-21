@@ -63,6 +63,7 @@ constexpr uint32_t DISPLAY_A_HEIGHT = 3296;
 constexpr uint32_t DISPLAY_B_HEIGHT = 1608;
 }
 constexpr uint32_t DISPLAY_A_WIDTH = 2472;
+constexpr float DEFAULT_SNAPSHOT_SCALE = 1.0f;
 
 /**
  * @struct HookInfo.
@@ -655,6 +656,42 @@ struct SupportedScreenModes : public RefBase {
     uint32_t refreshRate_;
 };
 
+/**
+ * @brief displayRect
+ */
+struct DMRect {
+    int32_t posX_;
+    int32_t posY_;
+    uint32_t width_;
+    uint32_t height_;
+
+    bool operator==(const DMRect& a) const
+    {
+        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
+    }
+
+    bool operator!=(const DMRect& a) const
+    {
+        return !this->operator==(a);
+    }
+
+    bool IsUninitializedRect() const
+    {
+        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
+    }
+
+    bool IsInsideOf(const DMRect& a) const
+    {
+        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
+            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
+    }
+
+    static DMRect NONE()
+    {
+        return {0, 0, 0, 0};
+    }
+};
+
 struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
@@ -662,6 +699,9 @@ struct CaptureOption {
     bool isCaptureFullOfScreen_ = false;
     std::vector<NodeId> surfaceNodesList_ = {}; // exclude surfacenodes in screenshot
     std::vector<NodeId> blackWindowIdList_ = {};
+    float scaleX_ = DEFAULT_SNAPSHOT_SCALE;
+    float scaleY_ = DEFAULT_SNAPSHOT_SCALE;
+    DMRect rect = DMRect::NONE();
 };
 
 struct ExpandOption {
@@ -760,41 +800,6 @@ struct ScreenDirectionInfo {
     int32_t screenRotation_;
     int32_t rotation_;
     int32_t phyRotation_;
-};
-
-/**
- * @brief displayRect
- */
-struct DMRect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
-
-    bool operator==(const DMRect& a) const
-    {
-        return (posX_ == a.posX_ && posY_ == a.posY_ && width_ == a.width_ && height_ == a.height_);
-    }
-
-    bool operator!=(const DMRect& a) const
-    {
-        return !this->operator==(a);
-    }
-
-    bool IsUninitializedRect() const
-    {
-        return (posX_ == 0 && posY_ == 0 && width_ == 0 && height_ == 0);
-    }
-
-    bool IsInsideOf(const DMRect& a) const
-    {
-        return (posX_ >= a.posX_ && posY_ >= a.posY_ &&
-            posX_ + width_ <= a.posX_ + a.width_ && posY_ + height_ <= a.posY_ + a.height_);
-    }
-    static DMRect NONE()
-    {
-        return {0, 0, 0, 0};
-    }
 };
 
 /**
