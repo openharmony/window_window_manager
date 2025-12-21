@@ -193,16 +193,6 @@ public:
     void NotifyDisplayDestroy(DisplayId displayId);
     void NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, ScreenId screenId, sptr<ScreenSession> screenSession);
     void NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event);
-    void CalculateStartWhenTransferState(sptr<ScreenSession> staticSession, sptr<ScreenSession> dynamicSession,
-        uint32_t borderingAreaPercent);
-    void AdjustTheBorderingAreaPercent(uint32_t adjacentPercent, uint32_t length, uint32_t& adjacentStart);
-    void HandleStaticOnLeft(MultiScreenPositionOptions& staticScreenOptions,
-        MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t dynamicWidth,
-            uint32_t staticHeight, uint32_t dynamicHeight);
-    void HandleStaticOnRight(MultiScreenPositionOptions& staticScreenOptions,
-        MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t staticHeight,
-            uint32_t staticWidth, uint32_t dynamicHeight);
-    void GetStaticAndDynamicSession();
 
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
@@ -588,6 +578,16 @@ public:
     void RemoveUserByPid(int32_t pid);
     bool CheckPidInDeathPidVector(int32_t pid) const;
     void NotifyRSCoordination(bool isEnterCoordination) const;
+    void CalculateStartWhenTransferState(sptr<ScreenSession> staticSession, sptr<ScreenSession> dynamicSession,
+        uint32_t borderingAreaPercent);
+    void AdjustTheBorderingAreaPercent(uint32_t adjacentPercent, uint32_t length, uint32_t& adjacentStart);
+    void HandleStaticOnRight(MultiScreenPositionOptions& staticScreenOptions,
+        MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t dynamicWidth,
+            uint32_t staticHeight, uint32_t dynamicHeight);
+    void HandleStaticOnLeft(MultiScreenPositionOptions& staticScreenOptions,
+        MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t staticHeight,
+            uint32_t staticWidth, uint32_t dynamicHeight);
+    void GetStaticAndDynamicSession();
 
     static bool GetScreenSessionMngSystemAbility();
 
@@ -756,8 +756,9 @@ private:
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
-    void LogPositions(const std::string& positions, const MultiScreenPositionOptions& mainScreenOptions,
-            const MultiScreenPositionOptions& secondScreenOptions);
+    void LogPositions(const std::string& positions,
+        const MultiScreenPositionOptions& mainScreenOptions,
+        const MultiScreenPositionOptions& secondScreenOptions);
     void RecoverMultiScreenRelativePosition(ScreenId screenId);
     void HandleSuperFoldStatusLocked(bool isLocked);
     void SetDisplayRegionAndAreaFixed(Rotation rotation, DMRect& displayRegion, DMRect& displayAreaFixed);

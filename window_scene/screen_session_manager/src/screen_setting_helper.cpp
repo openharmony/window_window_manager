@@ -434,7 +434,7 @@ std::map<std::string, uint32_t> ScreenSettingHelper::GetBorderingAreaPercent(con
             continue;
         }
         uint32_t borderingAreaPercent = {};
-        if (!GetPercent(info, infoVector[INDEX_SCREEN_MODE])) {
+        if (!GetAreaPercent(borderingAreaPercent, infoVector[INDEX_SCREEN_MODE])) {
             continue;
         }
         borderingAreaPercentMap[infoVector[INDEX_SCREEN_INFO]] = borderingAreaPercent;
@@ -442,7 +442,7 @@ std::map<std::string, uint32_t> ScreenSettingHelper::GetBorderingAreaPercent(con
     return borderingAreaPercentMap;
 }
 
-bool ScreenSettingHelper::GetPercent(uint32_t& borderingAreaPercent, const std::string& inputString)
+bool ScreenSettingHelper::GetAreaPercent(uint32_t& borderingAreaPercent, const std::string& inputString)
 {
     std::vector<std::string> modeStr = {};
     bool split = SplitString(modeStr, inputString, ' ');
@@ -460,7 +460,7 @@ bool ScreenSettingHelper::GetPercent(uint32_t& borderingAreaPercent, const std::
         tmpBorderingAreaPercent = static_cast<uint32_t>(strtoll(modeStr[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
     }
     borderingAreaPercent = tmpBorderingAreaPercent;
-    TLOGI(WmsLogTag::DMS, "borderingAreaPercent=%{public}d", borderingAreaPercent);
+    TLOGI(WmsLogTag::DMS, "borderingAreaPercent: %{public}d", borderingAreaPercent);
     return true;
 }
 
@@ -697,39 +697,6 @@ void ScreenSettingHelper::UnregisterSettingWireCastObserver()
 }
 // LCOV_EXCL_STOP
 
-void ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func)
-{
-    if (extendScreenDpiObserver_ != nullptr) {
-        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is registered");
-        return;
-    }
-    SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    extendScreenDpiObserver_ = extendScreenProvider.CreateObserver(SETTING_EXTEND_DPI_KEY, func);
-    if (extendScreenDpiObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "create observer failed");
-        return;
-    }
-    ErrCode ret = extendScreenProvider.RegisterObserver(extendScreenDpiObserver_);
-    if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
-        extendScreenDpiObserver_ = nullptr;
-    }
-}
-
-void ScreenSettingHelper::UnRegisterSettingExtendScreenDpiObserver()
-{
-    if (extendScreenDpiObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS, "extendScreenDpiObserver_ is nullptr");
-        return;
-    }
-    SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
-    ErrCode ret = extendScreenProvider.UnregisterObserver(extendScreenDpiObserver_);
-    if (ret != ERR_OK) {
-        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
-    }
-    extendScreenDpiObserver_ = nullptr;
-}
-
 void ScreenSettingHelper::RegisterSettingBorderingAreaPercentObserver(SettingObserver::UpdateFunc func)
 {
     if (borderingAreaPercentObserver_ != nullptr) {
@@ -762,6 +729,39 @@ void ScreenSettingHelper::UnregisterSettingBorderingAreaPercentObserver()
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
     }
     borderingAreaPercentObserver_ = nullptr;
+}
+
+void ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func)
+{
+    if (extendScreenDpiObserver_ != nullptr) {
+        TLOGD(WmsLogTag::DMS, "setting extend dpi observer is registered");
+        return;
+    }
+    SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    extendScreenDpiObserver_ = extendScreenProvider.CreateObserver(SETTING_EXTEND_DPI_KEY, func);
+    if (extendScreenDpiObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = extendScreenProvider.RegisterObserver(extendScreenDpiObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        extendScreenDpiObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnRegisterSettingExtendScreenDpiObserver()
+{
+    if (extendScreenDpiObserver_ == nullptr) {
+        TLOGD(WmsLogTag::DMS, "extendScreenDpiObserver_ is nullptr");
+        return;
+    }
+    SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = extendScreenProvider.UnregisterObserver(extendScreenDpiObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    extendScreenDpiObserver_ = nullptr;
 }
 
 bool ScreenSettingHelper::GetSettingExtendScreenDpi(float& coef, const std::string& key)
