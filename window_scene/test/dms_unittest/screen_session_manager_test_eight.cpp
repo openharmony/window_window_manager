@@ -1101,6 +1101,44 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowList, Function | SmallT
 }
 
 /**
+ * @tc.name: CalculateStartWhenTransferState
+ * @tc.desc: CalculateStartWhenTransferState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 1051;
+    sptr<ScreenSession> staticSession = sptr<ScreenSession>::MakeSptr(mainScreenId, ScreenProperty(), 0);
+    DMRect staticScreenBounds = {{0, 0, 1920, 1080}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
+    staticSession->SetBounds(staticScreenBounds);
+    staticSession->SetRSScreenId(mainScreenId);
+    staticSession->SetStartPosition(0,0);
+    ScreenId dynamicScreenId = 1052;
+    sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
+    DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
+    dynamicSession->SetBounds(dynamicScreenBounds);
+    dynamicSession->SetRSScreenId(dynamicScreenId);
+    dynamicSession->SetStartPosition(0,1080);
+    uint32_t borderingAreaPercent = 50;
+    uint32_t exceptStaticStartX = 0;
+    uint32_t exceptStaticStartY = 0;
+    uint32_t exceptDynamicStartX = 0;
+    uint32_t exceptDynamicStartY = 1080;
+    ssm_->CalculateStartWhenTransferState(staticSession, dynamicSession, borderingAreaPercent);
+    uint32_t testStaticStartX = staticSession->GetScreenProperty().GetStartX();
+    uint32_t testStaticStartY = staticSession->GetScreenProperty().GetStartY();
+    uint32_t testDynamicStartX = dynamicSession->GetScreenProperty().GetStartX();
+    uint32_t testDynamicStartY = dynamicSession->GetScreenProperty().GetStartY();
+    EXPECT_EQ(exceptStaticStartX, testStaticStartX);
+    EXPECT_EQ(exceptStaticStartY, testStaticStartY);
+    EXPECT_EQ(exceptDynamicStartX, testDynamicStartX);
+    EXPECT_EQ(exceptDynamicStartY, testDynamicStartY);
+}
+
+
+/**
  * @tc.name: GetAllScreenIds
  * @tc.desc: GetAllScreenIds screen power
  * @tc.type: FUNC
