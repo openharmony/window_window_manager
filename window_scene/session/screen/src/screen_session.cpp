@@ -688,7 +688,7 @@ void ScreenSession::SetBorderingAreaPercent(uint32_t borderingAreaPercent)
     borderingAreaPercent_ = borderingAreaPercent;
 }
 
-uint32_t GetBorderingAreaPercent() const
+uint32_t ScreenSession::GetBorderingAreaPercent() const
 {
     return borderingAreaPercent_;
 }
