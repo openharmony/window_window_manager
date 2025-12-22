@@ -573,6 +573,7 @@ void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToMainWhenFoldScreenOf
 void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
+    SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         SetdisplayModeChangeStatus(true, true);
         ChangeScreenDisplayModeToMainOnBootAnimation(screenSession);
@@ -643,6 +644,7 @@ void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToFullWhenFoldScreenOf
 void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,
     DisplayModeChangeReason reason)
 {
+    SetdisplayModeChangeStatus(true);
     if (onBootAnimation_) {
         SetdisplayModeChangeStatus(true, true);
         ChangeScreenDisplayModeToFullOnBootAnimation(screenSession);
