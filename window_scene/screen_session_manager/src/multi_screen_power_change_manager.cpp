@@ -280,10 +280,12 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalExtendChange(sptr<
     MultiScreenChangeUtils::ScreenConnectionChange(ssmClient, externalScreen, ScreenEvent::DISCONNECTED);
 
     /* step9: inner screen change */
-    auto rsSetScreenPowerStatustask = [=] {
-        ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreen->GetRSScreenId(),
+    innerScreenId = innerScreen->GetScreenId();
+    externalScreenId = externalScreen->GetScreenId();
+    auto rsSetScreenPowerStatustask = [innerScreenId, externalScreenId, this] {
+        ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreenId,
             ScreenPowerStatus::POWER_STATUS_OFF);
-        CallRsSetScreenPowerStatusSyncToOn(innerScreen->GetRSScreenId());
+        CallRsSetScreenPowerStatusSyncToOn(innerScreenId);
     };
     ScreenSessionManager::GetInstance().GetPowerTaskScheduler()->PostTask(rsSetScreenPowerStatustask,
         "rsInterface_.SetScreenPowerStatus task");
