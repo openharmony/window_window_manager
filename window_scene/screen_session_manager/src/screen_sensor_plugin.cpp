@@ -71,11 +71,11 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
     if (g_motionSubscribeCallbackPtr == nullptr) {
         g_motionSubscribeCallbackPtr = reinterpret_cast<MotionSubscribeCallbackPtr>(
             dlsym(g_handle, "MotionSubscribeCallback"));
-    }
-    const char* dlsymError = dlerror();
-    if  (dlsymError) {
-        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-        return false;
+        const char* dlsymError = dlerror();
+        if  (dlsymError) {
+            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+            return false;
+        }
     }
     return g_motionSubscribeCallbackPtr(motionType, callback);
 }
@@ -93,11 +93,11 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
     if (g_motionUnsubscribeCallbackPtr == nullptr) {
         g_motionUnsubscribeCallbackPtr = reinterpret_cast<MotionUnsubscribeCallbackPtr>(dlsym(
             g_handle, "MotionUnsubscribeCallback"));
-    }
-    const char* dlsymError = dlerror();
-    if  (dlsymError) {
-        TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-        return false;
+        const char* dlsymError = dlerror();
+        if  (dlsymError) {
+            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+            return false;
+        }
     }
     return g_motionUnsubscribeCallbackPtr(motionType, callback);
 }
