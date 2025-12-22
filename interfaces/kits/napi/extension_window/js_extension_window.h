@@ -109,7 +109,6 @@ private:
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnHidePrivacyContentForHost(napi_env env, napi_callback_info info);
-
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnOccupyEvents(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
