@@ -261,6 +261,42 @@ void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue
     BindNativeFunction(env, objValue, "setWindowShadowRadius", moduleName, JsExtensionWindow::InvalidSyncCall);
 }
 
+napi_value JsExtensionWindow::SetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowCornerRadius(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::OnSetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
+napi_value JsExtensionWindow::GetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowCornerRadius(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::OnGetWindowCornerRadius(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
+napi_value JsExtensionWindow::SetWindowShadowRadius(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowShadowRadius(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::OnSetWindowShadowRadius(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
 void JsExtensionWindow::Finalizer(napi_env env, void* data, void* hint)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");

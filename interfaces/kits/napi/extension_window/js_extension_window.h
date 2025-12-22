@@ -51,6 +51,9 @@ public:
     static napi_value SetWindowBackgroundColorSync(napi_env env, napi_callback_info info);
     static napi_value GetWindowPropertiesSync(napi_env env, napi_callback_info info);
     static napi_value MoveWindowTo(napi_env env, napi_callback_info info);
+    static napi_value SetWindowShadowRadius(napi_env env, napi_callback_info info);
+    static napi_value GetWindowCornerRadius(napi_env env, napi_callback_info info);
+    static napi_value SetWindowCornerRadius(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value SetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
@@ -100,6 +103,9 @@ private:
     napi_value OnSetUIContent(napi_env env, napi_callback_info info);
     napi_value OnSetWindowBackgroundColorSync(napi_env env, napi_callback_info info);
     napi_value OnGetWindowPropertiesSync(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowShadowRadius(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowCornerRadius(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowCornerRadius(napi_env env, napi_callback_info info);
     napi_value OnMoveWindowTo(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_info info);
@@ -109,7 +115,6 @@ private:
     napi_value OnSetWindowKeepScreenOn(napi_env env, napi_callback_info info);
     napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnHidePrivacyContentForHost(napi_env env, napi_callback_info info);
-
     napi_value OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info);
     napi_value OnOccupyEvents(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLayoutFullScreen(napi_env env, napi_callback_info info);
