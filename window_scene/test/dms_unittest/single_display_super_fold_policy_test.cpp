@@ -486,6 +486,26 @@ HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeScreenDisplayModeInner, TestSiz
 }
 
 /**
+ * @tc.name: ChangeScreenDisplayModeInner
+ * @tc.desc: test fold exit coordination
+ * @tc.type: FUNC
+ */
+HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeScreenDisplayModeInnerTest_foldExitCoordination, TestSize.Level1)
+{
+    std::recursive_mutex displayInfoMutex;
+    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
+    SingleDisplaySuperFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
+
+    policy.currentFoldStatus_ = FoldStatus::FOLDED;
+    policy.currentDisplayMode_ = FoldDisplayMode::COORDINATION;
+    
+    FoldDisplayMode displayMode = FoldDisplayMode::FULL;
+    DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
+    policy.ChangeScreenDisplayModeInner(displayMode, reason);
+    EXPECT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
+}
+
+/**
  * @tc.name: SetIsClearingBootAnimation
  * @tc.desc: test function : SetIsClearingBootAnimation
  * @tc.type: FUNC
