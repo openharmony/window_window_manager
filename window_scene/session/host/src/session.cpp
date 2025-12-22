@@ -3756,13 +3756,13 @@ WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> co
     }
     PostTask(
         [weakThis = wptr(this), where = __func__, weakProperty = wptr(compatibleModeProperty)]() {
-        auto session = weakThis.promote();
-        auto property = weakProperty.promote();
-        if (!session || !session->sessionStage_) {
-            TLOGNE(WmsLogTag::WMS_COMPAT, "session or sessionStage is null");
-            return;
-        }
-        session->sessionStage_->NotifyCompatibleModePropertyChange(property);
+            auto session = weakThis.promote();
+            auto property = weakProperty.promote();
+            if (!session || !session->sessionStage_) {
+                TLOGNE(WmsLogTag::WMS_COMPAT, "session or sessionStage is null");
+                return;
+            }
+            session->sessionStage_->NotifyCompatibleModePropertyChange(property);
         }, __func__);
     return WSError::WS_OK;
 }
