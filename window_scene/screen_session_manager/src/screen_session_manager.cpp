@@ -7744,7 +7744,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         }
         realDisplayId = 0;
     }
-    TLOGW(WmsLogTag::DMS, "dma=%{public}d, displayId:%{public}" PRIu64, isUseDma, realDisplayId);
+    TLOGNW(WmsLogTag::DMS, "dma=%{public}d, displayId:%{public}" PRIu64, isUseDma, realDisplayId);
     std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
     if (displayNode == nullptr) {
         TLOGE(WmsLogTag::DMS, "displayNode is null!");
@@ -7952,7 +7952,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
             }
-            TLOGI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
+            TLOGNI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
             if (option.isNeedNotify_) {
                 isScreenShot_ = true;
                 NotifyScreenshot(option.displayId_);
@@ -8331,7 +8331,7 @@ DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWin
             hasPrivateWindow = false;
         }
     }
-    TLOGI(WmsLogTag::DMS, "id: %{public}" PRIu64" has private window: %{public}u",
+    TLOGNI(WmsLogTag::DMS, "id: %{public}" PRIu64" has private window: %{public}u",
         id, static_cast<uint32_t>(hasPrivateWindow));
     return DMError::DM_OK;
 }

@@ -216,7 +216,7 @@ public:
         innerDisplayChangeFunc_(static_cast<uint64_t>(displayId));
         sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplaySync();
         if (display != nullptr) {
-            TLOGI(WmsLogTag::DMS, "[DMNDK] callback rotation=%{public}d orientation=%{public}d",
+            TLOGI(WmsLogTag::DMS, "[DMNDK] callback R: %{public}d O: %{public}d",
                 display->GetRotation(), display->GetOrientation());
         }
     }
