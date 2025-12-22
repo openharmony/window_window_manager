@@ -1023,7 +1023,11 @@ ohos_unittest("ws_screen_session_manager_test_eight") {
 
 ohos_unittest("ws_screen_aod_plugin_test") {
   module_out_path = module_out_path
-
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   sources = [ 
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
     "screen_aod_plugin_test.cpp" 
