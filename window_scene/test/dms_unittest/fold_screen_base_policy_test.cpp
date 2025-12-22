@@ -278,17 +278,17 @@ HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeInnerTest, TestSize.Le
  */
 HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeScreenDisplayModeInnerTest_foldExitCoordination, TestSize.Level1)
 {
-    std::recursive_mutex displayInfoMutex;
-    std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
-    SingleDisplaySuperFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-
-    policy.currentFoldStatus_ = FoldStatus::FOLDED;
-    policy.currentDisplayMode_ = FoldDisplayMode::COORDINATION;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    FoldScreenBasePolicy::GetInstance().currentFoldStatus_ = FoldStatus::FOLDED;
+    FoldScreenBasePolicy::GetInstance().currentDisplayMode_ = FoldDisplayMode::COORDINATION;
     
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
     DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
-    policy.ChangeScreenDisplayModeInner(displayMode, reason);
+    FoldScreenBasePolicy::GetInstance().ChangeScreenDisplayModeInner(displayMode, reason);
     EXPECT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
+    EXPECT_TRUE(g_logMsg.find("Exit coordination and recover full") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
