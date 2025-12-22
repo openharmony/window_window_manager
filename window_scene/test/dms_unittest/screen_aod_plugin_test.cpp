@@ -32,7 +32,7 @@ void* IsInAodTest::g_handle = nullptr;
 
 void IsInAodTest::SetUp()
 {
-     static void *g_handle = dlopen(nullptr, RTLD_LAZY);
+    static void *g_handle = dlopen(nullptr, RTLD_LAZY);
 }
 
 void IsInAodTest::TearDown()
