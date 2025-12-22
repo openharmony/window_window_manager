@@ -57,7 +57,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_namespace ns;
     ani_status ret;
-    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.window.window", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
@@ -66,7 +66,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::RegisterWindowManagerCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindowManager::UnregisterWindowManagerCallback)},
-        ani_native_function {"setWindowLayoutMode", "JL@ohos/window/window/WindowLayoutMode;:V",
+        ani_native_function {"setWindowLayoutMode", "lC{@ohos.window.window.WindowLayoutMode}:",
             reinterpret_cast<void *>(AniWindowManager::SetWindowLayoutMode)},
         ani_native_function {"shiftAppWindowPointerEventSync", "lii:",
             reinterpret_cast<void *>(AniWindowManager::ShiftAppWindowPointerEvent)},
@@ -84,22 +84,22 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::SetStartWindowBackgroundColor)},
         ani_native_function {"notifyScreenshotEventSync", "lC{@ohos.window.window.ScreenshotEventType}:",
             reinterpret_cast<void *>(AniWindowManager::NotifyScreenshotEvent)},
-        ani_native_function {"getAllWindowLayoutInfo", "ll:C{escompat.Array}",
+        ani_native_function {"getAllWindowLayoutInfo", "ll:C{std.core.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetAllWindowLayoutInfo)},
         ani_native_function {"getSnapshot", "li:C{@ohos.multimedia.image.image.PixelMap}",
             reinterpret_cast<void *>(AniWindowManager::GetSnapshot)},
-        ani_native_function {"getVisibleWindowInfo", "l:C{escompat.Array}",
+        ani_native_function {"getVisibleWindowInfo", "l:C{std.core.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetVisibleWindowInfo)},
         ani_native_function {"setGestureNavigationEnabled", "lz:",
             reinterpret_cast<void *>(AniWindowManager::SetGestureNavigationEnabled)},
         ani_native_function {"setWaterMarkImage", "lC{@ohos.multimedia.image.image.PixelMap}z:",
             reinterpret_cast<void *>(AniWindowManager::SetWaterMarkImage)},
         ani_native_function {"getWindowsByCoordinate",
-            "lC{@ohos.window.window.GetWindowsByCoordinateParam}:C{escompat.Array}",
+            "lC{@ohos.window.window.GetWindowsByCoordinateParam}:C{std.core.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetWindowsByCoordinate)},
         ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
             reinterpret_cast<void *>(AniWindowManager::ToggleShownStateForAllAppWindows)},
-        ani_native_function {"setSpecificSystemWindowZIndexSync", "JL@ohos/window/window/WindowType;I:V",
+        ani_native_function {"setSpecificSystemWindowZIndexSync", "lC{@ohos.window.window.WindowType}i:",
             reinterpret_cast<void *>(AniWindowManager::SetSpecificSystemWindowZIndex)},
     };
     for (auto method : functions) {
@@ -111,7 +111,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
     }
 
     ani_function setObjFunc = nullptr;
-    ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "J:V", &setObjFunc);
+    ret = env->Namespace_FindFunction(windowNameSpace, "setNativeObj", "l:", &setObjFunc);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find setNativeObj func fail %{public}u", ret);
         return ret;
@@ -327,7 +327,7 @@ ani_int AniWindowManager::OnGetGlobalWindowMode(ani_env* env, ani_object nativeD
     env->Reference_IsUndefined(nativeDisplayId, &isUndefined);
     if (!isUndefined) {
         ani_long aniDisplayId;
-        env->Object_CallMethodByName_Long(nativeDisplayId, "unboxed", ":l", &aniDisplayId);
+        env->Object_CallMethodByName_Long(nativeDisplayId, "toLong", ":l", &aniDisplayId);
         if (aniDisplayId < 0) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid displayId value: %{public}" PRId64,
                 static_cast<int64_t>(aniDisplayId));

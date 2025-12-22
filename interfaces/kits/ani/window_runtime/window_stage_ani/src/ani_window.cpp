@@ -88,7 +88,7 @@ AniWindow* AniWindow::GetWindowObjectFromEnv(ani_env* env, ani_object obj)
 {
     ani_class cls = nullptr;
     ani_status ret;
-    if ((ret = env->FindClass("L@ohos/window/window/Window;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]null env %{public}u", ret);
         return nullptr;
     }
@@ -2106,14 +2106,14 @@ __attribute__((no_sanitize("cfi")))
  
     ani_status ret;
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.WindowInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
         return nullptr;
     }
     std::unique_ptr<AniWindow> aniWindow = std::make_unique<AniWindow>(window);
  
     ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
@@ -2123,7 +2123,7 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] get setNativeObj fail %{public}u", ret);
         return nullptr;
     }
@@ -2408,7 +2408,7 @@ void AniWindow::OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOp
     if (!isFocusOnShowUndefined) {
         ani_boolean isFocusOnShow;
         env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniFocusOnShow),
-            "unboxed", ":z", &isFocusOnShow);
+            "toBoolean", ":z", &isFocusOnShow);
         focusOnShow = static_cast<bool>(isFocusOnShow);
     }
 
@@ -4116,7 +4116,7 @@ ani_object AniWindow::SetWindowLimits(ani_env* env, ani_object inWindowLimits, a
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         }
         ani_boolean aniIsForcible;
-        ani_status aniRet = env->Object_CallMethodByName_Boolean(forcible, "unboxed", ":Z", &aniIsForcible);
+        ani_status aniRet = env->Object_CallMethodByName_Boolean(forcible, "toBoolean", ":Z", &aniIsForcible);
         if (aniRet != ANI_OK) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] failed to convert parameter to isForcible");
             return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
@@ -4392,7 +4392,7 @@ std::optional<WaterfallResidentState> ParseWaterfallResidentState(ani_env* env, 
         return WaterfallResidentState::UNCHANGED;
     }
     ani_boolean acrossDisplay = ANI_FALSE;
-    ani_status ret = env->Object_CallMethodByName_Boolean(aniAcrossDisplay, "unboxed", ":z", &acrossDisplay);
+    ani_status ret = env->Object_CallMethodByName_Boolean(aniAcrossDisplay, "toBoolean", ":z", &acrossDisplay);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid acrossDisplay param, ret: %{public}d", ret);
         return std::nullopt;
@@ -4851,7 +4851,7 @@ __attribute__((no_sanitize("cfi")))
 
     ani_status ret;
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.WindowInternal", &cls)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
         return cls;
     }
@@ -4865,7 +4865,7 @@ __attribute__((no_sanitize("cfi")))
     }
 
     ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
         TLOGD(WmsLogTag::DEFAULT, "[ANI] get ctor fail %{public}u", ret);
         return nullptr;
     }
@@ -4875,7 +4875,7 @@ __attribute__((no_sanitize("cfi")))
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGD(WmsLogTag::DEFAULT, "[ANI] get setNativeObj fail %{public}u", ret);
         return nullptr;
     }
@@ -6084,38 +6084,38 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_class cls = nullptr;
-    if ((ret = env->FindClass("L@ohos/window/window/WindowInternal;", &cls)) != ANI_OK) {
+    if ((ret = env->FindClass("@ohos.window.window.WindowInternal", &cls)) != ANI_OK) {
         TLOGD(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array methods = {
         ani_native_function {"throwIfWindowInvalid", "l:",
             reinterpret_cast<void *>(AniWindow::ThrowIfWindowInvalid)},
-        ani_native_function {"resize", "JII:V",
+        ani_native_function {"resize", "lii:",
             reinterpret_cast<void *>(WindowResize)},
-        ani_native_function {"moveWindowTo", "JII:V",
+        ani_native_function {"moveWindowTo", "lii:",
             reinterpret_cast<void *>(WindowMoveWindowTo)},
-        ani_native_function {"getGlobalRect", "J:L@ohos/window/window/Rect;",
+        ani_native_function {"getGlobalRect", "l:C{@ohos.window.window.Rect}",
             reinterpret_cast<void *>(WindowGetGlobalRect)},
-        ani_native_function {"getWindowDecorHeight", "J:I",
+        ani_native_function {"getWindowDecorHeight", "l:i",
             reinterpret_cast<void *>(WindowGetWindowDecorHeight)},
-        ani_native_function {"setWindowBackgroundColor", "JLstd/core/String;:I",
+        ani_native_function {"setWindowBackgroundColor", "lC{std.core.String}:i",
             reinterpret_cast<void *>(WindowSetWindowBackgroundColor)},
         ani_native_function {"setImmersiveModeEnabledState", "lz:i",
             reinterpret_cast<void *>(WindowSetImmersiveModeEnabledState)},
-        ani_native_function {"setWindowDecorVisible", "JZ:I",
+        ani_native_function {"setWindowDecorVisible", "lz:i",
             reinterpret_cast<void *>(WindowSetWindowDecorVisible)},
-        ani_native_function {"setWindowDecorHeight", "JI:I",
+        ani_native_function {"setWindowDecorHeight", "li:i",
             reinterpret_cast<void *>(WindowSetWindowDecorHeight)},
-        ani_native_function {"getWindowProperties", "J:L@ohos/window/window/WindowProperties;",
+        ani_native_function {"getWindowProperties", "l:C{@ohos.window.window.WindowProperties}",
             reinterpret_cast<void *>(WindowGetWindowProperties)},
-        ani_native_function {"getProperties", "J:L@ohos/window/window/WindowProperties;",
+        ani_native_function {"getProperties", "l:C{@ohos.window.window.WindowProperties}",
             reinterpret_cast<void *>(WindowGetWindowProperties)},
-        ani_native_function {"isWindowSupportWideGamut", "J:Z",
+        ani_native_function {"isWindowSupportWideGamut", "l:z",
             reinterpret_cast<void *>(WindowIsWindowSupportWideGamut)},
-        ani_native_function {"setWindowLayoutFullScreen", "JZ:I",
+        ani_native_function {"setWindowLayoutFullScreen", "lz:i",
             reinterpret_cast<void *>(WindowSetWindowLayoutFullScreen)},
-        ani_native_function {"setWindowSystemBarProperties", "JL@ohos/window/window/SystemBarProperties;:I",
+        ani_native_function {"setWindowSystemBarProperties", "lC{@ohos.window.window.SystemBarProperties}:i",
             reinterpret_cast<void *>(WindowSetSystemBarProperties)},
         ani_native_function {"setRaiseByClickEnabled", "lz:i",
             reinterpret_cast<void *>(WindowSetRaiseByClickEnabled)},
@@ -6124,61 +6124,61 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"setSpecificSystemBarEnabled", "lC{std.core.String}zC{std.core.Boolean}:i",
             reinterpret_cast<void *>(WindowSetSpecificSystemBarEnabled)},
         ani_native_function {"setDragKeyFramePolicy",
-            "JL@ohos/window/window/KeyFramePolicy;:L@ohos/window/window/KeyFramePolicy;",
+            "lC{@ohos.window.window.KeyFramePolicy}:C{@ohos.window.window.KeyFramePolicy}",
             reinterpret_cast<void *>(WindowSetDragKeyFramePolicy)},
-        ani_native_function {"snapshot", "J:L@ohos/multimedia/image/image/PixelMap;",
+        ani_native_function {"snapshot", "l:C{@ohos.multimedia.image.image.PixelMap}",
             reinterpret_cast<void *>(Snapshot)},
         ani_native_function {"snapshotSync", "l:C{@ohos.multimedia.image.image.PixelMap}",
             reinterpret_cast<void *>(SnapshotSync)},
-        ani_native_function {"hideNonSystemFloatingWindows", "JZ:V",
+        ani_native_function {"hideNonSystemFloatingWindows", "lz:",
             reinterpret_cast<void *>(HideNonSystemFloatingWindows)},
-        ani_native_function {"setWindowColorSpaceSync", "JI:V",
+        ani_native_function {"setWindowColorSpaceSync", "li:",
             reinterpret_cast<void *>(AniWindow::SetWindowColorSpace)},
-        ani_native_function {"setPreferredOrientationSync", "JI:V",
+        ani_native_function {"setPreferredOrientationSync", "li:",
             reinterpret_cast<void *>(AniWindow::SetPreferredOrientation)},
         ani_native_function {"getPreferredOrientation", "l:i",
             reinterpret_cast<void *>(AniWindow::GetPreferredOrientation)},
         ani_native_function {"convertOrientationAndRotation", "liii:i",
             reinterpret_cast<void *>(AniWindow::ConvertOrientationAndRotation)},
-        ani_native_function {"setWindowPrivacyModeSync", "JZ:V",
+        ani_native_function {"setWindowPrivacyModeSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowPrivacyMode)},
-        ani_native_function {"recoverSync", "J:V",
+        ani_native_function {"recoverSync", "l:",
             reinterpret_cast<void *>(AniWindow::Recover)},
-        ani_native_function {"setUIContentSync", "JLstd/core/String;:V",
+        ani_native_function {"setUIContentSync", "lC{std.core.String}:",
             reinterpret_cast<void *>(AniWindow::SetUIContent)},
         ani_native_function {"loadContentSync",
-            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
+            "lC{std.core.String}C{arkui.stateManagement.storage.localStorage.LocalStorage}:",
             reinterpret_cast<void *>(AniWindow::LoadContent)},
         ani_native_function {"loadContentByNameSync",
-            "JLstd/core/String;Larkui/stateManagement/storage/localStorage/LocalStorage;:V",
+            "lC{std.core.String}C{arkui.stateManagement.storage.localStorage.LocalStorage}:",
             reinterpret_cast<void *>(AniWindow::LoadContentByName)},
-        ani_native_function {"setWindowKeepScreenOnSync", "JZ:V",
+        ani_native_function {"setWindowKeepScreenOnSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowKeepScreenOn)},
-        ani_native_function {"setWindowSystemBarEnableSync", "JLescompat/Array;:V",
+        ani_native_function {"setWindowSystemBarEnableSync", "lC{std.core.Array}:",
             reinterpret_cast<void *>(AniWindow::SetWindowSystemBarEnable)},
-        ani_native_function {"setWindowTouchableSync", "JZ:V",
+        ani_native_function {"setWindowTouchableSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowTouchable)},
         ani_native_function {"setDialogBackGestureEnabledSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetDialogBackGestureEnabled)},
-        ani_native_function {"setWindowMaskSync", "lC{escompat.Array}:",
+        ani_native_function {"setWindowMaskSync", "lC{std.core.Array}:",
             reinterpret_cast<void *>(AniWindow::SetWindowMask)},
-        ani_native_function {"setTouchableAreas", "lC{escompat.Array}:",
+        ani_native_function {"setTouchableAreas", "lC{std.core.Array}:",
             reinterpret_cast<void *>(AniWindow::SetTouchableAreas)},
-        ani_native_function {"getUIContextSync", "J:L@ohos/arkui/UIContext/UIContext;",
+        ani_native_function {"getUIContextSync", "l:C{@ohos.arkui.UIContext.UIContext}",
             reinterpret_cast<void *>(AniWindow::GetUIContext)},
-        ani_native_function {"getWindowAvoidAreaSync", "JI:L@ohos/window/window/AvoidArea;",
+        ani_native_function {"getWindowAvoidAreaSync", "li:C{@ohos.window.window.AvoidArea}",
             reinterpret_cast<void *>(AniWindow::GetWindowAvoidArea)},
-        ani_native_function {"getWindowAvoidAreaIgnoringVisibilitySync", "JI:L@ohos/window/window/AvoidArea;",
+        ani_native_function {"getWindowAvoidAreaIgnoringVisibilitySync", "li:C{@ohos.window.window.AvoidArea}",
             reinterpret_cast<void *>(AniWindow::GetWindowAvoidAreaIgnoringVisibility)},
-        ani_native_function {"setWaterMarkFlagSync", "JZ:V",
+        ani_native_function {"setWaterMarkFlagSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWaterMarkFlag)},
-        ani_native_function {"raiseMainWindowAboveTargetSync", "JI:V",
+        ani_native_function {"raiseMainWindowAboveTargetSync", "li:",
             reinterpret_cast<void *>(AniWindow::RaiseMainWindowAboveTarget)},
-        ani_native_function {"setMainWindowRaiseByClickEnabledSync", "JZ:V",
+        ani_native_function {"setMainWindowRaiseByClickEnabledSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetMainWindowRaiseByClickEnabled)},
         ani_native_function {"setWindowTopmost", "lz:",
             reinterpret_cast<void *>(SetWindowTopmost)},
-        ani_native_function {"setWindowFocusableSync", "JZ:V",
+        ani_native_function {"setWindowFocusableSync", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowFocusable)},
         ani_native_function {"getSubWindowZLevelSync", "l:i",
             reinterpret_cast<void *>(AniWindow::GetSubWindowZLevel)},
@@ -6194,11 +6194,11 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetTopmost)},
         ani_native_function {"setReceiveDragEventEnabled", "lz:",
             reinterpret_cast<void *>(AniWindow::SetReceiveDragEventEnabled)},
-        ani_native_function {"isReceiveDragEventEnabled", "J:Z",
+        ani_native_function {"isReceiveDragEventEnabled", "l:z",
             reinterpret_cast<void *>(AniWindow::IsReceiveDragEventEnabled)},
         ani_native_function {"setSeparationTouchEnabled", "lz:",
             reinterpret_cast<void *>(AniWindow::SetSeparationTouchEnabled)},
-        ani_native_function {"isSeparationTouchEnabled", "J:Z",
+        ani_native_function {"isSeparationTouchEnabled", "l:z",
             reinterpret_cast<void *>(AniWindow::IsSeparationTouchEnabled)},
         ani_native_function {"requestFocusSync", "lz:",
             reinterpret_cast<void *>(AniWindow::RequestFocus)},
@@ -6208,17 +6208,17 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetSubWindowModalType)},
         ani_native_function {"isWindowHighlightedSync", "l:z",
             reinterpret_cast<void *>(AniWindow::IsWindowHighlighted)},
-        ani_native_function {"setContentAspectRatio", "JDZZ:V",
+        ani_native_function {"setContentAspectRatio", "ldzz:",
             reinterpret_cast<void *>(AniWindow::SetContentAspectRatio)},
-        ani_native_function {"opacity", "JD:V",
+        ani_native_function {"opacity", "ld:",
             reinterpret_cast<void *>(AniWindow::Opacity)},
-        ani_native_function {"scale", "JL@ohos/window/window/ScaleOptions;:V",
+        ani_native_function {"scale", "lC{@ohos.window.window.ScaleOptions}:",
             reinterpret_cast<void *>(AniWindow::Scale)},
-        ani_native_function {"translate", "JL@ohos/window/window/TranslateOptions;:V",
+        ani_native_function {"translate", "lC{@ohos.window.window.TranslateOptions}:",
             reinterpret_cast<void *>(AniWindow::Translate)},
-        ani_native_function {"rotate", "JL@ohos/window/window/RotateOptions;:V",
+        ani_native_function {"rotate", "lC{@ohos.window.window.RotateOptions}:",
             reinterpret_cast<void *>(AniWindow::Rotate)},
-        ani_native_function {"setShadow", "JDLstd/core/String;Lstd/core/Double;Lstd/core/Double;:V",
+        ani_native_function {"setShadow", "ldC{std.core.String}C{std.core.Double}C{std.core.Double}:",
             reinterpret_cast<void *>(AniWindow::SetShadow)},
         ani_native_function {"setCornerRadiusSync", "ld:",
             reinterpret_cast<void *>(AniWindow::SetCornerRadius)},
@@ -6236,17 +6236,17 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWindowShadowRadius)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
-        ani_native_function {"onNoInteractionDetected", "JLstd/core/String;JLstd/core/Object;:V",
+        ani_native_function {"onNoInteractionDetected", "lC{std.core.String}lC{std.core.Object}:",
             reinterpret_cast<void *>(AniWindow::RegisterNoInteractionDetectedCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindow::UnregisterWindowCallback)},
         ani_native_function {"showWindowSync", nullptr,
             reinterpret_cast<void *>(AniWindow::ShowWindow)},
-        ani_native_function {"showWindowWithOptions", "JL@ohos/window/window/ShowWindowOptions;:V",
+        ani_native_function {"showWindowWithOptions", "lC{@ohos.window.window.ShowWindowOptions}:",
             reinterpret_cast<void *>(AniWindow::ShowWindowWithOptions)},
-        ani_native_function {"getParentWindow", "J:L@ohos/window/window/Window;",
+        ani_native_function {"getParentWindow", "l:C{@ohos.window.window.Window}",
             reinterpret_cast<void *>(GetParentWindow)},
-        ani_native_function {"setParentWindow", "JI:V",
+        ani_native_function {"setParentWindow", "li:",
             reinterpret_cast<void *>(SetParentWindow)},
         ani_native_function {"setWindowTitle", "lC{std.core.String}:",
             reinterpret_cast<void *>(AniWindow::SetWindowTitle)},
@@ -6282,28 +6282,28 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::ShowWithAnimation)},
         ani_native_function {"getTransitionControllerSync", "l:C{@ohos.window.window.TransitionController}",
             reinterpret_cast<void *>(AniWindow::GetTransitionController)},
-        ani_native_function {"nativeTransferStatic", "Lstd/interop/ESValue;:Lstd/core/Object;",
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
             reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
-        ani_native_function {"nativeTransferDynamic", "J:Lstd/interop/ESValue;",
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
             reinterpret_cast<void *>(AniWindow::NativeTransferDynamic)},
-        ani_native_function {"resizeAsync", "JII:V",
+        ani_native_function {"resizeAsync", "lii:",
             reinterpret_cast<void *>(WindowResizeAsync)},
         ani_native_function {"setWindowLimits",
-            "JL@ohos/window/window/WindowLimits;Lstd/core/Boolean;:L@ohos/window/window/WindowLimits;",
+            "lC{@ohos.window.window.WindowLimits}C{std.core.Boolean}:C{@ohos.window.window.WindowLimits}",
             reinterpret_cast<void *>(WindowSetWindowLimits)},
-        ani_native_function {"getWindowLimits", "J:L@ohos/window/window/WindowLimits;",
+        ani_native_function {"getWindowLimits", "l:C{@ohos.window.window.WindowLimits}",
             reinterpret_cast<void *>(WindowGetWindowLimits)},
-        ani_native_function {"getWindowLimitsVP", "J:L@ohos/window/window/WindowLimits;",
+        ani_native_function {"getWindowLimitsVP", "l:C{@ohos.window.window.WindowLimits}",
             reinterpret_cast<void *>(WindowGetWindowLimitsVP)},
-        ani_native_function {"setAspectRatio", "JD:V",
+        ani_native_function {"setAspectRatio", "ld:",
             reinterpret_cast<void *>(WindowSetAspectRatio)},
-        ani_native_function {"resetAspectRatio", "J:V",
+        ani_native_function {"resetAspectRatio", "l:",
             reinterpret_cast<void *>(WindowResetAspectRatio)},
         ani_native_function {"getWindowStatus", "l:i",
             reinterpret_cast<void *>(AniWindow::GetWindowStatus)},
         ani_native_function {"minimize", "l:",
             reinterpret_cast<void *>(AniWindow::Minimize)},
-        ani_native_function {"maximize", "JL@ohos/window/window/MaximizePresentation;Lstd/core/Boolean;:V",
+        ani_native_function {"maximize", "lC{@ohos.window.window.MaximizePresentation}C{std.core.Boolean}:",
             reinterpret_cast<void *>(AniWindow::Maximize)},
         ani_native_function {"startMoving", "l:",
             reinterpret_cast<void *>(AniWindow::StartMoving)},
@@ -6311,33 +6311,33 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::StartMoveWindowWithCoordinate)},
         ani_native_function {"stopMoving", "l:",
             reinterpret_cast<void *>(AniWindow::StopMoving)},
-        ani_native_function {"setResizeByDragEnabled", "JZ:V",
+        ani_native_function {"setResizeByDragEnabled", "lz:",
             reinterpret_cast<void *>(WindowSetResizeByDragEnabled)},
-        ani_native_function {"enableDrag", "JZ:V",
+        ani_native_function {"enableDrag", "lz:",
             reinterpret_cast<void *>(WindowEnableDrag)},
-        ani_native_function {"moveWindowToGlobal", "JIIL@ohos/window/window/MoveConfiguration;:V",
+        ani_native_function {"moveWindowToGlobal", "liiC{@ohos.window.window.MoveConfiguration}:",
             reinterpret_cast<void *>(WindowMoveWindowToGlobal)},
-        ani_native_function {"moveWindowToAsync", "JIIL@ohos/window/window/MoveConfiguration;:V",
+        ani_native_function {"moveWindowToAsync", "liiC{@ohos.window.window.MoveConfiguration}:",
             reinterpret_cast<void *>(WindowMoveWindowToAsync)},
-        ani_native_function {"setWindowMode", "JL@ohos/window/window/WindowMode;:V",
+        ani_native_function {"setWindowMode", "lC{@ohos.window.window.WindowMode}:",
             reinterpret_cast<void *>(WindowSetWindowMode)},
-        ani_native_function {"setForbidSplitMove", "JZ:V",
+        ani_native_function {"setForbidSplitMove", "lz:",
             reinterpret_cast<void *>(WindowSetForbidSplitMove)},
-        ani_native_function {"setFollowParentWindowLayoutEnabled", "JZ:V",
+        ani_native_function {"setFollowParentWindowLayoutEnabled", "lz:",
             reinterpret_cast<void *>(WindowSetFollowParentWindowLayoutEnabled)},
-        ani_native_function {"setFollowParentMultiScreenPolicy", "JZ:V",
+        ani_native_function {"setFollowParentMultiScreenPolicy", "lz:",
             reinterpret_cast<void *>(WindowSetFollowParentMultiScreenPolicy)},
-        ani_native_function {"moveWindowToGlobalDisplay", "JII:V",
+        ani_native_function {"moveWindowToGlobalDisplay", "lii:",
             reinterpret_cast<void *>(WindowMoveWindowToGlobalDisplay)},
-        ani_native_function {"clientToGlobalDisplay", "JII:L@ohos/window/window/Position;",
+        ani_native_function {"clientToGlobalDisplay", "lii:C{@ohos.window.window.Position}",
             reinterpret_cast<void *>(WindowClientToGlobalDisplay)},
-        ani_native_function {"globalDisplayToClient", "JII:L@ohos/window/window/Position;",
+        ani_native_function {"globalDisplayToClient", "lii:C{@ohos.window.window.Position}",
             reinterpret_cast<void *>(WindowGlobalDisplayToClient)},
-        ani_native_function {"setRotationLocked", "JZ:V",
+        ani_native_function {"setRotationLocked", "lz:",
             reinterpret_cast<void *>(AniWindow::SetRotationLocked)},
-        ani_native_function {"getRotationLocked", "J:Z",
+        ani_native_function {"getRotationLocked", "l:z",
             reinterpret_cast<void *>(AniWindow::GetRotationLocked)},
-        ani_native_function {"isInFreeWindowMode", "J:Z",
+        ani_native_function {"isInFreeWindowMode", "l:z",
             reinterpret_cast<void *>(AniWindow::IsInFreeWindowMode)},
         ani_native_function {"setWindowDelayRaiseOnDrag", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowDelayRaiseOnDrag)},
@@ -6414,12 +6414,12 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
     *result = ANI_VERSION_1;
 
     ani_namespace ns;
-    if ((ret = env->FindNamespace("L@ohos/window/window;", &ns)) != ANI_OK) {
+    if ((ret = env->FindNamespace("@ohos.window.window", &ns)) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] find ns %{public}u", ret);
         return ANI_NOT_FOUND;
     }
     std::array functions = {
-        ani_native_function {"CreateWindow", "J:L@ohos/window/window/WindowInternal;",
+        ani_native_function {"CreateWindow", "l:C{@ohos.window.window.WindowInternal}",
             reinterpret_cast<void *>(WindowCreate)},
     };
     if ((ret = env->Namespace_BindNativeFunctions(ns, functions.data(), functions.size())) != ANI_OK) {

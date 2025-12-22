@@ -121,7 +121,7 @@ void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysic
 
     for (uint32_t i = 0; i < displayPhysicalArray.size() && i < static_cast<uint32_t>(arrayObjLen); i++) {
         ani_ref obj;
-        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "I:Lstd/core/Object;", &obj, (ani_int)i);
+        env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &obj, (ani_int)i);
         env->Object_SetFieldByName_Int(static_cast<ani_object>(obj), "foldDisplayMode_",
             static_cast<ani_int>(displayPhysicalArray[i].foldDisplayMode_));
         env->Object_SetFieldByName_Long(static_cast<ani_object>(obj), "<property>physicalWidth",
@@ -578,7 +578,7 @@ ani_object DisplayAniUtils::CreatePositionObject(ani_env* env)
         return nullptr;
     }
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
         return nullptr;
@@ -601,7 +601,7 @@ ani_object DisplayAniUtils::CreateRelativePostionObject(ani_env* env)
         return nullptr;
     }
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
         return nullptr;
@@ -722,7 +722,7 @@ void DisplayAniUtils::SetFoldCreaseRegion(ani_env* env, FoldCreaseRegion& region
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCrease;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(creaseRectsObj),
-            "$_get", "I:Lstd/core/Object;", &currentCrease, (ani_int)i)) {
+            "$_get", "i:C{std.core.Object}", &currentCrease, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
@@ -782,7 +782,7 @@ ani_object DisplayAniUtils::CreateBrightnessInfoObject(ani_env* env)
         return nullptr;
     }
     ani_method aniCtor;
-    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":V", &aniCtor);
+    auto ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Class_FindMethod failed");
         return nullptr;

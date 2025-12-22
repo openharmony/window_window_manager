@@ -29,9 +29,9 @@ namespace Rosen {
 namespace {
 static std::map<ani_ref, AniExtensionWindow*> localObjs;
 constexpr const char* ETS_UIEXTENSION_HOST_CLASS_DESCRIPTOR =
-    "L@ohos/uiExtensionHost/uiExtensionHost/UIExtensionHostInternal;";
+    "@ohos.uiExtensionHost.uiExtensionHost.UIExtensionHostInternal";
 constexpr const char* ETS_UIEXTENSION_CLASS_DESCRIPTOR =
-    "L@ohos/arkui/uiExtension/uiExtension/UIExtensionInternal;";
+    "@ohos.arkui.uiExtension.uiExtension.UIExtensionInternal";
 }
 AniExtensionWindow::AniExtensionWindow(
     const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow, int32_t hostWindowId)
@@ -94,7 +94,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
     }
 
     ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find ctor method failed, ret: %{public}u", ret);
         return nullptr;
     }
@@ -104,7 +104,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return nullptr;
     }
@@ -559,39 +559,39 @@ ani_object createExtensionWindow(ani_env* env, ani_long win, ani_int hostId)
 extern "C" {
 using namespace OHOS::Rosen;
 std::array extensionWindowNativeMethods = {
-    ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
-    ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
+    ani_native_function {"getProperties", "lC{std.core.Object}:i", reinterpret_cast<void *>(ExtWindowGetProperties)},
+    ani_native_function {"getWindowAvoidArea", "liC{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-    ani_native_function {"setWaterMarkFlag", "JZ:I",
+    ani_native_function {"setWaterMarkFlag", "lz:i",
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
-    ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
+    ani_native_function {"hideNonSecureWindows", "lz:i", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Z:L@ohos/window/window/Window;",
+        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}z:@ohos.window.window.Window",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
-    ani_native_function {"occupyEvents", "JI:V", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
-    ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"occupyEvents", "li:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
+    ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(RegisterExtWindowCallback)},
-    ani_native_function {"offSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(UnregisterExtWindowCallback)},
-    ani_native_function {"onRectChange", "JILstd/core/Object;:V", reinterpret_cast<void *>(ExtWindowOnRectChange)},
-    ani_native_function {"offRectChange", "JLstd/core/Object;:V", reinterpret_cast<void *>(ExtWindowOffRectChange)},
+    ani_native_function {"onRectChange", "liC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOnRectChange)},
+    ani_native_function {"offRectChange", "lC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOffRectChange)},
     };
 
 std::array extensionWindowHostNativeMethods = {
-    ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
-    ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
+    ani_native_function {"getProperties", "lC{std.core.Object}:i", reinterpret_cast<void *>(ExtWindowGetProperties)},
+    ani_native_function {"getWindowAvoidArea", "liC{std.core.Object}:",
         reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-    ani_native_function {"setWaterMarkFlag", "JZ:I",
+    ani_native_function {"setWaterMarkFlag", "lz:i",
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
-    ani_native_function {"hidePrivacyContentForHost", "JZ:I",
+    ani_native_function {"hidePrivacyContentForHost", "lz:i",
         reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
-    ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
+    ani_native_function {"hideNonSecureWindows", "lz:i", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Z:L@ohos/window/window/Window;",
+        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}z:C{@ohos.window.window.Window}",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
-    ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(RegisterExtWindowCallback)},
-    ani_native_function {"offSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(UnregisterExtWindowCallback)},
     };
 
