@@ -282,7 +282,7 @@ DMError MultiScreenPowerChangeManager::HandleInnerMainExternalExtendChange(sptr<
     /* step9: inner screen change */
     innerScreenId = innerScreen->GetScreenId();
     externalScreenId = externalScreen->GetScreenId();
-    auto rsSetScreenPowerStatustask = [innerScreenId, externalScreenId, this] {
+    auto rsSetScreenPowerStatustask = [innerScreenId, externalScreenId, this]() {
         ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(externalScreenId,
             ScreenPowerStatus::POWER_STATUS_OFF);
         CallRsSetScreenPowerStatusSyncToOn(innerScreenId);
