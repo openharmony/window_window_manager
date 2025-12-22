@@ -261,7 +261,7 @@ void MainSession::ClearSnapshotPersistence()
     auto task = [weakThis = wptr(this), where = __func__]() {
         auto session = weakThis.promote();
         if (session == nullptr) {
-            TLOGE(WmsLogTag::WMS_PATTERN, "%{public}s, session %{public}d nullptr", where, session->GetPersistentId());
+            TLOGE(WmsLogTag::WMS_PATTERN, "%{public}s, session is nullptr", where);
             return;
         }
         TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s, %{public}d", where, session->GetPersistentId());
