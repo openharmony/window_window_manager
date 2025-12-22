@@ -218,15 +218,17 @@ void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayModeInner(FoldDisplayMode 
             if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
                 CloseCoordinationScreen();
             }
-            SetdisplayModeChangeStatus(true);
             ChangeScreenDisplayModeToMain(screenSession);
             break;
         }
         case FoldDisplayMode::FULL: {
             if (currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
                 CloseCoordinationScreen();
+                if (GetModeMatchStatus() != displayMode) {
+                    TLOGI(WmsLogTag::DMS, "Exit coordination and recover full");
+                    ChangeScreenDisplayModeToFull(screenSession, reason);
+                }
             } else {
-                SetdisplayModeChangeStatus(true);
                 ChangeScreenDisplayModeToFull(screenSession, reason);
             }
             break;
