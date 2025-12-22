@@ -936,6 +936,23 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SET_TARGET_FOLD_STATUS_AND_LOCK: {
+            FoldStatus targetFoldStatus = static_cast<FoldStatus>(data.ReadUint32());
+            DMError ret = ForceSetFoldStatusAndLock(targetFoldStatus);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "Write result failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UNLOCK_TARGET_FOLD_STATUS: {
+            DMError ret = RestorePhysicalFoldStatus();
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "Write result failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED: {
             bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
             SetFoldStatusExpandAndLocked(lockDisplayStatus);

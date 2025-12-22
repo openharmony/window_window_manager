@@ -65,7 +65,12 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         if (foldScreenPolicy != nullptr) {
             foldScreenPolicy->SetFoldStatus(mState_);
         }
-        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
+        if (!foldScreenPolicy->GetPhysicalFoldLockFlag()) {
+            ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
+        } else {
+            TLOGW(WmsLogTag::DMS,
+                "Fold status is locked, notify foldstatus changed skip, current foldstatus: %{public}d", mState_);
+        }
         if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
             foldScreenPolicy->SendSensorResult(mState_);
         }
@@ -156,7 +161,12 @@ void SensorFoldStateManager::ProcessNotifyFoldStatusChange(FoldStatus currentSta
     if (foldScreenPolicy != nullptr) {
         foldScreenPolicy->SetFoldStatus(nextStatus);
     }
-    ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(nextStatus);
+    if (!foldScreenPolicy->GetPhysicalFoldLockFlag()) {
+        ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(nextStatus);
+    } else {
+        TLOGW(WmsLogTag::DMS, "Fold status is locked, notify foldstatus changed skip, current foldstatus: %{public}d",
+            mState_);
+    }
     if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
         foldScreenPolicy->SendSensorResult(nextStatus);
     }

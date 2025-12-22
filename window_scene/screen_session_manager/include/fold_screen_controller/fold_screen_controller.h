@@ -55,6 +55,10 @@ public:
     FoldCreaseRegion GetLiveCreaseRegion() const override;
     ScreenId GetCurrentScreenId() override;
     void LockDisplayStatus(bool locked) override;
+    DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus) override;
+    DMError RestorePhysicalFoldStatus() override;
+    bool GetPhysicalFoldLockFlag() const override;
+    FoldStatus GetPhysicalFoldStatus() const override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     void UpdateForPhyScreenPropertyChange() override;
     void ExitCoordination() override;

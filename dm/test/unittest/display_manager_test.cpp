@@ -2537,6 +2537,21 @@ HWTEST_F(DisplayManagerTest, GetCallingAbilityDisplayId_shouldReturnInvalid_When
 }
 
 /**
+ * @tc.name: ForceSetAndRestoreFoldStatus
+ * @tc.desc: ForceSetAndRestoreFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, ForceSetAndRestoreFoldStatus, TestSize.Level1)
+{
+    if (!DisplayManager::GetInstance().IsFoldable()) {
+        GTEST_SKIP();
+    }
+    DisplayManager displayManager;
+    DMError ret = displayManager.ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
+    EXPECT_EQ(ret, DMError::DM_OK);
+}
+
+/**
  * @tc.name: ShouldReturnUNKNOWN
  * @tc.desc: GetFoldDisplayMode returns UNKNOWN
  * @tc.type: FUNC

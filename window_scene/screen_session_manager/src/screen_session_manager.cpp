@@ -8916,6 +8916,70 @@ DMError ScreenSessionManager::SetFoldStatusLockedFromJs(bool locked)
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    TLOGD(WmsLogTag::DMS, "Entry ForceSetFoldStatusAndLock");
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! clientName: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return foldScreenController_->ForceSetFoldStatusAndLock(targetFoldStatus);
+#else
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+#endif
+}
+
+DMError ScreenSessionManager::RestorePhysicalFoldStatus()
+{
+#ifdef FOLD_ABILITY_ENABLE
+    TLOGD(WmsLogTag::DMS, "Entry ForceSetFoldStatusAndLock");
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! clientName: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return foldScreenController_->RestorePhysicalFoldStatus();
+#else
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+#endif
+}
+
+bool ScreenSessionManager::GetPhysicalFoldLockFlag() const
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController is null");
+        return false;
+    }
+    return foldScreenController_->GetPhysicalFoldLockFlag();
+#else
+    return false;
+#endif
+}
+
+FoldStatus ScreenSessionManager::GetPhysicalFoldStatus() const
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenController is null");
+        return FoldStatus::UNKNOWN;
+    }
+    return foldScreenController_->GetPhysicalFoldStatus();
+#else
+    return FoldStatus::UNKNOWN;
+#endif
+}
+
 FoldDisplayMode ScreenSessionManager::GetFoldDisplayMode()
 {
 #ifdef FOLD_ABILITY_ENABLE

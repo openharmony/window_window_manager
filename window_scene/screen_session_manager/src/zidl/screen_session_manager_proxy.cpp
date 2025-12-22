@@ -2852,6 +2852,73 @@ DMError ScreenSessionManagerProxy::SetFoldStatusLockedFromJs(bool locked)
     return ret;
 }
 
+DMError ScreenSessionManagerProxy::ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (targetFoldStatus < FoldStatus::EXPAND ||
+            targetFoldStatus > FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED) {
+        TLOGE(WmsLogTag::DMS, "Invalid targetFoldStatus: %{public}d, IPC stop", static_cast<int>(targetFoldStatus));
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(targetFoldStatus))) {
+        TLOGE(WmsLogTag::DMS, "Write lock fold status failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+                            DisplayManagerMessage::TRANS_ID_SET_TARGET_FOLD_STATUS_AND_LOCK),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SET_TARGET_FOLD_STATUS_AND_LOCK failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Failed to read error code from reply");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    return ret;
+}
+
+DMError ScreenSessionManagerProxy::RestorePhysicalFoldStatus()
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+                            DisplayManagerMessage::TRANS_ID_UNLOCK_TARGET_FOLD_STATUS),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_UNLOCK_TARGET_FOLD_STATUS failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::DMS, "Failed to read error code from reply");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    return ret;
+}
+
 void ScreenSessionManagerProxy::SetFoldStatusExpandAndLocked(bool locked)
 {
     sptr<IRemoteObject> remote = Remote();

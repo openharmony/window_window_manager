@@ -309,6 +309,10 @@ public:
 
     void SetFoldStatusLocked(bool locked) override;
     DMError SetFoldStatusLockedFromJs(bool locked) override;
+    DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus) override;
+    DMError RestorePhysicalFoldStatus() override;
+    bool GetPhysicalFoldLockFlag() const;
+    FoldStatus GetPhysicalFoldStatus() const;
     void SetFoldStatusExpandAndLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
