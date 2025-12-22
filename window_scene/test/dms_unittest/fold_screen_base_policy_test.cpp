@@ -276,7 +276,7 @@ HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeInnerTest, TestSize.Le
  * @tc.desc: test fold exit coordination
  * @tc.type: FUNC
  */
-HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeScreenDisplayModeInnerTest_foldExitCoordination, TestSize.Level1)
+HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeInnerTest_foldExitCoordination, TestSize.Level1)
 {
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
