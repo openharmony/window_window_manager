@@ -1943,6 +1943,8 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env)
         static_cast<int32_t>(SizeChangeReason::SNAPSHOT_ROTATION)));
     napi_set_named_property(env, objValue, "SCENE_WITH_ANIMATION", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::SCENE_WITH_ANIMATION)));
+    napi_set_named_property(env, objValue, "LS_STATE_CHANGE", CreateJsValue(env,
+        static_cast<int32_t>(SizeChangeReason::LS_STATE_CHANGE)));
     napi_set_named_property(env, objValue, "END", CreateJsValue(env,
         static_cast<int32_t>(SizeChangeReason::END)));
 

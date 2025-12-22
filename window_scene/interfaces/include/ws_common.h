@@ -601,6 +601,7 @@ enum class SizeChangeReason : uint32_t {
     SCREEN_RELATIVE_POSITION_CHANGE,
     SNAPSHOT_ROTATION = 37,
     SCENE_WITH_ANIMATION,
+    LS_STATE_CHANGE,
     END,
 };
 
