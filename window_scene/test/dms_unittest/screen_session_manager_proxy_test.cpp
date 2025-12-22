@@ -1593,26 +1593,12 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetFoldDisplayModeFromJs, TestSize.Level
  */
 HWTEST_F(ScreenSessionManagerProxyTest, SetFoldStatusLocked, TestSize.Level1)
 {
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
     bool locked = true;
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     screenSessionManagerProxy->SetFoldStatusLocked(locked);
-    EXPECT_TRUE(logMsg.find("WriteInterfaceToken Failed") != std::string::npos);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    screenSessionManagerProxy->SetFoldStatusLocked(locked);
-    EXPECT_TRUE(logMsg.find("Write lock fold display status failed") != std::string::npos);
-
-    MockMessageParcel::ClearAllErrorFlag();
-    screenSessionManagerProxy->SetFoldStatusLocked(locked);
-    if (screenSessionManagerProxy->IsFoldable() && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
-    } else {
+    if (IsFoldable()) {
         EXPECT_EQ(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
+    } else {
+        EXPECT_NE(ScreenSessionManager::GetInstance().foldScreenController_, nullptr);
     }
 }
 

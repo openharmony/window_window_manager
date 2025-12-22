@@ -2881,12 +2881,12 @@ DMError ScreenSessionManagerProxy::ForceSetFoldStatusAndLock(FoldStatus targetFo
         TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SET_TARGET_FOLD_STATUS_AND_LOCK failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    int32_t errCode;
-    if (!reply.ReadInt32(errCode)) {
+    int32_t errorCode;
+    if (!reply.ReadInt32(errorCode)) {
         TLOGE(WmsLogTag::DMS, "Failed to read error code from reply");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    DMError ret = static_cast<DMError>(errorCode);
     return ret;
 }
 
@@ -2910,12 +2910,12 @@ DMError ScreenSessionManagerProxy::RestorePhysicalFoldStatus()
         TLOGE(WmsLogTag::DMS, "Send TRANS_ID_UNLOCK_TARGET_FOLD_STATUS failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    int32_t errCode;
-    if (!reply.ReadInt32(errCode)) {
+    int32_t errorCode;
+    if (!reply.ReadInt32(errorCode)) {
         TLOGE(WmsLogTag::DMS, "Failed to read error code from reply");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    DMError ret = static_cast<DMError>(reply.ReadInt32());
+    DMError ret = static_cast<DMError>(errorCode);
     return ret;
 }
 
