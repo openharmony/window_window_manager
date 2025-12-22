@@ -17,10 +17,10 @@
 
 #include "parameters.h"
 #include "picture_in_picture_controller.h"
+#include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_scene_session_impl.h"
-#include "scene_board_judgement.h"
-#include "window_adapter.h"
+
 
 namespace OHOS {
 namespace Rosen {
@@ -60,7 +60,7 @@ PictureInPictureManager::~PictureInPictureManager()
 
 bool PictureInPictureManager::IsSupportPiP()
 {
-    bool isSupportPiPFlag;
+    bool isSupportPiPFlag = false;
     SingletonContainer::Get<WindowAdapter>().GetIsPipEnabled(isSupportPiPFlag);
     return isSupportPiPFlag;
 }
