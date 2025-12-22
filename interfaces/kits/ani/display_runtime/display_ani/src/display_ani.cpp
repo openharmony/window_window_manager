@@ -534,6 +534,8 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
         ani_native_function {"finalizerDisplayNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::FinalizerDisplay)},
+        ani_native_function {"onChangeWithAttributeNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::RegisterDisplayAttributeListener)},
     };
     auto ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size());
     if (ret != ANI_OK) {

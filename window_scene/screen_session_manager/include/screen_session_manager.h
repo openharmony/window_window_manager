@@ -114,6 +114,9 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
+    virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) override;
+
     ScreenId GetInternalScreenId() override;
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowerState state);
@@ -193,6 +196,10 @@ public:
     void NotifyDisplayDestroy(DisplayId displayId);
     void NotifyAndPublishEvent(sptr<DisplayInfo> displayInfo, ScreenId screenId, sptr<ScreenSession> screenSession);
     void NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event);
+    void CheckAttributeChange(sptr<DisplayInfo> displayInfo);
+    void NotifyDisplayAttributeChanged(sptr<DisplayInfo> displayInfo, const std::vector<std::string>& attributes);
+    void GetChangedListenableAttribute(sptr<DisplayInfo> displayInfo1, sptr<DisplayInfo> displayInfo2,
+        std::vector<std::string>& attributes);
 
     std::vector<ScreenId> GetAllScreenIds() const;
     const std::shared_ptr<RSDisplayNode> GetRSDisplayNodeByScreenId(ScreenId smsScreenId) const;
@@ -960,6 +967,9 @@ private:
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
+
+    std::mutex lastDisplayInfoMutex_;
+    sptr<DisplayInfo> lastDisplayInfo_ = new DisplayInfo();
 
     std::atomic<PowerStateChangeReason> prePowerStateChangeReason_ =
         PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
