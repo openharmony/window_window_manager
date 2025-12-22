@@ -265,6 +265,7 @@ private:
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
+    static napi_value GetUid(napi_env env, napi_callback_info info);
     static napi_value CreateSessionInfosNapiValue(
         napi_env env, const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos);
     static napi_value CreatePendingInfosNapiValue(napi_env env,
@@ -371,6 +372,7 @@ private:
     napi_value OnSetPcAppInpadSpecificSystemBarInvisible(napi_env env, napi_callback_info info);
     napi_value OnSetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
     napi_value OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
+    napi_value OnGetUid(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
 
     /*

@@ -305,6 +305,7 @@ const std::map<WindowSizeChangeReason, RectChangeReason> JS_SIZE_CHANGE_REASON {
     { WindowSizeChangeReason::RECOVER_IN_IMPLICIT,             RectChangeReason::RECOVER    },
     { WindowSizeChangeReason::SCREEN_RELATIVE_POSITION_CHANGE, RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::SNAPSHOT_ROTATION,               RectChangeReason::UNDEFINED  },
+    { WindowSizeChangeReason::LS_STATE_CHANGE,                 RectChangeReason::UNDEFINED  },
     { WindowSizeChangeReason::END,                             RectChangeReason::UNDEFINED  },
 };
 
