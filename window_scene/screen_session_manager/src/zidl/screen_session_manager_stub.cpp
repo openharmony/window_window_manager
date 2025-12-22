@@ -291,7 +291,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         }
         case DisplayManagerMessage::TRANS_ID_GET_ROUNDED_CORNER: {
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            int radius;
+            int radius = 0;
             DMError ret = GetRoundedCorner(displayId, radius);
             if (!reply.WriteInt32(radius)) {
                 TLOGE(WmsLogTag::DMS, "write radius failed!");
