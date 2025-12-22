@@ -3779,11 +3779,17 @@ WSError Session::SetCompatibleModeProperty(const sptr<CompatibleModeProperty> co
     if (compatibleModeProperty && compatibleModeProperty->IsDragResizeDisabled()) {
         property->SetDragEnabled(false);
     }
-    if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyCompatibleModePropertyChange(compatibleModeProperty);
+    PostTask(
+        [weakThis = wptr(this), where = __func__, weakProperty = wptr(compatibleModeProperty)]() {
+            auto session = weakThis.promote();
+            auto property = weakProperty.promote();
+            if (!session || !session->sessionStage_) {
+                TLOGNE(WmsLogTag::WMS_COMPAT, "session or sessionStage is null");
+                return;
+            }
+            session->sessionStage_->NotifyCompatibleModePropertyChange(property);
+        }, __func__);
+    return WSError::WS_OK;
 }
 
 WSError Session::SetIsPcAppInPad(bool enable)
