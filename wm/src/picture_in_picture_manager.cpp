@@ -21,7 +21,6 @@
 #include "window_manager_hilog.h"
 #include "window_scene_session_impl.h"
 
-
 namespace OHOS {
 namespace Rosen {
 namespace {
