@@ -7900,8 +7900,8 @@ bool WindowSceneSessionImpl::IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& p
     MMI::PointerEvent::PointerItem pointerItem;
     bool isValidPointItem = pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     
-    int32_t width = windowRect.width_;
-    int32_t height = windowRect.height_;
+    int32_t width = static_cast<int32_t>(windowRect.width_);
+    int32_t height = static_cast<int32_t>(windowRect.height_);
     int32_t posX = windowRect.posX_;
     int32_t posY = windowRect.posY_;
     float vpr = WindowSessionImpl::GetVirtualPixelRatio();
