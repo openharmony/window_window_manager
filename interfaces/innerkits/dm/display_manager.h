@@ -706,7 +706,7 @@ public:
     /**
      * @brief Get the current fold status of the foldable device.
      *
-     * @return fold status of device.
+     * @return locked fold status if set; otherwise, return the current(actual) fold status.
      */
     FoldStatus GetFoldStatus();
 
@@ -772,6 +772,21 @@ public:
      * @return DM_OK means set success, others means set failed.
      */
     DMError SetFoldStatusLockedFromJs(bool locked);
+
+    /**
+     * @brief Locked fold and set to target fold status
+     *
+     * @param foldstatus specify fold status to switch to
+     * @return DM_OK means set success, others means set failed
+     */
+    DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus);
+
+    /**
+     * @brief Unlock fold status and restore display mode to actual physical fold status
+     *
+     * @return DM_OK means set success, others means set failed
+     */
+    DMError RestorePhysicalFoldStatus();
 
     /**
      * @brief Get the fold crease region in the current display mode.

@@ -64,6 +64,8 @@ const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
 const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor", "-g"};
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
+const std::string ARG_FORCE_SET_FOLD_STATUS_AND_LOCK = "-ln";
+const std::string ARG_RESTORE_PHYSICAL_FOLD_STATUS = "-u";
 const std::string ARG_SET_ON_TENT_MODE = "-ontent";
 const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
@@ -236,6 +238,18 @@ void ScreenSessionDumper::ExecuteInjectCmd()
     } else if (params_.size() == 1 && (params_[0] == ARG_LOCK_FOLD_DISPLAY_STATUS
                 || params_[0] == ARG_UNLOCK_FOLD_DISPLAY_STATUS)) {
         int errCode = SetFoldStatusLocked();
+        if (errCode != 0) {
+            ShowIllegalArgsInfo();
+        }
+        return;
+    } else if (params_[0].find(ARG_FORCE_SET_FOLD_STATUS_AND_LOCK) != std::string::npos) {
+        int errCode = ForceSetFoldStatusAndLock(params_[0]);
+        if (errCode != 0) {
+            ShowIllegalArgsInfo();
+        }
+        return;
+    } else if (params_[0] == ARG_RESTORE_PHYSICAL_FOLD_STATUS && params_.size() == 1) {
+        int errCode = RestorePhysicalFoldStatus();
         if (errCode != 0) {
             ShowIllegalArgsInfo();
         }
@@ -435,53 +449,22 @@ void ScreenSessionDumper::ShowVisibleAreaDisplayInfo()
 void ScreenSessionDumper::DumpFoldStatus()
 {
     std::ostringstream oss;
-    auto foldStatus = ScreenSessionManager::GetInstance().GetFoldStatus();
-    std::string status = "";
-    switch (foldStatus) {
-        case FoldStatus::EXPAND: {
-            status = "EXPAND";
-            break;
-        }
-        case FoldStatus::FOLDED: {
-            status = "FOLDED";
-            break;
-        }
-        case FoldStatus::HALF_FOLD: {
-            status = "HALF_FOLD";
-            break;
-        }
-        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND: {
-            status = "FOLD_STATUS_EXPANDED_WITH_SECOND_EXPANDED";
-            break;
-        }
-        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED: {
-            status = "FOLD_STATUS_EXPANDED_WITH_SECOND_HALF_FOLDED";
-            break;
-        }
-        case FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND: {
-            status = "FOLD_STATUS_FOLDED_WITH_SECOND_EXPANDED";
-            break;
-        }
-        case FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED: {
-            status = "FOLD_STATUS_FOLDED_WITH_SECOND_HALF_FOLDED";
-            break;
-        }
-        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND: {
-            status = "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_EXPANDED";
-            break;
-        }
-        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED: {
-            status = "FOLD_STATUS_HALF_FOLDED_WITH_SECOND_HALF_FOLDED";
-            break;
-        }
-        default: {
-            status = "UNKNOWN";
-            break;
-        }
-    }
-    oss << std::left << std::setw(LINE_WIDTH) << "FoldStatus: "
-        << status << std::endl;
+    auto& manager = ScreenSessionManager::GetInstance();
+    const FoldStatus physicalStatus = manager.GetPhysicalFoldStatus();
+    std::string physicalStatusStr = ConvertFoldStatusToString(physicalStatus);
+    const bool isLocked = manager.GetPhysicalFoldLockFlag();
+    const FoldStatus displayStatus = manager.GetFoldStatus();
+    std::string displayStatusStr = ConvertFoldStatusToString(displayStatus);
+    oss << std::left << std::setw(LINE_WIDTH) << "PhysicalFoldStatus: " << physicalStatusStr << "\n"
+        << std::left << std::setw(LINE_WIDTH) << "FoldLockStatus: " << (isLocked ? "LOCKED" : "UNLOCKED") << "\n"
+        << std::left << std::setw(LINE_WIDTH) << "DisplayFoldStatus: " << displayStatusStr << "\n";
     dumpInfo_.append(oss.str());
+}
+
+std::string ScreenSessionDumper::ConvertFoldStatusToString(FoldStatus status)
+{
+    auto it = statusMap_.find(status);
+    return it != statusMap_.end() ? it->second : "UNKNOWN";
 }
 
 void ScreenSessionDumper::DumpTentMode()
@@ -948,6 +931,54 @@ int ScreenSessionDumper::SetFoldStatusLocked()
         return -1;
     }
     ScreenSessionManager::GetInstance().SetFoldStatusLocked(lockDisplayStatus);
+    return 0;
+}
+
+int ScreenSessionDumper::ForceSetFoldStatusAndLock(std::string& input)
+{
+    if (input.empty()) {
+        return -1;
+    }
+    size_t commaPos = input.find(',');
+    if (commaPos == std::string::npos) {
+        TLOGW(WmsLogTag::DMS, "Input format is incorrect, expected '-ln,value'");
+        return -1;
+    }
+    std::string prefix = input.substr(0, commaPos);
+    std::string valueStr = input.substr(commaPos + 1);
+    if (prefix != ARG_FORCE_SET_FOLD_STATUS_AND_LOCK) {
+        TLOGW(WmsLogTag::DMS, "Invalid prefix, expect '-ln'");
+        return -1;
+    }
+
+    std::unordered_map<std::string, FoldStatus> stringToEnmu = {
+        {"1", FoldStatus::EXPAND},
+        {"2", FoldStatus::FOLDED},
+        {"3", FoldStatus::HALF_FOLD},
+        {"11", FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_EXPAND},
+        {"21", FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED},
+        {"12", FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND},
+        {"22", FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED},
+        {"13", FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND},
+        {"23", FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED},
+    };
+    if (stringToEnmu.find(valueStr) == stringToEnmu.end()) {
+        TLOGW(WmsLogTag::DMS, "Illeagle input: %{public}s fold status param!", valueStr.c_str());
+        return -1;
+    }
+    DMError ret = ScreenSessionManager::GetInstance().ForceSetFoldStatusAndLock(stringToEnmu[valueStr]);
+    if (ret != DMError::DM_OK) {
+        return -1;
+    }
+    return 0;
+}
+
+int ScreenSessionDumper::RestorePhysicalFoldStatus()
+{
+    DMError ret = ScreenSessionManager::GetInstance().RestorePhysicalFoldStatus();
+    if (ret != DMError::DM_OK) {
+        return -1;
+    }
     return 0;
 }
 
