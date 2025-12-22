@@ -1717,7 +1717,8 @@ HWTEST_F(SceneSessionTest6, ConvertDisplayOrientationToWindowOrientation, TestSi
     SessionInfo info;
     info.abilityName_ = "ConvertDisplayOrientationToWindowOrientation";
     info.bundleName_ = "ConvertDisplayOrientationToWindowOrientation";
-    sptr<SceneSession> session = nullptr;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
     int32_t value = 4;
     int32_t convertedValue = 0;
 
@@ -1741,7 +1742,8 @@ HWTEST_F(SceneSessionTest6, ConvertWindowOrientationToDisplayOrientation, TestSi
     SessionInfo info;
     info.abilityName_ = "ConvertWindowOrientationToDisplayOrientation";
     info.bundleName_ = "ConvertWindowOrientationToDisplayOrientation";
-    sptr<SceneSession> session = nullptr;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
     int32_t value = 4;
     int32_t convertedValue = 0;
     value = 5;
