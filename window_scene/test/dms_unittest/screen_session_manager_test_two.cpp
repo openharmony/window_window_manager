@@ -3396,6 +3396,22 @@ HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenWhiteList03, TestSize.Leve
     EXPECT_EQ(removeResult, DMError::DM_ERROR_INVALID_PARAM);
     ssm_->DestroyVirtualScreen(virtualScreenId);
 }
+
+/**
+ * @tc.name: NotifyDisplayAttributeChanged
+ * @tc.desc: NotifyDisplayAttributeChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level1)
+{
+    g_errLog.clear();
+    ASSERT_NE(ssm_, nullptr);
+ 
+    auto displayInfo = ssm_->GetDefaultDisplayInfo();
+    std::vector<std::string> attributes = {"rotation", "id"};
+    ssm_->NotifyDisplayAttributeChanged(displayInfo, attributes);
+    EXPECT_TRUE(g_errLog.find("NotifyDisplayAttributeChanged") != std::string::npos);
+}
 }
 }
 }

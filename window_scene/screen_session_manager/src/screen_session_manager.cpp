@@ -652,6 +652,28 @@ DMError ScreenSessionManager::RegisterDisplayManagerAgent(
         displayManagerAgent, type) ? DMError::DM_OK : DMError::DM_ERROR_NULLPTR;
 }
 
+DMError ScreenSessionManager::RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+    const sptr<IDisplayManagerAgent>& displayManagerAgent)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
+        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (attributes.empty() ) {
+        TLOGE(WmsLogTag::DMS, "attributes size less than 0");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    uintptr_t key = reinterpret_cast<uintptr_t>(displayManagerAgent->AsObject().GetRefPtr());
+    bool ret = ScreenSessionManagerAdapter::GetInstance().dmAttributeAgentContainer_.RegisterAttributeAgent(key,
+        displayManagerAgent, attributes);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "register attributes agent failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
@@ -662,6 +684,12 @@ DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     if (ret != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "call CheckDisplayMangerAgentTypeAndPermission fail!");
         return ret;
+    }
+    if (type == DisplayManagerAgentType::DISPLAY_ATTRIBUTE_CHANGED_LISTENER) {
+        uintptr_t key = reinterpret_cast<uintptr_t>(displayManagerAgent->AsObject().GetRefPtr());
+        auto ret = ScreenSessionManagerAdapter::GetInstance().dmAttributeAgentContainer_.UnRegisterAllAttributeAgent(
+            key, displayManagerAgent);
+        return ret ? DMError::DM_OK : DMError::DM_ERROR_NULLPTR;
     }
     auto res = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.UnregisterAgent(displayManagerAgent, type);
     if (type == DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER &&
@@ -5693,10 +5721,90 @@ void ScreenSessionManager::UpdateScreenRotationPropertyForRs(sptr<ScreenSession>
 
 void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, DisplayChangeEvent event)
 {
+    CheckAttributeChange(displayInfo);
     auto task = [=] {
         ScreenSessionManagerAdapter::GetInstance().OnDisplayChange(displayInfo, event);
     };
     taskScheduler_->PostAsyncTask(task, "NotifyDisplayChanged");
+}
+
+void ScreenSessionManager::CheckAttributeChange(sptr<DisplayInfo> displayInfo)
+{
+    std::vector<std::string> attributes;
+    std::lock_guard<std::mutex> lock(lastDisplayInfoMutex_);
+    GetChangedListenableAttribute(lastDisplayInfo_, displayInfo, attributes);
+    if (attributes.empty()) {
+        TLOGW(WmsLogTag::DMS, "No attribute changed");
+        return;
+    }
+    TLOGI(WmsLogTag::DMS, "has %{public}d attributes changed", (int32_t)attributes.size());
+
+    std::ostringstream oss;
+    oss << "current changed attributes:[";
+    for (const auto attribute : attributes) {
+        oss << attribute << ",";
+    }
+    TLOGD(WmsLogTag::DMS, "%{public}s]", oss.str().c_str());
+
+    NotifyDisplayAttributeChanged(displayInfo, attributes);
+    lastDisplayInfo_ = displayInfo;
+}
+ 
+void ScreenSessionManager::GetChangedListenableAttribute(sptr<DisplayInfo> displayInfo1, sptr<DisplayInfo> displayInfo2,
+    std::vector<std::string>& attributes)
+{
+    if (displayInfo1 == nullptr || displayInfo2 == nullptr) {
+        return;
+    }
+
+    struct AttributeCheck {
+        std::function<bool()> comparator;
+        std::vector<std::string> attributeNames;
+    };
+
+    std::vector<AttributeCheck> checks = {
+        {[&]() { return displayInfo1->GetDisplayId() != displayInfo2->GetDisplayId(); }, {"id"}},
+        {[&]() { return displayInfo1->GetName() != displayInfo2->GetName(); }, {"name"}},
+        {[&]() { return displayInfo1->GetAliveStatus() != displayInfo2->GetAliveStatus(); }, {"alive"}},
+        {[&]() { return displayInfo1->GetDisplayState() != displayInfo2->GetDisplayState(); }, {"state"}},
+        {[&]() { return displayInfo1->GetRefreshRate() != displayInfo2->GetRefreshRate(); }, {"refreshRate"}},
+        {[&]() { return displayInfo1->GetRotation() != displayInfo2->GetRotation(); }, {"rotation"}},
+        {[&]() { return displayInfo1->GetWidth() != displayInfo2->GetWidth(); }, {"width"}},
+        {[&]() { return displayInfo1->GetHeight() != displayInfo2->GetHeight(); }, {"height"}},
+        {[&]() { return displayInfo1->GetVirtualPixelRatio() != displayInfo2->GetVirtualPixelRatio(); }, 
+            {"densityDPI", "densityPixels", "scaledDensity"}},
+        {[&]() { return displayInfo1->GetDisplayOrientation() != displayInfo2->GetDisplayOrientation(); }, {"orientation"}},
+        {[&]() { return displayInfo1->GetXDpi() != displayInfo2->GetXDpi(); }, {"xDPI"}},
+        {[&]() { return displayInfo1->GetYDpi() != displayInfo2->GetYDpi(); }, {"yDPI"}},
+        {[&]() { return displayInfo1->GetColorSpaces() != displayInfo2->GetColorSpaces(); }, {"colorSpaces"}},
+        {[&]() { return displayInfo1->GetHdrFormats() != displayInfo2->GetHdrFormats(); }, {"hdrFormats"}},
+        {[&]() { return displayInfo1->GetAvailableWidth() != displayInfo2->GetAvailableWidth(); }, {"availableWidth"}},
+        {[&]() { return displayInfo1->GetAvailableHeight() != displayInfo2->GetAvailableHeight(); }, {"availableHeight"}},
+        {[&]() { return displayInfo1->GetScreenShape() != displayInfo2->GetScreenShape(); }, {"screenShape"}},
+        {[&]() { return displayInfo1->GetX() != displayInfo2->GetX(); }, {"x"}},
+        {[&]() { return displayInfo1->GetY() != displayInfo2->GetY(); }, {"y"}},
+        {[&]() { return displayInfo1->GetDisplaySourceMode() != displayInfo2->GetDisplaySourceMode(); }, {"sourceMode"}},
+        {[&]() { return displayInfo1->GetSupportedRefreshRate() != displayInfo2->GetSupportedRefreshRate(); }, 
+            {"supportedRefreshRates"}},
+    };
+
+    for (const auto& check : checks) {
+        if (check.comparator()) {
+            attributes.insert(attributes.end(), 
+                            check.attributeNames.begin(), 
+                            check.attributeNames.end());
+        }
+    }
+}
+ 
+void ScreenSessionManager::NotifyDisplayAttributeChanged(sptr<DisplayInfo> displayInfo,
+    const std::vector<std::string>& attributes)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+    auto task = [=] {
+        ScreenSessionManagerAdapter::GetInstance().OnDisplayAttributeChange(displayInfo, attributes);
+    };
+    taskScheduler_->PostAsyncTask(task, "NotifyDisplayAttributeChanged");
 }
 
 DMError ScreenSessionManager::SetOrientation(ScreenId screenId, Orientation orientation, bool isFromNapi)
