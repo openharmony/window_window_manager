@@ -59,6 +59,13 @@ group("unittest") {
       ":ws_screen_aod_plugin_test",
     ]
   }
+  
+  if (!window_manager_use_sceneboard) {
+    deps += [ ":ws_screen_session_ability_connection_ut_test" ]
+  } else {
+    deps += [ ":ws_screen_session_ability_connection_test" ]
+  }
+
   if (window_manager_fold_ability) {
     deps += [
       ":ws_dual_display_fold_policy_test",
