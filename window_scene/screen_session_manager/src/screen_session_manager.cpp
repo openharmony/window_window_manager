@@ -2656,7 +2656,7 @@ void ScreenSessionManager::CheckAndNotifyChangeMode(const RRect& bounds, sptr<Sc
         return;
     }
     ScreenProperty property = updateScreenSession->GetScreenProperty();
-    property.SetPropertyChangeReason("active mode change");
+    property.SetPropertyChangeReason(ScreenPropertyChangeReason::ACTIVE_MODE_CHANGE);
     updateScreenSession->PropertyChange(property, ScreenPropertyChangeReason::CHANGE_MODE);
     RRect updateBounds = property.GetBounds();
     bool isSizeChanged =
@@ -3265,7 +3265,7 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     auto oldProperty = internalSession->GetScreenProperty();
     internalSession->UpdatePropertyByResolution(targetRect);
     auto newProperty = internalSession->GetScreenProperty();
-    newProperty.SetPropertyChangeReason("resolutionEffectChange");
+    newProperty.SetPropertyChangeReason(ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
     }
