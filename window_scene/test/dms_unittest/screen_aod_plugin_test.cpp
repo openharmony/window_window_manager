@@ -21,40 +21,55 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+    static void *g_handle = nullptr;
+    using IsInAodFunc = bool (*)();
+    using StopAodFunc = bool (*)(int32_t);
+    IsInAodFunc g_isInAodFunc = nullptr;
+    StopAodFunc g_stopAodFunc = nullptr;
 class IsInAodTest : public testing::Test {
 public:
     void SetUp() override;
     void TearDown() override;
-    static void* g_handle;
 };
 
-void* IsInAodTest::g_handle = nullptr;
+void IsInAodTest::SetUp() {}
 
-void IsInAodTest::SetUp()
-{
-    g_handle = dlopen(nullptr, RTLD_LAZY);
-}
-
-void IsInAodTest::TearDown()
-{
-    if (g_handle) {
-        dlclose(g_handle);
-    }
-}
+void IsInAodTest::TearDown() {}
 
 namespace {
 
 /**
- * @tc.name: NotifyTest01
- * @tc.desc: NotifyTest01
+ * @tc.name: ATC_IsInAodAndStopAod01
+ * @tc.desc: ATC_IsInAodAndStopAod01
  * @tc.type: FUNC
  */
 HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod01, TestSize.Level0)
 {
+    g_handle = nullptr;
     bool result = IsInAod();
     EXPECT_FALSE(result);
     result = StopAod(1);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ATC_IsInAodAndStopAod02
+ * @tc.desc: ATC_IsInAodAndStopAod02
+ * @tc.type: FUNC
+ */
+HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod02, TestSize.Level0)
+{
+    g_handle = dlopen(PLUGIN_AOD_SO_PATH.c_str(), RTLD_LAZY);
+    g_isInAodFunc = []() {return true;};
+    g_stopAodFunc = []() {return true;};
+    bool result = IsInAod();
+    EXPECT_TRUE(result);
+    result = StopAod(1);
+    EXPECT_TRUE(result);
+    dlclose(g_handle);
+    g_handle = nullptr;
+    g_isInAodFunc = nullptr;
+    g_stopAodFunc = nullptr;
 }
 }
 } // namespace Rosen
