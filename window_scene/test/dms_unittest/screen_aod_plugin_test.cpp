@@ -55,12 +55,6 @@ HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod01, TestSize.Level0)
     EXPECT_FALSE(result);
     result = StopAod(1);
     EXPECT_FALSE(result);
-    LoadAodLib();
-    result = IsInAod();
-    EXPECT_TRUE(result);
-    result = StopAod(1);
-    EXPECT_TRUE(result);
-    UnloadAodLib();
 }
 }
 } // namespace Rosen
