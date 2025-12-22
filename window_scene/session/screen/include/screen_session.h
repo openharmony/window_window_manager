@@ -514,8 +514,8 @@ private:
     /*
      * Create Unique Screen Locked Rotation Parameters
      */
-    bool isUniqueRotationLocked_;
-    int32_t uniqueRotation_;
+    bool isUniqueRotationLocked_ { false };
+    int32_t uniqueRotation_ { 0 };
     std::map<int32_t, int32_t> uniqueRotationOrientationMap_;
 
     /*
