@@ -88,12 +88,33 @@ void SecondaryFoldSensorManager::RegisterPostureCallback()
     }
 }
 
+void SecondaryFoldSensorManager::UnRegisterPostureCallback()
+{
+    int ret = DMS::ScreenSensorMgr::GetInstance().UnSubscribeSensorCallback(SENSOR_TYPE_ID_POSTURE);
+    if (ret == SENSOR_SUCCESS) {
+        registerPosture_ = false;
+        TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "failed with ret: %{public}d", ret);
+    }
+}
+
 void SecondaryFoldSensorManager::RegisterHallCallback()
 {
     int32_t ret = DMS::ScreenSensorMgr::GetInstance().SubscribeSensorCallback(
         SENSOR_TYPE_ID_HALL_EXT, POSTURE_INTERVAL, SecondarySensorHallDataCallbackExt);
     if (ret == SENSOR_SUCCESS) {
         TLOGI(WmsLogTag::DMS, "RegisterHallCallback: success.");
+    }
+}
+
+void SecondaryFoldSensorManager::UnRegisterHallCallback()
+{
+    int ret = DMS::ScreenSensorMgr::GetInstance().UnSubscribeSensorCallback(SENSOR_TYPE_ID_HALL_EXT);
+    if (ret == SENSOR_SUCCESS) {
+        TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "failed with ret: %{public}d", ret);
     }
 }
 
