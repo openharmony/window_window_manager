@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,10 @@ class IsInAodTest : public testing::Test {
 public:
     void SetUp() override;
     void TearDown() override;
+    static void* g_handle;
 };
+
+void* IsInAodTest::g_handle = nullptr;
 
 void IsInAodTest::SetUp()
 {
@@ -64,12 +67,12 @@ HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod01, TestSize.Level0)
 {
     bool result = IsInAod();
     EXPECT_FALSE(result);
-    bool result = StopAod(1);
+    result = StopAod(1);
     EXPECT_FALSE(result);
     LoadAodLib();
-    bool result = IsInAod();
+    result = IsInAod();
     EXPECT_TRUE(result);
-    bool result = StopAod(1);
+    result = StopAod(1);
     EXPECT_TRUE(result);
     UnloadAodLib();
 }
