@@ -21,7 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-    static void *g_handle = nullptr;
+    static void* g_handle;
     using IsInAodFunc = bool (*)();
     using StopAodFunc = bool (*)(int32_t);
     IsInAodFunc g_isInAodFunc = nullptr;
@@ -59,17 +59,16 @@ HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod01, TestSize.Level0)
  */
 HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod02, TestSize.Level0)
 {
-    g_handle = dlopen(PLUGIN_AOD_SO_PATH.c_str(), RTLD_LAZY);
+    LoadAodLib();
     g_isInAodFunc = []() {return true;};
-    g_stopAodFunc = []() {return true;};
+    g_stopAodFunc = [](int32_t) {return true;};
     bool result = IsInAod();
     EXPECT_TRUE(result);
     result = StopAod(1);
     EXPECT_TRUE(result);
-    dlclose(g_handle);
-    g_handle = nullptr;
-    g_isInAodFunc = nullptr;
-    g_stopAodFunc = nullptr;
+    UnloadAodLib();
+    EXPECT_EQ(g_isInAodFunc, nullptr);
+    EXPECT_EQ(g_stopAodFunc, nullptr);
 }
 }
 } // namespace Rosen
