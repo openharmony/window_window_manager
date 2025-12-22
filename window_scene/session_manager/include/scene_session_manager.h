@@ -507,6 +507,7 @@ public:
     void UpdateRootSceneAvoidArea();
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
+    void UpdateAvoidAreaForLSStateChange(int32_t curState, int32_t preState);
     void NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible);
     void GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible) const;
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
@@ -1672,6 +1673,9 @@ private:
     std::unordered_map<DisplayId, bool> statusBarConstantlyShowMap_;
     std::mutex lastSystemBarPropertyMapMutex_;
     std::unordered_map<WindowType, SystemBarProperty> lastSystemBarPropertyMap_;
+    bool GetLSState() const { return isLSState_; }
+    void SetLSState(bool isLSState) { isLSState_ = isLSState; }
+    bool isLSState_ = false;
 
     struct SessionInfoList {
         int32_t uid_;
