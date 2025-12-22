@@ -710,7 +710,9 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
+    WMError GetIsPipEnabled(bool& isPipEnabled) override;
     void SetPiPSettingSwitchStatus(bool switchStatus);
+    void SetIsPipEnabled(bool isPipEnabled);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
     bool GetPipDeviceCollaborationPolicy(int32_t screenId);
     WMError SetPipEnableByScreenId(int32_t screenId, bool enabled);
@@ -1492,6 +1494,7 @@ private:
     std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
     bool pipSwitchStatus_ = true;
+    bool pipIsPipEnabled_ = false;
     std::shared_mutex screenPipEnabledMapLock_;
     std::unordered_map<int32_t, bool> screenPipEnabledMap_;
     std::shared_mutex pipChgListenerMapMutex_;

@@ -4822,6 +4822,14 @@ public:
     virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) const { return WMError::WM_OK; }
 
     /**
+     * @brief Get picture-in-picture isPipEnabled of system setting.
+     *
+     * @param isPipEnabled  picture-in-picture isPipEnabled value.
+     * @return WM_OK means get success.
+     */
+    virtual WMError GetIsPipEnabled(bool& isPipEnabled) const { return WMError::WM_OK; }
+
+    /**
      * @brief Set parent windowId of picture-in-picture window.
      *
      * @param windowId parent windowId of picture-in-picture window.
