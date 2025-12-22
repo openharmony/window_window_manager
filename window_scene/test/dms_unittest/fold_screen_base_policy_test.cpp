@@ -286,7 +286,7 @@ HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeScreenDisplayModeInnerTest_fold
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
     DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
     FoldScreenBasePolicy::GetInstance().ChangeScreenDisplayModeInner(displayMode, reason);
-    EXPECT_EQ(policy.currentDisplayMode_, FoldDisplayMode::FULL);
+    EXPECT_EQ(FoldScreenBasePolicy::GetInstance().currentDisplayMode_, FoldDisplayMode::FULL);
     EXPECT_TRUE(g_logMsg.find("Exit coordination and recover full") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
