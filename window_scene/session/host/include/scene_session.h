@@ -131,6 +131,7 @@ using GetKeyboardOccupiedAreaWithRotationCallback =
     std::function<void(int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)>;
 using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
     std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
+using GetLSStateFunc = std::function<bool()>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
@@ -187,6 +188,7 @@ public:
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
         GetNextAvoidAreaRectInfoFunc onGetNextAvoidAreaRectInfo_;
+        GetLSStateFunc onGetLSState_;
         OnOutsideDownEvent onOutsideDownEvent_;
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
@@ -1210,6 +1212,9 @@ private:
     void GetKeyboardAvoidAreaByRotation(Rotation rotation, const WSRect& rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByRotation(Rotation rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
+    void CalculateWindowRectByScale(WSRect& winRect);
+    void CalculateAvoidAreaByScale(Rect& avoidAreaRect) const;
+    WSError GetScaleInLSState(float& scaleX, float& scaleY)  const;
 
     /*
      * Window Lifecycle
