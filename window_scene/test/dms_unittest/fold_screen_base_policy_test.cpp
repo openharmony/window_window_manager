@@ -288,6 +288,11 @@ HWTEST_F(FoldScreenBasePolicyTest, ChangeScreenDisplayModeInnerTest_foldExitCoor
     FoldScreenBasePolicy::GetInstance().ChangeScreenDisplayModeInner(displayMode, reason);
     EXPECT_EQ(FoldScreenBasePolicy::GetInstance().currentDisplayMode_, FoldDisplayMode::FULL);
     EXPECT_TRUE(g_logMsg.find("Exit coordination and recover full") != std::string::npos);
+
+    FoldScreenBasePolicy::GetInstance().currentFoldStatus_ = FoldStatus::EXPAND;
+    FoldScreenBasePolicy::GetInstance().ChangeScreenDisplayModeInner(displayMode, reason);
+    EXPECT_EQ(FoldScreenBasePolicy::GetInstance().currentDisplayMode_, FoldDisplayMode::FULL);
+    EXPECT_TRUE(g_logMsg.find("Exit coordination and recover full") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 
