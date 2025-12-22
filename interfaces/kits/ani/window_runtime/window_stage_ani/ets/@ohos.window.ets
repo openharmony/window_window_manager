@@ -2558,9 +2558,9 @@ export class WindowStageInternal implements WindowStage {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setWindowModal(this.nativeObj, isModal);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -2575,9 +2575,9 @@ export class WindowStageInternal implements WindowStage {
             taskpool.execute((): Window => {
                 let window = this.getMainWindowSync(this.nativeObj);
                 return window;
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as Window);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -2587,9 +2587,9 @@ export class WindowStageInternal implements WindowStage {
         taskpool.execute((): Window => {
             let res = this.getMainWindowSync(this.nativeObj);
             return res;
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), ret as Window);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
         });
     }
 
@@ -2598,9 +2598,9 @@ export class WindowStageInternal implements WindowStage {
             taskpool.execute((): Window => {
                 let window = this.createSubWindowSync(this.nativeObj, name);
                 return window;
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as Window);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -2610,9 +2610,9 @@ export class WindowStageInternal implements WindowStage {
         taskpool.execute((): Window => {
             let res = this.createSubWindowSync(this.nativeObj, name);
             return res;
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), ret as Window);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
         });
     }
 
@@ -2620,9 +2620,9 @@ export class WindowStageInternal implements WindowStage {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
             taskpool.execute((): void => {
                 this.setWindowRectAutoSave(this.nativeObj, enabled, false);
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(undefined);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -2632,9 +2632,9 @@ export class WindowStageInternal implements WindowStage {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
             taskpool.execute((): void => {
                 this.setWindowRectAutoSave(this.nativeObj, enabled, isSaveBySpecifiedFlag);
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(undefined);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -2644,9 +2644,9 @@ export class WindowStageInternal implements WindowStage {
         return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void) => {
             taskpool.execute((): boolean => {
                 return this.isWindowRectAutoSave(this.nativeObj);
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as boolean);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -2665,9 +2665,9 @@ export class WindowStageInternal implements WindowStage {
         reject: (error: BusinessError) => void) => {
           taskpool.execute((): Array<Window> => {
               return this.getSubWindowSync(this.nativeObj);
-          }).then((ret: NullishType) => {
+          }).then((ret: Any) => {
               resolve(ret as Array<Window>);
-          }).catch((err: NullishType) => {
+          }).catch((err: Any) => {
               reject(err as BusinessError);
           });
       });
@@ -2676,9 +2676,9 @@ export class WindowStageInternal implements WindowStage {
     public getSubWindow(callback: AsyncCallback<Array<Window>>): void {
       taskpool.execute((): Array<Window> => {
           return this.getSubWindowSync(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           callback(new BusinessError(), ret as Array<Window>);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           callback(err as BusinessError, undefined);
       });
     }
@@ -2687,9 +2687,9 @@ export class WindowStageInternal implements WindowStage {
       return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
           taskpool.execute((): Window => {
               return this.createSubWindowWithOptionsSync(this.nativeObj, name, options);
-          }).then((ret: NullishType) => {
+          }).then((ret: Any) => {
               resolve(ret as Window);
-          }).catch((err: NullishType) => {
+          }).catch((err: Any) => {
               reject(err as BusinessError);
           });
       });
@@ -2732,9 +2732,9 @@ export class WindowStageInternal implements WindowStage {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setImageForRecentSync(this.nativeObj, imageResource, value as int);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -2764,9 +2764,9 @@ export class WindowStageInternal implements WindowStage {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.removeStartingWindowSync(this.nativeObj);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -2776,9 +2776,9 @@ export class WindowStageInternal implements WindowStage {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute(() => {
           this.setSupportedWindowModes(this.nativeObj, supportedWindowModes);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -2789,9 +2789,9 @@ export class WindowStageInternal implements WindowStage {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute(() => {
           this.setSupportedWindowModes(this.nativeObj, supportedWindowModes, grayOutMaximizeButton);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3026,9 +3026,9 @@ export class WindowInternal implements Window {
         reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.hideSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3037,9 +3037,9 @@ export class WindowInternal implements Window {
     public hide(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.hideSync(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3048,9 +3048,9 @@ export class WindowInternal implements Window {
       return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): Window => {
           return this.createSubWindowWithOptionsSync(this.nativeObj, name, options); 
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as Window);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3060,9 +3060,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.restore(this.nativeObj);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -3080,9 +3080,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowTopmost(this.nativeObj, isWindowTopmost);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -3092,9 +3092,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
           this.resize(this.nativeObj, width, height);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
             reject(err as BusinessError);
         });
       });
@@ -3104,9 +3104,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
           this.moveWindowTo(this.nativeObj, x, y);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
             reject(err as BusinessError);
         });
       });
@@ -3115,9 +3115,9 @@ export class WindowInternal implements Window {
     public resize(width: int, height: int, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.resize(this.nativeObj, width, height);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, undefined);
         });
     }
@@ -3125,9 +3125,9 @@ export class WindowInternal implements Window {
     public moveWindowTo(x: int, y: int, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.moveWindowTo(this.nativeObj, x, y);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, undefined);
         });
     }
@@ -3157,9 +3157,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setWindowTitle(this.nativeObj, titleName);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3191,9 +3191,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setTitleAndDockHoverShown(this.nativeObj, isTitleHoverShown, isDockHoverShown);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3203,9 +3203,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setHandwritingFlag(this.nativeObj, enable);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3262,9 +3262,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
             taskpool.execute((): void => {
                 this.setWindowBackgroundColor(this.nativeObj, color);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: Any) :void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: Any) :void => {
                 reject(err as BusinessError);
             });
         });
@@ -3273,9 +3273,9 @@ export class WindowInternal implements Window {
     public setBackgroundColor(color: string, callback: AsyncCallback<void>): void {
         taskpool.execute((): void => {
             this.setWindowBackgroundColor(this.nativeObj, color);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, undefined);
         });
     }
@@ -3303,9 +3303,9 @@ export class WindowInternal implements Window {
             taskpool.execute((): WindowProperties => {
                 let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
                 return res;
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as WindowProperties);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -3315,9 +3315,9 @@ export class WindowInternal implements Window {
         taskpool.execute((): WindowProperties => {
             let res = this.getProperties(this.nativeObj) as WindowPropertiesInternal;
             return res;
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), ret as WindowProperties);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, new WindowPropertiesInternal());
         });
     }
@@ -3327,9 +3327,9 @@ export class WindowInternal implements Window {
             taskpool.execute((): boolean => {
                 let res = this.isWindowSupportWideGamut(this.nativeObj);
                 return res;
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as boolean);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -3339,9 +3339,9 @@ export class WindowInternal implements Window {
         taskpool.execute((): boolean => {
             let res = this.isWindowSupportWideGamut(this.nativeObj);
             return res;
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), ret as boolean);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, false);
         });
     }
@@ -3350,9 +3350,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {
                 this.setWindowLayoutFullScreen(this.nativeObj, isLayoutFullScreen);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: Any) :void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: Any) :void => {
                 reject(err as BusinessError);
             });
         });
@@ -3361,9 +3361,9 @@ export class WindowInternal implements Window {
     public setWindowLayoutFullScreen(isLayoutFullScreen: boolean, callback: AsyncCallback<void>): void {
         taskpool.execute((): void => {
             this.setWindowLayoutFullScreen(this.nativeObj, isLayoutFullScreen);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, undefined);
         });
     }
@@ -3372,9 +3372,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setRaiseByClickEnabled(this.nativeObj, enable);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3383,9 +3383,9 @@ export class WindowInternal implements Window {
     public setRaiseByClickEnabled(enable: boolean, callback: AsyncCallback<void>): void {
         taskpool.execute((): void => {
             this.setRaiseByClickEnabled(this.nativeObj, enable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, undefined);
         });
     }
@@ -3394,9 +3394,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setExclusivelyHighlighted(this.nativeObj, exclusivelyHighlighted);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3406,9 +3406,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {
                 this.setWindowSystemBarProperties(this.nativeObj, systemBarProperties);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: Any) :void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: Any) :void => {
                 reject(err as BusinessError);
             });
         });
@@ -3417,9 +3417,9 @@ export class WindowInternal implements Window {
     public setWindowSystemBarProperties(systemBarProperties: SystemBarProperties, callback: AsyncCallback<void>): void {
         taskpool.execute((): void => {
             this.setWindowSystemBarProperties(this.nativeObj, systemBarProperties);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(new BusinessError(), undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, undefined);
         });
     }
@@ -3428,9 +3428,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {
               this.setSpecificSystemBarEnabled(this.nativeObj, name, enable, enableAnimation);
-            }).then((ret: NullishType) :void => {
+            }).then((ret: Any) :void => {
                 resolve(undefined);
-            }).catch((err: NullishType) :void => {
+            }).catch((err: Any) :void => {
                 reject(err as BusinessError);
             });
         });
@@ -3444,9 +3444,9 @@ export class WindowInternal implements Window {
       return new Promise<KeyFramePolicy>((resolve: (value: KeyFramePolicy) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute(() => {
           return this.setDragKeyFramePolicy(this.nativeObj, keyFramePolicy);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as KeyFramePolicy);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3456,9 +3456,9 @@ export class WindowInternal implements Window {
       return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute(() => {
           return this.snapshot(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as image.PixelMap);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3467,9 +3467,9 @@ export class WindowInternal implements Window {
     public snapshot(callback: AsyncCallback<image.PixelMap | undefined>): void {
       taskpool.execute(() => {
         return this.snapshot(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), ret as image.PixelMap);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3484,7 +3484,7 @@ export class WindowInternal implements Window {
           this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
         }).then(() => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3495,7 +3495,7 @@ export class WindowInternal implements Window {
         this.hideNonSystemFloatingWindows(this.nativeObj, shouldHide);
       }).then(() => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3544,9 +3544,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowCornerRadiusSync(this.nativeObj, cornerRadius);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3560,9 +3560,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowColorSpaceSync(this.nativeObj, colorSpace as int);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3571,9 +3571,9 @@ export class WindowInternal implements Window {
     public setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWindowColorSpaceSync(this.nativeObj, colorSpace as int);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3582,9 +3582,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setPreferredOrientationSync(this.nativeObj, orientation as int);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3593,9 +3593,9 @@ export class WindowInternal implements Window {
     public setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setPreferredOrientationSync(this.nativeObj, orientation as int);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3612,9 +3612,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowPrivacyModeSync(this.nativeObj, isPrivacyMode);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3623,9 +3623,9 @@ export class WindowInternal implements Window {
     public setWindowPrivacyMode(isPrivacyMode: boolean, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWindowPrivacyModeSync(this.nativeObj, isPrivacyMode);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3634,9 +3634,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.recoverSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3775,9 +3775,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) :void => {
             taskpool.execute((): void => {
                 this.setWindowKeepScreenOnSync(this.nativeObj, isKeepScreenOn);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(ret as undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -3786,9 +3786,9 @@ export class WindowInternal implements Window {
     public setWindowKeepScreenOn(isKeepScreenOn: boolean, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWindowKeepScreenOnSync(this.nativeObj, isKeepScreenOn);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3797,9 +3797,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
             taskpool.execute((): void => {
                 this.setWindowSystemBarEnableSync(this.nativeObj, names);
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(undefined);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -3808,9 +3808,9 @@ export class WindowInternal implements Window {
     public setWindowSystemBarEnable(names: Array<'status' | 'navigation'>, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWindowSystemBarEnableSync(this.nativeObj, names);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3819,9 +3819,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowTouchableSync(this.nativeObj, isTouchable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3830,9 +3830,9 @@ export class WindowInternal implements Window {
     public setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWindowTouchableSync(this.nativeObj, isTouchable);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3841,9 +3841,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
          taskpool.execute((): void => {
            this.setDialogBackGestureEnabledSync(this.nativeObj, enabled);
-         }).then((ret: NullishType) => {
+         }).then((ret: Any) => {
            resolve(undefined);
-         }).catch((err: NullishType) => {
+         }).catch((err: Any) => {
            reject(err as BusinessError);
          });
        });
@@ -3853,9 +3853,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowMaskSync(this.nativeObj, windowMask);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3873,9 +3873,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowBrightness(this.nativeObj, brightness);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3884,9 +3884,9 @@ export class WindowInternal implements Window {
     public setWindowBrightness(brightness: double, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWindowBrightness(this.nativeObj, brightness);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -3908,9 +3908,9 @@ export class WindowInternal implements Window {
         reject: (error: BusinessError) => void): void => {
         taskpool.execute(() => {
           return this.snapshotIgnorePrivacy(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as image.PixelMap);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3925,9 +3925,9 @@ export class WindowInternal implements Window {
         taskpool.execute((): void => {
           this.setStatusBarColor(
             this.nativeObj, (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3941,9 +3941,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setSystemAvoidAreaEnabled(this.nativeObj, enabled);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3961,9 +3961,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowGrayScale(this.nativeObj, grayScale);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3981,9 +3981,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setGestureBackEnabled(this.nativeObj, enabled);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -3993,9 +3993,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setSingleFrameComposerEnabled(this.nativeObj, enabled);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4009,9 +4009,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWaterMarkFlagSync(this.nativeObj, enable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4020,9 +4020,9 @@ export class WindowInternal implements Window {
     public setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWaterMarkFlagSync(this.nativeObj, enable);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4031,9 +4031,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.raiseMainWindowAboveTargetSync(this.nativeObj, windowId);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4043,9 +4043,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setMainWindowRaiseByClickEnabledSync(this.nativeObj, enable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4055,9 +4055,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowFocusableSync(this.nativeObj, isFocusable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4066,9 +4066,9 @@ export class WindowInternal implements Window {
     public setWindowFocusable(isFocusable: boolean, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.setWindowFocusableSync(this.nativeObj, isFocusable);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4086,9 +4086,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setSubWindowZLevelSync(this.nativeObj, zLevel);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4098,9 +4098,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.raiseAboveTargetSync(this.nativeObj, windowId);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -4109,9 +4109,9 @@ export class WindowInternal implements Window {
     public raiseAboveTarget(windowId: int, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.raiseAboveTargetSync(this.nativeObj, windowId);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4120,9 +4120,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.raiseToAppTopSync(this.nativeObj);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -4131,9 +4131,9 @@ export class WindowInternal implements Window {
     public raiseToAppTop(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.raiseToAppTopSync(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4142,9 +4142,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setTopmostSync(this.nativeObj, isTopmost);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -4154,9 +4154,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setReceiveDragEventEnabled(this.nativeObj, enabled);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -4170,9 +4170,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setSeparationTouchEnabled(this.nativeObj, enabled);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -4186,9 +4186,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.requestFocusSync(this.nativeObj, isFocused);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -4198,9 +4198,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setSubWindowModal(this.nativeObj, isModal);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -4210,9 +4210,9 @@ export class WindowInternal implements Window {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
             taskpool.execute((): void => {
                 this.setSubWindowModalType(this.nativeObj, isModal, modalityType);
-            }).then((ret: NullishType): void => {
+            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: NullishType): void => {
+            }).catch((err: Any): void => {
                 reject(err as BusinessError);
             });
         });
@@ -4223,9 +4223,9 @@ export class WindowInternal implements Window {
         (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
           taskpool.execute((): void => {
               this.setContentAspectRatio(this.nativeObj, ratio, isPersistent ?? true, needUpdateRect ?? true);
-          }).then((ret: NullishType) => {
+          }).then((ret: Any) => {
               resolve(undefined);
-          }).catch((err: NullishType) => {
+          }).catch((err: Any) => {
               reject(err as BusinessError);
           });
       });
@@ -4389,9 +4389,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowShadowEnabledSync(this.nativeObj, enable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4401,9 +4401,9 @@ export class WindowInternal implements Window {
       return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): boolean => {
           return this.isMainWindowFullScreenAcrossDisplaysSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as boolean);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4456,9 +4456,9 @@ export class WindowInternal implements Window {
     public showWindow(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.showWindowSync(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4467,9 +4467,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.showWindowSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4479,9 +4479,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.showWindowWithOptions(this.nativeObj, options);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
           resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
           reject(err as BusinessError);
         });
       });
@@ -4490,9 +4490,9 @@ export class WindowInternal implements Window {
     public destroyWindow(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.destroyWindowSync(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4501,9 +4501,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.destroyWindowSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4520,9 +4520,9 @@ export class WindowInternal implements Window {
     public hideWithAnimation(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.hideWithAnimationSync(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4531,9 +4531,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.hideWithAnimationSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4542,9 +4542,9 @@ export class WindowInternal implements Window {
     public showWithAnimation(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.showWithAnimationSync(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4553,9 +4553,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.showWithAnimationSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4569,9 +4569,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setParentWindow(this.nativeObj, windowId);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4581,9 +4581,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, token, deathCallback);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4593,9 +4593,9 @@ export class WindowInternal implements Window {
       callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.bindDialogTargetWithRemoteObjectSync(this.nativeObj, token, deathCallback);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4604,9 +4604,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.bindDialogTargetWithRequestInfoSync(this.nativeObj, requestInfo, deathCallback);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4616,9 +4616,9 @@ export class WindowInternal implements Window {
       callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
         this.bindDialogTargetWithRequestInfoSync(this.nativeObj, requestInfo, deathCallback);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4627,9 +4627,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.resizeAsync(this.nativeObj, width, height);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4639,9 +4639,9 @@ export class WindowInternal implements Window {
       return new Promise<WindowLimits>((resolve: (value: WindowLimits) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute(() => {
           return this.setWindowLimits(this.nativeObj, windowLimits);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as WindowLimits);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4651,9 +4651,9 @@ export class WindowInternal implements Window {
       return new Promise<WindowLimits>((resolve: (value: WindowLimits) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute(() => {
           return this.setWindowLimits(this.nativeObj, windowLimits, isForcible);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as WindowLimits);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4670,9 +4670,9 @@ export class WindowInternal implements Window {
     public setAspectRatio(ratio: double, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setAspectRatio(this.nativeObj, ratio);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4681,9 +4681,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.setAspectRatio(this.nativeObj, ratio);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4692,9 +4692,9 @@ export class WindowInternal implements Window {
     public resetAspectRatio(callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.resetAspectRatio(this.nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4703,9 +4703,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.resetAspectRatio(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4745,9 +4745,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.maximize(this.nativeObj, presentation, acrossDisplay);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4758,9 +4758,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.startMoving(this.nativeObj);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
             resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
             reject(err as BusinessError);
         });
       });
@@ -4770,9 +4770,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.startMoveWindowWithCoordinate(this.nativeObj, offsetX, offsetY);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
             resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
             reject(err as BusinessError);
         });
       });
@@ -4782,9 +4782,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute(() => {
           this.stopMoving(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4793,9 +4793,9 @@ export class WindowInternal implements Window {
     public setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setResizeByDragEnabled(this.nativeObj, enable);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4804,9 +4804,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.setResizeByDragEnabled(this.nativeObj, enable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4816,9 +4816,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.enableDrag(this.nativeObj, enable);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4828,9 +4828,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.moveWindowToGlobal(this.nativeObj, x, y);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4840,9 +4840,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.moveWindowToGlobal(this.nativeObj, x, y, moveConfiguration);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4852,9 +4852,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.moveWindowToAsync(this.nativeObj, x, y);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4864,9 +4864,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.moveWindowToAsync(this.nativeObj, x, y, moveConfiguration);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4875,9 +4875,9 @@ export class WindowInternal implements Window {
     public setWindowMode(mode: WindowMode, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setWindowMode(this.nativeObj, mode);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4886,9 +4886,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.setWindowMode(this.nativeObj, mode);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4897,9 +4897,9 @@ export class WindowInternal implements Window {
     public setForbidSplitMove(isForbidSplitMove: boolean, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setForbidSplitMove(this.nativeObj, isForbidSplitMove);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
       });
     }
@@ -4908,9 +4908,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.setForbidSplitMove(this.nativeObj, isForbidSplitMove);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4920,9 +4920,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.setFollowParentWindowLayoutEnabled(this.nativeObj, enabled);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4932,9 +4932,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.setFollowParentMultiScreenPolicy(this.nativeObj, enabled);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4944,9 +4944,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute(() => {
           this.moveWindowToGlobalDisplay(this.nativeObj, x, y);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4964,9 +4964,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setRotationLocked(this.nativeObj, locked);
-          }).then((ret: NullishType) => {
+          }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -4996,9 +4996,9 @@ export class WindowInternal implements Window {
         (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
           taskpool.execute((): void => {
             this.setRelativePositionToParentWindowEnabled(this.nativeObj, enabled, anchor, offsetX, offsetY);
-          }).then((ret: NullishType) => {
+          }).then((ret: Any) => {
             resolve(undefined);
-          }).catch((err: NullishType) => {
+          }).catch((err: Any) => {
             reject(err as BusinessError);
           });
       });
@@ -5013,9 +5013,9 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute(() => {
           this.setWindowTransitionAnimation(this.nativeObj, transitionType, animation);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -5367,9 +5367,9 @@ native function setSpecificSystemWindowZIndexSync(nativeObj: long, windowType: W
 export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
           toggleShownStateForAllAppWindowsSync(nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           callback(new BusinessError(), undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           callback(err as BusinessError, undefined);
       });
 }
@@ -5378,9 +5378,9 @@ export function toggleShownStateForAllAppWindows(): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
     taskpool.execute((): void => {
         return toggleShownStateForAllAppWindowsSync(nativeObj);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         resolve(undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         reject(err as BusinessError);
     });
   });
@@ -5390,9 +5390,9 @@ export function setWatermarkImageForAppWindows(pixelMap: image.PixelMap | undefi
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
     taskpool.execute((): void => {
       return setWatermarkImageForAppWindowsSync(nativeObj, pixelMap);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   });
@@ -5402,9 +5402,9 @@ export function getTopNavDestinationName(windowId: int): Promise<string> {
   return new Promise<string>((resolve: (value: string) => void, reject: (error: BusinessError) => void) => {
     taskpool.execute((): string => {
       return getTopNavDestinationNameSync(nativeObj, windowId);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(ret as string);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   });
@@ -5414,9 +5414,9 @@ export function getGlobalWindowMode(displayId?: long): Promise<int> {
   return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void): int => {
     taskpool.execute((): int => {
       return getGlobalWindowModeSync(nativeObj, displayId);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(ret as int);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   });
@@ -5428,9 +5428,9 @@ export function setStartWindowBackgroundColor(moduleName: string, abilityName: s
     taskpool.execute((): void => {
       return setStartWindowBackgroundColorSync(nativeObj, moduleName, abilityName,
         (color.alpha << 24) | (color.red << 16) | (color.green << 8) | color.blue);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   });
@@ -5440,9 +5440,9 @@ export function notifyScreenshotEvent(eventType: ScreenshotEventType): Promise<v
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
     taskpool.execute((): void => {
       return notifyScreenshotEventSync(nativeObj, eventType);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   });
@@ -5452,9 +5452,9 @@ export function getLastWindow(ctx: BaseContext): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
     taskpool.execute((): Window => {
       return getLastWindowSync(nativeObj, ctx);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(ret as Window);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   }); 
@@ -5463,9 +5463,9 @@ export function getLastWindow(ctx: BaseContext): Promise<Window> {
 export function getLastWindow(ctx: BaseContext, callback: AsyncCallback<Window>): void {
     taskpool.execute((): Window => {
         return getLastWindowSync(nativeObj, ctx);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         callback(new BusinessError(), ret as Window);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         callback(err as BusinessError, new WindowInternal());
     });
 }
@@ -5474,9 +5474,9 @@ export function createWindow(config: Configuration): Promise<Window> {
   return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
       taskpool.execute((): Window => {
           return createWindowSync(nativeObj, config);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(ret as Window);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5485,9 +5485,9 @@ export function createWindow(config: Configuration): Promise<Window> {
 export function createWindow(config: Configuration, callback: AsyncCallback<Window>): void {
     taskpool.execute((): Window => {
         return createWindowSync(nativeObj, config);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         callback(new BusinessError(), ret as Window);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         callback(err as BusinessError, new WindowInternal());
     });
 }
@@ -5496,9 +5496,9 @@ export function minimizeAll(id: long): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           minimizeAllSync(nativeObj, id);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5508,9 +5508,9 @@ export function minimizeAll(id: long): Promise<void> {
 export function minimizeAll(id: long, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
         minimizeAllSync(nativeObj, id);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
     });
 }
@@ -5519,9 +5519,9 @@ export function minimizeAllWithExclusion(displayId: long, excludeWindowId: int):
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           minimizeAllWithExclusionSync(nativeObj, displayId, excludeWindowId);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5532,9 +5532,9 @@ export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLay
     resolve: (value: Array<WindowLayoutInfo>) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute(() => {
           return getAllWindowLayoutInfo(nativeObj, displayId);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(ret as Array<WindowLayoutInfo>);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5545,9 +5545,9 @@ export function getSnapshot(windowId: int): Promise<image.PixelMap> {
     resolve: (value: image.PixelMap) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute(() => {
           return getSnapshot(nativeObj, windowId);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(ret as image.PixelMap);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5564,9 +5564,9 @@ export function getVisibleWindowInfo(): Promise<Array<WindowInfo>> {
             visibleWindowInfos[i].isFocused = visibleWindowInfos[i].isFocusedInternal;
           }
           return visibleWindowInfos;
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(ret as Array<WindowInfo>);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5577,9 +5577,9 @@ export function setGestureNavigationEnabled(enabled: boolean): Promise<void> {
     resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           return setGestureNavigationEnabled(nativeObj, enabled);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5588,9 +5588,9 @@ export function setGestureNavigationEnabled(enabled: boolean): Promise<void> {
 export function setGestureNavigationEnabled(enabled: boolean, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
         setGestureNavigationEnabled(nativeObj, enabled);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
     });
 }
@@ -5600,9 +5600,9 @@ export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean): P
     resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           return setWaterMarkImage(nativeObj, pixelMap, enabled);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5611,9 +5611,9 @@ export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean): P
 export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
         setWaterMarkImage(nativeObj, pixelMap, enabled);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
     });
 }
@@ -5639,9 +5639,9 @@ export function getWindowsByCoordinate(displayId: long, windowNumber?: int,
         param.y = y;
       }
       return getWindowsByCoordinate(nativeObj, param);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         resolve(ret as Array<Window>);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         reject(err as BusinessError);
     });
   });
@@ -5655,9 +5655,9 @@ export function shiftAppWindowFocus(sourceWindowId: int, targetWindowId: int): P
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           return shiftAppWindowFocusSync(nativeObj, sourceWindowId, targetWindowId);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5667,9 +5667,9 @@ export function shiftAppWindowPointerEvent(sourceWindowId: int, targetWindowId: 
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
     taskpool.execute((): void => {
       return shiftAppWindowPointerEventSync(nativeObj, sourceWindowId, targetWindowId);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   });
@@ -5679,9 +5679,9 @@ export function setSpecificSystemWindowZIndex(windowType: WindowType, zIndex: in
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           return setSpecificSystemWindowZIndexSync(nativeObj, windowType, zIndex);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5691,9 +5691,9 @@ export function shiftAppWindowTouchEvent(sourceWindowId: int, targetWindowId: in
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
     taskpool.execute((): void => {
       return shiftAppWindowTouchEventSync(nativeObj, sourceWindowId, targetWindowId, fingerId);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
       resolve(undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
       reject(err as BusinessError);
     });
   });
@@ -5702,9 +5702,9 @@ export function shiftAppWindowTouchEvent(sourceWindowId: int, targetWindowId: in
 export function setWindowLayoutMode(mode: WindowLayoutMode, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
         setWindowLayoutMode(nativeObj, mode);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
     });
 }
@@ -5713,9 +5713,9 @@ export function setWindowLayoutMode(mode: WindowLayoutMode): Promise<void> {
   return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
           setWindowLayoutMode(nativeObj, mode);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(undefined);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   }); 
@@ -5752,9 +5752,9 @@ export function getAllMainWindowInfo(): Promise<Array<MainWindowInfo>> {
     (resolve: (value: Array<MainWindowInfo>) => void, reject: (error: BusinessError) => void ) => {
       taskpool.execute((): Array<MainWindowInfo> => {
           return getAllMainWindowInfo(nativeObj);
-      }).then((ret: NullishType) => {
+      }).then((ret: Any) => {
           resolve(ret as Array<MainWindowInfo>);
-      }).catch((err: NullishType) => {
+      }).catch((err: Any) => {
           reject(err as BusinessError);
       });
   });
@@ -5766,9 +5766,9 @@ export function getMainWindowSnapshot(windowId: Array<number>, config: WindowSna
       (resolve: (value: Array<image.PixelMap>) => void, reject: (error: BusinessError) => void ) => {
       taskpool.execute((): Array<image.PixelMap> => {
         return getMainWindowSnapshot(nativeObj, windowId, config);
-    }).then((ret: NullishType) => {
+    }).then((ret: Any) => {
         resolve(ret as Array<image.PixelMap>);
-    }).catch((err: NullishType) => {
+    }).catch((err: Any) => {
         reject(err as BusinessError);
     });
   });
