@@ -15,12 +15,14 @@
 
 #include "screen_sensor_plugin.h"
 #include <shared_mutex>
+
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
     constexpr uint32_t SLEEP_TIME_AOD = 10;
 }
+
 static std::shared_mutex g_mutex;
 static void *g_handle = nullptr;
 static MotionSubscribeCallbackPtr g_motionSubscribeCallbackPtr = nullptr;
