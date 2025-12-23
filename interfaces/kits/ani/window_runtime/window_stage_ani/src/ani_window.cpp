@@ -1569,7 +1569,7 @@ void AniWindow::OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "[window][OnSetWindowFocusable]msg:SetWindowFocusable failed.");
+        AniWindowUtils::AniThrowError(env, ret, "[window][setWindowFocusable]msg: Window set focusable failed");
     }
 }
 
