@@ -22,8 +22,8 @@ namespace {
 }
 
 static void *g_handle = nullptr;
-MotionSubscribeCallbackPtr g_motionSubscribeCallbackPtr = nullptr;
-MotionUnsubscribeCallbackPtr g_motionUnsubscribeCallbackPtr = nullptr;
+static MotionSubscribeCallbackPtr g_motionSubscribeCallbackPtr = nullptr;
+static MotionUnsubscribeCallbackPtr g_motionUnsubscribeCallbackPtr = nullptr;
 
 bool LoadMotionSensor(void)
 {
