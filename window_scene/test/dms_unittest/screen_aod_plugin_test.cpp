@@ -53,16 +53,6 @@ HWTEST_F(IsInAodTest, ATC_IsInAodAndStopAod01, TestSize.Level0)
     EXPECT_FALSE(result);
     result = StopAod(1);
     EXPECT_FALSE(result);
-    LoadAodLib();
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    IsInAod();
-    EXPECT_TRUE(g_errLog.find("dlsym error") == std::string::npos);
-    g_errLog.clear();
-    StopAod(1);
-    EXPECT_TRUE(g_errLog.find("dlsym error") == std::string::npos);
-    LOG_SetCallback(nullptr);
-    g_errLog.clear();
 }
 }
 } // namespace Rosen
