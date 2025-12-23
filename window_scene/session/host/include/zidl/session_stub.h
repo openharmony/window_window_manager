@@ -129,6 +129,7 @@ private:
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetPipParentWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleIsPiPActive(MessageParcel& data, MessageParcel& reply);
 
     // Floating Ball
     int HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& reply);

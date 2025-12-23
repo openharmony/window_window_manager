@@ -731,6 +731,23 @@ HWTEST_F(SessionStubTest, HandleSetPipParentWindowId, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: HandleIsPiPActive
+ * @tc.desc: sessionStub HandleIsPiPActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsPiPActive, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_PIP_ACTIVE);
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    ASSERT_EQ(session_->OnRemoteRequest(code, data, reply, option), ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetWindowTransitionAnimation
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC

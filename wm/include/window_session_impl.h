@@ -408,6 +408,7 @@ public:
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) const override;
     WMError SetPipParentWindowId(uint32_t windowId) const override;
+    WMError IsPiPActive(bool& status) override;
 
     WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) override;

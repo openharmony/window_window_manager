@@ -4838,6 +4838,13 @@ public:
     virtual WMError SetPipParentWindowId(uint32_t windowId) const { return WMError::WM_OK; }
 
     /**
+     * @brief get is pip active
+     *
+     * @return WMError
+     */
+    virtual WMError IsPiPActive(bool& status) { return WMError::WM_OK; }
+
+    /**
      * @brief return true if current window is anco, otherwise return false
      */
     virtual bool IsAnco() const
