@@ -8943,6 +8943,20 @@ WMError WindowSessionImpl::SetPipParentWindowId(uint32_t windowId) const
     return WMError::WM_OK;
 }
 
+WMError WindowSessionImpl::IsPiPActive(bool& status)
+{
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGE(WmsLogTag::WMS_PIP, "hostSession is null");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    auto ret = hostSession->IsPiPActive(status);
+    if (ret != WMError::WM_OK) {
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSessionImpl::SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId)
 {
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);

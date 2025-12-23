@@ -354,6 +354,7 @@ public:
     void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
     void SetPipParentWindowIdCallback(NotifySetPipParentWindowIdFunc&& func);
     WSError SetPipParentWindowId(uint32_t windowId) override;
+    WMError IsPiPActive(bool& status) override;
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -1095,6 +1096,7 @@ protected:
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
+    std::atomic<bool> pipActiveStatus_{true};
 
     /*
      * Window Layout
