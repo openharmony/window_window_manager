@@ -14,7 +14,6 @@
  */
 
 #include "screen_sensor_plugin.h"
-#include <shared_mutex>
 
 namespace OHOS {
 namespace Rosen {
@@ -23,7 +22,6 @@ namespace {
     constexpr uint32_t SLEEP_TIME_AOD = 10;
 }
 
-static std::shared_mutex g_mutex;
 static void *g_handle = nullptr;
 static MotionSubscribeCallbackPtr g_motionSubscribeCallbackPtr = nullptr;
 static MotionUnsubscribeCallbackPtr g_motionUnsubscribeCallbackPtr = nullptr;
@@ -72,13 +70,13 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
         return false;
     }
     if (g_motionSubscribeCallbackPtr == nullptr) {
-        std::unique_lock<std::shared_mutex> lock(g_mutex);
         int32_t cnt = 0;
         int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
         do {
             cnt++;
-            g_motionSubscribeCallbackPtr = reinterpret_cast<MotionSubscribeCallbackPtr>(dlsym(g_handle, "MotionSubscribeCallback"));
+            g_motionSubscribeCallbackPtr = reinterpret_cast<MotionSubscribeCallbackPtr>(dlsym(
+                g_handle, "MotionSubscribeCallback"));
             dlsymError = dlerror();
             if (dlsymError) {
                 TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
@@ -105,13 +103,13 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
         return false;
     }
     if (g_motionUnsubscribeCallbackPtr == nullptr) {
-        std::unique_lock<std::shared_mutex> lock(g_mutex);
         int32_t cnt = 0;
         int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
         do {
             cnt++;
-            g_motionUnsubscribeCallbackPtr = reinterpret_cast<MotionUnsubscribeCallbackPtr>(dlsym(g_handle, "MotionUnsubscribeCallback"));
+            g_motionUnsubscribeCallbackPtr = reinterpret_cast<MotionUnsubscribeCallbackPtr>(dlsym(
+                g_handle, "MotionUnsubscribeCallback"));
             dlsymError = dlerror();
             if (dlsymError) {
                 TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
