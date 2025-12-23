@@ -1552,6 +1552,8 @@ void AniWindow::SetWindowFocusable(ani_env* env, ani_object obj, ani_long native
         aniWindow->OnSetWindowFocusable(env, isFocusable);
     } else {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][SetWindowFocusable]msg:aniWindow is nullptr");
     }
 }
 
@@ -1561,12 +1563,13 @@ void AniWindow::OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][OnSetWindowFocusable]msg:window is nullptr");
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "SetWindowFocusable failed.");
+        AniWindowUtils::AniThrowError(env, ret, "[window][OnSetWindowFocusable]msg:SetWindowFocusable failed.");
     }
 }
 
