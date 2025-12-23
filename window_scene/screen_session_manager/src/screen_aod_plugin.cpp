@@ -21,6 +21,7 @@ namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
     constexpr uint32_t SLEEP_TIME_AOD = 10;
 }
+
 static std::shared_mutex g_mutex;
 static void *g_handle = nullptr;
 using IsInAodFunc = bool (*)();
