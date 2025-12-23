@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "screen_aod_plugin.h"
-#include <shared_mutex>
 
 namespace OHOS {
 namespace Rosen {
@@ -22,7 +21,6 @@ namespace {
     constexpr uint32_t SLEEP_TIME_AOD = 10;
 }
 
-static std::shared_mutex g_mutex;
 static void *g_handle = nullptr;
 using IsInAodFunc = bool (*)();
 using StopAodFunc = bool (*)(int32_t);
@@ -35,7 +33,6 @@ bool LoadAodLib(void)
         TLOGW(WmsLogTag::DMS, "aod plugin has already exits.");
         return true;
     }
-    std::unique_lock<std::shared_mutex> lock(g_mutex);
     int32_t cnt = 0;
     int32_t retryTimes = 3;
     const char* dlopenError = nullptr;
@@ -54,7 +51,6 @@ bool LoadAodLib(void)
 
 void UnloadAodLib(void)
 {
-    std::unique_lock<std::shared_mutex> lock(g_mutex);
     TLOGI(WmsLogTag::DMS, "unload aod plugin.");
     if (g_handle != nullptr) {
         dlclose(g_handle);
@@ -71,7 +67,6 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
         return false;
     }
     if (g_isInAodFunc == nullptr) {
-        std::unique_lock<std::shared_mutex> lock(g_mutex);
         int32_t cnt = 0;
         int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
@@ -100,7 +95,6 @@ __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
         return false;
     }
     if (g_stopAodFunc == nullptr) {
-        std::unique_lock<std::shared_mutex> lock(g_mutex);
         int32_t cnt = 0;
         int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
