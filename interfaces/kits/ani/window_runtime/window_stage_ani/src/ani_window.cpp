@@ -6277,10 +6277,6 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::ShowWithAnimation)},
         ani_native_function {"getTransitionControllerSync", "l:C{@ohos.window.window.TransitionController}",
             reinterpret_cast<void *>(AniWindow::GetTransitionController)},
-        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
-            reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
-        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
-            reinterpret_cast<void *>(AniWindow::NativeTransferDynamic)},
         ani_native_function {"resizeAsync", "lii:",
             reinterpret_cast<void *>(WindowResizeAsync)},
         ani_native_function {"setWindowLimits",
@@ -6402,6 +6398,19 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
     for (auto method : methods) {
         if ((ret = env->Class_BindNativeMethods(cls, &method, 1u)) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window method fail %{public}u, %{public}s, %{public}s",
+                ret, method.name, method.signature);
+            return ANI_NOT_FOUND;
+        }
+    }
+    std::array staticMethods = {
+        ani_native_function {"nativeTransferStatic", "C{std.interop.ESValue}:C{std.core.Object}",
+            reinterpret_cast<void *>(AniWindow::NativeTransferStatic)},
+        ani_native_function {"nativeTransferDynamic", "l:C{std.interop.ESValue}",
+            reinterpret_cast<void *>(AniWindow::NativeTransferDynamic)}
+    };
+    for (auto method : staticMethods) {
+        if ((ret = env->Class_BindStaticNativeMethods(cls, &method, 1u)) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] bind window static method fail %{public}u, %{public}s, %{public}s",
                 ret, method.name, method.signature);
             return ANI_NOT_FOUND;
         }
