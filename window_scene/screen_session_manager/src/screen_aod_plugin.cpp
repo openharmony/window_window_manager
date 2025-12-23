@@ -19,6 +19,7 @@ namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
     constexpr uint32_t SLEEP_TIME_AOD = 10;
+    constexpr uint32_t RETRY_TIMES = 3;
 }
 
 static void *g_handle = nullptr;
@@ -34,7 +35,6 @@ bool LoadAodLib(void)
         return true;
     }
     int32_t cnt = 0;
-    int32_t retryTimes = 3;
     const char* dlopenError = nullptr;
     do {
         cnt++;
@@ -45,7 +45,7 @@ bool LoadAodLib(void)
         }
         TLOGI(WmsLogTag::DMS, "dlopen %{public}s, retry cnt: %{public}d", PLUGIN_AOD_SO_PATH.c_str(), cnt);
         usleep(SLEEP_TIME_US);
-    } while (!g_handle && cnt < retryTimes);
+    } while (!g_handle && cnt < RETRY_TIMES);
     return g_handle != nullptr;
 }
 
@@ -68,7 +68,6 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
     }
     if (g_isInAodFunc == nullptr) {
         int32_t cnt = 0;
-        int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
         do {
             cnt++;
@@ -79,7 +78,7 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
                 usleep(SLEEP_TIME_AOD);
             }
             TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "IsInAod", cnt);
-        } while (!g_isInAodFunc && cnt < retryTimes);
+        } while (!g_isInAodFunc && cnt < RETRY_TIMES);
     }
     if (g_isInAodFunc == nullptr) {
         return false;
@@ -96,7 +95,6 @@ __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
     }
     if (g_stopAodFunc == nullptr) {
         int32_t cnt = 0;
-        int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
         do {
             cnt++;
@@ -107,7 +105,7 @@ __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
                 usleep(SLEEP_TIME_AOD);
             }
             TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "StopAod", cnt);
-        } while (!g_stopAodFunc && cnt < retryTimes);
+        } while (!g_stopAodFunc && cnt < RETRY_TIMES);
     }
     if (g_stopAodFunc == nullptr) {
         return false;
