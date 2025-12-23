@@ -1115,7 +1115,8 @@ void ScreenSessionManager::OnScreenChangeDefault(ScreenId screenId, ScreenEvent 
 void ScreenSessionManager::OnFoldScreenChange(sptr<ScreenSession>& screenSession)
 {
 #ifdef FOLD_ABILITY_ENABLE
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() ||
+        !IsDefaultMirrorMode(screenSession->GetScreenId())) {
         SuperFoldSensorManager::GetInstance().SetTaskScheduler(screenPowerTaskScheduler_);
         SuperFoldSensorManager::GetInstance().RegisterPostureCallback();
         SuperFoldSensorManager::GetInstance().RegisterHallCallback();
