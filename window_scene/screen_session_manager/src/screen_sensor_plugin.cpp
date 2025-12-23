@@ -14,13 +14,14 @@
  */
 
 #include "screen_sensor_plugin.h"
-
+#include <shared_mutex>
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
+    constexpr uint32_t SLEEP_TIME_AOD = 10;
 }
-
+static std::shared_mutex g_mutex;
 static void *g_handle = nullptr;
 static MotionSubscribeCallbackPtr g_motionSubscribeCallbackPtr = nullptr;
 static MotionUnsubscribeCallbackPtr g_motionUnsubscribeCallbackPtr = nullptr;
@@ -69,15 +70,26 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
         return false;
     }
     if (g_motionSubscribeCallbackPtr == nullptr) {
-        g_motionSubscribeCallbackPtr = reinterpret_cast<MotionSubscribeCallbackPtr>(
-            dlsym(g_handle, "MotionSubscribeCallback"));
-        const char* dlsymError = dlerror();
-        if  (dlsymError) {
-            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-            return false;
-        }
+        std::unique_lock<std::shared_mutex> lock(g_mutex);
+        int32_t cnt = 0;
+        int32_t retryTimes = 3;
+        const char* dlsymError = nullptr;
+        do {
+            cnt++;
+            g_motionSubscribeCallbackPtr = reinterpret_cast<MotionSubscribeCallbackPtr>(dlsym(g_handle, "MotionSubscribeCallback"));
+            dlsymError = dlerror();
+            if (dlsymError) {
+                TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+                usleep(SLEEP_TIME_AOD);
+            }
+            TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "MotionSubscribeCallback", cnt);
+        } while (!g_motionSubscribeCallbackPtr && cnt < retryTimes);
     }
-    return g_motionSubscribeCallbackPtr(motionType, callback);
+    if (g_motionSubscribeCallbackPtr == nullptr) {
+        return false;
+    } else {
+        return g_motionSubscribeCallbackPtr(motionType, callback);
+    }
 }
 
 __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType, OnMotionChangedPtr callback)
@@ -91,15 +103,26 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
         return false;
     }
     if (g_motionUnsubscribeCallbackPtr == nullptr) {
-        g_motionUnsubscribeCallbackPtr = reinterpret_cast<MotionUnsubscribeCallbackPtr>(dlsym(
-            g_handle, "MotionUnsubscribeCallback"));
-        const char* dlsymError = dlerror();
-        if  (dlsymError) {
-            TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-            return false;
-        }
+        std::unique_lock<std::shared_mutex> lock(g_mutex);
+        int32_t cnt = 0;
+        int32_t retryTimes = 3;
+        const char* dlsymError = nullptr;
+        do {
+            cnt++;
+            g_motionUnsubscribeCallbackPtr = reinterpret_cast<MotionUnsubscribeCallbackPtr>(dlsym(g_handle, "MotionUnsubscribeCallback"));
+            dlsymError = dlerror();
+            if (dlsymError) {
+                TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+                usleep(SLEEP_TIME_AOD);
+            }
+            TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "MotionUnsubscribeCallback", cnt);
+        } while (!g_motionUnsubscribeCallbackPtr && cnt < retryTimes);
     }
-    return g_motionUnsubscribeCallbackPtr(motionType, callback);
+    if (g_motionUnsubscribeCallbackPtr == nullptr) {
+        return false;
+    } else {
+        return g_motionUnsubscribeCallbackPtr(motionType, callback);
+    }
 }
 }
 }
