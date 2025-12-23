@@ -20,6 +20,7 @@ namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
     constexpr uint32_t SLEEP_TIME_AOD = 10;
+    constexpr uint32_t RETRY_TIMES = 3;
 }
 
 static void *g_handle = nullptr;
@@ -33,7 +34,6 @@ bool LoadMotionSensor(void)
         return true;
     }
     int32_t cnt = 0;
-    int32_t retryTimes = 3;
     const char* dlopenError = nullptr;
     do {
         cnt++;
@@ -44,7 +44,7 @@ bool LoadMotionSensor(void)
         }
         TLOGI(WmsLogTag::DMS, "dlopen %{public}s, retry cnt: %{public}d", PLUGIN_SO_PATH.c_str(), cnt);
         usleep(SLEEP_TIME_US);
-    } while (!g_handle && cnt < retryTimes);
+    } while (!g_handle && cnt < RETRY_TIMES);
     return g_handle != nullptr;
 }
 
@@ -71,7 +71,6 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
     }
     if (g_motionSubscribeCallbackPtr == nullptr) {
         int32_t cnt = 0;
-        int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
         do {
             cnt++;
@@ -83,7 +82,7 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
                 usleep(SLEEP_TIME_AOD);
             }
             TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "MotionSubscribeCallback", cnt);
-        } while (!g_motionSubscribeCallbackPtr && cnt < retryTimes);
+        } while (!g_motionSubscribeCallbackPtr && cnt < RETRY_TIMES);
     }
     if (g_motionSubscribeCallbackPtr == nullptr) {
         return false;
@@ -104,7 +103,6 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
     }
     if (g_motionUnsubscribeCallbackPtr == nullptr) {
         int32_t cnt = 0;
-        int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
         do {
             cnt++;
@@ -116,7 +114,7 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
                 usleep(SLEEP_TIME_AOD);
             }
             TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "MotionUnsubscribeCallback", cnt);
-        } while (!g_motionUnsubscribeCallbackPtr && cnt < retryTimes);
+        } while (!g_motionUnsubscribeCallbackPtr && cnt < RETRY_TIMES);
     }
     if (g_motionUnsubscribeCallbackPtr == nullptr) {
         return false;
