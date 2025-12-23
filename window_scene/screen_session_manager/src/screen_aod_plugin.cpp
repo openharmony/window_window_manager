@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 #include "screen_aod_plugin.h"
+#include <shared_mutex>
 
 namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
 }
-
+static std::shared_mutex g_mutex;
 static void *g_handle = nullptr;
 using IsInAodFunc = bool (*)();
 using StopAodFunc = bool (*)(int32_t);
@@ -28,6 +29,7 @@ static StopAodFunc g_stopAodFunc = nullptr;
 
 bool LoadAodLib(void)
 {
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_handle != nullptr) {
         TLOGW(WmsLogTag::DMS, "aod plugin has already exits.");
         return true;
@@ -50,10 +52,11 @@ bool LoadAodLib(void)
 
 void UnloadAodLib(void)
 {
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
     TLOGI(WmsLogTag::DMS, "unload aod plugin.");
     if (g_handle != nullptr) {
-        g_handle = nullptr;
         dlclose(g_handle);
+        g_handle = nullptr;
     }
     g_isInAodFunc = nullptr;
     g_stopAodFunc = nullptr;
@@ -61,6 +64,7 @@ void UnloadAodLib(void)
 
 __attribute__((no_sanitize("cfi"))) bool IsInAod()
 {
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_handle == nullptr) {
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
@@ -80,11 +84,16 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
             usleep(SLEEP_TIME_US);
         } while (!g_isInAodFunc && cnt < retryTimes);
     }
-    return g_isInAodFunc();
+    if (g_isInAodFunc == nullptr) {
+        return false;
+    } else {
+        return g_isInAodFunc();
+    }
 }
 
 __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
 {
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_handle == nullptr) {
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
@@ -104,7 +113,11 @@ __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
                 usleep(SLEEP_TIME_US);
             } while (!g_stopAodFunc && cnt < retryTimes);
         }
-    return g_stopAodFunc(status);
+    if (g_stopAodFunc == nullptr) {
+        return false;
+    } else {
+        return g_stopAodFunc(status);
+    }
 }
 }
 }
