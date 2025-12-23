@@ -1124,6 +1124,16 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
             TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
             return;
         }
+        if (value == 4 || value == 5) {
+            HallData hallData;
+            hallData.status = (value == 4? 132: 128);
+            SensorEvent hallEvent = {
+                .data = reinterpret_cast<uint8_t*>(&hallData),
+                .dataLen = sizeof(hallData),
+            };
+            SuperFoldSensorManager::GetInstance().HandleHallData(&hallEvent);
+            TLOGI(WmsLogTag::DMS, "hall register status: %{public}d", value);
+        }
         SuperFoldStateManager::GetInstance().
             HandleSuperFoldStatusChange(static_cast<SuperFoldStatusChangeEvents>(value));
         TLOGI(WmsLogTag::DMS, "state: %{public}d, event: %{public}d",
