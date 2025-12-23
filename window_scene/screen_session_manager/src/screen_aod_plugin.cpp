@@ -19,6 +19,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
+    constexpr uint32_t SLEEP_TIME_AOD = 10;
 }
 static std::shared_mutex g_mutex;
 static void *g_handle = nullptr;
@@ -29,11 +30,11 @@ static StopAodFunc g_stopAodFunc = nullptr;
 
 bool LoadAodLib(void)
 {
-    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_handle != nullptr) {
         TLOGW(WmsLogTag::DMS, "aod plugin has already exits.");
         return true;
     }
+    std::unique_lock<std::shared_mutex> lock(g_mutex);
     int32_t cnt = 0;
     int32_t retryTimes = 3;
     const char* dlopenError = nullptr;
@@ -64,12 +65,12 @@ void UnloadAodLib(void)
 
 __attribute__((no_sanitize("cfi"))) bool IsInAod()
 {
-    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_handle == nullptr) {
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
     if (g_isInAodFunc == nullptr) {
+        std::unique_lock<std::shared_mutex> lock(g_mutex);
         int32_t cnt = 0;
         int32_t retryTimes = 3;
         const char* dlsymError = nullptr;
@@ -79,9 +80,9 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
             dlsymError = dlerror();
             if (dlsymError) {
                 TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+                usleep(SLEEP_TIME_AOD);
             }
             TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "IsInAod", cnt);
-            usleep(SLEEP_TIME_US);
         } while (!g_isInAodFunc && cnt < retryTimes);
     }
     if (g_isInAodFunc == nullptr) {
@@ -93,26 +94,26 @@ __attribute__((no_sanitize("cfi"))) bool IsInAod()
 
 __attribute__((no_sanitize("cfi"))) bool StopAod(int32_t status)
 {
-    std::unique_lock<std::shared_mutex> lock(g_mutex);
     if (g_handle == nullptr) {
         TLOGE(WmsLogTag::DMS, "g_handle is nullptr");
         return false;
     }
     if (g_stopAodFunc == nullptr) {
-            int32_t cnt = 0;
-            int32_t retryTimes = 3;
-            const char* dlsymError = nullptr;
-            do {
-                cnt++;
-                g_stopAodFunc = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "StopAod"));
-                dlsymError = dlerror();
-                if (dlsymError) {
-                    TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-                }
-                TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "StopAod", cnt);
-                usleep(SLEEP_TIME_US);
-            } while (!g_stopAodFunc && cnt < retryTimes);
-        }
+        std::unique_lock<std::shared_mutex> lock(g_mutex);
+        int32_t cnt = 0;
+        int32_t retryTimes = 3;
+        const char* dlsymError = nullptr;
+        do {
+            cnt++;
+            g_stopAodFunc = reinterpret_cast<StopAodFunc>(dlsym(g_handle, "StopAod"));
+            dlsymError = dlerror();
+            if (dlsymError) {
+                TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
+                usleep(SLEEP_TIME_AOD);
+            }
+            TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "StopAod", cnt);
+        } while (!g_stopAodFunc && cnt < retryTimes);
+    }
     if (g_stopAodFunc == nullptr) {
         return false;
     } else {
