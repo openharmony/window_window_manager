@@ -1047,8 +1047,8 @@ std::string DumpWindowInfo(const MMI::WindowInfo& info)
 {
     std::string infoStr = "wInfo:";
     infoStr = infoStr + std::to_string(info.id) + "|" + std::to_string(info.pid) +
-        "|" + std::to_string(info.uid) + "|" + std::to_string(info.area.x) + "," +
-        std::to_string(info.area.y) + "," + std::to_string(info.area.width) + "," +
+        "|" + std::to_string(info.agentPid) + "|" + std::to_string(info.uid) + "|" + std::to_string(info.area.x) +
+        "," + std::to_string(info.area.y) + "," + std::to_string(info.area.width) + "," +
         std::to_string(info.area.height) + "|" + std::to_string(info.agentWindowId) + "|" +
         std::to_string(info.flags) + "|" + std::to_string(info.displayId) +
         "|" + std::to_string(static_cast<int>(info.action)) + "|" + std::to_string(info.zOrder) + ",";
@@ -1082,7 +1082,7 @@ MMI::WindowInfo SceneSessionDirtyManager::MakeWindowInfoFormHostWindow(const MMI
     MMI::WindowInfo windowinfo;
     windowinfo.id = hostWindowinfo.id;
     windowinfo.pid = hostWindowinfo.pid;
-    windowinfo.agentPid = hostWindowinfo.pid;
+    windowinfo.agentPid = hostWindowinfo.agentPid;
     windowinfo.uid = hostWindowinfo.uid;
     windowinfo.area = hostWindowinfo.area;
     windowinfo.agentWindowId = hostWindowinfo.agentWindowId;
@@ -1133,8 +1133,12 @@ MMI::Rect CalRectInScreen(const Matrix3f& transform, const SecRectInfo& secRectI
 
 
 MMI::WindowInfo SceneSessionDirtyManager::GetHostComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
-    const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const
+    const MMI::WindowInfo& hostWindowinfo, const sptr<SceneSession>& sceneSession, const Matrix3f hostTransform) const
 {
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is nullptr");
+        return {};
+    }
     MMI::WindowInfo windowinfo;
     const auto& secRectInfoList = secSurfaceInfo.upperNodes;
     if (secRectInfoList.size() > 0) {
@@ -1142,7 +1146,7 @@ MMI::WindowInfo SceneSessionDirtyManager::GetHostComponentWindowInfo(const SecSu
     }
     for (const auto& secRectInfo : secRectInfoList) {
         windowinfo.pid = secSurfaceInfo.hostPid;
-        windowinfo.agentPid = secSurfaceInfo.hostPid;
+        windowinfo.agentPid = sceneSession->IsStartMoving() ? static_cast<int32_t>(getpid()) : windowinfo.pid;
         MMI::Rect hotArea = { secRectInfo.relativeCoords.GetLeft(), secRectInfo.relativeCoords.GetTop(),
             secRectInfo.relativeCoords.GetWidth(), secRectInfo.relativeCoords.GetHeight() };
         windowinfo.defaultHotAreas.emplace_back(hotArea);
