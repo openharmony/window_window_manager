@@ -1815,7 +1815,7 @@ napi_value JsExtensionWindow::OnGetStatusBarPropertySync(napi_env env, napi_call
         TLOGE(WmsLogTag::WMS_IMMS, "window is null");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
-    auto objValue = GetStatusBarPropertyObject(env, windowImpl);
+    auto objValue = GetHostStatusBarPropertyObject(env, windowImpl);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "get property failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
