@@ -105,7 +105,7 @@ void DisplayManagerAni::OnSetFoldDisplayModeReasonAni(ani_env* env, ani_int mode
         AniErrUtils::ThrowBusinessError(env, errCode, "SetFoldDisplayModeAni failed");
     }
 }
- 
+
 void DisplayManagerAni::SetFoldStatusLockedAni(ani_env* env, ani_boolean locked, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI]");
@@ -120,7 +120,7 @@ void DisplayManagerAni::SetFoldStatusLockedAni(ani_env* env, ani_boolean locked,
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnSetFoldStatusLockedAni(ani_env* env, ani_boolean locked)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] locked: %{public}d", static_cast<bool>(locked));
@@ -200,7 +200,7 @@ void DisplayManagerAni::OnGetCurrentFoldCreaseRegion(ani_env* env, ani_object ob
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCrease;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(creaseRectsObj),
-            "$_get", "i:C{std.core.Object}", &currentCrease, (ani_int)i)) {
+            "$_get", "i:Y", &currentCrease, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
@@ -222,7 +222,7 @@ void DisplayManagerAni::GetAllDisplaysAni(ani_env* env, ani_object arrayObj)
 
     for (int i = 0; i < std::min(int(length), static_cast<int>(displays.size())); i++) {
         ani_ref currentDisplay;
-        if (ANI_OK != env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}",
+        if (ANI_OK != env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:Y",
             &currentDisplay, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
@@ -591,7 +591,7 @@ void DisplayManagerAni::ConvertGlobalToRelativeCoordinate(
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnConvertGlobalToRelativeCoordinate(
     ani_env* env, ani_object positionObj, ani_object displayId, ani_object relativePostionObj)
 {
@@ -637,7 +637,7 @@ void DisplayManagerAni::OnConvertGlobalToRelativeCoordinate(
         return;
     }
 }
- 
+
 void DisplayManagerAni::ConvertRelativeToGlobalCoordinate(
     ani_env* env, ani_object relativePostionObj, ani_long nativeObj, ani_object positionObj)
 {
@@ -653,7 +653,7 @@ void DisplayManagerAni::ConvertRelativeToGlobalCoordinate(
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnConvertRelativeToGlobalCoordinate(
     ani_env* env, ani_object relativePostionObj, ani_object positionObj)
 {
@@ -694,7 +694,7 @@ void DisplayManagerAni::CreateVirtualScreen(ani_env* env, ani_object virtualScre
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 ani_long DisplayManagerAni::OnCreateVirtualScreen(ani_env* env, ani_object virtualScreenConfig)
 {
     ScreenId screenId = SCREEN_ID_INVALID;
@@ -725,7 +725,7 @@ ani_long DisplayManagerAni::OnCreateVirtualScreen(ani_env* env, ani_object virtu
     }
     return static_cast<ani_long>(screenId);
 }
- 
+
 void DisplayManagerAni::DestroyVirtualScreen(ani_env* env, ani_long screenId, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -740,7 +740,7 @@ void DisplayManagerAni::DestroyVirtualScreen(ani_env* env, ani_long screenId, an
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnDestroyVirtualScreen(ani_env* env, ani_long screenId)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -752,7 +752,7 @@ void DisplayManagerAni::OnDestroyVirtualScreen(ani_env* env, ani_long screenId)
         AniErrUtils::ThrowBusinessError(env, ret, "Destroy virtual screen failed.");
     }
 }
- 
+
 void DisplayManagerAni::SetVirtualScreenSurface(
     ani_env* env, ani_long screenId, ani_string surfaceId, ani_long nativeObj)
 {
@@ -768,7 +768,7 @@ void DisplayManagerAni::SetVirtualScreenSurface(
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnSetVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -788,7 +788,7 @@ void DisplayManagerAni::OnSetVirtualScreenSurface(ani_env* env, ani_long screenI
         AniErrUtils::ThrowBusinessError(env, ret, "set virtual screen surface failed.");
     }
 }
- 
+
 void DisplayManagerAni::MakeUnique(ani_env* env, ani_long screenId, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -803,7 +803,7 @@ void DisplayManagerAni::MakeUnique(ani_env* env, ani_long screenId, ani_long nat
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnMakeUnique(ani_env* env, ani_long screenId)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -833,7 +833,7 @@ void DisplayManagerAni::AddVirtualScreenBlocklist(ani_env* env, ani_object windo
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnAddVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -850,7 +850,7 @@ void DisplayManagerAni::OnAddVirtualScreenBlocklist(ani_env* env, ani_object win
         AniErrUtils::ThrowBusinessError(env, res, "OnAddVirtualScreenBlocklist failed.");
     }
 }
- 
+
 void DisplayManagerAni::RemoveVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -865,7 +865,7 @@ void DisplayManagerAni::RemoveVirtualScreenBlocklist(ani_env* env, ani_object wi
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnRemoveVirtualScreenBlocklist(ani_env* env, ani_object windowIdsObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
@@ -893,7 +893,7 @@ void DisplayManagerAni::FinalizerDisplay(ani_env* env, ani_object displayObj, an
         TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
     }
 }
- 
+
 void DisplayManagerAni::OnFinalizerDisplay(ani_env* env, ani_object displayObj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] DMS FinalizerDisplayNative begin");
