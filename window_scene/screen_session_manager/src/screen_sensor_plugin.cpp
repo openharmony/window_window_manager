@@ -19,7 +19,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_US = 10000;
-    constexpr uint32_t SLEEP_TIME_AOD = 10;
     constexpr uint32_t RETRY_TIMES = 3;
 }
 
@@ -79,7 +78,7 @@ __attribute__((no_sanitize("cfi"))) bool SubscribeCallback(int32_t motionType, O
             dlsymError = dlerror();
             if (dlsymError) {
                 TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-                usleep(SLEEP_TIME_AOD);
+                usleep(SLEEP_TIME_US);
             }
             TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "MotionSubscribeCallback", cnt);
         } while (!g_motionSubscribeCallbackPtr && cnt < RETRY_TIMES);
@@ -111,7 +110,7 @@ __attribute__((no_sanitize("cfi"))) bool UnsubscribeCallback(int32_t motionType,
             dlsymError = dlerror();
             if (dlsymError) {
                 TLOGE(WmsLogTag::DMS, "dlsym error: %{public}s", dlsymError);
-                usleep(SLEEP_TIME_AOD);
+                usleep(SLEEP_TIME_US);
             }
             TLOGI(WmsLogTag::DMS, "dlsym %{public}s, retry cnt: %{public}d", "MotionUnsubscribeCallback", cnt);
         } while (!g_motionUnsubscribeCallbackPtr && cnt < RETRY_TIMES);
