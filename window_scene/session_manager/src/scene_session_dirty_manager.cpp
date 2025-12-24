@@ -1323,7 +1323,7 @@ std::vector<MMI::WindowInfo> SceneSessionDirtyManager::GetSecSurfaceWindowinfoLi
         windowinfo = GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, hostTransform);
         windowinfo.zOrder = seczOrder++;
         windowinfoList.emplace_back(windowinfo);
-        windowinfo = GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, hostTransform);
+        windowinfo = GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, hostTransform);
         windowinfo.zOrder = seczOrder++;
         windowinfoList.emplace_back(windowinfo);
     }
