@@ -161,6 +161,7 @@ using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool
 using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode)>;
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
+using GetSCBEnterRecentFunc = std::function<bool()>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -333,6 +334,7 @@ public:
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
     std::shared_ptr<Rosen::RSNode> GetWindowDragMoveMountedNode(DisplayId displayId, uint32_t targetZOrder);
+    virtual void RegisterGetSCBEnterRecentFunc(GetSCBEnterRecentFunc&& callback) {};
 
     /*
      * PiP Window
@@ -381,6 +383,11 @@ public:
     virtual void SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& func) {};
     virtual void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) {};
     virtual void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) {};
+
+    /*
+     * Float Window
+     */
+    virtual void SetRestoreFloatMainWindowCallback(NotifyRestoreFloatMainWindowFunc&& func) {};
 
     /*
      * Window Layout
@@ -1091,6 +1098,12 @@ protected:
     NotifySetSupportedWindowModesFunc onSetSupportedWindowModesFunc_;
     NotifyUpdateFlagFunc onUpdateFlagFunc_;
     NotifyUseImplicitAnimationChangeFunc useImplicitAnimationChangeFunc_;
+
+    /*
+     * Float Window
+     */
+    std::mutex floatWindowDownEventMutex_;
+    uint8_t floatWindowDownEventCnt_ {0};
 
     /*
      * PiP Window

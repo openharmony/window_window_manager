@@ -2857,6 +2857,7 @@ export class WindowInternal implements Window {
     private native hideSync(nativeObj: long): void;
     private native createSubWindowWithOptionsSync(nativeObj: long, name: string, options: SubWindowOptions): Window;
     private native restore(nativeObj: long): void;
+    private native restoreMainWindow(nativeObj: long, wantParameters?: Record<string, object>): void;
 
     private static native nativeTransferStatic(input: ESValue): Object;
     private static native nativeTransferDynamic(nativeObj: long): ESValue;
@@ -3060,6 +3061,18 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
         taskpool.execute((): void => {
           this.restore(this.nativeObj);
+        }).then((ret: Any): void => {
+          resolve(undefined);
+        }).catch((err: Any): void => {
+          reject(err as BusinessError);
+        });
+      });
+    }  
+
+    public restoreMainWindow(wantParameters?: Record<string, object>): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+        taskpool.execute((): void => {
+          this.restoreMainWindow(this.nativeObj, wantParameters);
         }).then((ret: Any): void => {
           resolve(undefined);
         }).catch((err: Any): void => {
@@ -5066,6 +5079,7 @@ export interface Window {
     hide(callback: AsyncCallback<void>): void;
     createSubWindowWithOptions(name: string, options: SubWindowOptions): Promise<Window>;
     restore(): Promise<void>;
+    restoreMainWindow(wantParameters?: Record<string, object>): Promise<void>;
     resize(width: int, height: int): Promise<void>;
     moveWindowTo(x: int, y: int): Promise<void>;
     resize(width: int, height: int, callback: AsyncCallback<void>): void;

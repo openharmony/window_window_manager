@@ -359,6 +359,7 @@ public:
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
+    WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams) override;
 
     /*
      * Window Event
