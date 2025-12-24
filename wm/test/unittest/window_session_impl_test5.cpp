@@ -2280,10 +2280,11 @@ HWTEST_F(WindowSessionImplTest5, NotifySizeChangeFlag, Function | SmallTest | Le
     window->SetNotifySizeChangeFlag(true);
     ASSERT_EQ(window->notifySizeChangeFlag_, false);
 
+    window->property_->SetWindowRect(windowRect);
     window->SetNotifySizeChangeFlag(false);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     window->SetNotifySizeChangeFlag(true);
-    ASSERT_EQ(window->notifySizeChangeFlag_, false);
+    ASSERT_EQ(window->notifySizeChangeFlag_, true);
 }
 
 /**
