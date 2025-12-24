@@ -127,6 +127,8 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError OnRestoreMainWindow() { return WSError::WS_OK; }
+    virtual WMError RestoreFloatMainWindow(
+        const std::shared_ptr<AAFwk::WantParams>& wantParams) { return WMError::WM_OK; }
 
     /**
      * @brief Raise the application subwindow to the top layer of the application.

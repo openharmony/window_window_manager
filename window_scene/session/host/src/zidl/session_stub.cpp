@@ -175,6 +175,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleBatchPendingSessionsActivation(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_MAIN_WINDOW):
             return HandleRestoreMainWindow(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_MAIN_WINDOW):
+            return HandleRestoreFloatMainWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_TERMINATE):
             return HandleTerminateSession(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_EXCEPTION):
@@ -698,6 +700,22 @@ int SessionStub::HandleRestoreMainWindow(MessageParcel& data, MessageParcel& rep
     TLOGD(WmsLogTag::WMS_MAIN, "Handle restore main window readResult: %{public}u", errCode);
     if (!reply.WriteUint32(errCode)) {
         TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRestoreFloatMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "HandleRestoreFloatMainWindow In");
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WMError ret = RestoreFloatMainWindow(wantParams);
+    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

@@ -2756,6 +2756,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
             this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
         });
+        sceneSession->RegisterGetSCBEnterRecentFunc([this]() {
+            return this->enterRecent_.load();
+        });
         if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
                 return this->GetAppForceLandscapeConfigEnable(bundleName);
