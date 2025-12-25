@@ -2660,8 +2660,14 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
     TLOGD(WmsLogTag::WMS_EVENT,
           "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
           GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
-    if (raiseEnabled && isPointDown && !isModal) {
-        RaiseToAppTopForPointDown();
+    if (raiseEnabled && isPointDown) {
+        if (!isModal) {
+            RaiseToAppTopForPointDown();
+            return WSError::WS_OK;
+        }
+        if (auto mainSession = GetMainSession()) {
+            mainSession->NotifyClick(false);
+        }
     } else if (parentSession && isPointDown) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
@@ -3546,7 +3552,8 @@ void Session::NotifySessionTouchableChange(bool touchable)
 
 void Session::NotifyClick(bool requestFocus, bool isClick)
 {
-    TLOGD(WmsLogTag::WMS_FOCUS, "requestFocus: %{public}u, isClick: %{public}u", requestFocus, isClick);
+    TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, focus: %{public}u, isClick: %{public}u",
+        GetPersistentId(), requestFocus, isClick);
     if (clickFunc_) {
         clickFunc_(requestFocus, isClick);
     }
