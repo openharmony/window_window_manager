@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,8 +63,8 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
 }
 
 /**
- * @tc.name: SetTaskRunningFlagTest01
- * @tc.desc: SetTaskRunningFlagTest01
+ * @tc.name: AddTaskTest01
+ * @tc.desc: AddTaskTest01
  * @tc.type: FUNC
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_AddTask01, TestSize.Level0)
@@ -79,8 +79,8 @@ HWTEST_F(TaskSequenceProcessTest, ATC_AddTask01, TestSize.Level0)
 }
 
 /**
- * @tc.name: SetTaskRunningFlagTest01
- * @tc.desc: SetTaskRunningFlagTest01
+ * @tc.name: FinishTaskTest01
+ * @tc.desc: FinishTaskTest01
  * @tc.type: FUNC
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_FinishTask01, TestSize.Level0)
