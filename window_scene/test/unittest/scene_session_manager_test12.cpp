@@ -3356,6 +3356,83 @@ HWTEST_F(SceneSessionManagerTest12, ReportWindowProfileInfosTest, TestSize.Level
 }
 
 /**
+ * @tc.name: NotifySessionPropertyChangeFromSession
+ * @tc.desc: NotifySessionPropertyChangeFromSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifySessionPropertyChangeFromSession, Function | SmallTest | Level2)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "NotifySessionPropertyChangeFromSession";
+    sessionInfo.abilityName_ = "NotifySessionPropertyChangeFromSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ssm_->sceneSessionMap[100] = session;
+    nint32_t persistentId = 1000;
+    ssm_->NotifySessionPropertyChangeFromSession(persistentId, WindowInfoKey::NONE);
+    EXPECT_TRUE(g_logMsg.find("sceneSession nullptr") != std::string::npos);
+
+    g_logMsg.clear();
+    ssm_->NotifySessionPropertyChangeFromSession(100, WindowInfoKey::NONE);
+}
+
+/**
+ * @tc.name: NotifyWindowPropertyChange
+ * @tc.desc: NotifyWindowPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange, Function | SmallTest | Level2)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    
+    ssm_->sceneSessionMap_[1000] = nullptr;
+    ssm_->NotifyWindowPropertyChange(screenId);
+    EXPECT_TRUE(g_logMsg.find("sceneSession nullptr") != std::string::npos);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "NotifyWindowPropertyChange";
+    sessionInfo.abilityName_ = "NotifyWindowPropertyChange";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(session, nullptr);
+    session->SetScreenId(99);
+    ssm_->sceneSessionMap_[1001] = session;
+    ssm_->NotifyWindowPropertyChange(screenId);
+    EXPECT_EQ(session->GetScreenId(), 99);
+
+    session->SetScreenId(screenId);
+    session->SetPropertyDirtyFlags(0);
+    ssm_->observedFlags_ = 1;
+    ssm_->NotifyWindowPropertyChange(screenId);
+    EXPECT_EQ(session->GetPropertyDirtyFlags(), 0);
+
+    session->SetPropertyDirtyFlags(1);
+    ssm_->NotifyWindowPropertyChange(screenId);
+    EXPECT_EQ(session->GetPropertyDirtyFlags(), 0);
+}
+
+/**
+ * @tc.name: NotifyWindowPropertyChangeByWindowInfoKey
+ * @tc.desc: NotifyWindowPropertyChangeByWindowInfoKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChangeByWindowInfoKey, Function | SmallTest | Level2)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->NotifyWindowPropertyChangeByWindowInfoKey(nullptr, WindowInfoKey::WINDOW_ID);
+
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "NotifyWindowPropertyChangeByWindowInfoKey";
+    sessionInfo.abilityName_ = "NotifyWindowPropertyChangeByWindowInfoKey";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    EXPECT_NE(session, nullptr);
+    ssm_->NotifyWindowPropertyChangeByWindowInfoKey(session, WindowInfoKey::WINDOW_ID);
+}
+
+/**
  * @tc.name: FillWindowProfileInfoTest
  * @tc.desc: FillWindowProfileInfoTest
  * @tc.type: FUNC
