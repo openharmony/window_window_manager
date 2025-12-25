@@ -92,6 +92,7 @@ private:
     void FilterValidAttributes(std::vector<std::string>& attributes);
     bool IsAttributeCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback);
     void UnRegisterAllAttributeListener();
+    void UnRegisterAttributeListener(ani_env* env, ani_ref callback);
     std::mutex mtx_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsCbMap_;
     std::map<std::string, std::map<ani_ref, sptr<DisplayAniListener>>> jsAttributeCbMap_;

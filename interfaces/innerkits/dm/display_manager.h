@@ -1050,6 +1050,14 @@ public:
      */
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
 
+    /**
+     * @brief Unregister display attribute not listening .
+     *
+     * @param attributesNotListened Attributes which not listening.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributesNotListened);
+
 private:
     DisplayManager();
     ~DisplayManager();

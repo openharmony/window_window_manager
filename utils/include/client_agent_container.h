@@ -37,6 +37,7 @@ public:
     bool RegisterAttributeAgent(uintptr_t key, const sptr<T1>& agent, std::vector<T2>& attributes);
     bool UnregisterAgent(const sptr<T1>& agent, T2 type);
     bool UnRegisterAllAttributeAgent(uintptr_t key, const sptr<T1>& agent);
+    bool UnRegisterAttribute(uintptr_t key, const sptr<T1>& agent, const std::vector<T2>& attributesOff);
     std::set<sptr<T1>> GetAgentsByType(T2 type);
     void SetAgentDeathCallback(std::function<void(const sptr<IRemoteObject>&)> callback);
     int32_t GetAgentPid(const sptr<T1>& agent);
@@ -140,6 +141,31 @@ bool ClientAgentContainer<T1, T2>::UnRegisterAllAttributeAgent(uintptr_t key, co
     }
     attributeAgentMap_.erase(key);
     agent->AsObject()->RemoveDeathRecipient(deathRecipient_);
+    return true;
+}
+
+template<typename T1, typename T2>
+bool ClientAgentContainer<T1, T2>::UnRegisterAttribute(uintptr_t key, const sptr<T1>& agent,
+    const std::vector<T2>& attributesOff)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (agent == nullptr) {
+        WLOGFE("agent is invalid");
+        return false;
+    }
+    if (attributeAgentMap_.count(key) == 0) {
+        WLOGFD("repeat unregister agent");
+        return true;
+    }
+    auto& attributes = attributeAgentMap_.at(key).second;
+    for (auto attribute : attributesOff) {
+        auto iter = attributes.find(attribute);
+        if (iter == attributes.end()) {
+            WLOGFD("could not find this attribute: %{public}s", attribute.c_str());
+            continue;
+        }
+        attributes.erase(iter);
+    }
     return true;
 }
 

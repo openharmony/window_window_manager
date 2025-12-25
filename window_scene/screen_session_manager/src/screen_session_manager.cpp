@@ -674,6 +674,28 @@ DMError ScreenSessionManager::RegisterDisplayAttributeAgent(std::vector<std::str
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+    const sptr<IDisplayManagerAgent>& displayManagerAgent)
+{
+    TLOGI(WmsLogTag::DMS, "called");
+    if ((displayManagerAgent == nullptr) || (displayManagerAgent->AsObject() == nullptr)) {
+        TLOGE(WmsLogTag::DMS, "displayManagerAgent invalid");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    if (attributes.empty()) {
+        TLOGE(WmsLogTag::DMS, "attributes is empty");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    uintptr_t key = reinterpret_cast<uintptr_t>(displayManagerAgent->AsObject().GetRefPtr());
+    bool ret = ScreenSessionManagerAdapter::GetInstance().dmAttributeAgentContainer_.UnRegisterAttribute(key,
+        displayManagerAgent, attributes);
+    if (!ret) {
+        TLOGE(WmsLogTag::DMS, "unregister attributes failed");
+        return DMError::DM_ERROR_NULLPTR;
+    }
+    return DMError::DM_OK;
+}
+
 DMError ScreenSessionManager::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
