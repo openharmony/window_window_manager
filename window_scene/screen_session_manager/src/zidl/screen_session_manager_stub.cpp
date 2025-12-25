@@ -1579,6 +1579,23 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_ATTRIBUTE: {
+            TLOGI(WmsLogTag::DMS, "called");
+            sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+            auto agent = iface_cast<IDisplayManagerAgent>(remoteObj);
+            if (agent == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> attributes;
+            if (!data.ReadStringVector(&attributes)) {
+                TLOGE(WmsLogTag::DMS, "Read attributes failed");
+                return ERR_INVALID_DATA;
+            }
+ 
+            DMError ret = UnRegisterDisplayAttribute(attributes, agent);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

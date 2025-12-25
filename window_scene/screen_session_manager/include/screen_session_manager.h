@@ -116,6 +116,8 @@ public:
 
     virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
         const sptr<IDisplayManagerAgent>& displayManagerAgent) override;
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) override;
 
     ScreenId GetInternalScreenId() override;
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;

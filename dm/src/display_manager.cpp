@@ -150,6 +150,7 @@ public:
     DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
     DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
         RelativePosition& relativePosition);
+    DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributesNotListened);
 
 private:
     void ClearDisplayStateCallback();
@@ -3054,6 +3055,23 @@ DMError DisplayManager::Impl::ConvertGlobalCoordinateToRelativeWithDisplayId(con
     relativePosition.position.x = globalPosition.x - displayInfo->GetX();
     relativePosition.position.y = globalPosition.y - displayInfo->GetY();
     return DMError::DM_OK;
+}
+
+DMError DisplayManager::UnRegisterDisplayAttribute(const std::vector<std::string>& attributesNotListened)
+{
+    return pImpl_->UnRegisterDisplayAttribute(attributesNotListened);
+}
+
+DMError DisplayManager::Impl::UnRegisterDisplayAttribute(const std::vector<std::string>& attributesNotListened)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    if (displayManagerAttributeAgent_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Agent has been unregistered");
+        return DMError::DM_OK;
+    }
+
+    return SingletonContainer::Get<DisplayManagerAdapter>().UnRegisterDisplayAttribute(attributesNotListened,
+        displayManagerAttributeAgent_);
 }
 } // namespace OHOS::Rosen
 

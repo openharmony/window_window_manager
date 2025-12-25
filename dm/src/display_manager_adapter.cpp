@@ -662,6 +662,18 @@ DMError DisplayManagerAdapter::RegisterDisplayAttributeAgent(std::vector<std::st
     return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
+DMError DisplayManagerAdapter::UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+    const sptr<IDisplayManagerAgent> displayManagerAgent)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->UnRegisterDisplayAttribute(attributes, displayManagerAgent);
+    }
+
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 bool DisplayManagerAdapter::WakeUpBegin(PowerStateChangeReason reason)
 {
     INIT_PROXY_CHECK_RETURN(false);

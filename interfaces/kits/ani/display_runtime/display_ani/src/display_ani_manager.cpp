@@ -565,8 +565,39 @@ void DisplayManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_
     env->GlobalReference_Delete(cbRef);
 }
 
+void DisplayManagerAni::UnRegisterAttributeListener(ani_env* env, ani_ref callback)
+{
+    std::vector<std::string> attributesNotListened;
+    for (auto itAttribute = jsAttributeCbMap_.begin(); itAttribute != jsAttributeCbMap_.end();){
+        for (auto it = itAttribute->second.begin(); it != itAttribute->second.end();) {
+            ani_boolean isEquals = false;
+            env->Reference_StrictEquals(callback, it->first, &isEquals);
+            if (isEquals) {
+                it->second->RemoveCallback(env, itAttribute->first, callback);
+                sptr<DisplayManager::IDisplayAttributeListener> thisListener(it->second);
+                SingletonContainer::Get<DisplayManager>().UnRegisterDisplayAttributeListener(thisListener);
+                it = itAttribute->second.erase(it);
+                continue;
+            }
+            it++;
+        }
+        if (itAttribute->second.empty()) {
+            attributesNotListened.push_back(itAttribute->first);
+            itAttribute = jsAttributeCbMap_.erase(itAttribute);
+            continue;
+        }
+        itAttribute++;
+    }
+    if (!attributesNotListened.empty()) {
+        SingletonContainer::Get<DisplayManager>().UnRegisterDisplayAttribute(attributesNotListened);
+    }
+}
+
 DMError DisplayManagerAni::UnRegisterDisplayListenerWithType(std::string type, ani_env* env, ani_ref callback)
 {
+    if (type == ANI_EVENT_CHANGE) {
+        UnRegisterAttributeListener(env, callback);
+    }
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!", type.c_str());

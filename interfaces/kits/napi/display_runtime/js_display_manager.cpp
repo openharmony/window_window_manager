@@ -745,8 +745,39 @@ DMError UnregBrightnessInfoListener(sptr<DisplayManager::IBrightnessInfoListener
     return ret;
 }
 
+void UnRegisterAttributeListener(napi_env env, napi_value callback)
+{
+    std::vector<std::string> attributesNotListened;
+    for (auto itAttribute = jsAttributeCbMap_.begin(); itAttribute != jsAttributeCbMap_.end();){
+        for (auto it = itAttribute->second.begin(); it != itAttribute->second.end();) {
+            bool isEquals = false;
+            napi_strict_equals(env, callback, it->first->GetNapiValue(), &isEquals);
+            if (isEquals) {
+                it->second->RemoveCallback(env, itAttribute->first, callback);
+                sptr<DisplayManager::IDisplayAttributeListener> thisListener(it->second);
+                SingletonContainer::Get<DisplayManager>().UnRegisterDisplayAttributeListener(thisListener);
+                it = itAttribute->second.erase(it);
+                continue;
+            }
+            it++;
+        }
+        if (itAttribute->second.empty()) {
+            attributesNotListened.push_back(itAttribute->first);
+            itAttribute = jsAttributeCbMap_.erase(itAttribute);
+            continue;
+        }
+        itAttribute++;
+    }
+    if (!attributesNotListened.empty()) {
+        SingletonContainer::Get<DisplayManager>().UnRegisterDisplayAttribute(attributesNotListened);
+    }
+}
+
 DMError UnRegisterDisplayListenerWithType(napi_env env, const std::string& type, napi_value value)
 {
+    if (type == EVENT_CHANGE) {
+        UnRegisterAttributeListener(env, value);
+    }
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
         TLOGI(WmsLogTag::DMS, "%{public}s not registered!", type.c_str());
         return DMError::DM_OK;

@@ -171,6 +171,8 @@ public:
         DisplayManagerAgentType type) { return DMError::DM_OK; }
     virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
         const sptr<IDisplayManagerAgent>& displayManagerAgent) { return DMError::DM_OK; }
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) { return DMError::DM_OK; }
 
     virtual bool WakeUpBegin(PowerStateChangeReason reason) { return false; }
     virtual bool WakeUpEnd() { return false; }
