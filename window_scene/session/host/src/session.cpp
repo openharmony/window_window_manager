@@ -2659,7 +2659,7 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
     bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
     TLOGD(WmsLogTag::WMS_EVENT,
           "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
-          GetPersistentId(), raiseEnabled, isPointDown, isPointDown);
+          GetPersistentId(), raiseEnabled, isPointDown, isModal);
     if (raiseEnabled && isPointDown) {
         if (!isModal) {
             RaiseToAppTopForPointDown();
