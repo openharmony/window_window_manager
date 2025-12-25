@@ -56,6 +56,7 @@ group("unittest") {
       ":ws_screen_session_manager_test_six",
       ":ws_screen_session_manager_test_seven",
       ":ws_screen_session_manager_test_eight",
+      ":ws_screen_aod_plugin_test",
     ]
   }
 
@@ -1022,6 +1023,26 @@ ohos_unittest("ws_screen_session_manager_test_eight") {
   if (window_manager_feature_multi_usr) {
     defines += [ "WM_MULTI_USR_ABILITY_ENABLE" ]
   }
+}
+
+ohos_unittest("ws_screen_aod_plugin_test") {
+  module_out_path = module_out_path
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = [ 
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "screen_aod_plugin_test.cpp" 
+  ]
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+  external_deps += [
+    "ability_runtime:dataobs_manager",
+    "init:libbegetutil"
+  ]
 }
 
 ohos_unittest("ws_screen_rotation_property_test") {
