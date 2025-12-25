@@ -138,7 +138,6 @@ constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int MAX_RESEND_TIMES = 6;
-constexpr int MAX_NOTIFY_PRIVACY_INTERNAL = 10;
 constexpr int ORIEN_MAX_WIDTH = 12;
 constexpr int OFFSET_MAX_WIDTH = 8;
 constexpr int SCALE_MAX_WIDTH = 8;
@@ -9362,7 +9361,6 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
 {
     bool needNotify = false;
     static int reSendTimes = MAX_RESEND_TIMES;
-    static int notifyInternal = 0;
     std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
     do {
         if (privacyBundleMap_.find(displayId) == privacyBundleMap_.end()) {
