@@ -457,7 +457,8 @@ bool ScreenSettingHelper::GetAreaPercent(uint32_t& borderingAreaPercent, const s
         TLOGE(WmsLogTag::DMS, "not number");
         return false;
     } else {
-        tmpBorderingAreaPercent = static_cast<uint32_t>(strtoll(modeStr[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
+        tmpBorderingAreaPercent =
+            static_cast<uint32_t>(strtoll(modeStr[DATA_INDEX_ZERO].c_str(), nullptr, PARAM_NUM_TEN));
     }
     borderingAreaPercent = tmpBorderingAreaPercent;
     TLOGI(WmsLogTag::DMS, "borderingAreaPercent: %{public}d", borderingAreaPercent);
