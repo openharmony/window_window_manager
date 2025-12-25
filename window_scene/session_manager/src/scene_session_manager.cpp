@@ -138,6 +138,7 @@ constexpr int WINDOW_NAME_MAX_WIDTH = 21;
 constexpr int DISPLAY_NAME_MAX_WIDTH = 10;
 constexpr int VALUE_MAX_WIDTH = 5;
 constexpr int MAX_RESEND_TIMES = 6;
+constexpr int MAX_NOTIFY_PRIVACY_INTERNAL = 10;
 constexpr int ORIEN_MAX_WIDTH = 12;
 constexpr int OFFSET_MAX_WIDTH = 8;
 constexpr int SCALE_MAX_WIDTH = 8;
@@ -9361,6 +9362,7 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
 {
     bool needNotify = false;
     static int reSendTimes = MAX_RESEND_TIMES;
+    static int notifyInternal = 0;
     std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
     do {
         if (privacyBundleMap_.find(displayId) == privacyBundleMap_.end()) {
@@ -9383,15 +9385,22 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
         }
     } while (false);
 
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "display=%{public}" PRIu64 ", needNotify=%{public}d, sendTimes=%{public}d",
-          displayId, needNotify, reSendTimes);
     if (needNotify) {
         reSendTimes = MAX_RESEND_TIMES;
+        notifyInternal = 0;
         privacyBundleMap_[displayId] = privacyBundles;
     } else if (reSendTimes > 0) {
         needNotify = true;
         reSendTimes--;
         privacyBundleMap_[displayId] = privacyBundles;
+        notifyInternal = 0;
+    } else if (notifyInternal >= MAX_NOTIFY_PRIVACY_INTERNAL) {
+        needNotify = true;
+        reSendTimes = MAX_RESEND_TIMES;
+        notifyInternal = 0;
+    } else {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "display=%{public}" PRIu64 ", sendTimes=%{public}d", displayId, reSendTimes);
+        notifyInternal++;
     }
     return needNotify;
 }
@@ -9424,12 +9433,9 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)){
         isNeedUpdatePrivateState |= JudgeNeedNotifyPrivacyInfo(VIRTUAL_DISPLAY_ID,
             privacyBundleList[VIRTUAL_DISPLAY_ID]);
-
-
     }
     if (!isNeedUpdatePrivateState) {
         return;
-
     }
     std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
     std::unordered_map<DisplayId, std::vector<std::string>> notifyPrivacyBundleList;
