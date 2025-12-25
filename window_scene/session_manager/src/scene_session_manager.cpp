@@ -17601,12 +17601,16 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
 
 WMError SceneSessionManager::RecoverWatermarkImageForApp(const std::string& watermarkName)
 {
+    const char* const where = __func__;
     int32_t pid = IPCSkeleton::GetCallingRealPid();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "watermark=%{public}s, pid=%{public}d", watermarkName.c_str(), pid);
-    if (!watermarkName.empty()) {
-        appWatermarkPidMap_.insert_or_assign(pid, watermarkName);
-    }
-    return WMError::WM_OK;
+    return taskScheduler_->PostSyncTask([this, pid, &watermarkName, where]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: watermark=%{public}s, pid=%{public}d",
+            where, watermarkName.c_str(), pid);
+        if (!watermarkName.empty() && appWatermarkPidMap_[pid] != watermarkName) {
+            appWatermarkPidMap_[pid] = watermarkName;
+        }
+        return WMError::WM_OK;
+    }, where);
 }
 
 std::vector<NodeId> SceneSessionManager::GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName)
