@@ -63,6 +63,14 @@ public:
         virtual void OnChange(DisplayId) = 0;
     };
 
+    class IDisplayAttributeListener : public virtual RefBase {
+    public:
+        /**
+         * @brief Notify when an attribute of a display changed.
+         */
+        virtual void OnAttributeChange(DisplayId displayId, const std::vector<std::string>& attributes) = 0;
+    };
+
     class IScreenshotListener : public virtual RefBase {
     public:
         /**
@@ -462,6 +470,23 @@ public:
      * @return DM_OK means unregister success, others means unregister failed.
      */
     DMError UnregisterDisplayListener(sptr<IDisplayListener> listener);
+
+    /**
+     * @brief Register a display attribute listener.
+     *
+     * @param listener IDisplayAttributeListener.
+     * @return DM_OK means register success, others means register failed.
+     */
+    DMError RegisterDisplayAttributeListener(std::vector<std::string>& attributes,
+        sptr<IDisplayAttributeListener> listener);
+
+    /**
+     * @brief Unregister an existed display attribute listener.
+     *
+     * @param listener IDisplayAttributeListener.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnRegisterDisplayAttributeListener(sptr<IDisplayAttributeListener> listener);
 
     /**
      * @brief Register a listener for display power events.
@@ -1024,6 +1049,14 @@ public:
      * @return DM_OK means the set operation succeeds.
      */
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
+
+    /**
+     * @brief Unregister display attribute not listening .
+     *
+     * @param attributesNotListened Attributes which not listening.
+     * @return DM_OK means unregister success, others means unregister failed.
+     */
+    DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributesNotListened);
 
 private:
     DisplayManager();

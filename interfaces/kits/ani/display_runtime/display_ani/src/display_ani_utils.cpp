@@ -795,5 +795,27 @@ ani_object DisplayAniUtils::CreateBrightnessInfoObject(ani_env* env)
     }
     return brightnessInfoObj;
 }
+
+ani_status DisplayAniUtils::GetStdStringVector(ani_env* env, ani_object arryObj, std::vector<std::string>& result)
+{
+    ani_int length;
+    ani_status ret = env->Object_GetPropertyByName_Int(arryObj, "length", &length);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Get array length failed, status: %{public}d", ret);
+        return ret;
+    }
+    for (int32_t i = 0; i< static_cast<int32_t>(length); i++) {
+        ani_ref stringRef;
+        ret = env->Object_CallMethodByName_Ref(arryObj, "$_get", "I:Lstd/core/Object;", &stringRef, (ani_int)i);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] Get index: %{public}d element failed, status: %{public}d", (ani_int)i, ret);
+            return ret;
+        }
+        std::string str;
+        DisplayAniUtils::GetStdString(env, static_cast<ani_string>(stringRef), str);
+        result.emplace_back(str);
+    }
+    return ANI_OK;
+}
 }
 }
