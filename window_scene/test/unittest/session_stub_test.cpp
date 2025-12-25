@@ -731,6 +731,23 @@ HWTEST_F(SessionStubTest, HandleSetPipParentWindowId, Function | SmallTest | Lev
 }
 
 /**
+ * @tc.name: HandleIsPiPActive
+ * @tc.desc: sessionStub HandleIsPiPActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsPiPActive, Function | SmallTest | Level2)
+{
+    ASSERT_NE(session_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_PIP_ACTIVE);
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    ASSERT_EQ(session_->OnRemoteRequest(code, data, reply, option), ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetWindowTransitionAnimation
  * @tc.desc: sessionStub sessionStubTest
  * @tc.type: FUNC
@@ -978,6 +995,29 @@ HWTEST_F(SessionStubTest, HandleSyncSessionEvent, TestSize.Level1)
 
     auto result = session_->HandleSyncSessionEvent(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleRestoreFloatMainWindow
+ * @tc.desc: sessionStub HandleRestoreFloatMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleRestoreFloatMainWindow, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleRestoreFloatMainWindow(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+
+    MessageParcel data1;
+    MessageParcel reply1;
+    MessageOption option;
+    sptr<SessionStub> sessionStub = sptr<SessionStubMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sessionStub);
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_MAIN_WINDOW);
+    EXPECT_EQ(sessionStub->ProcessRemoteRequest(code, data1, reply1, option), ERR_INVALID_VALUE);
 }
 
 /**

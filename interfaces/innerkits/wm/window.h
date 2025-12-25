@@ -2715,6 +2715,18 @@ public:
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Restores the main window of current window to foreground.
+     * Only TYPE_FLOAT can use this interface, when the main window in the background
+     * need to be moved to foreground after the TYPE_FLOAT window is clicked
+     *
+     * @return WMError
+     */
+    virtual WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief close the window. It is called by ACE when close button is clicked.
      *
      * @return WMError
@@ -4836,6 +4848,13 @@ public:
      * @return WMError::WM_OK means set success, otherwise failed.
      */
     virtual WMError SetPipParentWindowId(uint32_t windowId) const { return WMError::WM_OK; }
+
+    /**
+     * @brief get is pip active
+     *
+     * @return WMError
+     */
+    virtual WMError IsPiPActive(bool& status) { return WMError::WM_OK; }
 
     /**
      * @brief return true if current window is anco, otherwise return false

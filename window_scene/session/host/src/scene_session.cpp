@@ -112,6 +112,7 @@ const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr int32_t MIN_ROTATION_VALUE = 0;
 constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
+constexpr uint8_t MAX_DOWN_TIMES = 100;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -1983,6 +1984,12 @@ WSError SceneSession::SetPipParentWindowId(uint32_t windowId)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::IsPiPActive(bool& status)
+{
+    status = pipActiveStatus_.load();
+    return WMError::WM_OK;
+}
+
 /** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
     const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
@@ -3493,6 +3500,7 @@ WSError SceneSession::NotifyPiPActiveStatusChange(bool status)
         TLOGE(WmsLogTag::WMS_PIP, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    pipActiveStatus_.store(status);
     return sessionStage_->NotifyPiPActiveStatusChange(status);
 }
 
@@ -3612,6 +3620,13 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+
+    {
+        std::lock_guard<std::mutex> lock(floatWindowDownEventMutex_);
+        if (isPointDown && floatWindowDownEventCnt_ < MAX_DOWN_TIMES) {
+            ++floatWindowDownEventCnt_;
+        }
+    }
 
     auto property = GetSessionProperty();
     if (property == nullptr) {

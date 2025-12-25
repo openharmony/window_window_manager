@@ -651,6 +651,24 @@ bool PictureInPictureControllerBase::GetPiPSettingSwitchStatus()
     TLOGI(WmsLogTag::WMS_PIP, "switchStatus: %{public}d", switchStatus);
     return switchStatus;
 }
+
+WMError PictureInPictureControllerBase::IsPiPActive(bool& status)
+{
+    if (curState_ != PiPWindowState::STATE_STARTED) {
+        return WMError::WM_OK;
+    }
+    if (window_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "window is nullptr.");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    WMError ret = window_->IsPiPActive(status);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_PIP, "get switch error.");
+        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "active status: %{public}d", status);
+    return WMError::WM_OK;
+}
 // LCOV_EXCL_STOP
 } // namespace Rosen
 } // namespace OHOS
