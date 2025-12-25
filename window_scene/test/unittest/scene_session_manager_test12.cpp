@@ -3368,8 +3368,8 @@ HWTEST_F(SceneSessionManagerTest12, NotifySessionPropertyChangeFromSession, Func
     sessionInfo.bundleName_ = "NotifySessionPropertyChangeFromSession";
     sessionInfo.abilityName_ = "NotifySessionPropertyChangeFromSession";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ssm_->sceneSessionMap[100] = session;
-    nint32_t persistentId = 1000;
+    ssm_->sceneSessionMap_[100] = sceneSession;
+    int32_t persistentId = 1000;
     ssm_->NotifySessionPropertyChangeFromSession(persistentId, WindowInfoKey::NONE);
     EXPECT_TRUE(g_logMsg.find("sceneSession nullptr") != std::string::npos);
 

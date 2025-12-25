@@ -3053,20 +3053,20 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
  * @tc.desc: HandleActionUpdateViewKeepScreenOn
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, HandleActionUpdateViewKeepScreenOn, TestSize.Level1)
-{
+ HWTEST_F(SceneSessionTest5, HandleActionUpdateViewKeepScreenOn, TestSize.Level1)
+  {
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdateViewKeepScreenOn";
     info.bundleName_ = "HandleActionUpdateViewKeepScreenOn";
-    info.windowType = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
     property->SetViewKeepScreenOn(true);
-    Expect_EQ(WMError::WM_OK, session->HandleActionUpdateViewKeepScreenOn
-        (property, WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE));
-}
+    WMError result = session->HandleActionUpdateViewKeepScreenOn(
+        property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    EXPECT_EQ(result, WMError::WM_OK);
+  }
 
 /**
  * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
@@ -3078,7 +3078,6 @@ HWTEST_F(SceneSessionTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
-    info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
     session->SetSkipSelfWhenShowOnVirtualScreen(true);
@@ -3096,7 +3095,7 @@ HWTEST_F(SceneSessionTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCallBack->onSetSkipSelfWhenShowOnVirtualScreen_ =
         [](uint64_t id, bool isSkip) {};
-    session->specificSessionCallback_ = specificCallBack;
+    session->specificCallback_ = specificCallBack;
     
     session->SetSkipSelfWhenShowOnVirtualScreen(true);
     usleep(10000);
