@@ -129,6 +129,10 @@ public:
     virtual DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
     virtual DMError GetRoundedCorner(std::vector<RoundedCorner>& roundedCorner, DisplayId displayId,
         int32_t width, int32_t height);
+    virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent> displayManagerAgent);
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent> displayManagerAgent);
     
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
