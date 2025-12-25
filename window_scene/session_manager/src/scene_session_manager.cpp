@@ -9426,8 +9426,6 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
             privacyBundleList[VIRTUAL_DISPLAY_ID]);
     }
     if (!isNeedUpdatePrivateState) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "skip for win=[%{public}u, %{public}s]",
-            persistentId, sceneSession->GetWindowName().c_str());
         return;
     }
     std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
