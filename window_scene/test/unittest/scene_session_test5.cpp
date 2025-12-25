@@ -3054,7 +3054,7 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
  * @tc.type: FUNC
  */
  HWTEST_F(SceneSessionTest5, HandleActionUpdateViewKeepScreenOn, TestSize.Level1)
-  {
+{
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdateViewKeepScreenOn";
     info.bundleName_ = "HandleActionUpdateViewKeepScreenOn";
@@ -3066,7 +3066,7 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
     WMError result = session->HandleActionUpdateViewKeepScreenOn(
         property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     EXPECT_EQ(result, WMError::WM_OK);
-  }
+}
 
 /**
  * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
