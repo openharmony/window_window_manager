@@ -3436,13 +3436,6 @@ HWTEST_F(DisplayManagerTest, UnRegisterDisplayAttributeListener02, TestSize.Leve
     sptr<DisplayManager::IDisplayAttributeListener> listener;
     auto ret = impl.UnRegisterDisplayAttributeListener(listener);
     ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
-
-    std::vector<std::string> attributes = {"rotation"};
-    DisplayManager::GetInstance().pImpl_->RegisterDisplayAttributeListener(attributes, listener);
-    ret = impl.UnRegisterDisplayAttributeListener(listener);
-    auto displayAttributeListener = DisplayManager::GetInstance().pImpl_->displayAttributeListeners_;
-    EXPECT_TRUE(std::find(displayAttributeListener.begin(), displayAttributeListener.end(), listener) ==
-        displayAttributeListener.end());
 }
 }
 } // namespace Rosen

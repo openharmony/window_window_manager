@@ -748,7 +748,7 @@ DMError UnregBrightnessInfoListener(sptr<DisplayManager::IBrightnessInfoListener
 void UnRegisterAttributeListener(napi_env env, napi_value callback)
 {
     std::vector<std::string> attributesNotListened;
-    for (auto itAttribute = jsAttributeCbMap_.begin(); itAttribute != jsAttributeCbMap_.end();){
+    for (auto itAttribute = jsAttributeCbMap_.begin(); itAttribute != jsAttributeCbMap_.end();) {
         for (auto it = itAttribute->second.begin(); it != itAttribute->second.end();) {
             bool isEquals = false;
             napi_strict_equals(env, callback, it->first->GetNapiValue(), &isEquals);
