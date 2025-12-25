@@ -17598,16 +17598,15 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
 
 WMError SceneSessionManager::RecoverWatermarkImageForApp(const std::string& watermarkName)
 {
-    const char* const where = __func__;
     int32_t pid = IPCSkeleton::GetCallingRealPid();
-    return taskScheduler_->PostSyncTask([this, pid, &watermarkName, where]() {
+    taskScheduler_->PostAsyncTask([this, pid, watermarkName, where = __func__]() {
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: watermark=%{public}s, pid=%{public}d",
             where, watermarkName.c_str(), pid);
         if (!watermarkName.empty() && appWatermarkPidMap_[pid] != watermarkName) {
             appWatermarkPidMap_[pid] = watermarkName;
         }
-        return WMError::WM_OK;
-    }, where);
+    }, __func__);
+    return WMError::WM_OK;
 }
 
 std::vector<NodeId> SceneSessionManager::GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName)
