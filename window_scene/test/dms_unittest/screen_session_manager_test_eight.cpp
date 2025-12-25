@@ -1113,14 +1113,14 @@ HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState001, Function 
     ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
     staticSession->SetBounds(staticScreenBounds);
     staticSession->SetRSScreenId(mainScreenId);
-    staticSession->SetStartPosition(0,0);
+    staticSession->SetStartPosition(0, 0);
     ScreenId dynamicScreenId = 1052;
     sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
     DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
     ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
     dynamicSession->SetBounds(dynamicScreenBounds);
     dynamicSession->SetRSScreenId(dynamicScreenId);
-    dynamicSession->SetStartPosition(0,1080);
+    dynamicSession->SetStartPosition(0, 1080);
     uint32_t borderingAreaPercent = 50;
     uint32_t exceptStaticStartX = 0;
     uint32_t exceptStaticStartY = 0;
@@ -1157,7 +1157,7 @@ HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState002, Function 
     ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
     dynamicSession->SetBounds(dynamicScreenBounds);
     dynamicSession->SetRSScreenId(dynamicScreenId);
-    dynamicSession->SetStartPosition(1919,1080);
+    dynamicSession->SetStartPosition(1919, 1080);
     uint32_t borderingAreaPercent = 50;
     uint32_t exceptStaticStartX = 0;
     uint32_t exceptStaticStartY = 0;
@@ -1194,7 +1194,7 @@ HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState003, Function 
     ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
     dynamicSession->SetBounds(dynamicScreenBounds);
     dynamicSession->SetRSScreenId(dynamicScreenId);
-    dynamicSession->SetStartPosition(1920,1080);
+    dynamicSession->SetStartPosition(1920, 1080);
     uint32_t borderingAreaPercent = 50;
     uint32_t exceptStaticStartX = 0;
     uint32_t exceptStaticStartY = 0;

@@ -316,8 +316,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             VirtualScreenFlag virtualScreenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
             bool supportsFocus = data.ReadBool();
             bool supportsInput = data.ReadBool();
-            bool isSurfaceValid = data.ReadBool();
             std::string serialNumber = data.ReadString();
+            bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
                 sptr<IRemoteObject> surfaceObject = data.ReadRemoteObject();
