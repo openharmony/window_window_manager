@@ -3122,14 +3122,14 @@ HWTEST_F(SceneSessionTest5, SetSkipEventOnCastPlus, TestSize.Level1)
     
     sptr<SceneSession::SpecificSessionCallback> specificCallback =
         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = nullptr;
-    session->specificSessionCallback_ = specificCallback;
+    specificCallback->onSetSkipEventOnCastPlus_ = nullptr;
+    session->specificCallback_ = specificCallback;
     session->SetSkipEventOnCastPlus(true);
     usleep(10000);
 
     specificCallback->onSetSkipEventOnCastPlus_ =
-        [](uint32_t persistentId, bool isSkip) {};
-    session->specificSessionCallback_ = specificCallback;
+        [](int32_t persistentId, bool isSkip) {};
+    session->specificCallback_ = specificCallback;
     session->SetSkipEventOnCastPlus(false);
     usleep(10000);
 }
