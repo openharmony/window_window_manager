@@ -1187,7 +1187,7 @@ HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState003, Function 
     ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
     staticSession->SetBounds(staticScreenBounds);
     staticSession->SetRSScreenId(mainScreenId);
-    staticSession->SetStartPosition(0,0);
+    staticSession->SetStartPosition(0, 0);
     ScreenId dynamicScreenId = 1052;
     sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
     DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
