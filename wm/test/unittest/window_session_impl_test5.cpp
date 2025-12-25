@@ -2236,6 +2236,26 @@ HWTEST_F(WindowSessionImplTest5, SwitchSubWindow, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: IsPiPActive
+ * @tc.desc: IsPiPActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, IsPiPActive, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    bool status = false;
+    EXPECT_EQ(window->IsPiPActive(status), WMError::WM_ERROR_PIP_INTERNAL_ERROR);
+
+    SessionInfo sessionInfo = {"IsPiPActive", "IsPiPActive", "IsPiPActive"};
+    auto hostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = hostSession;
+
+    EXPECT_EQ(window->IsPiPActive(status), WMError::WM_OK);
+}
+
+/**
  * @tc.name: NotifySizeChangeFlag
  * @tc.desc: NotifySizeChangeFlag
  * @tc.type: FUNC

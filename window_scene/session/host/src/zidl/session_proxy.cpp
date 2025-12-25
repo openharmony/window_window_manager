@@ -1049,6 +1049,38 @@ WSError SessionProxy::OnRestoreMainWindow()
     return static_cast<WSError>(ret);
 }
 
+WMError SessionProxy::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(wantParams.get())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write wantParams failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_MAIN_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t ret = 0;
+    if (!reply.ReadUint32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read reply failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 /** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
     bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
@@ -3777,6 +3809,37 @@ WSError SessionProxy::SetPipParentWindowId(uint32_t windowId)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);
+}
+
+WMError SessionProxy::IsPiPActive(bool& status)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_PIP, "writeInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_IS_PIP_ACTIVE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read return code failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(status)) {
+        TLOGE(WmsLogTag::WMS_PIP, "read status failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WSError SessionProxy::UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister)
