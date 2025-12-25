@@ -3405,6 +3405,7 @@ HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenWhiteList03, TestSize.Leve
 HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level1)
 {
     g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     ASSERT_NE(ssm_, nullptr);
  
     auto displayInfo = ssm_->GetDefaultDisplayInfo();

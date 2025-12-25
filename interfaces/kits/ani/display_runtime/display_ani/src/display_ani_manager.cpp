@@ -568,7 +568,7 @@ void DisplayManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_
 void DisplayManagerAni::UnRegisterAttributeListener(ani_env* env, ani_ref callback)
 {
     std::vector<std::string> attributesNotListened;
-    for (auto itAttribute = jsAttributeCbMap_.begin(); itAttribute != jsAttributeCbMap_.end();){
+    for (auto itAttribute = jsAttributeCbMap_.begin(); itAttribute != jsAttributeCbMap_.end();) {
         for (auto it = itAttribute->second.begin(); it != itAttribute->second.end();) {
             ani_boolean isEquals = false;
             env->Reference_StrictEquals(callback, it->first, &isEquals);
