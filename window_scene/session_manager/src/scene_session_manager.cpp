@@ -552,12 +552,19 @@ void SceneSessionManager::InitWindowPattern()
 {
     InitSnapshotCache();
     InitStartingWindow();
+    InitDmaReclaimParam();
 }
 
 void SceneSessionManager::InitStartingWindow()
 {
     syncLoadStartingWindow_ = system::GetBoolParameter("const.window.sync_startingWindow", false);
     TLOGI(WmsLogTag::WMS_PATTERN, "Sync Load StartingWindow: %{public}d", syncLoadStartingWindow_);
+}
+
+void SceneSessionManager::InitDmaReclaimParam()
+{
+    enableDmaReclaim_ = system::GetBoolParameter("resourceschedule.memmgr.dma.reclaimable", false);
+    TLOGI(WmsLogTag::WMS_PATTERN, "Dma reclaim enabled: %{public}d", enableDmaReclaim_);
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
@@ -6337,6 +6344,7 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         if (sceneSession->GetSessionState() != SessionState::STATE_DISCONNECT) {
             TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d is not disconnect",
                 where, sceneSession->GetPersistentId());
+            sceneSession->PreloadSnapshot();
             return;
         }
         StartingWindowInfo startingWindowInfo;
