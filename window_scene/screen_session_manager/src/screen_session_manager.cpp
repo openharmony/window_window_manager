@@ -1701,12 +1701,11 @@ void ScreenSessionManager::HandleScreenConnectEvent(sptr<ScreenSession> screenSe
     HandlePhysicalMirrorConnect(screenSession, phyMirrorEnable);
     ScreenConnectionChanged(screenSession, screenId, screenEvent, phyMirrorEnable);
     if (phyMirrorEnable || (IsConcurrentUser() && screenId != SCREEN_ID_DEFAULT)) {
-        sptr<ScreenSession> internalSession = GetScreenSession(SCREEN_ID_DEFAULT);
-        TLOGW(WmsLogTag::DMS, "HandleScreenConnectEven. SCreenId: %{public}" PRIu64, internalSession->GetScreenId());
-        NotifyScreenConnected(internalSession->ConvertToScreenInfo());
+        TLOGW(WmsLogTag::DMS, "HandleScreenConnectEven. SCreenId: %{public}" PRIu64, screenSession->GetScreenId());
+        NotifyScreenConnected(screenSession->ConvertToScreenInfo());
         // when display add, need wait update available area, ensure display info is accurate
         WaitUpdateAvailableAreaForPc();
-        NotifyDisplayCreate(internalSession->ConvertToDisplayInfo());
+        NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
     }
     TLOGW(WmsLogTag::DMS, "connect end. ScreenId: %{public}" PRIu64, screenId);
 }
@@ -1729,7 +1728,7 @@ void ScreenSessionManager::HandleFoldDeviceScreenConnect(ScreenId screenId, cons
     }
 }
 
-void ScreenSessionManager::ScreenConnectionChanged(sptr<ScreenSession> screenSession,
+void ScreenSessionManager::ScreenConnectionChanged(sptr<ScreenSession>& screenSession,
     ScreenId screenId, ScreenEvent screenEvent, bool phyMirrorEnable)
 {
     auto clientProxy = GetClientProxy();
@@ -13093,6 +13092,7 @@ std::map<ScreenId, std::shared_ptr<RSDisplayNode>> ScreenSessionManager::GetUser
 
 void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
 {
+    SetUserDisplayNodePositionZ(currentUserId_, POSITION_Z_DEFAULT);
     auto newUserDisplayNodeMap = GetUserDisplayNodeMap(newUserId);
     std::ostringstream oss;
     for (auto sessionIt : newUserDisplayNodeMap) {
@@ -13144,6 +13144,7 @@ void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
             RemoveUserDisplayNode(newUserId, screenId);
         }
     }
+    SetUserDisplayNodePositionZ(newUserId, POSITION_Z_LOW);
 }
 
 void ScreenSessionManager::AddUserDisplayNodeOnTree(int32_t userId)
@@ -13234,12 +13235,10 @@ void ScreenSessionManager::HandleNewUserDisplayNode(int32_t newUserId, bool cold
 {
     std::unique_lock<std::mutex> lock(switchUserDisplayNodeMutex_);
     TLOGI(WmsLogTag::DMS, "newUserId: %{public}d, coldBoot: %{public}d", newUserId, coldBoot);
-    SetUserDisplayNodePositionZ(currentUserId_, POSITION_Z_DEFAULT);
     if (!coldBoot) {
         TLOGI(WmsLogTag::DMS, "deal with userDisplayNode");
         SwitchUserDealUserDisplayNode(newUserId);
     }
-    SetUserDisplayNodePositionZ(newUserId, POSITION_Z_LOW);
     AddUserDisplayNodeOnTree(newUserId);
     MakeMirrorAfterSwitchUser();
 }
