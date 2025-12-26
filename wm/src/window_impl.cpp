@@ -1906,6 +1906,10 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
         static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::TOGGLING) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+
+        if (static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::KEYGUARD) {
+            NotifyMainWindowDidForeground(reason);
+        }
         return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_SHOWN) {
@@ -1974,6 +1978,11 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
         state_ = stateChangeReason == WindowStateChangeReason::KEYGUARD ?
             WindowState::STATE_FROZEN : WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
+
+        if (WindowHelper::IsMainWindow(property_->GetWindowType()) &&
+            stateChangeReason == WindowStateChangeReason::KEYGUARD) {
+            NotifyAfterDidBackground(reason);
+        }
         return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
