@@ -75,6 +75,10 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual bool IsOnboardDisplay(DisplayId displayId)
+    {
+        return false;
+    }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {

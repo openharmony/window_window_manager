@@ -1629,6 +1629,16 @@ void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::ve
     }
 }
 
+bool DisplayManagerAdapter::IsOnboardDisplay(DisplayId displayId)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->IsOnboardDisplay(displayId);
+    }
+    TLOGE(WmsLogTag::DMS, "fail");
+    return false;
+}
+
 void DisplayManagerAdapter::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)
 {
     INIT_PROXY_CHECK_RETURN();
