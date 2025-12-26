@@ -178,6 +178,7 @@ public:
     void SetDisplayNodeSecurity();
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
+    void ConvertBScreenHeight(uint32_t& height);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
@@ -235,6 +236,8 @@ public:
     void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
     std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
+    void SetBorderingAreaPercent(uint32_t borderingAreaPercent);
+    uint32_t GetBorderingAreaPercent() const;
 
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
@@ -296,6 +299,7 @@ public:
     NodeId nodeId_ {};
 
     int32_t activeIdx_ { 0 };
+    uint32_t borderingAreaPercent_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
 
     bool isScreenGroup_ { false };

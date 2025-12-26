@@ -2684,6 +2684,190 @@ void ScreenSessionManager:: ReportRelativePositionChangeEvent(MultiScreenPositio
 #endif
 }
 
+void ScreenSessionManager::GetStaticAndDynamicSession()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    sptr<ScreenSession> mainScreenSession = GetScreenSessionByRsId(SCREEN_ID_FULL);
+    if (mainScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "mainScreenSession is nullptr");
+        return;
+    }
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    sptr<ScreenSession> secondarySession;
+    for (const auto& sessionIt : screenSessionMapCopy) {
+        sptr<ScreenSession> tempScreenSession = sessionIt.second;
+        if (tempScreenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+            continue;
+        }
+        if (tempScreenSession->GetIsExtendVirtual()) {
+            secondarySession = tempScreenSession;
+            break;
+        }
+    }
+    if (secondarySession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "secondarySession is nullptr");
+        return;
+    }
+    uint32_t borderingAreaPercent = secondarySession->GetBorderingAreaPercent();
+    CalculateStartWhenTransferState(secondarySession, mainScreenSession, borderingAreaPercent);
+}
+
+bool ScreenSessionManager::CheckPercent(std::map<std::string, uint32_t> percentMap, const std::string& serialNumber)
+{
+    if (percentMap.empty()) {
+        TLOGE(WmsLogTag::DMS, "no restored screen");
+        return false;
+    }
+    if (serialNumber.size() == 0) {
+        TLOGE(WmsLogTag::DMS, "serialNumber empty!");
+        return false;
+    }
+    if (percentMap.find(serialNumber) == percentMap.end()) {
+        TLOGE(WmsLogTag::DMS, "screen not found");
+        return false;
+    }
+    return true;
+}
+
+void ScreenSessionManager::CalculateStartWhenTransferState(sptr<ScreenSession> staticSession,
+    sptr<ScreenSession> dynamicSession, uint32_t borderingAreaPercent)
+{
+    if (dynamicSession == nullptr || staticSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    auto staticProperty = staticSession->GetScreenProperty();
+    auto dynamicProperty = dynamicSession->GetScreenProperty();
+    auto staticBounds = staticProperty.GetBounds();
+    auto dynamicBounds = dynamicProperty.GetBounds();
+    uint32_t staticScreenStartX = staticProperty.GetStartX();
+    uint32_t staticScreenStartY = staticProperty.GetStartY();
+    uint32_t dynamicScreenStartX = dynamicProperty.GetStartX();
+    uint32_t dynamicScreenStartY = dynamicProperty.GetStartY();
+    uint32_t staticWidth = staticBounds.rect_.GetWidth();
+    uint32_t staticHeight = staticBounds.rect_.GetHeight();
+    uint32_t dynamicWidth = dynamicBounds.rect_.GetWidth();
+    uint32_t dynamicHeight = dynamicBounds.rect_.GetHeight();
+    dynamicSession->ConvertBScreenHeight(dynamicHeight);
+    MultiScreenPositionOptions staticScreenOptions = { staticSession->GetRSScreenId(),
+        staticScreenStartX, staticScreenStartY};
+    MultiScreenPositionOptions dynamicScreenOptions = { dynamicSession->GetRSScreenId(),
+        dynamicScreenStartX, dynamicScreenStartY};
+    std::string positions = "init start";
+    LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+    if (staticScreenStartX == 0) {
+        // static on left
+        HandleStaticOnLeft(staticScreenOptions, dynamicScreenOptions, borderingAreaPercent, staticHeight,
+            staticWidth, dynamicHeight);
+    } else {
+        // static on right
+        HandleStaticOnRight(staticScreenOptions, dynamicScreenOptions, borderingAreaPercent, dynamicWidth,
+            staticHeight, dynamicHeight);
+    }
+    auto ret = SetMultiScreenRelativePosition(dynamicScreenOptions, staticScreenOptions);
+    if (ret != DMError::DM_OK) {
+        SetMultiScreenDefaultRelativePosition();
+    }
+    staticSession->PropertyChange(staticSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+    dynamicSession->PropertyChange(dynamicSession->GetScreenProperty(),
+        ScreenPropertyChangeReason::RELATIVE_POSITION_CHANGE);
+}
+
+void ScreenSessionManager::HandleStaticOnLeft(MultiScreenPositionOptions& staticScreenOptions,
+    MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t staticHeight,
+        uint32_t staticWidth, uint32_t dynamicHeight)
+{
+    uint32_t staticScreenStartX = staticScreenOptions.startX_;
+    uint32_t staticScreenStartY = staticScreenOptions.startY_;
+    uint32_t dynamicScreenStartX = dynamicScreenOptions.startX_;
+    uint32_t dynamicScreenStartY = dynamicScreenOptions.startY_;
+    std::string positions;
+    if (dynamicScreenStartX == 0 && dynamicScreenStartY == staticHeight) {
+        positions = "sStart:[0, 0], dStart:[0, dSY == sH]";
+        LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+        return;
+    } else if (dynamicScreenStartX > 0 && dynamicScreenStartY == staticHeight && dynamicScreenStartX != staticWidth) {
+        positions = "sStart:[0, any], dStart:[0 < dSX < sW, dSY = sH]";
+        LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+        return;
+    } else if (staticScreenStartY == 0 && dynamicScreenStartX == staticWidth) {
+        positions = "sStart:[0, 0], dStart:[dSX == sW, dSY > 0]";
+        LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+        return;
+    } else if (staticScreenStartY > 0 && dynamicScreenStartX == staticWidth) {
+        positions = "sStart:[0, 0 < sSY], dStart:[dSX == sW, dSY == 0]]";
+        AdjustTheBorderingAreaPercent(adjacentPercentage, dynamicHeight, staticScreenStartY);
+    } else if (staticScreenStartY >0 && dynamicScreenStartX < staticWidth && dynamicScreenStartX > 0) {
+        positions = "sStart:[0, 0 < sSY], dStart:[0 < dSX < sW, dSY == 0]";
+        staticScreenStartY = dynamicHeight;
+        AdjustTheBorderingAreaPercent(adjacentPercentage, staticWidth, dynamicScreenStartX);
+    } else if (dynamicScreenStartX == 0 && dynamicScreenStartY == 0) {
+        positions = "sStart:[0, 0 < sSY], dStart:[0, 0]";
+        staticScreenStartY = dynamicHeight;
+    } else {
+        positions = "other case";
+        LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+        return;
+    }
+    staticScreenOptions.startY_ = staticScreenStartY;
+    dynamicScreenOptions.startX_ = dynamicScreenStartX;
+    LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+}
+
+void ScreenSessionManager::HandleStaticOnRight(MultiScreenPositionOptions& staticScreenOptions,
+    MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t dynamicWidth,
+        uint32_t staticHeight, uint32_t dynamicHeight)
+{
+    uint32_t staticScreenStartX = staticScreenOptions.startX_;
+    uint32_t staticScreenStartY = staticScreenOptions.startY_;
+    uint32_t dynamicScreenStartX = dynamicScreenOptions.startX_;
+    uint32_t dynamicScreenStartY = dynamicScreenOptions.startY_;
+    std::string positions;
+    if (dynamicScreenStartY == 0 && dynamicScreenStartX == 0) {
+        positions = "dStart:[0, 0], sStart:[0 < ssX, 0 < ssY]";
+        staticScreenStartX = dynamicWidth;
+        AdjustTheBorderingAreaPercent(adjacentPercentage, dynamicHeight, staticScreenStartY);
+    } else if (dynamicScreenStartY > 0 && dynamicScreenStartX == 0 && dynamicScreenStartY != staticHeight &&
+        staticScreenStartY == 0) {
+        positions = "dStart:[0, 0 < dSY < sH], sStart:[sSX == dW, 0]";
+        staticScreenStartX = dynamicWidth;
+        AdjustTheBorderingAreaPercent(adjacentPercentage, staticHeight, dynamicScreenStartY);
+    } else if (dynamicScreenStartY == staticHeight && dynamicScreenStartX ==0 && staticScreenStartY == 0) {
+        positions = "dStart:[0, dSY == sH], sStart:[0, ssX < dW]";
+        AdjustTheBorderingAreaPercent(adjacentPercentage, dynamicWidth, staticScreenStartX);
+    } else {
+        positions = "other case";
+        LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+        return;
+    }
+    staticScreenOptions.startX_ = staticScreenStartX;
+    staticScreenOptions.startY_ = staticScreenStartY;
+    dynamicScreenOptions.startY_ = dynamicScreenStartY;
+    LogPositions(positions, staticScreenOptions, dynamicScreenOptions);
+}
+
+void ScreenSessionManager::AdjustTheBorderingAreaPercent(uint32_t adjacentPercent, uint32_t length,
+    uint32_t& adjacentStart)
+{
+    adjacentStart = static_cast<uint32_t>(length * adjacentPercent / 100); // int changeto percent
+    TLOGI(WmsLogTag::DMS, "adjacentStart: %{public}u", adjacentStart);
+}
+
+void ScreenSessionManager::LogPositions(const std::string& positions, const MultiScreenPositionOptions& mainScreenOptions,
+    const MultiScreenPositionOptions& secondScreenOptions)
+{
+    TLOGI(WmsLogTag::DMS, "%{public}s, static ID:%{public}" PRIu64",sX:%{public}u, sY:%{public}u"
+        "dynamic ID:%{public}" PRIu64",sX:%{public}u, sY:%{public}u",
+        positions.c_str(), mainScreenOptions.screenId_, mainScreenOptions.startX_, mainScreenOptions.startY_,
+        secondScreenOptions.screenId_, secondScreenOptions.startX_, secondScreenOptions.startY_);
+}
+
 void ScreenSessionManager::CheckAndNotifyRefreshRate(uint32_t refreshRate, sptr<ScreenSession> updateScreenSession)
 {
     if (updateScreenSession == nullptr) {
@@ -5265,10 +5449,12 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
         that.SetExtendScreenDpi();
+        that.SetBorderingAreaPercent();
         that.UpdateDisplayState(that.GetAllScreenIds(), DisplayState::ON);
         that.RegisterSettingDpiObserver();
         that.RegisterSettingExtendScreenDpiObserver();
         that.RegisterRotationCorrectionExemptionListObserver();
+        that.RegisterSettingBorderingAreaPercentObserver();
         if (FoldScreenStateInternel::IsDualDisplayFoldDevice()) {
             that.RegisterSettingDuringCallStateObserver();
         }
@@ -5698,6 +5884,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         if (physicalScreen) {
             physicalScreen->UpdatePropertyAfterRotation(bounds, rotation, GetFoldDisplayMode());
         }
+        GetStaticAndDynamicSession();
         NotifyScreenModeChange();
     }
     SetFoldDisplayModeAfterRotation(GetFoldDisplayMode());
@@ -6599,11 +6786,6 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId)
         }
         RemoveScreenCastInfo(screenId);
         NotifyScreenDisconnected(screenId);
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screen->GetIsExtendVirtual()) {
-            SetIsExtendModelocked(false);
-            SetExpandAndHorizontalLocked(false);
-            TLOGW(WmsLogTag::DMS, "statemachine unlocked");
-        }
         if (auto clientProxy = GetClientProxy()) {
             clientProxy->OnVirtualScreenDisconnected(rsScreenId);
         }
@@ -11567,38 +11749,21 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         return DMError::DM_OK;
     }
     SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        SetIsExtendModelocked(screenMode == MultiScreenMode::SCREEN_EXTEND);
-    }
-    if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
-        SetExpandAndHorizontalLocked(true);
+    sptr<ScreenSession> secondaryScreenSession = GetScreenSessionByRsId(secondaryScreenId);
+    if (secondaryScreenSession != nullptr && secondaryScreenSession->GetIsExtendVirtual() == false) {
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            SetIsExtendModelocked(screenMode == MultiScreenMode::SCREEN_EXTEND);
+        }
+        if (screenMode == MultiScreenMode::SCREEN_EXTEND) {
+            SetExpandAndHorizontalLocked(true);
+        }
     }
     auto combination = screenMode == MultiScreenMode::SCREEN_MIRROR ?
         ScreenCombination::SCREEN_MIRROR : ScreenCombination::SCREEN_EXPAND;
     SetScreenCastInfo(secondaryScreenId, mainScreenId, combination);
-    UnlockStateMachineInExtendAndVirtualScreen(secondaryScreenId);
     NotifyScreenModeChange();
 #endif
     return DMError::DM_OK;
-}
-
-void ScreenSessionManager::UnlockStateMachineInExtendAndVirtualScreen(ScreenId screenId) 
-{
-    TLOGI(WmsLogTag::DMS, "Enter");
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        return;
-    }
-    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(screenId);
-    if (screenSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
-        return;
-    }
-    if (screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR &&
-        screenSession->GetIsExtendVirtual()) {
-        SetIsExtendModelocked(false);
-        SetExpandAndHorizontalLocked(false);
-        TLOGI(WmsLogTag::DMS, "unlock");
-    }
 }
 
 void ScreenSessionManager::SetMultiScreenModeInner(ScreenId mainScreenId, ScreenId secondaryScreenId,
@@ -12530,6 +12695,41 @@ void ScreenSessionManager::SetForceCloseHdr(ScreenId screenId, bool isForceClose
     TLOGI(WmsLogTag::DMS, "[UL_POWER]screenId:%{public}" PRIu64 "isForceCloseHdr:%{public}d",
         screenId, isForceCloseHdr);
     screenSession->SetForceCloseHdr(isForceCloseHdr);
+}
+
+void ScreenSessionManager::RegisterSettingBorderingAreaPercentObserver()
+{
+    TLOGI(WmsLogTag::DMS, "Register Setting bordering area percent Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { SetBorderingAreaPercent(); };
+    ScreenSettingHelper::RegisterSettingBorderingAreaPercentObserver(DmUtils::wrap_callback(updateFunc));
+}
+
+void ScreenSessionManager::SetBorderingAreaPercent()
+{
+    TLOGI(WmsLogTag::DMS, "enter");
+    std::map<std::string, uint32_t> borderingAreaPercentMap = ScreenSettingHelper::GetBorderingAreaPercent();
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    for (const auto& sessionIt : screenSessionMapCopy) {
+        auto screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGE(WmsLogTag::DMS, "screenSession is nullptr!");
+            continue;
+        }
+        if (screenSession->GetIsExtendVirtual() == false) {
+            TLOGE(WmsLogTag::DMS, "is not extend virtual!");
+            continue;
+        }
+        std::string serialNumber = screenSession->GetSerialNumber();
+        if (CheckPercent(borderingAreaPercentMap, serialNumber)) {
+            uint32_t borderingAreaPercent = borderingAreaPercentMap[serialNumber];
+            screenSession->SetBorderingAreaPercent(borderingAreaPercent);
+            TLOGE(WmsLogTag::DMS, "get setting bordering area percent is:%{public}u", borderingAreaPercent);
+        }
+    }
 }
 
 void ScreenSessionManager::RegisterSettingExtendScreenDpiObserver()
