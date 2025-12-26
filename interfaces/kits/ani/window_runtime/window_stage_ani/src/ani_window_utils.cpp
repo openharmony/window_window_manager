@@ -211,7 +211,7 @@ ani_status AniWindowUtils::GetStdStringVector(ani_env* env, ani_object ary, std:
     }
     for (int32_t i = 0; i< static_cast<int32_t>(length); i++) {
         ani_ref stringRef;
-        ret = env->Object_CallMethodByName_Ref(ary, "$_get", "i:C{std.core.Object}", &stringRef, ani_int(i));
+        ret = env->Object_CallMethodByName_Ref(ary, "$_get", "i:Y", &stringRef, ani_int(i));
         if (ret != ANI_OK) {
             return ret;
         }
@@ -878,7 +878,7 @@ ani_object AniWindowUtils::CreateAniWindowLimits(ani_env* env, const WindowLimit
     }
 
     ani_enum_item pixelUnitItem;
-    
+
     std::string itemName = GetPixelUnitString(windowLimits.pixelUnit_);
     ret = env->Enum_GetEnumItemByName(pixelUnit, itemName.c_str(), &pixelUnitItem);
     if (ret != ANI_OK) {
@@ -965,7 +965,7 @@ ani_object AniWindowUtils::CreateAniTitleButtonRect(ani_env* env, const TitleBut
     CallAniMethodVoid(env, aniRect, aniClass, "<set>height", nullptr, ani_int(rect.height_));
     return aniRect;
 }
- 
+
 ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorButtonStyle& style)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -1014,7 +1014,7 @@ ani_object AniWindowUtils::CreateAniDecorButtonStyle(ani_env* env, const DecorBu
         ani_int(style.buttonBackgroundCornerRadius));
     return aniStyle;
 }
- 
+
 ani_status AniWindowUtils::SetOptionalFieldInt(ani_env* env, ani_object obj,
     ani_class cls, const char* method, ani_int aniInt)
 {
@@ -1037,7 +1037,7 @@ ani_status AniWindowUtils::SetOptionalFieldInt(ani_env* env, ani_object obj,
     }
     return CallAniMethodVoid(env, obj, cls, method, nullptr, intObj);
 }
- 
+
 bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& decorButtonStyle,
                                                 const ani_object& decorStyle)
 {
@@ -1053,7 +1053,7 @@ bool AniWindowUtils::SetDecorButtonStyleFromAni(ani_env* env, DecorButtonStyle& 
         decorStyle, decorButtonStyle.buttonBackgroundCornerRadius);
     return hasParam;
 }
- 
+
 bool AniWindowUtils::GetColorMode(ani_env* env, const ani_object& decorStyle, int32_t& colorMode)
 {
     ani_ref colorModeRef;
@@ -1072,7 +1072,7 @@ bool AniWindowUtils::GetColorMode(ani_env* env, const ani_object& decorStyle, in
         TLOGE(WmsLogTag::DEFAULT, "[ANI] colorMode is Undefined Now");
         return false;
     }
- 
+
     ani_int colorModeValue;
     if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(colorModeRef), &colorModeValue)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_GetPropertyByName_Ref colorMode Failed");
@@ -1806,7 +1806,7 @@ bool AniWindowUtils::ParseKeyFramePolicy(ani_env* env, ani_object aniKeyFramePol
     }
     keyFramePolicy.dragResizeType_ = enable ? DragResizeType::RESIZE_KEY_FRAME :
         DragResizeType::RESIZE_TYPE_UNDEFINED;
-    
+
     bool propertyUndefined = false;
     int32_t distance = 0;
     if (CheckPropertyNameUndefined(env, "distance", aniKeyFramePolicy, propertyUndefined) != ANI_OK ||
@@ -2512,7 +2512,7 @@ ani_object AniWindowUtils::CreateOptionalBool(ani_env *env, ani_boolean value)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to allocate Boolean");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    
+
     return obj;
 }
 
@@ -2535,7 +2535,7 @@ ani_object AniWindowUtils::CreateOptionalInt(ani_env *env, ani_int value)
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to allocate Int");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    
+
     return obj;
 }
 
@@ -2592,7 +2592,7 @@ bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sp
         TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] GetPropertyRectObject failed");
         return false;
     }
-    
+
     if (windowRect.width_ <= 0 || windowRect.height_ <= 0) {
         TLOGE(WmsLogTag::WMS_SUB, "width or height should greater than 0!");
         return false;
@@ -2621,7 +2621,7 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
         return false;
     }
     windowOption->SetWindowTopmost(isTopmost);
-    
+
     ani_ref modalityTypeRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
     ani_boolean isUndefined = false;
