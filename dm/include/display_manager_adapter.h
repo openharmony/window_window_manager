@@ -105,6 +105,7 @@ public:
     virtual DMError GetLiveCreaseRegion(FoldCreaseRegion& region);
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
+    virtual bool IsOnboardDisplay(DisplayId displayId);
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
