@@ -1129,20 +1129,20 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
             return;
         }
         if (value == HALL_HAVE_KEYBOARD || value == HALL_REMOVE_KEYBOARD) {
-            HallData hallData;
             if (value == HALL_HAVE_KEYBOARD) {
+                HallData hallData;
                 hallData.status = HALL_HAVE_KEYBOARD_THRESHOLD;
-                SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
-            } else {
-                hallData.status = HALL_REMOVE_KEYBOARD_THRESHOLD;
-                SuperFoldSensorManager::GetInstance().RegisterHallCallback();
-            }
-            SensorEvent hallEvent = {
-                .data = reinterpret_cast<uint8_t*>(&hallData),
-                .dataLen = sizeof(hallData),
-            };
+                SensorEvent hallEvent = {
+                    .data = reinterpret_cast<uint8_t*>(&hallData),
+                    .dataLen = sizeof(hallData),
+                };
+            SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
             SuperFoldSensorManager::GetInstance().HandleHallData(&hallEvent);
-            TLOGI(WmsLogTag::DMS, "set hall value: %{public}d", value);
+            TLOGW(WmsLogTag::DMS, "set hall value: %{public}d and unregisterHallCallback", value);
+            } else {
+                SuperFoldSensorManager::GetInstance().RegisterHallCallback();
+                TLOGW(WmsLogTag::DMS, "registerHallCallback ", value);
+            }
         }
         SuperFoldStateManager::GetInstance().
             HandleSuperFoldStatusChange(static_cast<SuperFoldStatusChangeEvents>(value));
