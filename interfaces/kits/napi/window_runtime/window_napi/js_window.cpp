@@ -7575,13 +7575,13 @@ bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits
     if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
         return false;
     }
-    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+    if (!parseField("minWidth", windowLimits.minWidth_, defaultValue)) {
         return false;
     }
-    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+    if (!parseField("maxHeight", windowLimits.maxHeight_, defaultValue)) {
         return false;
     }
-    if (!parseField("maxWidth", windowLimits.maxWidth_, defaultValue)) {
+    if (!parseField("minHeight", windowLimits.minHeight_, defaultValue)) {
         return false;
     }
     if (!ParseJsValueOrGetDefault(jsObject, env, "pixelUnit", pixelUnit, PixelUnit::PX)) {
