@@ -5425,8 +5425,8 @@ napi_value JsWindow::OnHideNonSystemFloatingWindows(napi_env env, napi_callback_
         }
         task->Resolve(env, NapiGetUndefined(env));
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE,
-            "%{public}s end. Window [%{public}u, %{public}s]",
-            where, window->GetWindowId(), window->GetWindowName().c_str());
+            "%{public}s end. Wid: %{public}u, shouldHide: %{public}d",
+            where, window->GetWindowId(), shouldHide);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnHideNonSystemFloatingWindows") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
