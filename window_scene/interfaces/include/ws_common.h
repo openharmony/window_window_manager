@@ -129,16 +129,7 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_EDM_CONTROLLED = 16000013, // enterprise limit
 };
 
-const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
-    { WSError::WS_OK,                    WSErrorCode::WS_OK },
-    { WSError::WS_DO_NOTHING,            WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_INVALID_SESSION, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_INVALID_PARAM, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_IPC_FAILED,      WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
-    { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED },
-    { WSError::WS_ERROR_INVALID_WINDOW,  WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-};
+extern const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP;
 
 enum class SessionState : uint32_t {
     STATE_DISCONNECT = 0,
