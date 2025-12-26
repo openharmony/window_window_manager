@@ -8355,11 +8355,11 @@ void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<Display
         oss << "[displayId: " << displayId
             << ", private: " << (isPrivate ? "true" : "false") << "] ";
     }
-    TLOGI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
     const std::vector<DisplayId> displayIds = GetAllDisplayIds();
     // all display use or to calculate private state
-    if (CheckNeedNotify(displayIds, privacyBundleDisplayId)) {
-        bool allDisplayHasPrivate = false;
+    bool isNeedNotify = CheckNeedNotify(displayIds, privacyBundleDisplayId);
+    bool allDisplayHasPrivate = false;
+    if (isNeedNotify) {
         {
             std::lock_guard<std::mutex> lock(hasPrivateWindowForegroundMutex_);
             allDisplayHasPrivate = std::any_of(hasPrivateWindowForeground_.begin(), hasPrivateWindowForeground_.end(),
@@ -8367,6 +8367,8 @@ void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<Display
         }
         NotifyPrivateSessionStateChanged(allDisplayHasPrivate);
     }
+    TLOGI(WmsLogTag::DMS, "needNotify=%{public}d, hasPrivacy=%{public}d, displayPrivacyInfo=%{public}s",
+        isNeedNotify, allDisplayHasPrivate, oss.str().c_str());
 }
 
 bool ScreenSessionManager::CheckNeedNotify(const std::vector<DisplayId>& displayIds,
@@ -8384,7 +8386,7 @@ bool ScreenSessionManager::CheckNeedNotify(const std::vector<DisplayId>& display
         DisplayId displayId = it->first;
         bool hasPrivate = it->second;
         if (std::find(displayIds.begin(), displayIds.end(), displayId) == displayIds.end()) {
-            TLOGW(WmsLogTag::DMS, "invalid displayId");
+            TLOGW(WmsLogTag::DMS, "invalid displayId=%{public}" PRIu64, displayId);
             it = privacyBundleDisplayId.erase(it);
             continue;
         }
