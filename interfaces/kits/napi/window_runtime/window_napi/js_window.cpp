@@ -4499,7 +4499,7 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowBrightness]"));
         }
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "winId=%{public}u, brightness=%{public}f, result: %{public}d",
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s,  winId=%{public}u, brightness=%{public}f, result: %{public}d",
             weakWindow->GetWindowId(), brightness, ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowBrightness") != napi_status::napi_ok) {
@@ -4934,7 +4934,7 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
     }
     wptr<Window> weakToken(windowToken_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodePtr] {
+    NapiAsyncTask::ExecuteCallback execute = [weakToken, keepScreenOn, errCodePtr, where = __func__] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -4944,8 +4944,8 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
-        WLOGI("Window [%{public}u, %{public}s] set keep screen on end",
-            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str());
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, Wid: %{public}u, set keep screen on as %{public}d end",
+            where, weakWindow->GetWindowId(), keepScreenOn);
     };
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, keepScreenOn, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
