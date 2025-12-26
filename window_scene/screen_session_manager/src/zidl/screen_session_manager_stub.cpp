@@ -433,6 +433,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             reply.WriteUint32(static_cast<uint32_t>(result));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY: {
+            DisplayId displayId = data.ReadUint64();
+            bool res = IsOnboardDisplay(displayId);
+            if (!reply.WriteBool(res)) {
+                TLOGE(WmsLogTag::DMS, "write res failed");
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::shared_ptr<Media::PixelMap> privacyMaskImg{nullptr};

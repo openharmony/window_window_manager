@@ -866,6 +866,14 @@ public:
     void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
 
     /**
+     * @brief Determine whether the display is onboard.
+     *
+     * @param displayId display id.
+     * @return displayid whether onboard
+    */
+    bool IsOnboardDisplay(DisplayId displayId);
+
+    /**
      * @brief When casting the screen, the display not be skipped after the physical screen is turned off.
      *
      * @param screenId ScreenId used in virtual screen.
