@@ -8994,10 +8994,8 @@ void WindowSessionImpl::SwitchSystemWindow(bool freeMultiWindowEnable, int32_t p
 
 void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
 {
+    // Support for all system windows
     if (flag) {
-        if (GetType() != WindowType::WINDOW_TYPE_FLOAT_NAVIGATION) {
-            return;
-        }
         if (GetRect() == GetRequestRect()) {
             return;
         }
