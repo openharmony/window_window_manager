@@ -570,8 +570,7 @@ void JsSceneSessionManager::OnOutsideDownEvent(int32_t x, int32_t y)
         napi_value argv[] = {objValue};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
-    std::string info = "OnOutsideDownEvent:[" + std::to_string(x) + ", " + std::to_string(y) + "]";
-    taskScheduler_->PostMainThreadTask(task, info);
+    taskScheduler_->PostMainThreadTask(task, "OnOutsideDownEvent");
 }
 
 void JsSceneSessionManager::OnShiftFocus(int32_t persistentId, DisplayId displayGroupId)
