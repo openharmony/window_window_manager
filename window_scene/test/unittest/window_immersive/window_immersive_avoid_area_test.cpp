@@ -120,6 +120,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateRootSceneAvoidArea, TestSize.Level1
     ssm_->UpdateRootSceneAvoidArea();
     auto res = ssm_->rootSceneSession_->GetPersistentId();
     EXPECT_NE(res, 0);
+    sleep(1);
 }
 
 /**
@@ -134,6 +135,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateRootSceneSessionAvoidArea, TestSize
     ASSERT_NE(nullptr, ssm_->rootSceneSession_);
     bool needUpdate = false;
     ssm_->UpdateRootSceneSessionAvoidArea(persistentId, needUpdate);
+    sleep(1);
 }
 
 /**
@@ -159,6 +161,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidSessionAvoidArea, TestSize.Lev
     sceneSession->isVisible_ = true;
     ssm_->UpdateAvoidSessionAvoidArea(type);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+    sleep(1);
 }
 
 /**
@@ -217,6 +220,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateNormalSessionAvoidArea_01, TestSize
     ssm_->avoidAreaListenerSessionSet_.insert(1);
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ssm_->HandleSecureSessionShouldHide(nullptr));
+    sleep(1);
 }
 
 /**
@@ -241,6 +245,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateNormalSessionAvoidArea_02, TestSize
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
     sceneSession->isVisible_ = false;
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+    sleep(1);
 }
 
 /**
@@ -266,6 +271,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateNormalSessionAvoidArea_03, TestSize
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
     sceneSession = nullptr;
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+    sleep(1);
 }
 
 /**
@@ -290,6 +296,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateNormalSessionAvoidArea_04, TestSize
     ssm_->avoidAreaListenerSessionSet_.clear();
     ssm_->avoidAreaListenerSessionSet_.insert(persistentId);
     ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
+    sleep(1);
 }
 
 /**
@@ -312,6 +319,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidArea_01, TestSize.Level1)
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
     ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
     ssm_->UpdateAvoidArea(persistentId);
+    sleep(1);
 }
 
 /**
@@ -334,6 +342,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidArea_02, TestSize.Level1)
     sceneSession->property_->SetWindowType(WindowType::APP_WINDOW_BASE);
     ssm_->sceneSessionMap_.insert(std::make_pair(persistentId, sceneSession));
     ssm_->UpdateAvoidArea(persistentId);
+    sleep(1);
 }
 
 /**
@@ -347,6 +356,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidArea_03, TestSize.Level1)
     ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     ssm_->UpdateAvoidArea(persistentId);
+    sleep(1);
 }
 
 /**
@@ -468,6 +478,7 @@ HWTEST_F(WindowImmersiveAvoidAreaTest, UpdateAvoidAreaForLSStateChange, TestSize
     ssm_->sceneSessionMap_.insert({ 2, nullptr });
     ssm_->sceneSessionMap_.insert({ 2, sceneSession2 });
     ssm_->UpdateAvoidAreaForLSStateChange(1, 2);
+    sleep(1);
 }
 }
 }
