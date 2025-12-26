@@ -1371,6 +1371,34 @@ DMError ScreenSessionManagerProxy::SendVirtualScreenWhiteListRequest(ScreenId sc
     return static_cast<DMError>(reply.ReadInt32());
 }
 
+bool ScreenSessionManagerProxy::IsOnboardDisplay(DisplayId displayId)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is nullptr");
+        return false;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "write interface token failed");
+        return false;
+    }
+    if (!data.WriteUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "write displayId failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "send request failed");
+        return false;
+    }
+    bool res = reply.ReadBool();
+    TLOGI(WmsLogTag::DMS, "res %{public}s", res ? "true" : "false");
+    return res;
+}
+
 DMError ScreenSessionManagerProxy::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {

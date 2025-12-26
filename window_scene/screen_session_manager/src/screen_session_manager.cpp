@@ -69,6 +69,7 @@
 #include "screen_scene_config.h"
 #include "screen_sensor_plugin.h"
 #include "screen_cache.h"
+#include "product_config.h"
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
 #include <display_power_mgr_client.h>
 #endif
@@ -6618,6 +6619,35 @@ std::vector<uint64_t> ScreenSessionManager::ProcessMissionIdsToSurfaceNodeIds(co
         return surfaceNodeIds;
     }
     return {};
+}
+
+bool ScreenSessionManager::IsOnboardDisplay(DisplayId displayId)
+{
+    TLOGI(WmsLogTag::DMS, "displayID is %{public}" PRIu64, displayId);
+    ScreenId boardId;
+    auto displayInfo = GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayinfo is null");
+        return false;
+    }
+    if (g_isPcDevice) {
+        if (!screenIdManager_.ConvertToRsScreenId(displayinfo->GetScreenId(), boardId) {
+            TLOGE(WmsLogTag::DMS, "no rsid");
+            return false;
+        }
+    } else {
+        boardId = displayinfo->GetScreenId();
+    }
+    TLOGI(WmsLogTag::DMS, "boardId %{public}" PRIu64, boardId);
+    const auto& boardList = DMS::ProductConfig::GetInstance().GetBoardList();
+    bool isBoardListExist = (std::find(boardList.begin(), boardList.end(), boardId) != boardList.end());
+    std::ostringstream oss;
+    oss << "boardList";
+    for (auto val : boardList) {
+        oss << val << " ";
+    }
+    TLOGI(WmsLogTag::DMS, "boardlist [%{public}s] isBoardListExist %{public}s", oss.str().c_str(), isBoardListExist);
+    return isBoardListExist;
 }
 
 DMError ScreenSessionManager::SetScreenPrivacyMaskImage(ScreenId screenId,

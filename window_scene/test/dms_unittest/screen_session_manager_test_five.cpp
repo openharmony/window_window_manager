@@ -906,6 +906,108 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsOnboardDisplay01
+ * @tc.desc: IsOnboardDisplay, Check whether displayInfo is abnormal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay01, TestSize.Level0)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ssm->screenSessionMap_.erase(50);
+    EXPECT_NE(ssm, nullptr);
+    DisplayId id = 50;
+    auto res = ssm->IsOnboardDisplay(id);
+    EXPECT_EQ(res, false);
+    ssm->screenSessionMap_.erase(50);
+}
+
+/**
+ * @tc.name: IsOnboardDisplay02
+ * @tc.desc: IsOnboardDisplay, Check pc has board.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay02, TestSize.Level0)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ssm->screenSessionMap_.erase(0);
+    EXPECT_NE(ssm, nullptr);
+    bool isPcNow = ssm->GetPcStatus();
+    ssm->SetPcStatus(true);
+    DisplayId id = 0;
+    ssm->screenIdManager_.sms2RsScreenIdMap_[id] = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->IsOnboardDisplay(id);
+    EXPECT_EQ(res, true);
+    ssm->screenIdManager_.sms2RsScreenIdMap_.clear();
+    ssm->screenSessionMap_.erase(0);
+    ssm->SetPcStatus(isPcNow);
+}
+
+/**
+ * @tc.name: IsOnboardDisplay03
+ * @tc.desc: IsOnboardDisplay, Check pc has no board.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay03, TestSize.Level0)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ssm->screenSessionMap_.erase(100);
+    EXPECT_NE(ssm, nullptr);
+    bool isPcNow = ssm->GetPcStatus();
+    ssm->SetPcStatus(true);
+    DisplayId id = 100;
+    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->IsOnboardDisplay(id);
+    EXPECT_EQ(res, false);
+    ssm->screenSessionMap_.erase(100);
+    ssm->SetPcStatus(isPcNow);
+}
+
+/**
+ * @tc.name: IsOnboardDisplay04
+ * @tc.desc: IsOnboardDisplay, Check phone/pad has board.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay04, TestSize.Level0)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ssm->screenSessionMap_.erase(0);
+    EXPECT_NE(ssm, nullptr);
+    bool isPcNow = ssm->GetPcStatus();
+    ssm->SetPcStatus(false);
+    DisplayId id = 0;
+    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->IsOnboardDisplay(id);
+    EXPECT_EQ(res, true);
+    ssm->screenSessionMap_.erase(0);
+    ssm->SetPcStatus(isPcNow);
+}
+
+/**
+ * @tc.name: IsOnboardDisplay05
+ * @tc.desc: IsOnboardDisplay, Check phone/pad has noboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay05, TestSize.Level0)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ssm->screenSessionMap_.erase(100);
+    EXPECT_NE(ssm, nullptr);
+    bool isPcNow = ssm->GetPcStatus();
+    ssm->SetPcStatus(false);
+    DisplayId id = 100;
+    sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->IsOnboardDisplay(id);
+    EXPECT_EQ(res, false);
+    ssm->screenSessionMap_.erase(100);
+    ssm->SetPcStatus(isPcNow);
+}
+
+/**
  * @tc.name: SetMultiScreenRelativePosition
  * @tc.desc: ScreenSession is null
  * @tc.type: FUNC
@@ -957,6 +1059,7 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition02, TestSize.Le
     ssm_->DestroyVirtualScreen(screenId1);
 #endif
 }
+
 
 /**
  * @tc.name: SetMultiScreenRelativePosition
