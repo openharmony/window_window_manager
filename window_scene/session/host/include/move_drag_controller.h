@@ -613,13 +613,6 @@ private:
         DRAG_LEFT_TOP_CORNER,
         DRAG_RIGHT_TOP_CORNER,
     };
-    const std::map<DragType, uint32_t> STYLEID_MAP = {
-        {DragType::DRAG_UNDEFINED,        MMI::MOUSE_ICON::DEFAULT},
-        {DragType::DRAG_BOTTOM_OR_TOP,    MMI::MOUSE_ICON::NORTH_SOUTH},
-        {DragType::DRAG_LEFT_OR_RIGHT,    MMI::MOUSE_ICON::WEST_EAST},
-        {DragType::DRAG_LEFT_TOP_CORNER,  MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
-        {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
-    };
     Rect parentRect_ { 0, 0, 0, 0};
     MoveTempProperty moveTempProperty_;
 
@@ -630,16 +623,6 @@ private:
     NotifyWindowPidChangeCallback pidChangeCallback_;
 
     std::optional<Gravity> preDragGravity_ = std::nullopt;
-    const std::map<AreaType, Gravity> GRAVITY_MAP = {
-        {AreaType::LEFT,          Gravity::TOP_RIGHT},
-        {AreaType::TOP,           Gravity::BOTTOM_LEFT},
-        {AreaType::RIGHT,         Gravity::TOP_LEFT},
-        {AreaType::BOTTOM,        Gravity::TOP_LEFT},
-        {AreaType::LEFT_TOP,      Gravity::BOTTOM_RIGHT},
-        {AreaType::RIGHT_TOP,     Gravity::BOTTOM_LEFT},
-        {AreaType::RIGHT_BOTTOM,  Gravity::TOP_LEFT},
-        {AreaType::LEFT_BOTTOM,   Gravity::TOP_RIGHT}
-    };
 
     /*
      * Cross Display Move Drag

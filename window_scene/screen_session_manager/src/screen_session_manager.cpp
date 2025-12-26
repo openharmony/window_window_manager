@@ -240,6 +240,18 @@ const uint32_t FREEZE_SCREEN_RETRY_DELAY_MS = 2000;
 const uint32_t UNFREEZE_SCREEN_DELAY_MS = 2000;
 const std::string REAL_DEVICE_RADIUS = system::GetParameter("const.product.real_device_radius", "");
 
+static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
+    {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
+    {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
+    {ScreenPowerStatus::POWER_STATUS_DOZE, DisplayPowerEvent::DISPLAY_DOZE},
+    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
+};
+
+static const std::map<DisplayState, ScreenPowerEvent> POWER_STATE_CHANGE_MAP = {
+    {DisplayState::DOZE, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE},
+    {DisplayState::DOZE_SUSPEND, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE_SUSPEND}
+};
+
 // based on the bundle_util
 // LCOV_EXCL_START
 inline int32_t GetUserIdByCallingUid()
