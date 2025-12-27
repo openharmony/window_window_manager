@@ -1323,7 +1323,7 @@ void AniWindow::OnRaiseToAppTop(ani_env* env)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseToAppTop());
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "RaiseToAppTop failed.",
+        AniWindowUtils::AniThrowError(env, ret,
             "[window][raiseToAppTop]msg: Raise window zorder failed");
     }
 }
@@ -5348,7 +5348,7 @@ static void WindowResize(ani_env* env, ani_object obj, ani_long nativeObj, ani_i
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     aniWindow->Resize(env, width, height);
