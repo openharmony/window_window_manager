@@ -25,19 +25,18 @@ namespace {
 static void *g_handle = nullptr;
 using CreateAndEnableInputEventListenerFunc =  bool (*)(
     Ace::UIContent*, std::shared_ptr<AppExecFwk::EventHandler>, wptr<Window>);
-static CreateAndEnableInputEventListenerFunc g_createAndEnableInputEventListenerFunc = nullptr;
-
 
 bool LoadIntentionEvent(void)
 {
     if (g_handle != nullptr) {
-        TLOGW(WmsLogTag::WMS_EVENT, "Intention event has already exits.");
+        TLOGW(WmsLogTag::WMS_EVENT, "Intention event has already exists.");
         return true;
     }
     int32_t cnt = 0;
     const char* dlopenError = nullptr;
     do {
         cnt++;
+        dlerror();
         g_handle = dlopen(INTENTION_EVENT_SO_PATH.c_str(), RTLD_LAZY);
         dlopenError = dlerror();
         if (dlopenError) {
@@ -56,7 +55,6 @@ void UnloadIntentionEvent(void)
         dlclose(g_handle);
         g_handle = nullptr;
     }
-    g_createAndEnableInputEventListenerFunc = nullptr;
 }
 
 __attribute__((no_sanitize("cfi"))) bool EnableInputEventListener(
@@ -66,26 +64,15 @@ __attribute__((no_sanitize("cfi"))) bool EnableInputEventListener(
         TLOGE(WmsLogTag::WMS_EVENT, "g_handle is nullptr");
         return false;
     }
-    if (g_createAndEnableInputEventListenerFunc == nullptr) {
-        int32_t cnt = 0;
-        const char* dlsymError = nullptr;
-        do {
-            cnt++;
-            g_createAndEnableInputEventListenerFunc = reinterpret_cast<CreateAndEnableInputEventListenerFunc>(
-                dlsym(g_handle, "CreateAndEnableInputEventListener"));
-            dlsymError = dlerror();
-            if (dlsymError) {
-                TLOGE(WmsLogTag::WMS_EVENT, "dlsym error: %{public}s", dlsymError);
-                usleep(SLEEP_TIME_US);
-            }
-            TLOGI(WmsLogTag::WMS_EVENT, "dlsym %{public}s, retry cnt: %{public}d",
-                "CreateAndEnableInputEventListener", cnt);
-        } while (!g_createAndEnableInputEventListenerFunc && cnt < RETRY_TIMES);
-    }
-    if (g_createAndEnableInputEventListenerFunc == nullptr) {
+    dlerror();
+    CreateAndEnableInputEventListenerFunc func = reinterpret_cast<CreateAndEnableInputEventListenerFunc>(
+        dlsym(g_handle, "CreateAndEnableInputEventListener"));
+    const char* dlsymError = dlerror();
+    if (dlsymError) {
+        TLOGE(WmsLogTag::WMS_EVENT, "dlsym error: %{public}s", dlsymError);
         return false;
     }
-    return g_createAndEnableInputEventListenerFunc(uiContent, eventHandler, window);
+    return func(uiContent, eventHandler, window);
 }
 } // namespace Rosen
 } // namespace OHOS
