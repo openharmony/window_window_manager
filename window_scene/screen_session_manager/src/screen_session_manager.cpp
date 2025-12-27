@@ -7995,7 +7995,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetDisplayHD
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
             }
-            TLOGI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
+            TLOGNI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
             if (option.isNeedNotify_) {
                 isScreenShot_ = true;
                 NotifyScreenshot(option.displayId_);

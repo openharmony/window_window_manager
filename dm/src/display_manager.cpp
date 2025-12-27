@@ -2549,7 +2549,7 @@ DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
     for (auto pid : pidList) {
         oss << pid << " ";
     }
-    TLOGI(WmsLogTag::DMS, "pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
+    TLOGNI(WmsLogTag::DMS, "pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
     return pImpl_->ProxyForFreeze(pidList, isProxy);
 }
 
