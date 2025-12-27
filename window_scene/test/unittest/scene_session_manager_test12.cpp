@@ -3362,6 +3362,7 @@ HWTEST_F(SceneSessionManagerTest12, ReportWindowProfileInfosTest, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerTest12, NotifySessionPropertyChangeFromSession, Function | SmallTest | Level2)
 {
+    ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "NotifySessionPropertyChangeFromSession";
     sessionInfo.abilityName_ = "NotifySessionPropertyChangeFromSession";
@@ -3379,7 +3380,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifySessionPropertyChangeFromSession, Func
 
     auto it = ssm_->sceneSessionMap_.find(100);
     EXPECT_NE(it, ssm_->sceneSessionMap_.end());
-    EXPECT_EQ(it->second, nullptr);
+    EXPECT_NE(it->second, nullptr);
 }
 
 /**
@@ -3389,15 +3390,16 @@ HWTEST_F(SceneSessionManagerTest12, NotifySessionPropertyChangeFromSession, Func
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange01, Function | SmallTest | Level2)
 {
+    ssm_->sceneSessionMap_.clear();
     ScreenId screenId = 0;
-    auto result = ssm_->screenSessionMap_.insert({1000, nullptr});
+    auto result = ssm_->sceneSessionMap_.insert({1000, nullptr});
     EXPECT_TRUE(result.second);
-    EXPECT_EQ(ssm_->screenSessionMap_.size(), 1);
+    EXPECT_EQ(ssm_->sceneSessionMap_.size(), 1);
 
     ssm_->NotifyWindowPropertyChange(screenId);
-    EXPECT_EQ(ssm_->screenSessionMap_.size(), 1);
-    auto it = ssm_->screenSessionMap_.find(1000);
-    EXPECT_NE(it, ssm_->screenSessionMap_.end());
+    EXPECT_EQ(ssm_->sceneSessionMap_.size(), 1);
+    auto it = ssm_->sceneSessionMap_.find(1000);
+    EXPECT_NE(it, ssm_->sceneSessionMap_.end());
     EXPECT_EQ(it->second, nullptr);
 }
 
@@ -3408,6 +3410,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange01, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange02, Function | SmallTest | Level2)
 {
+    ssm_->sceneSessionMap_.clear();
     ScreenId screenId = 0;
 
     SessionInfo sessionInfo;
@@ -3415,14 +3418,14 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange02, Function | Sma
     sessionInfo.abilityName_ = "NotifyWindowPropertyChange02";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession.SetScreenId(99);
+    sceneSession->SetScreenId(99);
 
-    auto result = ssm_->screenSessionMap_.insert({1001, sceneSession});
+    auto result = ssm_->sceneSessionMap_.insert({1001, sceneSession});
     EXPECT_TRUE(result.second);
     
     ssm_->NotifyWindowPropertyChange(screenId);
     EXPECT_EQ(sceneSession->GetScreenId(), 99);
-    EXPECT_EQ(ssm_->screenSessionMap_.size(), 1);
+    EXPECT_EQ(ssm_->sceneSessionMap_.size(), 1);
 }
 
 /**
@@ -3432,6 +3435,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange02, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange03, Function | SmallTest | Level2)
 {
+    ssm_->sceneSessionMap_.clear();
     ScreenId screenId = 0;
 
     SessionInfo sessionInfo;
@@ -3439,15 +3443,15 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange03, Function | Sma
     sessionInfo.abilityName_ = "NotifyWindowPropertyChange03";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession.SetScreenId(screenId);
-    sceneSession.SetPropertyDirtyFlags(0);
-    ssm->observedFlags_ = 1;
+    sceneSession->SetScreenId(screenId);
+    sceneSession->SetPropertyDirtyFlags(0);
+    ssm_->observedFlags_ = 1;
 
-    auto result = ssm_->screenSessionMap_.insert({1002, sceneSession});
+    auto result = ssm_->sceneSessionMap_.insert({1002, sceneSession});
     EXPECT_TRUE(result.second);
     ssm_->NotifyWindowPropertyChange(screenId);
-    EXPECT_EQ(sceneSession->GetPropertyDirtyFlags(), 1);
-    EXPECT_EQ(ssm_->screenSessionMap_.size(), 1);
+    EXPECT_EQ(sceneSession->GetPropertyDirtyFlags(), 0);
+    EXPECT_EQ(ssm_->sceneSessionMap_.size(), 1);
 }
 
 /**
@@ -3457,6 +3461,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange03, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange04, Function | SmallTest | Level2)
 {
+    ssm_->sceneSessionMap_.clear();
     ScreenId screenId = 0;
 
     SessionInfo sessionInfo;
@@ -3464,16 +3469,16 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange04, Function | Sma
     sessionInfo.abilityName_ = "NotifyWindowPropertyChange04";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    sceneSession.SetScreenId(screenId);
-    sceneSession.SetPropertyDirtyFlags(1);
-    ssm->observedFlags_ = 1;
+    sceneSession->SetScreenId(screenId);
+    sceneSession->SetPropertyDirtyFlags(1);
+    ssm_->observedFlags_ = 1;
 
-    auto result = ssm_->screenSessionMap_.insert({1003, sceneSession});
+    auto result = ssm_->sceneSessionMap_.insert({1003, sceneSession});
     EXPECT_TRUE(result.second);
     EXPECT_EQ(sceneSession->GetPropertyDirtyFlags(), 1);
     ssm_->NotifyWindowPropertyChange(screenId);
     EXPECT_EQ(sceneSession->GetPropertyDirtyFlags(), 0);
-    EXPECT_EQ(ssm_->screenSessionMap_.size(), 1);
+    EXPECT_EQ(ssm_->sceneSessionMap_.size(), 1);
 }
 
 /**
@@ -3483,17 +3488,18 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange04, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChangeByWindowInfoKey, Function | SmallTest | Level2)
 {
+    ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "NotifyWindowPropertyChangeByWindowInfoKey";
     sessionInfo.abilityName_ = "NotifyWindowPropertyChangeByWindowInfoKey";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    auto result = ssm_->screenSessionMap_.insert({100, sceneSession});
+    auto result = ssm_->sceneSessionMap_.insert({100, sceneSession});
     EXPECT_TRUE(result.second);
     ssm_->NotifyWindowPropertyChangeByWindowInfoKey(sceneSession, WindowInfoKey::WINDOW_ID);
-     auto it = ssm_->screenSessionMap_.find(100);
-    EXPECT_NE(it, ssm_->screenSessionMap_.end());
-    EXPECT_EQ(it->second, nullptr);
+    auto it = ssm_->sceneSessionMap_.find(100);
+    EXPECT_NE(it, ssm_->sceneSessionMap_.end());
+    EXPECT_NE(it->second, nullptr);
 
 }
 
