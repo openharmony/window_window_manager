@@ -8110,7 +8110,7 @@ void WindowSceneSessionImpl::ModifySidebarBlurProperty(bool isDark, SidebarBlurT
     }
 }
 
-bool WindowSessionImpl::IsInFreeWindowMode() const
+bool WindowSceneSessionImpl::IsInFreeWindowMode() const
 {
     return IsPcOrPadFreeMultiWindowMode();
 }
