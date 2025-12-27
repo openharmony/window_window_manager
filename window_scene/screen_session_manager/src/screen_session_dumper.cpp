@@ -1127,7 +1127,7 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
             return;
         }
         auto superFoldStatus = static_cast<SuperFoldStatusChangeEvents>(value);
-        if (superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_ON || 
+        if (superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_ON ||
             superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_OFF) {
             int halVal = (superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_ON)?
                 HALL_HAVE_KEYBOARD_THRESHOLD: HALL_REMOVE_KEYBOARD_THRESHOLD;
@@ -1135,8 +1135,8 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
                 .status = halVal,
             };
             SensorEvent hallEvent = {
-                    .data = reinterpret_cast<uint8_t*>(&hallData),
-                    .dataLen = sizeof(HallData),
+                .data = reinterpret_cast<uint8_t*>(&hallData),
+                .dataLen = sizeof(HallData),
             };
             SuperFoldSensorManager::GetInstance().HandleHallData(&hallEvent);
             TLOGW(WmsLogTag::DMS, "set hall value: %{public}d ", superFoldStatus);
