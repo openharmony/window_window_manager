@@ -925,6 +925,21 @@ public:
     virtual void OnFreeWindowModeChange(bool isInFreeWindowMode) {}
 };
 
+/**
+ * @class IUIContentCreateListener
+ *
+ * @brief IUIContentCreateListener is used to observe the ui content create.
+ */
+class IUIContentCreateListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when ui content create.
+     *
+     * @param uiContent created UIContent object.
+     */
+    virtual void OnUIContentCreate(std::weak_ptr<Ace::UIContent> uiContent) {}
+};
+
 static WMError DefaultCreateErrCode = WMError::WM_OK;
 class Window : virtual public RefBase {
 public:
@@ -4878,6 +4893,39 @@ public:
      * @param shouldFullScreen true means full screen, false means force split.
      */
     virtual void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) {}
+
+    /**
+     * @brief Register a listener to listen ui content create.
+     *
+     * @param listener IUIContentCreateListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister a listener to listen ui content create.
+     *
+     * @param listener IUIContentCreateListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError UnregisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Update compatible style mode of the window.
+     *
+     * @param mode CompatibleStyleMode.
+     * @return WM_OK means update mode success, others means failed.
+     */
+    virtual WMError UpdateCompatibleStyleMode(CompatibleStyleMode mode)
+    {
+        return WMError::WM_OK;
+    }
 
     /**
      * @brief register a listener to listen whether the window title bar is show or hide.
