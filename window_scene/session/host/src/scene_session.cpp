@@ -1051,6 +1051,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                 // use window rect when fullscreen or compatible mode
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, proportionalScale);
             }
+            
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
         }
