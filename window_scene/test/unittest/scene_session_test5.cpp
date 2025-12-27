@@ -3081,7 +3081,7 @@ HWTEST_F(SceneSessionTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     session->SetSkipSelfWhenShowOnVirtualScreen(true);
-    EXPECT_EQ(session->GetSessionProperty()->getSkipSelfWhenShowOnVirtualScreen(), true);
+    EXPECT_EQ(session->GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen(), true);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
