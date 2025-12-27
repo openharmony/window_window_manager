@@ -16,17 +16,17 @@
 #ifndef LOAD_INTENTION_EVENT_H
 #define LOAD_INTENTION_EVENT_H
 
+#include <dlfcn.h>
+#include <unistd.h>
+
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <dlfcn.h>
-#include <unistd.h>
-
-#include "window_manager_hilog.h"
+#include "window.h"
 #include "ui_content.h"
 #include "event_handler.h"
-#include "window.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -35,9 +35,6 @@ const std::string INTENTION_EVENT_SO_PATH = "/system/lib64/libintention_event.z.
 #else
 const std::string INTENTION_EVENT_SO_PATH = "/system/lib/libintention_event.z.so";
 #endif
-
-using CreateAndEnableInputEventListenerPtr =  bool (*)(
-    Ace::UIContent*, std::shared_ptr<AppExecFwk::EventHandler>, wptr<Window>);
 
 bool LoadIntentionEvent(void);
 void UnloadIntentionEvent(void);
