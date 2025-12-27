@@ -156,7 +156,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
 }
 
 int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCode,
-    MessageParcel& data, MessageParcel& reply)
+    MessageParcel &data, MessageParcel &reply)
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
     if (!isConnected_) {
