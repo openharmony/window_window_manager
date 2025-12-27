@@ -3237,6 +3237,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
         property_->SetRequestedOrientation(requestedOrientation, needAnimation);
     } else {
         property_->SetRequestedOrientation(orientation, needAnimation);
+        property_->SetIsSpecificSessionRequestOrientation(true);
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
 }
