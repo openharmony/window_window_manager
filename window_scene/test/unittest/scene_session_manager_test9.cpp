@@ -1694,6 +1694,48 @@ HWTEST_F(SceneSessionManagerTest9, SetParentWindowInner, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSpecificWindowZIndexListener
+ * @tc.desc: test function : SetSpecificWindowZIndexListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, SetSpecificWindowZIndexListener, TestSize.Level1)
+{
+    int value = 0;
+    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex,
+                                                      SetSpecificZIndexReason reason) {
+        value = zIndex;
+    };
+    ssm_->SetSpecificWindowZIndexListener(func);
+    ssm_->setSpecificWindowZIndexFunc_(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20, SetSpecificZIndexReason::SET);
+    EXPECT_EQ(value, 20);
+    ssm_->SetSpecificWindowZIndexListener(nullptr);
+}
+
+/**
+ * @tc.name: SetSpecificWindowZIndex
+ * @tc.desc: test function : SetSpecificWindowZIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, SetSpecificWindowZIndex, TestSize.Level1)
+{
+    MockAccesstokenKit::MockIsSystemApp(false);
+    WSError ret = ssm_->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NOT_SYSTEM_APP);
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    int value = 0;
+    NotifySetSpecificWindowZIndexFunc func = [&value](WindowType windowType, int32_t zIndex,
+                                                      SetSpecificZIndexReason reason) {
+        value = zIndex;
+    };
+    ssm_->SetSpecificWindowZIndexListener(func);
+    ret = ssm_->SetSpecificWindowZIndex(WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD, 20);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(value, 20);
+    ssm_->SetSpecificWindowZIndexListener(nullptr);
+}
+
+/**
  * @tc.name: ResetSpecificWindowZIndex
  * @tc.desc: test function : ResetSpecificWindowZIndex
  * @tc.type: FUNC
