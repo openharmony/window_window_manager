@@ -9090,10 +9090,5 @@ void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
     property_->SetPageCompatibleMode(mode);
     hostSession->NotifyCompatibleModeChange(mode);
 }
-
-bool WindowSessionImpl::IsInFreeWindowMode() const
-{
-    return IsPcOrPadFreeMultiWindowMode();
-}
 } // namespace Rosen
 } // namespace OHOS

@@ -256,6 +256,7 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;
     bool GetIsUIExtAnySubWindow() const override;
+    bool IsInFreeWindowMode() const override;
 
     /*
      * Gesture Back
