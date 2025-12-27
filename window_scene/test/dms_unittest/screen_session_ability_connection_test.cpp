@@ -248,15 +248,11 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSync, TestSize.Level1)
 HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSyncBlock, TestSize.Level1)
 {
     sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
-    new (std::nothrow) ScreenSessionAbilityConnectionStub());
+        new (std::nothrow) ScreenSessionAbilityConnectionStub());
     ASSERT_NE(abilityConnectionStub, nullptr);
 
     LOG_SetCallback(ScreenSessionLogCallback);
-    AppExecFwk::ElementName element;
-    int resultCode = 0;
-    sptr<IRemoteObject> remoteObject = sptr::MakeSptr();
-    auto ret = abilityConnectionStub->AddObjectDeathRecipient();
-    abilityConnectionStub->OnAbilityConnectDone(element, remoteObject, resultCode);
+    sptr<IRemoteObject> remoteObject = sptr<MockIRemoteObject>::MakeSptr();
 
     MessageParcel data;
     MessageParcel reply;
