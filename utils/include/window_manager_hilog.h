@@ -124,7 +124,7 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
 #define WIN_PRINT_LIMIT(tag, level, intervals, canPrint, frequency)                                      \
     do {                                                                                                 \
         uint32_t hilogDomain = HILOG_DOMAIN_WINDOW + static_cast<uint32_t>(tag);                         \
-        const char *domainContent = (tag >= WmsLogTag::DEFAULT && tag < WmsLogTag::END) ?                \
+        const char *domainContent = ((tag) >= WmsLogTag::DEFAULT && (tag) < WmsLogTag::END) ?            \
             g_domainContents[static_cast<uint32_t>(tag)] : "";                                           \
         static auto last = std::chrono::time_point<std::chrono::system_clock, std::chrono::seconds>();   \
         static uint32_t supressed = 0;                                                                   \
@@ -155,7 +155,7 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
     do {                                                                                                 \
         bool can = true;                                                                                 \
         TLOGD(tag, fmt, ##__VA_ARGS__);                                                                  \
-        WIN_PRINT_LIMIT(tag, LOG_INFO, WIN_LOG_LIMIT_HOURS, can, freq);                             \
+        WIN_PRINT_LIMIT(tag, LOG_INFO, WIN_LOG_LIMIT_HOURS, can, freq);                                  \
         if (can) {                                                                                       \
             TLOGI(tag, fmt, ##__VA_ARGS__);                                                              \
         }                                                                                                \
@@ -165,7 +165,7 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
     do {                                                                                                 \
         bool can = true;                                                                                 \
         TLOGD(tag, fmt, ##__VA_ARGS__);                                                                  \
-        WIN_PRINT_LIMIT(tag, LOG_WARN, WIN_LOG_LIMIT_HOURS, can, freq);                             \
+        WIN_PRINT_LIMIT(tag, LOG_WARN, WIN_LOG_LIMIT_HOURS, can, freq);                                  \
         if (can) {                                                                                       \
             TLOGW(tag, fmt, ##__VA_ARGS__);                                                              \
         }                                                                                                \
@@ -175,7 +175,7 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
     do {                                                                                                 \
         bool can = true;                                                                                 \
         TLOGD(tag, fmt, ##__VA_ARGS__);                                                                  \
-        WIN_PRINT_LIMIT(tag, LOG_ERROR, WIN_LOG_LIMIT_HOURS, can, freq);                            \
+        WIN_PRINT_LIMIT(tag, LOG_ERROR, WIN_LOG_LIMIT_HOURS, can, freq);                                 \
         if (can) {                                                                                       \
             TLOGE(tag, fmt, ##__VA_ARGS__);                                                              \
         }                                                                                                \
@@ -185,7 +185,7 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
     do {                                                                                                 \
         bool can = true;                                                                                 \
         OGD(tag, fmt, ##__VA_ARGS__);                                                                    \
-        WIN_PRINT_LIMIT(tag, LOG_INFO, WIN_LOG_LIMIT_MINUTE, can, freq);                            \
+        WIN_PRINT_LIMIT(tag, LOG_INFO, WIN_LOG_LIMIT_MINUTE, can, freq);                                 \
         if (can) {                                                                                       \
             TLOGI(tag, fmt, ##__VA_ARGS__);                                                              \
         }                                                                                                \
@@ -195,7 +195,7 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
     do {                                                                                                 \
         bool can = true;                                                                                 \
         TLOGD(tag, fmt, ##__VA_ARGS__);                                                                  \
-        WIN_PRINT_LIMIT(tag, LOG_WARN, WIN_LOG_LIMIT_MINUTE, can, freq);                            \
+        WIN_PRINT_LIMIT(tag, LOG_WARN, WIN_LOG_LIMIT_MINUTE, can, freq);                                 \
         if (can) {                                                                                       \
             TLOGW(tag, fmt, ##__VA_ARGS__);                                                              \
         }                                                                                                \
@@ -205,7 +205,7 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
     do {                                                                                                 \
         bool can = true;                                                                                 \
         TLOGD(tag, fmt, ##__VA_ARGS__);                                                                  \
-        WIN_PRINT_LIMIT(tag, LOG_ERROR, WIN_LOG_LIMIT_MINUTE, can, freq);                           \
+        WIN_PRINT_LIMIT(tag, LOG_ERROR, WIN_LOG_LIMIT_MINUTE, can, freq);                                \
         if (can) {                                                                                       \
             TLOGE(tag, fmt, ##__VA_ARGS__);                                                              \
         }                                                                                                \
