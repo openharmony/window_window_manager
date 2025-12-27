@@ -25,6 +25,7 @@
 #include "scene_board_judgement.h"
 #include "iremote_object_mocker.h"
 #include "window_manager_hilog.h"
+#include "mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
