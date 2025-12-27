@@ -348,7 +348,6 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         }
         property->SetMissionInfo(*missionInfo);
         property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
-        property->SetCompatibleModePage(reply.ReadString());
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
@@ -4200,12 +4199,7 @@ WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
         TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "read ret failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return static_cast<WSError>(ret);
+    return WSError::WS_OK;
 }
 
 WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated()

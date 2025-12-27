@@ -2247,7 +2247,9 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
-        RegisterNavigateCallbackForPageCompatibleModeIfNeed();
+        for (auto& listener : uiContentCreateListeners_) {
+            listener->OnUIContentCreate(std::weak_ptr<Ace::UIContent>(uiContent_));
+        }
         TLOGI(WmsLogTag::DEFAULT, "[%{public}d, %{public}d]",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
@@ -9054,41 +9056,46 @@ void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
     }
 }
 
-void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
+WMError WindowSessionImpl::RegisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)
 {
-    const std::string compatibleModePage = property_->GetCompatibleModePage();
-    if (!uiContent_ || compatibleModePage.empty()) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "content is nullptr or page is empty");
-        return;
+    if (!listener) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent_->RegisterNavigateChangeCallback(
-        [weakThis = wptr(this), where = __func__](const OHOS::Ace::NavigateChangeInfo& fromPage,
-            const OHOS::Ace::NavigateChangeInfo& toPage) {
-        auto window = weakThis.promote();
-        if (!window) {
-            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
-            return;
-        }
-        window->HandleNavigateCallbackForPageCompatibleMode(fromPage.name, toPage.name);
-    });
+    TLOGI(WmsLogTag::WMS_COMPAT, "id: %{public}d", GetParentId());
+    std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+    uiContentCreateListeners_.emplace_back(listener);
+    return WMError::WM_OK;
 }
 
-void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
-    const std::string& fromPage, const std::string& toPage)
+WMError WindowSessionImpl::UnregisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)
 {
-    const std::string compatibleModePage = property_->GetCompatibleModePage();
-    if ((fromPage == compatibleModePage && toPage == compatibleModePage) ||
-        (fromPage != compatibleModePage && toPage != compatibleModePage)) {
-        return;
+    if (!listener) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
     }
+    TLOGI(WmsLogTag::WMS_COMPAT, "id: %{public}d", GetParentId());
+    std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+    auto iter = std::find(uiContentCreateListeners_.begin(), uiContentCreateListeners_.end(), listener);
+    if (iter != uiContentCreateListeners_.end()) {
+        uiContentCreateListeners_.erase(iter);
+    } else {
+        TLOGE(WmsLogTag::WMS_COMPAT, "listener not found");
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::UpdateCompatibleStyleMode(CompatibleStyleMode mode)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "id:%{public}d mode:%{public}d", GetParentId(), static_cast<int32_t>(mode));
     auto hostSession = GetHostSession();
     if (!hostSession) {
         TLOGNE(WmsLogTag::WMS_COMPAT, "hostSession is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
-    auto mode = toPage == compatibleModePage ? CompatibleStyleMode::LANDSCAPE_18_9 : CompatibleStyleMode::INVALID_VALUE;
     property_->SetPageCompatibleMode(mode);
     hostSession->NotifyCompatibleModeChange(mode);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
