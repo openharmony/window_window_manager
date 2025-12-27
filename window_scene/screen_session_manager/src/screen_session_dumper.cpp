@@ -1137,7 +1137,7 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
             SensorEvent hallEvent = {
                     .data = reinterpret_cast<uint8_t*>(&hallData),
                     .dataLen = sizeof(HallData),
-            }
+            };
             SuperFoldSensorManager::GetInstance().HandleHallData(&hallEvent);
             TLOGW(WmsLogTag::DMS, "set hall value: %{public}d ", superFoldStatus);
             return;
