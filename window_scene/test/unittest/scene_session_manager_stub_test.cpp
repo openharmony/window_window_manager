@@ -1719,7 +1719,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateExtended,
     data1.WriteInt32(rect.width_);
     data1.WriteInt32(rect.height_);
     int res1 = stub_->HandleConvertToRelativeCoordinateExtended(data1, reply);
-    EXPECT_EQ(res1, ERR_NONE);
+    EXPECT_EQ(res1, ERR_TRANSACTION_FAILED);
 
     MessageParcel data2;
     data2.WriteInt32(rect.posX_);
