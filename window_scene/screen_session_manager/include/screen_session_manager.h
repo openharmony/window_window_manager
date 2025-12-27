@@ -54,18 +54,6 @@ struct ScaleProperty {
                                                                             pivotX(pivotX), pivotY(pivotY) {}
 };
 
-static const std::map<ScreenPowerStatus, DisplayPowerEvent> SCREEN_STATUS_POWER_EVENT_MAP = {
-    {ScreenPowerStatus::POWER_STATUS_ON, DisplayPowerEvent::DISPLAY_ON},
-    {ScreenPowerStatus::POWER_STATUS_OFF, DisplayPowerEvent::DISPLAY_OFF},
-    {ScreenPowerStatus::POWER_STATUS_DOZE, DisplayPowerEvent::DISPLAY_DOZE},
-    {ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND, DisplayPowerEvent::DISPLAY_DOZE_SUSPEND}
-};
-
-static const std::map<DisplayState, ScreenPowerEvent> POWER_STATE_CHANGE_MAP = {
-    {DisplayState::DOZE, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE},
-    {DisplayState::DOZE_SUSPEND, ScreenPowerEvent::SET_DISPLAY_STATE_DOZE_SUSPEND}
-};
-
 class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
 DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)

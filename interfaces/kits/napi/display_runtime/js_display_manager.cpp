@@ -33,6 +33,13 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+const std::map<DmErrorCode, std::string> brightnessInfoErrCodeMap = {
+    {DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, "Capability not supported."},
+    {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "This display manager service works abnormally."},
+    {DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Parameter error. Possible cause: 1. Invalid parameter range."}
+};
+}
 using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
