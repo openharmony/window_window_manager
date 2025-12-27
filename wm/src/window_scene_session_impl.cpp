@@ -8109,5 +8109,10 @@ void WindowSceneSessionImpl::ModifySidebarBlurProperty(bool isDark, SidebarBlurT
         RSNode::CloseImplicitAnimation(rsUIContext);
     }
 }
+
+bool WindowSessionImpl::IsInFreeWindowMode() const
+{
+    return IsPcOrPadFreeMultiWindowMode();
+}
 } // namespace Rosen
 } // namespace OHOS
