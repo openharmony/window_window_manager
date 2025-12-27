@@ -1402,7 +1402,8 @@ WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t conte
     property.contentColor_ = contentColor;
     property.settingFlag_ = static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-    return window->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property);
+    SystemBarSettingFlag flag = { false, flase, true, false };
+    return window->UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, property, flag);
 }
 
 napi_value NapiGetUndefined(napi_env env)
