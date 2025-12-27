@@ -68,7 +68,7 @@ public:
     /*
      * Window Hierarchy
      */
-    void NotifySetSpecificWindowZIndex(int32_t clientUserId);
+    ErrCode NotifySetSpecificWindowZIndex() override;
     void ResetSpecificWindowZIndex(int32_t clientUserId, int32_t pid);
 
     /*

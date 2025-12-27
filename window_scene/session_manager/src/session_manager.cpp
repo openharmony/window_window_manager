@@ -505,7 +505,7 @@ void SessionManager::NotifySetSpecificWindowZIndex()
         mockProxy = mockSessionManagerServiceProxy_;
     }
     if (mockProxy) {
-        mockProxy->NotifySetSpecificWindowZIndex(userId_);
+        mockProxy->NotifySetSpecificWindowZIndex();
     }
 }
 
