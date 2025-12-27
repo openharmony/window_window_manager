@@ -366,7 +366,8 @@ void IntentionEventManager::InputEventListener::OnInputEvent(
 }
 
 bool CreateAndEnableInputEventListener(Ace::UIContent* uiContent,
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler, wptr<Window> window) {
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler, wptr<Window> window)
+{
     TLOGD(WmsLogTag::WMS_EVENT, "in");
     return DelayedSingleton<IntentionEventManager>::GetInstance()->EnableInputEventListener(
         uiContent, eventHandler, window);
