@@ -1315,7 +1315,7 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange08, TestSize.Level1)
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->SetSuperFoldStatusChange("-supertrans,5");
     ASSERT_EQ(dumper->fd_, 1);
-    EXPECT_TRUE(g_errLog.find("registerHallCallback") != std::string::npos);
+    EXPECT_TRUE(g_errLog.find("set hall value") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 
