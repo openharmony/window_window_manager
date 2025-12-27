@@ -9091,7 +9091,7 @@ void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
     hostSession->NotifyCompatibleModeChange(mode);
 }
 
-bool WindowSessionImpl::isInFreeWindowMode() const
+bool WindowSessionImpl::IsInFreeWindowMode() const
 {
     return IsPcOrPadFreeMultiWindowMode();
 }
