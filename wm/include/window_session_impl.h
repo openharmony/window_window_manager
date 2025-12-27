@@ -526,7 +526,7 @@ public:
     }
     void SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId);
     void SwitchSystemWindow(bool freeMultiWindowEnable, int32_t parentId);
-    bool isInFreeWindowMode() const override;
+    bool IsInFreeWindowMode() const override;
 
     /*
      * Window Immersive
