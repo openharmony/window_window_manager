@@ -443,31 +443,34 @@ ani_boolean AniWindowStage::OnIsWindowRectAutoSave(ani_env* env)
     
 void AniWindowStage::SetShowOnLockScreen(ani_env* env, ani_class cls, ani_long nativeObj, ani_boolean showOnLockScreen)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
     if (aniWindowStage != nullptr) {
         aniWindowStage->OnSetShowOnLockScreen(env, showOnLockScreen);
     } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindowStage is nullptr");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindowStage is nullptr");
     }
 }
 void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockScreen)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]set show on lock screen permission denied!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI]set show on lock screen permission denied!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "[window][SetShowOnLockScreen]msg: permission denied");
         return;
     }
     auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]windowScene is nullptr!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI]windowScene is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][SetShowOnLockScreen]msg: invalid windowScene");
         return;
     }
     auto mainWindow = windowScene->GetMainWindow();
     if (mainWindow == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] mainWindowis nullptr!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] mainWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][SetShowOnLockScreen]msg: invalid mainWindow");
         return;
     }
     if (showOnLockScreen) {
@@ -475,7 +478,7 @@ void AniWindowStage::OnSetShowOnLockScreen(ani_env* env, ani_boolean showOnLockS
     } else {
         mainWindow->RemoveWindowFlag(OHOS::Rosen::WindowFlag::WINDOW_FLAG_SHOW_WHEN_LOCKED);
     }
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] OnSetShowOnLockScreen end!");
+    TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] OnSetShowOnLockScreen end!");
 }
 
 void AniWindowStage::SetWindowModal(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isModal)

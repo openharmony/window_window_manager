@@ -1176,7 +1176,8 @@ ani_int AniWindow::GetSubWindowZLevel(ani_env* env, ani_object obj, ani_long nat
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getSubWindowZLevel]msg: Window is nullptr");
         return ANI_ERROR;
     }
     return aniWindow->OnGetSubWindowZLevel(env);
@@ -1187,13 +1188,15 @@ ani_int AniWindow::OnGetSubWindowZLevel(ani_env* env)
     TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getSubWindowZLevel]msg: Window is nullptr");
         return ANI_ERROR;
     }
     int32_t zLevel = 0;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetSubWindowZLevel(zLevel));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "GetSubWindowZLevel failed.");
+        AniWindowUtils::AniThrowError(env, ret,
+            "[window][getSubWindowZLevel]msg: Get sub window zLevel failed");
         return ANI_ERROR;
     }
     return static_cast<ani_int>(zLevel);
@@ -1234,7 +1237,8 @@ void AniWindow::SetSubWindowZLevel(ani_env* env, ani_object obj, ani_long native
         aniWindow->OnSetSubWindowZLevel(env, zLevel);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setSubWindowZLevel]msg: Window is nullptr");
     }
 }
 
@@ -1244,18 +1248,21 @@ void AniWindow::OnSetSubWindowZLevel(ani_env* env, ani_int zLevel)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setSubWindowZLevel]msg: Window is nullptr");
         return;
     }
 
     if (!WindowHelper::IsSubWindow(window->GetType())) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "not allowed since window is not sub window");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][setSubWindowZLevel]msg: Not allowed since window is not sub window");
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "SetSubWindowZLevel failed.");
+        AniWindowUtils::AniThrowError(env, ret,
+            "[window][setSubWindowZLevel]msg: Set sub window zLevel failed");
     }
 }
 
@@ -1294,7 +1301,8 @@ void AniWindow::RaiseToAppTop(ani_env* env, ani_object obj, ani_long nativeObj)
         aniWindow->OnRaiseToAppTop(env);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][raiseToAppTop]msg: Window is nullptr");
     }
 }
 
@@ -1304,12 +1312,14 @@ void AniWindow::OnRaiseToAppTop(ani_env* env)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][raiseToAppTop]msg: Window is nullptr");
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseToAppTop());
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "RaiseToAppTop failed.");
+        AniWindowUtils::AniThrowError(env, ret, "RaiseToAppTop failed.",
+            "[window][raiseToAppTop]msg: Raise window zorder failed");
     }
 }
 
@@ -2857,7 +2867,8 @@ ani_boolean AniWindow::IsWindowHighlighted(ani_env* env, ani_object obj, ani_lon
         return aniWindow->OnIsWindowHighlighted(env);
     } else {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] aniWindow is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isWindowHighlighted]msg: WindowToken is nullptr");
         return ani_boolean(false);
     }
 }
@@ -2868,14 +2879,16 @@ ani_boolean AniWindow::OnIsWindowHighlighted(ani_env* env)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isWindowHighlighted]msg: WindowToken is nullptr");
         return ani_boolean(false);
     }
     bool isHighlighted = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->IsWindowHighlighted(isHighlighted));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "get window highlight failed, ret: %{public}d", ret);
-        AniWindowUtils::AniThrowError(env, ret);
+        AniWindowUtils::AniThrowError(env, ret,
+            "[window][isWindowHighlighted] get window highlight failed");
         return ani_boolean(false);
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted: %{public}u", isHighlighted);
@@ -3278,12 +3291,14 @@ ani_object AniWindow::SetRaiseByClickEnabled(ani_env* env, ani_boolean enable)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setRaiseByClickEnabled]msg:  windowToken_ is nullptr");
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetRaiseByClickEnabled(static_cast<bool>(enable)));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] SetRaiseByClickEnabled set error");
-        return AniWindowUtils::AniThrowError(env, ret);
+        return AniWindowUtils::AniThrowError(env, ret,
+            "[window][setRaiseByClickEnabled]msg:  SetRaiseByClickEnabled set error");
     }
     return 0;
 }
@@ -3297,7 +3312,8 @@ ani_object AniWindow::SetExclusivelyHighlighted(ani_env* env, ani_boolean exclus
         WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetExclusivelyHighlighted(static_cast<bool>(exclusivelyHighlighted)));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] Set exclusively highlighted failed");
-        return AniWindowUtils::AniThrowError(env, ret);
+        return AniWindowUtils::AniThrowError(env, ret,
+            "[window][setExclusivelyHighlighted]msg: Set exclusively highlighted failed");
     }
     return 0;
 }
@@ -5483,11 +5499,12 @@ static ani_int WindowSetRaiseByClickEnabled(ani_env* env, ani_object obj,
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] windowToken_ is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setRaiseByClickEnabled]msg: windowToken_ is nullptr");
         return ANI_ERROR;
     }
     aniWindow->SetRaiseByClickEnabled(env, enable);
-    TLOGI(WmsLogTag::WMS_IMMS, "[ANI] setRaiseByClickEnabled end");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI] setRaiseByClickEnabled end");
     return ANI_OK;
 }
 
@@ -5499,7 +5516,8 @@ static ani_int WindowSetExclusivelyHighlighted(ani_env* env, ani_object obj,
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] windowToken_ is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setExclusivelyHighlighted]msg: Window is nullptr");
         return ANI_ERROR;
     }
     aniWindow->SetExclusivelyHighlighted(env, exclusivelyHighlighted);
