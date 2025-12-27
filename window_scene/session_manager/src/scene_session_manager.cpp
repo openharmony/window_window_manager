@@ -552,12 +552,19 @@ void SceneSessionManager::InitWindowPattern()
 {
     InitSnapshotCache();
     InitStartingWindow();
+    InitDmaReclaimParam();
 }
 
 void SceneSessionManager::InitStartingWindow()
 {
     syncLoadStartingWindow_ = system::GetBoolParameter("const.window.sync_startingWindow", false);
     TLOGI(WmsLogTag::WMS_PATTERN, "Sync Load StartingWindow: %{public}d", syncLoadStartingWindow_);
+}
+
+void SceneSessionManager::InitDmaReclaimParam()
+{
+    enableDmaReclaim_ = system::GetBoolParameter("resourceschedule.memmgr.dma.reclaimable", false);
+    TLOGI(WmsLogTag::WMS_PATTERN, "Dma reclaim enabled: %{public}d", enableDmaReclaim_);
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
@@ -6337,6 +6344,7 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         if (sceneSession->GetSessionState() != SessionState::STATE_DISCONNECT) {
             TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d is not disconnect",
                 where, sceneSession->GetPersistentId());
+            sceneSession->PreloadSnapshot();
             return;
         }
         StartingWindowInfo startingWindowInfo;
@@ -9383,7 +9391,7 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
         }
     } while (false);
 
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "display=%{public}" PRIu64 ", needNotify=%{public}d, sendTimes=%{public}d",
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "display=%{public}" PRIu64 ", needNotify=%{public}d, sendTimes=%{public}d",
           displayId, needNotify, reSendTimes);
     if (needNotify) {
         reSendTimes = MAX_RESEND_TIMES;
@@ -9424,12 +9432,9 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)){
         isNeedUpdatePrivateState |= JudgeNeedNotifyPrivacyInfo(VIRTUAL_DISPLAY_ID,
             privacyBundleList[VIRTUAL_DISPLAY_ID]);
-
-
     }
     if (!isNeedUpdatePrivateState) {
         return;
-
     }
     std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
     std::unordered_map<DisplayId, std::vector<std::string>> notifyPrivacyBundleList;
@@ -17602,10 +17607,13 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
 WMError SceneSessionManager::RecoverWatermarkImageForApp(const std::string& watermarkName)
 {
     int32_t pid = IPCSkeleton::GetCallingRealPid();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "watermark=%{public}s, pid=%{public}d", watermarkName.c_str(), pid);
-    if (!watermarkName.empty()) {
-        appWatermarkPidMap_.insert_or_assign(pid, watermarkName);
-    }
+    taskScheduler_->PostAsyncTask([this, pid, watermarkName, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: watermark=%{public}s, pid=%{public}d",
+            where, watermarkName.c_str(), pid);
+        if (!watermarkName.empty() && appWatermarkPidMap_[pid] != watermarkName) {
+            appWatermarkPidMap_[pid] = watermarkName;
+        }
+    }, __func__);
     return WMError::WM_OK;
 }
 

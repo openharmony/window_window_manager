@@ -88,6 +88,13 @@ public:
     static ani_status GetPropertyBoolObject(ani_env* env, const char* propertyName, ani_object object, bool& result);
     static bool GetPropertyRectObject(ani_env* env, const char* propertyName,
         ani_object object, Rect& result);
+    static ani_status GetOptionalProperty(ani_env* env, ani_object object, const char* propertyName,
+        ani_ref& outPropRef, bool& outIsUndefined);
+    static ani_status GetOptionalIntProperty(ani_env* env, const char* propertyName,
+        ani_object object, std::optional<ani_int>& optIntProp);
+    template <typename EnumType>
+    static ani_status GetOptionalEnumProperty(
+        ani_env* env, const char* propertyName, ani_object object, std::optional<EnumType>& optEnumProp);
     static bool GetIntObject(ani_env* env, const char* propertyName, ani_object object, int32_t& result);
     static ani_status GetDoubleObject(ani_env* env, ani_object double_object, double& result);
     static ani_status GetBooleanObject(ani_env* env, ani_object boolean_object, bool& result);
@@ -228,7 +235,6 @@ public:
      */
     template <typename EnumType>
     static std::vector<EnumType> ExtractEnumValues(ani_env* env, ani_object enumArrayObj);
-
     static bool ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
@@ -268,6 +274,31 @@ std::vector<EnumType> AniWindowUtils::ExtractEnumValues(ani_env* env, ani_object
         result.push_back(static_cast<EnumType>(enumValue));
     }
     return result;
+}
+
+template <typename EnumType>
+ani_status AniWindowUtils::GetOptionalEnumProperty(
+    ani_env* env, const char* propertyName, ani_object object, std::optional<EnumType>& optEnumProp)
+{
+    optEnumProp.reset();
+
+    ani_ref propRef;
+    bool isUndefined;
+    ani_status ret = AniWindowUtils::GetOptionalProperty(env, object, propertyName, propRef, isUndefined);
+    if (ret != ANI_OK || isUndefined) {
+        return ret;
+    }
+
+    uint32_t enumValue = 0;
+    ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(propRef), enumValue);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT,
+              "[ANI] Failed to get enum value for %{public}s, ret: %{public}d",
+              propertyName, static_cast<int32_t>(ret));
+        return ret;
+    }
+    optEnumProp = static_cast<EnumType>(enumValue);
+    return ANI_OK;
 }
 
 template<typename T>

@@ -691,6 +691,7 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotifyInServer(sptr<Scr
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
     RefreshExternalRegion();
+    ScreenSessionManager::GetInstance().GetStaticAndDynamicSession();
 }
 
 void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotifyInServer(sptr<ScreenSession>& screenSession)
@@ -711,6 +712,7 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotifyInServer(sptr<Scr
     screenSession->PropertyChange(screenSession->GetScreenProperty(),
         ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
     RefreshExternalRegion();
+    ScreenSessionManager::GetInstance().GetStaticAndDynamicSession();
 }
 
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotifyInServer(sptr<ScreenSession>& screenSession)
@@ -819,6 +821,7 @@ void SuperFoldStateManager::HandleExtendToHalfFoldDisplayNotify(sptr<ScreenSessi
     ScreenSessionManager::GetInstance().NotifyDisplayCreate(
         fakeScreenSession->ConvertToDisplayInfo());
     RefreshExternalRegion();
+    ScreenSessionManager::GetInstance().GetStaticAndDynamicSession();
 }
 
 uint32_t SuperFoldStateManager::GetFoldCreaseHeight() const
@@ -918,6 +921,7 @@ void SuperFoldStateManager::HandleHalfFoldToExtendDisplayNotify(sptr<ScreenSessi
         screenSession->ConvertToDisplayInfo(),
         DisplayChangeEvent::SUPER_FOLD_RESOLUTION_CHANGED);
     RefreshExternalRegion();
+    ScreenSessionManager::GetInstance().GetStaticAndDynamicSession();
 }
 
 void SuperFoldStateManager::HandleKeyboardOnDisplayNotify(sptr<ScreenSession>& screenSession)
