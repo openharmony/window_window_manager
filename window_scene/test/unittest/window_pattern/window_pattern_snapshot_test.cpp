@@ -527,6 +527,75 @@ HWTEST_F(WindowPatternSnapshotTest, ResetSnapshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetPreloadSnapshot
+ * @tc.desc: ResetPreloadSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, ResetPreloadSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->preloadSnapshot_ = nullptr;
+    ASSERT_EQ(session_->GetPreloadSnapshot(), nullptr);
+
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    session_->preloadSnapshot_ = std::make_shared<Media::PixelMap>();
+    ASSERT_NE(session_->GetPreloadSnapshot(), nullptr);
+
+    session_->ResetPreloadSnapshot();
+    ASSERT_EQ(nullptr, session_->preloadSnapshot_);
+}
+
+/**
+ * @tc.name: PreloadSnapshot
+ * @tc.desc: PreloadSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, PreloadSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    session_->snapshot_ = std::make_shared<Media::PixelMap>();
+    ASSERT_NE(session_->snapshot_, nullptr);
+
+    session_->preloadSnapshot_ = nullptr;
+    session_->PreloadSnapshot();
+    ASSERT_NE(session_->preloadSnapshot_, nullptr);
+
+    session_->snapshot_ = nullptr;
+    session_->preloadSnapshot_ = nullptr;
+    auto tempScenePersistence = session_->scenePersistence_;
+    session_->scenePersistence_ = nullptr;
+    ASSERT_EQ(session_->scenePersistence_, nullptr);
+    session_->PreloadSnapshot();
+    ASSERT_EQ(session_->preloadSnapshot_, nullptr);
+
+    session_->preloadSnapshot_ = nullptr;
+    session_->scenePersistence_ = tempScenePersistence;
+    session_->PreloadSnapshot();
+    ASSERT_EQ(session_->preloadSnapshot_, nullptr);
+}
+
+/**
+ * @tc.name: InitDmaReclaimParam
+ * @tc.desc: InitDmaReclaimParam Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, InitDmaReclaimParam, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->enableDmaReclaim_ = false;
+    EXPECT_EQ(ssm_->IsDmaReclaimEnabled(), false);
+    ssm_->InitDmaReclaimParam();
+    EXPECT_TRUE(g_logMsg.find("Dma reclaim enabled:") != std::string::npos);
+}
+
+/**
  * @tc.name: Session::SaveSnapshot
  * @tc.desc: Session::SaveSnapshot Test
  * @tc.type: FUNC
