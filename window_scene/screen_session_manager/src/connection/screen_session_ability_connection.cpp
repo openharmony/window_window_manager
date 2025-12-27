@@ -156,8 +156,7 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSync(int32_t transCode,
 }
 
 int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCode,
-                                                                 MessageParcel& data,
-                                                                 MessageParcel& reply)
+    MessageParcel& data, MessageParcel& reply)
 {
     std::unique_lock<std::mutex> lock(connectedMutex_);
     if (!isConnected_) {
@@ -176,10 +175,8 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCo
             TLOGE(WmsLogTag::DMS, "remoteObject is nullptr");
             return RES_FAILURE;
         }
-        TLOG(
-            WmsLogTag::DMS, "snapshot token: %{public}s", Str16ToStr8(remoteObject_->GetInterfaceDescriptor()).c_str());
         if (!data.WriteInterfaceToken(remoteObject_->GetInterfaceDescriptor())) {
-            TLOG(WmsLogTag::DMS, "WriteInterfaceToken failed");
+            TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
             return RES_FAILURE;
         }
         int32_t ret = remoteObject_->SendRequest(transCode, data, reply, option);
