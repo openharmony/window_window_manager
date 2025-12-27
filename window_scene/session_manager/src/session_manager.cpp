@@ -496,6 +496,19 @@ void SessionManager::OnFoundationDied()
     mockSessionManagerServiceProxy_ = nullptr;
 }
 
+void SessionManager::NotifySetSpecificWindowZIndex()
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "enter");
+    sptr<IMockSessionManagerInterface> mockProxy = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mockSessionManagerServiceMutex_);
+        mockProxy = mockSessionManagerServiceProxy_;
+    }
+    if (mockProxy) {
+        mockProxy->NotifySetSpecificWindowZIndex(userId_);
+    }
+}
+
 FoundationDeathRecipient::FoundationDeathRecipient(int32_t userId) : userId_(userId) {}
 
 void FoundationDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)

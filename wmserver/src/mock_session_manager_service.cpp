@@ -76,6 +76,9 @@ public:
     {
         TLOGW(WmsLogTag::WMS_RECOVER, "Client died, pid = %{public}d, isLite = %{public}d", pid_, isLite_);
         MockSessionManagerService::GetInstance().UnregisterSMSRecoverListenerInner(userId_, displayId_, pid_, isLite_);
+        if (!isLite_) {
+            MockSessionManagerService::GetInstance().ResetSpecificWindowZIndex(userId_, pid_);
+        }
     }
 
 private:
@@ -474,9 +477,25 @@ void MockSessionManagerService::UnregisterSMSRecoverListenerInner(int32_t client
     }
 }
 
+void MockSessionManagerService::NotifySetSpecificWindowZIndex(int32_t clientUserId)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "clientUserId: %{public}d", clientUserId, pid);
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
+    int32_t userId = GetUserIdByCallingUid();
+    std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
+    specificZIndexByPidMap_[pid] = userId;
+
+    TLOGI(WmsLogTag::WMS_FOCUS, "UserId: %{public}d, pid: %{public}d", userId, pid);
+}
+
 void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, int32_t pid)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "clientUserId: %{public}d, pid: %{public}d", clientUserId, pid);
+    std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
+    auto iter = specificZIndexByPidMap_.find(pid);
+    if (iter == specificZIndexByPidMap_.end()) {
+        return;
+    }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(clientUserId);
     if (!remoteObject) {
         TLOGE(WmsLogTag::WMS_FOCUS, "remoteObject is null");
@@ -487,10 +506,7 @@ void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, 
         TLOGE(WmsLogTag::WMS_FOCUS, "sessionManagerServiceProxy is nullptr");
         return;
     }
-    WSError ret = sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
-    if (ret != WSError::WS_OK) {
-        TLOGD(WmsLogTag::WMS_FOCUS, "reset failed, result: %{public}d", ret);
-    }
+    sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
 }
 
 ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
