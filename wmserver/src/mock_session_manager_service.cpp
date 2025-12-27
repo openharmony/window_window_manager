@@ -477,24 +477,25 @@ void MockSessionManagerService::UnregisterSMSRecoverListenerInner(int32_t client
     }
 }
 
-void MockSessionManagerService::NotifySetSpecificWindowZIndex(int32_t clientUserId)
+ErrCode MockSessionManagerService::NotifySetSpecificWindowZIndex()
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "clientUserId: %{public}d", clientUserId, pid);
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     int32_t userId = GetUserIdByCallingUid();
     std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
     specificZIndexByPidMap_[pid] = userId;
-
-    TLOGI(WmsLogTag::WMS_FOCUS, "UserId: %{public}d, pid: %{public}d", userId, pid);
+    TLOGI(WmsLogTag::WMS_FOCUS, "pid: %{public}d", pid);
+    return ERR_OK;
 }
 
 void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, int32_t pid)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "clientUserId: %{public}d, pid: %{public}d", clientUserId, pid);
-    std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
-    auto iter = specificZIndexByPidMap_.find(pid);
-    if (iter == specificZIndexByPidMap_.end()) {
-        return;
+    {
+        std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
+        auto iter = specificZIndexByPidMap_.find(pid);
+        if (iter == specificZIndexByPidMap_.end()) {
+            return;
+        }
     }
     sptr<IRemoteObject> remoteObject = GetSceneSessionManagerByUserId(clientUserId);
     if (!remoteObject) {
