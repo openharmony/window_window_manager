@@ -261,14 +261,18 @@ HWTEST_F(ScreenSceneTest, IsAppWindow, TestSize.Level1)
  */
 HWTEST_F(ScreenSceneTest, RegisterInputEventListener, TestSize.Level1)
 {
-    ScreenScene screenScene("UNKNOWN");
+    sptr<ScreenScene> screenScene = sptr<ScreenScene>::MakeSptr("UNKNOWN");
+    auto prevStaticRootScene = RootScene::staticRootScene_;
 
     RootScene::staticRootScene_ = nullptr;
-    screenScene.RegisterInputEventListener();
-    RootScene::staticRootScene_ = sptr<RootScene>::MakeSptr();
-    screenScene.RegisterInputEventListener();
+    screenScene->RegisterInputEventListener();
 
-    ASSERT_EQ(1, screenScene.GetWindowId());
+    sptr<RootScene> staticRootScene = sptr<RootScene>::MakeSptr();
+    RootScene::staticRootScene_ = staticRootScene;
+    screenScene->RegisterInputEventListener();
+
+    RootScene::staticRootScene_ = prevStaticRootScene;
+    ASSERT_EQ(1, screenScene->GetWindowId());
 }
 } // namespace
 } // namespace Rosen
