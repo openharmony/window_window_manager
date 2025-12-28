@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,6 @@
 #include <gtest/gtest.h>
 
 #include "mock_uicontent.h"
-#include "session/host/include/scene_session.h"
-#include "session_manager/include/scene_session_manager.h"
 #include "load_intention_event.h"
 
 using namespace testing;
@@ -31,9 +29,10 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
     std::unique_ptr<Ace::UIContent> uIContent_;
-    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<AppExecFwk::EventRunner> runner_;
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     static constexpr uint32_t WAIT_SYNC_IN_NS = 500000;
 };
 
@@ -43,18 +42,22 @@ void IntentionEventManagerTest::TearDownTestCase() {}
 
 void IntentionEventManagerTest::SetUp()
 {
+    UnloadIntentionEvent();
     uIContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_NE(nullptr, uIContent_);
     runner_ = AppExecFwk::EventRunner::Create("TestRunner");
+    EXPECT_NE(nullptr, runner_);
     eventHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner_);
     EXPECT_NE(nullptr, eventHandler_);
 }
 
 void IntentionEventManagerTest::TearDown()
 {
+    UnloadIntentionEvent();
     uIContent_ = nullptr;
-    eventHandler_ = nullptr;
     runner_ = nullptr;
+    eventHandler_ = nullptr;
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 namespace {
@@ -69,7 +72,6 @@ HWTEST_F(IntentionEventManagerTest, LoadIntentionEvent, TestSize.Level0)
     EXPECT_EQ(true, enable);
     enable = LoadIntentionEvent();
     EXPECT_EQ(true, enable);
-    UnloadIntentionEvent();
     UnloadIntentionEvent();
 }
 
@@ -91,7 +93,6 @@ HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level0)
     EXPECT_EQ(false, enable);
     enable = EnableInputEventListener(uIContent_.get(), eventHandler_, nullptr);
     EXPECT_EQ(true, enable);
-    UnloadIntentionEvent();
 }
 } // namespace
 } // namespace Rosen
