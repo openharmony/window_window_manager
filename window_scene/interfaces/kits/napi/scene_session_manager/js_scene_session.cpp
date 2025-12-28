@@ -458,6 +458,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, static_cast<int32_t>(session->GetSubWindowZLevel())));
     napi_set_named_property(env, objValue, "subWindowOutlineEnabled",
         CreateJsValue(env, session->IsSubWindowOutlineEnabled()));
+    napi_set_named_property(env, objValue, "requestOrientation",
+        CreateJsValue(env, session->GetSessionInfo().specificSessionRequestOrientation_));
     ParseMetadataConfiguration(env, objValue, session);
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
     if (sessionProperty != nullptr) {
