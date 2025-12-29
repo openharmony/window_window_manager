@@ -24,18 +24,26 @@ namespace OHOS::Rosen {
 
 class TaskSequenceProcess {
 public:
-    explicit TaskSequenceProcess(uint32_t maxQueueSize);
+    explicit TaskSequenceProcess(uint32_t maxQueueSize, uint64_t maxTimeInterval);
     ~TaskSequenceProcess();
     void AddTask(const std::function<void()>& task);
     void FinishTask();
+    void CreatSysTimer();
 private:
     uint32_t maxQueueSize_ {1};
+    uint64_t maxTimeInterval_ {1000};
+    uint64_t taskTimerId_ {0};
     std::queue<std::function<void()>> taskQueue_;
     std::mutex queueMutex_;
+    std::mutex timerMutex_;
     std::atomic<bool> taskRunningFlag_ {false};
+    WindowSysTimer TaskTimer;
     std::function<void()> PopFromQueue();
     void PushToQueue(const std::function<void()>& task);
     void ExecTask();
+    void DestroySysTimer();
+    void StartSysTimer();
+    void StopSysTimer();
 };
 } //namespace OHOS::Rosen
 #endif
