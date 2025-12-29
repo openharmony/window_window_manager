@@ -650,6 +650,30 @@ DMError BaseAdapter::UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAge
     return ConvertToDMError(errCode, dmError);
 }
 
+DMError DisplayManagerAdapter::RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+    const sptr<IDisplayManagerAgent> displayManagerAgent)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->RegisterDisplayAttributeAgent(attributes, displayManagerAgent);
+    }
+
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
+DMError DisplayManagerAdapter::UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+    const sptr<IDisplayManagerAgent> displayManagerAgent)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->UnRegisterDisplayAttribute(attributes, displayManagerAgent);
+    }
+
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 bool DisplayManagerAdapter::WakeUpBegin(PowerStateChangeReason reason)
 {
     INIT_PROXY_CHECK_RETURN(false);
@@ -1603,6 +1627,16 @@ void DisplayManagerAdapter::SetVirtualScreenBlackList(ScreenId screenId, std::ve
         screenSessionManagerServiceProxy_->SetVirtualScreenBlackList(screenId, windowIdList, surfaceIdList,
             typeBlackList);
     }
+}
+
+bool DisplayManagerAdapter::IsOnboardDisplay(DisplayId displayId)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->IsOnboardDisplay(displayId);
+    }
+    TLOGE(WmsLogTag::DMS, "fail");
+    return false;
 }
 
 void DisplayManagerAdapter::SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag)

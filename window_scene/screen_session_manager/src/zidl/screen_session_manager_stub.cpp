@@ -316,6 +316,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             VirtualScreenFlag virtualScreenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
             bool supportsFocus = data.ReadBool();
             bool supportsInput = data.ReadBool();
+            std::string serialNumber = data.ReadString();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -337,7 +338,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 .isSecurity_ = isSecurity,
                 .virtualScreenFlag_ = virtualScreenFlag,
                 .supportsFocus_ = supportsFocus,
-                .supportsInput_ = supportsInput
+                .supportsInput_ = supportsInput,
+                .serialNumber_ = serialNumber
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
@@ -429,6 +431,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             DMError result = RemoveVirtualScreenWhiteList(screenId, missionIds);
             reply.WriteUint32(static_cast<uint32_t>(result));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY: {
+            DisplayId displayId = data.ReadUint64();
+            bool res = IsOnboardDisplay(displayId);
+            if (!reply.WriteBool(res)) {
+                TLOGE(WmsLogTag::DMS, "write res failed");
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
@@ -1560,6 +1570,40 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             ScreenPowerState state = static_cast<ScreenPowerState>(ret);
             SyncScreenPowerState(state);
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_ATTRIBUTE_AGENT: {
+            TLOGI(WmsLogTag::DMS, "called");
+            sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+            auto agent = iface_cast<IDisplayManagerAgent>(remoteObj);
+            if (agent == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> attributes;
+            if (!data.ReadStringVector(&attributes)) {
+                TLOGE(WmsLogTag::DMS, "Read attributes failed");
+                return ERR_INVALID_DATA;
+            }
+ 
+            DMError ret = RegisterDisplayAttributeAgent(attributes, agent);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_ATTRIBUTE: {
+            TLOGI(WmsLogTag::DMS, "called");
+            sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+            auto agent = iface_cast<IDisplayManagerAgent>(remoteObj);
+            if (agent == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> attributes;
+            if (!data.ReadStringVector(&attributes)) {
+                TLOGE(WmsLogTag::DMS, "Read attributes failed");
+                return ERR_INVALID_DATA;
+            }
+ 
+            DMError ret = UnRegisterDisplayAttribute(attributes, agent);
+            reply.WriteInt32(static_cast<int32_t>(ret));
             break;
         }
         default:

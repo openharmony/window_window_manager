@@ -64,11 +64,6 @@ struct WindowProfileSum {
     int32_t minimizeWindowCount = -1;
 };
 
-const std::map<KeyboardLifeCycleException, std::string> KEYBOARD_LIFE_CYCLE_EXCEPTION_MAP = {
-    {KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION, "ANIM_SYNC_EXCEPTION"},
-    {KeyboardLifeCycleException::CREATE_EXCEPTION, "CREATE_EXCEPTION"}
-};
-
 struct WindowLifeCycleReportInfo {
     std::string bundleName;
     int32_t windowId;

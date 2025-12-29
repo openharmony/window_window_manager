@@ -884,4 +884,13 @@ DMError DisplayManagerLite::SetSystemKeyboardStatus(bool isTpKeyboardOn)
 {
     return SingletonContainer::Get<DisplayManagerAdapterLite>().SetSystemKeyboardStatus(isTpKeyboardOn);
 }
+
+bool DisplayManagerLite::IsOnboardDisplay(DisplayId displayId)
+{
+    if (displayId == DISPLAY_ID_INVALID) {
+        TLOGE(WmsLogTag::DMS, "id invalid");
+        return false;
+    }
+    return SingletonContainer::Get<DisplayManagerAdapterLite>().IsOnboardDisplay(displayId);
+}
 } // namespace OHOS::Rosen

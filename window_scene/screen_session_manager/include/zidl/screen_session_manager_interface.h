@@ -75,6 +75,10 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual bool IsOnboardDisplay(DisplayId displayId)
+    {
+        return false;
+    }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
@@ -169,6 +173,11 @@ public:
         DisplayManagerAgentType type) { return DMError::DM_OK; }
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) { return DMError::DM_OK; }
+    virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) { return DMError::DM_OK; }
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) { return DMError::DM_OK; }
+
     virtual bool WakeUpBegin(PowerStateChangeReason reason) { return false; }
     virtual bool WakeUpEnd() { return false; }
     virtual bool SuspendBegin(PowerStateChangeReason reason) { return false; }

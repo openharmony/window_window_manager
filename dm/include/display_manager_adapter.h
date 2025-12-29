@@ -105,6 +105,7 @@ public:
     virtual DMError GetLiveCreaseRegion(FoldCreaseRegion& region);
     virtual void SetVirtualScreenBlackList(ScreenId screenId, std::vector<uint64_t>& windowIdList,
         std::vector<uint64_t> surfaceIdList = {}, std::vector<uint8_t> typeBlackList = {});
+    virtual bool IsOnboardDisplay(DisplayId displayId);
     virtual void SetVirtualDisplayMuteFlag(ScreenId screenId, bool muteFlag);
     virtual void DisablePowerOffRenderControl(ScreenId screenId);
     virtual DMError ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy);
@@ -129,6 +130,10 @@ public:
     virtual DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
     virtual DMError GetRoundedCorner(std::vector<RoundedCorner>& roundedCorner, DisplayId displayId,
         int32_t width, int32_t height);
+    virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent> displayManagerAgent);
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent> displayManagerAgent);
     
 private:
     static inline SingletonDelegator<DisplayManagerAdapter> delegator;
