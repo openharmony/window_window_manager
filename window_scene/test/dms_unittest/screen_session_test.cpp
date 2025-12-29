@@ -4912,6 +4912,21 @@ HWTEST_F(ScreenSessionTest, SetSupportsInput, TestSize.Level1)
 }
 
 /**
+ * @tc.name  : SetBundleName
+ * @tc.desc  : SetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetBundleName, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetBundleName("test");
+    auto bundleName = session->GetBundleName();
+    EXPECT_EQ(bundleName, "test");
+}
+
+/**
  * @tc.name  : UpdateRotationOrientationMap01
  * @tc.desc  : UpdateRotationOrientationMap01
  * @tc.type: FUNC

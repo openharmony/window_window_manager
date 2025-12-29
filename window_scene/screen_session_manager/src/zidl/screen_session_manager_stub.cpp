@@ -289,6 +289,19 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_BUNDLE_NAME: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            std::string bundleName;
+            DMError ret = GetBundleName(displayId, bundleName);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+                break;
+            }
+            if (!reply.WriteString(bundleName)) {
+                TLOGE(WmsLogTag::DMS, "write bundleName failed!");
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_ROUNDED_CORNER: {
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
             int radius = 0;
@@ -316,6 +329,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             VirtualScreenFlag virtualScreenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
             bool supportsFocus = data.ReadBool();
             bool supportsInput = data.ReadBool();
+            std::string bundleName = data.ReadString();
             std::string serialNumber = data.ReadString();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
@@ -339,6 +353,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 .virtualScreenFlag_ = virtualScreenFlag,
                 .supportsFocus_ = supportsFocus,
                 .supportsInput_ = supportsInput,
+                .bundleName_ = bundleName,
                 .serialNumber_ = serialNumber
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);

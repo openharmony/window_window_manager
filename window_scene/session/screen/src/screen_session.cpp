@@ -3401,6 +3401,16 @@ void ScreenSession::SetSupportsInput(bool input)
     supportsInput_.store(input);
 }
 
+const std::string& ScreenSession::GetBundleName() const
+{
+    return bundleName_;
+}
+
+void ScreenSession::SetBundleName(const std::string& bundleName)
+{
+    bundleName_ = bundleName;
+}
+
 bool ScreenSession::GetUniqueRotationLock() const
 {
     return isUniqueRotationLocked_;
