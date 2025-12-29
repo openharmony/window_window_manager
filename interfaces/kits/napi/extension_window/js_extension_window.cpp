@@ -1895,7 +1895,7 @@ napi_value JsExtensionWindow::OnGetStatusBarPropertySync(napi_env env, napi_call
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getStatusBarProperty]msg: The window is not created or destroyed");
     }
-    auto objValue = GetStatusBarPropertyObject(env, windowImpl);
+    auto objValue = GetHostStatusBarPropertyObject(env, windowImpl);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "get property failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,

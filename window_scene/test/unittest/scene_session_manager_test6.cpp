@@ -514,6 +514,9 @@ HWTEST_F(SceneSessionManagerTest6, RecoverWatermarkImageForApp, TestSize.Level1)
     ASSERT_NE(nullptr, ssm_);
     std::string watermarkName = "watermark#1";
     EXPECT_EQ(ssm_->RecoverWatermarkImageForApp(watermarkName), WMError::WM_OK);
+    EXPECT_EQ(ssm_->RecoverWatermarkImageForApp(""), WMError::WM_OK);
+    EXPECT_EQ(ssm_->RecoverWatermarkImageForApp(watermarkName), WMError::WM_OK);
+    ssm_->appWatermarkPidMap_.clear();
 }
 
 /**

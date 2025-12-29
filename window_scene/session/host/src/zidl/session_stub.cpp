@@ -540,7 +540,6 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
-        reply.WriteString(property->GetCompatibleModePage());
     }
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

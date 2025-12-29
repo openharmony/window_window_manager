@@ -890,6 +890,7 @@ public:
     void ConfigSupportPreloadStartingWindow();
     void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
     bool IsSyncLoadStartingWindow() { return syncLoadStartingWindow_; };
+    bool IsDmaReclaimEnabled() { return enableDmaReclaim_; };
 
     /*
      * Window Animation
@@ -1828,8 +1829,10 @@ private:
     std::unordered_set<std::string> emptyStartupResource_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
     bool syncLoadStartingWindow_ = false;
+    bool enableDmaReclaim_ = false;
     void InitWindowPattern();
     void InitStartingWindow();
+    void InitDmaReclaimParam();
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool isDark);

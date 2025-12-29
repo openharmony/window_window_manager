@@ -1003,4 +1003,11 @@ export let displayMgrRef: long;
 export function setDisplayMgrRef(nativeObj : long) : void{
     displayMgrRef = nativeObj;
 }
+
+export function onChangeWithAttribute(displayAttributeOption: Array<string>, callback: Callback<long>): void {
+    onChangeWithAttributeNative(displayAttributeOption, callback, displayMgrRef);
+}
+
+export native function onChangeWithAttributeNative(displayAttributeOption: Array<string>, callback: Callback<long>,
+    nativeObj: long): void;
 }

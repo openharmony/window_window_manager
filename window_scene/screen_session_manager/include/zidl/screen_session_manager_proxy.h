@@ -58,6 +58,11 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
+    virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) override;
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) override;
+
     virtual void NotifyDisplayEvent(DisplayEvent event) override;
     virtual bool WakeUpBegin(PowerStateChangeReason reason) override;
     virtual bool WakeUpEnd() override;
@@ -89,6 +94,8 @@ public:
     DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
 
     DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
+
+    bool IsOnboardDisplay(DisplayId displayId) override;
 
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;

@@ -59,7 +59,8 @@ void ScreenCutoutController::GetCutoutArea(DisplayId displayId, uint32_t width, 
 {
     FoldDisplayMode displayMode = ScreenSceneConfig::GetFoldDisplayMode(width, height);
 
-    TLOGI(WmsLogTag::DMS, "display:[ID: %{public}" PRIu64 ", W: %{public}u, H: %{public}u, R: %{public}u,"
+    TLOGI_LIMITN_HOUR(WmsLogTag::DMS, THREE_TIMES,
+        "display:[ID: %{public}" PRIu64 ", W: %{public}u, H: %{public}u, R: %{public}u,"
         "Mode %{public}u]", displayId, width, height, rotation, displayMode);
 
     std::vector<DMRect> boundaryRects;
