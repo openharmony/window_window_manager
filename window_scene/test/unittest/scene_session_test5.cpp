@@ -3058,12 +3058,12 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
     SessionInfo info;
     info.abilityName_ = "HandleActionUpdateViewKeepScreenOn";
     info.bundleName_ = "HandleActionUpdateViewKeepScreenOn";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(session, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetViewKeepScreenOn(true);
-    WMError result = session->HandleActionUpdateViewKeepScreenOn(
+    WMError result = sceneSession->HandleActionUpdateViewKeepScreenOn(
         property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
     EXPECT_EQ(result, WMError::WM_OK);
 }
@@ -3078,20 +3078,20 @@ HWTEST_F(SceneSessionTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
     info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(session, nullptr);
-    session->SetSkipSelfWhenShowOnVirtualScreen(true);
-    EXPECT_EQ(session->GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen(), true);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    EXPECT_EQ(sceneSession->GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen(), true);
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
     ASSERT_NE(surfaceNode, nullptr);
-    session->surfaceNode_ = surfaceNode;
+    sceneSession->surfaceNode_ = surfaceNode;
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
-    session->SetSessionProperty(property);
+    sceneSession->SetSessionProperty(property);
 
     uint64_t persistentId = 0;
     bool isSkip = false;
@@ -3102,16 +3102,16 @@ HWTEST_F(SceneSessionTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
             persistentId = id;
             isSkip = skip;
         };
-    session->specificCallback_ = specificCallBack;
+    sceneSession->specificCallback_ = specificCallBack;
 
-    session->SetSkipSelfWhenShowOnVirtualScreen(true);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
     EXPECT_EQ(persistentId, surfaceNode->GetId());
     EXPECT_EQ(isSkip, true);
 
     property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    session->SetSessionProperty(property);
-    session->SetSkipSelfWhenShowOnVirtualScreen(false);
-    EXPECT_EQ(persistentId, session->GetMissionId());
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(false);
+    EXPECT_EQ(persistentId, sceneSession->GetMissionId());
     EXPECT_EQ(isSkip, false);
 }
 
@@ -3125,8 +3125,8 @@ HWTEST_F(SceneSessionTest5, SetSkipEventOnCastPlus, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "SetSkipEventOnCastPlus";
     info.bundleName_ = "SetSkipEventOnCastPlus";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(session, nullptr);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
 
     int32_t persistentId = 0;
     bool isSkip = false;
@@ -3137,9 +3137,9 @@ HWTEST_F(SceneSessionTest5, SetSkipEventOnCastPlus, TestSize.Level1)
             persistentId = id;
             isSkip = skip;
         };
-    session->specificCallback_ = specificCallBack;
-    session->SetSkipEventOnCastPlus(true);
-    EXPECT_EQ(persistentId, session->GetMissionId());
+    sceneSession->specificCallback_ = specificCallBack;
+    sceneSession->SetSkipEventOnCastPlus(true);
+    EXPECT_EQ(persistentId, sceneSession->GetMissionId());
     EXPECT_EQ(isSkip, true);
 }
 
