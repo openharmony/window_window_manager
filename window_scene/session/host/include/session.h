@@ -354,6 +354,10 @@ public:
     int32_t GetSessionInfoCursorDragCount();
     void SetSessionInfoCursorDragFlag(bool value);
     bool GetSessionInfoCursorDragFlag();
+    void SetSessionInfoSeparationTouchEnabled(bool value);
+    bool GetSessionInfoSeparationTouchEnabled();
+    void SetSessionInfoReceiveDragEventEnabled(bool value);
+    bool GetSessionInfoReceiveDragEventEnabled();
     void SetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition, bool value);
     bool GetSessionInfoAdvancedFeatureFlag(uint32_t bitPosition);
     void SetSessionInfoWindowMode(int32_t windowMode);
