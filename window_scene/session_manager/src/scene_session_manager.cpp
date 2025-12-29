@@ -303,7 +303,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.ohos.commondialog", "FoldStatusAbility", "phone_commondialog"),
         std::make_tuple("com.ohos.commondialog", "SecondaryReflexionAbility", "phone_commondialog"),
         std::make_tuple("com.huawei.hmos.clock", "ScreenLockCoverExtensionAbility", "entry"),
-        std::make_tuple("com.huawei.hmos.clock", "ScreenMomentXExtensionAbility", "entry"),
+        std::make_tuple("com.huawei.hmos.clock", "ClockScreenLockExtensionAbility", "entry"),
         std::make_tuple("com.huawei.hmos.penglaimodeassistant", "ExpandedDialogUIExtAbility", "entry"),
         std::make_tuple("com.huawei.hmos.penglaimodeassistant", "CameraDialogAbility", "entry"),
     };
