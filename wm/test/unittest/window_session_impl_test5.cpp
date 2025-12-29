@@ -85,15 +85,12 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
     option->SetWindowName(name);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     if (window == nullptr) {
-        delete option;
         return nullptr;
     }
 
     SessionInfo sessionInfo = { name, name, name };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     if (session == nullptr) {
-        delete window;
-        delete option;
         return nullptr;
     }
 
