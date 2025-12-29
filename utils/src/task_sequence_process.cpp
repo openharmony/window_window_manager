@@ -106,7 +106,7 @@ void TaskSequenceProcess::DestroySysTimer()
 }
 
 void TaskSequenceProcess::StartSysTimer()
-{   
+{
     auto currentTime = std::chrono::steady_clock::now();
     auto duration = std::chrono::milliseconds(maxTimeInterval_);
     auto expireTime = currentTime + duration;
