@@ -4499,8 +4499,8 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowBrightness]"));
         }
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s,  winId=%{public}u, brightness=%{public}f, result: %{public}d",
-            weakWindow->GetWindowId(), brightness, ret);
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end. WinId=%{public}u, brightness=%{public}f, result: %{public}d",
+            where, weakWindow->GetWindowId(), brightness, ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowBrightness") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
@@ -4944,7 +4944,7 @@ napi_value JsWindow::OnSetWindowKeepScreenOn(napi_env env, napi_callback_info in
             return;
         }
         *errCodePtr = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SetKeepScreenOn(keepScreenOn));
-        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s, Wid: %{public}u, set keep screen on as %{public}d end",
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s end. Wid: %{public}u, isKeepScreenOn: %{public}d",
             where, weakWindow->GetWindowId(), keepScreenOn);
     };
     NapiAsyncTask::CompleteCallback complete =
