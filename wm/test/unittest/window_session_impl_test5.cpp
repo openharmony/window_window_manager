@@ -85,12 +85,15 @@ sptr<WindowSessionImpl> GetTestWindowImpl(const std::string& name)
     option->SetWindowName(name);
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     if (window == nullptr) {
+        delete option;
         return nullptr;
     }
 
     SessionInfo sessionInfo = { name, name, name };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     if (session == nullptr) {
+        delete window;
+        delete option;
         return nullptr;
     }
 
@@ -124,7 +127,7 @@ HWTEST_F(WindowSessionImplTest5, NotifyAfterFocused, TestSize.Level1)
  * @tc.desc: GetFocusable
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, GetFocusable, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest5, GetFocusable, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetFocusableTest01 start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
@@ -140,7 +143,7 @@ HWTEST_F(WindowSessionImplTest4, GetFocusable, TestSize.Level1)
  * @tc.desc: SetTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetTopmost, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest5, SetTopmost, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetTopmost");
@@ -167,7 +170,7 @@ HWTEST_F(WindowSessionImplTest4, SetTopmost, TestSize.Level1)
  * @tc.desc: IsTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, IsTopmost, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest5, IsTopmost, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsTopmost");
@@ -182,7 +185,7 @@ HWTEST_F(WindowSessionImplTest4, IsTopmost, TestSize.Level1)
  * @tc.desc: SetMainWindowTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest5, SetMainWindowTopmost, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetMainWindowTopmost");
@@ -212,7 +215,7 @@ HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, TestSize.Level1)
  * @tc.desc: IsMainWindowTopmost
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest5, IsMainWindowTopmost, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("IsMainWindowTopmost");
