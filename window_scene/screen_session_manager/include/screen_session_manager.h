@@ -323,8 +323,6 @@ public:
     float GetSuperRotation() override;
     void SetLandscapeLockStatus(bool isLocked) override;
     bool GetTentMode();
-    bool IsLapTopLidOpen() const;
-    void SetLapTopLidOpenStatus(bool isLapTopLidOpen);
     ExtendScreenConnectStatus GetExtendScreenConnectStatus() override;
     bool GetIsPhysicalExtendScreenConnected();
     void SetIsPhysicalExtendScreenConnected(bool isExtendScreenConnected);
@@ -535,7 +533,6 @@ public:
     bool SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
-    void SwitchSubscriberInit();
     virtual bool IsNeedAddInputServiceAbility();
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
@@ -932,7 +929,6 @@ private:
     std::atomic<bool> isOuterOnlyModeBeforePowerOff_ = false;
     std::atomic<bool> isFoldStatusLocked_ = false;
     std::atomic<bool> isLandscapeLockStatus_ = false;
-    std::atomic<bool> isLapTopLidOpen_ = true;
     std::atomic<bool> isExtendMode_ = false;
 
     /**

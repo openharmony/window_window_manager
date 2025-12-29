@@ -638,16 +638,11 @@ void MultiScreenPowerChangeManager::SetInnerAndExternalCombination(ScreenCombina
 
 void MultiScreenPowerChangeManager::CallRsSetScreenPowerStatusSyncToOn(ScreenId screenId)
 {
-    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn() &&
-            ScreenSessionManager::GetInstance().IsSystemSleep()) {
-        TLOGI(WmsLogTag::DMS, "power state IsScreenOn is false");
+    if (!PowerMgr::PowerMgrClient::GetInstance().IsFoldScreenOn()) {
+        TLOGI(WmsLogTag::DMS, "power state IsFoldScreenOn is false");
         return;
     }
-
-    if (!ScreenSessionManager::GetInstance().IsLapTopLidOpen() && screenId == SCREEN_ID_FULL) {
-        TLOGI(WmsLogTag::DMS, "laptop lid is close and build-in screen");
-        return;
-    }
+    TLOGI(WmsLogTag::DMS, "power state IsFoldScreenOn is true");
     ScreenSessionManager::GetInstance().CallRsSetScreenPowerStatusSync(screenId,
         ScreenPowerStatus::POWER_STATUS_ON);
 }
