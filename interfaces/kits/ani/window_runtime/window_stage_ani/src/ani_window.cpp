@@ -3614,7 +3614,7 @@ void AniWindow::SetStatusBarColor(ani_env* env, ani_long color)
     property.contentColor_ = static_cast<uint32_t>(color);
     property.settingFlag_ = static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-    SystemBarSettingFlag flag = { false, flase, true, false };
+    SystemBarPropertyFlag flag = { false, false, true, false };
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         windowToken_->UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, property, flag));
     if (ret != WmErrorCode::WM_OK) {

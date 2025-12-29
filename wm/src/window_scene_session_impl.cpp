@@ -3536,7 +3536,7 @@ WMError WindowSceneSessionImpl::SetSystemBarProperties(const std::map<WindowType
             iter->second.contentColor_ = propertyIter->second.contentColor_;
             iter->second.settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
             UpdateStatusBarColorHistory(StatusBarColorChangeReason::NAVIGATION_CONFIGURATION,
-                std::optional<uiin32_t>(propertyIter->second.contentColor_));
+                std::optional<uint32_t>(propertyIter->second.contentColor_));
             isNavigationUseColor_ = true;
             finshUpdate = true;
         }
@@ -3582,7 +3582,7 @@ uint32_t WindowSceneSessionImpl::UpdateStatusBarColorHistory(
     if (color != std::nullopt) {
         statusBarColorHistory_.push(std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value()));
     }
-    auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATE_BAR);
+    auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     if (statusBarColorHistory_.empty()) {
         std::pair<StatusBarColorChangeReason, uint32_t> value = color == std::nullopt ?
             std::pair<StatusBarColorChangeReason, uint32_t>(reason, property.contentColor_) :
@@ -3637,7 +3637,7 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uin
                     static_cast<uint32_t>(newProperty.settingFlag_);
                 nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
             }
-            if (!statusBarColorHistory_ &&
+            if (!statusBarColorHistory_.empty() &&
                 statusBarColorHistory_.top().first == StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION) {
                 nowsystemBarPropertyMap_[type].contentColor_ =
                     UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);

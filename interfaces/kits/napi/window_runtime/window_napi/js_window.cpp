@@ -1402,7 +1402,7 @@ WMError UpdateStatusBarProperty(const sptr<Window>& window, const uint32_t conte
     property.contentColor_ = contentColor;
     property.settingFlag_ = static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-    SystemBarSettingFlag flag = { false, flase, true, false };
+    SystemBarPropertyFlag flag = { false, false, true, false };
     return window->UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, property, flag);
 }
 
