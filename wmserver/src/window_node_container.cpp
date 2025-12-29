@@ -1440,8 +1440,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
             avoidAreas[avoidAreaType] = area;
         }
         if (callingWindow->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP ||
-            callingWindow->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD ||
-            callingWindow->GetWindowType() == WindowType::WINDOW_TYPE_LAUNCHER_RECENT) {
+            callingWindow->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
             avoidAreas = {};
             TLOGD(WmsLogTag::WMS_KEYBOARD, "No need to update Immersive avoidarea");
         }
