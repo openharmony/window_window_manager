@@ -3061,7 +3061,7 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
+    ASSERT_NE(property, nullptr);
     property->SetViewKeepScreenOn(true);
     WMError result = session->HandleActionUpdateViewKeepScreenOn(
         property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
@@ -3085,11 +3085,11 @@ HWTEST_F(SceneSessionTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
 
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    EXPECT_NE(surfaceNode, nullptr);
+    ASSERT_NE(surfaceNode, nullptr);
     session->surfaceNode_ = surfaceNode;
 
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
+    ASSERT_NE(property, nullptr);
     property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
     session->SetSessionProperty(property);
 
@@ -3128,8 +3128,8 @@ HWTEST_F(SceneSessionTest5, SetSkipEventOnCastPlus, TestSize.Level1)
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
 
-   int32_t persistentId = 0;
-   bool isSkip = false;
+    int32_t persistentId = 0;
+    bool isSkip = false;
     sptr<SceneSession::SpecificSessionCallback> specificCallBack =
          sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCallBack->onSetSkipEventOnCastPlus_ =
