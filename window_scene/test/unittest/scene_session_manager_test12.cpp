@@ -3363,6 +3363,7 @@ HWTEST_F(SceneSessionManagerTest12, ReportWindowProfileInfosTest, TestSize.Level
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange01, Function | SmallTest | Level2)
 {
+    ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     ScreenId screenId = 0;
 
@@ -3385,6 +3386,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange01, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange02, Function | SmallTest | Level2)
 {
+    ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     ScreenId screenId = 0;
 
@@ -3408,6 +3410,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange02, Function | Sma
  */
 HWTEST_F(SceneSessionManagerTest12, NotifyWindowPropertyChange03, Function | SmallTest | Level2)
 {
+    ASSERT_NE(nullptr, ssm_);
     ssm_->sceneSessionMap_.clear();
     ScreenId screenId = 0;
 
