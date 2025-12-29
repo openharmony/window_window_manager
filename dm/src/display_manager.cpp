@@ -2349,7 +2349,7 @@ void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         screenshotListeners = screenshotListeners_;
     }
-    TLOGI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
+    TLOGNI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
         info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners.size());
     for (auto& listener : screenshotListeners) {
         listener->OnScreenshot(*info);
@@ -2652,7 +2652,7 @@ DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
     for (auto pid : pidList) {
         oss << pid << " ";
     }
-    TLOGI(WmsLogTag::DMS, "pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
+    TLOGNI(WmsLogTag::DMS, "pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
     return pImpl_->ProxyForFreeze(pidList, isProxy);
 }
 

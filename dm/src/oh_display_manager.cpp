@@ -267,11 +267,11 @@ public:
             TLOGI(WmsLogTag::DMS, "[DMNDK] callback is null");
             return;
         }
-        TLOGI(WmsLogTag::DMS, "[DMNDK] callback displayId=%{public}" PRIu64, displayId);
+        TLOGD(WmsLogTag::DMS, "[DMNDK] callback displayId=%{public}" PRIu64, displayId);
         innerDisplayChangeFunc_(static_cast<uint64_t>(displayId));
         sptr<Display> display = DisplayManager::GetInstance().GetDefaultDisplaySync();
         if (display != nullptr) {
-            TLOGI(WmsLogTag::DMS, "[DMNDK] callback rotation=%{public}d orientation=%{public}d",
+            TLOGI(WmsLogTag::DMS, "[DMNDK] cb R: %{public}d O: %{public}d",
                 display->GetRotation(), display->GetOrientation());
         }
     }
