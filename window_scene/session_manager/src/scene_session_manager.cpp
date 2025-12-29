@@ -2334,10 +2334,6 @@ WMError SceneSessionManager::CheckWindowId(int32_t windowId, int32_t& pid)
 
 WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& windowLimits)
 {
-    if (!(systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "not pc device, return.");
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
     if (!SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;

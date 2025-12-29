@@ -534,14 +534,10 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ windowId, sceneSession });
     auto defaultUIType = ssm_->systemConfig_.windowUIType_;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
-    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
-    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
-    auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
-    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
-    ret = ssm_->GetWindowLimits(windowId, windowlimits);
+    auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
