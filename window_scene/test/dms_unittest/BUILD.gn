@@ -24,22 +24,14 @@ group("unittest") {
     ":ws_screen_power_utils_test",
     ":ws_screen_property_test",
     ":ws_screen_rotation_property_test",
-    ":ws_screen_scene_config_test",
-    ":ws_screen_session_manager_client_proxy_test",
-    ":ws_screen_session_manager_client_stub_test",
     ":ws_screen_session_manager_lite_proxy_test",
     ":ws_screen_session_manager_lite_stub_test",
-    ":ws_screen_session_manager_lite_test",
     ":ws_screen_session_manager_lite_proxy_mock_test",
     ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_publish_test",
-    ":ws_screen_session_test",
-    ":ws_screen_setting_helper_test",
     ":ws_screen_snapshot_picker_connection_test",
     ":ws_session_display_power_controller_test",
-    ":ws_screen_state_machine_test",
     ":ws_setting_observer_test",
-    ":ws_setting_provider_test",
   ]
 
   if (!window_manager_use_sceneboard) {
@@ -57,6 +49,14 @@ group("unittest") {
       ":ws_screen_session_manager_test_seven",
       ":ws_screen_session_manager_test_eight",
       ":ws_screen_aod_plugin_test",
+      ":ws_screen_scene_config_test",
+      ":ws_setting_provider_test",
+      ":ws_screen_session_test",
+      ":ws_screen_session_manager_client_stub_test",
+      ":ws_screen_setting_helper_test",
+      ":ws_screen_session_manager_lite_test",
+      ":ws_screen_state_machine_test",
+      ":ws_screen_session_manager_client_proxy_test",
     ]
   }
 
@@ -66,7 +66,7 @@ group("unittest") {
     deps += [ ":ws_screen_session_ability_connection_test" ]
   }
 
-  if (window_manager_fold_ability) {
+  if (window_manager_fold_ability && window_manager_use_sceneboard) {
     deps += [
       ":ws_dual_display_fold_policy_test",
       ":ws_dual_display_sensor_fold_state_manager_test",
@@ -92,7 +92,7 @@ group("unittest") {
     ]
   }
 
-  if (window_manager_feature_multi_screen) {
+  if (window_manager_feature_multi_screen && window_manager_use_sceneboard) {
     deps += [
       ":ws_multi_screen_change_utils_test",
       ":ws_multi_screen_manager_test",
