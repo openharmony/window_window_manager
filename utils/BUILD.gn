@@ -101,6 +101,7 @@ ohos_static_library("libwmutil_static") {
     "src/surface_draw.cpp",
     "src/surface_reader.cpp",
     "src/surface_reader_handler_impl.cpp",
+    "src/system_timer.cpp",
     "src/sys_cap_util.cpp",
     "src/unreliable_window_info.cpp",
     "src/vsync_station.cpp",
@@ -143,6 +144,8 @@ ohos_static_library("libwmutil_static") {
     "ipc:ipc_single",
     "preferences:native_preferences",
     "samgr:samgr_proxy",
+    "time_service:time_client",
+    "ability_runtime:wantagent_innerkits",
   ]
 
   part_name = "window_manager"
@@ -222,6 +225,7 @@ ohos_shared_library("libwmutil") {
     "src/surface_reader.cpp",
     "src/surface_reader_handler_impl.cpp",
     "src/sys_cap_util.cpp",
+    "src/system_timer.cpp",
     "src/task_sequence_process.cpp",
     "src/typec_port_info.cpp",
     "src/vsync_station.cpp",
@@ -264,6 +268,8 @@ ohos_shared_library("libwmutil") {
     "ipc:ipc_single",
     "samgr:samgr_proxy",
     "ffrt:libffrt",
+    "time_service:time_client",
+    "ability_runtime:wantagent_innerkits",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
