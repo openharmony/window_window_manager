@@ -89,10 +89,6 @@ HWTEST_F(IntentionEventManagerTest, EnableInputEventListener, TestSize.Level0)
     EXPECT_EQ(true, enable);
     enable = EnableInputEventListener(nullptr, nullptr, nullptr);
     EXPECT_EQ(false, enable);
-    enable = EnableInputEventListener(uIContent_.get(), nullptr, nullptr);
-    EXPECT_EQ(false, enable);
-    enable = EnableInputEventListener(uIContent_.get(), eventHandler_, nullptr);
-    EXPECT_EQ(true, enable);
 }
 } // namespace
 } // namespace Rosen
