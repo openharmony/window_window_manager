@@ -27,8 +27,11 @@
 #endif
 
 namespace OHOS::Rosen {
-
-SensorFoldStateManager::SensorFoldStateManager() : taskProcessor_(1) {};
+namespace {
+constexpr int32_t MAX_QUEUE_SIZE = 1;
+constexpr uint64_t MAX_TIME_INTERVAL = 1000;
+}
+SensorFoldStateManager::SensorFoldStateManager() : taskProcessor_(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL) {};
 SensorFoldStateManager::~SensorFoldStateManager() = default;
 
 void SensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) {}

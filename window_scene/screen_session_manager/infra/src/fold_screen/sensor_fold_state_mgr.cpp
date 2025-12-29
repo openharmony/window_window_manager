@@ -41,6 +41,8 @@ constexpr float TENT_MODE_EXIT_MIN_THRESHOLD = 5.0F;
 constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 175.0F;
 constexpr int32_t TENT_MODE_OFF = 0;
 constexpr int32_t TENT_MODE_ON = 1;
+constexpr int32_t MAX_QUEUE_SIZE = 1;
+constexpr uint64_t MAX_TIME_INTERVAL = 1000;
 
 std::chrono::time_point<std::chrono::system_clock> g_lastUpdateTime = std::chrono::system_clock::now();
 }  // namespace
@@ -58,7 +60,7 @@ SensorFoldStateMgr& SensorFoldStateMgr::GetInstance()
     return *instance_;
 }
 
-SensorFoldStateMgr::SensorFoldStateMgr() : taskProcessor_(1)
+SensorFoldStateMgr::SensorFoldStateMgr() : taskProcessor_(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL)
 {
     currentFoldStatus_ = {FoldStatus::UNKNOWN};
     foldAlgorithmStrategy_ = {0, 0};
