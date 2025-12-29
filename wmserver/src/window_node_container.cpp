@@ -1442,7 +1442,7 @@ void WindowNodeContainer::NotifyIfKeyboardRegionChanged(const sptr<WindowNode>& 
         if (callingWindow->GetWindowType() == WindowType::WINDOW_TYPE_DESKTOP ||
             callingWindow->GetWindowType() == WindowType::WINDOW_TYPE_KEYGUARD) {
             avoidAreas = {};
-            TLOGD(WmsLogTag::WMS_KEYBOARD, "No need to update Immersive avoidarea");
+            TLOGD(WmsLogTag::WMS_KEYBOARD, "No need to update immersive avoidarea");
         }
         if (isAnimateTransactionEnabled_) {
             auto rsTransaction = RSSyncTransactionAdapter::GetRSTransaction(node->GetRSUIContext());
