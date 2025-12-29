@@ -509,7 +509,7 @@ private:
     enum class StatusBarColorChangeReason {
         WINDOW_CONFIGURATION,
         NAVIGATION_CONFIGURATION,
-        ATOMIC_CONFIGURATION,
+        ATOMICSERVICE_CONFIGURATION,
     };
     std::stack<std::pair<StatusBarColorChangeReason, uint32_t>> statusBarColorHistory_;
     uint32_t UpdateStatusBarColorHistory(StatusBarColorChangeReason reason, std::optional<uint32_t> color);
