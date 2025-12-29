@@ -3554,7 +3554,7 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
         std::lock_guard<std::mutex> lock(nowsystemBarPropertyMapMutex_);
         auto iter = nowsystemBarPropertyMap_.find(WindowType::WINDOW_TYPE_STATUS_BAR);
         if (iter != nowsystemBarPropertyMap_.end()) {
-            properties[WindowType::WINDOW_TYPE_STATUS_BAR] = iter.second;
+            properties[WindowType::WINDOW_TYPE_STATUS_BAR] = iter->second;
         } else {
             properties[WindowType::WINDOW_TYPE_STATUS_BAR] =
                 GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -3566,18 +3566,18 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
 uint32_t WindowSceneSessionImpl::UpdateStatusBarColorHistory(
     StatusBarColorChangeReason reason, std::optional<uint32_t> color)
 {
-    std::stack<std::pair<StatusBarColorChangeReason, uint32_t>> tmpstatusBarColorHistory_;
+    std::stack<std::pair<StatusBarColorChangeReason, uint32_t>> tmpstatusBarColorHistory;
     while (!statusBarColorHistory_.empty()) {
         auto top = statusBarColorHistory_.top();
         statusBarColorHistory_.pop();
         if (top.first == reason) {
             break;
         }
-        tmpstatusBarColorHistory_.push(top);
+        tmpstatusBarColorHistory.push(top);
     }
-    while (!tmpstatusBarColorHistory_.empty()) {
-        statusBarColorHistory_.push(tmpstatusBarColorHistory_.top());
-        tmpstatusBarColorHistory_.pop();
+    while (!tmpstatusBarColorHistory.empty()) {
+        statusBarColorHistory_.push(tmpstatusBarColorHistory.top());
+        tmpstatusBarColorHistory.pop();
     }
     if (color != std::nullopt) {
         statusBarColorHistory_.push(std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value()));
@@ -3638,18 +3638,18 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uin
                 nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
             }
             if (!statusBarColorHistory_ &&
-                statusBarColorHistory_.top().first == StatusBarColorChangeReason::ATOMIC_CONFIGURATION) {
+                statusBarColorHistory_.top().first == StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION) {
                 nowsystemBarPropertyMap_[type].contentColor_ =
-                    UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMIC_CONFIGURATION, color);
+                    UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
             } else {
-                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMIC_CONFIGURATION, color);
+                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
                 return WMError::WM_DO_NOTHING;
             }
             isAtomicServiceUseColor_ = false;
         } else {
             nowsystemBarPropertyMap_[type].settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
             nowsystemBarPropertyMap_[type].contentColor_ =
-                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMIC_CONFIGURATION, color);
+                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
             isAtomicServiceUseColor_ = true;
         }
     }
