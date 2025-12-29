@@ -23,6 +23,7 @@
 #include <unique_fd.h>
 #include <unordered_set>
 #include <cmath>
+#include "input_manager.h"
 
 #include <hitrace_meter.h>
 #ifdef DEVICE_STATUS_ENABLE
