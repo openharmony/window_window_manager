@@ -1125,6 +1125,35 @@ HWTEST_F(DisplayManagerAdapterTest, SetSupportsInput02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBundleName
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetBundleName, TestSize.Level1)
+{
+    std::string bundleName = "";
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetBundleName(0, bundleName);
+    EXPECT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name:GetBundleName02
+ * @tc.desc: test screenSessionManagerServiceProxy_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetBundleNamee02, TestSize.Level1)
+{
+    std::string bundleName = "";
+    auto screenSessionManagerServiceProxy =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetBundleName(0, bundleName);
+    EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxy;
+}
+
+/**
  * @tc.name: RegisterDisplayManagerAgent
  * @tc.desc: test success
  * @tc.type: FUNC

@@ -4347,6 +4347,22 @@ DMError ScreenSessionManager::SetSupportsInput(DisplayId displayId, bool support
     return DMError::DM_OK;
 }
 
+DMError ScreenSessionManager::GetBundleName(DisplayId displayId, std::string& bundleName)
+{
+    TLOGI(WmsLogTag::DMS, "start");
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
+    sptr<ScreenSession> screenSession = GetScreenSession(displayId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;
+    }
+    bundleName = screenSession->GetBundleName();
+    return DMError::DM_OK;
+}
+
 static std::vector<int> GetDeviceRadiusFormConfig(float dpi)
 {
     std::vector<int> result;
@@ -6490,7 +6506,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     }
     virtualScreenCount_ = virtualScreenCount_ + 1;
     NotifyCaptureStatusChanged();
-    SetConfigForInputmethod(smsScreenId, option);
+    SetOptionConfig(smsScreenId, option);
     return smsScreenId;
 }
 
@@ -14031,11 +14047,11 @@ void ScreenSessionManager::DoAodExitAndSetPowerAllOff()
 #endif
 }
 
-void ScreenSessionManager::SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option)
+void ScreenSessionManager::SetOptionConfig(ScreenId screenId, VirtualScreenOption option)
 {
     auto screenSession = GetScreenSession(screenId);
-    TLOGD(WmsLogTag::DMS, "screenId:%{public}" PRIu64", supportsFocus:%{public}d, supportsInput:%{public}d",
-        screenId, option.supportsFocus_, option.supportsInput_);
+    TLOGD(WmsLogTag::DMS, "screenId:%{public}" PRIu64", focus:%{public}d, input:%{public}d, bundleName:%{public}s",
+        screenId, option.supportsFocus_, option.supportsInput_, option.bundleName_.c_str());
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
@@ -14046,6 +14062,7 @@ void ScreenSessionManager::SetConfigForInputmethod(ScreenId screenId, VirtualScr
     } else {
         screenSession->SetSupportsInput(false);
     }
+    screenSession->SetBundleName(option.bundleName_);
 }
 
 void ScreenSessionManager::BootFinishedUnfreezeCallback(const char *key, const char *value, void *context)
