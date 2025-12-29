@@ -11161,6 +11161,7 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
         bool isColdStart = false;
         OHOS::AbilityRuntime::StartParamsBySCB startParams;
         startParams.pageConfig = sceneSession->GetSessionInfo().pageConfig;
+        startParams.sceneFlag = static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL);
         AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, startParams, isColdStart);
         CloseAllFd(sessionInfo.want);
         if (isColdStart) {
