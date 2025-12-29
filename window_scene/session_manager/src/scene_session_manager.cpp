@@ -6989,7 +6989,9 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         return WSError::WS_DO_NOTHING;
     }
     auto brightness = sceneSession->GetBrightness();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    if (GetDisplayBrightness() != brightness) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    }
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (IsNeedUpdateBrightness(persistentId, brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
