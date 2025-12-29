@@ -210,7 +210,7 @@ void JsDisplayListener::OnChange(DisplayId id)
             TLOGE(WmsLogTag::DMS, "Failed to SendEvent.");
         }
     } else {
-        TLOGE(WmsLogTag::DMS, "env is nullptr");
+        TLOGE_LIMITN_HOUR(WmsLogTag::DMS, THREE_TIMES, "env is nullptr");
     }
 }
 
