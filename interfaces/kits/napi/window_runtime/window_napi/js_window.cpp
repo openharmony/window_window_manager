@@ -4486,7 +4486,7 @@ napi_value JsWindow::OnSetWindowBrightness(napi_env env, napi_callback_info info
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), brightness, env, task = napiAsyncTask] {
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), brightness, env, task = napiAsyncTask, where = __func__] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
