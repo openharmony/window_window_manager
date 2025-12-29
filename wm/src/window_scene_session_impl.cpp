@@ -3637,7 +3637,8 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uin
                     static_cast<uint32_t>(newProperty.settingFlag_);
                 nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
             }
-            if (statusBarColorHistory_.top().first == StatusBarColorChangeReason::ATOMIC_CONFIGURATION) {
+            if (!statusBarColorHistory_ &&
+                statusBarColorHistory_.top().first == StatusBarColorChangeReason::ATOMIC_CONFIGURATION) {
                 nowsystemBarPropertyMap_[type].contentColor_ =
                     UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMIC_CONFIGURATION, color);
             } else {
