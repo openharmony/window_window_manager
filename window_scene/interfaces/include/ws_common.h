@@ -515,7 +515,7 @@ struct SessionInfo {
     /*
      * Compatible Mode
      */
-    std::string compatibleModePage = "";
+    std::string pageConfig = "";
 
     AAFwk::Want GetWantSafely() const
     {
