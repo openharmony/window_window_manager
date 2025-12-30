@@ -247,7 +247,10 @@ ohos_unittest("ws_session_event_test") {
 
   cflags_cc = [ "-Wno-thread-safety" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+    ws_unittest_common,
+  ]
 
   external_deps = test_external_deps
   external_deps += [
@@ -273,7 +276,10 @@ ohos_unittest("ws_window_session_property_event_test") {
 
   sources = [ "window_session_property_event_test.cpp" ]
 
-  deps = [ ":ws_unittest_common" ]
+  deps = [
+    "${window_base_path}/window_scene/intention_event:libintention_event",
+    ws_unittest_common,
+  ]
 
   external_deps = test_external_deps
 }
