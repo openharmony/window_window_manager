@@ -18464,7 +18464,7 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
 {
     auto toSceneSession = GetSceneSession(toPersistentId);
     if (toSceneSession == nullptr) {
-        TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
+        TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
         return WSError::WS_ERROR_NULLPTR;
     }
     NodeId nodeId = INVALID_NODEID;
@@ -18474,12 +18474,12 @@ WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPer
                 nodeId = surfaceNode->GetId();
             }
         } else {
-            TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
+            TLOGE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
     }
     toSceneSession->CloneWindow(nodeId, needOffScreen);
-    TLOGNI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
+    TLOGI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
     return WSError::WS_OK;
 }
 
