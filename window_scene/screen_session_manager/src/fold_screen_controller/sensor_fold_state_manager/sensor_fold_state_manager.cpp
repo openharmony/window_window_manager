@@ -78,6 +78,9 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
             foldScreenPolicy->SendSensorResult(mState_);
         }
+        if (foldScreenPolicy->GetdisplayModeRunningStatus() == false) {
+            FinishTaskSequence();
+        }
     };
     taskProcessor_.AddTask(task);
 }
