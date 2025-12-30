@@ -47,7 +47,7 @@ namespace {
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess01, TestSize.Level0)
 {
-    TaskSequenceProcess process = TaskSequenceProcess(0);
+    TaskSequenceProcess process = TaskSequenceProcess(0, 1000);
     EXPECT_EQ(process.maxQueueSize_, 1);
 }
 
@@ -58,7 +58,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess01, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
 {
-    TaskSequenceProcess process = TaskSequenceProcess(10);
+    TaskSequenceProcess process = TaskSequenceProcess(10, 1000);
     EXPECT_EQ(process.maxQueueSize_, 10);
 }
 
@@ -69,7 +69,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_TaskSequenceProcess02, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_AddTask01, TestSize.Level0)
 {
-    TaskSequenceProcess process = TaskSequenceProcess(1);
+    TaskSequenceProcess process = TaskSequenceProcess(1, 1000);
     bool taskCallback =  false;
     std::function<void()> task = [&taskCallback]() {
         taskCallback =true;
@@ -85,7 +85,7 @@ HWTEST_F(TaskSequenceProcessTest, ATC_AddTask01, TestSize.Level0)
  */
 HWTEST_F(TaskSequenceProcessTest, ATC_FinishTask01, TestSize.Level0)
 {
-    TaskSequenceProcess process = TaskSequenceProcess(1);
+    TaskSequenceProcess process = TaskSequenceProcess(1, 1000);
     bool taskCallback =  false;
     std::function<void()> task = [&taskCallback]() {
         taskCallback =true;
