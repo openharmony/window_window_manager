@@ -60,7 +60,7 @@ SensorFoldStateMgr& SensorFoldStateMgr::GetInstance()
     return *instance_;
 }
 
-SensorFoldStateMgr::SensorFoldStateMgr() :
+SensorFoldStateMgr::SensorFoldStateMgr()
 {
     currentFoldStatus_ = {FoldStatus::UNKNOWN};
     foldAlgorithmStrategy_ = {0, 0};
