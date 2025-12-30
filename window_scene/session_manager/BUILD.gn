@@ -150,8 +150,6 @@ ohos_shared_library("scene_session_manager") {
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "time_service:time_client",
-    "ability_runtime:wantagent_innerkits",
   ]
 
   defines = []
