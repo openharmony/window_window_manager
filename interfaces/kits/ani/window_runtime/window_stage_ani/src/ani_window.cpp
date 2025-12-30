@@ -1565,7 +1565,7 @@ void AniWindow::SetWindowTopmost(ani_env* env, ani_boolean isWindowTopmost)
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] Window set main window topmost failed");
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][setWindowTopmost]msg: Window set main window topmost failed");
+            "[window][setWindowTopmost]");
         return;
     }
     TLOGI(WmsLogTag::WMS_HIERARCHY,
@@ -1598,7 +1598,7 @@ void AniWindow::OnSetWindowFocusable(ani_env* env, ani_boolean isFocusable)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "[window][setWindowFocusable]msg: Window set focusable failed");
+        AniWindowUtils::AniThrowError(env, ret, "[window][setWindowFocusable]");
     }
 }
 
@@ -1633,7 +1633,7 @@ void AniWindow::OnRequestFocus(ani_env* env, ani_boolean isFocused)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RequestFocusByClient(isFocused));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "[window][requestFocus]msg: RequestFocus failed.");
+        AniWindowUtils::AniThrowError(env, ret, "[window][requestFocus]");
     }
 }
 
@@ -1663,7 +1663,7 @@ void AniWindow::OnSetSubWindowModal(ani_env* env, ani_boolean isModal)
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowModal(isModal));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][setSubWindowModal]msg:SetSubWindowModal failed.");
+            "[window][setSubWindowModal]");
     }
 }
 
@@ -1701,7 +1701,7 @@ void AniWindow::OnSetSubWindowModalType(ani_env* env, ani_boolean isModal, ani_i
         static_cast<ModalityType>(modalityType)));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][setSubWindowModal]msg:SetSubWindowModal failed");
+            "[window][setSubWindowModal]");
     }
 }
 
@@ -2917,7 +2917,7 @@ ani_boolean AniWindow::OnIsWindowHighlighted(ani_env* env)
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "get window highlight failed, ret: %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][isWindowHighlighted] get window highlight failed");
+            "[window][isWindowHighlighted]");
         return ani_boolean(false);
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "get window highlight end, isHighlighted: %{public}u", isHighlighted);
@@ -3198,7 +3198,7 @@ void AniWindow::OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "failed");
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][keepKeyboardOnFocus]msg: failed");
+            "[window][keepKeyboardOnFocus]");
     }
     TLOGE(WmsLogTag::WMS_KEYBOARD, "end, window [%{public}u, %{public}s] keepKeyboardFlag=%{public}d",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), keepKeyboardFlag);
@@ -3330,7 +3330,7 @@ ani_object AniWindow::SetRaiseByClickEnabled(ani_env* env, ani_boolean enable)
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] SetRaiseByClickEnabled set error");
         return AniWindowUtils::AniThrowError(env, ret,
-            "[window][setRaiseByClickEnabled]msg:  SetRaiseByClickEnabled set error");
+            "[window][setRaiseByClickEnabled]");
     }
     return 0;
 }
@@ -3345,7 +3345,7 @@ ani_object AniWindow::SetExclusivelyHighlighted(ani_env* env, ani_boolean exclus
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "[ANI] Set exclusively highlighted failed");
         return AniWindowUtils::AniThrowError(env, ret,
-            "[window][setExclusivelyHighlighted]msg: Set exclusively highlighted failed");
+            "[window][setExclusivelyHighlighted]");
     }
     return 0;
 }
