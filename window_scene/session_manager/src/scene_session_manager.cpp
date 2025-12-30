@@ -18462,27 +18462,25 @@ WMError SceneSessionManager::MinimizeAllAppWindows(DisplayId displayId, int32_t 
 
 WSError SceneSessionManager::CloneWindow(int32_t fromPersistentId, int32_t toPersistentId, bool needOffScreen)
 {
-    return taskScheduler_->PostSyncTask([this, fromPersistentId, toPersistentId, needOffScreen]() {
-        auto toSceneSession = GetSceneSession(toPersistentId);
-        if (toSceneSession == nullptr) {
-            TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
+    auto toSceneSession = GetSceneSession(toPersistentId);
+    if (toSceneSession == nullptr) {
+        TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", toPersistentId);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    NodeId nodeId = INVALID_NODEID;
+    if (fromPersistentId >= 0) { // if fromPersistentId < 0, excute CloneWindow(0) to cancel cloneWindow
+        if (auto fromSceneSession = GetSceneSession(fromPersistentId)) {
+            if (auto surfaceNode = fromSceneSession->GetSurfaceNode()) {
+                nodeId = surfaceNode->GetId();
+            }
+        } else {
+            TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
             return WSError::WS_ERROR_NULLPTR;
         }
-        NodeId nodeId = INVALID_NODEID;
-        if (fromPersistentId >= 0) { // if fromPersistentId < 0, excute CloneWindow(0) to cancel cloneWindow
-            if (auto fromSceneSession = GetSceneSession(fromPersistentId)) {
-                if (auto surfaceNode = fromSceneSession->GetSurfaceNode()) {
-                    nodeId = surfaceNode->GetId();
-                }
-            } else {
-                TLOGNE(WmsLogTag::WMS_PC, "Session is nullptr, id: %{public}d", fromPersistentId);
-                return WSError::WS_ERROR_NULLPTR;
-            }
-        }
-        toSceneSession->CloneWindow(nodeId, needOffScreen);
-        TLOGNI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
-        return WSError::WS_OK;
-    }, __func__);
+    }
+    toSceneSession->CloneWindow(nodeId, needOffScreen);
+    TLOGNI(WmsLogTag::WMS_PC, "fromSurfaceId: %{public}" PRIu64, nodeId);
+    return WSError::WS_OK;
 }
 
 DisplayId SceneSessionManager::UpdateSpecificSessionClientDisplayId(const sptr<WindowSessionProperty>& property)
