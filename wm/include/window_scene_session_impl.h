@@ -16,6 +16,8 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
+#include <modifier/rs_property.h>
+
 #include "window_session_impl.h"
 #include "window_manager.h"
 #include "screen_manager.h"
@@ -198,6 +200,8 @@ public:
     WMError SetFollowParentMultiScreenPolicy(bool enabled) override;
     WMError UseImplicitAnimation(bool useImplicit) override;
     bool IsHitHotAreas(std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
+    WSError AddSidebarBlur() override;
+    WSError SetSidebarBlurStyleWithType(SidebarBlurType type) override;
 
     /*
      * PC Window Layout
@@ -252,6 +256,7 @@ public:
     WMError GetWindowStatus(WindowStatus& windowStatus) override;
     bool GetIsUIExtFirstSubWindow() const override;
     bool GetIsUIExtAnySubWindow() const override;
+    bool IsInFreeWindowMode() const override;
 
     /*
      * Gesture Back
@@ -355,6 +360,7 @@ public:
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
+    WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams) override;
 
     /*
      * Window Event
@@ -619,13 +625,26 @@ private:
     /*
      * Window Event
      */
-    bool isReceiveDragEventEnable_ = true;
+    bool isReceiveDragEventEnabled_ = true;
     bool isSeparationTouchEnabled_ = true;
+    std::bitset<ADVANCED_FEATURE_BIT_MAX> advancedFeatureFlag_ = 0;
+    void UpdateStartRecoverEventFlag();
 
     /*
      * Window Decor
      */
     WMError GrayOutMaximizeButton(bool isGrayOut);
+
+    /*
+     * PC Window Sidebar Blur
+     */
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurRadiusValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurSaturationValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurBrightnessValue_;
+    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
+    void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
+    void ModifySidebarBlurProperty(bool isDark, SidebarBlurType type);
+    void UpdateSidebarBlurStyleWhenColorModeChange();
 };
 } // namespace Rosen
 } // namespace OHOS

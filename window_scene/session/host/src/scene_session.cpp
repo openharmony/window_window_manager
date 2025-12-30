@@ -112,6 +112,7 @@ const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr int32_t MIN_ROTATION_VALUE = 0;
 constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
+constexpr uint8_t MAX_DOWN_TIMES = 100;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -185,7 +186,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetAppInstanceKey(session->GetAppInstanceKey());
             property->SetUseControlState(session->isAppUseControl_);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
-            property->SetCompatibleModePage(session->GetSessionInfo().compatibleModePage);
             if (session->GetSessionInfo().processOptions != nullptr) {
                 MissionInfo missionInfo;
                 missionInfo.startupInvisibility_ = session->GetSessionInfo().processOptions->startupVisibility ==
@@ -1983,6 +1983,12 @@ WSError SceneSession::SetPipParentWindowId(uint32_t windowId)
     return WSError::WS_OK;
 }
 
+WMError SceneSession::IsPiPActive(bool& status)
+{
+    status = pipActiveStatus_.load();
+    return WMError::WM_OK;
+}
+
 /** @note @window.layout */
 void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason reason,
     const MoveConfiguration& moveConfiguration, const RectAnimationConfig& rectAnimationConfig)
@@ -2719,6 +2725,7 @@ void SceneSession::CalculateAvoidAreaRect(const WSRect& rect, const WSRect& avoi
         float(avoidAreaCenterX);
     float res2 = float(avoidAreaCenterY) + float(rect.height_) / float(rect.width_) *
         float(avoidAreaCenterX) - float(rect.height_);
+    CalculateAvoidAreaByScale(avoidAreaRect);
     if (res1 < 0) {
         if (res2 < 0) {
             avoidArea.topRect_ = avoidAreaRect;
@@ -3190,6 +3197,47 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
+WSError SceneSession::GetScaleInLSState(float& scaleX, float& scaleY) const
+{
+    if (GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN || GetIsMidScene() ||
+        !specificCallback_ || !specificCallback_->onGetLSState_ || !specificCallback_->onGetLSState_()) {
+        TLOGD(WmsLogTag::WMS_IMMS, "win: %{public}d, not in LS state", GetPersistentId());
+        return WSError::WS_DO_NOTHING;
+    }
+    constexpr float invalidScale = 0;
+    if (GetScaleX() <= invalidScale || GetScaleY() <= invalidScale) {
+        TLOGE(WmsLogTag::WMS_IMMS, "win: %{public}d, invalid scale", GetPersistentId());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    scaleX = GetScaleX();
+    scaleY = GetScaleY();
+    return WSError::WS_OK;
+}
+
+void SceneSession::CalculateWindowRectByScale(WSRect& winRect)
+{
+    float scaleX = 1;
+    float scaleY = 1;
+    if (GetScaleInLSState(scaleX, scaleY) != WSError::WS_OK) {
+        return;
+    }
+    winRect.width_ *= scaleX;
+    winRect.height_ *= scaleY;
+}
+
+void SceneSession::CalculateAvoidAreaByScale(Rect& avoidAreaRect) const
+{
+    float scaleX = 1;
+    float scaleY = 1;
+    if (GetScaleInLSState(scaleX, scaleY) != WSError::WS_OK) {
+        return;
+    }
+    avoidAreaRect.posX_ = std::ceil(avoidAreaRect.posX_ / scaleX);
+    avoidAreaRect.posY_ = std::ceil(avoidAreaRect.posY_ / scaleY);
+    avoidAreaRect.width_ = std::ceil(avoidAreaRect.width_ / scaleX);
+    avoidAreaRect.height_ = std::ceil(avoidAreaRect.height_ / scaleY);
+}
+
 AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect& rect, bool ignoreVisibility)
 {
     if (!CheckGetAvoidAreaAvailable(type)) {
@@ -3198,6 +3246,7 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
 
     AvoidArea avoidArea;
     WSRect sessionRect = rect.IsEmpty() ? GetSessionRect() : rect;
+    CalculateWindowRectByScale(sessionRect);
     switch (type) {
         case AvoidAreaType::TYPE_SYSTEM: {
             GetSystemAvoidArea(sessionRect, avoidArea, ignoreVisibility);
@@ -3450,6 +3499,7 @@ WSError SceneSession::NotifyPiPActiveStatusChange(bool status)
         TLOGE(WmsLogTag::WMS_PIP, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
     }
+    pipActiveStatus_.store(status);
     return sessionStage_->NotifyPiPActiveStatusChange(status);
 }
 
@@ -3569,6 +3619,13 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
 
     bool isPointDown = (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
+
+    {
+        std::lock_guard<std::mutex> lock(floatWindowDownEventMutex_);
+        if (isPointDown && floatWindowDownEventCnt_ < MAX_DOWN_TIMES) {
+            ++floatWindowDownEventCnt_;
+        }
+    }
 
     auto property = GetSessionProperty();
     if (property == nullptr) {
@@ -8775,6 +8832,7 @@ bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, fl
     } else {
         WLOGFE("sessionStage is nullptr");
     }
+    HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END);
     return true;
 }
 
@@ -9259,32 +9317,12 @@ void SceneSession::SetColorSpace(ColorSpace colorSpace)
 
 void SceneSession::AddSidebarBlur()
 {
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+    TLOGI(WmsLogTag::WMS_PC,"in");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_PC, "sessionStage is null");
         return;
     }
-    if (blurRadiusValue_ && blurSaturationValue_ && blurBrightnessValue_ && blurMaskColorValue_) {
-        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty has value");
-        return;
-    }
-    auto rsNodeTemp = RSAdapterUtil::GetRSNode(GetRSUIContext(), surfaceNode->GetId());
-    if (rsNodeTemp) {
-        std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
-        AbilityRuntime::Context::GetApplicationContext();
-        if (appContext == nullptr) {
-            TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
-            return;
-        }
-        std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-        if (config == nullptr) {
-            TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
-            return;
-        }
-        std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-        AddRSNodeModifier(isDark, rsNodeTemp);
-    }
+    sessionStage_->AddSidebarBlur();
 }
 
 void SceneSession::SetSessionGetTargetOrientationConfigInfoCallback(
@@ -9570,112 +9608,17 @@ std::map<Rosen::WindowType, Rosen::SystemBarProperty>& SceneSession::GetCurrentS
     return currentSystemBarProperty_;
 }
 
-void SceneSession::AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode)
-{
-    if (!rsNode) {
-        TLOGE(WmsLogTag::WMS_PC, "rsNode is nullptr");
-        return;
-    }
-    TLOGI(WmsLogTag::WMS_PC, "isDark: %{public}d", isDark);
-    if (isDark) {
-        blurRadiusValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_RADIUS_DARK);
-        blurSaturationValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_SATURATION_DARK);
-        blurBrightnessValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
-        blurMaskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
-            Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
-    } else {
-        blurRadiusValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_RADIUS_LIGHT);
-        blurSaturationValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_SATURATION_LIGHT);
-        blurBrightnessValue_ = std::make_shared<Rosen::RSAnimatableProperty<float>>(
-            SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
-        blurMaskColorValue_ = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(
-            Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
-    }
-
-    auto modifier = std::make_shared<Rosen::ModifierNG::RSBehindWindowFilterModifier>();
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_RADIUS, blurRadiusValue_);
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_SATURATION, blurSaturationValue_);
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_BRIGHTNESS, blurBrightnessValue_);
-    modifier->AttachProperty(ModifierNG::RSPropertyType::BEHIND_WINDOW_FILTER_MASK_COLOR, blurMaskColorValue_);
-    rsNode->AddModifier(modifier);
-}
-
 void SceneSession::SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation)
 {
     TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isNeedAnimation: %{public}d",
         isDefaultSidebarBlur, isNeedAnimation);
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_PC, "sessionStage is null");
         return;
     }
-    if (!blurRadiusValue_ || !blurSaturationValue_ || !blurBrightnessValue_ || !blurMaskColorValue_) {
-        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty is null");
-        return;
-    }
-
-    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
-        AbilityRuntime::Context::GetApplicationContext();
-    if (appContext == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
-        return;
-    }
-    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-    if (config == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
-        return;
-    }
-    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    ModifyRSAnimatableProperty(isDefaultSidebarBlur, isDark, isNeedAnimation);
-}
-
-void SceneSession::ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation)
-{
-    TLOGI(WmsLogTag::WMS_PC, "isDefaultSidebarBlur: %{public}d, isDark: %{public}d, isNeedAnimation: %{public}d",
-        isDefaultSidebarBlur, isDark, isNeedAnimation);
-    // sidebar animation duration
-    constexpr int32_t duration = 150;
-    if (isDefaultSidebarBlur) {
-        auto rsUIContext = GetRSUIContext();
-        AutoRSTransaction trans(rsUIContext);
-        if (isNeedAnimation) {
-            Rosen::RSAnimationTimingProtocol timingProtocol;
-            timingProtocol.SetDuration(duration);
-            timingProtocol.SetDirection(true);
-            timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
-            timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
-            RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
-        }
-        if (isDark) {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_DARK);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_DARK);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
-        } else {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_LIGHT);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_LIGHT);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
-        }
-        if (isNeedAnimation) {
-            RSNode::CloseImplicitAnimation(rsUIContext);
-        }
-    } else {
-        blurRadiusValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
-        blurSaturationValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
-        blurBrightnessValue_->Set(SIDEBAR_BLUR_NUMBER_ZERO);
-        if (isDark) {
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_SNAPSHOT_MASKCOLOR_DARK));
-        } else {
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_SNAPSHOT_MASKCOLOR_LIGHT));
-        }
-    }
+    SidebarBlurType type = isDefaultSidebarBlur ?
+        (isNeedAnimation ? SidebarBlurType::DEFAULT_FLOAT : SidebarBlurType::INITIAL) : SidebarBlurType::NONE;
+    sessionStage_->SetSidebarBlurStyleWithType(type);
 }
 
 void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
@@ -9930,70 +9873,12 @@ void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFu
 void SceneSession::SetSidebarBlurMaximize(bool isMaximize)
 {
     TLOGI(WmsLogTag::WMS_PC, "isMaximize: %{public}d", isMaximize);
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        TLOGE(WmsLogTag::WMS_PC, "surfaceNode is null");
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_PC, "sessionStage is null");
         return;
     }
-    if (!blurRadiusValue_ || !blurSaturationValue_ || !blurBrightnessValue_ || !blurMaskColorValue_) {
-        TLOGE(WmsLogTag::WMS_PC, "RSAnimatableProperty is null");
-        return;
-    }
-
-    std::shared_ptr<AbilityRuntime::ApplicationContext> appContext =
-        AbilityRuntime::Context::GetApplicationContext();
-    if (appContext == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app context is nullptr");
-        return;
-    }
-    std::shared_ptr<AppExecFwk::Configuration> config = appContext->GetConfiguration();
-    if (config == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "app configuration is nullptr");
-        return;
-    }
-    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    ModifyRSAnimatablePropertyMaximize(isMaximize, isDark);
-}
-
-void SceneSession::ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark)
-{
-    TLOGI(WmsLogTag::WMS_PC, "isMaximize: %{public}d, isDark: %{public}d", isMaximize, isDark);
-    // sidebar maximize animation duration
-    constexpr int32_t duration = 150;
-    Rosen::RSAnimationTimingProtocol timingProtocol;
-    timingProtocol.SetDuration(duration);
-    timingProtocol.SetDirection(true);
-    timingProtocol.SetFillMode(Rosen::FillMode::FORWARDS);
-    timingProtocol.SetFinishCallbackType(Rosen::FinishCallbackType::LOGICALLY);
-    auto rsUIContext = GetRSUIContext();
-    RSNode::OpenImplicitAnimation(rsUIContext, timingProtocol, Rosen::RSAnimationTimingCurve::LINEAR, nullptr);
-    if (isMaximize) {
-        if (isDark) {
-            blurRadiusValue_->Set(SIDEBAR_MAXIMIZE_RADIUS_DARK);
-            blurSaturationValue_->Set(SIDEBAR_MAXIMIZE_SATURATION_DARK);
-            blurBrightnessValue_->Set(SIDEBAR_MAXIMIZE_BRIGHTNESS_DARK);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_MAXIMIZE_MASKCOLOR_DARK));
-        } else {
-            blurRadiusValue_->Set(SIDEBAR_MAXIMIZE_RADIUS_LIGHT);
-            blurSaturationValue_->Set(SIDEBAR_MAXIMIZE_SATURATION_LIGHT);
-            blurBrightnessValue_->Set(SIDEBAR_MAXIMIZE_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_MAXIMIZE_MASKCOLOR_LIGHT));
-        }
-    } else {
-        if (isDark) {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_DARK);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_DARK);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_DARK);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_DARK));
-        } else {
-            blurRadiusValue_->Set(SIDEBAR_DEFAULT_RADIUS_LIGHT);
-            blurSaturationValue_->Set(SIDEBAR_DEFAULT_SATURATION_LIGHT);
-            blurBrightnessValue_->Set(SIDEBAR_DEFAULT_BRIGHTNESS_LIGHT);
-            blurMaskColorValue_->Set(Rosen::RSColor::FromArgbInt(SIDEBAR_DEFAULT_MASKCOLOR_LIGHT));
-        }
-    }
-    RSNode::CloseImplicitAnimation(rsUIContext);
+    sessionStage_->SetSidebarBlurStyleWithType(isMaximize ? SidebarBlurType::DEFAULT_MAXIMIZE :
+        SidebarBlurType::DEFAULT_FLOAT);
 }
 
 void SceneSession::SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func)
@@ -10407,8 +10292,9 @@ WMError SceneSession::SetReceiveDragEventEnabled(const std::vector<int32_t>& par
         TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    bool enalbed = static_cast<bool>(parameters[1]);
-    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enalbed);
+    bool enabled = static_cast<bool>(parameters[1]);
+    SetSessionInfoReceiveDragEventEnabled(enabled);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enabled);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }
@@ -10419,8 +10305,9 @@ WMError SceneSession::SetSeparationTouchEnabled(const std::vector<int32_t>& para
         TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    bool enalbed = static_cast<bool>(parameters[1]);
-    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, !enalbed);
+    bool enabled = static_cast<bool>(parameters[1]);
+    SetSessionInfoSeparationTouchEnabled(enabled);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, !enabled);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }

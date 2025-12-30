@@ -55,6 +55,7 @@ class ViewportConfig;
 
 namespace OHOS::AAFwk {
 class Want;
+class WantParams;
 }
 
 namespace OHOS {
@@ -401,6 +402,10 @@ public:
     virtual WMError Maximize() = 0;
     virtual WMError Recover() = 0;
     virtual WMError Restore() { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError SetWindowRectAutoSave(bool enabled,
         bool isSaveBySpecifiedFlag = false) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
@@ -912,7 +917,7 @@ public:
     /**
      * @brief Set whether the window receive drag event.
      *
-     * @param enalbed - whether the window receive drag event.
+     * @param enabled - whether the window receive drag event.
      *        True: - means default state, the window can receive drag event.
      *        False: - means the window can't receive drag event.
      * @return Returns the status code of the execution.
@@ -940,7 +945,7 @@ public:
      *        If the first finger does not touch the window,
      *        the system will discard the events when subsequent fingers touch the window.
      *
-     * @param enalbed - Whether the window supports event separation capability.
+     * @param enabled - Whether the window supports event separation capability.
      *        True: - means default state, the event will be sent to the window that the finger taps.
      *        False: - means the window doesn't support event separation capability.
      * @return - Promise that returns no value.

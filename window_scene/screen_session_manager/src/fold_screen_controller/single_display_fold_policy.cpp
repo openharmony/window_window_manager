@@ -132,11 +132,16 @@ void SingleDisplayFoldPolicy::SetdisplayModeChangeStatus(bool status, bool isOnB
     }
 }
 
-bool SingleDisplayFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce)
+bool SingleDisplayFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce,
+    DisplayModeChangeReason reason)
 {
     if (isForce) {
         TLOGI(WmsLogTag::DMS, "force change displayMode");
         return true;
+    }
+    if (GetPhysicalFoldLockFlag() && reason != DisplayModeChangeReason::FORCE_SET) {
+        TLOGI(WmsLogTag::DMS, "Fold status is locked, can't change to display mode: %{public}d", displayMode);
+        return false;
     }
     if (isClearingBootAnimation_) {
         TLOGI(WmsLogTag::DMS, "clearing bootAnimation not change displayMode");
@@ -163,12 +168,15 @@ bool SingleDisplayFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displayMode
 
 void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
-    if (!CheckDisplayModeChange(displayMode, false)) {
+    if (!CheckDisplayModeChange(displayMode, false, reason)) {
         return;
     }
+    TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, reason: %{public}d", displayMode, reason);
     ChangeScreenDisplayModeInner(displayMode, reason);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
+    TLOGD(WmsLogTag::DMS, "end change displaymode: %{public}d, reason: %{public}d", displayMode, reason);
+    return;
 }
 
 void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, bool isForce,
@@ -313,8 +321,13 @@ void SingleDisplayFoldPolicy::UpdateForPhyScreenPropertyChange()
 
 FoldDisplayMode SingleDisplayFoldPolicy::GetModeMatchStatus()
 {
+    return GetModeMatchStatus(currentFoldStatus_);
+}
+
+FoldDisplayMode SingleDisplayFoldPolicy::GetModeMatchStatus(FoldStatus targetFoldStatus)
+{
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
-    switch (currentFoldStatus_) {
+    switch (targetFoldStatus) {
         case FoldStatus::EXPAND: {
             displayMode = FoldDisplayMode::FULL;
             break;

@@ -125,6 +125,8 @@ public:
     // Window Property
     WSError UpdateBrightness(float brightness) override;
     void UpdateDensity() override;
+    WSError AddSidebarBlur() override;
+    WSError SetSidebarBlurStyleWithType(SidebarBlurType type) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;

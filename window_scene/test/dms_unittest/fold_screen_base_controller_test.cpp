@@ -361,6 +361,20 @@ HWTEST_F(FoldScreenBaseControllerTest, SetIsClearingBootAnimationTest, TestSize.
     EXPECT_TRUE(FoldScreenBasePolicy::GetInstance().isClearingBootAnimation_);
 }
 
+/**
+ * @tc.name: NotifyRunSensorFoldStateManagerTest
+ * @tc.desc: test function : NotifyRunSensorFoldStateManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenBaseControllerTest, NotifyRunSensorFoldStateManagerTest, TestSize.Level1)
+{
+    auto controller = FoldScreenBaseController();
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    controller.NotifyRunSensorFoldStateManager();
+    EXPECT_TRUE(g_logMsg.find("TaskSequenceProcess") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 } // namespace
 } // namespace DMS
 } // namespace Rosen

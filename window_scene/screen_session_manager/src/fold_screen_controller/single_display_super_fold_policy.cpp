@@ -136,8 +136,13 @@ void SingleDisplaySuperFoldPolicy::SetdisplayModeChangeStatus(bool status, bool 
     }
 }
 
-bool SingleDisplaySuperFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce)
+bool SingleDisplaySuperFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce,
+    DisplayModeChangeReason reason)
 {
+    if (GetPhysicalFoldLockFlag() && reason != DisplayModeChangeReason::FORCE_SET) {
+        TLOGI(WmsLogTag::DMS, "Fold status is locked, can't change to display mode: %{public}d", displayMode);
+        return false;
+    }
     if (isForce) {
         TLOGI(WmsLogTag::DMS, "force change displayMode");
         SetLastCacheDisplayMode(displayMode);
@@ -155,7 +160,7 @@ bool SingleDisplaySuperFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displa
     TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
         displayMode, getFoldingElapsedMs());
 
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:ChangeScreenDisplayMode(displayMode = %" PRIu64")", displayMode);
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:`(displayMode = %" PRIu64")", displayMode);
     {
         std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
         if (currentDisplayMode_ == displayMode) {
@@ -168,13 +173,16 @@ bool SingleDisplaySuperFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displa
 
 void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
-    if (!CheckDisplayModeChange(displayMode, false)) {
+    if (!CheckDisplayModeChange(displayMode, false, reason)) {
         return;
     }
+    TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, reason: %{public}d", displayMode, reason);
     ChangeScreenDisplayModeInner(displayMode, reason);
     UpdateDeviceStatus(displayMode);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
     ScreenSessionManager::GetInstance().SwitchScrollParam(displayMode);
+    TLOGD(WmsLogTag::DMS, "end change displaymode: %{public}d, reason: %{public}d", displayMode, reason);
+    return;
 }
 
 void SingleDisplaySuperFoldPolicy::UpdateDeviceStatus(FoldDisplayMode displayMode)
@@ -469,8 +477,13 @@ void SingleDisplaySuperFoldPolicy::UpdateForPhyScreenPropertyChange()
 
 FoldDisplayMode SingleDisplaySuperFoldPolicy::GetModeMatchStatus()
 {
+    return GetModeMatchStatus(currentFoldStatus_);
+}
+
+FoldDisplayMode SingleDisplaySuperFoldPolicy::GetModeMatchStatus(FoldStatus targetFoldStatus)
+{
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
-    switch (currentFoldStatus_) {
+    switch (targetFoldStatus) {
         case FoldStatus::EXPAND: {
             displayMode = FoldDisplayMode::FULL;
             break;
@@ -673,6 +686,7 @@ void SingleDisplaySuperFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> 
 {
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
     screenProperty_ = ScreenSessionManager::GetInstance().GetPhyScreenProperty(screenId);
+    screenSession->SetPhyScreenId(screenId);
     if (!ScreenSessionManager::GetInstance().GetClientProxy()) {
         screenSession->UpdatePropertyByFoldControl(screenProperty_);
 

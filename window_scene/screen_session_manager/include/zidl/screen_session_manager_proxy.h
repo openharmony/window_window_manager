@@ -58,6 +58,11 @@ public:
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) override;
 
+    virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) override;
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) override;
+
     virtual void NotifyDisplayEvent(DisplayEvent event) override;
     virtual bool WakeUpBegin(PowerStateChangeReason reason) override;
     virtual bool WakeUpEnd() override;
@@ -89,6 +94,8 @@ public:
     DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
 
     DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
+
+    bool IsOnboardDisplay(DisplayId displayId) override;
 
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
@@ -166,6 +173,8 @@ public:
 
     void SetFoldStatusLocked(bool locked) override;
     DMError SetFoldStatusLockedFromJs(bool locked) override;
+    DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus) override;
+    DMError RestorePhysicalFoldStatus() override;
     void SetFoldStatusExpandAndLocked(bool locked) override;
 
     FoldDisplayMode GetFoldDisplayMode() override;
@@ -252,6 +261,7 @@ public:
     DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError GetSupportsInput(DisplayId displayId, bool& supportsInput) override;
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput) override;
+    DMError GetBundleName(DisplayId displayId, std::string& bundleName) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,

@@ -75,6 +75,10 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual bool IsOnboardDisplay(DisplayId displayId)
+    {
+        return false;
+    }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
@@ -169,6 +173,11 @@ public:
         DisplayManagerAgentType type) { return DMError::DM_OK; }
     virtual DMError UnregisterDisplayManagerAgent(const sptr<IDisplayManagerAgent>& displayManagerAgent,
         DisplayManagerAgentType type) { return DMError::DM_OK; }
+    virtual DMError RegisterDisplayAttributeAgent(std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) { return DMError::DM_OK; }
+    virtual DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributes,
+        const sptr<IDisplayManagerAgent>& displayManagerAgent) { return DMError::DM_OK; }
+
     virtual bool WakeUpBegin(PowerStateChangeReason reason) { return false; }
     virtual bool WakeUpEnd() { return false; }
     virtual bool SuspendBegin(PowerStateChangeReason reason) { return false; }
@@ -258,6 +267,8 @@ public:
 
     virtual void SetFoldStatusLocked(bool locked) {}
     virtual DMError SetFoldStatusLockedFromJs(bool locked) { return DMError::DM_OK; }
+    virtual DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus) { return DMError::DM_OK; }
+    virtual DMError RestorePhysicalFoldStatus() { return DMError::DM_OK; }
     virtual void SetFoldStatusExpandAndLocked(bool locked) {}
 
     virtual FoldDisplayMode GetFoldDisplayMode() { return FoldDisplayMode::UNKNOWN; }
@@ -412,6 +423,7 @@ public:
         return DMError::DM_OK;
     }
     virtual DMError GetRoundedCorner(DisplayId displayId, int& radius) { return DMError::DM_OK; }
+    virtual DMError GetBundleName(DisplayId displayId, std::string& bundleName) { return DMError::DM_OK; }
 };
 } // namespace Rosen
 } // namespace OHOS

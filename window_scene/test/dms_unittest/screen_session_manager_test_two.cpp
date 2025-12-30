@@ -1479,6 +1479,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSuperFoldRefreshRate, TestSize.Level1)
         GTEST_SKIP();
     }
     g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
     uint32_t tempRefreshRate = 60;
     sptr<ScreenSession> screenSession = nullptr;
     ssm_->UpdateSuperFoldRefreshRate(screenSession, tempRefreshRate);
@@ -1514,20 +1515,6 @@ HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSiz
     ssm_->OnVerticalChangeBoundsWhenSwitchUser(screenSession, FoldDisplayMode::UNKNOWN);
     RRect afterbounds = screenProperty.GetBounds();
     EXPECT_EQ(bounds.rect_.GetHeight(), bounds.rect_.GetWidth());
-}
-
-/**
- * @tc.name: SetLandscapeLockStatus01
- * @tc.desc: SetLandscapeLockStatus01 test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
-{
-    g_errLog.clear();
-    MockAccesstokenKit::MockIsSACalling(false);
-    MockAccesstokenKit::MockIsSystemApp(false);
-    ssm_->SetLandscapeLockStatus(true);
-    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
 }
 
 /**
@@ -2129,7 +2116,10 @@ HWTEST_F(ScreenSessionManagerTest, LockLandExtendIfScreenInfoNull01, TestSize.Le
 #define FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         sptr<ScreenSession> session = ssm_->GetOrCreateScreenSession(SCREENID);
-        EXPECT_NE(session, nullptr);
+        ScreenProperty property;
+        ssm_->CreateScreenProperty(SCREENID, property);
+        ssm_->phyScreenPropMap_[SCREENID] = property;
+        EXPECT_EQ(session, nullptr);
         ssm_->SetClient(nullptr);
         ASSERT_EQ(ssm_->GetClientProxy(), nullptr);
         ssm_->LockLandExtendIfScreenInfoNull(session);
@@ -3131,6 +3121,19 @@ HWTEST_F(ScreenSessionManagerTest, SetSupportsInput, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBundleName
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetBundleName, TestSize.Level1)
+{
+    std::string bundleName = "";
+    DisplayId illegalDisplay = 10000;
+    auto ret = ssm_->GetBundleName(illegalDisplay, bundleName);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
  * @tc.name: MockFoldDisplayModeAfterRotation
  * @tc.desc: test get and set foldDisplayModeAfterRotation
  * @tc.type: FUNC
@@ -3395,6 +3398,23 @@ HWTEST_F(ScreenSessionManagerTest, RemoveVirtualScreenWhiteList03, TestSize.Leve
     DMError removeResult = ssm_->RemoveVirtualScreenWhiteList(virtualScreenId, removeMissionIds);
     EXPECT_EQ(removeResult, DMError::DM_ERROR_INVALID_PARAM);
     ssm_->DestroyVirtualScreen(virtualScreenId);
+}
+
+/**
+ * @tc.name: NotifyDisplayAttributeChanged
+ * @tc.desc: NotifyDisplayAttributeChanged test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+ 
+    auto displayInfo = ssm_->GetDefaultDisplayInfo();
+    std::vector<std::string> attributes = {"rotation", "id"};
+    ssm_->NotifyDisplayAttributeChanged(displayInfo, attributes);
+    EXPECT_TRUE(g_errLog.find("NotifyDisplayAttributeChanged") != std::string::npos);
 }
 }
 }

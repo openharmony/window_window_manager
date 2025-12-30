@@ -683,6 +683,16 @@ void ScreenSession::SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffse
     property_.SetDefaultDeviceRotationOffset(defaultRotationOffset);
 }
 
+void ScreenSession::SetBorderingAreaPercent(uint32_t borderingAreaPercent)
+{
+    borderingAreaPercent_ = borderingAreaPercent;
+}
+
+uint32_t ScreenSession::GetBorderingAreaPercent() const
+{
+    return borderingAreaPercent_;
+}
+
 void ScreenSession::UpdatePropertyByActiveModeChange()
 {
     sptr<SupportedScreenModes> mode = GetActiveScreenMode();
@@ -1276,6 +1286,18 @@ void ScreenSession::SetScreenComponentRotation(int rotation)
     TLOGI(WmsLogTag::DMS, "screenComponentRotation :%{public}f ", property_.GetScreenComponentRotation());
 }
 
+void ScreenSession::ConvertBScreenHeight(uint32_t& height)
+{
+    if (isBScreenHalf_) {
+        DMRect creaseRect = property_.GetCreaseRect();
+        if (creaseRect.posY_ > 0) {
+            height = creaseRect.posY_;
+        } else {
+            height = property_.GetBounds().rect_.GetHeight() / HALF_SCREEN_PARAM;
+        }
+    }
+}
+
 void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, FoldDisplayMode foldDisplayMode)
 {
     Rotation targetRotation = ConvertIntToRotation(rotation);
@@ -1681,7 +1703,7 @@ Rotation ScreenSession::CalcRotationByDeviceOrientation(DisplayOrientation displ
     } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
         displayRotation =
             GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_90));
-    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() && foldDisplayMode == FoldDisplayMode::FULL) {
+    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         displayRotation =
             GetTargetOrientationWithBounds(displayRotation, boundsInRotationZero, static_cast<uint32_t>(ROTATION_270));
     }
@@ -1810,8 +1832,7 @@ DisplayOrientation ScreenSession::CalcDeviceOrientationWithBounds(Rotation rotat
         rotation = static_cast<Rotation>(temp);
     } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
         rotation = GetTargetRotationWithBounds(rotation, bounds, static_cast<uint32_t>(ROTATION_90));
-    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() &&
-        foldDisplayMode == FoldDisplayMode::FULL) {
+    } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         rotation = GetTargetRotationWithBounds(rotation, bounds, static_cast<uint32_t>(ROTATION_270));
     }
     DisplayOrientation displayRotation = DisplayOrientation::UNKNOWN;
@@ -3378,6 +3399,16 @@ bool ScreenSession::GetSupportsInput() const
 void ScreenSession::SetSupportsInput(bool input)
 {
     supportsInput_.store(input);
+}
+
+const std::string& ScreenSession::GetBundleName() const
+{
+    return bundleName_;
+}
+
+void ScreenSession::SetBundleName(const std::string& bundleName)
+{
+    bundleName_ = bundleName;
 }
 
 bool ScreenSession::GetUniqueRotationLock() const

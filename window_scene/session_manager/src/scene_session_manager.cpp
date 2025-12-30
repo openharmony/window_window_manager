@@ -303,6 +303,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.ohos.commondialog", "FoldStatusAbility", "phone_commondialog"),
         std::make_tuple("com.ohos.commondialog", "SecondaryReflexionAbility", "phone_commondialog"),
         std::make_tuple("com.huawei.hmos.clock", "ScreenLockCoverExtensionAbility", "entry"),
+        std::make_tuple("com.huawei.hmos.clock", "ClockScreenLockExtensionAbility", "entry"),
         std::make_tuple("com.huawei.hmos.penglaimodeassistant", "ExpandedDialogUIExtAbility", "entry"),
         std::make_tuple("com.huawei.hmos.penglaimodeassistant", "CameraDialogAbility", "entry"),
     };
@@ -551,12 +552,19 @@ void SceneSessionManager::InitWindowPattern()
 {
     InitSnapshotCache();
     InitStartingWindow();
+    InitDmaReclaimParam();
 }
 
 void SceneSessionManager::InitStartingWindow()
 {
     syncLoadStartingWindow_ = system::GetBoolParameter("const.window.sync_startingWindow", false);
     TLOGI(WmsLogTag::WMS_PATTERN, "Sync Load StartingWindow: %{public}d", syncLoadStartingWindow_);
+}
+
+void SceneSessionManager::InitDmaReclaimParam()
+{
+    enableDmaReclaim_ = system::GetBoolParameter("resourceschedule.memmgr.dma.reclaimable", false);
+    TLOGI(WmsLogTag::WMS_PATTERN, "Dma reclaim enabled: %{public}d", enableDmaReclaim_);
 }
 
 void SceneSessionManager::RegisterSessionRecoverStateChangeListener()
@@ -2079,6 +2087,9 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
+    specificCb->onGetLSState_ = [this]() {
+        return this->GetLSState();
+    };
     specificCb->onOutsideDownEvent_ = [this](int32_t x, int32_t y) {
         this->OnOutsideDownEvent(x, y);
     };
@@ -2752,6 +2763,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->RegisterForceSplitFullScreenChangeCallback([this](uint32_t uid, bool isFullScreen) {
             this->NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);
+        });
+        sceneSession->RegisterGetSCBEnterRecentFunc([this]() {
+            return this->enterRecent_.load();
         });
         if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
@@ -3438,12 +3452,17 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSes
         coldStartFlag, retCode, windowStateChangeReason] {
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-        auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
-            *coldStartFlag, windowStateChangeReason, sceneSession->GetSessionInfo().isRestartApp_);
+        OHOS::AbilityRuntime::StartParamsBySCB startParams;
+        startParams.sceneFlag = windowStateChangeReason;
+        startParams.isRestart = sceneSession->GetSessionInfo().isRestartApp_;
+        startParams.pageConfig = sceneSession->GetSessionInfo().pageConfig;
+        auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, startParams,
+            *coldStartFlag);
         CloseAllFd(sceneSession->GetSessionInfo().want);
         HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
         *retCode = static_cast<int32_t>(result);
-        TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability retCode: %{public}d", *retCode);
+        TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability sceneFlag:%{public}d isRestart:%{public}d pageConfig:%{public}zu retCode: %{public}d",
+            startParams.sceneFlag, startParams.isRestart, startParams.pageConfig.size(), *retCode);
     }, START_UI_ABILITY_TIMEOUT);
 
     if (isTimeout) {
@@ -4761,6 +4780,9 @@ void SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& 
     sessionInfo.windowMode = static_cast<int32_t>(property->GetWindowMode());
     sessionInfo.windowType_ = static_cast<uint32_t>(property->GetWindowType());
     sessionInfo.requestOrientation_ = static_cast<uint32_t>(property->GetRequestedOrientation());
+    sessionInfo.specificSessionRequestOrientation_ = property->GetIsSpecificSessionRequestOrientation()
+        ? static_cast<int32_t>(property->GetRequestedOrientation())
+        : -1;
     sessionInfo.sessionState_ = (property->GetWindowState() == WindowState::STATE_SHOWN)
                                     ? SessionState::STATE_ACTIVE
                                     : SessionState::STATE_BACKGROUND;
@@ -6330,6 +6352,7 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         if (sceneSession->GetSessionState() != SessionState::STATE_DISCONNECT) {
             TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d is not disconnect",
                 where, sceneSession->GetPersistentId());
+            sceneSession->PreloadSnapshot();
             return;
         }
         StartingWindowInfo startingWindowInfo;
@@ -6966,7 +6989,9 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         return WSError::WS_DO_NOTHING;
     }
     auto brightness = sceneSession->GetBrightness();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    if (GetDisplayBrightness() != brightness) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    }
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (IsNeedUpdateBrightness(persistentId, brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
@@ -9376,7 +9401,7 @@ bool SceneSessionManager::JudgeNeedNotifyPrivacyInfo(DisplayId displayId,
         }
     } while (false);
 
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "display=%{public}" PRIu64 ", needNotify=%{public}d, sendTimes=%{public}d",
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "display=%{public}" PRIu64 ", needNotify=%{public}d, sendTimes=%{public}d",
           displayId, needNotify, reSendTimes);
     if (needNotify) {
         reSendTimes = MAX_RESEND_TIMES;
@@ -9417,12 +9442,9 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
     if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)){
         isNeedUpdatePrivateState |= JudgeNeedNotifyPrivacyInfo(VIRTUAL_DISPLAY_ID,
             privacyBundleList[VIRTUAL_DISPLAY_ID]);
-
-
     }
     if (!isNeedUpdatePrivateState) {
         return;
-
     }
     std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
     std::unordered_map<DisplayId, std::vector<std::string>> notifyPrivacyBundleList;
@@ -11135,11 +11157,14 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         const auto& sessionInfo = sceneSession->GetSessionInfo();
-        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: state:%{public}d, id:%{public}d",
-            where, sessionInfo.callState_, persistentId);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: state:%{public}d, id:%{public}d, pageConfig:%{public}zu",
+            where, sessionInfo.callState_, persistentId, sceneSession->GetSessionInfo().pageConfig.size());
         auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession, requestId, true);
         bool isColdStart = false;
-        AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
+        OHOS::AbilityRuntime::StartParamsBySCB startParams;
+        startParams.pageConfig = sceneSession->GetSessionInfo().pageConfig;
+        startParams.sceneFlag = static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL);
+        AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, startParams, isColdStart);
         CloseAllFd(sessionInfo.want);
         if (isColdStart) {
             TLOGNI(WmsLogTag::WMS_MAIN, "Cold start, identityToken:%{public}s, bundleName:%{public}s",
@@ -13219,6 +13244,26 @@ WSError SceneSessionManager::NotifyStatusBarShowStatus(int32_t persistentId, boo
         sceneSession->SetIsStatusBarVisible(isVisible);
     }, __func__);
     return WSError::WS_OK;
+}
+
+void SceneSessionManager::UpdateAvoidAreaForLSStateChange(int32_t curState, int32_t preState)
+{
+    if (curState == preState) {
+        return;
+    }
+    constexpr int32_t nonLSState = 0;
+    SetLSState(curState > nonLSState);
+    TLOGI(WmsLogTag::WMS_IMMS, "curState %{public}d, preState %{public}d", curState, preState);
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (auto& iter : sceneSessionMap_) {
+            auto session = iter.second;
+            if (session == nullptr || !IsSessionVisibleForeground(session)) {
+                continue;
+            }
+            session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END);
+        }
+    }
 }
 
 void SceneSessionManager::NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible)
@@ -17575,10 +17620,13 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
 WMError SceneSessionManager::RecoverWatermarkImageForApp(const std::string& watermarkName)
 {
     int32_t pid = IPCSkeleton::GetCallingRealPid();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "watermark=%{public}s, pid=%{public}d", watermarkName.c_str(), pid);
-    if (!watermarkName.empty()) {
-        appWatermarkPidMap_.insert_or_assign(pid, watermarkName);
-    }
+    taskScheduler_->PostAsyncTask([this, pid, watermarkName, where = __func__]() {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: watermark=%{public}s, pid=%{public}d",
+            where, watermarkName.c_str(), pid);
+        if (!watermarkName.empty() && appWatermarkPidMap_[pid] != watermarkName) {
+            appWatermarkPidMap_[pid] = watermarkName;
+        }
+    }, __func__);
     return WMError::WM_OK;
 }
 
@@ -19182,6 +19230,17 @@ WMError SceneSessionManager::GetPiPSettingSwitchStatus(bool& switchStatus)
 {
     std::lock_guard<std::mutex> lock(pipSettingSwitchMutex_);
     switchStatus = pipSwitchStatus_;
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::SetIsPipEnabled(bool isPipEnabled)
+{
+    pipIsPipEnabled_ = isPipEnabled;
+}
+
+WMError SceneSessionManager::GetIsPipEnabled(bool& isPipEnabled)
+{
+    isPipEnabled = pipIsPipEnabled_;
     return WMError::WM_OK;
 }
 

@@ -507,6 +507,7 @@ public:
     void UpdateRootSceneAvoidArea();
     bool GetImmersiveState(ScreenId screenId);
     WSError NotifyStatusBarShowStatus(int32_t persistentId, bool isVisible);
+    void UpdateAvoidAreaForLSStateChange(int32_t curState, int32_t preState);
     void NotifyStatusBarConstantlyShow(DisplayId displayId, bool isVisible);
     void GetStatusBarConstantlyShow(DisplayId displayId, bool& isVisible) const;
     WSError NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId);
@@ -709,7 +710,9 @@ public:
     WMError CloseTargetPiPWindow(const std::string& bundleName);
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
+    WMError GetIsPipEnabled(bool& isPipEnabled) override;
     void SetPiPSettingSwitchStatus(bool switchStatus);
+    void SetIsPipEnabled(bool isPipEnabled);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);
     bool GetPipDeviceCollaborationPolicy(int32_t screenId);
     WMError SetPipEnableByScreenId(int32_t screenId, bool enabled);
@@ -887,6 +890,7 @@ public:
     void ConfigSupportPreloadStartingWindow();
     void PreLoadStartingWindow(sptr<SceneSession> sceneSession);
     bool IsSyncLoadStartingWindow() { return syncLoadStartingWindow_; };
+    bool IsDmaReclaimEnabled() { return enableDmaReclaim_; };
 
     /*
      * Window Animation
@@ -1491,6 +1495,7 @@ private:
     std::mutex pipSettingSwitchMutex_;
     uint64_t pipWindowSurfaceId_ = 0;
     bool pipSwitchStatus_ = true;
+    bool pipIsPipEnabled_ = false;
     std::shared_mutex screenPipEnabledMapLock_;
     std::unordered_map<int32_t, bool> screenPipEnabledMap_;
     std::shared_mutex pipChgListenerMapMutex_;
@@ -1672,6 +1677,9 @@ private:
     std::unordered_map<DisplayId, bool> statusBarConstantlyShowMap_;
     std::mutex lastSystemBarPropertyMapMutex_;
     std::unordered_map<WindowType, SystemBarProperty> lastSystemBarPropertyMap_;
+    bool GetLSState() const { return isLSState_; }
+    void SetLSState(bool isLSState) { isLSState_ = isLSState; }
+    bool isLSState_ = false;
 
     struct SessionInfoList {
         int32_t uid_;
@@ -1821,8 +1829,10 @@ private:
     std::unordered_set<std::string> emptyStartupResource_;
     std::atomic<bool> delayRemoveSnapshot_ = false;
     bool syncLoadStartingWindow_ = false;
+    bool enableDmaReclaim_ = false;
     void InitWindowPattern();
     void InitStartingWindow();
+    void InitDmaReclaimParam();
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool isDark);

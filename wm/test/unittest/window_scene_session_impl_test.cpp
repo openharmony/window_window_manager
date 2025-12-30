@@ -2933,6 +2933,62 @@ HWTEST_F(WindowSceneSessionImplTest, SetSubWindowSource02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RestoreMainWindow
+ * @tc.desc: SetSubWindowSource test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest, RestoreMainWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RestoreMainWindow");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetParentPersistentId(-1);
+    window->SetWindowType(WindowType::WINDOW_TYPE_MEDIA);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    EXPECT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+    window->state_ = WindowState::STATE_CREATED;
+    window->hostSession_ = session;
+    {
+        std::unique_lock<std::shared_mutex> lock(window->windowSessionMutex_);
+        WindowSessionImpl::windowSessionMap_.insert(std::make_pair(window->property_->GetWindowName(),
+            std::pair<uint64_t, sptr<WindowSessionImpl>>(window->property_->GetPersistentId(), window)));
+    }
+    
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::shared_ptr<AAFwk::WantParams>();
+    WMError res = window->RestoreMainWindow(wantParams);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    window->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
+
+    res = window->RestoreMainWindow(wantParams);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+
+    sptr<WindowOption> parentOption = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RestoreParentMainWindow");
+    sptr<WindowSceneSessionImpl> parentWindow = sptr<WindowSceneSessionImpl>::MakeSptr(parentOption);
+    parentWindow->property_->SetPersistentId(100);
+    window->property_->SetParentPersistentId(100);
+    {
+        std::unique_lock<std::shared_mutex> lock(window->windowSessionMutex_);
+        WindowSessionImpl::windowSessionMap_.insert(std::make_pair(parentWindow->property_->GetWindowName(),
+            std::pair<uint64_t, sptr<WindowSessionImpl>>(parentWindow->property_->GetPersistentId(), parentWindow)));
+    }
+
+    res = window->RestoreMainWindow(wantParams);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
+    window->state_ = WindowState::STATE_SHOWN;
+
+    window->hostSession_ = nullptr;
+    res = window->RestoreMainWindow(wantParams);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    window->hostSession_ = session;
+
+    res = window->RestoreMainWindow(wantParams);
+    EXPECT_EQ(res, WMError::WM_OK);
+}
+
+/**
  * @tc.name: GetAndVerifyWindowTypeForArkUI01
  * @tc.desc: GetAndVerifyWindowTypeForArkUI01 test
  * @tc.type: FUNC

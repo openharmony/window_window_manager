@@ -774,14 +774,19 @@ HWTEST_F(DisplayManagerAdapterTest, SetDisplayScale, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetPrimaryDisplayInfo
- * @tc.desc: GetPrimaryDisplayInfo test
+ * @tc.name: ForceSetFoldStatusAndLock
+ * @tc.desc: ForceSetFoldStatusAndLock test
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerAdapterTest, GetPrimaryDisplayInfo, TestSize.Level1)
+HWTEST_F(DisplayManagerAdapterTest, ForceSetFoldStatusAndLock, TestSize.Level1)
 {
-    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetPrimaryDisplayInfo();
-    ASSERT_NE(displayInfo, nullptr);
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    DMError ret = SingletonContainer::Get<DisplayManagerAdapter>().ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
+    EXPECT_EQ(ret, DMError::DM_OK);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxyTmp;
 }
 
 /**
@@ -1114,6 +1119,35 @@ HWTEST_F(DisplayManagerAdapterTest, SetSupportsInput02, TestSize.Level1)
         SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
     DMError err = SingletonContainer::Get<DisplayManagerAdapter>().SetSupportsInput(0, supportInput);
+    EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxy;
+}
+
+/**
+ * @tc.name: GetBundleName
+ * @tc.desc: test success
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetBundleName, TestSize.Level1)
+{
+    std::string bundleName = "";
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetBundleName(0, bundleName);
+    EXPECT_EQ(err, DMError::DM_OK);
+}
+
+/**
+ * @tc.name:GetBundleName02
+ * @tc.desc: test screenSessionManagerServiceProxy_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetBundleNamee02, TestSize.Level1)
+{
+    std::string bundleName = "";
+    auto screenSessionManagerServiceProxy =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+    DMError err = SingletonContainer::Get<DisplayManagerAdapter>().GetBundleName(0, bundleName);
     EXPECT_EQ(err, DMError::DM_ERROR_DEVICE_NOT_SUPPORT);
     SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
         screenSessionManagerServiceProxy;

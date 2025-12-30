@@ -131,6 +131,7 @@ using GetKeyboardOccupiedAreaWithRotationCallback =
     std::function<void(int32_t persistentId, Rotation rotation, std::vector<std::pair<bool, WSRect>>& avoidAreas)>;
 using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
     std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
+using GetLSStateFunc = std::function<bool()>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
 using GetSceneSessionByIdCallback = std::function<sptr<SceneSession>(int32_t sessionId)>;
@@ -160,6 +161,7 @@ using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool
 using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode)>;
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
+using GetSCBEnterRecentFunc = std::function<bool()>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -187,6 +189,7 @@ public:
         NotifySessionTouchOutsideCallback onSessionTouchOutside_;
         GetAINavigationBarArea onGetAINavigationBarArea_;
         GetNextAvoidAreaRectInfoFunc onGetNextAvoidAreaRectInfo_;
+        GetLSStateFunc onGetLSState_;
         OnOutsideDownEvent onOutsideDownEvent_;
         HandleSecureSessionShouldHideCallback onHandleSecureSessionShouldHide_;
         CameraSessionChangeCallback onCameraSessionChange_;
@@ -331,6 +334,7 @@ public:
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
     std::shared_ptr<Rosen::RSNode> GetWindowDragMoveMountedNode(DisplayId displayId, uint32_t targetZOrder);
+    virtual void RegisterGetSCBEnterRecentFunc(GetSCBEnterRecentFunc&& callback) {};
 
     /*
      * PiP Window
@@ -352,6 +356,7 @@ public:
     void RegisterProcessPrepareClosePiPCallback(NotifyPrepareClosePiPSessionFunc&& callback);
     void SetPipParentWindowIdCallback(NotifySetPipParentWindowIdFunc&& func);
     WSError SetPipParentWindowId(uint32_t windowId) override;
+    WMError IsPiPActive(bool& status) override;
 
     void RequestHideKeyboard(bool isAppColdStart = false);
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
@@ -378,6 +383,11 @@ public:
     virtual void SetFloatingBallStopCallback(NotifyStopFloatingBallFunc&& func) {};
     virtual void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) {};
     virtual void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) {};
+
+    /*
+     * Float Window
+     */
+    virtual void SetRestoreFloatMainWindowCallback(NotifyRestoreFloatMainWindowFunc&& func) {};
 
     /*
      * Window Layout
@@ -449,14 +459,11 @@ public:
     void RegisterSupportWindowModesCallback(NotifySetSupportedWindowModesFunc&& func);
     void CloneWindow(NodeId surfaceNodeId, bool needOffScreen);
     void AddSidebarBlur();
-    void AddRSNodeModifier(bool isDark, const std::shared_ptr<RSBaseNode>& rsNode);
     void SetSidebarBlur(bool isDefaultSidebarBlur, bool isNeedAnimation);
-    void ModifyRSAnimatableProperty(bool isDefaultSidebarBlur, bool isDark, bool isNeedAnimation);
     void SaveLastDensity();
     virtual bool IsFollowParentMultiScreenPolicy() const { return false; }
     void NotifyUpdateFlagCallback(NotifyUpdateFlagFunc&& func);
     void SetSidebarBlurMaximize(bool isMaximize);
-    void ModifyRSAnimatablePropertyMaximize(bool isMaximize, bool isDark);
     void RegisterUseImplicitAnimationChangeCallback(NotifyUseImplicitAnimationChangeFunc&& func);
     WSError UseImplicitAnimation(bool useImplicit) override;
 
@@ -1093,9 +1100,16 @@ protected:
     NotifyUseImplicitAnimationChangeFunc useImplicitAnimationChangeFunc_;
 
     /*
+     * Float Window
+     */
+    std::mutex floatWindowDownEventMutex_;
+    uint8_t floatWindowDownEventCnt_ {0};
+
+    /*
      * PiP Window
      */
     NotifyPrepareClosePiPSessionFunc onPrepareClosePiPSession_;
+    std::atomic<bool> pipActiveStatus_{true};
 
     /*
      * Window Layout
@@ -1213,6 +1227,9 @@ private:
     void GetKeyboardAvoidAreaByRotation(Rotation rotation, const WSRect& rect, AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByRotation(Rotation rotation, const WSRect& rect,
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
+    void CalculateWindowRectByScale(WSRect& winRect);
+    void CalculateAvoidAreaByScale(Rect& avoidAreaRect) const;
+    WSError GetScaleInLSState(float& scaleX, float& scaleY)  const;
 
     /*
      * Window Lifecycle
@@ -1603,14 +1620,6 @@ private:
     NotifySetWindowShadowsFunc onSetWindowShadowsFunc_;
     UpdateScreenshotAppEventRegisteredFunc updateScreenshotAppEventRegisteredFunc_;
     NotifySnapshotSkipChangeFunc onSnapshotSkipChangeFunc_;
-
-    /*
-     * PC Window Sidebar Blur
-     */
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurRadiusValue_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurSaturationValue_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> blurBrightnessValue_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>> blurMaskColorValue_;
 
    /*
     * Window Lifecycle

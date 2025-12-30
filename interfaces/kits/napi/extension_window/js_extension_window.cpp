@@ -253,12 +253,14 @@ void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue
 
     BindNativeFunction(env, objValue, "setDialogBackGestureEnabled", moduleName, JsExtensionWindow::InvalidAsyncCall);
     BindNativeFunction(env, objValue, "setSubWindowZLevel", moduleName, JsExtensionWindow::InvalidAsyncCall);
-    BindNativeFunction(env, objValue, "setWindowCornerRadius", moduleName, JsExtensionWindow::InvalidAsyncCall);
+    BindNativeFunction(env, objValue, "setWindowCornerRadius", moduleName, JsExtensionWindow::EmptySyncCall);
+    BindNativeFunction(env, objValue, "getWindowTransitionAnimation", moduleName, JsExtensionWindow::EmptySyncCall);
 
     BindNativeFunction(env, objValue, "keepKeyboardOnFocus", moduleName, JsExtensionWindow::InvalidSyncCall);
     BindNativeFunction(env, objValue, "getSubWindowZLevel", moduleName, JsExtensionWindow::InvalidSyncCall);
-    BindNativeFunction(env, objValue, "getWindowCornerRadius", moduleName, JsExtensionWindow::InvalidSyncCall);
-    BindNativeFunction(env, objValue, "setWindowShadowRadius", moduleName, JsExtensionWindow::InvalidSyncCall);
+    BindNativeFunction(env, objValue, "getWindowCornerRadius", moduleName, JsExtensionWindow::EmptySyncCall);
+    BindNativeFunction(env, objValue, "setWindowShadowRadius", moduleName, JsExtensionWindow::EmptySyncCall);
+    BindNativeFunction(env, objValue, "setWindowTransitionAnimation", moduleName, JsExtensionWindow::EmptySyncCall);
 }
 
 void JsExtensionWindow::Finalizer(napi_env env, void* data, void* hint)
@@ -1893,7 +1895,7 @@ napi_value JsExtensionWindow::OnGetStatusBarPropertySync(napi_env env, napi_call
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getStatusBarProperty]msg: The window is not created or destroyed");
     }
-    auto objValue = GetStatusBarPropertyObject(env, windowImpl);
+    auto objValue = GetHostStatusBarPropertyObject(env, windowImpl);
     if (objValue == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "get property failed");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
