@@ -30,8 +30,9 @@ namespace OHOS::Rosen {
 namespace {
 constexpr int32_t MAX_QUEUE_SIZE = 1;
 constexpr uint64_t MAX_TIME_INTERVAL = 200;
+TaskSequenceProcess TASK_PROCESSOR(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL);
 }
-SensorFoldStateManager::SensorFoldStateManager() : taskProcessor_(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL) {};
+SensorFoldStateManager::SensorFoldStateManager() = default;
 SensorFoldStateManager::~SensorFoldStateManager() = default;
 
 void SensorFoldStateManager::HandleAngleChange(float angle, int hall, sptr<FoldScreenPolicy> foldScreenPolicy) {}
@@ -82,7 +83,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
             FinishTaskSequence();
         }
     };
-    taskProcessor_.AddTask(task);
+    TASK_PROCESSOR.AddTask(task);
 }
 
 void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std::vector<float> &angles,
@@ -148,13 +149,13 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             taskScheduler->PostAsyncTask(task, "secondaryFoldStatusChange");
         }
     };
-    taskProcessor_.AddTask(event);
+    TASK_PROCESSOR.AddTask(event);
 }
 
 void SensorFoldStateManager::FinishTaskSequence()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateManager::FinishTaskSequence");
-    taskProcessor_.FinishTask();
+    TASK_PROCESSOR.FinishTask();
 }
 
 void SensorFoldStateManager::ProcessNotifyFoldStatusChange(FoldStatus currentStatus, FoldStatus nextStatus,

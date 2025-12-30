@@ -43,7 +43,7 @@ constexpr int32_t TENT_MODE_OFF = 0;
 constexpr int32_t TENT_MODE_ON = 1;
 constexpr int32_t MAX_QUEUE_SIZE = 1;
 constexpr uint64_t MAX_TIME_INTERVAL = 200;
-
+TaskSequenceProcess TASK_PROCESSOR(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL);
 std::chrono::time_point<std::chrono::system_clock> g_lastUpdateTime = std::chrono::system_clock::now();
 }  // namespace
 
@@ -60,7 +60,7 @@ SensorFoldStateMgr& SensorFoldStateMgr::GetInstance()
     return *instance_;
 }
 
-SensorFoldStateMgr::SensorFoldStateMgr() : taskProcessor_(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL)
+SensorFoldStateMgr::SensorFoldStateMgr() :
 {
     currentFoldStatus_ = {FoldStatus::UNKNOWN};
     foldAlgorithmStrategy_ = {0, 0};
@@ -218,13 +218,13 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
             FoldScreenBasePolicy::GetInstance().SendSensorResult(globalFoldStatus_);
         }
     };
-    taskProcessor_.AddTask(task);
+    TASK_PROCESSOR.AddTask(task);
 }
 
 void SensorFoldStateMgr::FinishTaskSequence()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateMgr::FinishTaskSequence");
-    taskProcessor_.FinishTask();
+    TASK_PROCESSOR.FinishTask();
 }
 
 void SensorFoldStateMgr::UpdateFoldAlgorithmStrategy(const std::vector<ScreenAxis>& axis)
