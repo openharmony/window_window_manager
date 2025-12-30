@@ -437,6 +437,8 @@ public:
     void SetSupportsFocus(bool focus);
     bool GetSupportsInput() const;
     void SetSupportsInput(bool input);
+    const std::string& GetBundleName() const;
+    void SetBundleName(const std::string& bundleName);
 
     bool GetUniqueRotationLock() const;
     void SetUniqueRotationLock(bool isRotationLocked);
@@ -530,6 +532,7 @@ private:
     inline static std::atomic<uint64_t> sessionIdGenerator_ { 0 };
     std::atomic<bool> supportsFocus_ { true };
     std::atomic<bool> supportsInput_ { true };
+    std::string bundleName_ = "";
 };
 
 class ScreenSessionGroup : public ScreenSession {
