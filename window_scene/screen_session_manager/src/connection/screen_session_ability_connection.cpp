@@ -179,6 +179,10 @@ int32_t ScreenSessionAbilityConnectionStub::SendMessageSyncBlock(int32_t transCo
             TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
             return RES_FAILURE;
         }
+        if (!data.WriteRemoteObject(this->AsObject())) {
+            TLOGE(WmsLogTag::DMS, "WriteRemoteObject failed");
+            return RES_FAILURE;
+        }
         int32_t ret = remoteObject_->SendRequest(transCode, data, reply, option);
         if (ret != ERR_OK) {
             TLOGE(WmsLogTag::DMS, "remoteObject send request failed");
