@@ -8479,6 +8479,7 @@ WMError WindowSessionImpl::UpdateCompatScaleInfo(const Transform& transform)
     want.SetParam(Extension::COMPAT_IS_PROPORTION_SCALE_FIELD, IsAdaptToProportionalScale());
     want.SetParam(Extension::COMPAT_SCALE_X_FIELD, compatScaleX_);
     want.SetParam(Extension::COMPAT_SCALE_Y_FIELD, compatScaleY_);
+    NotifyTitleChange(true, 0);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_COMPAT_INFO),
             want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
