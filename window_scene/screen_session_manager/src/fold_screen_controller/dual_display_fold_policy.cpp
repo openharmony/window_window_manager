@@ -165,6 +165,7 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode,
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
         TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
+        ScreenSessionManager::GetInstance().RunFinishTask();
         return;
     }
     TLOGI(WmsLogTag::DMS,

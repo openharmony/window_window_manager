@@ -251,6 +251,7 @@ void SecondaryDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode display
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
         TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
+        ScreenSessionManager::GetInstance().RunFinishTask();
         return;
     }
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_FULL);

@@ -38,7 +38,7 @@ std::function<void()> TaskSequenceProcess::PopFromQueue()
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess taskQueue_.size(): %{public}zu", taskQueue_.size());
     if (taskQueue_.empty() || taskRunningFlag_.load()) {
         TLOGI(WmsLogTag::DMS, "TaskSequenceProcess do not pop");
-        return std::function<void()>();
+        return nullptr;
     }
     std::function<void()> task = taskQueue_.front();
     taskQueue_.pop();
@@ -84,7 +84,7 @@ void TaskSequenceProcess::CreatSysTimer()
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess StartSysTimer");
     std::lock_guard<std::mutex> lock(timerMutex_);
     if (taskTimerId_ != 0) {
-        TLOGI(WmsLogTag::DMS, "TaskTimerId is not zero, value is %{public}llu", taskTimerId_);
+        TLOGI(WmsLogTag::DMS, "TaskTimerId is not zero, value is %{public}lu", taskTimerId_);
         return;
     }
     std::shared_ptr<WindowSysTimer> taskSysTimer =

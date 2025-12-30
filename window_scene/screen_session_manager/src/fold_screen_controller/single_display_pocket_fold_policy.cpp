@@ -150,6 +150,7 @@ void SingleDisplayPocketFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode disp
     }
     SetLastCacheDisplayMode(displayMode);
     if (GetModeChangeRunningStatus()) {
+        ScreenSessionManager::GetInstance().RunFinishTask();
         TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
         return;
     }

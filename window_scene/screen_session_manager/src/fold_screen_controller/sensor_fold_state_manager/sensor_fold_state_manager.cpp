@@ -29,7 +29,7 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int32_t MAX_QUEUE_SIZE = 1;
-constexpr uint64_t MAX_TIME_INTERVAL = 1000;
+constexpr uint64_t MAX_TIME_INTERVAL = 2000;
 }
 SensorFoldStateManager::SensorFoldStateManager() : taskProcessor_(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL) {};
 SensorFoldStateManager::~SensorFoldStateManager() = default;
@@ -58,6 +58,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
     auto task = [=] {
         if (mState_ == nextState) {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
+            FinishTaskSequence();
             return;
         }
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
@@ -90,10 +91,6 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             TLOGW(WmsLogTag::DMS, "fold state is UNKNOWN");
             return;
         }
-        if (mState_ == nextState) {
-            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
-            return;
-        }
         {
             std::unique_lock<std::mutex> lock(oneStepMutex_);
             if (isInOneStep_) {
@@ -118,6 +115,11 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
         auto policy = weakPolicy.promote();
         if (manager == nullptr || policy == nullptr) {
             TLOGNE(WmsLogTag::DMS, "sensorFoldStateManager or foldScreenPolicy is nullptr.");
+            return;
+        }
+        if (manager->mState_ == manager->nextState) {
+            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", manager->mState_);
+            manager->FinishTaskSequence();
             return;
         }
         FoldStatus currentState = FoldStatus::UNKNOWN;
