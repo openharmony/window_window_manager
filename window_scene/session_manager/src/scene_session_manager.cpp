@@ -2798,7 +2798,7 @@ void SceneSessionManager::SetBufferAvailable(sptr<SceneSession>& sceneSession)
         auto surfaceNode = sceneSession->GetSurfaceNode();
         
         if (!surfaceNode) {
-            TLOGE(WmsLogTag::WMS_SCB, "surface node is nullptr");s
+            TLOGE(WmsLogTag::WMS_SCB, "surface node is nullptr");
             return;
         }
         TLOGI(WmsLogTag::WMS_SCB, "config surface node");
