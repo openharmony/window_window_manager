@@ -1196,7 +1196,7 @@ ani_int AniWindow::OnGetSubWindowZLevel(ani_env* env)
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetSubWindowZLevel(zLevel));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][getSubWindowZLevel]msg: Get sub window zLevel failed");
+            "[window][getSubWindowZLevel]");
         return ANI_ERROR;
     }
     return static_cast<ani_int>(zLevel);
@@ -1264,7 +1264,7 @@ void AniWindow::OnSetSubWindowZLevel(ani_env* env, ani_int zLevel)
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSubWindowZLevel(zLevel));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][setSubWindowZLevel]msg: Set sub window zLevel failed");
+            "[window][setSubWindowZLevel]");
     }
 }
 
@@ -1294,7 +1294,7 @@ void AniWindow::OnRaiseAboveTarget(ani_env* env, ani_int windowId)
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseAboveTarget(windowId));
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][raiseAboveTarget]msg: RaiseAboveTarget failed.");
+            "[window][raiseAboveTarget]");
     }
 }
 
@@ -1324,7 +1324,7 @@ void AniWindow::OnRaiseToAppTop(ani_env* env)
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseToAppTop());
     if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret,
-            "[window][raiseToAppTop]msg: Raise window zorder failed");
+            "[window][raiseToAppTop]");
     }
 }
 
@@ -1365,7 +1365,7 @@ void AniWindow::OnSetTopmost(ani_env* env, ani_boolean isTopmost)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetTopmost(isTopmost));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "[window][setTopmost]msg:setTopmost failed.");
+        AniWindowUtils::AniThrowError(env, ret, "[window][setTopmost]");
     }
 }
 
@@ -1502,7 +1502,7 @@ void AniWindow::OnRaiseMainWindowAboveTarget(ani_env* env, ani_int windowId)
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RaiseMainWindowAboveTarget(windowId));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "RaiseMainWindowAboveTarget failed.");
+        AniWindowUtils::AniThrowError(env, ret, "[window][raiseMainWindowAboveTarget]");
         return;
     }
 }
@@ -1514,7 +1514,8 @@ void AniWindow::SetMainWindowRaiseByClickEnabled(ani_env* env, ani_object obj, a
         aniWindow->OnSetMainWindowRaiseByClickEnabled(env, enable);
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] aniWindow is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setMainWindowRaiseByClickEnabled]msg: window is nullptr");
     }
 }
 
@@ -1523,17 +1524,19 @@ void AniWindow::OnSetMainWindowRaiseByClickEnabled(ani_env* env, ani_boolean ena
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setMainWindowRaiseByClickEnabled]msg: window is nullptr");
         return;
     }
     if (!Permission::IsSystemCallingOrStartByHdcd(true)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "permission denied, require system application");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "[window][setMainWindowRaiseByClickEnabled]msg: permission denied");
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetMainWindowRaiseByClickEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "SetMainWindowRaiseByClickEnabled failed.");
+        AniWindowUtils::AniThrowError(env, ret, "[window][setMainWindowRaiseByClickEnabled]");
         return;
     }
 }
