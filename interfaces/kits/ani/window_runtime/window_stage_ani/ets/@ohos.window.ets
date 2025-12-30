@@ -5425,7 +5425,7 @@ export function getTopNavDestinationName(windowId: int): Promise<string> {
 }
 
 export function getGlobalWindowMode(displayId?: long): Promise<int> {
-  return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void): int => {
+  return new Promise<int>((resolve: (value: int) => void, reject: (error: BusinessError) => void): void => {
     taskpool.execute((): int => {
       return getGlobalWindowModeSync(nativeObj, displayId);
     }).then((ret: Any) => {
