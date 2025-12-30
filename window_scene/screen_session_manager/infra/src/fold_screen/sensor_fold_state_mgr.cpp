@@ -42,7 +42,7 @@ constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 175.0F;
 constexpr int32_t TENT_MODE_OFF = 0;
 constexpr int32_t TENT_MODE_ON = 1;
 constexpr int32_t MAX_QUEUE_SIZE = 1;
-constexpr uint64_t MAX_TIME_INTERVAL = 1000;
+constexpr uint64_t MAX_TIME_INTERVAL = 200;
 
 std::chrono::time_point<std::chrono::system_clock> g_lastUpdateTime = std::chrono::system_clock::now();
 }  // namespace
