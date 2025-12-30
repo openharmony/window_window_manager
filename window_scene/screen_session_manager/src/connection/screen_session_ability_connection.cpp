@@ -328,7 +328,7 @@ int32_t ScreenSessionAbilityConnectionStub::OnRemoteRequest(uint32_t code, Messa
     [[maybe_unused]]MessageParcel& reply, [[maybe_unused]]MessageOption& option)
 {
     TLOGI(WmsLogTag::DMS, "OnRemoteRequest code is %{public}u", code);
-    if (data.ReadInterfaceToken() != GetInterfaceDescriptor()) {
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
         TLOGE(WmsLogTag::DMS, "InterfaceToken check failed");
         return ERR_INVALID_DATA;
     }
