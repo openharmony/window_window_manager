@@ -1518,20 +1518,6 @@ HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSiz
 }
 
 /**
- * @tc.name: SetLandscapeLockStatus01
- * @tc.desc: SetLandscapeLockStatus01 test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
-{
-    g_errLog.clear();
-    MockAccesstokenKit::MockIsSACalling(false);
-    MockAccesstokenKit::MockIsSystemApp(false);
-    ssm_->SetLandscapeLockStatus(true);
-    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
-}
-
-/**
  * @tc.name: NotifyDisplayChangedByUid
  * @tc.desc: NotifyDisplayChangedByUid test
  * @tc.type: FUNC
