@@ -76,23 +76,6 @@ ohos_unittest("wm_window_scene_session_impl_event_test") {
   ]
 }
 
-ohos_unittest("wm_window_event_test") {
-  module_out_path = module_out_path
- 
-  sources = [ "window_event_test.cpp" ]
- 
-  deps = [
-    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    wm_unittest_common,
-  ]
- 
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-    "init:libbegetutil",
-  ]
-}
-
 ohos_unittest("wm_window_impl_event_test") {
   module_out_path = module_out_path
  
