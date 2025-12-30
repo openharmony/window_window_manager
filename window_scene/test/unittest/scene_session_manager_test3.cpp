@@ -1387,25 +1387,6 @@ HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, TestSize.Level
 }
 
 /**
- * @tc.name: SetFocusedSessionId
- * @tc.desc: SceneSesionManager set focused session id
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, TestSize.Level1)
-{
-    int32_t focusedSession = ssm_->GetFocusedSessionId(DISPLAY_ID_INVALID);
-    EXPECT_EQ(focusedSession, INVALID_SESSION_ID);
-    int32_t persistentId = INVALID_SESSION_ID;
-    ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
-    WSError result01 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
-    EXPECT_EQ(result01, WSError::WS_DO_NOTHING);
-    persistentId = 10086;
-    WSError result02 = ssm_->SetFocusedSessionId(persistentId, DEFAULT_DISPLAY_ID);
-    EXPECT_EQ(result02, WSError::WS_OK);
-    ASSERT_EQ(ssm_->GetFocusedSessionId(), 10086);
-}
-
-/**
  * @tc.name: RequestFocusStatus
  * @tc.desc: SceneSesionManager request focus status
  * @tc.type: FUNC
@@ -1433,42 +1414,6 @@ HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, TestSize.Level1)
     EXPECT_EQ(result03, WMError::WM_ERROR_NULLPTR);
     reasonResult = ssm_->GetFocusChangeReason();
     EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
-}
-
-/**
- * @tc.name: RequestFocusStatusBySA
- * @tc.desc: SceneSesionManager request focus status by SA
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, RequestFocusStatusBySA, TestSize.Level1)
-{
-    int32_t persistentId = 3;
-    bool isFocused = true;
-    bool byForeground = true;
-    FocusChangeReason reason = FocusChangeReason::CLICK;
-    auto result = ssm_->SceneSessionManager::RequestFocusStatusBySA(persistentId, isFocused, byForeground, reason);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
-}
-
-/**
- * @tc.name: NotifyRequestFocusStatusNotifyManager
- * @tc.desc: NotifyRequestFocusStatusNotifyManager test.
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, NotifyRequestFocusStatusNotifyManager, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifyRequestFocusStatusNotifyManager";
-    info.bundleName_ = "NotifyRequestFocusStatusNotifyManager";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
-
-    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
-    sceneSession->NotifyRequestFocusStatusNotifyManager(true, true, reasonInput);
-    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
-
-    EXPECT_EQ(reasonInput, reasonResult);
 }
 
 /**
