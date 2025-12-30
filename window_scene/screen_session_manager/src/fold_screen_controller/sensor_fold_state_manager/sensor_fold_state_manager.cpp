@@ -120,7 +120,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             TLOGNE(WmsLogTag::DMS, "sensorFoldStateManager or foldScreenPolicy is nullptr.");
             return;
         }
-        if (manager->mState_ == manager->nextState) {
+        if (manager->mState_ == nextState) {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", manager->mState_);
             manager->FinishTaskSequence();
             return;
