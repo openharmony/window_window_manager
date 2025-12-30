@@ -852,7 +852,8 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForReceiveDragEventEnabled(const
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
         return;
     }
-    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT)) {
+    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT) ||
+        !sceneSession->GetSessionInfoReceiveDragEventEnabled()) {
         windowInfo.flags |= MMI::WindowInputPolicy::FLAG_DRAG_DISABLED;
     }
 }
@@ -864,7 +865,8 @@ void SceneSessionDirtyManager::UpdateWindowFlagsForWindowSeparation(const sptr<S
         TLOGE(WmsLogTag::WMS_EVENT, "sceneSession is null");
         return;
     }
-    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED)) {
+    if (sceneSession->GetSessionInfoAdvancedFeatureFlag(ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED) ||
+        !sceneSession->GetSessionInfoSeparationTouchEnabled()) {
         windowInfo.flags |= MMI::WindowInputPolicy::FLAG_FIRST_TOUCH_HIT;
     }
 }
@@ -985,6 +987,7 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
         windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_DISABLE_USER_ACTION;
     }
     UpdateWindowFlagsForReceiveDragEventEnabled(sceneSession, windowInfo);
+    UpdateWindowFlagsForWindowSeparation(sceneSession, windowInfo);
     UpdateWindowFlagsForLockCursor(sceneSession, windowInfo);
     UpdatePrivacyMode(sceneSession, windowInfo);
     windowInfo.uiExtentionWindowInfo = GetSecSurfaceWindowinfoList(sceneSession, windowInfo, transform);
