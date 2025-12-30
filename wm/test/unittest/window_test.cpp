@@ -436,6 +436,18 @@ HWTEST_F(WindowTest, GetTouchable, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTouchable
+ * @tc.desc: set Touchable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowTest, SetTouchable, TestSize.Level1)
+{
+    sptr<Window> window = sptr<Window>::MakeSptr();
+    ASSERT_EQ(WMError::WM_OK, window->SetTouchable(true));
+    ASSERT_EQ(WMError::WM_OK, window->Destroy());
+}
+
+/**
  * @tc.name: GetSystemBarPropertyByType
  * @tc.desc: get SystemBarPropertyByType
  * @tc.type: FUNC
