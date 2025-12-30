@@ -173,7 +173,6 @@ test_external_deps = [
   "napi:ace_napi",
   "safwk:system_ability_fwk",
   "time_service:time_client",
- 	"ability_runtime:wantagent_innerkits",
 ]
 
 ohos_unittest("ws_ability_info_manager_test") {
