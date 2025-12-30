@@ -2798,7 +2798,7 @@ void SceneSessionManager::SetBufferAvailable(sptr<SceneSession>& sceneSession)
         auto surfaceNode = sceneSession->GetSurfaceNode();
         
         if (!surfaceNode) {
-            TLOGE(WmsLogTag::WMS_SCB, "surface node is nullptr");
+            TLOGE(WmsLogTag::WMS_SCB, "surface node is nullptr");s
             return;
         }
         TLOGI(WmsLogTag::WMS_SCB, "config surface node");
@@ -2806,7 +2806,6 @@ void SceneSessionManager::SetBufferAvailable(sptr<SceneSession>& sceneSession)
             TLOGNE(WmsLogTag::WMS_SCB, "%{public}s BufferAvailableCallback called", where);
             ScreenSessionManagerClient::GetInstance().NotifySwitchUserAnimationFinishByWindow();
         });
-        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
     }
 }
 
