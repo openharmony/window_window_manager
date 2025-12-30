@@ -10292,8 +10292,9 @@ WMError SceneSession::SetReceiveDragEventEnabled(const std::vector<int32_t>& par
         TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    bool enalbed = static_cast<bool>(parameters[1]);
-    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enalbed);
+    bool enabled = static_cast<bool>(parameters[1]);
+    SetSessionInfoReceiveDragEventEnabled(enabled);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enabled);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }
@@ -10304,8 +10305,9 @@ WMError SceneSession::SetSeparationTouchEnabled(const std::vector<int32_t>& para
         TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    bool enalbed = static_cast<bool>(parameters[1]);
-    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, !enalbed);
+    bool enabled = static_cast<bool>(parameters[1]);
+    SetSessionInfoSeparationTouchEnabled(enabled);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, !enabled);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }

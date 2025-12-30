@@ -1089,6 +1089,7 @@ void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, 
     switch (state) {
         case WindowRecoverState::WINDOW_START_RECONNECT:
             UpdateStartRecoverProperty(isSpecificSession);
+            UpdateStartRecoverEventFlag();
             break;
         case WindowRecoverState::WINDOW_FINISH_RECONNECT:
             UpdateFinishRecoverProperty(isSpecificSession);
@@ -1098,6 +1099,13 @@ void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, 
         default:
             break;
     }
+}
+
+void WindowSceneSessionImpl::UpdateStartRecoverEventFlag()
+{
+    std::unique_lock<std::shared_mutex> lock(windowSessionMutex_);
+    property_->EditSessionInfo().isReceiveDragEventEnabled_ = isReceiveDragEventEnabled_;
+    property_->EditSessionInfo().isSeparationTouchEnabled_ = isSeparationTouchEnabled_;
 }
 
 void WindowSceneSessionImpl::UpdateStartRecoverProperty(bool isSpecificSession)
@@ -7884,14 +7892,14 @@ WMError WindowSceneSessionImpl::SetReceiveDragEventEnabled(bool enabled)
     auto result = hostSession->SendCommonEvent(static_cast<int32_t>(CommonEventCommand::SET_RECEIVE_DRAG_EVENT),
         parameters);
     if (result == WMError::WM_OK) {
-        isReceiveDragEventEnable_ = enabled;
+        isReceiveDragEventEnabled_ = enabled;
     }
     return result;
 }
 
 bool WindowSceneSessionImpl::IsReceiveDragEventEnabled()
 {
-    return isReceiveDragEventEnable_;
+    return isReceiveDragEventEnabled_;
 }
 
 WMError WindowSceneSessionImpl::SetSeparationTouchEnabled(bool enabled)

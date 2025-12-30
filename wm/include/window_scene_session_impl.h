@@ -625,8 +625,10 @@ private:
     /*
      * Window Event
      */
-    bool isReceiveDragEventEnable_ = true;
+    bool isReceiveDragEventEnabled_ = true;
     bool isSeparationTouchEnabled_ = true;
+    std::bitset<ADVANCED_FEATURE_BIT_MAX> advancedFeatureFlag_ = 0;
+    void UpdateStartRecoverEventFlag();
 
     /*
      * Window Decor
