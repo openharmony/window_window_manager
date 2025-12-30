@@ -289,9 +289,22 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_SCREEN_GET_BUNDLE_NAME: {
+            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+            std::string bundleName;
+            DMError ret = GetBundleName(displayId, bundleName);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "write ret failed!");
+                break;
+            }
+            if (!reply.WriteString(bundleName)) {
+                TLOGE(WmsLogTag::DMS, "write bundleName failed!");
+            }
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_GET_ROUNDED_CORNER: {
             DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            int radius;
+            int radius = 0;
             DMError ret = GetRoundedCorner(displayId, radius);
             if (!reply.WriteInt32(radius)) {
                 TLOGE(WmsLogTag::DMS, "write radius failed!");
@@ -316,6 +329,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             VirtualScreenFlag virtualScreenFlag = static_cast<VirtualScreenFlag>(data.ReadUint32());
             bool supportsFocus = data.ReadBool();
             bool supportsInput = data.ReadBool();
+            std::string bundleName = data.ReadString();
+            std::string serialNumber = data.ReadString();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -337,7 +352,9 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 .isSecurity_ = isSecurity,
                 .virtualScreenFlag_ = virtualScreenFlag,
                 .supportsFocus_ = supportsFocus,
-                .supportsInput_ = supportsInput
+                .supportsInput_ = supportsInput,
+                .bundleName_ = bundleName,
+                .serialNumber_ = serialNumber
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
@@ -429,6 +446,14 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             DMError result = RemoveVirtualScreenWhiteList(screenId, missionIds);
             reply.WriteUint32(static_cast<uint32_t>(result));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY: {
+            DisplayId displayId = data.ReadUint64();
+            bool res = IsOnboardDisplay(displayId);
+            if (!reply.WriteBool(res)) {
+                TLOGE(WmsLogTag::DMS, "write res failed");
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
@@ -934,6 +959,23 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             bool lockDisplayStatus = static_cast<bool>(data.ReadUint32());
             DMError ret = SetFoldStatusLockedFromJs(lockDisplayStatus);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(ret)));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_SET_TARGET_FOLD_STATUS_AND_LOCK: {
+            FoldStatus targetFoldStatus = static_cast<FoldStatus>(data.ReadUint32());
+            DMError ret = ForceSetFoldStatusAndLock(targetFoldStatus);
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "Write result failed");
+                return ERR_INVALID_DATA;
+            }
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UNLOCK_TARGET_FOLD_STATUS: {
+            DMError ret = RestorePhysicalFoldStatus();
+            if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+                TLOGE(WmsLogTag::DMS, "Write result failed");
+                return ERR_INVALID_DATA;
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_FOLD_STATUS_EXPAND_AND_LOCKED: {
@@ -1545,6 +1587,40 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             SyncScreenPowerState(state);
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_ATTRIBUTE_AGENT: {
+            TLOGI(WmsLogTag::DMS, "called");
+            sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+            auto agent = iface_cast<IDisplayManagerAgent>(remoteObj);
+            if (agent == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> attributes;
+            if (!data.ReadStringVector(&attributes)) {
+                TLOGE(WmsLogTag::DMS, "Read attributes failed");
+                return ERR_INVALID_DATA;
+            }
+ 
+            DMError ret = RegisterDisplayAttributeAgent(attributes, agent);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_ATTRIBUTE: {
+            TLOGI(WmsLogTag::DMS, "called");
+            sptr<IRemoteObject> remoteObj = data.ReadRemoteObject();
+            auto agent = iface_cast<IDisplayManagerAgent>(remoteObj);
+            if (agent == nullptr) {
+                return ERR_INVALID_DATA;
+            }
+            std::vector<std::string> attributes;
+            if (!data.ReadStringVector(&attributes)) {
+                TLOGE(WmsLogTag::DMS, "Read attributes failed");
+                return ERR_INVALID_DATA;
+            }
+ 
+            DMError ret = UnRegisterDisplayAttribute(attributes, agent);
+            reply.WriteInt32(static_cast<int32_t>(ret));
+            break;
+        }
         default:
             TLOGW(WmsLogTag::DMS, "unknown transaction code");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1682,7 +1758,15 @@ void ScreenSessionManagerStub::ProcGetDisplaySnapshotWithOption(MessageParcel& d
         TLOGE(WmsLogTag::DMS, "Read node surfaceNodesList failed");
         return;
     }
-    option.isCaptureFullOfScreen_ = static_cast<bool>(data.ReadBool());
+    if (!data.ReadFloat(option.scaleX_) || !data.ReadFloat(option.scaleY_)) {
+        TLOGE(WmsLogTag::DMS, "Read scale failed");
+        return;
+    }
+    if (!data.ReadInt32(option.rect.posX_) || !data.ReadInt32(option.rect.posY_) ||
+        !data.ReadUint32(option.rect.width_) || !data.ReadUint32(option.rect.height_)) {
+        TLOGE(WmsLogTag::DMS, "Read rect failed");
+        return;
+    }
     DmErrorCode errCode = DmErrorCode::DM_OK;
     std::shared_ptr<Media::PixelMap> capture = GetDisplaySnapshotWithOption(option, &errCode);
     reply.WriteParcelable(capture == nullptr ? nullptr : capture.get());

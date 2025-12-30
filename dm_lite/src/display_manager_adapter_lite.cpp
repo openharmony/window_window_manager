@@ -292,6 +292,16 @@ DMError DisplayManagerAdapterLite::SetSystemKeyboardStatus(bool isTpKeyboardOn)
     return displayManagerServiceProxy_->SetSystemKeyboardStatus(isTpKeyboardOn);
 }
 
+bool DisplayManagerAdapterLite::IsOnboardDisplay(DisplayId displayId)
+{
+    INIT_PROXY_CHECK_RETURN(false);
+    if (displayManagerServiceProxy_) {
+        return displayManagerServiceProxy_->IsOnboardDisplay(displayId);
+    }
+    TLOGE(WmsLogTag::DMS, "fail");
+    return false;
+}
+
 sptr<ScreenInfo> ScreenManagerAdapterLite::GetScreenInfo(ScreenId screenId)
 {
     if (screenId == SCREEN_ID_INVALID) {

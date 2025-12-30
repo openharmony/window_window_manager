@@ -167,6 +167,7 @@ public:
     static napi_value SetMaximizeFullScreen(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    static napi_value NotifyLSStateChange(napi_env env, napi_callback_info info);
     static napi_value NotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 
@@ -188,6 +189,7 @@ public:
      * PiP Window
      */
     static napi_value SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+    static napi_value SetIsPipEnabled(napi_env env, napi_callback_info info);
     static napi_value GetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info);
 
 private:
@@ -302,6 +304,7 @@ private:
     napi_value OnSetMaximizeFullScreen(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarDefaultVisibilityPerDisplay(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarShowStatus(napi_env env, napi_callback_info info);
+    napi_value OnNotifyLSStateChange(napi_env env, napi_callback_info info);
     napi_value OnNotifyStatusBarConstantlyShowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarAvoidHeight(napi_env env, napi_callback_info info);
 
@@ -364,6 +367,7 @@ private:
     void OnStartPiPFailed(DisplayId displayId);
     void ProcessStartPiPFailedRegister();
     napi_value OnSetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
+    napi_value OnSetIsPipEnabled(napi_env env, napi_callback_info info);
     napi_value OnGetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info);
 
     /*

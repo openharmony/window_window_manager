@@ -527,6 +527,75 @@ HWTEST_F(WindowPatternSnapshotTest, ResetSnapshot, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetPreloadSnapshot
+ * @tc.desc: ResetPreloadSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, ResetPreloadSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->preloadSnapshot_ = nullptr;
+    ASSERT_EQ(session_->GetPreloadSnapshot(), nullptr);
+
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    session_->preloadSnapshot_ = std::make_shared<Media::PixelMap>();
+    ASSERT_NE(session_->GetPreloadSnapshot(), nullptr);
+
+    session_->ResetPreloadSnapshot();
+    ASSERT_EQ(nullptr, session_->preloadSnapshot_);
+}
+
+/**
+ * @tc.name: PreloadSnapshot
+ * @tc.desc: PreloadSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, PreloadSnapshot, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    std::string bundleName = "testBundleName";
+    int32_t persistentId = 1423;
+    session_->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    session_->snapshot_ = std::make_shared<Media::PixelMap>();
+    ASSERT_NE(session_->snapshot_, nullptr);
+
+    session_->preloadSnapshot_ = nullptr;
+    session_->PreloadSnapshot();
+    ASSERT_NE(session_->preloadSnapshot_, nullptr);
+
+    session_->snapshot_ = nullptr;
+    session_->preloadSnapshot_ = nullptr;
+    auto tempScenePersistence = session_->scenePersistence_;
+    session_->scenePersistence_ = nullptr;
+    ASSERT_EQ(session_->scenePersistence_, nullptr);
+    session_->PreloadSnapshot();
+    ASSERT_EQ(session_->preloadSnapshot_, nullptr);
+
+    session_->preloadSnapshot_ = nullptr;
+    session_->scenePersistence_ = tempScenePersistence;
+    session_->PreloadSnapshot();
+    ASSERT_EQ(session_->preloadSnapshot_, nullptr);
+}
+
+/**
+ * @tc.name: InitDmaReclaimParam
+ * @tc.desc: InitDmaReclaimParam Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternSnapshotTest, InitDmaReclaimParam, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->enableDmaReclaim_ = false;
+    EXPECT_EQ(ssm_->IsDmaReclaimEnabled(), false);
+    ssm_->InitDmaReclaimParam();
+    EXPECT_TRUE(g_logMsg.find("Dma reclaim enabled:") != std::string::npos);
+}
+
+/**
  * @tc.name: Session::SaveSnapshot
  * @tc.desc: Session::SaveSnapshot Test
  * @tc.type: FUNC
@@ -1275,36 +1344,44 @@ HWTEST_F(WindowPatternSnapshotTest, NotifyAddOrRemoveSnapshotWindow, TestSize.Le
 HWTEST_F(WindowPatternSnapshotTest, RecoverSnapshotPersistence, TestSize.Level1)
 {
     SessionInfo info;
-    info.persistentId_ = 0;
+    info.persistentId_ = 1234;
     info.isPersistentRecover_ = false;
     info.abilityName_ = "RecoverSnapshotPersistence";
     info.bundleName_ = "RecoverSnapshotPersistence";
     sptr<MainSession> pMainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     pMainSession->scenePersistence_ = nullptr;
     pMainSession->RecoverSnapshotPersistence(info);
-    EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
+    info.persistentId_ = 0;
     sptr<ScenePersistence> scenePersistence =
         sptr<ScenePersistence>::MakeSptr(info.bundleName_, pMainSession->GetPersistentId());
     pMainSession->scenePersistence_ = scenePersistence;
+    pMainSession->ClearSnapshotPersistence();
+    usleep(WAIT_SYNC_IN_NS);
     pMainSession->RecoverSnapshotPersistence(info);
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
     info.persistentId_ = 1111;
     info.isPersistentRecover_ = true;
+    sptr<MainSession> pMainSession1 = sptr<MainSession>::MakeSptr(info, nullptr);
+    pMainSession1->ClearSnapshotPersistence();
+    usleep(WAIT_SYNC_IN_NS);
     pMainSession->RecoverSnapshotPersistence(info);
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
-    pMainSession = sptr<MainSession>::MakeSptr(info, nullptr);
-    pMainSession->RecoverSnapshotPersistence(info);
-    EXPECT_EQ(pMainSession->HasSnapshot(), false);
+    pMainSession1->RecoverSnapshotPersistence(info);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(pMainSession1->HasSnapshot(), false);
 
     ScenePersistentStorage::InitDir("/data/Snapshot");
-    ScenePersistentStorage::Insert("Snapshot_RecoverSnapshotPersistence_1111",
+    ScenePersistentStorage::Insert("Snapshot_RecoverSnapshotPersistence_2222",
         0, ScenePersistentStorageType::MAXIMIZE_STATE);
     info.persistentId_ = 2222;
-    pMainSession->RecoverSnapshotPersistence(info);
-    EXPECT_EQ(pMainSession->HasSnapshot(), true);
+    pMainSession1->RecoverSnapshotPersistence(info);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(pMainSession1->HasSnapshot(), true);
 }
 
 /**
@@ -1322,12 +1399,14 @@ HWTEST_F(WindowPatternSnapshotTest, ClearSnapshotPersistence, TestSize.Level1)
     sptr<MainSession> pMainSession = sptr<MainSession>::MakeSptr(info, nullptr);
     pMainSession->scenePersistence_ = nullptr;
     pMainSession->ClearSnapshotPersistence();
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 
     sptr<ScenePersistence> scenePersistence =
         sptr<ScenePersistence>::MakeSptr(info.bundleName_, pMainSession->GetPersistentId());
     pMainSession->scenePersistence_ = scenePersistence;
     pMainSession->ClearSnapshotPersistence();
+    usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(pMainSession->HasSnapshot(), false);
 }
 

@@ -1554,6 +1554,14 @@ WMError WindowAdapter::GetPiPSettingSwitchStatus(bool& switchStatus)
     return wmsProxy->GetPiPSettingSwitchStatus(switchStatus);
 }
 
+WMError WindowAdapter::GetIsPipEnabled(bool& isPipEnabled)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetIsPipEnabled(isPipEnabled);
+}
+
 WMError WindowAdapter::AddSessionBlackList(
     const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
 {

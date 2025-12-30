@@ -192,6 +192,9 @@ public:
     static void RegisterWindowScaleCallback();
     static WMError GetWindowScaleCoordinate(uint32_t windowId, CursorInfo& cursorInfo);
     static sptr<WindowSessionImpl> GetScaleWindow(uint32_t windowId);
+    WMError RegisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener) override;
+    WMError UnregisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener) override;
+    WMError UpdateCompatibleStyleMode(CompatibleStyleMode mode) override;
 
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
@@ -408,6 +411,7 @@ public:
     void UpdatePiPTemplateInfo(PiPTemplateInfo& pipTemplateInfo) override;
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) const override;
     WMError SetPipParentWindowId(uint32_t windowId) const override;
+    WMError IsPiPActive(bool& status) override;
 
     WMError UpdateFloatingBall(const FloatingBallTemplateBaseInfo& fbTemplateBaseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) override;
@@ -788,6 +792,7 @@ protected:
     float compatScaleX_ = 1.0f;
     float compatScaleY_ = 1.0f;
     std::atomic_bool isFullScreenInForceSplit_ { false };
+    std::vector<sptr<IUIContentCreateListener>> uiContentCreateListeners_;
 
     /*
      * DFX
@@ -1249,12 +1254,6 @@ private:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIDirector> rsUIDirector_;
-
-    /*
-     * Compatible Mode
-     */
-    void RegisterNavigateCallbackForPageCompatibleModeIfNeed();
-    void HandleNavigateCallbackForPageCompatibleMode(const std::string& fromPage, const std::string& toPage);
 };
 } // namespace Rosen
 } // namespace OHOS
