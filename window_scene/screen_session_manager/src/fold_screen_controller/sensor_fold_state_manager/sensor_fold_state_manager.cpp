@@ -138,8 +138,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             manager->mState_ = newState;
         }
         manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
-        if (policy->GetdisplayModeRunningStatus() == false)
-        {
+        if (policy->GetdisplayModeRunningStatus() == false) {
             manager->FinishTaskSequence();
         }
     };
