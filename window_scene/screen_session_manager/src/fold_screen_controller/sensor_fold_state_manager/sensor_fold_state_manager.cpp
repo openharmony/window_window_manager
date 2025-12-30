@@ -135,6 +135,10 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             manager->mState_ = newState;
         }
         manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
+        if (policy->GetdisplayModeRunningStatus() == false)
+        {
+            manager->FinishTaskSequence();
+        }
     };
     auto event = [=] {
         std::shared_ptr<TaskScheduler> taskScheduler = ScreenSessionManager::GetInstance().GetPowerTaskScheduler();
