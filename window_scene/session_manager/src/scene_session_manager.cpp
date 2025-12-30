@@ -8715,7 +8715,8 @@ bool SceneSessionManager::CheckBlockingFocus(const sptr<SceneSession>& session, 
     }
 
     bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
-    if (isPhoneOrPad && session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION) {
+    if (isPhoneOrPad && (session->GetWindowType() == WindowType::WINDOW_TYPE_VOICE_INTERACTION ||
+        session->GetWindowType() == WindowType::WINDOW_TYPE_WALLET_SWIPE_CARD)) {
         return true;
     }
     if (includingAppSession && session->IsAppSession()) {
