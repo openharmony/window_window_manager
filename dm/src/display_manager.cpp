@@ -146,6 +146,7 @@ public:
     DMError GetBrightnessInfo(DisplayId dispalyId, ScreenBrightnessInfo& brightnessInfo);
     DMError GetSupportsInput(DisplayId displayId, bool& supportsInput);
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
+    DMError GetBundleName(DisplayId displayId, std::string& bundleName);
     DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
     DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
     DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
@@ -2944,6 +2945,16 @@ DMError DisplayManager::SetSupportsInput(DisplayId displayId, bool supportsInput
 DMError DisplayManager::Impl::SetSupportsInput(DisplayId displayId, bool supportsInput)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetSupportsInput(displayId, supportsInput);
+}
+
+DMError DisplayManager::GetBundleName(DisplayId displayId, std::string& bundleName)
+{
+    return pImpl_->GetBundleName(displayId, bundleName);
+}
+
+DMError DisplayManager::Impl::GetBundleName(DisplayId displayId, std::string& bundleName)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetBundleName(displayId, bundleName);
 }
 
 DMError DisplayManager::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position)

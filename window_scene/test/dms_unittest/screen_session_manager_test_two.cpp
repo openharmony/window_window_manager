@@ -3121,6 +3121,19 @@ HWTEST_F(ScreenSessionManagerTest, SetSupportsInput, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBundleName
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetBundleName, TestSize.Level1)
+{
+    std::string bundleName = "";
+    DisplayId illegalDisplay = 10000;
+    auto ret = ssm_->GetBundleName(illegalDisplay, bundleName);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
  * @tc.name: MockFoldDisplayModeAfterRotation
  * @tc.desc: test get and set foldDisplayModeAfterRotation
  * @tc.type: FUNC

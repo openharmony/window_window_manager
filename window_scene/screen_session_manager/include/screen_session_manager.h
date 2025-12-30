@@ -540,6 +540,7 @@ public:
     DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError GetSupportsInput(DisplayId displayId, bool& supportsInput) override;
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput) override;
+    DMError GetBundleName(DisplayId displayId, std::string& bundleName) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     bool SetScreenOffset(ScreenId screenId, float offsetX, float offsetY);
     bool SynchronizePowerStatus(ScreenPowerState state) override;
@@ -1098,7 +1099,7 @@ private:
         uint32_t& targetWidth, uint32_t& targetHeight);
     std::atomic<bool> curResolutionEffectEnable_ = false;
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
-    void SetConfigForInputmethod(ScreenId screenId, VirtualScreenOption option);
+    void SetOptionConfig(ScreenId screenId, VirtualScreenOption option);
     std::function<void(sptr<ScreenSession>& screenSession,
         SuperFoldStatusChangeEvents changeEvent)> propertyChangedCallback_;
     std::mutex callbackMutex_;

@@ -3220,6 +3220,19 @@ HWTEST_F(DisplayManagerTest, SetSupportsInput, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBundleName
+ * @tc.desc: Test SetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetBundleName, TestSize.Level1)
+{
+    uint64_t screenId = 0;
+    std::string bundleName = "";
+    DMError res = SingletonContainer::Get<DisplayManager>().GetBundleName(screenId, bundleName);
+    EXPECT_EQ(res, DMError::DM_OK);
+}
+
+/**
  * @tc.name: NotifyAvailableAreaChanged
  * @tc.desc: Test NotifyAvailableAreaChanged
  * @tc.type: FUNC
