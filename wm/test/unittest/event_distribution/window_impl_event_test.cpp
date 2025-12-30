@@ -113,6 +113,6 @@ HWTEST_F(WindowImplEventTest, SetTouchable02, TestSize.Level1)
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
 }
-}    
+}
 }
 }
