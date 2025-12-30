@@ -172,7 +172,6 @@ test_external_deps = [
   "libxml2:libxml2",
   "napi:ace_napi",
   "safwk:system_ability_fwk",
-  "time_service:time_client",
 ]
 
 ohos_unittest("ws_ability_info_manager_test") {
