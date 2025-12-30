@@ -84,7 +84,7 @@ void TaskSequenceProcess::CreatSysTimer()
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess StartSysTimer");
     std::lock_guard<std::mutex> lock(timerMutex_);
     if (taskTimerId_ != 0) {
-        TLOGI(WmsLogTag::DMS, "TaskTimerId is not zero, value is "PRIu64, taskTimerId_);
+        TLOGI(WmsLogTag::DMS, "TaskTimerId is not zero");
         return;
     }
     std::shared_ptr<WindowSysTimer> taskSysTimer =
@@ -113,7 +113,7 @@ void TaskSequenceProcess::StartSysTimer()
     uint64_t triggerTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         expireTime.time_since_epoch()).count();
     MiscServices::TimeServiceClient::GetInstance()->StartTimer(taskTimerId_, triggerTime);
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess timer success, value is "PRIu64, taskTimerId_);
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess timer success");
 }
 
 void TaskSequenceProcess::StopSysTimer()
