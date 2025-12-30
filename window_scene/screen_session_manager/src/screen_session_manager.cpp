@@ -11194,7 +11194,7 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
     /* Avoid fold to expand process queues */
     if (foldScreenController_ != nullptr) {
         foldScreenController_->SetdisplayModeChangeStatus(false);
-        foldScreenController_->NotifyRunSensorFoldStateManager();
+        RunFinishTask();
     }
     sptr<ScreenSession> screenSession = GetDefaultScreenSession();
     if (screenSession == nullptr) {
@@ -11203,6 +11203,11 @@ void ScreenSessionManager::NotifyFoldToExpandCompletion(bool foldToExpand)
     }
     screenSession->UpdateRotationAfterBoot(foldToExpand);
 #endif
+}
+
+void ScreenSessionManager::RunFinishTask()
+{
+    foldScreenController_->NotifyRunSensorFoldStateManager();
 }
 
 void ScreenSessionManager::RecordEventFromScb(std::string description, bool needRecordEvent)

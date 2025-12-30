@@ -201,6 +201,7 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
     auto task = [=] {
         if (globalFoldStatus_ == nextStatus) {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", globalFoldStatus_);
+            FinishTaskSequence();
             return;
         }
         TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", globalFoldStatus_, nextStatus);
