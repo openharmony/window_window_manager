@@ -599,6 +599,7 @@ public:
     void GetStaticAndDynamicSession();
 
     static bool GetScreenSessionMngSystemAbility();
+    void RunFinishTask();
 
 protected:
     ScreenSessionManager();
