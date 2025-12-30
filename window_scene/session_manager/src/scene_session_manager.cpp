@@ -15431,6 +15431,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             actions.SetAllActive();
             HandleSpecialExtWindowFlagsChange(persistentId, ExtensionWindowFlags(), actions);
         }
+        remoteExtSession->RemoveDeathRecipient(extensionDeath_);
         extSessionInfoMap_.erase(iter->second);
         remoteExtSessionMap_.erase(iter);
     };
