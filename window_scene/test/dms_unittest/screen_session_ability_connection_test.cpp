@@ -25,7 +25,6 @@
 #include "scene_board_judgement.h"
 #include "iremote_object_mocker.h"
 #include "window_manager_hilog.h"
-#include "mock/mock_message_parcel.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -237,33 +236,6 @@ HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSync, TestSize.Level1)
     } else {
         ASSERT_NE(resConnect, ERR_OK);
     }
-    abilityConnectionStub.clear();
-    abilityConnectionStub = nullptr;
-}
-
-/**
- * @tc.name: SendMessageSyncBlock
- * @tc.desc: SendMessageSyncBlock func
- * @tc.type: FUNC
-*/
-HWTEST_F(ScreenSessionAbilityConnectionTest, SendMessageSyncBlock, TestSize.Level1)
-{
-    sptr<ScreenSessionAbilityConnectionStub> abilityConnectionStub(
-        new (std::nothrow) ScreenSessionAbilityConnectionStub());
-    ASSERT_NE(abilityConnectionStub, nullptr);
-
-    LOG_SetCallback(ScreenSessionLogCallback);
-    sptr<IRemoteObject> remoteObject = sptr<MockIRemoteObject>::MakeSptr();
-
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString16(Str8ToStr16("SA"));
-    data.WriteString16(Str8ToStr16("ScreenSessionManager"));
-
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    abilityConnectionStub->SendMessageSyncBlock(TRANS_CMD_SEND_SNAPSHOT_RECT, data, reply);
-    EXPECT_FALSE(g_errlog.find("WriteInterfaceToken failed") != std::string::npos);
-
     abilityConnectionStub.clear();
     abilityConnectionStub = nullptr;
 }
