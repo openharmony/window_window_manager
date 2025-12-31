@@ -11593,8 +11593,12 @@ DMError ScreenSessionManager::GetFoldableDeviceCapability(std::string& capabilit
         expandDisplayMode = FoldDisplayMode::MAIN;
         foldDisplayMode = FoldDisplayMode::SUB;
     }
+    std::vector<std::string> orientation = ORIENTATION_DEFAULT;
+    if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() && !CORRECTION_ENABLE) {
+        orientation = {"3", "0", "1", "2"};
+    }
     nlohmann::ordered_json expandCapabilityInfo = GetCapabilityJson(expandStatus, expandDisplayMode,
-        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+        ROTATION_DEFAULT, orientation);
     jsonDisplayCapabilityList["capability"].push_back(std::move(expandCapabilityInfo));
     nlohmann::ordered_json foldCapabilityInfo = GetCapabilityJson(foldStatus, foldDisplayMode,
         ROTATION_DEFAULT, ORIENTATION_DEFAULT);
