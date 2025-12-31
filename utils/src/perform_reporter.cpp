@@ -16,7 +16,9 @@
 #include "perform_reporter.h"
 
 #include <hisysevent.h>
+#include <iomanip>
 
+#include "parameters.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
@@ -35,6 +37,7 @@ constexpr char EVENT_KEY_BUNDLE_NAME[] = "BUNDLE_NAME";
 constexpr char EVENT_KEY_WINDOW_NAME[] = "WINDOW_NAME";
 constexpr char EVENT_KEY_MISSION_ID[] = "MISSION_ID";
 constexpr char EVENT_KEY_TIMESTAMP[] = "TIMESTAMP";
+static const std::string REAL_TIME_ENABLED = OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0");
 
 /**
  * @brief Construct a new Perform Reporter:: Perform Reporter object
@@ -399,6 +402,76 @@ int32_t WindowInfoReporter::ReportSpecWindowLifeCycleChange(WindowLifeCycleRepor
         TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
     }
     return ret;
+}
+
+void WindowInfoReporter::ReportWindowIOPerDay(const std::string& scenes, const std::string& subScene, double sizeKB)
+{
+    long long intervalMinutes;
+    {
+        std::lock_guard<std::mutex> lock(reportWindowIOMutex_);
+        if (!firstIOTimeInitialized_) {
+            firstIOTime_ = std::chrono::steady_clock::now();
+            firstIOTimeInitialized_ = true;
+        }
+        // record event
+        const auto currentTime = std::chrono::steady_clock::now();
+        intervalMinutes = std::chrono::duration_cast<std::chrono::minutes>(currentTime - firstIOTime_).count();
+        ioRecordMap_[scenes]["TOTAL_WRITE_DATA"] += sizeKB;
+        ioRecordMap_[scenes][subScene] += sizeKB;
+    }
+    TLOGD(WmsLogTag::DEFAULT, "scenes: %{public}s, subScene: %{public}s, sizeKB: %{public}f, "
+        "intervalMinutes: %{public}f, REAL_TIME_ENABLED: %{public}s",
+        scenes.c_str(), subScene.c_str(), sizeKB, static_cast<double>(intervalMinutes), REAL_TIME_ENABLED.c_str());
+    // 1 day = 1140 minutesa
+    int perDay = 1140;
+    // real time output per minute
+    if (REAL_TIME_ENABLED == "1") {
+        perDay = 1;
+    }
+    if (intervalMinutes < perDay) {
+        return;
+    }
+    ReportWindowIO();
+}
+
+void WindowInfoReporter::ReportWindowIO()
+{
+    // write event
+    std::unordered_map<std::string, std::unordered_map<std::string, double>> ioRecordMapCopy;
+    {
+        std::lock_guard<std::mutex> lock(reportWindowIOMutex_);
+        ioRecordMapCopy = ioRecordMap_;
+        firstIOTimeInitialized_ = false;
+        ioRecordMap_.clear();
+    }
+
+    std::string eventName = "SCENEBOARD_IO_DFX";
+    for (const auto& elem : ioRecordMapCopy) {
+        std::string scene = elem.first;
+        std::ostringstream oss;
+        for (onst auto& subSceneElem : elem.second) {
+            if (subSceneElem.first == "TOTAL_WRITE_DATA") {
+                continue;
+            }
+            oss << subSceneElem.first << ": " << std::fixed << std::setprecision(2) << subSceneElem.second << "KB, ";
+        }
+        std::string msg = oss.str();
+        if (msg.length() > 2) {
+            msg.erase(msg.length() - 2);
+        }
+        double totalWriteData = ioRecordMap_[scene]["TOTAL_WRITE_DATA"] / 1024.0;
+        TLOGI(WmsLogTag::DEFAULT, "tatal: %{public}f, msg: %{public}s", totalWriteData, msg.c_str());
+        int32_t ret = HiSysEventWrite(
+            HiviewDFX::HiSysEvent::Domain::WINDOW_IO_UE, eventName,
+            HiviewDFX::HiSysEvent::EventType::STATISTIC,
+            "SCENES", scene,
+            "TOTAL_WRITE_DATA", std::to_string(totalWriteData), // size MB
+            "MSG", msg);
+        if (ret != 0) {
+            TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
+        }
+    }
+    
 }
 } // namespace Rosen
 }
