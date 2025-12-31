@@ -74,9 +74,9 @@ void TaskSequenceProcess::AddTask(const std::function<void()>& task)
 
 void TaskSequenceProcess::FinishTask()
 {
-    ExecTask();
     taskRunningFlag_.store(false);
     StopSysTimer();
+    ExecTask();
 }
 
 void TaskSequenceProcess::CreatSysTimer()
@@ -107,6 +107,10 @@ void TaskSequenceProcess::DestroySysTimer()
 
 void TaskSequenceProcess::StartSysTimer()
 {
+    if (taskTimerId_ == 0) {
+        TLOGI(WmsLogTag::DMS, "TaskTimerId is zero");
+        return;
+    }
     auto currentTime = std::chrono::steady_clock::now();
     auto duration = std::chrono::milliseconds(maxTimeInterval_);
     auto expireTime = currentTime + duration;

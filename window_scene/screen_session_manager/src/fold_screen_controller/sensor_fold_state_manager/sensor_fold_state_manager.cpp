@@ -29,8 +29,8 @@
 namespace OHOS::Rosen {
 namespace {
 constexpr int32_t MAX_QUEUE_SIZE = 1;
-constexpr uint64_t MAX_TIME_INTERVAL = 200;
-TaskSequenceProcess TASK_PROCESSOR(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL);
+constexpr uint64_t MAX_TIME_INTERVAL_MS = 200;
+TaskSequenceProcess TASK_PROCESSOR(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL_MS);
 }
 SensorFoldStateManager::SensorFoldStateManager() = default;
 SensorFoldStateManager::~SensorFoldStateManager() = default;
