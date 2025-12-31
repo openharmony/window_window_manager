@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "system_timer.h"
+#include "window_system_timer.h"
 #include "common_timer_errors.h"
 
 namespace OHOS {
