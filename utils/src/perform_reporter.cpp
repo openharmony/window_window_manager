@@ -406,7 +406,7 @@ int32_t WindowInfoReporter::ReportSpecWindowLifeCycleChange(WindowLifeCycleRepor
 
 void WindowInfoReporter::ReportWindowIOPerDay(const std::string& scenes, const std::string& subScene, double sizeKB)
 {
-    long long intervalMinutes;
+    int32_t intervalMinutes;
     {
         std::lock_guard<std::mutex> lock(reportWindowIOMutex_);
         if (!firstIOTimeInitialized_) {
@@ -421,7 +421,7 @@ void WindowInfoReporter::ReportWindowIOPerDay(const std::string& scenes, const s
     }
     TLOGD(WmsLogTag::DEFAULT, "scenes: %{public}s, subScene: %{public}s, sizeKB: %{public}f, "
         "intervalMinutes: %{public}f, REAL_TIME_ENABLED: %{public}s",
-        scenes.c_str(), subScene.c_str(), sizeKB, static_cast<double>(intervalMinutes), REAL_TIME_ENABLED.c_str());
+        scenes.c_str(), subScene.c_str(), sizeKB, intervalMinutes, REAL_TIME_ENABLED.c_str());
     // 1 day = 1140 minutesa
     int perDay = 1140;
     // real time output per minute
@@ -453,16 +453,19 @@ void WindowInfoReporter::ReportWindowIO()
             if (subSceneElem.first == "TOTAL_WRITE_DATA") {
                 continue;
             }
+            // Set 2 precision, and output in kilobyte.
             oss << subSceneElem.first << ": " << std::fixed << std::setprecision(2) << subSceneElem.second << "KB, ";
         }
         std::string msg = oss.str();
+        // Remove 2 redundant characters
         if (msg.length() > 2) {
             msg.erase(msg.length() - 2);
         }
         double totalWriteData = ioRecordMap_[scene]["TOTAL_WRITE_DATA"] / 1024.0;
         TLOGI(WmsLogTag::DEFAULT, "total: %{public}f, msg: %{public}s", totalWriteData, msg.c_str());
+        static constexpr char WINDOW_IO_UE[] = "WINDOW_IO_UE";
         int32_t ret = HiSysEventWrite(
-            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_IO_UE, eventName,
+            WINDOW_IO_UE, eventName,
             OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
             "SCENES", scene,
             "TOTAL_WRITE_DATA", std::to_string(totalWriteData), // size MB
@@ -471,7 +474,6 @@ void WindowInfoReporter::ReportWindowIO()
             TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
         }
     }
-    
 }
 } // namespace Rosen
 }
