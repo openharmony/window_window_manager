@@ -20,7 +20,6 @@
 #include <want_params_wrapper.h>
 
 #include "ability_context_impl.h"
-#include "accessibility_event_info.h"
 #include "application_context.h"
 #include "color_parser.h"
 #include "extension/extension_business_info.h"
