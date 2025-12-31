@@ -7796,7 +7796,7 @@ WMError WindowSceneSessionImpl::RestoreMainWindow(const std::shared_ptr<AAFwk::W
     auto parentWindow = FindWindowById(property_->GetParentPersistentId());
     if (parentWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "parentWindow is invalid");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");
