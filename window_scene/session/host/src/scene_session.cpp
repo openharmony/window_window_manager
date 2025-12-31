@@ -9451,7 +9451,7 @@ WSError SceneSession::ConvertDisplayOrientationToDisplayRotation(const int32_t o
     }
     FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(orientation);
-    RRect bounds = screenSession->CalcBoundsInRotationZero();
+    RRect bounds = screenSession->CalcBoundsInRotationZero(foldDisplayMode);
     Rotation targetRotation =
         screenSession->CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
     rotation = static_cast<int32_t>(targetRotation);
