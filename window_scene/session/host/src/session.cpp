@@ -3190,6 +3190,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
+        WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTEN", "ASTC",
+            pixelMap->GetWidth() * pixelMap->GetHeight() * 4 / 4 / 1024.0);
     };
     if (!useFfrt) {
         task();
@@ -3226,6 +3228,8 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(persistentId_, key),
             EncodeSnapShotRecoverValue(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
+    WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTEN", "session_window_maximize_state",
+        (sizeof(int32_t) + sizeof(std::string)) / 1024.0);
 }
 
 int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
