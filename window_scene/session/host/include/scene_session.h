@@ -365,6 +365,7 @@ public:
     WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void NotifyOutsideDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     WSError NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect) override;
+    WMError NotifyRemovePrelaunchStartingWindow() override;
     void SetForegroundInteractiveStatus(bool interactive) override;
     WSError SetLandscapeMultiWindow(bool isLandscapeMultiWindow) override;
 

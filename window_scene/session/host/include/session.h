@@ -145,6 +145,7 @@ public:
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
     virtual void OnRestart() {}
+    virtual void OnRemovePrelaunchStartingWindow() {}
 };
 
 enum class LifeCycleTaskType : uint32_t {
@@ -853,8 +854,9 @@ public:
     /*
      * Prelaunch check
      */
-    void SetPrelaunch();
-    bool IsPrelaunch() const;
+    virtual void RemovePrelaunchStartingWindow() {};
+    virtual void SetPrelaunch() {};
+    virtual bool IsPrelaunch() const { return false; }
 
 protected:
     class SessionLifeCycleTask : public virtual RefBase {
@@ -1103,6 +1105,21 @@ protected:
      */
     uint32_t propertyDirtyFlags_ = 0;
 
+    template<typename T1, typename T2, typename Ret>
+    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
+    template<typename T>
+    inline EnableIfSame<T, ILifecycleListener, std::vector<std::weak_ptr<ILifecycleListener>>> GetListeners()
+    {
+        std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
+        {
+            std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
+            for (auto& listener : lifecycleListeners_) {
+                lifecycleListeners.push_back(listener);
+            }
+        }
+        return lifecycleListeners;
+    }
+
 private:
     void HandleDialogForeground();
     void HandleDialogBackground();
@@ -1133,21 +1150,6 @@ private:
     void InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property);
 
     void UpdateGravityWhenUpdateWindowMode(WindowMode mode);
-
-    template<typename T1, typename T2, typename Ret>
-    using EnableIfSame = typename std::enable_if<std::is_same_v<T1, T2>, Ret>::type;
-    template<typename T>
-    inline EnableIfSame<T, ILifecycleListener, std::vector<std::weak_ptr<ILifecycleListener>>> GetListeners()
-    {
-        std::vector<std::weak_ptr<ILifecycleListener>> lifecycleListeners;
-        {
-            std::lock_guard<std::recursive_mutex> lock(lifecycleListenersMutex_);
-            for (auto& listener : lifecycleListeners_) {
-                lifecycleListeners.push_back(listener);
-            }
-        }
-        return lifecycleListeners;
-    }
 
     std::recursive_mutex lifecycleListenersMutex_;
     std::vector<std::shared_ptr<ILifecycleListener>> lifecycleListeners_;

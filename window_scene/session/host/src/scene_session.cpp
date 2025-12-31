@@ -192,6 +192,8 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
                     AAFwk::StartupVisibility::STARTUP_HIDE;
                 property->SetMissionInfo(missionInfo);
             }
+            property->SetPrelaunch(session->GetSessionInfo().isPrelaunch_);
+            property->SetFrameNum(session->GetSessionInfo().frameNum_);
         }
         session->RetrieveStatusBarDefaultVisibility();
         auto ret = LOCK_GUARD_EXPR(SCENE_GUARD, session->Session::ConnectInner(
@@ -612,6 +614,22 @@ WMError SceneSession::NotifySnapshotUpdate()
     return WMError::WM_OK;
 }
 
+WMError SceneSession::NotifyRemovePrelaunchStartingWindow()
+{
+    PostTask([weakThis = wptr(this), where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s: session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s: id: %{public}d", where, session->GetPersistentId());
+        if (WindowHelper::IsMainWindow(session->GetWindowType())) {
+            session->RemovePrelaunchStartingWindow();
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
+
 void SceneSession::ClearSpecificSessionCbMap()
 {
     PostTask([weakThis = wptr(this), where = __func__] {
@@ -702,6 +720,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Remove prelaunch session id: %{public}d", where,
                 session->GetPersistentId());
             session->sessionInfo_.isPrelaunch_ = false;
+            session->sessionInfo_.frameNum_ = 0;
         }
         if (isFromClient) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Client need notify destroy session, id: %{public}d",
@@ -6007,20 +6026,21 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.startAnimationOptions = abilitySessionInfo->windowCreateParams->animationParams;
     }
     info.isPrelaunch_ = abilitySessionInfo->isPrelaunch;
+    info.frameNum_ = abilitySessionInfo->frameNum;
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s,"
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d,"
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d,"
         "needClearInNotShowRecent:%{public}u, appInstanceKey: %{public}s,"
         "supportedWindowModes.size:%{public}zu, requestId:%{public}d,"
         "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d,"
-        "reuseDelegatorWindow:%{public}d, startWindowType:%{public}d, isPrelaunch:%{public}d",
+        "reuseDelegatorWindow:%{public}d, startWindowType:%{public}d, isPrelaunch:%{public}d, frameNum:%{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(),
         info.supportedWindowModes.size(), info.requestId,
         info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
         info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight,
-        info.reuseDelegatorWindow, info.startWindowType_, info.isPrelaunch_);
+        info.reuseDelegatorWindow, info.startWindowType_, info.isPrelaunch_, info.frameNum_);
     return info;
 }
 
