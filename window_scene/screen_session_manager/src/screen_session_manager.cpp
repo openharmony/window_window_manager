@@ -4293,6 +4293,10 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
 DMError ScreenSessionManager::GetSupportsInput(DisplayId displayId, bool& supportsInput)
 {
     TLOGI(WmsLogTag::DMS, "start");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
@@ -4305,6 +4309,10 @@ DMError ScreenSessionManager::GetSupportsInput(DisplayId displayId, bool& suppor
 DMError ScreenSessionManager::SetSupportsInput(DisplayId displayId, bool supportsInput)
 {
     TLOGI(WmsLogTag::DMS, "start");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
