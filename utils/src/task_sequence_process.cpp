@@ -18,15 +18,18 @@
 
 namespace OHOS::Rosen {
 TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize, uint64_t maxTimeInterval)
-    : maxQueueSize_(maxQueueSize),
-    maxTimeInterval_(maxTimeInterval)
-    {
-        if (maxQueueSize_ <= 0) {
-            maxQueueSize_ = 1;
-        }
-        CreatSysTimer();
-        TLOGI(WmsLogTag::DMS, "TaskSequenceProcess created with maxQueueSize: %{public}u", maxQueueSize_);
+    : maxQueueSize_(maxQueueSize), maxTimeInterval_(maxTimeInterval)
+{
+    if (maxQueueSize_ <= 0) {
+        maxQueueSize_ = 1;
     }
+    if (CreatSysTimer()) {
+        TLOGI(WmsLogTag::DMS, "TaskSequenceProcess created succ, maxQueueSize: %{public}u", maxQueueSize_);
+    } else {
+        TLOGI(WmsLogTag::DMS, "TaskSequenceProcess created fail, maxQueueSize: %{public}u", maxQueueSize_);
+    }
+}
+
 TaskSequenceProcess::~TaskSequenceProcess()
 {
     DestroySysTimer();
@@ -79,55 +82,58 @@ void TaskSequenceProcess::FinishTask()
     ExecTask();
 }
 
-void TaskSequenceProcess::CreatSysTimer()
+bool TaskSequenceProcess::CreatSysTimer()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess StartSysTimer");
+
     std::lock_guard<std::mutex> lock(timerMutex_);
     if (taskTimerId_ != 0) {
         TLOGI(WmsLogTag::DMS, "TaskTimerId is not zero");
-        return;
+        return false;
     }
-    std::shared_ptr<WindowSysTimer> taskSysTimer =
-        std::make_unique<WindowSysTimer>(false, maxTimeInterval_, false);
-    std::function<void()> callback = [this]() {
-        taskRunningFlag_.store(false);
-    };
+    std::shared_ptr<WindowSysTimer> taskSysTimer = std::make_unique<WindowSysTimer>(false, maxTimeInterval_, false);
+    std::function<void()> callback = [this]() { taskRunningFlag_.store(false); };
     taskSysTimer->SetCallbackInfo(callback);
     taskSysTimer->SetName("task_system_timer");
     taskTimerId_ = MiscServices::TimeServiceClient::GetInstance()->CreateTimer(taskSysTimer);
+
+    return taskTimerId_ ? true : false;
 }
 
-void TaskSequenceProcess::DestroySysTimer()
+bool TaskSequenceProcess::DestroySysTimer()
 {
     std::lock_guard<std::mutex> lock(timerMutex_);
-    MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(taskTimerId_);
+    bool result = MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(taskTimerId_);
     taskTimerId_ = 0;
-    TLOGI(WmsLogTag::DMS, "stop TaskSequenceProcess timer success");
+    TLOGI(WmsLogTag::DMS, "stop TaskSequenceProcess timer result %{public}u", result);
+    return result;
 }
 
-void TaskSequenceProcess::StartSysTimer()
+bool TaskSequenceProcess::StartSysTimer()
 {
+    std::lock_guard<std::mutex> lock(timerMutex_);
     if (taskTimerId_ == 0) {
         TLOGI(WmsLogTag::DMS, "TaskTimerId is zero");
-        return;
+        return false;
     }
     auto currentTime = std::chrono::steady_clock::now();
     auto duration = std::chrono::milliseconds(maxTimeInterval_);
     auto expireTime = currentTime + duration;
-    uint64_t triggerTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-        expireTime.time_since_epoch()).count();
-    MiscServices::TimeServiceClient::GetInstance()->StartTimer(taskTimerId_, triggerTime);
-    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess timer success");
+    uint64_t triggerTime = std::chrono::duration_cast<std::chrono::milliseconds>(expireTime.time_since_epoch()).count();
+    bool result = MiscServices::TimeServiceClient::GetInstance()->StartTimer(taskTimerId_, triggerTime);
+    TLOGI(WmsLogTag::DMS, "TaskSequenceProcess timer result %{public}u", result);
+    return result;
 }
 
-void TaskSequenceProcess::StopSysTimer()
+bool TaskSequenceProcess::StopSysTimer()
 {
     std::lock_guard<std::mutex> lock(timerMutex_);
     if (taskTimerId_ == 0) {
         TLOGW(WmsLogTag::DMS, "TaskSequenceProcess TaskTimerId is zero");
-        return;
+        return false;
     }
-    MiscServices::TimeServiceClient::GetInstance()->StopTimer(taskTimerId_);
-    TLOGI(WmsLogTag::DMS, "stop TaskSequenceProcess timer success");
+    bool result = MiscServices::TimeServiceClient::GetInstance()->StopTimer(taskTimerId_);
+    TLOGI(WmsLogTag::DMS, "stop TaskSequenceProcess timer result %{public}u", result);
+    return result;
 }
 } // namespace OHOS::Rosen

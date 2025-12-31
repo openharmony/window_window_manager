@@ -38,7 +38,6 @@ public:
     void SetInterval(const uint64_t &interval) override;
     void SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> _wantAgent) override;
     void SetCallbackInfo(const std::function<void()> &callBack);
-    int32_t GetTodayMidnightTimestamp(int hour, int min, int sec);
 
 private:
     std::function<void()> callBack_ = nullptr;
