@@ -2268,12 +2268,12 @@ HWTEST_F(ScreenSessionTest, CalcBoundsInRotationZero, TestSize.Level1)
     property.SetBounds(bounds);
     property.UpdateDeviceRotation(Rotation::ROTATION_0);
     session->SetScreenProperty(property);
-    auto res = session->CalcBoundsInRotationZero();
+    auto res = session->CalcBoundsInRotationZero(FoldDisplayMode::MAIN);
     EXPECT_EQ(res.rect_.width_, 1344);
 
     property.UpdateDeviceRotation(Rotation::ROTATION_90);
     session->SetScreenProperty(property);
-    res = session->CalcBoundsInRotationZero();
+    res = session->CalcBoundsInRotationZero(FoldDisplayMode::MAIN);
     EXPECT_EQ(res.rect_.width_, 2772);
 }
 
