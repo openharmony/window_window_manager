@@ -449,7 +449,7 @@ void WindowInfoReporter::ReportWindowIO()
     for (const auto& elem : ioRecordMapCopy) {
         std::string scene = elem.first;
         std::ostringstream oss;
-        for (onst auto& subSceneElem : elem.second) {
+        for (const auto& subSceneElem : elem.second) {
             if (subSceneElem.first == "TOTAL_WRITE_DATA") {
                 continue;
             }
@@ -460,10 +460,10 @@ void WindowInfoReporter::ReportWindowIO()
             msg.erase(msg.length() - 2);
         }
         double totalWriteData = ioRecordMap_[scene]["TOTAL_WRITE_DATA"] / 1024.0;
-        TLOGI(WmsLogTag::DEFAULT, "tatal: %{public}f, msg: %{public}s", totalWriteData, msg.c_str());
+        TLOGI(WmsLogTag::DEFAULT, "total: %{public}f, msg: %{public}s", totalWriteData, msg.c_str());
         int32_t ret = HiSysEventWrite(
-            HiviewDFX::HiSysEvent::Domain::WINDOW_IO_UE, eventName,
-            HiviewDFX::HiSysEvent::EventType::STATISTIC,
+            OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_IO_UE, eventName,
+            OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
             "SCENES", scene,
             "TOTAL_WRITE_DATA", std::to_string(totalWriteData), // size MB
             "MSG", msg);
