@@ -174,7 +174,6 @@ bool SingleDisplaySuperFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displa
 void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
     if (!CheckDisplayModeChange(displayMode, false, reason)) {
-        ScreenSessionManager::GetInstance().RunFinishTask();
         return;
     }
     TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, reason: %{public}d", displayMode, reason);
@@ -202,7 +201,6 @@ void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displ
     DisplayModeChangeReason reason)
 {
     if (!CheckDisplayModeChange(displayMode, isForce)) {
-        ScreenSessionManager::GetInstance().RunFinishTask();
         return;
     }
     ChangeScreenDisplayModeInner(displayMode, reason);
