@@ -3467,6 +3467,11 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGE(WmsLogTag::DMS, "internalSession null");
         return false;
     }
+    /*
+     * When device is in the hover state with the magnetic keyboard attached and restarted, there will be a landscape
+     * orientation and keyboard state. This state does not normally exist, and it is expected that the logic for
+     * ResolutionEffect should not be applied. Therefore, a status check for SuperFoldStatus needs to be added.
+     */
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && (IsVertical(internalSession->GetRotation()) ||
         GetSuperFoldStatus() != SuperFoldStatus::EXPANDED)){
         TLOGI(WmsLogTag::DMS, "SuperFoldDisplayDevice status not support");
@@ -3477,8 +3482,8 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         internalProperty.GetScreenRealHeight()};
     TLOGI(WmsLogTag::DMS, "realResolutionRect %{public}d %{public}d %{public}d %{public}d",
         realResolutionRect.posX_, realResolutionRect.posY_, realResolutionRect.width_, realResolutionRect.height_);
-    SetInternalScreenResolutionEffect(internalSession, realResolutionRect);
     curResolutionEffectEnable_.store(false);
+    SetInternalScreenResolutionEffect(internalSession, realResolutionRect);
     if (externalSession != nullptr) {
         auto externalProperty = externalSession->GetScreenProperty();
         DMRect externalRealRect = { 0, 0, externalProperty.GetScreenRealWidth(),
@@ -3516,7 +3521,7 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
         TLOGE(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy->SetInternalClipToBounds(internalSession->GetScreenId(), true);
+    clientProxy->SetInternalClipToBounds(internalSession->GetScreenId(), curResolutionEffectEnable_.load());
 }
 
 void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& targetRect)
@@ -3533,12 +3538,12 @@ void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSe
     externalSession->SetMirrorScreenRegion(externalSession->GetScreenId(), mirrorRegion);
     externalSession->EnableMirrorScreenRegion();
     // Parameters required for multiinput cursor
-    externalSession->UpdateMirrorWidth(targetRect.width_);
-    externalSession->UpdateMirrorHeight(targetRect.height_);
+    externalSession->UpdateMirrorWidth(mirrorRegion.width_);
+    externalSession->UpdateMirrorHeight(mirrorRegion.height_);
     sptr<ScreenSession> phyScreenSession = GetPhysicalScreenSession(externalSession->GetRSScreenId());
     if (phyScreenSession) {
-        phyScreenSession->UpdateMirrorWidth(targetRect.width_);
-        phyScreenSession->UpdateMirrorHeight(targetRect.height_);
+        phyScreenSession->UpdateMirrorWidth(mirrorRegion.width_);
+        phyScreenSession->UpdateMirrorHeight(mirrorRegion.height_);
     }
 }
 
@@ -10592,6 +10597,23 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     }
 }
 
+void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser()
+{
+    if (!g_isPcDevice) {
+        return;
+    }
+    // After switching users, the listener will become invalid and needs to be re-registered. 
+    ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
+    RegisterSettingResolutionEffectObserver();
+    //ensure updateavilibearea success after switch user
+    auto internalSession = GetInternalScreenSession();
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ScreenSession Null");
+        return;
+    }
+    internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+}
+
 void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot)
 {
 #ifdef WM_MULTI_USR_ABILITY_ENABLE
@@ -10639,11 +10661,9 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     }
     currentUserId_ = newUserId;
     currentScbPId_ = newScbPid;
-    // After switching users, the listener will become invalid and needs to be re-registered.
-    ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
-    RegisterSettingResolutionEffectObserver();
     scbSwitchCV_.notify_all();
     oldScbDisplayMode_ = GetFoldDisplayMode();
+    HandleResolutionEffectAfterSwitchUser();
 #endif
 }
 
