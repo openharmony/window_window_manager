@@ -1622,20 +1622,15 @@ Rotation ScreenSession::CalcRotationSystemInner(Orientation orientation, FoldDis
  
 Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode)
 {
-    Rotation deviceRotation = property_.GetDeviceRotation();
-    auto bounds = property_.GetBounds();
-    if (!IsVertical(deviceRotation)) {
-        uint32_t width = bounds.rect_.GetWidth();
-        bounds.rect_.width_ = bounds.rect_.GetHeight();
-        bounds.rect_.height_ = width;
-    }
+    RRect boundsInRotationZero = CalcBoundsInRotationZero(foldDisplayMode);
     DisplayOrientation displayOrientation = CalcOrientationToDisplayOrientation(orientation);
-    return CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
+    return CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, boundsInRotationZero);
 }
 
-RRect ScreenSession::CalcBoundsInRotationZero()
+RRect ScreenSession::CalcBoundsInRotationZero(FoldDisplayMode foldDisplayMode)
 {
     Rotation deviceRotation = property_.GetDeviceRotation();
+    RemoveRotationCorrection(deviceRotation, foldDisplayMode);
     RRect bounds = property_.GetBounds();
     if (!IsVertical(deviceRotation)) {
         uint32_t width = bounds.rect_.GetWidth();
