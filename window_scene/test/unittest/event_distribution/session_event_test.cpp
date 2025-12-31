@@ -27,7 +27,6 @@
 #include "session_info.h"
 #include "key_event.h"
 #include "wm_common.h"
-#include "window_event_channel_base.h"
 #include "window_manager_hilog.h"
 
 using namespace testing;
