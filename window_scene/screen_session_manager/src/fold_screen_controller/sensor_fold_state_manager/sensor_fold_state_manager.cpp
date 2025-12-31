@@ -78,6 +78,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
             }
         } else {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
+            FinishTaskSequence();
         }
 
         // running status is false , foldstatus change process is finished here, we should start next task
@@ -139,6 +140,7 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
         } else {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", manager->mState_);
+            manager->FinishTaskSequence();
         }
 
         // running status is false , foldstatus change process is finished here, we should start next task
