@@ -261,6 +261,7 @@ public:
     DMError GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo) override;
     DMError GetSupportsInput(DisplayId displayId, bool& supportsInput) override;
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput) override;
+    DMError GetBundleName(DisplayId displayId, std::string& bundleName) override;
     DMError SetPrimaryDisplaySystemDpi(float dpi) override;
     DMError SetVirtualScreenAutoRotation(ScreenId screenId, bool enable) override;
     DMError SetScreenPrivacyWindowTagSwitch(ScreenId screenId, const std::vector<std::string>& privacyWindowTag,

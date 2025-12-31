@@ -2247,7 +2247,9 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
             uiContent_->SetContainerModalTitleVisible(false, true);
             uiContent_->EnableContainerModalCustomGesture(true);
         }
-        RegisterNavigateCallbackForPageCompatibleModeIfNeed();
+        for (auto& listener : uiContentCreateListeners_) {
+            listener->OnUIContentCreate(std::weak_ptr<Ace::UIContent>(uiContent_));
+        }
         TLOGI(WmsLogTag::DEFAULT, "[%{public}d, %{public}d]",
             uiContent_->IsUIExtensionSubWindow(), uiContent_->IsUIExtensionAbilityProcess());
     }
@@ -2931,7 +2933,7 @@ WMError WindowSessionImpl::SetTouchable(bool isTouchable)
 WMError WindowSessionImpl::SetTopmost(bool topmost)
 {
     TLOGD(WmsLogTag::WMS_HIERARCHY, "%{public}d", topmost);
-    if (!windowSystemConfig_.IsPcWindow()) {
+    if (!IsPcOrPadFreeMultiWindowMode()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (IsWindowSessionInvalid()) {
@@ -3237,6 +3239,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
         property_->SetRequestedOrientation(requestedOrientation, needAnimation);
     } else {
         property_->SetRequestedOrientation(orientation, needAnimation);
+        property_->SetIsSpecificSessionRequestOrientation(true);
     }
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
 }
@@ -8476,6 +8479,7 @@ WMError WindowSessionImpl::UpdateCompatScaleInfo(const Transform& transform)
     want.SetParam(Extension::COMPAT_IS_PROPORTION_SCALE_FIELD, IsAdaptToProportionalScale());
     want.SetParam(Extension::COMPAT_SCALE_X_FIELD, compatScaleX_);
     want.SetParam(Extension::COMPAT_SCALE_Y_FIELD, compatScaleY_);
+    NotifyTitleChange(true, 0);
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_COMPAT_INFO),
             want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
@@ -9054,41 +9058,46 @@ void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
     }
 }
 
-void WindowSessionImpl::RegisterNavigateCallbackForPageCompatibleModeIfNeed()
+WMError WindowSessionImpl::RegisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)
 {
-    const std::string compatibleModePage = property_->GetCompatibleModePage();
-    if (!uiContent_ || compatibleModePage.empty()) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "content is nullptr or page is empty");
-        return;
+    if (!listener) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent_->RegisterNavigateChangeCallback(
-        [weakThis = wptr(this), where = __func__](const OHOS::Ace::NavigateChangeInfo& fromPage,
-            const OHOS::Ace::NavigateChangeInfo& toPage) {
-        auto window = weakThis.promote();
-        if (!window) {
-            TLOGNE(WmsLogTag::WMS_COMPAT, "%{public}s window is null", where);
-            return;
-        }
-        window->HandleNavigateCallbackForPageCompatibleMode(fromPage.name, toPage.name);
-    });
+    TLOGI(WmsLogTag::WMS_COMPAT, "id: %{public}d", GetParentId());
+    std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+    uiContentCreateListeners_.emplace_back(listener);
+    return WMError::WM_OK;
 }
 
-void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
-    const std::string& fromPage, const std::string& toPage)
+WMError WindowSessionImpl::UnregisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)
 {
-    const std::string compatibleModePage = property_->GetCompatibleModePage();
-    if ((fromPage == compatibleModePage && toPage == compatibleModePage) ||
-        (fromPage != compatibleModePage && toPage != compatibleModePage)) {
-        return;
+    if (!listener) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "listener is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
     }
+    TLOGI(WmsLogTag::WMS_COMPAT, "id: %{public}d", GetParentId());
+    std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
+    auto iter = std::find(uiContentCreateListeners_.begin(), uiContentCreateListeners_.end(), listener);
+    if (iter != uiContentCreateListeners_.end()) {
+        uiContentCreateListeners_.erase(iter);
+    } else {
+        TLOGE(WmsLogTag::WMS_COMPAT, "listener not found");
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::UpdateCompatibleStyleMode(CompatibleStyleMode mode)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "id:%{public}d mode:%{public}d", GetParentId(), static_cast<int32_t>(mode));
     auto hostSession = GetHostSession();
     if (!hostSession) {
         TLOGNE(WmsLogTag::WMS_COMPAT, "hostSession is null");
-        return;
+        return WMError::WM_ERROR_NULLPTR;
     }
-    auto mode = toPage == compatibleModePage ? CompatibleStyleMode::LANDSCAPE_18_9 : CompatibleStyleMode::INVALID_VALUE;
     property_->SetPageCompatibleMode(mode);
     hostSession->NotifyCompatibleModeChange(mode);
+    return WMError::WM_OK;
 }
 } // namespace Rosen
 } // namespace OHOS

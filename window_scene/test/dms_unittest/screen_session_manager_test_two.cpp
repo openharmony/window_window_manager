@@ -1518,20 +1518,6 @@ HWTEST_F(ScreenSessionManagerTest, OnVerticalChangeBoundsWhenSwitchUser, TestSiz
 }
 
 /**
- * @tc.name: SetLandscapeLockStatus01
- * @tc.desc: SetLandscapeLockStatus01 test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetLandscapeLockStatus01, TestSize.Level1)
-{
-    g_errLog.clear();
-    MockAccesstokenKit::MockIsSACalling(false);
-    MockAccesstokenKit::MockIsSystemApp(false);
-    ssm_->SetLandscapeLockStatus(true);
-    EXPECT_TRUE(g_errLog.find("permission denied!") != std::string::npos);
-}
-
-/**
  * @tc.name: NotifyDisplayChangedByUid
  * @tc.desc: NotifyDisplayChangedByUid test
  * @tc.type: FUNC
@@ -3131,6 +3117,19 @@ HWTEST_F(ScreenSessionManagerTest, SetSupportsInput, TestSize.Level1)
     GTEST_LOG_(INFO) << "SetSupportsInput start";
     bool supportInput = false;
     auto ret = ssm_->SetSupportsInput(0, supportInput);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: GetBundleName
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetBundleName, TestSize.Level1)
+{
+    std::string bundleName = "";
+    DisplayId illegalDisplay = 10000;
+    auto ret = ssm_->GetBundleName(illegalDisplay, bundleName);
     EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
 }
 

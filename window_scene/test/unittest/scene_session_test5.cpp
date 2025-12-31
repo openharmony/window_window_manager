@@ -3049,6 +3049,101 @@ HWTEST_F(SceneSessionTest5, ConvertRotationToOrientation, Function | SmallTest |
 }
 
 /**
+ * @tc.name: HandleActionUpdateViewKeepScreenOn
+ * @tc.desc: HandleActionUpdateViewKeepScreenOn
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SceneSessionTest5, HandleActionUpdateViewKeepScreenOn, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleActionUpdateViewKeepScreenOn";
+    info.bundleName_ = "HandleActionUpdateViewKeepScreenOn";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetViewKeepScreenOn(true);
+    WMError result = sceneSession->HandleActionUpdateViewKeepScreenOn(
+        property, WSPropertyChangeAction::ACTION_UPDATE_KEEP_SCREEN_ON);
+    EXPECT_EQ(result, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.desc: SetSkipSelfWhenShowOnVirtualScreen
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSkipSelfWhenShowOnVirtualScreen, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSkipSelfWhenShowOnVirtualScreen";
+    info.bundleName_ = "SetSkipSelfWhenShowOnVirtualScreen";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    EXPECT_EQ(sceneSession->GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen(), true);
+
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->surfaceNode_ = surfaceNode;
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetWindowType(WindowType::WINDOW_TYPE_PIP);
+    sceneSession->SetSessionProperty(property);
+
+    uint64_t persistentId = 0;
+    bool isSkip = false;
+    sptr<SceneSession::SpecificSessionCallback> specificCallBack =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallBack->onSetSkipSelfWhenShowOnVirtualScreen_ =
+        [&persistentId, &isSkip](uint64_t id, bool skip) {
+            persistentId = id;
+            isSkip = skip;
+        };
+    sceneSession->specificCallback_ = specificCallBack;
+
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(true);
+    EXPECT_EQ(persistentId, surfaceNode->GetId());
+    EXPECT_EQ(isSkip, true);
+
+    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sceneSession->SetSessionProperty(property);
+    sceneSession->SetSkipSelfWhenShowOnVirtualScreen(false);
+    EXPECT_EQ(persistentId, sceneSession->GetMissionId());
+    EXPECT_EQ(isSkip, false);
+}
+
+/**
+ * @tc.name: SetSkipEventOnCastPlus
+ * @tc.desc: SetSkipEventOnCastPlus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, SetSkipEventOnCastPlus, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSkipEventOnCastPlus";
+    info.bundleName_ = "SetSkipEventOnCastPlus";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    int32_t persistentId = 0;
+    bool isSkip = false;
+    sptr<SceneSession::SpecificSessionCallback> specificCallBack =
+         sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallBack->onSetSkipEventOnCastPlus_ =
+        [&persistentId, &isSkip](int32_t id, bool skip) {
+            persistentId = id;
+            isSkip = skip;
+        };
+    sceneSession->specificCallback_ = specificCallBack;
+    sceneSession->SetSkipEventOnCastPlus(true);
+    EXPECT_EQ(persistentId, sceneSession->GetMissionId());
+    EXPECT_EQ(isSkip, true);
+}
+
+/**
  * @tc.name: GetSystemBarPropertyForRotation
  * @tc.desc: GetSystemBarPropertyForRotation
  * @tc.type: FUNC

@@ -2123,12 +2123,12 @@ export interface SubWindowOptions {
   /**
    * Indicates zlevel of subwindow
    * 
-   * @type { ?number }
+   * @type { ?int }
    * @syscap SystemCapability.Window.SessionManager
    * @atomicservice
    * @since 18
    */
-  zLevel?: number;
+  zLevel?: int;
   /**
    * Indicates whether subwindow show outline
    * 
@@ -2386,7 +2386,7 @@ export class ExtConfigSubWindowOptions implements SubWindowOptions {
   modalityType?: ModalityType;
   windowRect?: Rect;
   maximizeSupported?: boolean;
-  zLevel?: number;
+  zLevel?: int;
   outlineEnabled?: boolean;
 
   set title(value: string) {
