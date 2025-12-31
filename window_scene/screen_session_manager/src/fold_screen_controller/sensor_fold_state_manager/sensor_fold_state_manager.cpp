@@ -21,7 +21,7 @@
 #include "fold_screen_state_internel.h"
 #include "screen_session_manager/include/screen_session_manager.h"
 #include "window_manager_hilog.h"
-
+#include "task_sequence_process.h"
 #ifdef POWER_MANAGER_ENABLE
 #include <power_mgr_client.h>
 #endif
