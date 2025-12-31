@@ -171,6 +171,8 @@ export interface VirtualScreenConfig {
     density: double;
  
     surfaceId: string;
+
+    supportsFocus?: boolean;
 }
  
 export class VirtualScreenConfigImpl implements VirtualScreenConfig {
@@ -182,7 +184,9 @@ export class VirtualScreenConfigImpl implements VirtualScreenConfig {
  
     density: double;
  
-    surfaceId: string; 
+    surfaceId: string;
+
+    supportsFocus?: boolean;
 }
 
 export enum FoldDisplayMode {

@@ -92,22 +92,6 @@ HWTEST_F(WindowSessionImplTest4, GetRequestWindowState, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFocusabletest01
- * @tc.desc: GetFocusable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, GetFocusable, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetFocusabletest01 start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetFocusable");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    bool ret = window->GetFocusable();
-    ASSERT_EQ(ret, true);
-    GTEST_LOG_(INFO) << "WindowSessionImplTest4: GetFocusabletest01 end";
-}
-
-/**
  * @tc.name: TransferAccessibilityEvent
  * @tc.desc: TransferAccessibilityEvent
  * @tc.type: FUNC
@@ -147,92 +131,6 @@ HWTEST_F(WindowSessionImplTest4, SetSingleFrameComposerEnabled01, TestSize.Level
     window->surfaceNode_ = nullptr;
     retCode = window->SetSingleFrameComposerEnabled(false);
     ASSERT_EQ(retCode, WMError::WM_ERROR_INVALID_WINDOW);
-}
-
-/**
- * @tc.name: SetTopmost
- * @tc.desc: SetTopmost
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetTopmost, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetTopmost");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    WMError res = window->SetTopmost(true);
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, res);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    res = window->SetTopmost(true);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, res);
-
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    window->hostSession_ = session;
-    window->state_ = WindowState::STATE_CREATED;
-    res = window->SetTopmost(true);
-    ASSERT_EQ(WMError::WM_OK, res);
-}
-
-/**
- * @tc.name: IsTopmost
- * @tc.desc: IsTopmost
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, IsTopmost, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsTopmost");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    bool res = window->IsTopmost();
-    ASSERT_FALSE(res);
-}
-
-/**
- * @tc.name: SetMainWindowTopmost
- * @tc.desc: SetMainWindowTopmost
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, SetMainWindowTopmost, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetMainWindowTopmost");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    WMError res = window->SetMainWindowTopmost(false);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    res = window->SetMainWindowTopmost(true);
-    EXPECT_EQ(res, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    res = window->SetMainWindowTopmost(true);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    res = window->SetMainWindowTopmost(true);
-    EXPECT_EQ(res, WMError::WM_OK);
-    res = window->SetMainWindowTopmost(false);
-    EXPECT_EQ(res, WMError::WM_OK);
-}
-
-/**
- * @tc.name: IsMainWindowTopmost
- * @tc.desc: IsMainWindowTopmost
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest4, IsMainWindowTopmost, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("IsMainWindowTopmost");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    bool res = window->IsMainWindowTopmost();
-    ASSERT_FALSE(res);
 }
 
 /**

@@ -2268,12 +2268,12 @@ HWTEST_F(ScreenSessionTest, CalcBoundsInRotationZero, TestSize.Level1)
     property.SetBounds(bounds);
     property.UpdateDeviceRotation(Rotation::ROTATION_0);
     session->SetScreenProperty(property);
-    auto res = session->CalcBoundsInRotationZero();
+    auto res = session->CalcBoundsInRotationZero(FoldDisplayMode::MAIN);
     EXPECT_EQ(res.rect_.width_, 1344);
 
     property.UpdateDeviceRotation(Rotation::ROTATION_90);
     session->SetScreenProperty(property);
-    res = session->CalcBoundsInRotationZero();
+    res = session->CalcBoundsInRotationZero(FoldDisplayMode::MAIN);
     EXPECT_EQ(res.rect_.width_, 2772);
 }
 
@@ -4909,6 +4909,21 @@ HWTEST_F(ScreenSessionTest, SetSupportsInput, TestSize.Level1)
     session->SetSupportsInput(true);
     supportInput = session->GetSupportsInput();
     EXPECT_EQ(supportInput, true);
+}
+
+/**
+ * @tc.name  : SetBundleName
+ * @tc.desc  : SetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetBundleName, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetBundleName("test");
+    auto bundleName = session->GetBundleName();
+    EXPECT_EQ(bundleName, "test");
 }
 
 /**

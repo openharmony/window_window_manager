@@ -2594,6 +2594,78 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetSupportsInput01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetBundleName
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetBundleName, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    std::string bundleName = "";
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    screenSessionManagerProxy->GetBundleName(0, bundleName);
+    EXPECT_TRUE(logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    screenSessionManagerProxy->GetBundleName(0, bundleName);
+    EXPECT_TRUE(logMsg.find("Write displayId failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: GetBundleName01
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetBundleName01, TestSize.Level1)
+{
+    MockMessageParcel::ClearAllErrorFlag();
+    std::string bundleName = "";
+
+    // remote == nullptr
+    auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = proxy->GetBundleName(0, bundleName);
+    EXPECT_EQ(DMError::DM_ERROR_NULLPTR, ret);
+
+    // WriteInterfaceToken failed
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    proxy =  sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_NE(DMError::DM_ERROR_NULLPTR, ret);
+    ret = proxy->GetBundleName(0, bundleName);
+    EXPECT_EQ(DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED, ret);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // WriteUint64 failed
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    ret = proxy->GetBundleName(0, bundleName);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteUint64ErrorFlag(false);
+
+    // WriteBool failed
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ret = proxy->GetBundleName(0, bundleName);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    // SendRequest failed
+    ASSERT_NE(proxy, nullptr);
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->GetBundleName(0, bundleName);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Pass all
+    ret = proxy->GetBundleName(0, bundleName);
+    EXPECT_EQ(DMError::DM_ERROR_IPC_FAILED, ret);
+}
+
+/**
  * @tc.name: SetOrientation
  * @tc.desc: SetOrientation
  * @tc.type: FUNC

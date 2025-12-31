@@ -75,6 +75,24 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     }
     return contentInfoType;
 }
+
+const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
+    {OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED, Orientation::UNSPECIFIED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE, Orientation::HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT, Orientation::VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT, Orientation::LOCKED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED, Orientation::REVERSE_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED, Orientation::REVERSE_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION, Orientation::SENSOR},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE, Orientation::SENSOR_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT, Orientation::SENSOR_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED, Orientation::AUTO_ROTATION_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
+        Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
+        Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::LOCKED, Orientation::LOCKED},
+};
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
@@ -82,6 +100,14 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
     { ColorSpace::COLOR_SPACE_DEFAULT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB },
     { ColorSpace::COLOR_SPACE_WIDE_GAMUT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3 },
+};
+
+const std::map<DragType, uint32_t> STYLEID_MAP = {
+    {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
+    {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
+    {DragType::DRAG_LEFT_OR_RIGHT, MMI::MOUSE_ICON::WEST_EAST},
+    {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
+    {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
 };
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;

@@ -146,6 +146,7 @@ public:
     DMError GetBrightnessInfo(DisplayId dispalyId, ScreenBrightnessInfo& brightnessInfo);
     DMError GetSupportsInput(DisplayId displayId, bool& supportsInput);
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
+    DMError GetBundleName(DisplayId displayId, std::string& bundleName);
     DMError ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position);
     DMError ConvertGlobalCoordinateToRelative(const Position& globalPosition, RelativePosition& relativePosition);
     DMError ConvertGlobalCoordinateToRelativeWithDisplayId(const Position& globalPosition, DisplayId displayId,
@@ -2349,7 +2350,7 @@ void DisplayManager::Impl::NotifyScreenshot(sptr<ScreenshotInfo> info)
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         screenshotListeners = screenshotListeners_;
     }
-    TLOGI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
+    TLOGNI(WmsLogTag::DMS, "NotifyScreenshot trigger:[%{public}s] displayId:%{public}" PRIu64" size:%{public}zu",
         info->GetTrigger().c_str(), info->GetDisplayId(), screenshotListeners.size());
     for (auto& listener : screenshotListeners) {
         listener->OnScreenshot(*info);
@@ -2652,7 +2653,7 @@ DMError DisplayManager::ProxyForFreeze(std::set<int32_t> pidList, bool isProxy)
     for (auto pid : pidList) {
         oss << pid << " ";
     }
-    TLOGI(WmsLogTag::DMS, "pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
+    TLOGNI(WmsLogTag::DMS, "pidList:%{public}s, isProxy: %{public}d", oss.str().c_str(), isProxy);
     return pImpl_->ProxyForFreeze(pidList, isProxy);
 }
 
@@ -2944,6 +2945,16 @@ DMError DisplayManager::SetSupportsInput(DisplayId displayId, bool supportsInput
 DMError DisplayManager::Impl::SetSupportsInput(DisplayId displayId, bool supportsInput)
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().SetSupportsInput(displayId, supportsInput);
+}
+
+DMError DisplayManager::GetBundleName(DisplayId displayId, std::string& bundleName)
+{
+    return pImpl_->GetBundleName(displayId, bundleName);
+}
+
+DMError DisplayManager::Impl::GetBundleName(DisplayId displayId, std::string& bundleName)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().GetBundleName(displayId, bundleName);
 }
 
 DMError DisplayManager::ConvertRelativeCoordinateToGlobal(const RelativePosition& relativePosition, Position& position)

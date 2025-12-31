@@ -186,7 +186,6 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetAppInstanceKey(session->GetAppInstanceKey());
             property->SetUseControlState(session->isAppUseControl_);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
-            property->SetCompatibleModePage(session->GetSessionInfo().compatibleModePage);
             if (session->GetSessionInfo().processOptions != nullptr) {
                 MissionInfo missionInfo;
                 missionInfo.startupInvisibility_ = session->GetSessionInfo().processOptions->startupVisibility ==
@@ -2772,10 +2771,6 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool i
     auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
     bool isAvailableScreen = !screenSession || (screenSession->GetName() != "HiCar");
     if (isWindowFloatingOrSplit && isAvailableWindowType && isAvailableDevice && isAvailableScreen) {
-        // mini floating scene no need avoid
-        if (LessOrEqual(Session::GetFloatingScale(), MINI_FLOAT_SCALE) && !ignoreVisibility) {
-            return;
-        }
         float vpr = 3.5f; // 3.5f: default pixel ratio
         auto display = DisplayManager::GetInstance().GetDefaultDisplay();
         if (display == nullptr) {
@@ -9456,7 +9451,7 @@ WSError SceneSession::ConvertDisplayOrientationToDisplayRotation(const int32_t o
     }
     FoldDisplayMode foldDisplayMode = ScreenSessionManagerClient::GetInstance().GetFoldDisplayMode();
     DisplayOrientation displayOrientation = static_cast<DisplayOrientation>(orientation);
-    RRect bounds = screenSession->CalcBoundsInRotationZero();
+    RRect bounds = screenSession->CalcBoundsInRotationZero(foldDisplayMode);
     Rotation targetRotation =
         screenSession->CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, bounds);
     rotation = static_cast<int32_t>(targetRotation);
@@ -10293,8 +10288,9 @@ WMError SceneSession::SetReceiveDragEventEnabled(const std::vector<int32_t>& par
         TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    bool enalbed = static_cast<bool>(parameters[1]);
-    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enalbed);
+    bool enabled = static_cast<bool>(parameters[1]);
+    SetSessionInfoReceiveDragEventEnabled(enabled);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_RECEIVE_DRAG_EVENT, !enabled);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }
@@ -10305,8 +10301,9 @@ WMError SceneSession::SetSeparationTouchEnabled(const std::vector<int32_t>& para
         TLOGE(WmsLogTag::WMS_EVENT, "The param is illegal");
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    bool enalbed = static_cast<bool>(parameters[1]);
-    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, !enalbed);
+    bool enabled = static_cast<bool>(parameters[1]);
+    SetSessionInfoSeparationTouchEnabled(enabled);
+    SetSessionInfoAdvancedFeatureFlag(OHOS::Rosen::ADVANCED_FEATURE_BIT_WINDOW_SEPARATION_TOUCH_ENABLED, !enabled);
     NotifySessionInfoChange();
     return WMError::WM_OK;
 }

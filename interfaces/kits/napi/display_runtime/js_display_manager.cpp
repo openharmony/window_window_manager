@@ -33,6 +33,13 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+const std::map<DmErrorCode, std::string> brightnessInfoErrCodeMap = {
+    {DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT, "Capability not supported."},
+    {DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "This display manager service works abnormally."},
+    {DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "Parameter error. Possible cause: 1. Invalid parameter range."}
+};
+}
 using namespace AbilityRuntime;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
@@ -248,7 +255,7 @@ napi_value OnGetDefaultDisplay(napi_env env, napi_callback_info info)
         sptr<Display> display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
         if (display != nullptr) {
             task->Resolve(env, CreateJsDisplayObject(env, display));
-            TLOGNI(WmsLogTag::DMS, "OnGetDefaultDisplay success");
+            TLOGD(WmsLogTag::DMS, "OnGetDefaultDisplay success");
         } else {
             task->Reject(env, CreateJsError(env,
                 static_cast<int32_t>(DMError::DM_ERROR_NULLPTR), "JsDisplayManager::OnGetDefaultDisplay failed."));

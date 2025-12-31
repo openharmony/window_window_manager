@@ -3379,6 +3379,25 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_3, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequest155_4
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest155_4, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    uint32_t code = static_cast<uint32_t>(
+        DisplayManagerMessage::TRANS_ID_SCREEN_GET_BUNDLE_NAME);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: OnRemoteRequest156
  * @tc.desc: normal function
  * @tc.type: FUNC

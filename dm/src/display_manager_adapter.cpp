@@ -1832,6 +1832,15 @@ DMError DisplayManagerAdapter::SetSupportsInput(DisplayId displayId, bool suppor
     return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
 }
 
+DMError DisplayManagerAdapter::GetBundleName(DisplayId displayId, std::string& bundleName)
+{
+    INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
+    if (screenSessionManagerServiceProxy_) {
+        return screenSessionManagerServiceProxy_->GetBundleName(displayId, bundleName);
+    }
+    return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
+}
+
 DMError ScreenManagerAdapter::SetVirtualScreenAutoRotation(ScreenId screenId, bool enable)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);

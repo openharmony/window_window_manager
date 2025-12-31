@@ -1059,6 +1059,15 @@ public:
     DMError SetSupportsInput(DisplayId displayId, bool supportsInput);
 
     /**
+     * @brief Get bundleName of display
+     *
+     * @param displayId
+     * @param bundleName
+     * @return DMError
+     */
+    DMError GetBundleName(DisplayId displayId, std::string& bundleName);
+
+    /**
      * @brief Unregister display attribute not listening .
      *
      * @param attributesNotListened Attributes which not listening.

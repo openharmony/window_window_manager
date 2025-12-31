@@ -303,7 +303,7 @@ bool IsUIExtCanShowOnLockScreen(const AppExecFwk::ElementName& element, uint32_t
         std::make_tuple("com.ohos.commondialog", "FoldStatusAbility", "phone_commondialog"),
         std::make_tuple("com.ohos.commondialog", "SecondaryReflexionAbility", "phone_commondialog"),
         std::make_tuple("com.huawei.hmos.clock", "ScreenLockCoverExtensionAbility", "entry"),
-        std::make_tuple("com.huawei.hmos.clock", "ScreenMomentXExtensionAbility", "entry"),
+        std::make_tuple("com.huawei.hmos.clock", "ClockScreenLockExtensionAbility", "entry"),
         std::make_tuple("com.huawei.hmos.penglaimodeassistant", "ExpandedDialogUIExtAbility", "entry"),
         std::make_tuple("com.huawei.hmos.penglaimodeassistant", "CameraDialogAbility", "entry"),
     };
@@ -3452,12 +3452,17 @@ int32_t SceneSessionManager::StartUIAbilityBySCBTimeoutCheck(const sptr<SceneSes
         coldStartFlag, retCode, windowStateChangeReason] {
         int timerId = HiviewDFX::XCollie::GetInstance().SetTimer("WMS:SSM:StartUIAbilityBySCB",
             START_UI_ABILITY_TIMEOUT/1000, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-        auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo,
-            *coldStartFlag, windowStateChangeReason, sceneSession->GetSessionInfo().isRestartApp_);
+        OHOS::AbilityRuntime::StartParamsBySCB startParams;
+        startParams.sceneFlag = windowStateChangeReason;
+        startParams.isRestart = sceneSession->GetSessionInfo().isRestartApp_;
+        startParams.pageConfig = sceneSession->GetSessionInfo().pageConfig;
+        auto result = AAFwk::AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(abilitySessionInfo, startParams,
+            *coldStartFlag);
         CloseAllFd(sceneSession->GetSessionInfo().want);
         HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
         *retCode = static_cast<int32_t>(result);
-        TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability retCode: %{public}d", *retCode);
+        TLOGNI(WmsLogTag::WMS_LIFE, "start ui ability sceneFlag:%{public}d isRestart:%{public}d pageConfig:%{public}zu retCode: %{public}d",
+            startParams.sceneFlag, startParams.isRestart, startParams.pageConfig.size(), *retCode);
     }, START_UI_ABILITY_TIMEOUT);
 
     if (isTimeout) {
@@ -4775,6 +4780,9 @@ void SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& 
     sessionInfo.windowMode = static_cast<int32_t>(property->GetWindowMode());
     sessionInfo.windowType_ = static_cast<uint32_t>(property->GetWindowType());
     sessionInfo.requestOrientation_ = static_cast<uint32_t>(property->GetRequestedOrientation());
+    sessionInfo.specificSessionRequestOrientation_ = property->GetIsSpecificSessionRequestOrientation()
+        ? static_cast<int32_t>(property->GetRequestedOrientation())
+        : -1;
     sessionInfo.sessionState_ = (property->GetWindowState() == WindowState::STATE_SHOWN)
                                     ? SessionState::STATE_ACTIVE
                                     : SessionState::STATE_BACKGROUND;
@@ -6981,7 +6989,9 @@ WSError SceneSessionManager::UpdateBrightness(int32_t persistentId)
         return WSError::WS_DO_NOTHING;
     }
     auto brightness = sceneSession->GetBrightness();
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    if (GetDisplayBrightness() != brightness) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Brightness: [%{public}f, %{public}f]", GetDisplayBrightness(), brightness);
+    }
     if (std::fabs(brightness - UNDEFINED_BRIGHTNESS) < std::numeric_limits<float>::min()) {
         if (IsNeedUpdateBrightness(persistentId, brightness)) {
             TLOGI(WmsLogTag::WMS_ATTRIBUTE, "adjust brightness with default value");
@@ -11147,11 +11157,14 @@ WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>&
             return WSError::WS_ERROR_INVALID_SESSION;
         }
         const auto& sessionInfo = sceneSession->GetSessionInfo();
-        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: state:%{public}d, id:%{public}d",
-            where, sessionInfo.callState_, persistentId);
+        TLOGNI(WmsLogTag::WMS_MAIN, "%{public}s: state:%{public}d, id:%{public}d, pageConfig:%{public}zu",
+            where, sessionInfo.callState_, persistentId, sceneSession->GetSessionInfo().pageConfig.size());
         auto abilitySessionInfo = SetAbilitySessionInfo(sceneSession, requestId, true);
         bool isColdStart = false;
-        AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, isColdStart);
+        OHOS::AbilityRuntime::StartParamsBySCB startParams;
+        startParams.pageConfig = sceneSession->GetSessionInfo().pageConfig;
+        startParams.sceneFlag = static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL);
+        AAFwk::AbilityManagerClient::GetInstance()->CallUIAbilityBySCB(abilitySessionInfo, startParams, isColdStart);
         CloseAllFd(sessionInfo.want);
         if (isColdStart) {
             TLOGNI(WmsLogTag::WMS_MAIN, "Cold start, identityToken:%{public}s, bundleName:%{public}s",
@@ -15418,6 +15431,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             actions.SetAllActive();
             HandleSpecialExtWindowFlagsChange(persistentId, ExtensionWindowFlags(), actions);
         }
+        remoteExtSession->RemoveDeathRecipient(extensionDeath_);
         extSessionInfoMap_.erase(iter->second);
         remoteExtSessionMap_.erase(iter);
     };
