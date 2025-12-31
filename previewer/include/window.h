@@ -964,6 +964,11 @@ public:
     {
         return true;
     }
+
+    /**
+     * @brief Flush vsync for prelaunch.
+     */
+    virtual void FlushVsync() {}
 };
 }
 }
