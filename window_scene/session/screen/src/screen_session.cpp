@@ -3275,6 +3275,8 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         return;
     }
 
+    screenProperty.SetPhyWidth(eventPara.GetPhyWidth());
+    screenProperty.SetPhyHeight(eventPara.GetPhyHeight());
     screenProperty.SetDpiPhyBounds(eventPara.GetPhyWidth(), eventPara.GetPhyHeight());
     screenProperty.SetPhyBounds(eventPara.GetPhyBounds());
     screenProperty.SetBounds(eventPara.GetBounds());
