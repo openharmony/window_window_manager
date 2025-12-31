@@ -128,8 +128,6 @@ test_external_deps = [
   "napi:ace_napi",
   "safwk:system_ability_fwk",
   "selinux_adapter:librestorecon",
-  "time_service:time_client",
-  "ability_runtime:wantagent_innerkits",
 ]
 
 ohos_unittest("ws_setting_observer_test") {
