@@ -41,7 +41,7 @@ private:
     std::function<void()> PopFromQueue();
     void PushToQueue(const std::function<void()>& task);
     void ExecTask();
-    bool CreatSysTimer();
+    bool CreateSysTimer();
     bool DestroySysTimer();
     bool StartSysTimer();
     bool StopSysTimer();
