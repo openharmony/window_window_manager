@@ -54,7 +54,7 @@ const int32_t FULL_STATUS_HEIGHT = 3;
 const int32_t GLOBAL_FULL_STATUS_WIDTH = 4;
 const int32_t SCREEN_HEIGHT = 5;
 const int32_t FULL_STATUS_OFFSET_X = 6;
-const int32_t PARAMS_VECTOR_SIZE = 7;
+const int32_t PARAMS_VECTOR_SIZE = 9;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(SecondaryFoldSensorManager);
 
