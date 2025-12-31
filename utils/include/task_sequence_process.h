@@ -18,7 +18,7 @@
 #include <mutex>
 #include <queue>
 #include <atomic>
-#include "system_timer.h"
+#include "window_system_timer.h"
 
 namespace OHOS::Rosen {
 
