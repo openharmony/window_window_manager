@@ -57,28 +57,30 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
         return;
     }
     auto task = [=] {
-        if (mState_ == nextState) {
-            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
-            FinishTaskSequence();
-            return;
-        }
-        TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
-        ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
-        PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
-        NotifyReportFoldStatusToScb(mState_, nextState, angle);
-        mState_ = nextState;
-        if (foldScreenPolicy != nullptr) {
-            foldScreenPolicy->SetFoldStatus(mState_);
-        }
-        if (!foldScreenPolicy->GetPhysicalFoldLockFlag()) {
-            ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
+        if (mState_ != nextState) {
+            TLOGI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", mState_, nextState);
+            ReportNotifyFoldStatusChange(static_cast<int32_t>(mState_), static_cast<int32_t>(nextState), angle);
+            PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
+            NotifyReportFoldStatusToScb(mState_, nextState, angle);
+            mState_ = nextState;
+            if (foldScreenPolicy != nullptr) {
+                foldScreenPolicy->SetFoldStatus(mState_);
+            }
+            if (!foldScreenPolicy->GetPhysicalFoldLockFlag()) {
+                ScreenSessionManager::GetInstance().NotifyFoldStatusChanged(mState_);
+            } else {
+                TLOGW(WmsLogTag::DMS,
+                      "Fold status is locked, notify foldstatus changed skip, current foldstatus: %{public}d",
+                      mState_);
+            }
+            if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
+                foldScreenPolicy->SendSensorResult(mState_);
+            }
         } else {
-            TLOGW(WmsLogTag::DMS,
-                "Fold status is locked, notify foldstatus changed skip, current foldstatus: %{public}d", mState_);
+            TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
         }
-        if (foldScreenPolicy != nullptr && foldScreenPolicy->lockDisplayStatus_ != true) {
-            foldScreenPolicy->SendSensorResult(mState_);
-        }
+
+        // running status is false , foldstatus change process is finished here, we should start next task
         if (foldScreenPolicy->GetdisplayModeRunningStatus() == false) {
             FinishTaskSequence();
         }
@@ -121,24 +123,25 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             TLOGNE(WmsLogTag::DMS, "sensorFoldStateManager or foldScreenPolicy is nullptr.");
             return;
         }
-        if (manager->mState_ == nextState) {
+        if (manager->mState_ != nextState) {
+            FoldStatus currentState = FoldStatus::UNKNOWN;
+            FoldStatus newState = FoldStatus::UNKNOWN;
+            {
+                std::lock_guard<std::recursive_mutex> lock(manager->mStateMutex_);
+                currentState = manager->mState_;
+            }
+            TLOGNI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", currentState, nextState);
+            newState = manager->HandleSecondaryOneStep(currentState, nextState, angles, halls);
+            {
+                std::lock_guard<std::recursive_mutex> lock(manager->mStateMutex_);
+                manager->mState_ = newState;
+            }
+            manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
+        } else {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", manager->mState_);
-            manager->FinishTaskSequence();
-            return;
         }
-        FoldStatus currentState = FoldStatus::UNKNOWN;
-        FoldStatus newState = FoldStatus::UNKNOWN;
-        {
-            std::lock_guard<std::recursive_mutex> lock(manager->mStateMutex_);
-            currentState = manager->mState_;
-        }
-        TLOGNI(WmsLogTag::DMS, "current state: %{public}d, next state: %{public}d.", currentState, nextState);
-        newState = manager->HandleSecondaryOneStep(currentState, nextState, angles, halls);
-        {
-            std::lock_guard<std::recursive_mutex> lock(manager->mStateMutex_);
-            manager->mState_ = newState;
-        }
-        manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
+
+        // running status is false , foldstatus change process is finished here, we should start next task
         if (policy->GetdisplayModeRunningStatus() == false) {
             manager->FinishTaskSequence();
         }
