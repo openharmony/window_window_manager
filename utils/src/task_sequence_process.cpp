@@ -23,9 +23,7 @@ TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize, uint64_t maxTime
     if (maxQueueSize_ <= 0) {
         maxQueueSize_ = 1;
     }
-    if (CreatSysTimer()) {
-        TLOGI(WmsLogTag::DMS, "TaskSequenceProcess created succ, maxQueueSize: %{public}u", maxQueueSize_);
-    } else {
+    if (! CreateSysTimer()) {
         TLOGI(WmsLogTag::DMS, "TaskSequenceProcess created fail, maxQueueSize: %{public}u", maxQueueSize_);
     }
 }
@@ -82,7 +80,7 @@ void TaskSequenceProcess::FinishTask()
     ExecTask();
 }
 
-bool TaskSequenceProcess::CreatSysTimer()
+bool TaskSequenceProcess::CreateSysTimer()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess StartSysTimer");
 
