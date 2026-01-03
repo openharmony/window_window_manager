@@ -83,7 +83,7 @@ std::map<std::string, bool> ScreenSceneConfig::enableConfig_;
 std::map<std::string, std::vector<int>> ScreenSceneConfig::intNumbersConfig_;
 std::map<std::string, std::string> ScreenSceneConfig::stringConfig_;
 std::map<std::string, std::vector<std::string>> ScreenSceneConfig::stringListConfig_;
-std::map<uint64_t, std::vector<DMRect>> defaultCutoutBoundaryRectMap_;
+std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::defaultCutoutBoundaryRectMap_;
 std::map<uint64_t, std::vector<DMRect>> ScreenSceneConfig::cutoutBoundaryRectMap_;
 std::vector<DisplayPhysicalResolution> ScreenSceneConfig::displayPhysicalResolution_;
 std::map<FoldDisplayMode, ScrollableParam> ScreenSceneConfig::scrollableParams_;
