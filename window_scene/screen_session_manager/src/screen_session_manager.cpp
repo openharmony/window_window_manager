@@ -3287,6 +3287,7 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     screenSession->SetDensityInCurResolution(virtualPixelRatio);
     screenSession->SetDefaultDensity(virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
+    ScreenSceneConfig::UpdateCutoutBoundRect(static_cast<uint64_t>(screenId), vprScaleRatio);
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
         screenId, width, height, virtualPixelRatio);
@@ -5468,7 +5469,13 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.RegisterSettingRotationObserver();
         that.RegisterSettingResolutionEffectObserver();
         if (that.defaultDpi) {
-            auto ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
+            uint32_t initDefaultDpi;
+            auto ret = ScreenSettingHelper::GetSettingValue(initDefaultDpi, SET_SETTING_DPI_KEY);
+            if (ret && initDefaultDpi > 0) {
+                TLOGE(WmsLogTag::DMS, "set setting defaultDpi completed, value:%{public}d", initDefaultDpi);
+                return;
+            }
+            ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
             if (!ret) {
                 TLOGE(WmsLogTag::DMS, "set setting defaultDpi failed");
             } else {
