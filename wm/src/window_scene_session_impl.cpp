@@ -7138,8 +7138,12 @@ void WindowSceneSessionImpl::ConvertPointForCompatibleMode(const std::shared_ptr
 
 bool WindowSceneSessionImpl::IsInMappingRegionForCompatibleMode(int32_t displayX, int32_t displayY)
 {
-    const auto& windowRect = GetRect();
     Rect pointerRect = { displayX, displayY, 0, 0 };
+    Rect globalRect {};
+    if (WMError::WM_OK == GetGlobalScaledRect(globalRect)) {
+        return !pointerRect.IsInsideOf(globalRect);
+    }
+    const auto& windowRect = GetRect();
     return !pointerRect.IsInsideOf(windowRect);
 }
 
