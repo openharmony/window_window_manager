@@ -2235,8 +2235,8 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "gravity", CreateJsValue(env, param.gravity));
     napi_set_named_property(env, objValue, "waterfallResidentState", CreateJsValue(env, param.waterfallResidentState));
     napi_set_named_property(env, objValue, "compatibleStyleMode", CreateJsValue(env, param.compatibleStyleMode));
-    napi_set_named_property(env, objValue, "positionX", CreateJsValue(env, param.positionX_));
-    napi_set_named_property(env, objValue, "positionY", CreateJsValue(env, param.positionY_));
+    napi_set_named_property(env, objValue, "windowGlobalPosX", CreateJsValue(env, param.windowGlobalPosX_));
+    napi_set_named_property(env, objValue, "windowGlobalPosY", CreateJsValue(env, param.windowGlobalPosY_));
     return objValue;
 }
 
