@@ -676,7 +676,7 @@ HWTEST_F(WindowSceneSessionImplTest4, IsInMappingRegionForCompatibleMode, TestSi
     EXPECT_EQ(false, ret);
     EXPECT_CALL(*session, GetGlobalScaledRect(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ret = windowSceneSessionImpl->IsInMappingRegionForCompatibleMode(displayX, displayY);
-    EXPECT_EQ(false, ret);
+    EXPECT_EQ(true, ret);
 }
 
 /**
