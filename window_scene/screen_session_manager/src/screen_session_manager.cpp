@@ -8567,8 +8567,8 @@ void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<Display
     }
     std::ostringstream oss; 
     for (const auto& [displayId, isPrivate] : privacyBundleDisplayId) {
-        oss << "[displayId: " << displayId
-            << ", private: " << (isPrivate ? "true" : "false") << "] ";
+        oss << "[id: " << displayId
+            << ", priv: " << (isPrivate ? "T" : "F") << "] ";
     }
     const std::vector<DisplayId> displayIds = GetAllDisplayIds();
     // all display use or to calculate private state
@@ -8582,7 +8582,7 @@ void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<Display
         }
         NotifyPrivateSessionStateChanged(allDisplayHasPrivate);
     }
-    TLOGI(WmsLogTag::DMS, "needNotify=%{public}d, hasPrivacy=%{public}d, displayPrivacyInfo=%{public}s",
+    TLOGI(WmsLogTag::DMS, "notify=%{public}d, allP=%{public}d, %{public}s",
         isNeedNotify, allDisplayHasPrivate, oss.str().c_str());
 }
 
@@ -8633,7 +8633,7 @@ void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    TLOGW(WmsLogTag::DMS, "enter");
+    TLOGNW(WmsLogTag::DMS, "SetPrivList enter");
     std::vector<ScreenId> screenIds = GetAllScreenIds();
     auto iter = std::find(screenIds.begin(), screenIds.end(), id);
     if (iter == screenIds.end()) {
@@ -8675,7 +8675,7 @@ DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWin
             hasPrivateWindow = false;
         }
     }
-    TLOGNI(WmsLogTag::DMS, "id: %{public}" PRIu64" has private window: %{public}u",
+    TLOGNI(WmsLogTag::DMS, "id: %{public}" PRIu64" privW: %{public}u",
         id, static_cast<uint32_t>(hasPrivateWindow));
     return DMError::DM_OK;
 }
