@@ -648,10 +648,10 @@ void ScreenSceneConfig::UpdateCutoutBoundRect(uint64_t displayId, float rogRatio
         return;
     }
     for (uint64_t i = 0; i < cutoutBoundaryRectMap_[displayId].size(); i++) {
-        cutoutBoundaryRectMap_[displayId][i].posX_ = cutoutBoundaryRectMap_[displayId][i].posX_ * rogRatio;
-        cutoutBoundaryRectMap_[displayId][i].posY_ = cutoutBoundaryRectMap_[displayId][i].posY_ * rogRatio;
-        cutoutBoundaryRectMap_[displayId][i].width_ = cutoutBoundaryRectMap_[displayId][i].width_ * rogRatio;
-        cutoutBoundaryRectMap_[displayId][i].height_ = cutoutBoundaryRectMap_[displayId][i].height_ * rogRatio;
+        cutoutBoundaryRectMap_[displayId][i].posX_ = defaultCutoutBoundaryRectMap_[displayId][i].posX_ * rogRatio;
+        cutoutBoundaryRectMap_[displayId][i].posY_ = defaultCutoutBoundaryRectMap_[displayId][i].posY_ * rogRatio;
+        cutoutBoundaryRectMap_[displayId][i].width_ = defaultCutoutBoundaryRectMap_[displayId][i].width_ * rogRatio;
+        cutoutBoundaryRectMap_[displayId][i].height_ = defaultCutoutBoundaryRectMap_[displayId][i].height_ * rogRatio;
     }
 }
 
