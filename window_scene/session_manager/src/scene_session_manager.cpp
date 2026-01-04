@@ -10912,13 +10912,29 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
     if (abilityInfo.orientationId == 0) {
         return;
     }
+
+    auto context = rootSceneContextWeak_.lock();
+    if (!context) {
+        TLOGE(WmsLogTag::DEFAULT, "context is nullptr.");
+        return;
+    }
+
+    auto resourceMgr = context->GetResourceManager();
+    if (!resourceMgr) {
+        TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr");
+        return;
+    }
+
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "resConfig is nullptr.");
         return;
     }
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager(
-        abilityInfo.bundleName, abilityInfo.moduleName, "", {}, *resConfig));
+
+    resourceMgr->GetResConfig(*resConfig);
+    TLOGE(WmsLogTag::DEFAULT, "deviceType:%{public}d", resConfig->GetDeviceType());
+    resourceMgr = Global::Resource::CreateResourceManager(
+        abilityInfo.bundleName, abilityInfo.moduleName, "", {}, *resConfig);
     if (resourceMgr == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "resourceMgr is nullptr.");
         return;
@@ -10927,6 +10943,7 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
     if (!resourceMgr->AddResource(loadPath.c_str(), Global::Resource::SELECT_STRING)) {
         TLOGE(WmsLogTag::DEFAULT, "Add resource %{private}s failed.", loadPath.c_str());
     }
+    resourceMgr->UpdateResConfig(*resConfig);
     std::string orientation;
     auto ret = resourceMgr->GetStringById(abilityInfo.orientationId, orientation);
     if (ret != Global::Resource::RState::SUCCESS) {
