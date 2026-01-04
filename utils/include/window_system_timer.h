@@ -36,7 +36,7 @@ public:
     void SetType(const int &type) override;
     void SetRepeat(bool repeat) override;
     void SetInterval(const uint64_t &interval) override;
-    void SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> _wantAgent) override;
+    void SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> wantAgent) override;
     void SetCallbackInfo(const std::function<void()> &callBack);
 
 private:
