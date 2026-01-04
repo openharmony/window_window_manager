@@ -163,6 +163,11 @@ void DualDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode,
         return;
     }
     SetLastCacheDisplayMode(displayMode);
+    if (GetModeChangeRunningStatus()) {
+        TLOGW(WmsLogTag::DMS, "last process not complete, skip mode: %{public}d", displayMode);
+        ScreenSessionManager::GetInstance().RunFinishTask();
+        return;
+    }
     TLOGI(WmsLogTag::DMS,
         "start change displaymode: %{public}d, reason: %{public}d, lastElapsedMs: %{public}" PRId64 "ms",
         displayMode, reason, getFoldingElapsedMs());
