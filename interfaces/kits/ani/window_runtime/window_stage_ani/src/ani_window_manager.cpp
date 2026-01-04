@@ -127,24 +127,26 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
 
 ani_ref AniWindowManager::GetLastWindow(ani_env* env, ani_long nativeObj, ani_object context)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     return aniWindowManager != nullptr ? aniWindowManager->OnGetLastWindow(env, context) : nullptr;
 }
 
 ani_ref AniWindowManager::OnGetLastWindow(ani_env* env, ani_object aniContext)
 {
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    TLOGI(WmsLogTag::WMS_HIERARCHY, "[ANI]");
     auto contextPtr = AniWindowUtils::GetAbilityContext(env, aniContext);
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
     if (context == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] context is nullptr");
-        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Stage mode without context");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] context is nullptr");
+        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR,
+            "[window][getLastWindow]msg: Stage mode without context");
     }
     auto window = Window::GetTopWindowWithContext(context->lock());
     if (window == nullptr || window->GetWindowState() == WindowState::STATE_DESTROYED) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr or destroyed");
-        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR, "Get top window failed");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] window is nullptr or destroyed");
+        return AniWindowUtils::AniThrowError(env, WMError::WM_ERROR_NULLPTR,
+            "[window][getLastWindow]msg: Get top window failed");
     }
     return CreateAniWindowObject(env, window);
 }
@@ -167,7 +169,8 @@ void AniWindowManager::OnShiftAppWindowFocus(ani_env* env, ani_int sourceWindowI
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
         SingletonContainer::Get<WindowManager>().ShiftAppWindowFocus(sourceWindowId, targetWindowId));
     if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret, "ShiftAppWindowFocus failed.");
+        AniWindowUtils::AniThrowError(env, ret,
+            "[window][shiftAppWindowFocus]msg:ShiftAppWindowFocus failed");
     }
     return ;
 }
