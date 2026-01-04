@@ -72,6 +72,7 @@
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/ability_info_manager.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/move_drag_controller.h"
 #include "session/host/include/multi_instance_manager.h"
 #include "session/host/include/scb_system_session.h"
 #include "session/host/include/scene_persistent_storage.h"
@@ -1597,7 +1598,7 @@ void SceneSessionManager::SetWindowStatusDeduplicationBySystemConfig(const Sessi
 bool SceneSessionManager::ConfigWindowLayout(const WindowSceneConfig::ConfigItem& windowLayoutConfig)
 {
     if (!windowLayoutConfig.IsMap()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "The windowLayoutConfig is invalid.");
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The windowLayoutConfig is invalid (not a map).");
         return false;
     }
     ConfigMoveDrag(windowLayoutConfig["moveDrag"]);
@@ -1607,15 +1608,43 @@ bool SceneSessionManager::ConfigWindowLayout(const WindowSceneConfig::ConfigItem
 bool SceneSessionManager::ConfigMoveDrag(const WindowSceneConfig::ConfigItem& moveDragConfig)
 {
     if (!moveDragConfig.IsMap()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "The moveDragConfig is invalid.");
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The moveDrag config is invalid (not a map).");
         return false;
     }
-    const auto& enableMoveResampleProp = moveDragConfig["moveResample"].GetProp("enable");
-    if (enableMoveResampleProp.IsBool()) {
-        SessionUtils::SetMoveResampleEnabled(enableMoveResampleProp.boolValue_);
-    } else {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "The moveResampleConfig or its enableProp is invalid.");
+    ConfigMoveResample(moveDragConfig["moveResample"]);
+    return true;
+}
+
+bool SceneSessionManager::ConfigMoveResample(const WindowSceneConfig::ConfigItem& moveResampleConfig)
+{
+    if (!moveResampleConfig.IsMap()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The moveResample config is invalid (not a map).");
+        return false;
     }
+    const auto& enableMoveResampleProp = moveResampleConfig.GetProp("enable");
+    if (!enableMoveResampleProp.IsBool()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The moveResample.enable prop is missing or not a bool.");
+        return false;
+    }
+    bool enable = enableMoveResampleProp.boolValue_;
+    const auto& resampleFpsRangeConfig = moveResampleConfig["resampleFpsRange"];
+    if (!resampleFpsRangeConfig.IsInts() || !resampleFpsRangeConfig.intsValue_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "The resampleFpsRange config is invalid (not int array), fallback to default.");
+        MoveDragController::SetMoveResampleSystemConfig(enable, std::nullopt, std::nullopt);
+        return true;
+    }
+    auto fpsRange = *resampleFpsRangeConfig.intsValue_;
+    if (fpsRange.size() != 2) { // 2: only contain minFps and maxFps
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "The resampleFpsRange config size is invalid (expect 2), fallback to default.");
+        MoveDragController::SetMoveResampleSystemConfig(enable, std::nullopt, std::nullopt);
+        return true;
+    }
+    int minVal = std::min(fpsRange[0], fpsRange[1]);
+    int maxVal = std::max(fpsRange[0], fpsRange[1]);
+    MoveDragController::SetMoveResampleSystemConfig(
+        enable, static_cast<uint32_t>(minVal), static_cast<uint32_t>(maxVal));
     return true;
 }
 
@@ -3203,11 +3232,11 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterGetStateFromManagerFunc(sceneSession);
     RegisterSessionChangeByActionNotifyManagerFunc(sceneSession);
     RegisterAcquireRotateAnimationConfigFunc(sceneSession);
-    RegisterRequestVsyncFunc(sceneSession);
     RegisterSceneSessionDestructNotifyManagerFunc(sceneSession);
     RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
     RegisterClientDisplayIdChangeNotifyManagerFunc(sceneSession);
     RegisterGetRsCmdBlockingCountFunc(sceneSession);
+    BindVsyncStation(sceneSession);
 }
 
 void SceneSessionManager::UpdateSceneSessionWant(const SessionInfo& sessionInfo)
@@ -7380,15 +7409,13 @@ void SceneSessionManager::RegisterSessionSnapshotFunc(const sptr<SceneSession>& 
     TLOGD(WmsLogTag::DEFAULT, "success, id: %{public}d", sceneSession->GetPersistentId());
 }
 
-void SceneSessionManager::RegisterRequestVsyncFunc(const sptr<SceneSession>& sceneSession)
+void SceneSessionManager::BindVsyncStation(const sptr<SceneSession>& sceneSession)
 {
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "session is nullptr");
+        TLOGE(WmsLogTag::DEFAULT, "sceneSession is nullptr");
         return;
     }
-    sceneSession->SetRequestNextVsyncFunc([this](const std::shared_ptr<VsyncCallback>& callback) {
-        vsyncStation_->RequestVsync(callback);
-    });
+    sceneSession->SetVsyncStation(vsyncStation_);
 }
 
 void SceneSessionManager::RegisterAcquireRotateAnimationConfigFunc(const sptr<SceneSession>& sceneSession)
