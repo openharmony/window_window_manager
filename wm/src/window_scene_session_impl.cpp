@@ -3566,24 +3566,24 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
 uint32_t WindowSceneSessionImpl::UpdateStatusBarColorHistory(
     StatusBarColorChangeReason reason, std::optional<uint32_t> color)
 {
-    std::stack<std::pair<StatusBarColorChangeReason, uint32_t>> tmpstatusBarColorHistory;
+    std::stack<std::pair<StatusBarColorChangeReason, uint32_t>> tmpStatusBarColorHistory;
     while (!statusBarColorHistory_.empty()) {
         auto top = statusBarColorHistory_.top();
         statusBarColorHistory_.pop();
         if (top.first == reason) {
             break;
         }
-        tmpstatusBarColorHistory.push(top);
+        tmpStatusBarColorHistory.push(top);
     }
-    while (!tmpstatusBarColorHistory.empty()) {
-        statusBarColorHistory_.push(tmpstatusBarColorHistory.top());
-        tmpstatusBarColorHistory.pop();
+    while (!tmpStatusBarColorHistory.empty()) {
+        statusBarColorHistory_.push(tmpStatusBarColorHistory.top());
+        tmpStatusBarColorHistory.pop();
     }
     if (color != std::nullopt) {
         statusBarColorHistory_.push(std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value()));
     }
-    auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
     if (statusBarColorHistory_.empty()) {
+        auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         std::pair<StatusBarColorChangeReason, uint32_t> value = color == std::nullopt ?
             std::pair<StatusBarColorChangeReason, uint32_t>(reason, property.contentColor_) :
             std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value());
