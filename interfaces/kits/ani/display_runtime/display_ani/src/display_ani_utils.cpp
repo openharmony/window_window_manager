@@ -453,6 +453,7 @@ static DmErrorCode GetFocusFromAni(ani_env* env, ani_object virtualScreenObj, Vi
         option.supportsFocus_ = static_cast<bool>(result);
         TLOGD(WmsLogTag::DMS, "Convert supportsFocus:%{public}d", option.supportsFocus_);
     }
+    option.supportsInput_ = false;
     return DmErrorCode::DM_OK;
 }
 
