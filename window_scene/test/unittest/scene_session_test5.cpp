@@ -24,6 +24,7 @@
 
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
+#include "mock_vsync_station.h"
 #include "pointer_event.h"
 
 #include "screen_manager.h"
@@ -629,8 +630,9 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback, TestSize.Level1)
     info.bundleName_ = "OnMoveDragCallback";
     info.isSystem_ = false;
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {});
-    EXPECT_NE(nullptr, session->requestNextVsyncFunc_);
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    session->SetVsyncStation(mockVsyncStation);
+    EXPECT_NE(nullptr, session->vsyncStation_);
     session->moveDragController_ = nullptr;
     SizeChangeReason reason = { SizeChangeReason::DRAG };
     session->OnMoveDragCallback(reason);
@@ -711,7 +713,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback03, TestSize.Level1)
     specificCallback->onGetSceneSessionVectorByTypeAndDisplayId_ = func;
     compatibleModeProperty->SetIsAdaptToDragScale(true);
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    session->moveDragController_->SetTargetRect(windowRect);
+    session->moveDragController_->UpdateTargetRect(reason, windowRect);
     session->GetLayoutController()->SetSessionRect(systemBarRect);
     session->OnMoveDragCallback(reason);
     WSRect newRect = session->moveDragController_->GetTargetRect(
@@ -721,7 +723,7 @@ HWTEST_F(SceneSessionTest5, OnMoveDragCallback03, TestSize.Level1)
 
     compatibleModeProperty->SetIsAdaptToDragScale(false);
     session->property_->SetCompatibleModeProperty(compatibleModeProperty);
-    session->moveDragController_->SetTargetRect(windowRect);
+    session->moveDragController_->UpdateTargetRect(reason, windowRect);
     session->GetLayoutController()->SetSessionRect(systemBarRect);
     session->OnMoveDragCallback(reason);
     newRect = session->moveDragController_->GetTargetRect(
@@ -964,14 +966,24 @@ HWTEST_F(SceneSessionTest5, RequestKeyFrameNextVsync, Function | SmallTest | Lev
     info.bundleName_ = "keyframe";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
+    session->handler_ = nullptr;
     uint64_t requestStamp = 0;
     uint64_t count = 0;
+    uint32_t triggerCount = 0;
+
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .WillRepeatedly(Invoke([&](const std::shared_ptr<VsyncCallback>& cb) {
+            ASSERT_NE(cb, nullptr);
+            // Trigger the vsync callback only once to avoid recursive re-entry in tests.
+            if (++triggerCount <= 1) {
+                cb->onCallback(0, 0);
+            }
+        }));
+    session->SetVsyncStation(mockVsyncStation);
 
     session->RequestKeyFrameNextVsync(requestStamp, count);
     session->keyFramePolicy_.running_ = true;
-    session->RequestKeyFrameNextVsync(requestStamp, count);
-    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {});
-    EXPECT_NE(nullptr, session->requestNextVsyncFunc_);
     session->RequestKeyFrameNextVsync(requestStamp, count);
     session->keyFrameVsyncRequestStamp_ = requestStamp;
     session->RequestKeyFrameNextVsync(requestStamp, count);
@@ -1982,10 +1994,15 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds, TestSize.Level1)
     WSRect rect = { 0, 0, 100, 100 };
     WSRect globalRect = { 0, 0, 100, 100 };
 
-    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
-        callback->onCallback(1, 1);
-    });
-    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .WillRepeatedly(Invoke([](const std::shared_ptr<VsyncCallback>& callback) {
+            ASSERT_NE(callback, nullptr);
+            callback->onCallback(1, 1);
+        }));
+    session->SetVsyncStation(mockVsyncStation);
+    ASSERT_NE(nullptr, session->vsyncStation_);
+
     session->SetSessionRect(preRect);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->keyFramePolicy_.running_ = true;
@@ -2017,10 +2034,16 @@ HWTEST_F(SceneSessionTest5, HandleMoveDragSurfaceBounds02, TestSize.Level1)
     WSRect preRect = { 0, 0, 50, 50 };
     WSRect rect = { 0, 0, 100, 100 };
     WSRect globalRect = { 0, 0, 100, 100 };
-    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
-        callback->onCallback(1, 1);
-    });
-    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
+
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .WillRepeatedly(Invoke([](const std::shared_ptr<VsyncCallback>& callback) {
+            ASSERT_NE(callback, nullptr);
+            callback->onCallback(1, 1);
+        }));
+    session->SetVsyncStation(mockVsyncStation);
+    ASSERT_NE(nullptr, session->vsyncStation_);
+
     session->SetSessionRect(preRect);
     EXPECT_EQ(preRect, session->GetSessionRect());
     session->keyFramePolicy_.running_ = false;
@@ -2104,29 +2127,6 @@ HWTEST_F(SceneSessionTest5, SetNotifyVisibleChangeFunc, TestSize.Level1)
 
     session->SetNotifyVisibleChangeFunc([](int32_t persistentId) {});
     EXPECT_NE(session->notifyVisibleChangeFunc_, nullptr);
-}
-
-/**
- * @tc.name: SetRequestNextVsyncFunc
- * @tc.desc: SetRequestNextVsyncFunc01 Test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest5, SetRequestNextVsyncFunc01, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "test1";
-    info.bundleName_ = "test1";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    session->SetRequestNextVsyncFunc(nullptr);
-    ASSERT_EQ(nullptr, session->requestNextVsyncFunc_);
-
-    session->SetRequestNextVsyncFunc([](const std::shared_ptr<VsyncCallback>& callback) {
-        SessionInfo info1;
-        info1.abilityName_ = "test2";
-        info1.bundleName_ = "test2";
-    });
-    ASSERT_NE(nullptr, session->requestNextVsyncFunc_);
 }
 
 /**

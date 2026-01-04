@@ -1769,6 +1769,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
             // Set a flag when the window rect and the request rect are the same for size change notify
+            // SetNotifySizeChangeFlag must be set before SetWindowRect
             SetNotifySizeChangeFlag(true);
             property_->SetWindowRect(requestRect);
             hostSession->UpdateClientRect(wsRect);
