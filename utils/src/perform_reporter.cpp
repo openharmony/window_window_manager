@@ -463,7 +463,7 @@ void WindowInfoReporter::ReportWindowIO()
             msg.erase(msg.length() - redundantSize);
         }
         const double KILOBYTE = 1024.0;
-        double totalWriteData = ioRecordMap_[scene]["TOTAL_WRITE_DATA"] / KILOBYTE;
+        double totalWriteData = ioRecordMapCopy[scene]["TOTAL_WRITE_DATA"] / KILOBYTE;
         TLOGI(WmsLogTag::DEFAULT, "total: %{public}f, msg: %{public}s", totalWriteData, msg.c_str());
         static constexpr char WINDOW_IO_UE[] = "WINDOW_IO_UE";
         int32_t ret = HiSysEventWrite(
