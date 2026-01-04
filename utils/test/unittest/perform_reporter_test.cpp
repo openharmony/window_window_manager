@@ -17,6 +17,7 @@
 #include <thread>
 
 #include "input_manager.h"
+#include "parameters.h"
 #include "perform_reporter.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
