@@ -6618,7 +6618,7 @@ std::shared_ptr<AppExecFwk::AbilityInfo> SceneSessionManager::QueryAbilityInfoFr
     if (abilityInfoMap_.count(list)) {
         return abilityInfoMap_[list];
     }
-    if (isAtomicServiceFreeInstall) {
+    if (isAtomicServiceFreeInstall && abilityName.empty() && moduleName.empty()) {
         AppExecFwk::BundleInfo bundleInfo;
         auto flag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
             static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE);

@@ -2175,6 +2175,27 @@ void WindowSceneSessionImpl::SetDefaultProperty()
     }
 }
 
+void WindowSceneSessionImpl::ReleaseUIContentTimeoutCheck()
+{
+    handler_->PostTask(
+        [weakThis = wptr(this), where = __func__] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+                return;
+            }
+            auto uiContent = window->GetUIContentSharedPtr();
+            if (uiContent == nullptr) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id:%{public}d, uiContent is already destroy.",
+                    where, window->GetProperty()->GetPersistentId());
+                return;
+            }
+            TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s Destroy window timeout, id:%{public}d",
+                where, window->GetProperty()->GetPersistentId());
+            window->NotifyUIContentDestroy();
+        }, __func__, WINDOW_DETACH_TIMEOUT);
+}
+
 WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 {
     WMError ret = WMError::WM_OK;
@@ -2187,7 +2208,9 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
-            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(
+                property_->GetPersistentId());
+            ReleaseUIContentTimeoutCheck();
         } else if (property_->GetIsUIExtFirstSubWindow()) {
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
@@ -6747,7 +6770,22 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
-    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d, isAttach:%{public}u.", GetPersistentId(), isAttach);
+    if (handler_) {
+        handler_->PostTask(
+            [weakThis = wptr(this), isAttach] {
+                auto window = weakThis.promote();
+                if (!window) {
+                    return;
+                }
+                window->isAttachedOnFrameNode_ = isAttach;
+                if (window->state_ == WindowState::STATE_DESTROYED && !isAttach &&
+                    WindowHelper::IsSubWindow(window->GetType()) &&
+                    !window->property_->GetIsUIExtFirstSubWindow()) {
+                    window->NotifyUIContentDestroy();
+                }
+            }, __func__);
+    }
     if (lifecycleCallback_) {
         TLOGI(WmsLogTag::WMS_SUB, "notifyAttachState id: %{public}d", GetPersistentId());
         lifecycleCallback_->OnNotifyAttachState(isAttach);
