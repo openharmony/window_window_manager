@@ -63,6 +63,7 @@ constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
 const uint64_t PRELAUNCH_DONE_TIME = system::GetIntParameter("window.prelaunchDoneTime", 6000);
+const double KILOBYTE = 1024.0;
 
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
@@ -3190,9 +3191,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
-        // 1024.0 is kilobyte
         WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTERN", "ASTC",
-            pixelMap->GetWidth() * pixelMap->GetHeight() * 4 / 4 / 1024.0);
+            pixelMap->GetWidth() * pixelMap->GetHeight() * 4 / 4 / KILOBYTE);
     };
     if (!useFfrt) {
         task();
@@ -3229,9 +3229,8 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
         ScenePersistentStorage::Insert(GetSnapshotPersistentKey(persistentId_, key),
             EncodeSnapShotRecoverValue(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
-    // 1024.0 is kilobyte
     WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTERN", "session_window_maximize_state",
-        (sizeof(int32_t) + sizeof(std::string)) / 1024.0);
+        (sizeof(int32_t) + sizeof(std::string)) / KILOBYTE);
 }
 
 int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
