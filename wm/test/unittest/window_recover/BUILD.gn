@@ -29,6 +29,7 @@ ohos_unittest("wm_window_recover_manager_test") {
   }
   sources = [ "window_recover_manager_test.cpp" ]
   deps = [
+    "${window_base_path}/wmserver:sms",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     wm_unittest_common,
   ]
