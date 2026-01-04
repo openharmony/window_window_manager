@@ -154,7 +154,6 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 constexpr int32_t SIDEBAR_BLUR_ANIMATION_DURATION = 150;
-const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
 
 bool IsValueInRange(double value, double lowerBound, double upperBound)
 {
@@ -1756,7 +1755,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Update prelayout failed, %{public}" PRIu64, screenId);
         } else {
             std::string dispName = info->GetName();
-            Rect newRect = (info->GetWidth() > info->GetHeight() || dispName == COOPERATION_DISPLAY_NAME) ?
+            Rect newRect = (info->GetWidth() > info->GetHeight()) ?
                             params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
             property_->SetRequestRect(newRect);
         }
@@ -6883,7 +6882,6 @@ bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
         isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
             orientation == DisplayOrientation::LANDSCAPE_INVERTED);
     }
-    isLandscape = isLandscape || (dispName == COOPERATION_DISPLAY_NAME);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "c-displayInfo: %{public}" PRIu64 ", %{public}d|%{public}d|%{public}d, %{public}s",
         displayId, displayWidth, displayHeight, isLandscape, dispName.c_str());
     return isLandscape;
