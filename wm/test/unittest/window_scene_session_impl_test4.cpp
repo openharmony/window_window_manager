@@ -1500,22 +1500,27 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
 
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
-    displayInfo->name_ = "Cooperation"; // 白名单
 
     KeyboardLayoutParams tmpParams;
-    const Rect expected = {1, 2, 3, 4};
-    tmpParams.LandscapeKeyboardRect_ = expected;
+    const Rect landscapeKeyboardRect = {1, 1, 4, 3};
+    tmpParams.LandscapeKeyboardRect_ = landscapeKeyboardRect;
+    const Rect portraitKeyboardRect = {1, 1, 3, 4};
+    tmpParams.PortraitKeyboardRect_ = portraitKeyboardRect;
 
+    displayInfo->width_ = 10;
+    displayInfo->height_ = 8;
     window->property_->SetRequestRect({0, 0, 0, 0});
     window->property_->SetKeyboardLayoutParams(tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_NE(window->property_->requestRect_, expected);
+    ASSERT_NE(window->property_->requestRect_, landscapeKeyboardRect);
 
     tmpParams.displayId_ = 0;
     displayInfo->screenId_ = 0;
+    displayInfo->width_ = 8;
+    displayInfo->height_ = 10;
     window->property_->AddKeyboardLayoutParams(0, tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_EQ(window->property_->requestRect_, expected);
+    ASSERT_EQ(window->property_->requestRect_, portraitKeyboardRect);
 }
 
 /**
