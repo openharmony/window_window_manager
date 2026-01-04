@@ -63,7 +63,7 @@ constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_ONECE = 1;
 constexpr int32_t TIMES_TO_WAIT_FOR_VSYNC_TWICE = 2;
 const uint64_t PRELAUNCH_DONE_TIME = system::GetIntParameter("window.prelaunchDoneTime", 6000);
-const double KILOBYTE = 1024.0;
+constexpr double KILOBYTE = 1024.0;
 
 const std::map<SessionState, bool> ATTACH_MAP = {
     { SessionState::STATE_DISCONNECT, false },
@@ -3191,8 +3191,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         }
         session->scenePersistence_->SaveSnapshot(pixelMap, saveSnapshotCallback, key, rotate,
             session->freeMultiWindow_.load());
-        WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTERN", "ASTC",
-            pixelMap->GetWidth() * pixelMap->GetHeight() * 4 / 4 / KILOBYTE);
+        WindowInfoReporter::GetInstance().ReportWindowIO("PATTERN", "ASTC",
+            pixelMap->GetWidth() * pixelMap->GetHeight() / KILOBYTE);
     };
     if (!useFfrt) {
         task();
@@ -3220,17 +3220,20 @@ void Session::SetHasSnapshot(SnapshotStatus key, DisplayOrientation rotate)
         TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
         return;
     }
+    std::string snapshotPersistentKey;
     if (freeMultiWindow_.load()) {
         scenePersistence_->SetHasSnapshotFreeMultiWindow(true);
-        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(persistentId_), EncodeSnapShotRecoverValue(rotate),
+        snapshotPersistentKey = GetSnapshotPersistentKey(persistentId_);
+        ScenePersistentStorage::Insert(snapshotPersistentKey, EncodeSnapShotRecoverValue(rotate),
             ScenePersistentStorageType::MAXIMIZE_STATE);
     } else {
         scenePersistence_->SetHasSnapshot(true, key);
-        ScenePersistentStorage::Insert(GetSnapshotPersistentKey(persistentId_, key),
+        snapshotPersistentKey = GetSnapshotPersistentKey(persistentId_, key);
+        ScenePersistentStorage::Insert(snapshotPersistentKey,
             EncodeSnapShotRecoverValue(rotate), ScenePersistentStorageType::MAXIMIZE_STATE);
     }
-    WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTERN", "session_window_maximize_state",
-        (sizeof(int32_t) + sizeof(std::string)) / KILOBYTE);
+    WindowInfoReporter::GetInstance().ReportWindowIO("PATTERN", "session_window_maximize_state",
+        snapshotPersistentKey.length() / KILOBYTE);
 }
 
 int32_t Session::EncodeSnapShotRecoverValue(DisplayOrientation rotate)
