@@ -508,6 +508,10 @@ void MockSessionManagerService::ResetSpecificWindowZIndex(int32_t clientUserId, 
         return;
     }
     sceneSessionManagerProxy->ResetSpecificWindowZIndex(pid);
+    {
+        std::lock_guard<std::mutex> lock(specificZIndexByPidMapMutex_);
+        specificZIndexByPidMap_.erase(pid);
+    }
 }
 
 ErrCode MockSessionManagerService::NotifySceneBoardAvailable()
