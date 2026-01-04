@@ -133,8 +133,7 @@ public:
     int32_t ReportSpecWindowLifeCycleChange(WindowLifeCycleReportInfo reportInfo);
 
     // IO record
-    void ReportWindowIOPerDay(const std::string& scenes, const std::string& subScene, double sizeKB);
-    void ReportWindowIO();
+    void ReportWindowIO(const std::string& scenes, const std::string& subScene, double sizeKB);
 
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,
@@ -145,6 +144,9 @@ private:
 
     void Report(const std::string& reportTag, const std::string& msg);
     void ClearRecordedInfos();
+
+    // IO record
+    void ReportWindowIOPerDay();
 
     BundleNameMap windowCreateReportInfos_;
     BundleNameMap windowShowReportInfos_;

@@ -61,7 +61,7 @@ constexpr int32_t DB_STARTWINDOW_TYPE_INDEX = 14;
 constexpr const char* PROFILE_PREFIX = "$profile:";
 constexpr uint16_t MAX_JSON_STRING_LENGTH = 4096;
 constexpr int32_t DEFAULT_ROW_COUNT = -1;
-const double KILOBYTE = 1024.0;
+constexpr double KILOBYTE = 1024.0;
 
 NativeRdb::ValuesBucket BuildValuesBucket(const StartingWindowRdbItemKey& key, const StartingWindowInfo& value)
 {
@@ -183,7 +183,7 @@ bool StartingWindowRdbManager::InsertData(const StartingWindowRdbItemKey& key, c
     auto valuesBucket = BuildValuesBucket(key, value);
     auto ret = rdbStore->InsertWithConflictResolution(
         rowId, wmsRdbConfig_.tableName, valuesBucket, NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
-    WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTERN", "starting_window_config.db",
+    WindowInfoReporter::GetInstance().ReportWindowIO("PATTERN", "starting_window_config.db",
         sizeof(valuesBucket) / KILOBYTE);
     return CheckRdbResult(ret);
 }
@@ -202,7 +202,7 @@ bool StartingWindowRdbManager::BatchInsert(int64_t& outInsertNum,
         valuesBuckets.emplace_back(valuesBucket);
     }
     auto ret = rdbStore->BatchInsert(outInsertNum, wmsRdbConfig_.tableName, valuesBuckets);
-    WindowInfoReporter::GetInstance().ReportWindowIOPerDay("PATTERN", "starting_window_config.db",
+    WindowInfoReporter::GetInstance().ReportWindowIO("PATTERN", "starting_window_config.db",
         sizeof(valuesBuckets) / KILOBYTE);
     return CheckRdbResult(ret);
 }

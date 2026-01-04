@@ -404,7 +404,7 @@ int32_t WindowInfoReporter::ReportSpecWindowLifeCycleChange(WindowLifeCycleRepor
     return ret;
 }
 
-void WindowInfoReporter::ReportWindowIOPerDay(const std::string& scenes, const std::string& subScene, double sizeKB)
+void WindowInfoReporter::ReportWindowIO(const std::string& scenes, const std::string& subScene, double sizeKB)
 {
     int32_t intervalMinutes;
     {
@@ -422,8 +422,8 @@ void WindowInfoReporter::ReportWindowIOPerDay(const std::string& scenes, const s
     TLOGD(WmsLogTag::DEFAULT, "scenes: %{public}s, subScene: %{public}s, sizeKB: %{public}f, "
         "intervalMinutes: %{public}d, REAL_TIME_ENABLED: %{public}s",
         scenes.c_str(), subScene.c_str(), sizeKB, intervalMinutes, REAL_TIME_ENABLED.c_str());
-    // 1 day = 1140 minutesa
-    int perDay = 1140;
+    // 1 day = 1440 minutes
+    int32_t perDay = 1440;
     // real time output per minute
     if (REAL_TIME_ENABLED == "1") {
         perDay = 1;
@@ -431,10 +431,10 @@ void WindowInfoReporter::ReportWindowIOPerDay(const std::string& scenes, const s
     if (intervalMinutes < perDay) {
         return;
     }
-    ReportWindowIO();
+    ReportWindowIOPerDay();
 }
 
-void WindowInfoReporter::ReportWindowIO()
+void WindowInfoReporter::ReportWindowIOPerDay()
 {
     // write event
     std::unordered_map<std::string, std::unordered_map<std::string, double>> ioRecordMapCopy;
