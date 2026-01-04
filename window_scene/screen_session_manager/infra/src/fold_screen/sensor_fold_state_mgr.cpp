@@ -43,7 +43,7 @@ constexpr int32_t TENT_MODE_OFF = 0;
 constexpr int32_t TENT_MODE_ON = 1;
 constexpr int32_t MAX_QUEUE_SIZE = 1;
 constexpr uint64_t MAX_TIME_INTERVAL_MS = 200;
-TaskSequenceProcess TASK_PROCESSOR(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL_MS);
+TaskSequenceProcess g_taskProcessor(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL_MS);
 std::chrono::time_point<std::chrono::system_clock> g_lastUpdateTime = std::chrono::system_clock::now();
 }  // namespace
 
@@ -221,13 +221,13 @@ void SensorFoldStateMgr::HandleSensorChange(FoldStatus nextStatus)
             FinishTaskSequence();
         }
     };
-    TASK_PROCESSOR.AddTask(task);
+    g_taskProcessor.AddTask(task);
 }
 
 void SensorFoldStateMgr::FinishTaskSequence()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess SensorFoldStateMgr::FinishTaskSequence");
-    TASK_PROCESSOR.FinishTask();
+    g_taskProcessor.FinishTask();
 }
 
 void SensorFoldStateMgr::UpdateFoldAlgorithmStrategy(const std::vector<ScreenAxis>& axis)
