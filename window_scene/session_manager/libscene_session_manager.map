@@ -185,6 +185,7 @@
             OHOS::Rosen::SceneSessionManager::UpdateAppBoundSystemTrayStatus*;
             OHOS::Rosen::SceneSessionManager::UpdateAppHookDisplayInfo*;
             OHOS::Rosen::SceneSessionManager::UpdateAppHookWindowInfo*;
+            OHOS::Rosen::SceneSessionManager::UpdateAvoidAreaForLSStateChange*;
             OHOS::Rosen::SceneSessionManager::UpdateDisplayHookInfo*;
             OHOS::Rosen::SceneSessionManager::UpdateMaximizeMode*;
             OHOS::Rosen::SceneSessionManager::UpdatePrivateStateAndNotify*;
