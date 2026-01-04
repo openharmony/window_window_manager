@@ -5450,7 +5450,7 @@ void WindowSessionImpl::NotifyUIContentHighlightStatus(bool isHighlighted)
     }
 }
 
-void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
+void WindowSessionImpl::NotifyUIContentDestroy()
 {
     auto task = [this]() {
         if (auto uiContent = GetUIContentSharedPtr()) {
@@ -5471,6 +5471,13 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         task();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Release uicontent successfully, id: %{public}d.", GetPersistentId());
+}
+
+void WindowSessionImpl::NotifyBeforeDestroy(const std::string& windowName)
+{
+    if (!isAttachedOnFrameNode_ || (!WindowHelper::IsSubWindow(GetType()) || property_->GetIsUIExtFirstSubWindow())) {
+        NotifyUIContentDestroy();
+    }
     if (notifyNativeFunc_) {
         notifyNativeFunc_(windowName);
     }
