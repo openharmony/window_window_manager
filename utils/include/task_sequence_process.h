@@ -19,17 +19,24 @@
 #include <queue>
 #include <atomic>
 #include "window_system_timer.h"
- 
+
 namespace OHOS::Rosen {
- 
+
 class TaskSequenceProcess {
 public:
     explicit TaskSequenceProcess(uint32_t maxQueueSize, uint64_t maxTimeInterval);
     ~TaskSequenceProcess();
     void AddTask(const std::function<void()>& task);
     void FinishTask();
- 
+
 private:
+    std::function<void()> PopFromQueue();
+    void PushToQueue(const std::function<void()>& task);
+    void ExecTask();
+    bool CreateSysTimer();
+    bool DestroySysTimer();
+    bool StartSysTimer();
+    bool StopSysTimer();
     uint32_t maxQueueSize_ {1};
     uint64_t maxTimeInterval_ {1000};
     uint64_t taskTimerId_ {0};
@@ -38,13 +45,6 @@ private:
     std::mutex timerMutex_;
     std::atomic<bool> taskRunningFlag_ {false};
     WindowSysTimer TaskTimer;
-    std::function<void()> PopFromQueue();
-    void PushToQueue(const std::function<void()>& task);
-    void ExecTask();
-    bool CreateSysTimer();
-    bool DestroySysTimer();
-    bool StartSysTimer();
-    bool StopSysTimer();
 };
 } //namespace OHOS::Rosen
 #endif
