@@ -420,7 +420,7 @@ void WindowInfoReporter::ReportWindowIOPerDay(const std::string& scenes, const s
         ioRecordMap_[scenes][subScene] += sizeKB;
     }
     TLOGD(WmsLogTag::DEFAULT, "scenes: %{public}s, subScene: %{public}s, sizeKB: %{public}f, "
-        "intervalMinutes: %{public}f, REAL_TIME_ENABLED: %{public}s",
+        "intervalMinutes: %{public}d, REAL_TIME_ENABLED: %{public}s",
         scenes.c_str(), subScene.c_str(), sizeKB, intervalMinutes, REAL_TIME_ENABLED.c_str());
     // 1 day = 1140 minutesa
     int perDay = 1140;
@@ -458,10 +458,12 @@ void WindowInfoReporter::ReportWindowIO()
         }
         std::string msg = oss.str();
         // Remove 2 redundant characters
-        if (msg.length() > 2) {
-            msg.erase(msg.length() - 2);
+        size_t redundantSize = 2;
+        if (msg.length() > redundantSize) {
+            msg.erase(msg.length() - redundantSize);
         }
-        double totalWriteData = ioRecordMap_[scene]["TOTAL_WRITE_DATA"] / 1024.0;
+        const double KILOBYTE = 1024.0;
+        double totalWriteData = ioRecordMap_[scene]["TOTAL_WRITE_DATA"] / KILOBYTE;
         TLOGI(WmsLogTag::DEFAULT, "total: %{public}f, msg: %{public}s", totalWriteData, msg.c_str());
         static constexpr char WINDOW_IO_UE[] = "WINDOW_IO_UE";
         int32_t ret = HiSysEventWrite(

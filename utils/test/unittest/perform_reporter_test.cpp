@@ -548,6 +548,50 @@ HWTEST_F(PerformReporterTest, ReportSpecWindowLifeCycleChange, Function | SmallT
     int32_t res = windowInfoReporter.ReportSpecWindowLifeCycleChange(reportInfo);
     ASSERT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: ReportWindowIOPerDay
+ * @tc.desc: ReportWindowIOPerDay test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportWindowIOPerDay, Function | SmallTest | Level2)
+{
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
+
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportWindowIOPerDay("PATTERN", "ASTC", 10.5);
+    windowInfoReporter.ReportWindowIOPerDay("PATTERN", "ASTC", 10.5);
+
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "1");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "1");
+
+    windowInfoReporter.ReportWindowIOPerDay("PATTERN", "ASTC", 10.5);
+
+    EXPECT_FALSE(g_errLog.find("total") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: ReportWindowIO
+ * @tc.desc: ReportWindowIO test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportWindowIO, Function | SmallTest | Level2)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportWindowIOPerDay("PATTERN", "ASTC", 10.5);
+    windowInfoReporter.ReportWindowIO();
+
+    EXPECT_TRUE(g_errLog.find("total") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
