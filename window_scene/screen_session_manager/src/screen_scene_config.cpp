@@ -644,7 +644,7 @@ void ScreenSceneConfig::SetCutoutSvgPath(uint64_t displayId, const std::string& 
 
 void ScreenSceneConfig::UpdateCutoutBoundRect(uint64_t displayId, float rogRatio)
 {
-    if (defaultCutoutBoundaryRectMap_[displayId] == 0 || cutoutBoundaryRectMap_[displayId] == 0) {
+    if (defaultCutoutBoundaryRectMap_.count(displayId) == 0 || cutoutBoundaryRectMap_.count(displayId) == 0) {
         return;
     }
     for (uint64_t i = 0; i < cutoutBoundaryRectMap_[displayId].size(); i++) {
