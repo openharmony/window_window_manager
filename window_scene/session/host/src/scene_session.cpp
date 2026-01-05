@@ -2870,15 +2870,14 @@ void SceneSession::GetKeyboardOccupiedAreaWithRotation(
     specificCallback_->onKeyboardRotationChange_(persistentId, rotation, avoidAreas);
 }
 
-
 void SceneSession::RegisterNotifyOccupiedAreaChangeCallback(ForceNotifyOccupiedAreaChangeCallback&& callback){
-    forceNotifyOccupiedAreaChangeCallback_ = callback;
+    forceNotifyOccupiedAreaChangeFunc_ = std::move(callback);
 }
 
 void SceneSession::ForceNotifyKeyboardOccupiedArea(){
-    if(forceNotifyOccupiedAreaChangeCallback_){
+    if(forceNotifyOccupiedAreaChangeFunc_){
         auto displayId = GetSessionProperty()->GetDisplayId();
-        forceNotifyOccupiedAreaChangeCallback_(displayId);
+        forceNotifyOccupiedAreaChangeFunc_(displayId);
     } 
 }
 
