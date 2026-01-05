@@ -1997,6 +1997,51 @@ HWTEST_F(SceneSessionManagerTest9, ResetSpecificWindowZIndex, TestSize.Level1)
     ssm_->SetSpecificWindowZIndexListener(nullptr);
     ssm_->specificZIndexByPidMap_.clear();
 }
+
+/**
+ * @tc.name: CloneWindow
+ * @tc.desc: test function : CloneWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest9, CloneWindow, TestSize.Level1)
+{
+    int32_t fromPersistentId = -1;
+    int32_t toPersistentId = 2;
+    bool needOffScreen = false;
+    WSError ret = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    SessionInfo toSessionInfo;
+    toSessionInfo.bundleName_ = "CloneWindowToScession";
+    toSessionInfo.abilityName_ = "CloneWindowToScession";
+    sptr<SceneSession> toSceneSession = sptr<SceneSession>::MakeSptr(toSessionInfo, nullptr);
+    ASSERT_NE(nullptr, toSceneSession);
+    ssm_->sceneSessionMap_.insert(std::make_pair(toPersistentId, toSceneSession));
+    ret = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    fromPersistentId = 1;
+    SessionInfo fromSessionInfo;
+    fromSessionInfo.bundleName_ = "CloneWindowFromScession";
+    fromSessionInfo.abilityName_ = "CloneWindowFromScession";
+    sptr<SceneSession> fromSceneSession = sptr<SceneSession>::MakeSptr(fromSessionInfo, nullptr);
+    ASSERT_NE(nullptr, fromSceneSession);
+    ret = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    ssm_->sceneSessionMap_.insert(std::make_pair(fromPersistentId, fromSceneSession));
+    ret = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+
+    ret = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    struct RSSurfaceNodeConfig config;
+    fromSceneSession->surfaceNode_ = RSSurfaceNode::Create(config);
+    ASSERT_NE(nullptr, fromSceneSession->surfaceNode_);
+    fromSceneSession->surfaceNode_->id_ = 0;
+    ret = ssm_->CloneWindow(fromPersistentId, toPersistentId, needOffScreen);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
