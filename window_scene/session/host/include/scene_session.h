@@ -162,6 +162,7 @@ using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 using GetSCBEnterRecentFunc = std::function<bool()>;
+using ForceNotifyOccupiedAreaChangeCallback = std::function<void(DisplayId displayId)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -296,6 +297,7 @@ public:
     virtual void OpenKeyboardSyncTransaction() {}
     virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
         bool isKeyboardShow, const WindowAnimationInfo& animationInfo) {}
+    virtual void ForceProcessKeyboardOccupiedAreaInfo(){};
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
     WSError BatchPendingSessionsActivation(const std::vector<sptr<AAFwk::SessionInfo>>& abilitySessionInfos,
@@ -953,6 +955,8 @@ public:
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual void HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeReason reason = SizeChangeReason::UNDEFINED,
         DisplayId displayId = DISPLAY_ID_INVALID) { return; }
+    void RegisterNotifyOccupiedAreaChangeCallback(ForceNotifyOccupiedAreaChangeCallback&& callback);
+    void ForceNotifyKeyboardOccupiedArea();
 
     /*
      * Window Focus
@@ -1626,6 +1630,11 @@ private:
      * Window Transition Animation For PC
      */
     UpdateTransitionAnimationFunc updateTransitionAnimationFunc_;
+
+     /*
+     * Keyboard
+     */
+    ForceNotifyOccupiedAreaChangeCallback forceNotifyOccupiedAreaChangeCallback_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCENE_SESSION_H
