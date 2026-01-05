@@ -409,6 +409,14 @@ bool KeyboardSession::CalculateOccupiedArea(const sptr<SceneSession>& callingSes
     return true;
 }
 
+void KeyboardSession::ForceProcessKeyboardOccupiedAreaInfo()
+{
+    if (IsVisibleForeground() && GetKeyboardGravity() == SessionGravity::SESSION_GRAVITY_BOTTOM) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "set CalculateOccupiedAreaWaitUntilDragEnd");
+        isCalculateOccupiedAreaWaitUntilDragEnd_ = true;
+    }
+}
+
 void KeyboardSession::ProcessKeyboardOccupiedAreaInfo(uint32_t callingId, bool needRecalculateAvoidAreas,
     bool needCheckRSTransaction)
 {
@@ -1144,6 +1152,11 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
         } else {
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Calling session rect has changed");
             needRecalculateOccupiedArea = true;
+        }
+        if(reason == SizeChangeReason::DRAG_END && isCalculateOccupiedAreaWaitUntilDragEnd_){
+            needRecalculateOccupiedArea = true;
+            isCalculateOccupiedAreaWaitUntilDragEnd_ = false;
+            TLOGI(WmsLogTag::WMS_KEYBOARD, "CalculateOccupiedAreaWaitUntilDragEnd");
         }
     }
     if (needRecalculateOccupiedArea) {
