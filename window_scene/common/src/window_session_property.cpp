@@ -1499,7 +1499,9 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFullScreenInForceSplitMode_) &&
         parcel.WriteInt32(static_cast<int32_t>(pageCompatibleMode_)) &&
         parcel.WriteFloat(aspectRatio_) &&
-        parcel.WriteBool(isRotationLock_);
+        parcel.WriteBool(isRotationLock_) &&
+        parcel.WriteInt32(frameNum_) &&
+        parcel.WriteBool(isPrelaunch_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1623,6 +1625,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPageCompatibleMode(static_cast<CompatibleStyleMode>(parcel.ReadInt32()));
     property->SetAspectRatio(parcel.ReadFloat());
     property->SetRotationLocked(parcel.ReadBool());
+    property->SetFrameNum(parcel.ReadInt32());
+    property->SetPrelaunch(parcel.ReadBool());
     return property;
 }
 
@@ -2888,6 +2892,26 @@ void WindowSessionProperty::SetStatusBarHeightInImmersive(int32_t statusBarHeigh
 int32_t WindowSessionProperty::GetStatusBarHeightInImmersive() const
 {
     return statusBarHeightInImmersive_;
+}
+
+void WindowSessionProperty::SetPrelaunch(bool isPrelaunch)
+{
+    isPrelaunch_ = isPrelaunch;
+}
+
+bool WindowSessionProperty::IsPrelaunch() const
+{
+    return isPrelaunch_;
+}
+
+void WindowSessionProperty::SetFrameNum(int32_t frameNum)
+{
+    frameNum_ = frameNum;
+}
+
+int32_t WindowSessionProperty::GetFrameNum() const
+{
+    return frameNum_;
 }
 } // namespace Rosen
 } // namespace OHOS
