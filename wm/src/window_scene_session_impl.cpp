@@ -7631,6 +7631,7 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
 
 WMError WindowSceneSessionImpl::GetWindowStateSnapshot(std::string& winStateSnapshotJsonStr)
 {
+    auto persistentId = GetPersistentId();
     nlohmann::json winStateSnapshotJson = {
         {"isPcMode", system::GetBoolParameter("persist.sceneboard.ispcmode", false)},
     };
