@@ -3489,6 +3489,9 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
         newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
     }
     internalSession->PropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE);
+    newProperty.SetPropertyChangeReason(ScreenPropertyChangeReason::UNDEFINED);
+    newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::UNDEFINED);
+    internalSession->SetScreenProperty(newProperty);
     if (oldProperty.GetScreenAreaWidth() != targetRect.width_ ||
         oldProperty.GetScreenAreaHeight() != targetRect.height_) {
         NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
