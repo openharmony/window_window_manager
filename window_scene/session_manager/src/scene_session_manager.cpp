@@ -2796,7 +2796,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterNotifyOccupiedAreaChangeCallback([this](DisplayId displayId) {
             auto keyboardSession = GetKeyboardSession(displayId, false);
             if (keyboardSession == nullptr) {
-                TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, displayId: %{public}" PRLu64, displayId);
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, displayId: %{public}" PRIu64, displayId);
                 return;
             }
             keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
