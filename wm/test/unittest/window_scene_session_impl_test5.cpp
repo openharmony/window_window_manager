@@ -1149,12 +1149,14 @@ HWTEST_F(WindowSceneSessionImplTest5, SetStatusBarColorForPage, Function | Small
     std::optional<uint32_t> color;
     EXPECT_EQ(WMError::WM_DO_NOTHING, window->SetStatusBarColorForPage(color));
     window->isAtomicServiceUseColor_ = true;
-    EXPECT_EQ(WMError::WM_DO_NOTHING, window->SetStatusBarColorForPage(color));
+    EXPECT_EQ(WMError::WM_OK, window->SetStatusBarColorForPage(color));
+    window->isAtomicServiceUseColor_ = true;
     window->isNavigationUseColor_ = true;
     window->statusBarColorHistory_.push(
         std::pair<WindowSceneSessionImpl::StatusBarColorChangeReason,
         uint32_t>(WindowSceneSessionImpl::StatusBarColorChangeReason::NAVIGATION_CONFIGURATION, 1));
-    EXPECT_EQ(WMError::WM_DO_NOTHING, window->SetStatusBarColorForPage(color));
+    EXPECT_EQ(WMError::WM_OK, window->SetStatusBarColorForPage(color));
+    window->isAtomicServiceUseColor_ = true;
     window->statusBarColorHistory_.push(
         std::pair<WindowSceneSessionImpl::StatusBarColorChangeReason,
         uint32_t>(WindowSceneSessionImpl::StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, 1));

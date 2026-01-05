@@ -3584,10 +3584,11 @@ uint32_t WindowSceneSessionImpl::UpdateStatusBarColorHistory(
     }
     if (statusBarColorHistory_.empty()) {
         auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        std::pair<StatusBarColorChangeReason, uint32_t> value = color == std::nullopt ?
-            std::pair<StatusBarColorChangeReason, uint32_t>(reason, property.contentColor_) :
-            std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value());
-        statusBarColorHistory_.push(value);
+        auto defaultConfig = std::pair<StatusBarColorChangeReason, uint32_t>(
+            StatusBarColorChangeReason::WINDOW_CONFIGURATION, property.contentColor_);
+        auto config = color == std::nullopt ?
+            defaultConfig : std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value());
+        statusBarColorHistory_.push(config);
     }
     return statusBarColorHistory_.top().second;
 }
@@ -3630,20 +3631,19 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uin
         std::lock_guard<std::mutex> lock(nowsystemBarPropertyMapMutex_);
         if (color == std::nullopt && !isAtomicServiceUseColor_) {
             return WMError::WM_DO_NOTHING;
-        } else if (color == std::nullopt) {
+        }
+        if (color == std::nullopt) {
             if (!isNavigationUseColor_) {
                 auto flag = (static_cast<uint32_t>(nowsystemBarPropertyMap_[type].settingFlag_) &
                     ~static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING)) |
                     static_cast<uint32_t>(newProperty.settingFlag_);
                 nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
             }
+            auto statusBarColor =
+                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
             if (!statusBarColorHistory_.empty() &&
                 statusBarColorHistory_.top().first == StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION) {
-                nowsystemBarPropertyMap_[type].contentColor_ =
-                    UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
-            } else {
-                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
-                return WMError::WM_DO_NOTHING;
+                nowsystemBarPropertyMap_[type].contentColor_ = statusBarColor;
             }
             isAtomicServiceUseColor_ = false;
         } else {
