@@ -6444,7 +6444,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::Hide)},
         ani_native_function {"restore", "l:",
             reinterpret_cast<void *>(Restore)},
-        ani_native_function {"restoreMainWindow", nullptr,
+        ani_native_function {"restoreMainWindow", "lC{std.core.Record}:",
             reinterpret_cast<void *>(AniWindow::RestoreMainWindow)},
     };
     for (auto method : methods) {
