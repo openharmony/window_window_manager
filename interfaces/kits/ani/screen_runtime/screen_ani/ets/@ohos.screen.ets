@@ -627,6 +627,8 @@ export interface VirtualScreenOption {
     density: double;
 
     surfaceId: string;
+
+    supportsFocus?: boolean;
 }
 
 class VirtualScreenOptionImpl implements VirtualScreenOption {
@@ -639,6 +641,8 @@ class VirtualScreenOptionImpl implements VirtualScreenOption {
     density: double;
 
     surfaceId: string;
+
+    supportsFocus?: boolean;
 }
 
 export interface Rect {

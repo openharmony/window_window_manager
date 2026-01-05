@@ -932,6 +932,7 @@ HWTEST_F(WindowSceneSessionImplTest, GetGlobalScaledRect, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSession->hostSession_ = session;
+    EXPECT_CALL(*session, GetGlobalScaledRect(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->GetGlobalScaledRect(globalScaledRect));
 }
 
@@ -2962,7 +2963,7 @@ HWTEST_F(WindowSceneSessionImplTest, RestoreMainWindow, TestSize.Level1)
     window->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
 
     res = window->RestoreMainWindow(wantParams);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_CALLING);
 
     sptr<WindowOption> parentOption = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RestoreParentMainWindow");

@@ -154,7 +154,6 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 constexpr int32_t SIDEBAR_BLUR_ANIMATION_DURATION = 150;
-const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
 
 bool IsValueInRange(double value, double lowerBound, double upperBound)
 {
@@ -1756,7 +1755,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Update prelayout failed, %{public}" PRIu64, screenId);
         } else {
             std::string dispName = info->GetName();
-            Rect newRect = (info->GetWidth() > info->GetHeight() || dispName == COOPERATION_DISPLAY_NAME) ?
+            Rect newRect = (info->GetWidth() > info->GetHeight()) ?
                             params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
             property_->SetRequestRect(newRect);
         }
@@ -1769,6 +1768,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
         if (auto hostSession = GetHostSession()) {
             WSRect wsRect = { requestRect.posX_, requestRect.posY_, requestRect.width_, requestRect.height_ };
             // Set a flag when the window rect and the request rect are the same for size change notify
+            // SetNotifySizeChangeFlag must be set before SetWindowRect
             SetNotifySizeChangeFlag(true);
             property_->SetWindowRect(requestRect);
             hostSession->UpdateClientRect(wsRect);
@@ -6882,7 +6882,6 @@ bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
         isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
             orientation == DisplayOrientation::LANDSCAPE_INVERTED);
     }
-    isLandscape = isLandscape || (dispName == COOPERATION_DISPLAY_NAME);
     TLOGI(WmsLogTag::WMS_KEYBOARD, "c-displayInfo: %{public}" PRIu64 ", %{public}d|%{public}d|%{public}d, %{public}s",
         displayId, displayWidth, displayHeight, isLandscape, dispName.c_str());
     return isLandscape;
@@ -7138,8 +7137,12 @@ void WindowSceneSessionImpl::ConvertPointForCompatibleMode(const std::shared_ptr
 
 bool WindowSceneSessionImpl::IsInMappingRegionForCompatibleMode(int32_t displayX, int32_t displayY)
 {
-    const auto& windowRect = GetRect();
     Rect pointerRect = { displayX, displayY, 0, 0 };
+    Rect globalRect {};
+    if (WMError::WM_OK == GetGlobalScaledRect(globalRect)) {
+        return !pointerRect.IsInsideOf(globalRect);
+    }
+    const auto& windowRect = GetRect();
     return !pointerRect.IsInsideOf(windowRect);
 }
 
@@ -7803,7 +7806,7 @@ WMError WindowSceneSessionImpl::RestoreMainWindow(const std::shared_ptr<AAFwk::W
     auto parentWindow = FindWindowById(property_->GetParentPersistentId());
     if (parentWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "parentWindow is invalid");
-        return WMError::WM_ERROR_INVALID_PARAM;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LIFE, "session is invalid");

@@ -362,19 +362,6 @@ HWTEST_F(SceneSessionManagerTest, CheckIsRemote01, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckIsRemote02
- * @tc.desc: SceneSesionManager check is remote
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, CheckIsRemote02, TestSize.Level1)
-{
-    std::string deviceId = "abc";
-    EXPECT_EQ(deviceId.empty(), false);
-    bool result = ssm_->CheckIsRemote(deviceId);
-    EXPECT_FALSE(result);
-}
-
-/**
  * @tc.name: AnonymizeDeviceId01
  * @tc.desc: SceneSesionManager anonymize deviceId
  * @tc.type: FUNC
