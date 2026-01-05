@@ -8477,11 +8477,13 @@ bool SceneSessionManager::IsBlockingFocusWindowType(const sptr<SceneSession>& sc
     auto posX = sceneSession->GetSessionRect().posX_;
     auto posY = sceneSession->GetSessionRect().posY_;
     for (const auto& area : touchHotAreas) {
-        if (posX + area.x <= 0 && posX + area.width >= displayInfo->GetWidth() && posY + area.y <= 0 &&
-            posY + area.height >= displayInfo->GetHeight()) {
+        auto hotAreaWidth = ceil(posX + area.width * sceneSession->GetScaleX());
+        auto hotAreaHeight = ceil(posY + area.height * sceneSession->GetScaleY());
+        if (posX + area.x <= 0 && hotAreaWidth >= displayInfo->GetWidth() && posY + area.y <= 0 &&
+            hotAreaHeight >= displayInfo->GetHeight()) {
             TLOGI(WmsLogTag::WMS_FOCUS, "current session is full-screen, screen w: %{public}d, h: %{public}d, "
-                "window x: %{public}d, y: %{public}d, w: %{public}d, h: %{public}d", displayInfo->GetWidth(),
-                displayInfo->GetHeight(), area.x, area.y, area.width, area.height);
+                "window x: %{public}d, y: %{public}d, w: %{public}f, h: %{public}f", displayInfo->GetWidth(),
+                displayInfo->GetHeight(), area.x, area.y, hotAreaWidth, hotAreaHeight);
             return true;
         }
     }
