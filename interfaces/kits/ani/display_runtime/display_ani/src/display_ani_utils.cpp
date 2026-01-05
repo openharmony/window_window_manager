@@ -436,6 +436,27 @@ ani_object DisplayAniUtils::CreateAniUndefined(ani_env* env)
     return static_cast<ani_object>(aniRef);
 }
 
+static DmErrorCode GetFocusFromAni(ani_env* env, ani_object virtualScreenObj, VirtualScreenOption& option)
+{
+    ani_ref supportsFocus = nullptr;
+    if (env->Object_GetPropertyByName_Ref(virtualScreenObj, "<property>supportsFocus", &supportsFocus) != ANI_OK) {
+        TLOGE(WmsLogTag::DMS, "Failed to get supportsFocus.");
+        return DmErrorCode::DM_ERROR_INVALID_PARAM;
+    }
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(supportsFocus, &isUndefined);
+    if (isUndefined) {
+        TLOGD(WmsLogTag::DMS, "supportsFocus is undefined.");
+    } else {
+        ani_boolean result;
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(supportsFocus), "toBoolean", ":z", &result);
+        option.supportsFocus_ = static_cast<bool>(result);
+        TLOGD(WmsLogTag::DMS, "Convert supportsFocus:%{public}d", option.supportsFocus_);
+    }
+    option.supportsInput_ = false;
+    return DmErrorCode::DM_OK;
+}
+
 DmErrorCode DisplayAniUtils::GetVirtualScreenOptionFromAni(
     ani_env* env, ani_object virtualScreenConfigObj, VirtualScreenOption& option)
 {
@@ -475,7 +496,7 @@ DmErrorCode DisplayAniUtils::GetVirtualScreenOptionFromAni(
         TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert surface.");
         return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }
-    return DmErrorCode::DM_OK;
+    return GetFocusFromAni(env, virtualScreenConfigObj, option);
 }
 
 bool DisplayAniUtils::GetSurfaceFromAni(ani_env* env, ani_string surfaceIdAniValue, sptr<Surface>& surface)

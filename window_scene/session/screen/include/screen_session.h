@@ -170,7 +170,7 @@ public:
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
         FoldDisplayMode foldDisplayMode, const RRect& bounds);
-    RRect CalcBoundsInRotationZero();
+    RRect CalcBoundsInRotationZero(FoldDisplayMode foldDisplayMode);
     RRect CalcBoundsByRotation(Rotation rotation);
     DisplayOrientation GetTargetOrientationWithBounds(
         DisplayOrientation displayRotation, const RRect& boundsInRotationZero, uint32_t rotationOffset);

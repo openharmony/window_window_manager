@@ -4293,6 +4293,10 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
 DMError ScreenSessionManager::GetSupportsInput(DisplayId displayId, bool& supportsInput)
 {
     TLOGI(WmsLogTag::DMS, "start");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
@@ -4305,6 +4309,10 @@ DMError ScreenSessionManager::GetSupportsInput(DisplayId displayId, bool& suppor
 DMError ScreenSessionManager::SetSupportsInput(DisplayId displayId, bool supportsInput)
 {
     TLOGI(WmsLogTag::DMS, "start");
+    if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
+        TLOGE(WmsLogTag::DMS, "permission denied!");
+        return DMError::DM_ERROR_INVALID_PERMISSION;
+    }
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
     if (screenSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "GetScreenSession failed");
@@ -8559,8 +8567,8 @@ void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<Display
     }
     std::ostringstream oss; 
     for (const auto& [displayId, isPrivate] : privacyBundleDisplayId) {
-        oss << "[displayId: " << displayId
-            << ", private: " << (isPrivate ? "true" : "false") << "] ";
+        oss << "[id: " << displayId
+            << ", priv: " << (isPrivate ? "T" : "F") << "] ";
     }
     const std::vector<DisplayId> displayIds = GetAllDisplayIds();
     // all display use or to calculate private state
@@ -8574,7 +8582,7 @@ void ScreenSessionManager::SetPrivacyStateByDisplayId(std::unordered_map<Display
         }
         NotifyPrivateSessionStateChanged(allDisplayHasPrivate);
     }
-    TLOGI(WmsLogTag::DMS, "needNotify=%{public}d, hasPrivacy=%{public}d, displayPrivacyInfo=%{public}s",
+    TLOGI(WmsLogTag::DMS, "notify=%{public}d, allP=%{public}d, %{public}s",
         isNeedNotify, allDisplayHasPrivate, oss.str().c_str());
 }
 
@@ -8625,7 +8633,7 @@ void ScreenSessionManager::SetScreenPrivacyWindowList(DisplayId id, std::vector<
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return;
     }
-    TLOGW(WmsLogTag::DMS, "enter");
+    TLOGNW(WmsLogTag::DMS, "SetPrivList enter");
     std::vector<ScreenId> screenIds = GetAllScreenIds();
     auto iter = std::find(screenIds.begin(), screenIds.end(), id);
     if (iter == screenIds.end()) {
@@ -8667,7 +8675,7 @@ DMError ScreenSessionManager::HasPrivateWindow(DisplayId id, bool& hasPrivateWin
             hasPrivateWindow = false;
         }
     }
-    TLOGNI(WmsLogTag::DMS, "id: %{public}" PRIu64" has private window: %{public}u",
+    TLOGNI(WmsLogTag::DMS, "id: %{public}" PRIu64" privW: %{public}u",
         id, static_cast<uint32_t>(hasPrivateWindow));
     return DMError::DM_OK;
 }
@@ -10571,7 +10579,10 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
         SwitchScbNodeHandle(userId, newScbPid, true);
     }
     AddScbClientDeathRecipient(client, IPCSkeleton::GetCallingPid());
+}
 
+void ScreenSessionManager::SwitchUserResetDisplayNodeScreenId()
+{
     static bool isNeedSwitchScreen = FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
         FoldScreenStateInternel::IsSingleDisplayFoldDevice() ||
         FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice();
@@ -10754,7 +10765,8 @@ void ScreenSessionManager::HandleScreenRotationAndBoundsWhenSetClient(sptr<Scree
     }
     TLOGI(WmsLogTag::DMS, "phyWidth:%{public}f, phyHeight:%{public}f, localRotation:%{public}u",
         phyWidth, phyHeight, localRotation);
-    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         auto bounds = screenSession->GetScreenProperty().GetBounds();
         screenSession->SetRotation(Rotation::ROTATION_0);
         TLOGI(WmsLogTag::DMS, "rotation:%{public}d", screenSession->GetRotation());
@@ -11593,8 +11605,12 @@ DMError ScreenSessionManager::GetFoldableDeviceCapability(std::string& capabilit
         expandDisplayMode = FoldDisplayMode::MAIN;
         foldDisplayMode = FoldDisplayMode::SUB;
     }
+    std::vector<std::string> orientation = ORIENTATION_DEFAULT;
+    if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() && !CORRECTION_ENABLE) {
+        orientation = {"3", "0", "1", "2"};
+    }
     nlohmann::ordered_json expandCapabilityInfo = GetCapabilityJson(expandStatus, expandDisplayMode,
-        ROTATION_DEFAULT, ORIENTATION_DEFAULT);
+        ROTATION_DEFAULT, orientation);
     jsonDisplayCapabilityList["capability"].push_back(std::move(expandCapabilityInfo));
     nlohmann::ordered_json foldCapabilityInfo = GetCapabilityJson(foldStatus, foldDisplayMode,
         ROTATION_DEFAULT, ORIENTATION_DEFAULT);
@@ -13502,6 +13518,7 @@ void ScreenSessionManager::SwitchUserDealUserDisplayNode(int32_t newUserId)
         }
     }
     SetUserDisplayNodePositionZ(newUserId, POSITION_Z_LOW);
+    SwitchUserResetDisplayNodeScreenId();
 }
 
 void ScreenSessionManager::AddUserDisplayNodeOnTree(int32_t userId)

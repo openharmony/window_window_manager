@@ -1101,6 +1101,9 @@ ani_object DisplayManagerAni::OnGetBrightnessInfoAni(ani_env* env, ani_long disp
         if (ret == DMError::DM_ERROR_ILLEGAL_PARAM) {
             AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM,
                 "JsDisplayManager::OnGetBrightnessInfoAni failed.");
+        } else if (ret == DMError::DM_ERROR_DEVICE_NOT_SUPPORT) {
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_DEVICE_NOT_SUPPORT,
+                "JsDisplayManager::OnGetBrightnessInfoAni failed.");
         } else {
             AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,
                 "JsDisplayManager::OnGetBrightnessInfoAni failed.");
