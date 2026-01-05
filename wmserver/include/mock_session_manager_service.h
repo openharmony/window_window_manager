@@ -64,6 +64,11 @@ public:
     ErrCode RegisterSMSRecoverListener(const sptr<IRemoteObject>& listener, int32_t userId, bool isLite) override;
     ErrCode UnregisterSMSRecoverListener(int32_t userId, bool isLite) override;
     void UnregisterSMSRecoverListenerInner(int32_t clientUserId, DisplayId displayId, int32_t pid, bool isLite);
+
+    /*
+     * Window Hierarchy
+     */
+    ErrCode NotifySetSpecificWindowZIndex() override;
     void ResetSpecificWindowZIndex(int32_t clientUserId, int32_t pid);
 
     /*
@@ -170,6 +175,12 @@ private:
     std::mutex systemAppRecoverListenerMutex_;
     std::map<DisplayId, SMSRecoverListenerMap> liteSystemAppRecoverListenerMap_;
     std::mutex liteSystemAppRecoverListenerMutex_;
+
+    /*
+     * Window Hierarchy
+     */
+    std::unordered_map<int32_t, int32_t> specificZIndexByPidMap_;
+    std::mutex specificZIndexByPidMapMutex_;
 
     /*
      * Window Snapshot
