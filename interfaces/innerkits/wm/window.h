@@ -5136,6 +5136,11 @@ public:
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError SetStatusBarColorForExtension(uint32_t color) { return WMError::WM_OK; }
+
+    /**
+     * @brief Flush vsync for prelaunch.
+     */
+    virtual void FlushVsync() {}
 };
 }
 }

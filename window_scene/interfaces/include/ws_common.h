@@ -472,6 +472,7 @@ struct SessionInfo {
     bool isAncoApplication_ = false;
     int32_t scenarios = 0;
     bool isPrelaunch_ = false;
+    int32_t frameNum_ = 0;
 
     /*
      * Keyboard
