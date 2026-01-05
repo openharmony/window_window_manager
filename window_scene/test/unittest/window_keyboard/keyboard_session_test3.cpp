@@ -871,16 +871,16 @@ HWTEST_F(KeyboardSessionTest3, ForceProcessKeyboardOccupiedAreaInfo, Function | 
     keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_ = false;
     keyboardSession->isVisible_ = false;
     keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
-    EXPECT__EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
+    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
 
     keyboardSession->isVisible_ = true;
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
     keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
-    EXPECT__EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
+    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
 
     keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
     keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
-    EXPECT__EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, true);
+    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, true);
 }
 
 /**
