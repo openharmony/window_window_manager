@@ -210,7 +210,9 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode(bool isUpdateContextBefor
               GetPersistentId(),
               RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(),
               RSAdapterUtil::RSUIContextToStr(GetRSUIContext()).c_str());
-        RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
+        if (surfaceNode_) {
+            RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
+        }
     }
     return surfaceNode_;
 }
