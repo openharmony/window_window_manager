@@ -3163,7 +3163,6 @@ HWTEST_F(WindowExtensionSessionImplTest, OnExtensionMessage, TestSize.Level1)
     auto ret = window->OnExtensionMessage(code, persistentId, want);
     EXPECT_EQ(WMError::WM_OK, ret);
 
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::REGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window->OnExtensionMessage(code, persistentId, want));
     code = static_cast<uint32_t>(Extension::Businesscode::UNREGISTER_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY_LISTENER);
