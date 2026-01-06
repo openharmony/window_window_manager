@@ -1083,7 +1083,7 @@ protected:
      */
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> needNotifyAttachState_ = { false };
-    uint32_t lastSnapshotScreen_ = SCREEN_UNKNOWN;
+    int32_t lastSnapshotScreen_ = SCREEN_UNKNOWN;
     SnapshotStatus capacity_ = defaultCapacity;
 
     /*
