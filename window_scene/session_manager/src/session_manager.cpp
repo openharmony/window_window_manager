@@ -309,6 +309,9 @@ void SessionManager::RegisterSMSRecoverListener()
             TLOGI(WmsLogTag::WMS_RECOVER, "listener has been registered");
             return;
         }
+        if (!smsRecoverListener_) {
+            smsRecoverListener_ = sptr<SessionManagerServiceRecoverListener>::MakeSptr(userId_);
+        }
     }
     sptr<IMockSessionManagerInterface> mockProxy = nullptr;
     {
@@ -319,7 +322,6 @@ void SessionManager::RegisterSMSRecoverListener()
         }
         mockProxy = mockSessionManagerServiceProxy_;
     }
-    smsRecoverListener_ = sptr<SessionManagerServiceRecoverListener>::MakeSptr(userId_);
     mockProxy->RegisterSMSRecoverListener(smsRecoverListener_, userId_, false);
     {
         std::lock_guard<std::mutex> lock(recoverListenerMutex_);

@@ -78,6 +78,7 @@ public:
     WSError UpdateSizeChangeReason(SizeChangeReason reason) override;
     bool GetIsKeyboardSyncTransactionOpen() const { return isKeyboardSyncTransactionOpen_; }
     void SetSkipEventOnCastPlus(bool isSkip) override;
+    void ForceProcessKeyboardOccupiedAreaInfo() override;
 
 protected:
     void EnableCallingSessionAvoidArea() override;
@@ -124,6 +125,7 @@ private:
     sptr<KeyboardSessionCallback> keyboardCallback_ = nullptr;
     bool isKeyboardSyncTransactionOpen_ = false;
     NotifyKeyboarEffectOptionChangeFunc changeKeyboardEffectOptionFunc_;
+    bool isCalculateOccupiedAreaWaitUntilDragEnd_ = false;
     WMError IsLandscape(uint64_t screenId, bool& isLandscape);
     void PrintRectsInfo(const std::vector<Rect>& rects, const std::string& infoTag);
 };

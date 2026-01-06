@@ -2792,6 +2792,16 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterGetSCBEnterRecentFunc([this]() {
             return this->enterRecent_.load();
         });
+
+        sceneSession->RegisterNotifyOccupiedAreaChangeCallback([this](DisplayId displayId) {
+            auto keyboardSession = GetKeyboardSession(displayId, false);
+            if (keyboardSession == nullptr) {
+                TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, displayId: %{public}" PRIu64, displayId);
+                return;
+            }
+            keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
+        });
+
         if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
             sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
                 return this->GetAppForceLandscapeConfigEnable(bundleName);
