@@ -5007,7 +5007,6 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
         }
     }
 
-    powerStateChangeReason_ = reason;
     CallRsSetScreenPowerStatusSync(screenId, status);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
         return true;
@@ -5169,13 +5168,13 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 #ifdef FOLD_ABILITY_ENABLE
     if (foldScreenController_ != nullptr) {
         CallRsSetScreenPowerStatusSyncForFold(status);
-        CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
+        CallRsSetScreenPowerStatusSyncForExtend(screenIds, status, reason);
         TryToRecoverFoldDisplayMode(status);
     } else {
-        SetRsSetScreenPowerStatusSync(screenIds, status);
+        SetRsSetScreenPowerStatusSync(screenIds, status, reason);
     }
 #else
-    SetRsSetScreenPowerStatusSync(screenIds, status);
+    SetRsSetScreenPowerStatusSync(screenIds, status, reason);
 #endif
     HandlerSensor(status, reason);
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
@@ -5191,7 +5190,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
 }
 
 void ScreenSessionManager::SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& screenIds,
-    ScreenPowerStatus status)
+    ScreenPowerStatus status, PowerStateChangeReason reason)
 {
     if (g_isPcDevice && status == ScreenPowerStatus::POWER_STATUS_ON) {
         std::sort(screenIds.begin(), screenIds.end(), SortByScreenId);
@@ -5201,7 +5200,7 @@ void ScreenSessionManager::SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& 
                 TLOGNFI(WmsLogTag::DMS, "Power on skip");
                 continue;
             }
-            CallRsSetScreenPowerStatusSync(screenId, status);
+            CallRsSetScreenPowerStatusSync(screenId, status, reason);
         }
     } else if (g_isPcDevice && (status == ScreenPowerStatus::POWER_STATUS_OFF ||
         status == ScreenPowerStatus::POWER_STATUS_SUSPEND)) {
@@ -5209,22 +5208,22 @@ void ScreenSessionManager::SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& 
             std::reverse(screenIds.begin(), screenIds.end());
             for (auto screenId : screenIds) {
                 TLOGNFI(WmsLogTag::DMS, "[UL_POWER] Power off, screen id is %{public}d", (int)screenId);
-                CallRsSetScreenPowerStatusSync(screenId, status);
+                CallRsSetScreenPowerStatusSync(screenId, status, reason);
             }
     } else {
         for (auto screenId : screenIds) {
-            CallRsSetScreenPowerStatusSync(screenId, status);
+            CallRsSetScreenPowerStatusSync(screenId, status, reason);
         }
     }
 }
 
 void ScreenSessionManager::CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds,
-    ScreenPowerStatus status)
+    ScreenPowerStatus status, PowerStateChangeReason reason)
 {
     for (auto screenId : screenIds) {
         auto session = GetScreenSession(screenId);
         if (session && session->GetScreenProperty().GetScreenType() == ScreenType::REAL && !session->isInternal_) {
-            CallRsSetScreenPowerStatusSync(screenId, status);
+            CallRsSetScreenPowerStatusSync(screenId, status, reason);
         }
     }
 }
@@ -5304,7 +5303,8 @@ void ScreenSessionManager::TriggerDisplayModeUpdate(FoldDisplayMode targetDispla
     taskScheduler_->PostAsyncTask(updateDisplayModeTask, "updateDisplayModeTask");
 }
 #endif
-void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status)
+void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status,
+    PowerStateChangeReason reason)
 {
     auto rsSetScreenPowerStatusTask = [=] {
         bool phyMirrorEnable = IsDefaultMirrorMode(screenId);
@@ -5316,7 +5316,7 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
             auto sourceMode = screenSession->GetSourceMode();
             if (status != ScreenPowerStatus::POWER_STATUS_ON &&
                 (powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION ||
-                powerStateChangeReason_ == PowerStateChangeReason::STATE_CHANGE_REASON_APPCAST)) {
+                reason == PowerStateChangeReason::STATE_CHANGE_REASON_APPCAST)) {
                 return;
             }
             if (sourceMode == ScreenSourceMode::SCREEN_UNIQUE &&
