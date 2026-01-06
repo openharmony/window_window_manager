@@ -1022,10 +1022,10 @@ private:
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
     void SetExtendPixelRatio(const float& dpi);
     void CallRsSetScreenPowerStatusSyncForExtend(
-        const std::vector<ScreenId> &screenIds, ScreenPowerStatus status,
+        const std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
         PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
     void SetRsSetScreenPowerStatusSync(
-        std::vector<ScreenId> screenIds, ScreenPowerStatus status,
+        std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
         PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
     AodStatus aodNotifyFlag_ { AodStatus::UNKNOWN };
