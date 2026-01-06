@@ -81,12 +81,12 @@ void ScreenshotAniUtils::ConvertRect(ani_env* env, Media::Rect rect, ani_object 
 {
     TLOGI(WmsLogTag::DMS, "[ANI] rect area info: %{public}d, %{public}d, %{public}u, %{public}u",
         rect.left, rect.width, rect.top, rect.height);
-    env->Object_SetFieldByName_Long(rectObj, "<property>left", rect.left);
-    env->Object_SetFieldByName_Long(rectObj, "<property>top", rect.top);
-    env->Object_SetFieldByName_Long(rectObj, "<property>width", rect.width);
-    env->Object_SetFieldByName_Long(rectObj, "<property>height", rect.height);
+    env->Object_SetFieldByName_Long(rectObj, Builder::BuildPropertyName("left").c_str(), rect.left);
+    env->Object_SetFieldByName_Long(rectObj, Builder::BuildPropertyName("top").c_str(), rect.top);
+    env->Object_SetFieldByName_Long(rectObj, Builder::BuildPropertyName("width").c_str(), rect.width);
+    env->Object_SetFieldByName_Long(rectObj, Builder::BuildPropertyName("height").c_str(), rect.height);
 }
- 
+
 ani_object ScreenshotAniUtils::CreateScreenshotPickInfo(ani_env* env, std::unique_ptr<Param>& param)
 {
     ani_class aniClass{};
@@ -109,13 +109,15 @@ ani_object ScreenshotAniUtils::CreateScreenshotPickInfo(ani_env* env, std::uniqu
     }
     ani_object rectObj = ScreenshotAniUtils::CreateRectObject(env);
     ScreenshotAniUtils::ConvertRect(env, param->imageRect, rectObj);
-    env->Object_SetFieldByName_Ref(pickInfoObj, "<property>pickRect", static_cast<ani_ref>(rectObj));
- 
+    env->Object_SetFieldByName_Ref(
+        pickInfoObj, Builder::BuildPropertyName("pickRect").c_str(), static_cast<ani_ref>(rectObj));
+
     auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, param->image);
-    env->Object_SetFieldByName_Ref(pickInfoObj, "<property>pixelMap", static_cast<ani_ref>(nativePixelMap));
+    env->Object_SetFieldByName_Ref(
+        pickInfoObj, Builder::BuildPropertyName("pixelMap").c_str(), static_cast<ani_ref>(nativePixelMap));
     return pickInfoObj;
 }
- 
+
 ani_status ScreenshotAniUtils::GetAniString(ani_env* env, const std::string& str, ani_string* result)
 {
     return env->String_NewUTF8(str.c_str(), static_cast<ani_size>(str.size()), result);
