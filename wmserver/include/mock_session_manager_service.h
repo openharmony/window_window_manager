@@ -142,7 +142,9 @@ private:
         std::vector<std::string>>& userIdAndBunldeNames);
 
     sptr<IRemoteObject> screenSessionManager_;
+    std::mutex screenSessionManagerMutex_;
     sptr<IRemoteObject> defaultSceneSessionManager_;
+    std::mutex defaultSceneSessionManagerMutex_;
 
     /*
      * Multi User
