@@ -17,7 +17,7 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
-TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize, uint64_t maxTimeInterval,std::string timerName)
+TaskSequenceProcess::TaskSequenceProcess(uint32_t maxQueueSize, uint64_t maxTimeInterval, std::string timerName)
     : maxQueueSize_(maxQueueSize), maxTimeInterval_(maxTimeInterval), timerName_(timerName)
 {
     if (maxQueueSize_ <= 0) {
