@@ -3171,7 +3171,7 @@ export class WindowInternal implements Window {
             try {
                 this.setWindowTitle(this.nativeObj, titleName);
                 resolve(undefined);
-            } catch(err: Any) {
+            } catch (err: Error) {
                 reject(err as BusinessError);
             }
         });
