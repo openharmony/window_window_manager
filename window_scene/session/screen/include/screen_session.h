@@ -34,6 +34,7 @@
 #include "screen_group_info.h"
 #include "event_handler.h"
 #include "screen_session_manager/include/screen_rotation_property.h"
+#include "screen_manager/rs_screen_mode_info.h"
 
 namespace OHOS::Rosen {
 using SetScreenSceneDpiFunc = std::function<void(float density)>;
@@ -157,6 +158,7 @@ public:
     void SetFakeScreenSession(sptr<ScreenSession> screenSession);
     sptr<ScreenSession> GetFakeScreenSession() const;
     void UpdatePropertyByActiveMode();
+    void UpdatePropertyByScreenMode(RSScreenModeInfo screenMode);
     void UpdatePropertyByActiveModeChange();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
