@@ -1153,7 +1153,7 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Calling session rect has changed");
             needRecalculateOccupiedArea = true;
         }
-        if(reason == SizeChangeReason::DRAG_END && isCalculateOccupiedAreaWaitUntilDragEnd_){
+        if (reason == SizeChangeReason::DRAG_END && isCalculateOccupiedAreaWaitUntilDragEnd_) {
             needRecalculateOccupiedArea = true;
             isCalculateOccupiedAreaWaitUntilDragEnd_ = false;
             TLOGI(WmsLogTag::WMS_KEYBOARD, "CalculateOccupiedAreaWaitUntilDragEnd");
