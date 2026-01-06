@@ -3304,7 +3304,9 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     NotifyScreenChanged(screenInfo, ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayStateChange(screenId, displayInfo, emptyMap, DisplayStateChangeType::RESOLUTION_CHANGE);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    // unfreeze screen when system boot completed
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedUnfreezeCallback, this);
+    // add asyc task to judge when to unfreeze screen
     AddScreenUnfreezeTask(screenSession, 0);
     return DMError::DM_OK;
 }
