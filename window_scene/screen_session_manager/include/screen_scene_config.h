@@ -70,7 +70,7 @@ public:
     static bool IsSupportDuringCall();
     static uint32_t GetNumberConfigValue(const std::string& name, const uint32_t& default_value);
     static bool IsConcurrentUser();
-    static bool UpdateCutoutBoundRect(uint64_t displayId, float rogRatio);
+    static void UpdateCutoutBoundRect(uint64_t displayId, float rogRatio);
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
