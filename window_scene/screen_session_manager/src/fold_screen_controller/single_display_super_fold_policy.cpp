@@ -197,7 +197,6 @@ void SingleDisplaySuperFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displ
     DisplayModeChangeReason reason)
 {
     if (!CheckDisplayModeChange(displayMode, isForce)) {
-        ScreenSessionManager::GetInstance().RunFinishTask();
         return;
     }
     ChangeScreenDisplayModeInner(displayMode, reason);
