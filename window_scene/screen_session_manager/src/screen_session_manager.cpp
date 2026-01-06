@@ -10616,7 +10616,7 @@ void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
     //ensure updateavilibearea success after switch user
     auto internalSession = GetInternalScreenSession();
     if (internalSession == nullptr) {
-        TLOGE(WmsLogTag::DMS, "ScreenSession Null");
+        TLOGE(WmsLogTag::DMS, "Internal Session null");
         return;
     }
     internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
