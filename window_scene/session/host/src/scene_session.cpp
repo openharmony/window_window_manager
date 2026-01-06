@@ -1061,12 +1061,16 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                 session->Session::UpdateRect(rect, SizeChangeReason::RECOVER, where, nullptr);
                 session->moveDragController_->SetStartMoveFlag(true);
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, true);
+                session->ForceNotifyKeyboardOccupiedArea();
             } else {
                 session->SetParentRect();
                 session->moveDragController_->SetScale(session->GetScaleX(), session->GetScaleY());
                 session->moveDragController_->SetStartMoveFlag(true);
                 // use window rect when fullscreen or compatible mode
                 session->moveDragController_->CalcFirstMoveTargetRect(rect, proportionalScale);
+                if(session->IsSplitMovable()){
+                    session->ForceNotifyKeyboardOccupiedArea();
+                }
             }
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
                 session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
@@ -2883,6 +2887,17 @@ void SceneSession::GetKeyboardOccupiedAreaWithRotation(
         return;
     }
     specificCallback_->onKeyboardRotationChange_(persistentId, rotation, avoidAreas);
+}
+
+void SceneSession::RegisterNotifyOccupiedAreaChangeCallback(ForceNotifyOccupiedAreaChangeCallback&& callback){
+    forceNotifyOccupiedAreaChangeFunc_ = std::move(callback);
+}
+
+void SceneSession::ForceNotifyKeyboardOccupiedArea(){
+    if(forceNotifyOccupiedAreaChangeFunc_){
+        auto displayId = GetSessionProperty()->GetDisplayId();
+        forceNotifyOccupiedAreaChangeFunc_(displayId);
+    } 
 }
 
 void SceneSession::GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea)
