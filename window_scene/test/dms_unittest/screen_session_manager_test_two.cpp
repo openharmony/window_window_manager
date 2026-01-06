@@ -3416,6 +3416,37 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level
     ssm_->NotifyDisplayAttributeChanged(displayInfo, attributes);
     EXPECT_TRUE(g_errLog.find("NotifyDisplayAttributeChanged") != std::string::npos);
 }
+
+/**
+ * @tc.name: HandleResolutionEffectAfterSwitchUser
+ * @tc.desc: HandleResolutionEffectAfterSwitchUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectAfterSwitchUser, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (!g_isPcDevice) {
+        GTEST_SKIP();
+    }
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+ 
+    sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    screenSession->SetIsCurrentInUse(true);
+    screenSession->SetScreenType(ScreenType::REAL);
+    screenSession->isInternal_ = true;
+ 
+    ssm_->HandleResolutionEffectAfterSwitchUser();
+    EXPECT_TRUE(g_errLog.find("Internal Session null") != std::string::npos);
+    g_errLog.clear();
+ 
+    ssm_->screenSessionMap_[51] = screenSession;
+    ssm_->HandleResolutionEffectAfterSwitchUser();
+    EXPECT_FALSE(g_errLog.find("Internal Session null") != std::string::npos);
+    g_errLog.clear();
+    ssm_->screenSessionMap_.erase(51);
+}
 }
 }
 }

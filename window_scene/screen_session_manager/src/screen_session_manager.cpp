@@ -10606,6 +10606,22 @@ void ScreenSessionManager::SwitchUserResetDisplayNodeScreenId()
     }
 }
 
+void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
+    if (!g_isPcDevice) {
+        return;
+    }
+    // After switching users, the listener will become invalid and needs to be re-registered. 
+    ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
+    RegisterSettingResolutionEffectObserver();
+    //ensure updateavilibearea success after switch user
+    auto internalSession = GetInternalScreenSession();
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "ScreenSession Null");
+        return;
+    }
+    internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+}
+
 void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot)
 {
 #ifdef WM_MULTI_USR_ABILITY_ENABLE
@@ -10653,11 +10669,9 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
     }
     currentUserId_ = newUserId;
     currentScbPId_ = newScbPid;
-    // After switching users, the listener will become invalid and needs to be re-registered.
-    ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
-    RegisterSettingResolutionEffectObserver();
     scbSwitchCV_.notify_all();
     oldScbDisplayMode_ = GetFoldDisplayMode();
+    HandleResolutionEffectAfterSwitchUser();
 #endif
 }
 
