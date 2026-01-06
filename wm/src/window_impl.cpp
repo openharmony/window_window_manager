@@ -1908,7 +1908,9 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
         NotifyAfterForeground();
 
         if (static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::KEYGUARD) {
-            NotifyMainWindowDidForeground(reason);
+            if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+                NotifyAfterDidForeground(reason, true);
+            }
         }
         return WMError::WM_OK;
     }
@@ -1981,7 +1983,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
 
         if (WindowHelper::IsMainWindow(property_->GetWindowType()) &&
             stateChangeReason == WindowStateChangeReason::KEYGUARD) {
-            NotifyAfterDidBackground(reason);
+            NotifyAfterDidBackground(reason, true);
         }
         return WMError::WM_OK;
     }
@@ -4216,10 +4218,10 @@ void WindowImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotify
     }
 }
 
-void WindowImpl::NotifyAfterDidForeground(uint32_t reason)
+void WindowImpl::NotifyAfterDidForeground(uint32_t reason, bool forceNotify)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
-    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d, need forceNotify:%{public}d", reason, forceNotify);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL) && !forceNotify) {
         TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did foreground", reason);
         return;
     }
@@ -4251,10 +4253,10 @@ void WindowImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotify
     }
 }
 
-void WindowImpl::NotifyAfterDidBackground(uint32_t reason)
+void WindowImpl::NotifyAfterDidBackground(uint32_t reason, bool forceNotify)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
-    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d, need forceNotify:%{public}d", reason, forceNotify);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL) && !forceNotify) {
         TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did background", reason);
         return;
     }
