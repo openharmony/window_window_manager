@@ -1372,15 +1372,15 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    const auto persistentId = GetPersistentId();
     TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
-        "reason:%{public}u %{public}s", GetPersistentId(), rect.ToString().c_str(), reason, updateReason.c_str());
+        "reason:%{public}u %{public}s", persistentId, rect.ToString().c_str(), reason, updateReason.c_str());
+    GetLayoutController()->SetSessionRect(rect);
     if (!IsSessionValid()) {
-        GetLayoutController()->SetSessionRect(rect);
-        TLOGD(WmsLogTag::WMS_MAIN, "Session is invalid, id: %{public}d state: %{public}u",
-            GetPersistentId(), GetSessionState());
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
+            persistentId, GetSessionState());
         return WSError::WS_ERROR_INVALID_SESSION;
     }
-    GetLayoutController()->SetSessionRect(rect);
     WSRect updateRect = IsNeedConvertToRelativeRect(reason) ?
         GetLayoutController()->ConvertGlobalRectToRelative(rect, GetDisplayId()) : rect;
 
@@ -1392,16 +1392,8 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         return WSError::WS_DO_NOTHING;
     }
     if (sessionStage_ != nullptr) {
-        int32_t rotateAnimationDuration = GetRotateAnimationDuration();
-        SceneAnimationConfig config;
-        config.rsTransaction_ = rsTransaction;
-        config.animationDuration_ = rotateAnimationDuration;
-        if (reason == SizeChangeReason::SCENE_WITH_ANIMATION) {
-            TLOGI(WmsLogTag::WMS_LAYOUT_PC, "UpdateRectWithLayoutInfo %{public}d", reason);
-            config = sceneAnimationConfig_;
-        }
         UpdateClientRectPosYAndDisplayId(updateRect);
-        sessionStage_->UpdateRect(updateRect, reason, config, avoidAreas);
+        UpdateClientRectInfo(updateRect, reason, avoidAreas, rsTransaction);
         SetClientRect(rect);
         NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(reason);
         RectCheckProcess();
@@ -5468,6 +5460,24 @@ WSError Session::UpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason re
     globalDisplayRectSizeChangeReason_ = reason;
     NotifyClientToUpdateGlobalDisplayRect(rect, reason);
     return WSError::WS_OK;
+}
+
+WSError Session::UpdateClientRectInfo(const WSRect& rect, SizeChangeReason reason,
+                                      const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
+                                      const std::shared_ptr<RSTransaction>& rsTransaction)
+{
+    if (!sessionStage_) {
+        return WSError::WS_DO_NOTHING;
+    }
+
+    int32_t rotateAnimationDuration = GetRotateAnimationDuration();
+    SceneAnimationConfig config;
+    config.rsTransaction_ = rsTransaction;
+    config.animationDuration_ = rotateAnimationDuration;
+    if (reason == SizeChangeReason::SCENE_WITH_ANIMATION) {
+        config = sceneAnimationConfig_;
+    }
+    return sessionStage_->UpdateRect(rect, reason, config, avoidAreas);
 }
 
 WSError Session::NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason)
