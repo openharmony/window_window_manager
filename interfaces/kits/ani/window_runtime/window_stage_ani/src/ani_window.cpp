@@ -1856,7 +1856,7 @@ WMError AniWindow::SetSystemBarPropertiesByFlags(std::map<WindowType, SystemBarP
         WindowType type = it.first;
         SystemBarPropertyFlag flag = it.second;
         if (flag.enableFlag || flag.backgroundColorFlag || flag.contentColorFlag || flag.enableAnimationFlag) {
-            ret = windowToken->SetSystemBarProperty(type, systemBarProperties.at(type));
+            ret = windowToken->UpdateSystemBarPropertyForPage(type, systemBarProperties.at(type), flag);
             if (ret != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_IMMS, "[ANI] SetSystemBarProperty failed, ret = %{public}d", ret);
             }
@@ -3664,8 +3664,9 @@ void AniWindow::SetStatusBarColor(ani_env* env, ani_long color)
     property.contentColor_ = static_cast<uint32_t>(color);
     property.settingFlag_ = static_cast<SystemBarSettingFlag>(static_cast<uint32_t>(property.settingFlag_) |
         static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
+    SystemBarPropertyFlag flag = { false, false, true, false };
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        windowToken_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, property));
+        windowToken_->UpdateSystemBarPropertyForPage(WindowType::WINDOW_TYPE_STATUS_BAR, property, flag));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "set status bar property error: %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetStatusBarProperty failed");
