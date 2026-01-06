@@ -3142,7 +3142,8 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         rotate = DisplayOrientation::PORTRAIT;
     }
     isSnapshotBlur_.store(GetNeedUseBlurSnapshot());
-    bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && reason == LifeCycleChangeReason::SCREEN_LOCK);
+    bool needCacheSnapshot = (SupportCacheLockedSessionSnapshot() && (reason == LifeCycleChangeReason::SCREEN_LOCK ||
+        reason == LifeCycleChangeReason::EXPAND_TO_FOLD_SINGLE_POCKET));
     const char* const where = __func__;
     auto task = [weakThis = wptr(this), runInFfrt = useFfrt, requirePersist = needPersist, persistentPixelMap,
         updateSnapshot, key, rotate, needCacheSnapshot, reason, where]() {
