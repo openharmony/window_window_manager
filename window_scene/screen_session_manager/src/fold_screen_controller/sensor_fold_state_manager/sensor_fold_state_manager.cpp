@@ -30,7 +30,7 @@ namespace OHOS::Rosen {
 namespace {
 constexpr int32_t MAX_QUEUE_SIZE = 1;
 constexpr uint64_t MAX_TIME_INTERVAL_MS = 200;
-TaskSequenceProcess g_taskProcessor(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL_MS);
+TaskSequenceProcess g_taskProcessor(MAX_QUEUE_SIZE, MAX_TIME_INTERVAL_MS, "foldStatusProcessor");
 }
 SensorFoldStateManager::SensorFoldStateManager() = default;
 SensorFoldStateManager::~SensorFoldStateManager() = default;
@@ -78,7 +78,6 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, float angl
             }
         } else {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", mState_);
-            FinishTaskSequence();
         }
 
         // running status is false , foldstatus change process is finished here, we should start next task
@@ -140,7 +139,6 @@ void SensorFoldStateManager::HandleSensorChange(FoldStatus nextState, const std:
             manager->ProcessNotifyFoldStatusChange(currentState, newState, angles, policy);
         } else {
             TLOGD(WmsLogTag::DMS, "fold state doesn't change, foldState = %{public}d.", manager->mState_);
-            manager->FinishTaskSequence();
         }
 
         // running status is false , foldstatus change process is finished here, we should start next task
