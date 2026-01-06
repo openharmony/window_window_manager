@@ -165,7 +165,6 @@ bool SingleDisplayFoldPolicy::CheckDisplayModeChange(FoldDisplayMode displayMode
 void SingleDisplayFoldPolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, DisplayModeChangeReason reason)
 {
     if (!CheckDisplayModeChange(displayMode, false, reason)) {
-        ScreenSessionManager::GetInstance().RunFinishTask();
         return;
     }
     TLOGI(WmsLogTag::DMS, "start change displaymode: %{public}d, reason: %{public}d", displayMode, reason);
