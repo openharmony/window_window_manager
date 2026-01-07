@@ -32,12 +32,20 @@ const static float INVALID_DEFAULT_DENSITY = 1.0f;
 const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 constexpr uint32_t MAP_SIZE_MAX_NUM = 100;
+const std::map<DisplayManagerMessage, EventPriority> EVENT_PRIORITY_MAP{
+    { DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO,  EventPriority::VIP },
+};
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    DmUtils::HoldLock callbackLock;
+    auto it = EVENT_PRIORITY_MAP.find(static_cast<DisplayManagerMessage>(code));
+    if (it != EVENT_PRIORITY_MAP.end()) {
+        DmUtils::HoldLock callbackLock(it->second);
+    } else {
+        DmUtils::HoldLock callbackLock;
+    }
     int32_t result = OnRemoteRequestInner(code, data, reply, option);
     return result;
 }
