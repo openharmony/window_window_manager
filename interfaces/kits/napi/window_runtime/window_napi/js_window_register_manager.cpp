@@ -79,12 +79,6 @@ const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_C
     {CaseType::CASE_WINDOW, WINDOW_LISTENER_MAP},
     {CaseType::CASE_STAGE, WINDOW_STAGE_LISTENER_MAP},
 };
-
-WmErrorCode MappingWmErrorCodeSafely(WMError err)
-{
-    auto it = WM_JS_TO_ERROR_CODE_MAP.find(err);
-    return it != WM_JS_TO_ERROR_CODE_MAP.end() ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-}
 }
 
 JsWindowRegisterManager::JsWindowRegisterManager()
