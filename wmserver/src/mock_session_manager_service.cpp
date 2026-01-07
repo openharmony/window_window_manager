@@ -281,9 +281,9 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
         return ERR_INVALID_VALUE;
     }
     if (clientUserId == SYSTEM_USERID) {
-        TLOGI(WmsLogTag::WMS_MULTI_USER, "System user, return default sessionManagerService with %{public}d",
-              defaultWMSUserId_);
+        std::lock_guard<std::mutex> lock(defaultWMSUserIdMutex_);
         clientUserId = defaultWMSUserId_;
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "use default sessionManagerService with %{public}d", clientUserId);
     }
     sessionManagerService = GetSessionManagerServiceInner(clientUserId);
     if (!sessionManagerService) {
@@ -664,6 +664,7 @@ void MockSessionManagerService::NotifyWMSConnectionChangedToClient(int32_t wmsUs
 
 ErrCode MockSessionManagerService::GetScreenSessionManagerLite(sptr<IRemoteObject>& screenSessionManagerLite)
 {
+    std::lock_guard<std::mutex> lock(screenSessionManagerMutex_);
     if (screenSessionManager_) {
         screenSessionManagerLite = screenSessionManager_;
         return ERR_OK;
@@ -695,8 +696,10 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManager()
         WLOGFW("Get scene session manager proxy failed, scene session manager service is null");
         return sptr<IRemoteObject>(nullptr);
     }
+    UpdateSceneSessionManagerFromCache(defaultWMSUserId_, false, remoteObject);
+
+    std::lock_guard<std::mutex> lock(defaultSceneSessionManagerMutex_);
     defaultSceneSessionManager_ = remoteObject;
-    UpdateSceneSessionManagerFromCache(defaultWMSUserId_, false, defaultSceneSessionManager_);
     return defaultSceneSessionManager_;
 }
 
