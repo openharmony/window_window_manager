@@ -3545,7 +3545,6 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
     RequestInputMethodCloseKeyboard(persistentId);
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
         sceneSession->SetIsStarting(true);
-        sceneSession->SetStartingBeforeVisible(true);
     }
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType()) && sceneSession->IsFocusedOnShow()) {
         if (Session::IsScbCoreEnabled()) {
