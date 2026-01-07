@@ -1107,6 +1107,8 @@ struct SessionEventParam {
     uint32_t gravity = 0;
     uint32_t waterfallResidentState = 0;
     uint32_t compatibleStyleMode = 0;
+    int32_t windowGlobalPosX_ = 0;
+    int32_t windowGlobalPosY_ = 0;
 };
 
 struct BackgroundParams {
