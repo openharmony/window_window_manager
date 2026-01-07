@@ -503,6 +503,43 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
     return true;
 }
 
+bool ParseOtherConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
+{
+    bool dialogDecorEnable;
+    ani_status status = AniWindowUtils::GetPropertyBoolObject(env, "decorEnabled", configuration, dialogDecorEnable);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property decorEnabled %{public}d",
+            static_cast<int32_t>(status));
+        return false;
+    }
+    option.SetDialogDecorEnable(dialogDecorEnable);
+
+    int ret = 0;
+    status = AniWindowUtils::GetPropertyIntObject(env, "displayId", configuration, ret);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property displayId %{public}d", static_cast<int32_t>(status));
+        return false;
+    }
+    int64_t displayId = static_cast<int64_t>(ret);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] displayId: %{public}d", static_cast<int>(displayId));
+    if (displayId < 0 ||
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
+        return false;
+    }
+    option.SetDisplayId(displayId);
+
+    status = AniWindowUtils::GetPropertyIntObject(env, "parentId", configuration, ret);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property parentId %{public}d", static_cast<int32_t>(status));
+        return false;
+    }
+    int64_t parentId = static_cast<int64_t>(ret);
+    option.SetParentId(parentId);
+    
+    return true;
+}
+
 bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &option, void*& contextPtr)
 {
     if (!ParseRequiredConfigOption(env, configuration, option)) {
@@ -546,39 +583,7 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
         }
     }
 
-    bool dialogDecorEnable;
-    ani_status status = AniWindowUtils::GetPropertyBoolObject(env, "decorEnabled", configuration, dialogDecorEnable);
-    if (ANI_OK != status) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property decorEnabled %{public}d",
-            static_cast<int32_t>(status));
-        return false;
-    }
-    option.SetDialogDecorEnable(dialogDecorEnable);
-
-    int ret = 0;
-    status = AniWindowUtils::GetPropertyIntObject(env, "displayId", configuration, ret);
-    if (ANI_OK != status) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property displayId %{public}d", static_cast<int32_t>(status));
-        return false;
-    }
-    int64_t displayId = static_cast<int64_t>(ret);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] displayId: %{public}d", static_cast<int>(displayId));
-    if (displayId < 0 ||
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
-        return false;
-    }
-    option.SetDisplayId(displayId);
-
-    status = AniWindowUtils::GetPropertyIntObject(env, "parentId", configuration, ret);
-    if (ANI_OK != status) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property parentId %{public}d", static_cast<int32_t>(status));
-        return false;
-    }
-    int64_t parentId = static_cast<int64_t>(ret);
-    option.SetParentId(parentId);
-
-    return true;
+    return ParseOtherConfigOption(env, configuration, option);
 }
 
 ani_ref AniWindowManager::OnCreateWindow(ani_env* env, ani_object configuration)
