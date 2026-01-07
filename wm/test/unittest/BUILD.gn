@@ -672,6 +672,7 @@ ohos_unittest("wm_window_adapter_test") {
     ":wm_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/session_manager:session_manager",
+    "${window_base_path}/window_scene/session:ui_effect_controller_client"
   ]
 
   external_deps = test_external_deps
@@ -835,6 +836,7 @@ ohos_static_library("wm_unittest_common") {
 
   deps = [
     "${window_base_path}/window_scene/session_manager:scene_session_manager_static",
+    "${window_base_path}/window_scene/session:scene_session_static",
   ]
 
   public_deps = [
@@ -844,7 +846,6 @@ ohos_static_library("wm_unittest_common") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/common:window_scene_common",
-    "${window_base_path}/window_scene/session:scene_session",
     "${window_base_path}/wm:libwm",
     "${window_base_path}/wm:libwm_lite",
     "${window_base_path}/wmserver:libwms",
