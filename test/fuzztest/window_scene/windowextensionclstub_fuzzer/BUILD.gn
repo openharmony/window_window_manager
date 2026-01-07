@@ -45,6 +45,7 @@ ohos_fuzztest("WindowExtensionClStubFuzzTest") {
   ]
 
   external_deps = [
+    "ability_base:want",
     "c_utils:utils",
     "graphic_2d:librender_service_base",
     "hilog:libhilog",
