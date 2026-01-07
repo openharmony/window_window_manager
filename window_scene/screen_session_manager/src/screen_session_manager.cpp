@@ -3184,7 +3184,6 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
             screenId);
         return DMError::DM_ERROR_NULLPTR;
     }
-    virtualPixelRatio *= screenSession->GetVprScaleRatio();
     // less to 1e-6 mean equal
     if (fabs(screenSession->GetScreenProperty().GetVirtualPixelRatio() - virtualPixelRatio) < 1e-6) {
         TLOGNFE(WmsLogTag::DMS,
@@ -3283,13 +3282,20 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
         rsInterface_.ForceRefreshOneFrameWithNextVSync();
         return DMError::DM_ERROR_IPC_FAILED;
     }
+    // update setting default dpi when change resolution
     uint32_t defaultResolutionDpi = virtualPixelRatio * BASELINE_DENSITY;
     (void)ScreenSettingHelper::SetSettingDefaultDpi(defaultResolutionDpi, SET_SETTING_DPI_KEY);
-    float vprScaleRatio = virtualPixelRatio / densityDpi_;
-    screenSession->SetVprScaleRatio(vprScaleRatio);
-    screenSession->SetDensityInCurResolution(virtualPixelRatio);
+    
+    auto property = screenSession->GetScreenProperty();
+    auto defaultDensity = property.GetDefaultDensity();
+    auto curResolutionScale = property.GetDensityInCurResolution() / defaultDensity;
+    auto vprScale = property.GetVirtualPixelRatio() / defaultDensity;
+    screenSession->SetDensityInCurResolution(virtualPixelRatio * curResolutionScale);
     screenSession->SetDefaultDensity(virtualPixelRatio);
-    screenSession->SetVirtualPixelRatio(virtualPixelRatio);
+    screenSession->SetVirtualPixelRatio(virtualPixelRatio * vprScale);
+    float rogScaleRatio = virtualPixelRatio / densityDpi_;
+    screenSession->SetVprScaleRatio(rogScaleRatio);
+    ScreenSceneConfig::UpdateCutoutBoundRect(static_cast<uint64_t>(screenId), rogScaleRatio);
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
         screenId, width, height, virtualPixelRatio);
@@ -3301,7 +3307,9 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     NotifyScreenChanged(screenInfo, ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayStateChange(screenId, displayInfo, emptyMap, DisplayStateChangeType::RESOLUTION_CHANGE);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    // unfreeze screen when system boot completed
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedUnfreezeCallback, this);
+    // add asyc task to judge when to unfreeze screen
     AddScreenUnfreezeTask(screenSession, 0);
     return DMError::DM_OK;
 }
@@ -5479,7 +5487,13 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.RegisterSettingRotationObserver();
         that.RegisterSettingResolutionEffectObserver();
         if (that.defaultDpi) {
-            auto ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
+            uint32_t initDefaultDpi;
+            auto ret = ScreenSettingHelper::GetSettingValue(initDefaultDpi, SET_SETTING_DPI_KEY);
+            if (ret && initDefaultDpi > 0) {
+                TLOGE(WmsLogTag::DMS, "set setting defaultDpi completed, value:%{public}d", initDefaultDpi);
+                return;
+            }
+            ret = ScreenSettingHelper::SetSettingDefaultDpi(that.defaultDpi, SET_SETTING_DPI_KEY);
             if (!ret) {
                 TLOGNFE(WmsLogTag::DMS, "set setting defaultDpi failed");
             } else {
