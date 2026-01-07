@@ -66,7 +66,6 @@ sptr<FoldCreaseRegion> FoldCreaseRegionController::GetCurrentFoldCreaseRegion()
 FoldCreaseRegion FoldCreaseRegionController::GetLiveCreaseRegion()
 {
     TLOGI(WmsLogTag::DMS, "enter");
-    std::lock_guard<std::mutex> lock_mode(liveCreaseRegionMutex_);
     FoldDisplayMode displayMode = ScreenSessionManager::GetInstance().GetFoldDisplayMode();
     if (displayMode == FoldDisplayMode::UNKNOWN || displayMode == FoldDisplayMode::MAIN) {
         return FoldCreaseRegion(0, {});
