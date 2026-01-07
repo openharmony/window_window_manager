@@ -2900,55 +2900,58 @@ DMError ScreenSessionManager::SetScreenActiveMode(ScreenId screenId, uint32_t mo
         TLOGNFE(WmsLogTag::DMS, "invalid screenId");
         return DMError::DM_ERROR_NULLPTR;
     }
-    ScreenId rsScreenId = SCREEN_ID_INVALID;
-    if (!screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId)) {
-        TLOGNFE(WmsLogTag::DMS, "No corresponding rsId");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    sptr<ScreenSession> screenSession = GetScreenSessionByRsId(rsScreenId);
-    if (screenSession == nullptr) {
-        TLOGNFE(WmsLogTag::DMS, "screenSession is nullptr");
-        return DMError::DM_ERROR_NULLPTR;
-    }
-    RRect screenBounds = screenSession->GetScreenProperty().GetBounds();
-    uint32_t refreshRate = screenSession->GetRefreshRate();
-    RSScreenModeInfo screenMode = RSScreenModeInfo();
-    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
-    auto ret = rsInterface_.SetScreenActiveMode(rsScreenId, modeId); // modeId is activeIdx;
-    const char* logPreFix = (ret = StatusCode::SUCCESS) ? "RS success" : "RS fail";
-    TLOGNFW(WmsLogTag::DMS, "%{public}s, rsScreenId: %{public}" PRIu64",modeId:%{public}u, ret%{public}d",
-        logPreFix, rsScreenId, modeId, ret);
-    if (ret != StatusCode::SUCCESS) {
-        ReportScreenModeChangeEvent(screenMode, ret);
-        if (ret == StatusCode::HDI_ERR_NOT_SUPPORT) {
-            return DMError::DM_ERROR_INVALID_MODE_ID;
-        } else {
-            return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+    {
+        ScreenId rsScreenId = SCREEN_ID_INVALID;
+        sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+        if (screenSession == nullptr) {
+            TLOGNFE(WmsLogTag::DMS, "screenSession is nullptr");
+            return DMError::DM_ERROR_NULLPTR;
         }
+        if (!screenIdManager_.ConvertToRsScreenId(screenSession->GetPhyScreenId(), rsScreenId)) {
+            TLOGE(WmsLogTag::DMS, "No corresponding rsId");
+            return DMError::DM_ERROR_NULLPTR;
+        }
+        RRect screenBounds = screenSession->GetScreenProperty().GetBounds();
+        uint32_t refreshRate = screenSession->GetRefreshRate();
+        RSScreenModeInfo screenMode = RSScreenModeInfo();
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetScreenActiveMode(%" PRIu64", %u)", screenId, modeId);
+        auto ret = rsInterface_.SetScreenActiveMode(rsScreenId, modeId); // modeId is activeIdx;
+        const char* logPreFix = (ret = StatusCode::SUCCESS) ? "RS success" : "RS fail";
+        TLOGNFW(WmsLogTag::DMS, "%{public}s, rsScreenId: %{public}" PRIu64",modeId:%{public}u, ret%{public}d",
+            logPreFix, rsScreenId, modeId, ret);
+        if (ret != StatusCode::SUCCESS) {
+            ReportScreenModeChangeEvent(screenMode, ret);
+            if (ret == StatusCode::HDI_ERR_NOT_SUPPORT) {
+                return DMError::DM_ERROR_INVALID_MODE_ID;
+            } else {
+                return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
+            }
+        }
+        int setScreenActiveId = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS",
+            XCOLLIE_TIMEOUT_10S, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
+        TLOGNFW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
+        screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
+        HiviewDFX::XCollie::GetInstance().CancelTimer(setScreenActiveId);
+        ReportScreenModeChangeEvent(screenMode, ret);
+        UpdateSessionByActiveModeChange(screenSession, screenMode);
+        CheckAndNotifyChangeMode(screenBounds, screenSession);
+        CheckAndNotifyRefreshRate(refreshRate, screenSession);
     }
-    int setScreenActiveId = HiviewDFX::XCollie::GetInstance().SetTimer("SetScreenActiveModeCallRS",
-        XCOLLIE_TIMEOUT_10S, nullptr, nullptr, HiviewDFX::XCOLLIE_FLAG_LOG);
-    TLOGNFW(WmsLogTag::DMS, "Call rsInterface_ GetScreenActiveMode rsid: %{public}" PRIu64, rsScreenId);
-    screenMode = rsInterface_.GetScreenActiveMode(rsScreenId);
-    HiviewDFX::XCollie::GetInstance().CancelTimer(setScreenActiveId);
-    ReportScreenModeChangeEvent(screenMode, ret);
-    int32_t activeId = screenMode.GetScreenModeId();
-    UpdateSessionByActiveModeChange(screenSession, activeId);
-    CheckAndNotifyChangeMode(screenBounds, screenSession);
-    CheckAndNotifyRefreshRate(refreshRate, screenSession);
 #endif
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession, int32_t activeIdx)
+void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession,
+    RSScreenModeInfo screenMode)
 {
     if (screenSession == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
+    int32_t activeIdx = screenMode.GetScreenModeId();
     if (!g_isPcDevice) {
         screenSession->activeIdx_ = activeIdx;
-        screenSession->UpdatePropertyByActiveMode();
+        screenSession->UpdatePropertyByScreenMode(screenMode);
     } else {
         sptr<ScreenSession>  phyScreenSession = GetPhysicalScreenSession(screenSession->GetRSScreenId());
         if (phyScreenSession == nullptr) {
