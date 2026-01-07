@@ -835,37 +835,37 @@ HWTEST_F(SceneSessionTest5, HandleSessionDragEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsCompatibleModeDirtyDragScaleWindow
- * @tc.desc: IsCompatibleModeDirtyDragScaleWindow function01
+ * @tc.name: IsToNotifyDragEventOnNextVsync
+ * @tc.desc: IsToNotifyDragEventOnNextVsync function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, IsCompatibleModeDirtyDragScaleWindow, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, IsToNotifyDragEventOnNextVsync, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "IsCompatibleModeDirtyDragScaleWindow";
-    info.bundleName_ = "IsCompatibleModeDirtyDragScaleWindow";
+    info.abilityName_ = "IsToNotifyDragEventOnNextVsync";
+    info.bundleName_ = "IsToNotifyDragEventOnNextVsync";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    session->compatibleDragScaleFlags_ = false;
-    EXPECT_EQ(session->IsCompatibleModeDirtyDragScaleWindow(), false);
-    session->compatibleDragScaleFlags_ = true;
-    EXPECT_EQ(session->IsCompatibleModeDirtyDragScaleWindow(), true);
+    session->toNotifyDragEventOnNextVsyncFlag_ = false;
+    EXPECT_EQ(session->IsToNotifyDragEventOnNextVsync(), false);
+    session->toNotifyDragEventOnNextVsyncFlag_ = true;
+    EXPECT_EQ(session->IsToNotifyDragEventOnNextVsync(), true);
 }
  
 /**
- * @tc.name: ResetCompatibleModeDragScaleFlags
- * @tc.desc: ResetCompatibleModeDragScaleFlags function01
+ * @tc.name: ResetToNotifyDragEventOnNextVsyncFlags
+ * @tc.desc: ResetToNotifyDragEventOnNextVsyncFlags function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, ResetCompatibleModeDragScaleFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, ResetToNotifyDragEventOnNextVsyncFlags, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "ResetCompatibleModeDragScaleFlags";
-    info.bundleName_ = "ResetCompatibleModeDragScaleFlags";
+    info.abilityName_ = "ResetToNotifyDragEventOnNextVsyncFlags";
+    info.bundleName_ = "ResetToNotifyDragEventOnNextVsyncFlags";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    session->ResetCompatibleModeDragScaleFlags();
-    EXPECT_EQ(session->IsCompatibleModeDirtyDragScaleWindow(), false);
+    session->ResetToNotifyDragEventOnNextVsyncFlags();
+    EXPECT_EQ(session->IsToNotifyDragEventOnNextVsync(), false);
 }
 
 /**

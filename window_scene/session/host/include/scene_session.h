@@ -905,8 +905,8 @@ public:
     void CalcSubWindowRectByAnchor(const WSRect& parentRect, WSRect& subRect);
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
-    bool IsCompatibleModeDirtyDragScaleWindow() const;
-    void ResetCompatibleModeDragScaleFlags();
+    bool IsToNotifyDragEventOnNextVsync() const;
+    void ResetToNotifyDragEventOnNextVsyncFlags();
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
@@ -1253,7 +1253,7 @@ private:
     void OnMoveDragCallback(SizeChangeReason reason,
                             TargetRectUpdateMode mode = TargetRectUpdateMode::UPDATED_IMMEDIATELY);
     bool DragResizeWhenEndFilter(SizeChangeReason reason);
-    void HandleMoveDragEvent(SizeChangeReason reason);
+    void NotifyDragEventOnNextVsync(SizeChangeReason reason);
     bool IsDragResizeScale(SizeChangeReason reason);
     void InitializeCrossMoveDrag();
     WSError InitializeMoveInputBar();

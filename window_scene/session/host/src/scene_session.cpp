@@ -4498,7 +4498,7 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
     if (isResizeWhenEnd) {
         UpdateSizeChangeReason(reason);
         if (reason == SizeChangeReason::DRAG) {
-            HandleMoveDragEvent(reason);
+            NotifyDragEventOnNextVsync(reason);
         } else {
             TLOGI(WmsLogTag::WMS_LAYOUT_PC, "trigger client rect change by scb, "
                 "isPcOrPcMode: %{public}d", systemConfig_.IsPcWindow());
@@ -4516,19 +4516,15 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
     return isResizeWhenEnd;
 }
 
-void SceneSession::HandleMoveDragEvent(SizeChangeReason reason)
+void SceneSession::NotifyDragEventOnNextVsync(SizeChangeReason reason)
 {
-    if (!IsDragResizeScale(reason)) {
-        OnSessionEvent(SessionEvent::EVENT_DRAG);
-        return;
-    }
-    compatibleDragScaleFlags_ = true;
-    RunOnNextVsync([weakThis = wptr(this), where = __func__](int64_t, int64_t) {
+    toNotifyDragEventOnNextVsyncFlag_ = true;
+    RunOnNextVsync([weakThis = wptr(this), reason, where = __func__](int64_t, int64_t) {
         auto session = weakThis.promote();
         RETURN_IF_NULL_IMPL(session, WmsLogTag::WMS_LAYOUT, where);
-        if (session->IsCompatibleModeDirtyDragScaleWindow()) {
+        if (session->GetSizeChangeReason() == reason && session->IsToNotifyDragEventOnNextVsync()) {
             session->OnSessionEvent(SessionEvent::EVENT_DRAG);
-            session->ResetCompatibleModeDragScaleFlags();
+            session->ResetToNotifyDragEventOnNextVsyncFlags();
         }
     });
 }
@@ -7651,14 +7647,14 @@ void SceneSession::ResetDirtyDragFlags()
     isDragging_ = false;
 }
 
-bool SceneSession::IsCompatibleModeDirtyDragScaleWindow() const
+bool SceneSession::IsToNotifyDragEventOnNextVsync() const
 {
-    return compatibleDragScaleFlags_;
+    return toNotifyDragEventOnNextVsyncFlag_;
 }
 
-void SceneSession::ResetCompatibleModeDragScaleFlags()
+void SceneSession::ResetToNotifyDragEventOnNextVsyncFlags()
 {
-    compatibleDragScaleFlags_ = false;
+    toNotifyDragEventOnNextVsyncFlag_ = false;
 }
 
 void SceneSession::NotifyUILostFocus()
