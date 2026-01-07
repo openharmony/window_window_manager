@@ -27,18 +27,26 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
+
+enum class EventPriority : uint32_t {
+    // The highest priority, skip try_lock
+    VIP = 0,
+    // The highest priority, try_lock wait 5ms
+    LOW,
+};
+
 namespace DmUtils {
 #define FREE_GLOBAL_LOCK_FOR_IPC() {DmUtils::DropLock ipcLock;}
 class HoldLock {
 public:
-    HoldLock()
+    HoldLock(EventPriority eventPriority = EventPriority::LOW)
     {
         // "counter" is used to resolve deadlock issues caused by nested tasks within the same thread.
         // "lockStatus" is used to prevent task delay canuse by prolonged lock retention.
         if (++counter() == 1) {
             // max try lock for 2 times, 1 second
             // if lock success, execute Serial Run Mode, else roll back to Concurrent Run Mode
-            if ((resMtx.try_lock()) || (lockStatus && resMtx.try_lock_for(TRY_LOCK_TIMEOUT))) {
+            if ((resMtx.try_lock()) || (eventPriority >= EventPriority::LOW && lockStatus && resMtx.try_lock_for(TRY_LOCK_TIMEOUT))) {
                 lockStatus = true;
             } else {
                 lockStatus = false;
