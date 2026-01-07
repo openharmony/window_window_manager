@@ -736,6 +736,18 @@ void ScreenSession::UpdatePropertyByActiveMode()
     }
 }
 
+void ScreenSession::UpdatePropertyByScreenMode(RSScreenModeInfo screenMode)
+{
+    if (screenMode.GetScreenWidth() == -1 && screenMode.GetScreenHeight() == -1 && screenMode.GetScreenModeId() == -1) {
+        TLOGE(WmsLogTag::DMS, "Invalid RSScreenModeInfo, cannot update property");
+        return;
+    }
+    auto screeBounds = property_.GetBounds();
+    screeBounds.rect_.width_ = screenMode.GetScreenWidth();
+    screeBounds.rect_.height_ = screenMode.GetScreenHeight();
+    property_.SetBounds(screeBounds);
+}
+
 ScreenProperty ScreenSession::UpdatePropertyByFoldControl(const ScreenProperty& updatedProperty,
     FoldDisplayMode foldDisplayMode, bool firstSCBConnect)
 {
