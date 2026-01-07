@@ -82,13 +82,13 @@ HWTEST_F(DmsGlobalMutexTest, VipPriorityEvent_LockTime, TestSize.Level1)
     EXPECT_FALSE(DmUtils::HoldLock::lockStatus);
 
     auto threadFunc = []() {
-        DmUtils::HoldLock holdLock(EventPriority::VIP);
+        DmUtils::HoldLock holdLock(IPCPriority::VIP);
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     };
     std::thread t1(threadFunc);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     // 当前线程vip任务trylock失败
-    DmUtils::HoldLock holdLock(EventPriority::VIP);
+    DmUtils::HoldLock holdLock(IPCPriority::VIP);
     // trylock失败，lockStatus状态不变
     EXPECT_FALSE(DmUtils::HoldLock::lockStatus);
     t1.join();
