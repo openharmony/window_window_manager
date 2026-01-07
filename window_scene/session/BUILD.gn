@@ -182,8 +182,6 @@ ohos_static_library("scene_session_static") {
   if (!(host_os == "linux" && host_cpu == "arm64")) {
     external_deps += [ "preferences:native_preferences" ]
   }
-  public_external_deps = [
-  ]
   
   defines = []
 
