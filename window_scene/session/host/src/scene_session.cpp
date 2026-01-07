@@ -1072,8 +1072,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                     session->ForceNotifyKeyboardOccupiedArea();
                 }
             }
+            auto globalRect = session->moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
-                session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
+                session->moveDragController_->GetOriginalPointerPosY(),
+                rect.width_, rect.height_, 0, 0, 0, 0, globalRect.posX_, globalRect.posY_});
         }
         session->HandleSessionDragEvent(event);
         session->ApplySessionEventParam(event, param);
