@@ -430,24 +430,28 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<uint64_t> missionIds;
             if (!data.ReadUInt64Vector(&missionIds)) {
-                TLOGE(WmsLogTag::DMS, "AddWhitelist::fail to receive missionIds from proxy");
+                TLOGE(WmsLogTag::DMS, "fail to receive missionIds");
                 reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
                 break;
             }
             DMError result = AddVirtualScreenWhiteList(screenId, missionIds);
-            reply.WriteUint32(static_cast<uint32_t>(result));
+            if (!reply.WriteUint32(static_cast<uint32_t>(result))) {
+                TLOGE(WmsLogTag::DMS, "read reply hookInfo failed!");
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_REMOVE_VIRTUAL_SCREEN_WHITE_LIST: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<uint64_t> missionIds;
             if (!data.ReadUInt64Vector(&missionIds)) {
-                TLOGE(WmsLogTag::DMS, "RemoveWhitelist::fail to receive missionIds from proxy");
+                TLOGE(WmsLogTag::DMS, "fail to receive missionIds");
                 reply.WriteInt32(static_cast<int32_t>(DMError::DM_ERROR_INVALID_PARAM));
                 break;
             }
             DMError result = RemoveVirtualScreenWhiteList(screenId, missionIds);
-            reply.WriteUint32(static_cast<uint32_t>(result));
+            if (!reply.WriteUint32(static_cast<uint32_t>(result))) {
+                TLOGE(WmsLogTag::DMS, "read reply hookInfo failed!");
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY: {
