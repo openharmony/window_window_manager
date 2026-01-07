@@ -951,7 +951,7 @@ void DisplayManagerAni::OnSetVirtualScreenSurface(ani_env* env, ani_long screenI
     std::vector<ScreenId> screenIds;
     screenIds.emplace_back(static_cast<ScreenId>(screenId));
     sptr<Surface> surface;
-    if (!DisplayAniUtils::GetSurfaceFromAni(env, surfaceId, surface)) {
+    if (!DisplayAniUtils::GetSurfaceFromAni(env, surfaceId, surface) || surface == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert surface.");
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert surface.");
         return;
