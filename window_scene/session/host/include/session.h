@@ -1273,6 +1273,8 @@ private:
      */
     uint64_t screenIdOfRSUIContext_ = SCREEN_ID_INVALID;
     std::shared_ptr<RSUIContext> rsUIContext_;
+    // Above guarded by rsUIContextMutex_
+    std::mutex rsUIContextMutex_;
 
     /*
      * Window highligt outline
