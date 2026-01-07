@@ -510,9 +510,15 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
     }
 
     ani_ref result;
-    env->Object_GetPropertyByName_Ref(configuration, "title", &result);
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, "title", &result)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property title");
+        return false;
+    }
     ani_boolean isTitleUndefined = false;
-    env->Reference_IsUndefined(result, &isTitleUndefined);
+    if (ANI_OK != env->Reference_IsUndefined(result, &isTitleUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to judge isTitleUndefined");
+        return false;
+    }
     if (!isTitleUndefined) {
         ani_string aniDialogTitle = reinterpret_cast<ani_string>(result);
         std::string dialogTitle;
@@ -521,9 +527,15 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
         option.SetDialogTitle(dialogTitle);
     }
 
-    env->Object_GetPropertyByName_Ref(configuration, "ctx", &result);
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, "ctx", &result)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property ctx");
+        return false;
+    }
     ani_boolean isCtxUndefined = false;
-    env->Reference_IsUndefined(result, &isCtxUndefined);
+    if (ANI_OK != env->Reference_IsUndefined(result, &isCtxUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to judge isCtxUndefined");
+        return false;
+    }
     if (!isCtxUndefined) {
         ani_object aniContextPtr = reinterpret_cast<ani_object>(result);
         contextPtr = AniWindowUtils::GetAbilityContext(env, aniContextPtr);
@@ -534,21 +546,35 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
         }
     }
 
-    ani_boolean dialogDecorEnable;
-    env->Object_GetPropertyByName_Boolean(configuration, "decorEnabled", &dialogDecorEnable);
+    bool dialogDecorEnable;
+    ani_status status = AniWindowUtils::GetPropertyBoolObject(env, "decorEnabled", configuration, dialogDecorEnable);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property decorEnabled %{public}d",
+            static_cast<int32_t>(status));
+        return false;
+    }
     option.SetDialogDecorEnable(dialogDecorEnable);
 
-    ani_double ret;
-    env->Object_GetPropertyByName_Double(configuration, "displayId", &ret);
+    int ret = 0;
+    status = AniWindowUtils::GetPropertyIntObject(env, "displayId", configuration, ret);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property displayId %{public}d", static_cast<int32_t>(status));
+        return false;
+    }
     int64_t displayId = static_cast<int64_t>(ret);
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] displayId: %{public}d", static_cast<int>(displayId));
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] DisplayId is invalid");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
+        return false;
     }
     option.SetDisplayId(displayId);
 
-    env->Object_GetPropertyByName_Double(configuration, "parentId", &ret);
+    status = AniWindowUtils::GetPropertyIntObject(env, "parentId", configuration, ret);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property parentId %{public}d", static_cast<int32_t>(status));
+        return false;
+    }
     int64_t parentId = static_cast<int64_t>(ret);
     option.SetParentId(parentId);
 
