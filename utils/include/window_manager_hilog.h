@@ -125,11 +125,11 @@ PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX_NO_FUNC fmt, WMS_FILE_NAME, ##__VA_ARGS__)
  * There is no file name built in TLOGNF log micros. Choose suitable log micros when needed.
  */
 #define TLOGNFI(tag, fmt, ...) \
-PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+PRINT_TLOG(LOG_INFO, tag, FMT_PREFIX fmt, WMS_NO_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
 #define TLOGNFW(tag, fmt, ...) \
-PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+PRINT_TLOG(LOG_WARN, tag, FMT_PREFIX fmt, WMS_NO_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
 #define TLOGNFE(tag, fmt, ...) \
-PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
+PRINT_TLOG(LOG_ERROR, tag, FMT_PREFIX fmt, WMS_NO_FILE_NAME, C_W_FUNC, ##__VA_ARGS__)
 
 #define WIN_PRINT_LIMIT(tag, level, intervals, canPrint, frequency)                                      \
     do {                                                                                                 \
