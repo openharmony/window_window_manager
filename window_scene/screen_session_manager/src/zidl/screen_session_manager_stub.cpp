@@ -20,7 +20,6 @@
 #include <ipc_skeleton.h>
 #include "transaction/rs_marshalling_helper.h"
 #include "session_manager/include/scene_session_manager.h"
-#include "dms_global_mutex.h"
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -32,20 +31,15 @@ const static float INVALID_DEFAULT_DENSITY = 1.0f;
 const static uint32_t PIXMAP_VECTOR_SIZE = 2;
 constexpr uint32_t  MAX_CREASE_REGION_SIZE = 20;
 constexpr uint32_t MAP_SIZE_MAX_NUM = 100;
-const std::map<DisplayManagerMessage, EventPriority> EVENT_PRIORITY_MAP{
-    { DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO,  EventPriority::VIP },
+const std::map<DisplayManagerMessage, IPCPriority> EVENT_PRIORITY_MAP{
+    { DisplayManagerMessage::TRANS_ID_GET_DEFAULT_DISPLAY_INFO,  IPCPriority::VIP },
 };
 }
 
 int32_t ScreenSessionManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    auto it = EVENT_PRIORITY_MAP.find(static_cast<DisplayManagerMessage>(code));
-    if (it != EVENT_PRIORITY_MAP.end()) {
-        DmUtils::HoldLock callbackLock(it->second);
-    } else {
-        DmUtils::HoldLock callbackLock;
-    }
+    DmUtils::HoldLock callbackLock(GetIPCPriority(code));
     int32_t result = OnRemoteRequestInner(code, data, reply, option);
     return result;
 }
@@ -1751,5 +1745,14 @@ void ScreenSessionManagerStub::ProcSetVirtualScreenAutoRotation(MessageParcel& d
     }
     DMError ret = SetVirtualScreenAutoRotation(screenId, enable);
     reply.WriteInt32(static_cast<int32_t>(ret));
+}
+
+IPCPriority ScreenSessionManagerStub::GetIPCPriority(uint32_t code)
+{
+    auto it = EVENT_PRIORITY_MAP.find(static_cast<DisplayManagerMessage>(code));
+    if (it == EVENT_PRIORITY_MAP.end()) {
+        return IPCPriority::LOW;
+    }
+    return it->second;
 }
 } // namespace OHOS::Rosen
