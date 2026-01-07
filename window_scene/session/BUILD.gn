@@ -187,23 +187,23 @@ ohos_static_library("scene_session_static") {
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.barrierfree_accessibility)) {
-    public_external_deps += [ "accessibility:accessibility_common" ]
+    external_deps += [ "accessibility:accessibility_common" ]
   }
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.powermgr_power_manager)) {
-    public_external_deps += [ "power_manager:powermgr_client" ]
+    external_deps += [ "power_manager:powermgr_client" ]
     defines += [ "POWER_MANAGER_ENABLE" ]
   }
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.resourceschedule_resource_schedule_service)) {
-    public_external_deps += [ "resource_schedule_service:ressched_client" ]
+    external_deps += [ "resource_schedule_service:ressched_client" ]
     defines += [ "RES_SCHED_ENABLE" ]
   }
 
   if (device_status_enable) {
-    public_external_deps += [ "device_status:devicestatus_client" ]
+    external_deps += [ "device_status:devicestatus_client" ]
     defines += [ "DEVICE_STATUS_ENABLE" ]
   }
 
@@ -215,7 +215,7 @@ ohos_static_library("scene_session_static") {
   }
   print("imf_enable: ", imf_enable)
   if (imf_enable == true) {
-    public_external_deps += [ "imf:inputmethod_client" ]
+    external_deps += [ "imf:inputmethod_client" ]
     defines += [ "IMF_ENABLE" ]
   }
 
