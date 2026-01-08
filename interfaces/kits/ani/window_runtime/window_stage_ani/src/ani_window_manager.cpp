@@ -503,7 +503,7 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
     return true;
 }
 
-bool ParseOtherConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
+bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
 {
     bool dialogDecorEnable;
     ani_status status = AniWindowUtils::GetPropertyBoolObject(env, "decorEnabled", configuration, dialogDecorEnable);
@@ -583,7 +583,7 @@ bool ParseConfigOption(ani_env* env, ani_object configuration, WindowOption &opt
         }
     }
 
-    return ParseOtherConfigOption(env, configuration, option);
+    return ParseOptionalConfigOption(env, configuration, option);
 }
 
 ani_ref AniWindowManager::OnCreateWindow(ani_env* env, ani_object configuration)
