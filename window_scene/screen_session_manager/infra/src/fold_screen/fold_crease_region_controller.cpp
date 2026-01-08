@@ -198,7 +198,8 @@ std::vector<DMRect> FoldCreaseRegionController::ConvertToRectList(const std::vec
  * @throws std::invalid_argument Throws an exception when the input parameters are invalid
  */
  DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect,
-    uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation) {
+    uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation)
+{
     if (portraitWidth == 0 || portraitHeight == 0) {
         TLOGW(WmsLogTag::DMS, "[RotateRect Error] Portrait width or height cannot be zero.");
         return {};
@@ -266,7 +267,8 @@ std::vector<DMRect> FoldCreaseRegionController::ConvertToRectList(const std::vec
  * Rectangles that fail will be empty rectangles (with width_ = 0 and height_ = 0)
  */
 std::vector<DMRect> FoldCreaseRegionController::RotateRectArray(const std::vector<DMRect>& originalRects,
-    uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation) {
+    uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation)
+{
     std::vector<DMRect> rotatedRects;
     rotatedRects.reserve(originalRects.size());
  
