@@ -905,8 +905,7 @@ ani_object AniWindowManager::OnGetVisibleWindowInfo(ani_env* env)
         return AniWindowUtils::CreateAniWindowInfoArray(env, infos);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
-        return AniWindowUtils::AniThrowError(env, ret, "OnGetVisibleWindowInfo failed",
-            "[window][getVisibleWindowInfo]");
+        return AniWindowUtils::AniThrowError(env, ret, "[window][getVisibleWindowInfo]");
     }
 }
 
