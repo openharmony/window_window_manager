@@ -25,6 +25,15 @@
 
 namespace OHOS::Rosen::DMS {
 class FoldCreaseRegionController : public RefBase {
+const ScreenId SCREEN_ID_FULL = 0;
+const ScreenId SCREEN_ID_MAIN = 5;
+constexpr int32_t FOLD_CREASE_RECT_SIZE = 4;
+const std::string FOLD_CREASE_DELIMITER = ",;";
+
+const int32_t RECT_POS_X_INDEX = 0;
+const int32_t RECT_POS_Y_INDEX = 1;
+const int32_t RECT_POS_WIDTH_INDEX = 2;
+const int32_t RECT_POS_HEIGHT_INDEX = 3;
 WM_DECLARE_SINGLE_INSTANCE_BASE(FoldCreaseRegionController)
 public:
     FoldCreaseRegionController();

@@ -25,22 +25,13 @@
 #include "window_manager_hilog.h"
 
 namespace OHOS::Rosen::DMS {
-namespace {
-const ScreenId SCREEN_ID_FULL = 0;
-const ScreenId SCREEN_ID_MAIN = 5;
-constexpr int32_t FOLD_CREASE_RECT_SIZE = 4; //numbers of parameter on the current device is 4
-const std::string g_FoldScreenRect = system::GetParameter("const.display.foldscreen.crease_region", "");
-const std::string FOLD_CREASE_DELIMITER = ",;";
-
-const int32_t RECT_POS_X_INDEX = 0;
-const int32_t RECT_POS_Y_INDEX = 1;
-const int32_t RECT_POS_WIDTH_INDEX = 2;
-const int32_t RECT_POS_HEIGHT_INDEX = 3;
-} // namespace
 
 WM_IMPLEMENT_SINGLE_INSTANCE(FoldCreaseRegionController)
 
-FoldCreaseRegionController::FoldCreaseRegionController() {}
+FoldCreaseRegionController::FoldCreaseRegionController()
+{
+    InitModeCreaseRegion();
+}
 
 sptr<FoldCreaseRegion> FoldCreaseRegionController::GetCurrentFoldCreaseRegion()
 {
@@ -152,6 +143,7 @@ void FoldCreaseRegionController::InitModeCreaseRegion()
     }
     std::vector<DMRect> allRect = ConvertToRectList(foldRect);
     GetDisplayModeRectMap(allRect);
+    isInitModeCreaseRegion_.store(true);
 }
  
 void FoldCreaseRegionController::GetDisplayModeRectMap(const std::vector<DMRect>& allRect)
@@ -167,7 +159,6 @@ void FoldCreaseRegionController::GetDisplayModeRectMap(const std::vector<DMRect>
     displayModeRects_[FoldDisplayMode::COORDINATION] = fullRects;
     std::vector<DMRect> mainRects;
     displayModeRects_[FoldDisplayMode::MAIN] = mainRects;
-    isInitModeCreaseRegion_.store(true);
 }
  
 std::vector<DMRect> FoldCreaseRegionController::ConvertToRectList(const std::vector<int32_t>& input)
