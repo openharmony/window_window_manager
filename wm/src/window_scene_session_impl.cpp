@@ -3189,6 +3189,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     }
     isIgnoreSafeArea_ = status;
     isIgnoreSafeAreaNeedNotify_ = true;
+    if (isIgnoreSafeArea_) {
+        maximizeLayoutFullScreen_.store(false);
+    }
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u status %{public}d",
@@ -3955,6 +3958,8 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
     SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
+    maximizeLayoutFullScreen_.store(presentation == MaximizePresentation::ENTER_IMMERSIVE ||
+        presentation == MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
@@ -6231,6 +6236,7 @@ void WindowSceneSessionImpl::PendingUpdateSupportWindowModesWhenSwitchMultiWindo
 void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable)
 {
     if (freeMultiWindowEnable && enableImmersiveMode_) {
+        maximizeLayoutFullScreen_.store(false);
         cacheEnableImmersiveMode_.store(true);
         enableImmersiveMode_.store(false);
         property_->SetIsLayoutFullScreen(enableImmersiveMode_);
@@ -6240,14 +6246,21 @@ void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEna
             TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
         }
     }
-    if (!freeMultiWindowEnable && cacheEnableImmersiveMode_) {
-        enableImmersiveMode_.store(true);
-        cacheEnableImmersiveMode_.store(false);
-        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
-        if (auto hostSession = GetHostSession()) {
-            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
-        } else {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
+    if (!freeMultiWindowEnable) {
+        if (maximizeLayoutFullScreen_.load() && !cacheEnableImmersiveMode_) {
+            SetLayoutFullScreenByApiVersion(false);
+            maximizeLayoutFullScreen_.store(false);
+        }
+        if (cacheEnableImmersiveMode_) {
+            enableImmersiveMode_.store(true);
+            cacheEnableImmersiveMode_.store(false);
+            property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+            SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
+            if (auto hostSession = GetHostSession()) {
+                hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+            } else {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
+            }
         }
     }
 }
