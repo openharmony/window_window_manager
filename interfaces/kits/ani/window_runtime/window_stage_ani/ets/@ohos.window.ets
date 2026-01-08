@@ -4426,9 +4426,9 @@ export class WindowInternal implements Window {
       return new Promise<string>((resolve: (value: string) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): string => {
           return this.getWindowStateSnapshotSync(this.nativeObj);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(ret as string);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
