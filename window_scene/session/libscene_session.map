@@ -649,6 +649,25 @@
             OHOS::Rosen::SceneSession::SetIsUserRequestedExit*;
             OHOS::Rosen::SceneSession::RegisterNotifyOccupiedAreaChangeCallback*;
             OHOS::Rosen::MoveDragController::SetMoveResampleSystemConfig*;
+            OHOS::Rosen::Session::~Session*;
+            OHOS::Rosen::SessionStub::OnRemoteRequest*;
+            OHOS::Rosen::ExtensionSession::SetEventHandler*;
+            OHOS::Rosen::Session::Foreground*;
+            OHOS::Rosen::ExtensionSession::Background*;
+            OHOS::Rosen::Session::Disconnect*;
+            OHOS::Rosen::Session::Show*;
+            OHOS::Rosen::Session::Hide*;
+            OHOS::Rosen::Session::DrawingCompleted*;
+            OHOS::Rosen::Session::NotifyExtensionDied*;
+            OHOS::Rosen::Session::NotifyExtensionTimeout*;
+            OHOS::Rosen::Session::NotifyTransferAccessibilityEvent*;
+            OHOS::Rosen::Session::NotifyExtensionDetachToDisplay*;
+            OHOS::Rosen::Session::TransferPointerEvent*;
+            OHOS::Rosen::Session::TransferKeyEvent*;
+            OHOS::Rosen::ExtensionSession::UpdateAvoidArea*;
+            OHOS::Rosen::Session::SetSessionState*;
+            OHOS::Rosen::Session::SetScreenId*;
+            OHOS::Rosen::Session::SetAspectRatio*;
 
             VTT*SessionProxy*;
             VTT*RootSceneSession*;
