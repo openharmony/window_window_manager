@@ -668,6 +668,8 @@
             OHOS::Rosen::Session::SetSessionState*;
             OHOS::Rosen::Session::SetScreenId*;
             OHOS::Rosen::Session::SetAspectRatio*;
+            OHOS::Rosen::Session::UpdateSizeChangeReason*;
+            
 
             VTT*SessionProxy*;
             VTT*RootSceneSession*;
