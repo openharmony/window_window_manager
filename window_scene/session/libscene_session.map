@@ -691,11 +691,15 @@
             OHOS::Rosen::Session*;
             OHOS::Rosen::ExtensionSession*;
 
+            VTT*Session*;
+            VTT*ExtensionSession*;
             VTT*SessionProxy*;
             VTT*RootSceneSession*;
             VTT*WindowEventChannel*;
             VTT*WindowEventChannelListenerProxy*;
 
+            vtable*Session*;
+            vtable*ExtensionSession*;
             vtable*SessionProxy*;
             vtable*RootSceneSession*;
             vtable*WindowEventChannel*;
