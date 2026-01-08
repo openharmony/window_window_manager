@@ -669,7 +669,27 @@
             OHOS::Rosen::Session::SetScreenId*;
             OHOS::Rosen::Session::SetAspectRatio*;
             OHOS::Rosen::Session::UpdateSizeChangeReason*;
+            OHOS::Rosen::ExtensionSession::ConnectInner*;
+            OHOS::Rosen::Session::GetGlobalScaledRect*;
+            OHOS::Rosen::Session::SetActive*;
+            OHOS::Rosen::Session::UpdateRect*;
+            OHOS::Rosen::Session::UpdateRectWithLayoutInfo*;
+            OHOS::Rosen::Session::IsExitSplitOnBackground*;
+            OHOS::Rosen::Session::UnregisterSessionChangeListeners*;
+            OHOS::Rosen::Session::ProcessBackEvent*;
+            OHOS::Rosen::Session::PresentFocusIfNeed*;
+            OHOS::Rosen::Session::UpdateWindowMode*;
+            OHOS::Rosen::Session::SetSystemTouchable*;
+            OHOS::Rosen::Session::SetRSVisible*;
+            OHOS::Rosen::Session::SetSystemSceneBlockingFocus*;
+            OHOS::Rosen::Session::SetSystemFocusable*;
+            OHOS::Rosen::Session::UpdateFocus*;
+            OHOS::Rosen::Session::PresentFocusIfPointDown*;
+            OHOS::Rosen::Session::RequestFocus*;
+            OHOS::Rosen::Session::NotifyUILostFocus*;
+            OHOS::Rosen::Session::UpdateHighlightStatus*;
             
+
 
             VTT*SessionProxy*;
             VTT*RootSceneSession*;
