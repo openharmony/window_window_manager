@@ -4853,6 +4853,14 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             }
             movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
             dragMoveMountedNode->RemoveCrossScreenChild(movedSurfaceNode);
+            // When the drag-to-move or drag-to-scale operation ends, if the window's current screen
+            // is the same as the starting screen, the cloned node is removed immediately. Otherwise,
+            // the removal of the cloned node is submitted along with the vsync refresh.
+            if (!moveDragController_->IsWindowCrossScreenOnDragEnd()) {
+                TLOGD(WmsLogTag::WMS_LAYOUT, "Cloned node removed immediately");
+                RSTransactionAdapter::FlushImplicitTransaction(dragMoveMountedNode->GetRSUIContext());
+            }
+
             movedSurfaceNode->SetIsCrossNode(false);
             HandleSubSessionSurfaceNodeByWindowAnchor(reason, displayId);
             TLOGI(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64 "persistentId: %{public}d",
