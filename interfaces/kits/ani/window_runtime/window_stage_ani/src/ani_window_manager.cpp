@@ -514,14 +514,14 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
     }
     option.SetDialogDecorEnable(dialogDecorEnable);
 
-    int ret = 0;
+    int32_t ret = 0;
     status = AniWindowUtils::GetPropertyIntObject(env, "displayId", configuration, ret);
     if (ANI_OK != status) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property displayId %{public}d", static_cast<int32_t>(status));
         return false;
     }
     int64_t displayId = static_cast<int64_t>(ret);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] displayId: %{public}d", static_cast<int>(displayId));
+    TLOGI(WmsLogTag::DEFAULT, "[ANI] displayId: %{public}d", static_cast<int32_t>(displayId));
     if (displayId < 0 ||
         SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
