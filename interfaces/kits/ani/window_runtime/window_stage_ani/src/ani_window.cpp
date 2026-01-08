@@ -5057,6 +5057,38 @@ bool AniWindow::OnIsInFreeWindowMode(ani_env* env)
     return windowToken_->IsPcOrPadFreeMultiWindowMode();
 }
 
+ani_string AniWindow::GetWindowStateSnapshot(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    return aniWindow != nullptr ? aniWindow->OnGetWindowStateSnapshot(env) : nullptr;
+}
+
+ani_string AniWindow::OnGetWindowStateSnapshot(ani_env* env)
+{
+    ani_string result = nullptr;
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] window is null");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return result;
+    }
+    std::string winStateSnapshot;
+    WMError errCode = windowToken_->GetWindowStateSnapshot(winStateSnapshot);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "get window state snapshot failed, errCode=%{public}d",
+            static_cast<int32_t>(errCode));
+        auto retErrCode = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        if (WM_JS_TO_ERROR_CODE_MAP.count(errCode) > 0) {
+            retErrCode = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+        }
+        AniWindowUtils::AniThrowError(env, retErrCode, "get window state snapshot failed");
+        return result;
+    }
+    AniWindowUtils::GetAniString(env, winStateSnapshot, &result);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winStateSnapshot=%{public}s", winStateSnapshot.c_str());
+    return result;
+}
+
 void AniWindow::SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "[ANI]");
@@ -6495,6 +6527,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWindowContainerColor)},
         ani_native_function {"setWindowContainerModalColor", "lC{std.core.String}C{std.core.String}:",
             reinterpret_cast<void *>(AniWindow::SetWindowContainerModalColor)},
+        ani_native_function {"getWindowStateSnapshotSync", "l:C{std.core.String}",
+            reinterpret_cast<void *>(AniWindow::GetWindowStateSnapshot)},
         ani_native_function {"isMainWindowFullScreenAcrossDisplaysSync", "l:z",
             reinterpret_cast<void *>(AniWindow::IsMainWindowFullScreenAcrossDisplays)},
         ani_native_function {"setWindowShadowEnabledSync", "lz:",
