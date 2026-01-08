@@ -1375,34 +1375,6 @@ DMError ScreenSessionManagerProxy::SendVirtualScreenWhiteListRequest(ScreenId sc
     return static_cast<DMError>(rawErrorCode);
 }
 
-bool ScreenSessionManagerProxy::IsOnboardDisplay(DisplayId displayId)
-{
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGW(WmsLogTag::DMS, "remote is nullptr");
-        return false;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "write interface token failed");
-        return false;
-    }
-    if (!data.WriteUint64(displayId)) {
-        TLOGE(WmsLogTag::DMS, "write displayId failed");
-        return false;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::DMS, "send request failed");
-        return false;
-    }
-    bool res = reply.ReadBool();
-    TLOGI(WmsLogTag::DMS, "res %{public}s", res ? "true" : "false");
-    return res;
-}
-
 DMError ScreenSessionManagerProxy::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
@@ -1442,6 +1414,43 @@ DMError ScreenSessionManagerProxy::SetScreenPrivacyMaskImage(ScreenId screenId,
     return DMError::DM_ERROR_IPC_FAILED;
     }
     return static_cast<DMError>(reply.ReadInt32());
+}
+
+DMError ScreenSessionManagerProxy::IsOnboardDisplay(DisplayId displayId, bool& isOnboardDisplay)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::DMS, "remote is null");
+        return DMError::DM_ERROR_REMOTE_CREATE_FAILED;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "write interface token failed");
+        return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    bool resWriteDisplayId = data.WriteUint64(static_cast<uint64_t>(displayId));
+    if (!resWriteDisplayId) {
+        TLOGE(WmsLogTag::DMS, "write displayId failed");
+        return DMError::DM_ERROR_WRITE_DATA_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY),
+        data, reply, option) != ERR_NONE) {
+        TLOGW(WmsLogTag::DMS, "send request failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    uint32_t result;
+    if (!reply.ReadUint32(result)) {
+        TLOGE(WmsLogTag::DMS, "read result failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadBool(isOnboardDisplay)) {
+        TLOGE(WmsLogTag::DMS, "read isOnboardDisplay failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    TLOGI(WmsLogTag::DMS, "result %{public}u", result);
+    return static_cast<DMError>(result);
 }
 
 DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)

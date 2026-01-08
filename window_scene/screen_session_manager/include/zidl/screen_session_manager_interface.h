@@ -75,14 +75,14 @@ public:
     {
         return DMError::DM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    virtual bool IsOnboardDisplay(DisplayId displayId)
-    {
-        return false;
-    }
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
     {
         return DMError::DM_OK;
+    }
+    virtual DMError IsOnboardDisplay(DisplayId displayId, bool& isOnboardDisplay)
+    {
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate)
     {
