@@ -390,7 +390,7 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     AvoidArea avoidArea {};
     ani_status ret {};
     ret = env->Object_SetFieldByName_Boolean(
-        area, Builder::BuildPropertyName("visible").c_str(), areaType != (int)(AvoidAreaType::TYPE_CUTOUT));
+        area, Builder::BuildPropertyName("visible").c_str(), areaType != (int)AvoidAreaType::TYPE_CUTOUT);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set visible failed, ret: %{public}u", ret);
         return static_cast<ani_int>(ret);
