@@ -2070,6 +2070,8 @@ HWTEST_F(WindowSceneSessionImplTest, SetLayoutFullScreenByApiVersion, TestSize.L
     window->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(false));
     ASSERT_EQ(false, window->property_->IsLayoutFullScreen());
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreenByApiVersion(true));
+    ASSERT_EQ(false, window->maximizeLayoutFullScreen_);
 }
 
 /**
