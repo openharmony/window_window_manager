@@ -1271,14 +1271,14 @@ enum class LifeCycleChangeReason {
 
     SCREEN_LOCK,
 
-    SCREEN_ROTATION,
-
     LAST_SCENE_TRANSFER,
 
     /*
      * Drive batch of windows go background quickly
      */
     QUICK_BATCH_BACKGROUND,
+
+    SCREEN_ROTATION,
 
     REASON_END,
 };
