@@ -888,6 +888,33 @@ struct WindowAnimationInfo {
     bool isGravityChanged { false };
 };
 
+/**
+ * @brief Calling Window State
+ */
+enum class CallingWindowState : int32_t {
+    WINDOW_IN_NORMAL = 0,
+    WINDOW_IN_AI = 1
+};
+
+struct KeyboardBaseInfo {
+    uint32_t callingId { 0 };
+    bool isGravityChanged { false };
+    bool isKeyboardShow { false };
+    WSRect keyboardPanelRect { 0, 0, 0, 0 };
+};
+
+struct KeyboardAnimationRectConfig {
+    WSRect beginRect { 0, 0, 0, 0 };
+    WSRect endRect { 0, 0, 0, 0 };
+    bool animated { false };
+};
+
+struct CallingWindowInfoData {
+    CallingWindowState callingWindowState = CallingWindowState::WINDOW_IN_NORMAL;
+    double scaleX = 1;
+    double scaleY = 1;
+};
+
 struct WindowShadowConfig {
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
