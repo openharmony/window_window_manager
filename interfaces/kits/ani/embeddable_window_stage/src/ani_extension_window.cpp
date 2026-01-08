@@ -16,6 +16,7 @@
 #include "ani_extension_window.h"
 
 #include "ani.h"
+#include <ani_signature_builder.h>
 #include "ani_extension_window_register_manager.h"
 #include "ani_window_utils.h"
 #include "ani_window_listener.h"
@@ -26,6 +27,7 @@
 
 namespace OHOS {
 namespace Rosen {
+using namespace arkts::ani_signature;
 namespace {
 static std::map<ani_ref, AniExtensionWindow*> localObjs;
 constexpr const char* ETS_UIEXTENSION_HOST_CLASS_DESCRIPTOR =
