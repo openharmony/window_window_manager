@@ -4434,7 +4434,7 @@ WSError Session::ProcessBackEvent()
     return sessionStage_->HandleBackEvent();
 }
 
-void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
+void Session::GeneratePersistentId(bool isExtension, int32_t persistentId, int32_t userId)
 {
     std::lock_guard lock(g_persistentIdSetMutex);
     if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(persistentId)) {
@@ -4448,8 +4448,12 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
     }
 
     g_persistentId++;
-    while (g_persistentIdSet.count(g_persistentId)) {
+    uint32_t maskedUserId = static_cast<uint32_t>(userId) & 0x000000FF; // userId use 8 bits
+    uint32_t maskedPersistentId = static_cast<uint32_t>(g_persistentId.load()) & 0x003FFFFF; // persistentId use 22 bits
+    int32_t tempPersistentId = (maskedUserId << 22) | maskedPersistentId;
+    while (g_persistentIdSet.count(tempPersistentId)) {
         g_persistentId++;
+        tempPersistentId++;
     }
     if (isExtension) {
         constexpr uint32_t pidLength = 18;
@@ -4460,9 +4464,9 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
             (static_cast<uint32_t>(g_persistentId.load()) & persistentIdMask);
         persistentId_ = assembledPersistentId | 0x40000000;
     } else {
-        persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
+        persistentId_ = tempPersistentId;
     }
-    g_persistentIdSet.insert(g_persistentId);
+    g_persistentIdSet.insert(persistentId_);
     TLOGI(WmsLogTag::WMS_LIFE,
         "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
