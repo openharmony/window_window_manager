@@ -869,7 +869,7 @@ protected:
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
         bool running = false;
     };
-    void GeneratePersistentId(bool isExtension, int32_t persistentId);
+    void GeneratePersistentId(bool isExtension, int32_t persistentId, int32_t userId = 0);
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
     void UpdateSessionTouchable(bool touchable);
