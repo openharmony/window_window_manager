@@ -197,16 +197,16 @@ std::vector<DMRect> FoldCreaseRegionController::ConvertToRectList(const std::vec
  * @brief Rotates a single rectangle (based on the display orientation, the coordinate system
  * is reset according to the orientation)
  * @param originalRect The original rectangle (in PORTRAIT orientation, i.e., the parameters at 0 degree)
- * @param portraitWidth The width of the parent container when the original screen 
+ * @param portraitWidth The width of the parent container when the original screen
  * is in portrait mode (the width of the parent container at 0 degree)
  * @param portraitHeight The height of the parent container when the original screen
  * is in portrait mode (the height of the parent container at 0 degree)
  * @param targetOrientation The target display orientation (the direction to rotate to)
  * @return The rectangle in the target orientation (based on the 0,0 coordinate system of the top-left
  * corner of the target orientation)
- * @throws std::invalid_argument Throws an exception when the input parameters are invalid 
+ * @throws std::invalid_argument Throws an exception when the input parameters are invalid
  */
-DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect, 
+ DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect,
     uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation) {
     if (portraitWidth == 0 || portraitHeight == 0) {
         TLOGW(WmsLogTag::DMS, "[RotateRect Error] Portrait width or height cannot be zero.");
@@ -259,7 +259,7 @@ DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect,
             break;
  
         default:
-            TLOGW(WmsLogTag::DMS, "[RotateRect Error] Invalid target orientation."); 
+            TLOGW(WmsLogTag::DMS, "[RotateRect Error] Invalid target orientation.");
             return {};
     }
     return {newPosX, newPosY, newWidth, newHeight};
@@ -271,7 +271,7 @@ DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect,
  * @param portraitWidth Width of the original portrait-shaped parent container
  * @param portraitHeight Height of the original portrait-shaped parent container
  * @param targetOrientation Target display orientation
- * @return Array of rectangles in the target orientation: 
+ * @return Array of rectangles in the target orientation:
  * Rectangles that fail will be empty rectangles (with width_ = 0 and height_ = 0)
  */
 std::vector<DMRect> FoldCreaseRegionController::RotateRectArray(const std::vector<DMRect>& originalRects,
