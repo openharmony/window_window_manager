@@ -16,6 +16,7 @@
 #include <hitrace_meter.h>
  
 #include "ani.h"
+#include <ani_signature_builder.h>
 #include "screenshot_ani_utils.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
@@ -27,6 +28,8 @@ namespace OHOS::Rosen {
 static const uint32_t PIXMAP_VECTOR_ONLY_SDR_SIZE = 1;
 static const uint32_t PIXMAP_VECTOR_SIZE = 2;
 static const uint32_t HDR_PIXMAP = 1;
+
+using namespace arkts::ani_signature;
 
 ani_status ScreenshotAniUtils::GetStdString(ani_env* env, ani_string ani_str, std::string& result)
 {
