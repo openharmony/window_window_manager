@@ -6580,33 +6580,31 @@ DMError ValidateParameters(ScreenId screenId, const std::vector<uint64_t>& missi
     return DMError::DM_OK;
 }
 
-void LogMissionIds(ScreenId screenId, const std::vector<uint64_t>& ids, const char* prefix)
-{
-    std::ostringstream oss;
-    oss << prefix << "[" << screenId << "]: ";
-    for (auto val : ids) {
-        oss << val << " ";
-    }
-    TLOGNFI(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
-}
-
 DMError ScreenSessionManager::AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGNFE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     auto err = ValidateParameters(screenId, missionIds, "AddWhiteList");
     if (err != DMError::DM_OK) {
         return err;
     }
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screensession is nullptr");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (screenSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+        TLOGE(WmsLogTag::DMS, "not mirror");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
     auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
-    TLOGNFI(WmsLogTag::DMS, "AddWhiteList::rsId:%{public}" PRIu64, rsId);
-
-    LogMissionIds(screenId, missionIds, "AddWhiteList::Get from ScreenRecord: missionIds");
     std::vector<uint64_t> surfaceNodeIds = ProcessMissionIdsToSurfaceNodeIds(missionIds);
-    LogMissionIds(screenId, surfaceNodeIds, "AddWhiteList::Transfer to RS: surfaceNodeIds");
     if (surfaceNodeIds.empty()) {
         TLOGNFE(WmsLogTag::DMS, "AddWhiteList::surfaceNodeIds is empty");
     }
-    TLOGNFI(WmsLogTag::DMS, "AddWhiteList::surfaceNodeIds size Add: %{public}ud", static_cast<uint32_t>(surfaceNodeIds.size()));
-
     int32_t rsErrCode = rsInterface_.AddVirtualScreenWhiteList(rsId, surfaceNodeIds);
     TLOGNFI(WmsLogTag::DMS, "AddWhiteList::rsErrCode:%{public}d", rsErrCode);
     return (rsErrCode == static_cast<int32_t>(DMError::DM_OK)) ? DMError::DM_OK : DMError::DM_ERROR_INVALID_PARAM;
@@ -6614,21 +6612,29 @@ DMError ScreenSessionManager::AddVirtualScreenWhiteList(ScreenId screenId, const
 
 DMError ScreenSessionManager::RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds)
 {
+    if (!Permission::IsSystemCalling()) {
+        TLOGNFE(WmsLogTag::DMS, "Permission Denied! calling clientName: %{public}s, calling pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
     auto err = ValidateParameters(screenId, missionIds, "RemoveWhiteList");
     if (err != DMError::DM_OK) {
         return err;
     }
-    auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
-    TLOGNFI(WmsLogTag::DMS, "RemoveWhiteList::rsId:%{public}" PRIu64, rsId);
-    LogMissionIds(screenId, missionIds, "RemoveWhiteList::Get from ScreenRecord: missionIds");
-
-    std::vector<uint64_t> surfaceNodeIds = ProcessMissionIdsToSurfaceNodeIds(missionIds);
-    LogMissionIds(screenId, surfaceNodeIds, "RemoveWhiteList::Transfer to RS: surfaceNodeIds");
-    if (surfaceNodeIds.empty()) {
-        TLOGNFE(WmsLogTag::DMS, "AddWhiteList::surfaceNodeIds is empty");
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screensession is nullptr");
+        return DMError::DM_ERROR_INVALID_PARAM;
     }
-
-    TLOGNFI(WmsLogTag::DMS, "surfaceNodeIds size Remove: %{public}ud", static_cast<uint32_t>(surfaceNodeIds.size()));
+    if (screenSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+        TLOGE(WmsLogTag::DMS, "not mirror");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    auto rsId = screenIdManager_.ConvertToRsScreenId(screenId);
+    std::vector<uint64_t> surfaceNodeIds = ProcessMissionIdsToSurfaceNodeIds(missionIds);
+    if (surfaceNodeIds.empty()) {
+        TLOGNFE(WmsLogTag::DMS, "RemoveWhiteList::surfaceNodeIds is empty");
+    }
     int32_t rsErrCode = rsInterface_.RemoveVirtualScreenWhiteList(rsId, surfaceNodeIds);
     TLOGNFI(WmsLogTag::DMS, "RemoveWhiteList::rsErrCode:%{public}d", rsErrCode);
     return (rsErrCode == static_cast<int32_t>(DMError::DM_OK)) ? DMError::DM_OK : DMError::DM_ERROR_INVALID_PARAM;
