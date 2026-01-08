@@ -127,7 +127,7 @@ void DisplayAniUtils::ConvertDisplayPhysicalResolution(std::vector<DisplayPhysic
         env->Object_SetFieldByName_Long(static_cast<ani_object>(obj),
             Builder::BuildPropertyName("physicalWidth").c_str(), displayPhysicalArray[i].physicalWidth_);
         env->Object_SetFieldByName_Long(static_cast<ani_object>(obj),
-        Builder::BuildPropertyName("physicialHeight").c_str(), displayPhysicalArray[i].physicalHeight_);
+            Builder::BuildPropertyName("physicalHeight").c_str(), displayPhysicalArray[i].physicalHeight_);
     }
 }
 
@@ -676,13 +676,12 @@ DmErrorCode DisplayAniUtils::SetPositionObj(ani_env* env, Position& globalPositi
 }
 
 DmErrorCode DisplayAniUtils::GetRelativePostionFromAni(ani_env* env,
-                                                       RelativePosition& relativePosition,
-                                                       ani_object relativePositionObj)
+    RelativePosition& relativePosition, ani_object relativePositionObj)
 {
     ani_ref positionObj;
     ani_long displayId;
     if (ANI_OK != env->Object_GetFieldByName_Long(
-                      relativePositionObj, Builder::BuildPropertyName("displayId").c_str(), &displayId)) {
+        relativePositionObj, Builder::BuildPropertyName("displayId").c_str(), &displayId)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get displayId failed");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
@@ -692,7 +691,7 @@ DmErrorCode DisplayAniUtils::GetRelativePostionFromAni(ani_env* env,
     }
     relativePosition.displayId = static_cast<DisplayId>(displayId);
     if (ANI_OK != env->Object_GetFieldByName_Ref(
-                      relativePositionObj, Builder::BuildPropertyName("position").c_str(), &positionObj)) {
+        relativePositionObj, Builder::BuildPropertyName("position").c_str(), &positionObj)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get positionObj failed");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
@@ -713,13 +712,16 @@ DmErrorCode DisplayAniUtils::SetRelativePostionObj(
         TLOGE(WmsLogTag::DMS, "[ANI] Create position object failed");
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
-    if (ANI_OK != env->Object_SetFieldByName_Long(PositionObj, Builder::BuildPropertyName("x").c_str(), relativePosition.position.x)) {
+    if (ANI_OK != env->Object_SetFieldByName_Long(
+        PositionObj, Builder::BuildPropertyName("x").c_str(), relativePosition.position.x)) {
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
-    if (ANI_OK != env->Object_SetFieldByName_Long(PositionObj, Builder::BuildPropertyName("y").c_str(), relativePosition.position.y)) {
+    if (ANI_OK != env->Object_SetFieldByName_Long(
+        PositionObj, Builder::BuildPropertyName("y").c_str(), relativePosition.position.y)) {
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
-    if (ANI_OK != env->Object_SetFieldByName_Ref(relativePositionObj, Builder::BuildPropertyName("position").c_str(), PositionObj)) {
+    if (ANI_OK != env->Object_SetFieldByName_Ref(
+        relativePositionObj, Builder::BuildPropertyName("position").c_str(), PositionObj)) {
         return DmErrorCode::DM_ERROR_ILLEGAL_PARAM;
     }
     if (ANI_OK != env->Object_SetFieldByName_Long(
@@ -739,13 +741,13 @@ void DisplayAniUtils::SetFoldCreaseRegion(ani_env* env, FoldCreaseRegion& region
         return;
     }
     if (ANI_OK != env->Object_SetFieldByName_Long(
-                      foldCreaseRegionObj, Builder::BuildPropertyName("diaplayId").c_str(), (ani_long)displayId)) {
+        foldCreaseRegionObj, Builder::BuildPropertyName("diaplayId").c_str(), (ani_long)displayId)) {
         TLOGE(WmsLogTag::DMS, "[ANI] set displayId field fail");
         return;
     }
     ani_ref creaseRectsObj{};
     if (ANI_OK != env->Object_GetFieldByName_Ref(
-                      foldCreaseRegionObj, Builder::BuildPropertyName("creaseRects").c_str(), &creaseRectsObj)) {
+        foldCreaseRegionObj, Builder::BuildPropertyName("creaseRects").c_str(), &creaseRectsObj)) {
         TLOGE(WmsLogTag::DMS, "[ANI] get ani_array len fail");
     }
     ani_int length;
@@ -756,7 +758,7 @@ void DisplayAniUtils::SetFoldCreaseRegion(ani_env* env, FoldCreaseRegion& region
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCrease;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-                          static_cast<ani_object>(creaseRectsObj), "$_get", "i:Y", &currentCrease, (ani_int)i)) {
+            static_cast<ani_object>(creaseRectsObj), "$_get", "i:Y", &currentCrease, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
