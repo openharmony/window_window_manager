@@ -3722,6 +3722,19 @@ HWTEST_F(WindowExtensionSessionImplTest, UpdateRotateDuration, TestSize.Level2)
 }
 
 /**
+ * @tc.name: GetWindowStateSnapshot01
+ * @tc.desc: test GetWindowStateSnapshot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, GetWindowStateSnapshot01, TestSize.Level1)
+{
+    ASSERT_NE(window_, nullptr);
+    std::string winStateSnapshotJsonStr;
+    auto errCode = window_->GetWindowStateSnapshot(winStateSnapshotJsonStr);
+    EXPECT_EQ(errCode, WMError::WM_OK);
+}
+
+/**
  * @tc.name: SetStatusBarColorForExtension
  * @tc.desc: SetStatusBarColorForExtension test
  * @tc.type: FUNC
