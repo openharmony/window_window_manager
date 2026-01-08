@@ -3168,13 +3168,12 @@ export class WindowInternal implements Window {
 
     public setWindowTitle(titleName: string): Promise<void> {
         return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-            taskpool.execute((): void => {
+            try {
                 this.setWindowTitle(this.nativeObj, titleName);
-            }).then((ret: Any): void => {
                 resolve(undefined);
-            }).catch((err: Any): void => {
+            } catch (err: Error) {
                 reject(err as BusinessError);
-            });
+            }
         });
     }
 
