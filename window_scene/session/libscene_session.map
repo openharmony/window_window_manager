@@ -227,9 +227,6 @@
             OHOS::Rosen::SessionUtils::SetMoveResampleEnabled*;
             OHOS::Rosen::SystemSession::SystemSession*;
             OHOS::Rosen::KeyboardSession::KeyboardSession*;
-            OHOS::Rosen::ExtensionSession::Background*;
-            OHOS::Rosen::ExtensionSession::SetEventHandler*;
-            OHOS::Rosen::ExtensionSession::ConnectInner*;
             OHOS::Rosen::ExtensionSession::NotifyDumpInfo*;
             OHOS::Rosen::ExtensionSession::TransferComponentData*;
             OHOS::Rosen::ExtensionSession::TransferKeyEventAsync*;
@@ -297,22 +294,6 @@
             OHOS::Rosen::ScenePersistentStorage::InitDir*;
             OHOS::Rosen::SessionCoordinateHelper::RelativeToGlobalDisplayRect*;
             OHOS::Rosen::IsExtensionSessionInvalid*;
-            OHOS::Rosen::Session::~Session*;
-            OHOS::Rosen::Session::Show*;
-            OHOS::Rosen::Session::Hide*;
-            OHOS::Rosen::Session::DrawingCompleted*;
-            OHOS::Rosen::Session::NotifyExtensionDied*;
-            OHOS::Rosen::Session::NotifyExtensionTimeout*;
-            OHOS::Rosen::Session::NotifyTransferAccessibilityEvent*;
-            OHOS::Rosen::Session::NotifyExtensionDetachToDisplay*;
-            OHOS::Rosen::Session::TransferPointerEvent*;
-            OHOS::Rosen::Session::TransferKeyEvent*;
-            OHOS::Rosen::Session::UpdateAvoidArea*;
-            OHOS::Rosen::Session::SetSessionState*;
-            OHOS::Rosen::Session::SetScreenId*;
-            OHOS::Rosen::Session::SetAspectRatio*;
-            OHOS::Rosen::Session::Disconnect*;
-            OHOS::Rosen::Session::Foreground*;
             OHOS::Rosen::Session::HasSnapshot*;
             OHOS::Rosen::Session::NotifyClick*;
             OHOS::Rosen::Session::SetRotation*;
@@ -668,8 +649,6 @@
             OHOS::Rosen::SceneSession::SetIsUserRequestedExit*;
             OHOS::Rosen::SceneSession::RegisterNotifyOccupiedAreaChangeCallback*;
             OHOS::Rosen::MoveDragController::SetMoveResampleSystemConfig*;
-            OHOS::Rosen::SessionStub::OnRemoteRequest*;
-
 
             VTT*SessionProxy*;
             VTT*RootSceneSession*;
