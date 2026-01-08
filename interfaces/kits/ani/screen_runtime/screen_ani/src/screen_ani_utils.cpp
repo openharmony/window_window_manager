@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
+#include <ani_signature_builder.h>
 #include "dm_common.h"
 #include "refbase.h"
 #include "screen.h"
@@ -30,6 +31,7 @@
 
 namespace OHOS {
 namespace Rosen {
+using namespace arkts::ani_signature;
 
 ani_status ScreenAniUtils::GetStdString(ani_env *env, ani_string ani_str, std::string &result)
 {
