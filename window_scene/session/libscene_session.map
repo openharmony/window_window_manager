@@ -688,8 +688,8 @@
             OHOS::Rosen::Session::RequestFocus*;
             OHOS::Rosen::Session::NotifyUILostFocus*;
             OHOS::Rosen::Session::UpdateHighlightStatus*;
-            
-
+            OHOS::Rosen::Session*;
+            OHOS::Rosen::ExtensionSession*;
 
             VTT*SessionProxy*;
             VTT*RootSceneSession*;
