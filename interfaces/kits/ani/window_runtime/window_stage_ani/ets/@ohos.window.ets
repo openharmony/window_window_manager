@@ -3012,6 +3012,7 @@ export class WindowInternal implements Window {
     private native setDefaultDensityEnabled(nativeObj: long, enabled: boolean): void;
     private native setWindowContainerColor(nativeObj: long, activeColor: string, inactiveColor: string): void;
     private native setWindowContainerModalColor(nativeObj: long, activeColor: string, inactiveColor: string): void;
+    private native getWindowStateSnapshotSync(nativeObj: long): string;
     private native isMainWindowFullScreenAcrossDisplaysSync(nativeObj: long): boolean;
     private native setWindowShadowEnabledSync(nativeObj: long, enable: boolean): void;
     private native isImmersiveLayoutSync(nativeObj: long): boolean;
@@ -4421,6 +4422,18 @@ export class WindowInternal implements Window {
       });
     }
 
+    public getWindowStateSnapshot(): Promise<string> {
+      return new Promise<string>((resolve: (value: string) => void, reject: (error: BusinessError) => void) => {
+        taskpool.execute((): string => {
+          return this.getWindowStateSnapshotSync(this.nativeObj);
+        }).then((ret: Any) => {
+          resolve(ret as string);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public isImmersiveLayout(): boolean {
       return this.isImmersiveLayoutSync(this.nativeObj);
     }
@@ -5325,6 +5338,7 @@ export interface Window {
     setDefaultDensityEnabled(enabled: boolean): void;
     setWindowContainerColor(activeColor: string, inactiveColor: string): void;
     setWindowContainerModalColor(activeColor: string, inactiveColor: string): void;
+    getWindowStateSnapshot(): Promise<string>;
     isMainWindowFullScreenAcrossDisplays(): Promise<boolean>;
     setWindowShadowEnabled(enable: boolean): Promise<void>;
     isImmersiveLayout(): boolean;
