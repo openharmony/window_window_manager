@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
+#include <ani_signature_builder.h>
 #include "display.h"
 #include "display_ani.h"
 #include "display_info.h"
@@ -29,6 +30,8 @@
 
 namespace OHOS {
 namespace Rosen {
+
+using namespace arkts::ani_signature;
 
 static thread_local std::map<DisplayId, std::shared_ptr<DisplayAni>> g_AniDisplayMap;
 std::recursive_mutex g_mutex;
