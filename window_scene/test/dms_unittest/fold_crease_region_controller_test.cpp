@@ -20,13 +20,9 @@
 #include <functional>
 #include "window_manager_hilog.h"
 
-#define private public
-#define protected public
 #include "fold_crease_region_controller.h"
 #include "screen_session_manager.h"
 #include "session/screen/include/screen_session.h"
-#undef private
-#undef protected
 
 namespace {
 std::string g_logMsg;
