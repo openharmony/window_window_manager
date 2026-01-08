@@ -1946,7 +1946,7 @@ napi_value JsExtensionWindow::OnGetWindowStateSnapshot(napi_env env, napi_callba
             return;
         }
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: ext winStateSnapshot=%{public}s",
-            here, winStateSnapshot.c_str());
+            where, winStateSnapshot.c_str());
         task->Resolve(env, objValue);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetWindowStateSnapshot") != napi_status::napi_ok) {
