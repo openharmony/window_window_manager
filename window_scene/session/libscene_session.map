@@ -691,6 +691,9 @@
             OHOS::Rosen::Session*;
             OHOS::Rosen::ExtensionSession*;
 
+            non-virtual?thunk?to?OHOS::Rosen::Session::*;
+            non-virtual?thunk?to?OHOS::Rosen::ExtensionSession::*;
+
             VTT*Session*;
             VTT*ExtensionSession*;
             VTT*SessionProxy*;
