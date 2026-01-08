@@ -200,6 +200,7 @@
             OHOS::Rosen::SceneSessionManager::UpdateTitleInTargetPos*;
             OHOS::Rosen::SceneSessionManager::UpdateWindowMode*;
             OHOS::Rosen::SceneSessionManager::VisitSnapshotFromCache*;
+            OHOS::Rosen::SceneSessionManager::RegisterMinimizeAllCallback*;
             OHOS::Rosen::SceneSessionManagerLite::GetInstance*;
             OHOS::Rosen::SessionLifecycleListenerStub::OnRemoteRequest*;
             OHOS::Rosen::SessionRouterStackListenerStub::OnRemoteRequest*;
