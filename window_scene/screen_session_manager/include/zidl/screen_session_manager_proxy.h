@@ -95,10 +95,10 @@ public:
 
     DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
 
-    bool IsOnboardDisplay(DisplayId displayId) override;
-
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
+
+    DMError IsOnboardDisplay(DisplayId displayId, bool& isOnboardDisplay) override;
 
     virtual DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
 

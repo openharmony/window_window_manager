@@ -130,7 +130,7 @@ public:
     DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
     DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
     std::vector<uint64_t> ProcessMissionIdsToSurfaceNodeIds(const std::vector<uint64_t>& missionIds);
-    bool IsOnboardDisplay(DisplayId displayId) override;
+    DMError IsOnboardDisplay(DisplayId displayId, bool& isOnboardDisplay) override;
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override;
