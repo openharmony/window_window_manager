@@ -18,6 +18,7 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
+#include <ani_signature_builder.h>
 #include "ani_err_utils.h"
 #include "display.h"
 #include "display_ani_manager.h"
@@ -36,6 +37,7 @@
 
 namespace OHOS {
 namespace Rosen {
+using namespace arkts::ani_signature;
 
 // construct, set registerManager.
 DisplayAni::DisplayAni(const sptr<Display>& display) : display_(display)
