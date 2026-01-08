@@ -35,6 +35,7 @@
 #include "window_manager.h"
 #include "window_option.h"
 #include "permission.h"
+#include "scene_board_judgement.h"
 #include "singleton_container.h"
 #include "pixel_map.h"
 #include "../../../../../../wm/include/get_snapshot_callback.h"
@@ -871,15 +872,22 @@ ani_object AniWindowManager::GetVisibleWindowInfo(ani_env* env, ani_long nativeO
 
 ani_object AniWindowManager::OnGetVisibleWindowInfo(ani_env* env)
 {
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "device not support!");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
+            "[window][getVisibleWindowInfo]");
+    }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
     if (apiVersion < API_VERSION_18 && !Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied! api%{public}u", apiVersion);
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "[window][getVisibleWindowInfo]");
     } else if (apiVersion >= API_VERSION_18 &&
                !CheckCallingPermission(PermissionConstants::PERMISSION_VISIBLE_WINDOW_INFO)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied! api%{public}u", apiVersion);
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION);
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION,
+            "[window][getVisibleWindowInfo]msg: Need ohos.permission.VISIBLE_WINDOW_INFO permission");
     }
     std::vector<sptr<WindowVisibilityInfo>> infos;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
@@ -897,7 +905,8 @@ ani_object AniWindowManager::OnGetVisibleWindowInfo(ani_env* env)
         return AniWindowUtils::CreateAniWindowInfoArray(env, infos);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
-        return AniWindowUtils::AniThrowError(env, ret, "OnGetVisibleWindowInfo failed");
+        return AniWindowUtils::AniThrowError(env, ret, "OnGetVisibleWindowInfo failed",
+            "[window][getVisibleWindowInfo]");
     }
 }
 
