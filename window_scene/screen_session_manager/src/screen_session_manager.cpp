@@ -10794,14 +10794,14 @@ void ScreenSessionManager::HandleScreenRotationAndBoundsWhenSetClient(sptr<Scree
     float phyWidth = 0.0f;
     float phyHeight = 0.0f;
     bool isReset = true;
-    int boundaryOffset = 0;
+    int32_t boundaryOffset = 0;
     ScreenId screenId = screenSession->GetScreenId();
     GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     auto localRotation = screenSession->GetRotation();
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
         FoldDisplayMode displayMode = GetFoldDisplayMode();
         if (displayMode == FoldDisplayMode::FULL) {
-            boundaryOffset = screenParams_[FULL_STATUS_OFFSET_X];
+            boundaryOffset = static_cast<int32_t>(screenParams_[FULL_STATUS_OFFSET_X]);
             phyWidth = screenParams_[FULL_STATUS_WIDTH];
         } else if (displayMode == FoldDisplayMode::MAIN) {
             phyWidth = screenParams_[MAIN_STATUS_WIDTH];
@@ -13278,14 +13278,15 @@ DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, co
 void ScreenSessionManager::SetDisplayRegionAndAreaFixed(Rotation rotation, DMRect& displayRegion,
     DMRect& displayAreaFixed)
 {
+    int32_t offsetX = static_cast<int32_t>(screenParams_[FULL_STATUS_OFFSET_X]);
     switch (rotation) {
         case Rotation::ROTATION_0:
-            displayRegion.posX_ = screenParams_[FULL_STATUS_OFFSET_X];
-            displayAreaFixed.posX_ += screenParams_[FULL_STATUS_OFFSET_X];
+            displayRegion.posX_ = offsetX;
+            displayAreaFixed.posX_ += offsetX;
             break;
         case Rotation::ROTATION_90:
-            displayRegion.posY_ = screenParams_[FULL_STATUS_OFFSET_X];
-            displayAreaFixed.posY_ += screenParams_[FULL_STATUS_OFFSET_X];
+            displayRegion.posY_ = offsetX;
+            displayAreaFixed.posY_ += offsetX;
             break;
         default:
             break;
