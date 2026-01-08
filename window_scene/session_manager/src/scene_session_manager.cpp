@@ -410,9 +410,6 @@ SceneSessionManager::SceneSessionManager() : rsInterface_(RSInterfaces::GetInsta
         TLOGE(WmsLogTag::DEFAULT, "Failed to register bundle status callback.");
     }
 
-    collaboratorDeathRecipient_ = sptr<AgentDeathRecipient>::MakeSptr(
-        [this](const sptr<IRemoteObject>& remoteObject) { this->ClearAllCollaboratorSessions(); });
-
     scbDumpSubscriber_ = ScbDumpSubscriber::Subscribe();
 
     listenerController_ = std::make_shared<SessionListenerController>(taskScheduler_);
@@ -11193,6 +11190,22 @@ sptr<AAFwk::IAbilityManagerCollaborator> SceneSessionManager::GetCollaboratorByT
     return collaborator;
 }
 
+sptr<AgentDeathRecipient> SceneSessionManager::GetCollaboratorDeathRecipient(int32_t collaboratorType)
+{
+    sptr<AgentDeathRecipient> collaboratorDeathRecipient = nullptr;
+    std::shared_lock<std::shared_mutex> lock(collaboratorDeathRecipientMapLock_);
+    auto iter = collaboratorDeathRecipientMap_.find(collaboratorType);
+    if (iter == collaboratorDeathRecipientMap_.end()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Fail to found collaborator deathRecipient, type: %{public}d", collaboratorType);
+        return collaboratorDeathRecipient;
+    }
+    collaboratorDeathRecipient = iter->second;
+    if (collaboratorDeathRecipient == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "collaborator deathRecipient is nullptr, type: %{public}d", collaboratorType);
+    }
+    return collaboratorDeathRecipient;
+}
+
 WSError SceneSessionManager::RequestSceneSessionByCall(const sptr<SceneSession>& sceneSession, int32_t requestId)
 {
     const char* const where = __func__;
@@ -13926,17 +13939,23 @@ WSError SceneSessionManager::RegisterIAbilityManagerCollaborator(int32_t type,
         TLOGW(WmsLogTag::DEFAULT, "collaborator register failed, invalid type.");
         return WSError::WS_ERROR_INVALID_TYPE;
     }
-    if (impl == nullptr) {
+    if (impl == nullptr || impl->AsObject() == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "Collaborator is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (impl->AsObject() == nullptr || !impl->AsObject()->AddDeathRecipient(collaboratorDeathRecipient_)) {
+    sptr<AgentDeathRecipient> collaboratorDeathRecipient = sptr<AgentDeathRecipient>::MakeSptr(
+        [this, type](const sptr<IRemoteObject>& remoteObject) { this->ClearCollaboratorSessionsByType(type); });
+    if (!impl->AsObject()->AddDeathRecipient(collaboratorDeathRecipient)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to add collaborator death recipient");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     {
         std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_[type] = impl;
+    }
+    {
+        std::unique_lock<std::shared_mutex> lock(collaboratorDeathRecipientMapLock_);
+        collaboratorDeathRecipientMap_[type] = collaboratorDeathRecipient;
     }
     auto task = [this] {
         if (abilityManagerCollaboratorRegisteredFunc_) {
@@ -13960,30 +13979,36 @@ WSError SceneSessionManager::UnregisterIAbilityManagerCollaborator(int32_t type)
         return WSError::WS_ERROR_INVALID_TYPE;
     }
     sptr<AAFwk::IAbilityManagerCollaborator> collaborator = GetCollaboratorByType(type);
-    if (collaborator != nullptr && collaborator->AsObject() != nullptr) {
+    sptr<AgentDeathRecipient> collaboratorDeathRecipient = GetCollaboratorDeathRecipient(type);
+    if (collaborator != nullptr && collaborator->AsObject() != nullptr && collaboratorDeathRecipient != nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "Remove collaborator death recipient");
-        collaborator->AsObject()->RemoveDeathRecipient(collaboratorDeathRecipient_);
+        collaborator->AsObject()->RemoveDeathRecipient(collaboratorDeathRecipient);
     }
     {
         std::unique_lock<std::shared_mutex> lock(collaboratorMapLock_);
         collaboratorMap_.erase(type);
     }
+    {
+        std::unique_lock<std::shared_mutex> lock(collaboratorDeathRecipientMapLock_);
+        collaboratorDeathRecipientMap_.erase(type);
+    }
     return WSError::WS_OK;
 }
 
-void SceneSessionManager::ClearAllCollaboratorSessions()
+void SceneSessionManager::ClearCollaboratorSessionsByType(int32_t type)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    TLOGI(WmsLogTag::WMS_MAIN, "type: %{public}d", type);
     std::vector<sptr<SceneSession>> collaboratorSessions;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession != nullptr && CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+            if (sceneSession != nullptr && type == sceneSession->GetCollaboratorType()) {
                 collaboratorSessions.push_back(sceneSession);
             }
         }
     }
     for (const auto& sceneSession : collaboratorSessions) {
+        TLOGI(WmsLogTag::WMS_MAIN, "clear session id: %{public}d", sceneSession->GetPersistentId());
         sceneSession->Clear();
     }
 }
