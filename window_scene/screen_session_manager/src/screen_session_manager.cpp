@@ -270,21 +270,25 @@ inline int32_t GetUserIdByCallingUid()
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManager)
 
+static void* g_dmsExtHandler = nullptr;
 void ScreenSessionManager::LoadDmsExtension()
 {
     TLOGNFE(WmsLogTag::DMS, "LoadDmsExtension start");
-    void* handler = nullptr;
+    if (g_dmsExtHandler != nullptr) {
+        dlclose(g_dmsExtHandler);
+        g_dmsExtHandler = nullptr;
+    }
     int32_t cnt = 0;
     int32_t retryTimes = 3;
     do {
         cnt++;
-        handler = dlopen(EXT_PLUGIN_SO_PATH.c_str(), RTLD_NOW | RTLD_NODELETE);
+        g_dmsExtHandler = dlopen(EXT_PLUGIN_SO_PATH.c_str(), RTLD_NOW | RTLD_NODELETE);
         TLOGNFI(WmsLogTag::DMS, "dlopen %{public}s, retry cnt: %{public}d", EXT_PLUGIN_SO_PATH.c_str(), cnt);
-        if (handler == nullptr) {
+        if (g_dmsExtHandler == nullptr) {
             TLOGNFE(WmsLogTag::DMS, "dlopen failed: %{public}s", dlerror());
         }
         usleep(SLEEP_TIME_US);
-    } while (!handler && cnt < retryTimes);
+    } while (!g_dmsExtHandler && cnt < retryTimes);
 }
 bool ScreenSessionManager::GetScreenSessionMngSystemAbility()
 {
