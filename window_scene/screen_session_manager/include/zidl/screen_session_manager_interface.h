@@ -51,7 +51,8 @@ public:
 
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IRemoteObject>& displayManagerAgent) { return SCREEN_ID_INVALID; }
-    virtual DMError DestroyVirtualScreen(ScreenId screenId) { return DMError::DM_OK; }
+    virtual DMError DestroyVirtualScreen(ScreenId screenId, bool isCallingByThirdParty = false)
+        { return DMError::DM_OK; }
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface)
     {
         return DMError::DM_OK;
