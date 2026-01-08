@@ -19,7 +19,7 @@
 #include "gmock/gmock.h"
 #include <functional>
 #include "window_manager_hilog.h"
- 
+
 #define private public
 #define protected public
 #include "fold_crease_region_controller.h"
@@ -27,7 +27,7 @@
 #include "session/screen/include/screen_session.h"
 #undef private
 #undef protected
- 
+
 namespace {
 std::string g_logMsg;
 void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
@@ -38,12 +38,12 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 }
 using namespace testing;
 using namespace testing::ext;
- 
+
 namespace OHOS {
 namespace Rosen {
 namespace DMS {
 constexpr uint32_t SLEEP_TIME_US = 100000;
- 
+
 class FoldCreaseRegionControllerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -51,21 +51,21 @@ public:
     void SetUp() override;
     void TearDown() override;
 };
- 
+
 void FoldCreaseRegionControllerTest::SetUpTestCase() {}
- 
+
 void FoldCreaseRegionControllerTest::TearDownTestCase() {}
- 
+
 void FoldCreaseRegionControllerTest::SetUp() {}
- 
+
 void FoldCreaseRegionControllerTest::TearDown()
 {
     LOG_SetCallback(nullptr);
     usleep(SLEEP_TIME_US);
 }
- 
+
 namespace {
- 
+
 /**
  * @tc.name: GetCurrentFoldCreaseRegion
  * @tc.desc: test function : GetCurrentFoldCreaseRegion
@@ -81,7 +81,7 @@ HWTEST_F(FoldCreaseRegionControllerTest, GetCurrentFoldCreaseRegion, TestSize.Le
     controller.GetCurrentFoldCreaseRegion();
     EXPECT_TRUE(g_logMsg.find("InitModeCreaseRegion") != std::string::npos);
     g_logMsg.clear();
- 
+
     controller.isInitModeCreaseRegion_ = true;
     controller.currentFoldCreaseRegion_ = new FoldCreaseRegion(0, {});
     controller.GetCurrentFoldCreaseRegion();
@@ -129,7 +129,7 @@ HWTEST_F(FoldCreaseRegionControllerTest, GetAllCreaseRegion, TestSize.Level1)
     controller.GetAllCreaseRegion(foldCreaseRegionItems);
     EXPECT_TRUE(g_logMsg.find("InitModeCreaseRegion") != std::string::npos);
     g_logMsg.clear();
- 
+
     foldCreaseRegionItems.clear();
     controller.isInitModeCreaseRegion_ = true;
     std::vector<DMRect> fullRects;
@@ -145,7 +145,7 @@ HWTEST_F(FoldCreaseRegionControllerTest, GetAllCreaseRegion, TestSize.Level1)
     ScreenSessionManager::GetInstance().screenSessionMap_.erase(screenId);
     LOG_SetCallback(nullptr);
 }
- 
+
 /**
  * @tc.name: GetAllCreaseRegionByDisplayMode
  * @tc.desc: test function : GetAllCreaseRegionByDisplayMode
@@ -161,7 +161,7 @@ HWTEST_F(FoldCreaseRegionControllerTest, GetAllCreaseRegionByDisplayMode, TestSi
     controller.GetAllCreaseRegionByDisplayMode(FoldDisplayMode::FULL, screenId, foldCreaseRegionItems);
     EXPECT_TRUE(g_logMsg.find("screenSession is null") != std::string::npos);
     g_logMsg.clear();
- 
+
     ScreenProperty screenProperty;
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
     ScreenSessionManager::GetInstance().screenSessionMap_.insert({screenId, session});
@@ -169,7 +169,7 @@ HWTEST_F(FoldCreaseRegionControllerTest, GetAllCreaseRegionByDisplayMode, TestSi
     EXPECT_EQ(foldCreaseRegionItems.size(), 4);
     LOG_SetCallback(nullptr);
 }
- 
+
 /**
  * @tc.name: GetCreaseRegionByOrientation
  * @tc.desc: test function : GetCreaseRegionByOrientation
@@ -188,7 +188,7 @@ HWTEST_F(FoldCreaseRegionControllerTest, GetCreaseRegionByOrientation, TestSize.
     g_logMsg.clear();
     LOG_SetCallback(nullptr);
 }
- 
+
 /**
  * @tc.name: GetDisplayModeRectMap
  * @tc.desc: test function : GetDisplayModeRectMap
@@ -211,7 +211,7 @@ HWTEST_F(FoldCreaseRegionControllerTest, GetDisplayModeRectMap, TestSize.Level1)
     EXPECT_FALSE(controller.displayModeRects_[FoldDisplayMode::COORDINATION].empty());
     LOG_SetCallback(nullptr);
 }
- 
+
 /**
  * @tc.name: RotateSingleRect
  * @tc.desc: test function : RotateSingleRect invalid param
@@ -269,21 +269,21 @@ HWTEST_F(FoldCreaseRegionControllerTest, RotateSingleRect, TestSize.Level1)
     EXPECT_EQ(ret.posY_, originalPosY);
     EXPECT_EQ(ret.width_, originalWidth);
     EXPECT_EQ(ret.height_, originalHeight);
- 
+
     targetRotation = Rotation::ROTATION_90;
     ret = controller.RotateSingleRect(originalRect, portraitWidth, portraitHeight, targetRotation);
     EXPECT_EQ(ret.posX_, static_cast<int32_t>(portraitHeight - originalPosY - originalHeight));
     EXPECT_EQ(ret.posY_, originalPosX);
     EXPECT_EQ(ret.width_, originalHeight);
     EXPECT_EQ(ret.height_, originalWidth);
- 
+
     targetRotation = Rotation::ROTATION_180;
     ret = controller.RotateSingleRect(originalRect, portraitWidth, portraitHeight, targetRotation);
     EXPECT_EQ(ret.posX_, static_cast<int32_t>(portraitWidth - originalPosX - originalWidth));
     EXPECT_EQ(ret.posY_, static_cast<int32_t>(portraitHeight - originalPosY - originalHeight));
     EXPECT_EQ(ret.width_, originalWidth);
     EXPECT_EQ(ret.height_, originalHeight);
- 
+
     targetRotation = Rotation::ROTATION_270;
     ret = controller.RotateSingleRect(originalRect, portraitWidth, portraitHeight, targetRotation);
     EXPECT_EQ(ret.posX_, originalPosY);

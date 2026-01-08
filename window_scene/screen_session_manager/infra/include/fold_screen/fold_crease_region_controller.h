@@ -33,7 +33,7 @@ public:
     FoldCreaseRegion GetLiveCreaseRegion();
     void GetAllCreaseRegion(std::vector<FoldCreaseRegionItem>& foldCreaseRegionItems);
 private:
-    DMRect RotateSingleRect(const DMRect& originalRect, 
+    DMRect RotateSingleRect(const DMRect& originalRect,
         uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation);
     std::vector<DMRect> RotateRectArray(const std::vector<DMRect>& originalRects,
         uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation);
