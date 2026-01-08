@@ -53,7 +53,7 @@ public:
         IsLastFrameLayoutFinishedCallback isLastFrameLayoutFinished;
     };
     KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
-        const sptr<KeyboardSessionCallback>& keyboardCallback);
+        const sptr<KeyboardSessionCallback>& keyboardCallback, int32_t userId = 0);
     ~KeyboardSession();
 
     WSError Show(sptr<WindowSessionProperty> property) override;
