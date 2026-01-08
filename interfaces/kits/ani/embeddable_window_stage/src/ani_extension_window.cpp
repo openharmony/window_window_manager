@@ -566,7 +566,7 @@ std::array extensionWindowNativeMethods = {
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
     ani_native_function {"hideNonSecureWindows", "lz:i", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}z:@ohos.window.window.Window",
+        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}z:C{@ohos.window.window.Window}",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
     ani_native_function {"occupyEvents", "li:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
     ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
@@ -579,7 +579,7 @@ std::array extensionWindowNativeMethods = {
 
 std::array extensionWindowHostNativeMethods = {
     ani_native_function {"getProperties", "lC{std.core.Object}:i", reinterpret_cast<void *>(ExtWindowGetProperties)},
-    ani_native_function {"getWindowAvoidArea", "liC{std.core.Object}:",
+    ani_native_function {"getWindowAvoidArea", "liC{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
     ani_native_function {"setWaterMarkFlag", "lz:i",
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
