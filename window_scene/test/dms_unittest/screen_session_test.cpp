@@ -5134,10 +5134,10 @@ HWTEST_F(ScreenSessionTest, ClearPropertyChangeReasonAndEvent, TestSize.Level1)
     screenProperty.SetPropertyChangeReason(ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
     screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
- 
     session->ClearPropertyChangeReasonAndEvent();
-    EXPECT_EQ(screenProperty.GetPropertyChangeReason(), ScreenPropertyChangeReason::UNDEFINED);
-    EXPECT_EQ(screenProperty.GetSuperFoldStatusChangeEvent(), SuperFoldStatusChangeEvents::UNDEFINED);
+    auto proeperty = session->GetScreenProperty();
+    EXPECT_EQ(proeperty.GetPropertyChangeReason(), ScreenPropertyChangeReason::UNDEFINED);
+    EXPECT_EQ(proeperty.GetSuperFoldStatusChangeEvent(), SuperFoldStatusChangeEvents::UNDEFINED);
 }
 } // namespace
 } // namespace Rosen
