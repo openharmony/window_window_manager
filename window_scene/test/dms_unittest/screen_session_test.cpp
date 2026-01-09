@@ -5121,6 +5121,24 @@ HWTEST_F(ScreenSessionTest, UpdateScbScreenPropertyForSuperFlod, TestSize.Level1
     g_errLog.clear();
     LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name  : ClearChangeReasonAndEvent
+ * @tc.desc  : ClearChangeReasonAndEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, ClearChangeReasonAndEvent, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    screenProperty.SetPropertyChangeReason(ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
+    screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+ 
+    session->ClearPropertyChangeReasonAndEvent();
+    EXPECT_EQ(screenProperty.GetPropertyChangeReason(), ScreenPropertyChangeReason::UNDEFINED);
+    EXPECT_EQ(screenProperty.GetSuperFoldStatusChangeEvent(), SuperFoldStatusChangeEvents::UNDEFINED);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
