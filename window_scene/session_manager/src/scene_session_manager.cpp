@@ -6483,14 +6483,12 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
             TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
         }
-    };
-    FfrtSerialQueueHelper::GetInstance().SubmitTask(task);
-    taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         if (auto iter = startingWindowMap_.find(bundleName); iter != startingWindowMap_.end()) {
             startingWindowMap_.erase(iter);
         }
-    }, __func__);
+    };
+    FfrtSerialQueueHelper::GetInstance().SubmitTask(task);
 }
 
 void SceneSessionManager::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
