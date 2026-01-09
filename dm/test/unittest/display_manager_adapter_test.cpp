@@ -26,6 +26,12 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Rosen {
+std::string g_errLog;
+void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+    const char* msg)
+{
+    g_errLog = msg;
+}
 class DisplayManagerAdapterTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -753,6 +759,34 @@ HWTEST_F(DisplayManagerAdapterTest, GetAllDisplayPhysicalResolution, TestSize.Le
     std::vector<DisplayPhysicalResolution> allSize =
         SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
     ASSERT_FALSE(allSize.empty());
+}
+
+/**
+ * @tc.name: IsOnboardDisplay
+ * @tc.desc: IsOnboardDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, IsOnboardDisplay, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = 10;
+    bool isOnboardDisplay = false;
+
+    sptr<IScreenSessionManager> screenSessionManagerServiceProxyTmp =
+        SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ = nullptr;
+
+    SingletonContainer::Get<DisplayManagerAdapter>().IsOnboardDisplay(displayId, isOnboardDisplay);
+    EXPECT_TRUE(g_errLog.find("fail") != std::string::npos);
+
+    g_errLog.clear();
+    isOnboardDisplay = false;
+    SingletonContainer::Get<DisplayManagerAdapter>().screenSessionManagerServiceProxy_ =
+        screenSessionManagerServiceProxyTmp;
+    SingletonContainer::Get<DisplayManagerAdapter>().IsOnboardDisplay(displayId, isOnboardDisplay);
+    EXPECT_TRUE(g_errLog.find("fail") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**

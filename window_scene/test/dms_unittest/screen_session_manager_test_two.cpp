@@ -3572,6 +3572,27 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectAfterSwitchUser, TestSi
     g_errLog.clear();
     ssm_->screenSessionMap_.erase(51);
 }
+
+/*
+ * @tc.name: IsOnboardDisplay_systemCall
+ * @tc.desc: IsOnboardDisplay systemCall
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay_systemCall, Function | SmallTest | Level3)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = 10;
+    bool isOnboardDisplay = false;
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    ScreenSessionManager::GetInstance().IsOnboardDisplay(displayId, isOnboardDisplay);
+    EXPECT_TRUE(g_errLog.find("Permission Denied") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+}
 }
 }
 }

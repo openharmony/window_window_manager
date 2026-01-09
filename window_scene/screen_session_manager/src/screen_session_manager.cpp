@@ -6659,35 +6659,6 @@ std::vector<uint64_t> ScreenSessionManager::ProcessMissionIdsToSurfaceNodeIds(co
     return {};
 }
 
-bool ScreenSessionManager::IsOnboardDisplay(DisplayId displayId)
-{
-    TLOGNFI(WmsLogTag::DMS, "displayID is %{public}" PRIu64, displayId);
-    ScreenId boardId;
-    auto displayInfo = GetDisplayInfoById(displayId);
-    if (displayInfo == nullptr) {
-        TLOGNFE(WmsLogTag::DMS, "displayInfo is null");
-        return false;
-    }
-    if (g_isPcDevice) {
-        if (!screenIdManager_.ConvertToRsScreenId(displayInfo->GetScreenId(), boardId)) {
-            TLOGNFE(WmsLogTag::DMS, "no rsid");
-            return false;
-        }
-    } else {
-        boardId = displayInfo->GetScreenId();
-    }
-    TLOGNFI(WmsLogTag::DMS, "boardId %{public}" PRIu64, boardId);
-    const auto& boardList = DMS::ProductConfig::GetInstance().GetBoardList();
-    bool isBoardListExist = (std::find(boardList.begin(), boardList.end(), boardId) != boardList.end());
-    std::ostringstream oss;
-    oss << "boardList";
-    for (auto val : boardList) {
-        oss << val << " ";
-    }
-    TLOGNFI(WmsLogTag::DMS, "boardlist [%{public}s] isBoardListExist %{public}s", oss.str().c_str(), isBoardListExist ? "true" : "false");
-    return isBoardListExist;
-}
-
 DMError ScreenSessionManager::SetScreenPrivacyMaskImage(ScreenId screenId,
     const std::shared_ptr<Media::PixelMap>& privacyMaskImg)
 {
@@ -6725,6 +6696,45 @@ DMError ScreenSessionManager::SetScreenPrivacyMaskImage(ScreenId screenId,
         TLOGNFE(WmsLogTag::DMS, "Fail to set privacy mask image in RenderService");
         return DMError::DM_ERROR_RENDER_SERVICE_FAILED;
     }
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::IsOnboardDisplay(DisplayId displayId, bool& isOnboardDisplay)
+{
+    if (!SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+            SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+        return DMError::DM_ERROR_NOT_SYSTEM_APP;
+    }
+    TLOGI(WmsLogTag::DMS, "displayID is %{public}" PRIu64, displayId);
+#ifdef FOLD_ABILITY_ENABLE
+    ScreenId boardId;
+    auto displayInfo = GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "displayInfo is null");
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    if (g_isPcDevice) {
+        if (!screenIdManager_.ConvertToRsScreenId(displayInfo->GetScreenId(), boardId)) {
+            TLOGE(WmsLogTag::DMS, "no rsid");
+            return DMError::DM_ERROR_INVALID_PARAM;
+        }
+    } else {
+        boardId = displayInfo->GetScreenId();
+    }
+    TLOGNFI(WmsLogTag::DMS, "boardId %{public}" PRIu64, boardId);
+    const auto& boardList = DMS::ProductConfig::GetInstance().GetBoardList();
+    bool isBoardListExist = (std::find(boardList.begin(), boardList.end(), boardId) != boardList.end());
+    isOnboardDisplay = isBoardListExist;
+
+    std::ostringstream oss;
+    for (auto val : boardList) {
+        oss << val << " ";
+    }
+    TLOGI(WmsLogTag::DMS, "boardList [%{public}s], isBoardListExist %{public}s", oss.str().c_str(),
+        isBoardListExist ? "true" : "false");
+    return DMError::DM_OK;
+#endif
     return DMError::DM_OK;
 }
 

@@ -454,14 +454,6 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             }
             break;
         }
-        case DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY: {
-            DisplayId displayId = data.ReadUint64();
-            bool res = IsOnboardDisplay(displayId);
-            if (!reply.WriteBool(res)) {
-                TLOGE(WmsLogTag::DMS, "write res failed");
-            }
-            break;
-        }
         case DisplayManagerMessage::TRANS_ID_SET_SCREEN_PRIVACY_MASKIMAGE: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
             std::shared_ptr<Media::PixelMap> privacyMaskImg{nullptr};
@@ -481,6 +473,24 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             bool autoRotate = data.ReadBool();
             DMError result = SetVirtualMirrorScreenCanvasRotation(screenId, autoRotate);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(result)));
+            break;
+        }
+        case DisplayManagerMessage::TRANS_ID_IS_ON_BOARD_DISPLAY: {
+            DisplayId displayId;
+            if (!data.ReadUint64(displayId)) {
+                TLOGE(WmsLogTag::DMS, "read displayId fail");
+                reply.WriteUint32(static_cast<int32_t>(DMError::DM_ERROR_IPC_FAILED));
+                break;
+            }
+            bool tempOnboardDisplay;
+            DMError res = IsOnboardDisplay(displayId, tempOnboardDisplay);
+            if (!reply.WriteUint32(static_cast<int32_t>(res))) {
+                TLOGE(WmsLogTag::DMS, "write res failed");
+                break;
+            }
+            if (!reply.WriteBool(tempOnboardDisplay)) {
+                TLOGE(WmsLogTag::DMS, "write tempOnboardDisplay failed");
+            }
             break;
         }
         case DisplayManagerMessage::TRANS_ID_SET_VIRTUAL_SCREEN_SCALE_MODE: {
