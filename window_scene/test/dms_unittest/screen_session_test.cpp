@@ -5123,11 +5123,11 @@ HWTEST_F(ScreenSessionTest, UpdateScbScreenPropertyForSuperFlod, TestSize.Level1
 }
 
 /**
- * @tc.name  : ClearChangeReasonAndEvent
- * @tc.desc  : ClearChangeReasonAndEvent
+ * @tc.name  : ClearPropertyChangeReasonAndEvent
+ * @tc.desc  : ClearPropertyChangeReasonAndEvent
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, ClearChangeReasonAndEvent, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, ClearPropertyChangeReasonAndEvent, TestSize.Level1)
 {
     ScreenId screenId = 10000;
     ScreenProperty screenProperty;
