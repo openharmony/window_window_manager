@@ -2723,6 +2723,43 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode, TestSize.Leve
 }
 
 /**
+ * @tc.name: UpdateImmersiveBySwitchMode2
+ * @tc.desc: Test UpdateImmersiveBySwitchMode2
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateImmersiveBySwitchMode2, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo;
+    sptr<SessionMocker> mockHostSession = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    auto property = window->GetProperty();
+
+    property->SetPersistentId(123);
+
+    window->cacheEnableImmersiveMode_ = false;
+    window->maximizeLayoutFullScreen_ = true;
+    window->isIgnoreSafeArea_ = true;
+    window->hostSession_ = mockHostSession;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->isIgnoreSafeArea_, false);
+
+    window->cacheEnableImmersiveMode_ = true;
+    window->maximizeLayoutFullScreen_ = true;
+    window->isIgnoreSafeArea_ = true;
+    window->hostSession_ = mockHostSession;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->isIgnoreSafeArea_, true);
+
+    window->cacheEnableImmersiveMode_ = true;
+    window->maximizeLayoutFullScreen_ = false;
+    window->isIgnoreSafeArea_ = false;
+    window->hostSession_ = mockHostSession;
+    window->UpdateImmersiveBySwitchMode(false);
+    EXPECT_EQ(window->isIgnoreSafeArea_, true);
+}
+
+/**
  * @tc.name: TestSetContentAspectRatio
  * @tc.desc: Test SetContentAspectRatio under multiple conditions
  * @tc.type: FUNC
