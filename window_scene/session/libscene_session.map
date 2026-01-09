@@ -348,19 +348,19 @@
             non-virtual?thunk?to?OHOS::Rosen::Session::*;
             non-virtual?thunk?to?OHOS::Rosen::ExtensionSession::*;
 
-            VTT*Session*;
-            VTT*ExtensionSession*;
-            VTT*SessionProxy*;
-            VTT*RootSceneSession*;
-            VTT*WindowEventChannel*;
-            VTT*WindowEventChannelListenerProxy*;
+            VTT?for?OHOS::Rosen::Session*;
+            VTT?for?OHOS::Rosen::ExtensionSession*;
+            VTT?for?OHOS::Rosen::SessionProxy*;
+            VTT?for?OHOS::Rosen::RootSceneSession*;
+            VTT?for?OHOS::Rosen::WindowEventChannel*;
+            VTT?for?OHOS::Rosen::WindowEventChannelListenerProxy*;
 
-            vtable*Session*;
-            vtable*ExtensionSession*;
-            vtable*SessionProxy*;
-            vtable*RootSceneSession*;
-            vtable*WindowEventChannel*;
-            vtable*WindowEventChannelListenerProxy*;
+            vtable?for?OHOS::Rosen::Session*;
+            vtable?for?OHOS::Rosen::ExtensionSession*;
+            vtable?for?OHOS::Rosen::SessionProxy*;
+            vtable?for?OHOS::Rosen::RootSceneSession*;
+            vtable?for?OHOS::Rosen::WindowEventChannel*;
+            vtable?for?OHOS::Rosen::WindowEventChannelListenerProxy*;
         };
     local:
     *;
