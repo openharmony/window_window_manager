@@ -1541,7 +1541,7 @@ DMError ScreenSessionManagerProxy::ResizeVirtualScreen(ScreenId screenId, uint32
     return static_cast<DMError>(reply.ReadInt32());
 }
 
-DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId)
+DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId, bool isCallingByThirdParty)
 {
     TLOGW(WmsLogTag::DMS, "SCB: ENTER");
     sptr<IRemoteObject> remote = Remote();
@@ -1559,6 +1559,10 @@ DMError ScreenSessionManagerProxy::DestroyVirtualScreen(ScreenId screenId)
     }
     if (!data.WriteUint64(static_cast<uint64_t>(screenId))) {
         TLOGW(WmsLogTag::DMS, "SCB: WriteUint64 screenId failed");
+        return DMError::DM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isCallingByThirdParty)) {
+        TLOGE(WmsLogTag::DMS, "SCB: WriteBool isCallingByThirdParty failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN),
