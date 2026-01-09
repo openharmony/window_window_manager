@@ -497,7 +497,7 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
         return false;
     }
     status = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(result), &ret);
-    if (status != ANI_OK) {
+    if (ANI_OK != status) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] Fail to throw err, status: %{public}d", static_cast<int32_t>(status));
         return false;
     }
@@ -514,7 +514,7 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
 }
 
 bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
-{   
+{
     ani_ref result;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, "decorEnabled", &result)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property decorEnabled");
@@ -562,7 +562,7 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
         }
         option.SetDisplayId(displayId);
     }
-    
+
     if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, "parentId", &result)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property parentId");
         return false;
