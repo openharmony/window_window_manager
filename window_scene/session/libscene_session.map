@@ -691,7 +691,7 @@
             OHOS::Rosen::Session::*;
             OHOS::Rosen::ExtensionSession::*;
             
-            virtual thunk to OHOS::Rosen::Session::~Session*;
+            virtual?thunk?to?OHOS::Rosen::Session::~Session*;
             non-virtual?thunk?to?OHOS::Rosen::Session::*;
             non-virtual?thunk?to?OHOS::Rosen::ExtensionSession::*;
 
