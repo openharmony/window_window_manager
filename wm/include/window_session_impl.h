@@ -517,6 +517,7 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
+    Rect GetGlobalScaledRectLocal();
 
     /*
      * Free Multi Window
@@ -844,6 +845,7 @@ protected:
     void SetCurrentTransform(const Transform& transform);
     Transform GetCurrentTransform() const;
     void NotifyAfterUIContentReady();
+    void NotifyGlobalScaledRectChange(const Rect& globalScaledRect) override;
     void SetNeedRenotifyTransform(bool isNeedRenotify) { needRenotifyTransform_.store(isNeedRenotify); }
     bool IsNeedRenotifyTransform() const { return needRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
@@ -1195,6 +1197,8 @@ private:
     std::shared_mutex hookWindowInfoMutex_;
     HookWindowInfo hookWindowInfo_;
     std::atomic_bool notifySizeChangeFlag_ = false;
+    std::mutex globalScaledRectMutex_;
+    Rect globalScaledRect_;
 
     /*
      * Window Decor

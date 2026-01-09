@@ -278,6 +278,7 @@ public:
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
+    void NotifyGlobalScaledRectChange();
     WSRect GetSessionGlobalRectWithSingleHandScale();
     WSRect GetMoveRectForWindowDrag();
     void UpdateSessionState(SessionState state) override;

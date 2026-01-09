@@ -1906,6 +1906,20 @@ float WindowSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayIn
     return displayInfo->GetVirtualPixelRatio();
 }
 
+void WindowSessionImpl::NotifyGlobalScaledRectChange(const Rect& globalScaledRect)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, rect:%{public}s", GetPersistentId(),
+        globalScaledRect.ToString().c_str());
+    std::lock_guard<std::mutex> lock(globalScaledRectMutex_);
+    globalScaledRect_ = globalScaledRect;
+}
+
+Rect WindowSessionImpl::GetGlobalScaledRectLocal()
+{
+    std::lock_guard<std::mutex> lock(globalScaledRectMutex_);
+    return globalScaledRect_;
+}
+
 WMError WindowSessionImpl::GetVirtualPixelRatio(float& vpr)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
