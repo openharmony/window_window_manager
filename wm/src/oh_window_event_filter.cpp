@@ -196,10 +196,10 @@ TouchEventFilterFunc convert2TouchEventFilterFunc(OH_NativeWindowManager_TouchEv
         OH_Input_SetTouchEventWindowX(touchEvent, item.GetWindowX());
         OH_Input_SetTouchEventWindowY(touchEvent, item.GetWindowY());
         auto toolType = item.GetToolType();
- 	    if (toolType >= Input_TouchEventToolType::TOOL_TYPE_FINGER &&
- 	        toolType <= Input_TouchEventToolType::TOOL_TYPE_LENS) {
+        if (toolType >= Input_TouchEventToolType::TOOL_TYPE_FINGER &&
+            toolType <= Input_TouchEventToolType::TOOL_TYPE_LENS) {
             OH_Input_SetTouchEventToolType(touchEvent, static_cast<Input_TouchEventToolType>(toolType));
- 	    }
+        }
         OH_Input_SetTouchEventDownTime(touchEvent, item.GetDownTime());
         bool res = filter(touchEvent);
         OH_Input_DestroyTouchEvent(&touchEvent);
