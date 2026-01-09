@@ -625,6 +625,7 @@ private:
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
     WindowLifeCycleInfo GetWindowLifecycleInfo() const;
+    void ReleaseUIContentTimeoutCheck();
 
     /**
      * Window Transition Animation For PC
