@@ -528,7 +528,7 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
     if (!isDecorEnabledUndefined) {
         ani_boolean bool_value;
         if (ANI_OK !=
-            env->Object_CallMethodByName_Boolean(static_cast<ani_object>(result), "unboxed", ":Z", &bool_value)) {
+            env->Object_CallMethodByName_Boolean(static_cast<ani_object>(result), "toBoolean", ":z", &bool_value)) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Boolean decorEnabled Failed");
             return false;
         }
@@ -549,7 +549,7 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
     if (!isDisplayIdUndefined) {
         ani_long long_value;
         if (ANI_OK !=
-            env->Object_CallMethodByName_Long(static_cast<ani_object>(result), "unboxed", ":J", &long_value)) {
+            env->Object_CallMethodByName_Long(static_cast<ani_object>(result), "toLong", ":l", &long_value)) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long displayId Failed");
             return false;
         }
@@ -575,7 +575,7 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
     if (!isParentIdUndefined) {
         ani_int int_value;
         if (ANI_OK !=
-            env->Object_CallMethodByName_Int(static_cast<ani_object>(result), "unboxed", "intValue", &int_value)) {
+            env->Object_CallMethodByName_Int(static_cast<ani_object>(result), "intValue", nullptr, &int_value)) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Int parentId Failed");
             return false;
         }
