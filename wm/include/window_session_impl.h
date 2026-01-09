@@ -632,6 +632,7 @@ public:
     void NotifyAfterLifecyclePaused();
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     void SetNavDestinationInfo(const std::string& navDestinationInfo) override;
+    void NotifyUIContentDestroy();
 
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
 
@@ -642,7 +643,7 @@ protected:
     void NotifyWindowAfterFocused();
     void NotifyAfterActive();
     void NotifyAfterInactive();
-    void NotifyBeforeDestroy(std::string windowName);
+    void NotifyBeforeDestroy(const std::string& windowName);
     void NotifyAfterDestroy();
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -826,6 +827,7 @@ protected:
     bool isIntentColdStart_ = true;
     std::string navDestinationInfo_;
     sptr<LifecycleFutureCallback> lifecycleCallback_ = nullptr;
+    bool isAttachedOnFrameNode_ = true;
 
     /*
      * Window Layout
