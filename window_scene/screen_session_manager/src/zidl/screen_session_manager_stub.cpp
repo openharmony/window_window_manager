@@ -492,7 +492,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         }
         case DisplayManagerMessage::TRANS_ID_DESTROY_VIRTUAL_SCREEN: {
             ScreenId screenId = static_cast<ScreenId>(data.ReadUint64());
-            DMError result = DestroyVirtualScreen(screenId);
+            bool isCallingByThirdParty = data.ReadBool();
+            DMError result = DestroyVirtualScreen(screenId, isCallingByThirdParty);
             static_cast<void>(reply.WriteInt32(static_cast<int32_t>(result)));
             break;
         }

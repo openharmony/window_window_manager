@@ -398,13 +398,13 @@ ScreenId ScreenManagerAdapter::CreateVirtualScreen(VirtualScreenOption option,
     return screenId;
 }
 
-DMError ScreenManagerAdapter::DestroyVirtualScreen(ScreenId screenId)
+DMError ScreenManagerAdapter::DestroyVirtualScreen(ScreenId screenId, bool isCallingByThirdParty)
 {
     INIT_PROXY_CHECK_RETURN(DMError::DM_ERROR_INIT_DMS_PROXY_LOCKED);
 
     TLOGI(WmsLogTag::DMS, "enter");
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->DestroyVirtualScreen(screenId);
+        return screenSessionManagerServiceProxy_->DestroyVirtualScreen(screenId, isCallingByThirdParty);
     }
 
     int32_t dmError;

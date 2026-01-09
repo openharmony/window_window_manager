@@ -923,7 +923,7 @@ void DisplayManagerAni::OnDestroyVirtualScreen(ani_env* env, ani_long screenId)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<ScreenManager>().DestroyVirtualScreen(static_cast<ScreenId>(screenId)));
+        SingletonContainer::Get<ScreenManager>().DestroyVirtualScreen(static_cast<ScreenId>(screenId), true));
     ret = (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : ret;
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Destroy virtual screen failed.");

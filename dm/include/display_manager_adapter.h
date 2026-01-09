@@ -145,7 +145,7 @@ WM_DECLARE_SINGLE_INSTANCE(ScreenManagerAdapter);
 public:
     virtual ScreenId CreateVirtualScreen(VirtualScreenOption option,
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
-    virtual DMError DestroyVirtualScreen(ScreenId screenId);
+    virtual DMError DestroyVirtualScreen(ScreenId screenId, bool isCallingByThirdParty = false);
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<Surface> surface);
     virtual DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
     virtual DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds);
