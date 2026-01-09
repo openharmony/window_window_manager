@@ -538,13 +538,24 @@ WSError SceneSession::Background(bool isFromClient, const std::string& identityT
 WSError SceneSession::NotifyFrameLayoutFinishFromApp(bool notifyListener, const WSRect& rect)
 {
     TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d, %{public}s", notifyListener, rect.ToString().c_str());
-    PostTask([weakThis = wptr(this), notifyListener, rect, where = __func__] {
+    bool isSaCalling = SessionPermission::IsSACalling();
+    PostTask([weakThis = wptr(this), notifyListener, rect, where = __func__, isSaCalling] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        session->layoutRect_ = rect;
+        const bool isAncoSupportNotifyFrameLayoutFinish = system::GetBoolParameter("prop_to_param.support.notifyFrameLayoutFinish", false);
+        if (session->IsAnco() && isAncoSupportNotifyFrameLayoutFinish) {
+            if (!isSaCalling) {
+                TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s, not sa invoke, set rect and return.", where);
+                session->layoutRect_ = rect;
+                return WSError::WS_OK;
+            }
+        } else {
+            TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s, set rect and notifyListener.", where);
+            session->layoutRect_ = rect;
+        }
         session->NotifyLayoutFinished();
         if (notifyListener && session->frameLayoutFinishFunc_) {
             TLOGND(WmsLogTag::WMS_MULTI_WINDOW, "%{public}s id: %{public}d", where, session->GetPersistentId());
