@@ -114,7 +114,7 @@ bool TaskSequenceProcess::StartSysTimer()
         TLOGW(WmsLogTag::DMS, "TaskTimerId is zero");
         return false;
     }
-    auto currentTime = MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
+    uint64_t currentTime = static_cast<uint64_t>(MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs());
     uint64_t triggerTime = currentTime + maxTimeInterval_;
     bool result = MiscServices::TimeServiceClient::GetInstance()->StartTimer(taskTimerId_, triggerTime);
     return result;
