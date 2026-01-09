@@ -502,6 +502,7 @@ private:
     std::atomic<uint32_t> getAvoidAreaCnt_ = 0;
     std::atomic<bool> enableImmersiveMode_ = false;
     std::atomic<bool> cacheEnableImmersiveMode_ = false;
+    std::atomic<bool> maximizeLayoutFullScreen_ = false;
     bool titleHoverShowEnabled_ = true;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
