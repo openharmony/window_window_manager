@@ -1094,7 +1094,7 @@ DMError DisplayManagerLiteProxy::IsOnboardDisplay(DisplayId displayId, bool& isO
         TLOGE(WmsLogTag::DMS, "read result failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-    if (static_cast<DMError>(res) != DMError::M_OK) {
+    if (static_cast<DMError>(res) != DMError::DM_OK) {
         TLOGE(WmsLogTag::DMS, "server error:%d", res);
         return static_cast<DMError>(res);
     }
