@@ -883,6 +883,25 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenCanvasRotation, Te
     }
 }
 
+
+/**
+ * @tc.name: IsOnboardDisplay_InvalidParam
+ * @tc.desc: IsOnboardDisplay_InvalidParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, IsOnboardDisplay_InvalidParam, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    DisplayId displayId = -1;
+    bool isOnboardDisplay = false;
+
+    auto res = screenSessionManagerProxy->IsOnboardDisplay(displayId, isOnboardDisplay);
+    EXPECT_TRUE(logMsg.find("server error") != std::string::npos);
+    EXPECT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
+    LOG_SetCallback(nullptr);
+}
+
 /**
  * @tc.name: IsOnboardDisplay
  * @tc.desc: IsOnboardDisplay
