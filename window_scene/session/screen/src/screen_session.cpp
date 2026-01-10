@@ -1303,7 +1303,7 @@ void ScreenSession::ConvertBScreenHeight(uint32_t& height)
     if (isBScreenHalf_) {
         DMRect creaseRect = property_.GetCreaseRect();
         if (creaseRect.posY_ > 0) {
-            height = creaseRect.posY_;
+            height = static_cast<uint32_t>(creaseRect.posY_);
         } else {
             height = property_.GetBounds().rect_.GetHeight() / HALF_SCREEN_PARAM;
         }
