@@ -1446,7 +1446,7 @@ DMError ScreenSessionManagerProxy::IsOnboardDisplay(DisplayId displayId, bool& i
         return DMError::DM_ERROR_IPC_FAILED;
     }
     if (static_cast<DMError>(result) != DMError::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "server error:%d", result);
+        TLOGE(WmsLogTag::DMS, "server error:%{public}d", result);
         return static_cast<DMError>(result);
     }
     if (!reply.ReadBool(isOnboardDisplay)) {
@@ -1454,7 +1454,7 @@ DMError ScreenSessionManagerProxy::IsOnboardDisplay(DisplayId displayId, bool& i
         return DMError::DM_ERROR_IPC_FAILED;
     }
     TLOGI(WmsLogTag::DMS, "result %{public}u", result);
-    return static_cast<DMError>(result);
+    return DMError::DM_OK;
 }
 
 DMError ScreenSessionManagerProxy::SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool canvasRotation)
