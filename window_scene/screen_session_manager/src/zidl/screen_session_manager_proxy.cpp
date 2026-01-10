@@ -1445,6 +1445,10 @@ DMError ScreenSessionManagerProxy::IsOnboardDisplay(DisplayId displayId, bool& i
         TLOGE(WmsLogTag::DMS, "read result failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
+    if (static_cast<DMError>(result) != DMError::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "server error:%d", result);
+        return static_cast<DMError>(result);
+    }
     if (!reply.ReadBool(isOnboardDisplay)) {
         TLOGE(WmsLogTag::DMS, "read isOnboardDisplay failed");
         return DMError::DM_ERROR_IPC_FAILED;
