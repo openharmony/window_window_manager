@@ -6469,6 +6469,7 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             return;
         }
         startingWindowRdbMgr_->DeleteDataByBundleName(bundleName);
+        TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s delete start window rdb", where);
         AppExecFwk::BundleInfo bundleInfo;
         bool ret = bundleMgr_->GetBundleInfoV9(bundleName,
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) |
@@ -6481,16 +6482,16 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
                 bundleInfo, inputValues);
             int64_t outInsertNum = -1;
             auto batchInsertRes = startingWindowRdbMgr_->BatchInsert(outInsertNum, inputValues);
-            TLOGNI(WmsLogTag::WMS_PATTERN, "res:%{public}d, insert num:%{public}" PRId64, batchInsertRes, outInsertNum);
+            TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s updated rdb res:%{public}d, insert num:%{public}" PRId64,
+                where, batchInsertRes, outInsertNum);
         }
-    };
-    FfrtSerialQueueHelper::GetInstance().SubmitTask(task);
-    taskScheduler_->PostAsyncTask([this, bundleName]() {
         std::unique_lock<std::shared_mutex> lock(startingWindowMapMutex_);
         if (auto iter = startingWindowMap_.find(bundleName); iter != startingWindowMap_.end()) {
             startingWindowMap_.erase(iter);
         }
-    }, __func__);
+        TLOGNI(WmsLogTag::WMS_PATTERN, "%{public}s delete start window cache", where);
+    };
+    FfrtSerialQueueHelper::GetInstance().SubmitTask(task);
 }
 
 void SceneSessionManager::OnConfigurationUpdated(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
