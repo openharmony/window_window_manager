@@ -3495,5 +3495,5 @@ void ScreenSession::ClearPropertyChangeReasonAndEvent()
 {
     property_.SetPropertyChangeReason(ScreenPropertyChangeReason::UNDEFINED);
     property_.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::UNDEFINED);
-} 
+}
 } // namespace OHOS::Rosen
