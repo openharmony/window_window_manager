@@ -1171,8 +1171,6 @@ void JsSceneSession::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantPar
             TLOGE(WmsLogTag::WMS_LIFE, "%{public}s jsCallBack is nullptr", funcName);
             return;
         }
-        TLOGI(WmsLogTag::WMS_LIFE,
-            "restore send params: %{public}s", wantParameters->ToString().c_str());
         napi_value jsWantParams = OHOS::AppExecFwk::WrapWantParams(env, *wantParameters);
         napi_value argv[] = {jsWantParams};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);

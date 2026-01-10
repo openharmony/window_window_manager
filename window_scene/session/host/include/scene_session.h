@@ -161,7 +161,7 @@ using ForceSplitFullScreenChangeCallback = std::function<void(uint32_t uid, bool
 using CompatibleModeChangeCallback = std::function<void(CompatibleStyleMode mode)>;
 using NotifyRotationLockChangeFunc = std::function<void(bool locked)>;
 using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
-using GetSCBEnterRecentFunc = std::function<bool()>;
+using GetIsRecentStateFunc = std::function<bool()>;
 using ForceNotifyOccupiedAreaChangeCallback = std::function<void(DisplayId displayId)>;
 
 struct UIExtensionTokenInfo {
@@ -336,7 +336,7 @@ public:
     WSError RaiseAboveTarget(int32_t subWindowId) override;
     WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
     std::shared_ptr<Rosen::RSNode> GetWindowDragMoveMountedNode(DisplayId displayId, uint32_t targetZOrder);
-    virtual void RegisterGetSCBEnterRecentFunc(GetSCBEnterRecentFunc&& callback) {};
+    virtual void RegisterGetIsRecentStateFunc(GetIsRecentStateFunc&& callback) {};
 
     /*
      * PiP Window
