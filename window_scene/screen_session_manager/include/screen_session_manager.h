@@ -118,6 +118,9 @@ public:
     void ForceSkipScreenOffAnimation();
     ScreenPowerState GetScreenPower() override;
     void SyncScreenPowerState(ScreenPowerState state) override;
+#ifdef FOLD_ABILITY_ENABLE
+    bool IsInRecoveringProcess();
+#endif
 
     void RegisterDisplayChangeListener(sptr<IDisplayChangeListener> listener);
     bool NotifyDisplayStateChanged(DisplayId id, DisplayState state);
@@ -817,6 +820,9 @@ private:
     std::vector<std::string> rotationCorrectionExemptionList_;
     bool needReinstallExemptionList_ = true;
     std::unordered_map<DisplayId, bool> hasPrivateWindowForeground_;
+#ifdef FOLD_ABILITY_ENABLE
+    std::atomic<bool> isRecoveringDisplayMode_ = false;
+#endif
 
     class ScreenIdManager {
     friend class ScreenSessionGroup;
