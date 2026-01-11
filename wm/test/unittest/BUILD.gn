@@ -394,7 +394,11 @@ if (!window_manager_use_sceneboard) {
 
     external_deps = [
       "c_utils:utils",
+      "graphic_2d:librender_service_client",
+      "graphic_2d:window_animation",
       "hilog:libhilog",
+      "input:libmmi-client",
+      "input:libmmi-napi",
     ]
   }
 }
