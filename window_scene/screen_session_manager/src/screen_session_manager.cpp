@@ -2308,7 +2308,7 @@ void ScreenSessionManager::HandleRotationCorrectionExemption(sptr<DisplayInfo>& 
     {
         std::shared_lock<std::shared_mutex> lock(rotationCorrectionExemptionMutex_);
         if (rotationCorrectionExemptionList_.empty()) {
-            TLOGNFI(WmsLogTag::DMS, "rotationCorrectionExemptionList empty, return");
+            TLOGD(WmsLogTag::DMS, "rotationCorrectionExemptionList empty, return");
             return;
         }
         rotationCorrectionExemptionList = rotationCorrectionExemptionList_;
@@ -5150,13 +5150,22 @@ void ScreenSessionManager::TryToRecoverFoldDisplayMode(ScreenPowerStatus status)
         TLOGNFW(WmsLogTag::DMS, "foldScreenController_ is null");
         return;
     }
+    isRecoveringDisplayMode_ = true;
     if (status == ScreenPowerStatus::POWER_STATUS_OFF || status == ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED ||
         status == ScreenPowerStatus::POWER_STATUS_OFF_FAKE || status == ScreenPowerStatus::POWER_STATUS_SUSPEND ||
         status == ScreenPowerStatus::POWER_STATUS_DOZE) {
         foldScreenController_->RecoverDisplayMode();
     }
+    isRecoveringDisplayMode_ = false;
 #endif
 }
+
+#ifdef FOLD_ABILITY_ENABLE
+bool ScreenSessionManager::IsInRecoveringProcess()
+{
+    return isRecoveringDisplayMode_;
+}
+#endif
 
 bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason)
 {
