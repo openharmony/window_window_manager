@@ -478,7 +478,12 @@ ani_ref CreateAniSubWindow(ani_env* env, sptr<WindowOption> windowOption)
 bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
 {
     ani_ref result;
-    env->Object_GetPropertyByName_Ref(configuration, "name", &result);
+    ani_status status = env->Object_GetPropertyByName_Ref(configuration, "name", &result);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT,
+            "[ANI] Object_GetPropertyByName_Ref name failed, status: %{public}d", static_cast<int32_t>(status));
+        return false;
+    }
     ani_string aniWindowName = reinterpret_cast<ani_string>(result);
     std::string windowName;
     AniWindowUtils::GetStdString(env, aniWindowName, windowName);
@@ -486,9 +491,14 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
     option.SetWindowName(windowName);
 
     ani_int ret;
-    env->Object_GetPropertyByName_Ref(configuration, "windowType", &result);
-    auto status = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(result), &ret);
-    if (status != ANI_OK) {
+    status = env->Object_GetPropertyByName_Ref(configuration, "windowType", &result);
+    if (ANI_OK != status) {
+        TLOGE(WmsLogTag::DEFAULT,
+            "[ANI] Object_GetPropertyByName_Ref windowType failed, status: %{public}d", static_cast<int32_t>(status));
+        return false;
+    }
+    status = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(result), &ret);
+    if (ANI_OK != status) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] Fail to throw err, status: %{public}d", static_cast<int32_t>(status));
         return false;
     }
@@ -504,40 +514,67 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
     return true;
 }
 
+bool GetConfigProp(ani_env* env, ani_object configuration, const char* propName, ani_ref& ref, ani_boolean& isUndefined)
+{
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, propName, &ref)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property %s", propName);
+        return false;
+    }
+    if (ANI_OK != env->Reference_IsUndefined(ref, &isUndefined)) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to judge property %s undefined", propName);
+        return false;
+    }
+    return true;
+}
+
+
 bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
 {
-    bool dialogDecorEnable;
-    ani_status status = AniWindowUtils::GetPropertyBoolObject(env, "decorEnabled", configuration, dialogDecorEnable);
-    if (ANI_OK != status) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property decorEnabled %{public}d",
-            static_cast<int32_t>(status));
+    ani_ref result;
+    ani_boolean isPropUndefined = false;
+    if (!GetConfigProp(env, configuration, "decorEnabled", result, isPropUndefined)) {
         return false;
     }
-    option.SetDialogDecorEnable(dialogDecorEnable);
-
-    int32_t ret = 0;
-    status = AniWindowUtils::GetPropertyIntObject(env, "displayId", configuration, ret);
-    if (ANI_OK != status) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property displayId %{public}d", static_cast<int32_t>(status));
+    if (!isPropUndefined) {
+        ani_boolean boolValue;
+        if (ANI_OK !=
+            env->Object_CallMethodByName_Boolean(static_cast<ani_object>(result), "toBoolean", ":z", &boolValue)) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Boolean decorEnabled Failed");
+            return false;
+        }
+        bool dialogDecorEnable = static_cast<bool>(boolValue);
+        option.SetDialogDecorEnable(dialogDecorEnable);
+    }
+    if (!GetConfigProp(env, configuration, "displayId", result, isPropUndefined)) {
         return false;
     }
-    int64_t displayId = static_cast<int64_t>(ret);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] displayId: %{public}d", static_cast<int32_t>(displayId));
-    if (displayId < 0 ||
-        SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
+    if (!isPropUndefined) {
+        ani_long longValue;
+        if (ANI_OK != env->Object_CallMethodByName_Long(static_cast<ani_object>(result), "toLong", ":l", &longValue)) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long displayId Failed");
+            return false;
+        }
+        int64_t displayId = static_cast<int64_t>(longValue);
+        if (displayId < 0 ||
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
+            return false;
+        }
+        option.SetDisplayId(displayId);
+    }
+    if (!GetConfigProp(env, configuration, "parentId", result, isPropUndefined)) {
         return false;
     }
-    option.SetDisplayId(displayId);
-
-    status = AniWindowUtils::GetPropertyIntObject(env, "parentId", configuration, ret);
-    if (ANI_OK != status) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property parentId %{public}d", static_cast<int32_t>(status));
-        return false;
+    if (!isPropUndefined) {
+        ani_int intValue;
+        if (ANI_OK !=
+            env->Object_CallMethodByName_Int(static_cast<ani_object>(result), "intValue", nullptr, &intValue)) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Int parentId Failed");
+            return false;
+        }
+        int64_t parentId = static_cast<int64_t>(intValue);
+        option.SetParentId(parentId);
     }
-    int64_t parentId = static_cast<int64_t>(ret);
-    option.SetParentId(parentId);
-    
     return true;
 }
 
