@@ -515,13 +515,11 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
 
 bool GetConfigProp(ani_env* env, ani_object configuration, const char* propName, ani_ref& ref, ani_boolean& isUndefined)
 {
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, propName, &ref))
-    {
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, propName, &ref)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property %s", propName);
         return false;
     }
-    if (ANI_OK != env->Reference_IsUndefined(ref, &isUndefined))
-    {
+    if (ANI_OK != env->Reference_IsUndefined(ref, &isUndefined)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to judge property %s undefined", propName);
         return false;
     }
@@ -537,28 +535,25 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
         return false;
     }
     if (!isPropUndefined) {
-        ani_boolean bool_value;
+        ani_boolean boolValue;
         if (ANI_OK !=
-            env->Object_CallMethodByName_Boolean(static_cast<ani_object>(result), "toBoolean", ":z", &bool_value)) {
+            env->Object_CallMethodByName_Boolean(static_cast<ani_object>(result), "toBoolean", ":z", &boolValue)) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Boolean decorEnabled Failed");
             return false;
         }
         bool dialogDecorEnable = static_cast<bool>(bool_value);
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] decorEnabled: %{public}d", dialogDecorEnable);
         option.SetDialogDecorEnable(dialogDecorEnable);
     }
     if (!GetConfigProp(env, configuration, "displayId", result, isPropUndefined)) {
         return false;
     }
     if (!isPropUndefined) {
-        ani_long long_value;
-        if (ANI_OK !=
-            env->Object_CallMethodByName_Long(static_cast<ani_object>(result), "toLong", ":l", &long_value)) {
+        ani_long longValue;
+        if (ANI_OK != env->Object_CallMethodByName_Long(static_cast<ani_object>(result), "toLong", ":l", &longValue)) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long displayId Failed");
             return false;
         }
         int64_t displayId = static_cast<int64_t>(long_value);
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] displayId: %{public}d", static_cast<int32_t>(displayId));
         if (displayId < 0 ||
             SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
@@ -570,14 +565,13 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
         return false;
     }
     if (!isPropUndefined) {
-        ani_int int_value;
+        ani_int intValue;
         if (ANI_OK !=
-            env->Object_CallMethodByName_Int(static_cast<ani_object>(result), "intValue", nullptr, &int_value)) {
+            env->Object_CallMethodByName_Int(static_cast<ani_object>(result), "intValue", nullptr, &intValue)) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Int parentId Failed");
             return false;
         }
         int64_t parentId = static_cast<int64_t>(int_value);
-        TLOGI(WmsLogTag::DEFAULT, "[ANI] parentId: %{public}d", static_cast<int32_t>(parentId));
         option.SetParentId(parentId);
     }
     return true;
