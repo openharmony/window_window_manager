@@ -195,7 +195,6 @@ std::vector<DMRect> FoldCreaseRegionController::ConvertToRectList(const std::vec
  * @param targetOrientation The target display orientation (the direction to rotate to)
  * @return The rectangle in the target orientation (based on the 0,0 coordinate system of the top-left
  * corner of the target orientation)
- * @throws std::invalid_argument Throws an exception when the input parameters are invalid
  */
  DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect,
     uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation)

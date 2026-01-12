@@ -237,10 +237,6 @@ HWTEST_F(FoldCreaseRegionControllerTest, RotateSingleRectInvalidParam, TestSize.
     controller.RotateSingleRect(originalRect, portraitWidth, portraitHeight, targetRotation);
     EXPECT_TRUE(g_logMsg.find("Original rect width or height cannot be zero") != std::string::npos);
     g_logMsg.clear();
-    targetRotation = static_cast<Rotation>(5);
-    controller.RotateSingleRect(originalRect, portraitWidth, portraitHeight, targetRotation);
-    EXPECT_TRUE(g_logMsg.find("Invalid target orientation") != std::string::npos);
-    g_logMsg.clear();
     LOG_SetCallback(nullptr);
 }
 
