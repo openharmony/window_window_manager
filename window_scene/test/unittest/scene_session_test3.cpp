@@ -865,8 +865,8 @@ HWTEST_F(SceneSessionTest3, OnWaterfallButtonChange, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "OnWaterfallButtonChange";
     info.bundleName_ = "OnWaterfallButtonChange";
-    sptr sceneSession = sptr::MakeSptr(info, nullptr);
-    sceneSession->pcFoldScreenController_ = sptr::MakeSptr(wptr(sceneSession),
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(sceneSession),
         sceneSession->GetPersistentId());
     sceneSession->OnWaterfallButtonChange(isShow);
     EXPECT_NE(sceneSession, nullptr);
