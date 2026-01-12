@@ -873,7 +873,7 @@ HWTEST_F(SceneSessionTest3, OnWaterfallButtonChange, TestSize.Level1)
 
     sceneSession->pcFoldScreenController_ = nullptr;
     sceneSession->OnWaterfallButtonChange(isShow);
-    EXPECT_NE(sceneSession, nullptr);
+    EXPECT_EQ(sceneSession->pcFoldScreenController_, nullptr);
 }
 
 /**
