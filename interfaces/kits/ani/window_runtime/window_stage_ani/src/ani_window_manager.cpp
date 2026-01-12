@@ -513,23 +513,29 @@ bool ParseRequiredConfigOption(ani_env* env, ani_object configuration, WindowOpt
     return true;
 }
 
+bool GetConfigProp(ani_env* env, ani_object configuration, const char* propName, ani_ref& ref, ani_boolean& isUndefined)
+{
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, propName, &ref))
+    {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property %s", propName);
+        return false;
+    }
+    if (ANI_OK != env->Reference_IsUndefined(ref, &isUndefined))
+    {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to judge property %s undefined", propName);
+        return false;
+    }
+    return true;
+}
+
+
 bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
 {
-    auto getConfigProp = [&](const char* propName, ani_ref& ref, ani_boolean& isUndefined) -> bool {
-        if (ANI_OK != env->Object_GetPropertyByName_Ref(configuration, propName, &ref)) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property %s", propName);
-            return false;
-        }
-        if (ANI_OK != env->Reference_IsUndefined(ref, &isUndefined)) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to judge property %s undefined", propName);
-            return false;
-        }
-        return true;
-    };
-
     ani_ref result;
     ani_boolean isPropUndefined = false;
-    if (!getConfigProp("decorEnabled", result, isPropUndefined)) return false;
+    if (!GetConfigProp(env, configuration, "decorEnabled", result, isPropUndefined)) {
+        return false;
+    }
     if (!isPropUndefined) {
         ani_boolean bool_value;
         if (ANI_OK !=
@@ -541,7 +547,9 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
         TLOGI(WmsLogTag::DEFAULT, "[ANI] decorEnabled: %{public}d", dialogDecorEnable);
         option.SetDialogDecorEnable(dialogDecorEnable);
     }
-    if (!getConfigProp("displayId", result, isPropUndefined)) return false;
+    if (!GetConfigProp(env, configuration, "displayId", result, isPropUndefined)) {
+        return false;
+    }
     if (!isPropUndefined) {
         ani_long long_value;
         if (ANI_OK !=
@@ -558,7 +566,9 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
         }
         option.SetDisplayId(displayId);
     }
-    if (!getConfigProp("parentId", result, isPropUndefined)) return false;
+    if (!GetConfigProp(env, configuration, "parentId", result, isPropUndefined)) {
+        return false;
+    }
     if (!isPropUndefined) {
         ani_int int_value;
         if (ANI_OK !=
