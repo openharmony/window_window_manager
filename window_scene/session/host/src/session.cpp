@@ -3024,7 +3024,7 @@ void Session::RenameSnapshotFromOldPersistentId(int32_t oldPersistentId)
         auto id = session->GetPersistentId();
         renameMap["SetImageForRecent_" + std::to_string(oldPersistentId)] = "SetImageForRecent_" + std::to_string(id);
         renameMap[session->GetSnapshotPersistentKey(oldPersistentId)] = session->GetSnapshotPersistentKey(id);
-        for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
+        for (int32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
             renameMap[session->GetSnapshotPersistentKey(oldPersistentId, screenStatus)] =
                 session->GetSnapshotPersistentKey(id, screenStatus);
         }
@@ -3284,7 +3284,7 @@ void Session::SetFreeMultiWindow()
 
 void Session::DeleteHasSnapshot()
 {
-    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
+    for (int32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         DeleteHasSnapshot(screenStatus);
     }
     DeleteHasSnapshotFreeMultiWindow();
@@ -3351,7 +3351,7 @@ bool Session::HasSnapshot()
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "HasSnapshot[%d][%s]",
         persistentId_, sessionInfo_.bundleName_.c_str());
     bool hasSnapshot = false;
-    for (uint32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
+    for (int32_t screenStatus = SCREEN_UNKNOWN; screenStatus < SCREEN_COUNT; screenStatus++) {
         hasSnapshot |= HasSnapshot(screenStatus);
     }
     return hasSnapshot || HasSnapshotFreeMultiWindow();
@@ -3385,7 +3385,7 @@ SnapshotStatus Session::GetSessionSnapshotStatus(LifeCycleChangeReason reason) c
     if (!SupportSnapshotAllSessionStatus()) {
         return defaultStatus;
     }
-    uint32_t snapshotScreen;
+    int32_t snapshotScreen;
     if (state_ == SessionState::STATE_BACKGROUND || state_ == SessionState::STATE_DISCONNECT) {
         snapshotScreen = lastSnapshotScreen_;
     } else {
@@ -4426,7 +4426,7 @@ WSError Session::ProcessBackEvent()
     return sessionStage_->HandleBackEvent();
 }
 
-void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
+void Session::GeneratePersistentId(bool isExtension, int32_t persistentId, int32_t userId)
 {
     std::lock_guard lock(g_persistentIdSetMutex);
     if (persistentId != INVALID_SESSION_ID  && !g_persistentIdSet.count(persistentId)) {
@@ -4440,8 +4440,12 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
     }
 
     g_persistentId++;
-    while (g_persistentIdSet.count(g_persistentId)) {
+    uint32_t maskedUserId = static_cast<uint32_t>(userId) & 0x000000FF; // userId use 8 bits
+    uint32_t maskedPersistentId = static_cast<uint32_t>(g_persistentId.load()) & 0x003FFFFF; // persistentId use 22 bits
+    int32_t tempPersistentId = (maskedUserId << 22) | maskedPersistentId;
+    while (g_persistentIdSet.count(tempPersistentId)) {
         g_persistentId++;
+        tempPersistentId++;
     }
     if (isExtension) {
         constexpr uint32_t pidLength = 18;
@@ -4452,9 +4456,9 @@ void Session::GeneratePersistentId(bool isExtension, int32_t persistentId)
             (static_cast<uint32_t>(g_persistentId.load()) & persistentIdMask);
         persistentId_ = assembledPersistentId | 0x40000000;
     } else {
-        persistentId_ = static_cast<uint32_t>(g_persistentId.load()) & 0x3fffffff;
+        persistentId_ = tempPersistentId;
     }
-    g_persistentIdSet.insert(g_persistentId);
+    g_persistentIdSet.insert(persistentId_);
     TLOGI(WmsLogTag::WMS_LIFE,
         "persistentId: %{public}d, persistentId_: %{public}d", persistentId, persistentId_);
 }
@@ -5470,12 +5474,12 @@ WSError Session::UpdateClientRectInfo(const WSRect& rect, SizeChangeReason reaso
         return WSError::WS_DO_NOTHING;
     }
 
-    int32_t rotateAnimationDuration = GetRotateAnimationDuration();
     SceneAnimationConfig config;
-    config.rsTransaction_ = rsTransaction;
-    config.animationDuration_ = rotateAnimationDuration;
     if (reason == SizeChangeReason::SCENE_WITH_ANIMATION) {
         config = sceneAnimationConfig_;
+    } else {
+        config.rsTransaction_ = rsTransaction;
+        config.animationDuration_ = GetRotateAnimationDuration();
     }
     return sessionStage_->UpdateRect(rect, reason, config, avoidAreas);
 }
@@ -5527,6 +5531,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
+    std::lock_guard<std::mutex> lock(rsUIContextMutex_);
     if (screenIdOfRSUIContext_ != screenId) {
         // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
         // directly here because its server side is not SceneBoard. The acquisition of RSUIContext

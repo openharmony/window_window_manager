@@ -517,6 +517,7 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
+    Rect GetGlobalScaledRectLocal();
 
     /*
      * Free Multi Window
@@ -632,6 +633,7 @@ public:
     void NotifyAfterLifecyclePaused();
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     void SetNavDestinationInfo(const std::string& navDestinationInfo) override;
+    void NotifyUIContentDestroy();
 
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
 
@@ -642,7 +644,7 @@ protected:
     void NotifyWindowAfterFocused();
     void NotifyAfterActive();
     void NotifyAfterInactive();
-    void NotifyBeforeDestroy(std::string windowName);
+    void NotifyBeforeDestroy(const std::string& windowName);
     void NotifyAfterDestroy();
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -826,6 +828,7 @@ protected:
     bool isIntentColdStart_ = true;
     std::string navDestinationInfo_;
     sptr<LifecycleFutureCallback> lifecycleCallback_ = nullptr;
+    bool isAttachedOnFrameNode_ = true;
 
     /*
      * Window Layout
@@ -842,6 +845,7 @@ protected:
     void SetCurrentTransform(const Transform& transform);
     Transform GetCurrentTransform() const;
     void NotifyAfterUIContentReady();
+    void NotifyGlobalScaledRectChange(const Rect& globalScaledRect) override;
     void SetNeedRenotifyTransform(bool isNeedRenotify) { needRenotifyTransform_.store(isNeedRenotify); }
     bool IsNeedRenotifyTransform() const { return needRenotifyTransform_.load(); }
     mutable std::recursive_mutex transformMutex_;
@@ -1193,6 +1197,8 @@ private:
     std::shared_mutex hookWindowInfoMutex_;
     HookWindowInfo hookWindowInfo_;
     std::atomic_bool notifySizeChangeFlag_ = false;
+    std::mutex globalScaledRectMutex_;
+    Rect globalScaledRect_;
 
     /*
      * Window Decor
