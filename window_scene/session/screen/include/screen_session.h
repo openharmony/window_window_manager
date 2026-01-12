@@ -454,6 +454,7 @@ public:
     void SetVprScaleRatio(float vprScaleRatio);
     float GetVprScaleRatio() const;
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
+    void ClearPropertyChangeReasonAndEvent();
 
 private:
     bool IsVertical(Rotation rotation) const;
