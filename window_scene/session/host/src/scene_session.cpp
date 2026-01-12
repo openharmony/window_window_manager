@@ -210,6 +210,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
+        session->NotifyGlobalScaledRectChange();
         session->NotifyPropertyWhenConnect();
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
@@ -458,6 +459,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
+        session->NotifyGlobalScaledRectChange();
         session->SetSecurityLayerWhenEnterForeground();
         session->MarkAvoidAreaAsDirty();
         auto subSessions = session->GetSubSession();
@@ -2301,6 +2303,23 @@ void SceneSession::NotifySingleHandTransformChange(const SingleHandTransform& si
     }
     if (sessionStage_ != nullptr) {
         sessionStage_->NotifySingleHandTransformChange(singleHandTransform);
+    }
+}
+
+void SceneSession::NotifyGlobalScaledRectChange()
+{
+    if (!IsSessionForeground()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());
+        return;
+    }
+    if (sessionStage_ != nullptr) {
+        Rect globalScaledRect;
+        WMError errorCode = GetGlobalScaledRect(globalScaledRect);
+        if (errorCode != WMError::WM_OK) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errCode:%{public}d", GetPersistentId(), errorCode);
+            return;
+        }
+        sessionStage_->NotifyGlobalScaledRectChange(globalScaledRect);
     }
 }
 
@@ -8615,6 +8634,10 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
     }
     dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::SCALE) : 0;
+    if (dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT) ||
+        dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::SCALE)) {
+        NotifyGlobalScaledRectChange();
+    }
     if (!isPcScenePanel_) {
         dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
     }
