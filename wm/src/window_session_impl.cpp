@@ -1914,7 +1914,7 @@ void WindowSessionImpl::NotifyGlobalScaledRectChange(const Rect& globalScaledRec
     globalScaledRect_ = globalScaledRect;
 }
 
-Rect WindowSessionImpl::GetGlobalScaledRectLocal()
+Rect WindowSessionImpl::GetGlobalScaledRectLocal() const
 {
     std::lock_guard<std::mutex> lock(globalScaledRectMutex_);
     return globalScaledRect_;
