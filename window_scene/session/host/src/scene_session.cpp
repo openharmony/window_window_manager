@@ -147,10 +147,10 @@ std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMa
 static bool g_enableForceUIFirst = system::GetParameter("window.forceUIFirst.enabled", "1") == "1";
 GetConstrainedModalExtWindowInfoFunc SceneSession::onGetConstrainedModalExtWindowInfoFunc_;
 
-SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback)
+SceneSession::SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback, int32_t userId)
     : Session(info)
 {
-    GeneratePersistentId(false, info.persistentId_);
+    GeneratePersistentId(false, info.persistentId_, userId);
     specificCallback_ = specificCallback;
     SetCollaboratorType(info.collaboratorType_);
     TLOGI(WmsLogTag::WMS_LIFE, "Create session, id: %{public}d", GetPersistentId());
@@ -207,6 +207,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
+        session->NotifyGlobalScaledRectChange();
         session->NotifyPropertyWhenConnect();
         if (session->pcFoldScreenController_) {
             session->pcFoldScreenController_->OnConnect();
@@ -455,6 +456,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             return ret;
         }
         session->NotifySingleHandTransformChange(session->GetSingleHandTransform());
+        session->NotifyGlobalScaledRectChange();
         session->SetSecurityLayerWhenEnterForeground();
         session->MarkAvoidAreaAsDirty();
         auto subSessions = session->GetSubSession();
@@ -1069,8 +1071,10 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                     session->ForceNotifyKeyboardOccupiedArea();
                 }
             }
+            auto globalRect = session->moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
             session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
-                session->moveDragController_->GetOriginalPointerPosY(), rect.width_, rect.height_});
+                session->moveDragController_->GetOriginalPointerPosY(),
+                rect.width_, rect.height_, 0, 0, 0, 0, globalRect.posX_, globalRect.posY_});
         }
         session->HandleSessionDragEvent(event);
         session->ApplySessionEventParam(event, param);
@@ -1625,7 +1629,12 @@ WSError SceneSession::SetContentAspectRatio(float ratio, bool isPersistent, bool
 bool SceneSession::ShouldSkipUpdateRect(const WSRect& rect)
 {
     const auto persistentId = GetPersistentId();
-    // to solve the problem that setBounds is frequently invoked during the drag-and-drop process
+    if (rect.IsInvalid()) {
+        TLOGNE(WmsLogTag::WMS_LAYOUT, "id:%{public}d rect:%{public}s is invalid", persistentId,
+            rect.ToString().c_str());
+        return true;
+    }
+    // to solve the problem that setBounds is frequently invoked during the drag process
     if (GetSizeChangeReason() == SizeChangeReason::DRAG) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "skip drag reason update id:%{public}d rect:%{public}s",
             persistentId, rect.ToString().c_str());
@@ -1633,14 +1642,15 @@ bool SceneSession::ShouldSkipUpdateRect(const WSRect& rect)
     }
     // the application can recongnize the end of the drag and perform some operations for layout refreshing
     if (GetSessionRect() == rect && GetSizeChangeReason() != SizeChangeReason::DRAG_END &&
-        (GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
-            GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT)) {
+        GetWindowType() != WindowType::WINDOW_TYPE_KEYBOARD_PANEL &&
+        GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         // the session with an empty handle is not an application window and does not have a client. Therefore, clientRect does not need to be checked.
         if (!sessionStage_) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "sessionStage is null, skip same rect update id:%{public}d rect:%{public}s",
                 persistentId, rect.ToString().c_str());
             return true;
-        } else if (GetClientRect() == rect) {
+        }
+        if (GetClientRect() == rect) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "skip same rect update id:%{public}d rect:%{public}s clientRect:%{public}s",
                 persistentId, rect.ToString().c_str(), GetClientRect().ToString().c_str());
             return true;
@@ -1653,8 +1663,8 @@ bool SceneSession::ShouldSkipUpdateRect(const WSRect& rect)
 bool SceneSession::ShouldSkipUpdateRectNotify(const WSRect& rect)
 {
     // position change no need to notify client, since frame layout finish will notify
-    if ((rect.width_ == GetSessionRect().width_ && rect.height_ == GetSessionRect().height_) &&
-       (GetSizeChangeReason() != SizeChangeReason::DRAG_MOVE || !rectChangeListenerRegistered_)) {
+    if (rect.IsSizeEqual(GetSessionRect()) && (GetSizeChangeReason() != SizeChangeReason::DRAG_MOVE ||
+        !rectChangeListenerRegistered_)) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "position change no need notify client id:%{public}d, "
             "rect:%{public}s, preRect:%{public}s",
             GetPersistentId(), rect.ToString().c_str(), GetSessionRect().ToString().c_str());
@@ -1673,21 +1683,16 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
             return;
         }
-        if (rect.IsInvalid()) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d rect:%{public}s is invalid",
-                where, session->GetPersistentId(), rect.ToString().c_str());
-            return;
-        }
-        // check whether the rect update is skipped
+        // check whether to update rect
         if (session->ShouldSkipUpdateRect(rect)) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: no need to update rect", where);
+            TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: no need to update rect", where);
             return;
         }
 
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdateRect %d [%d, %d, %u, %u]",
             session->GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
         session->SetWinRectWhenUpdateRect(rect);
-        // check whether notify to client the rect update is skipped
+        // check whether to notify the client rect update
         if (session->ShouldSkipUpdateRectNotify(rect)) {
             session->NotifyClientToUpdateRect(updateReason, rsTransaction);
         }
@@ -2148,7 +2153,7 @@ WSError SceneSession::UpdateSessionRect(
             }
         }
     }
-    // rect update for moving window position based on screen coordinates
+    // moving window based on screen coordinates
     if (isFromMoveToGlobal && needAdjust) {
         auto mainSession = GetMainSession();
         if (mainSession && mainSession->GetFloatingScale() != 0) {
@@ -2321,6 +2326,23 @@ void SceneSession::NotifySingleHandTransformChange(const SingleHandTransform& si
     }
     if (sessionStage_ != nullptr) {
         sessionStage_->NotifySingleHandTransformChange(singleHandTransform);
+    }
+}
+
+void SceneSession::NotifyGlobalScaledRectChange()
+{
+    if (!IsSessionForeground()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());
+        return;
+    }
+    if (sessionStage_ != nullptr) {
+        Rect globalScaledRect;
+        WMError errorCode = GetGlobalScaledRect(globalScaledRect);
+        if (errorCode != WMError::WM_OK) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errCode:%{public}d", GetPersistentId(), errorCode);
+            return;
+        }
+        sessionStage_->NotifyGlobalScaledRectChange(globalScaledRect);
     }
 }
 
@@ -4873,6 +4895,14 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             }
             movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
             dragMoveMountedNode->RemoveCrossScreenChild(movedSurfaceNode);
+            // When the drag-to-move or drag-to-scale operation ends, if the window's current screen
+            // is the same as the starting screen, the cloned node is removed immediately. Otherwise,
+            // the removal of the cloned node is submitted along with the vsync refresh.
+            if (!moveDragController_->IsWindowCrossScreenOnDragEnd()) {
+                TLOGD(WmsLogTag::WMS_LAYOUT, "Cloned node removed immediately");
+                RSTransactionAdapter::FlushImplicitTransaction(dragMoveMountedNode->GetRSUIContext());
+            }
+
             movedSurfaceNode->SetIsCrossNode(false);
             HandleSubSessionSurfaceNodeByWindowAnchor(reason, displayId);
             TLOGI(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64 "persistentId: %{public}d",
@@ -8627,6 +8657,10 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
     }
     dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::SCALE) : 0;
+    if (dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::GLOBAL_RECT) ||
+        dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::SCALE)) {
+        NotifyGlobalScaledRectChange();
+    }
     if (!isPcScenePanel_) {
         dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
     }

@@ -1906,6 +1906,20 @@ float WindowSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayIn
     return displayInfo->GetVirtualPixelRatio();
 }
 
+void WindowSessionImpl::NotifyGlobalScaledRectChange(const Rect& globalScaledRect)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, rect:%{public}s", GetPersistentId(),
+        globalScaledRect.ToString().c_str());
+    std::lock_guard<std::mutex> lock(globalScaledRectMutex_);
+    globalScaledRect_ = globalScaledRect;
+}
+
+Rect WindowSessionImpl::GetGlobalScaledRectLocal()
+{
+    std::lock_guard<std::mutex> lock(globalScaledRectMutex_);
+    return globalScaledRect_;
+}
+
 WMError WindowSessionImpl::GetVirtualPixelRatio(float& vpr)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -5401,6 +5415,11 @@ static void RequestInputMethodCloseKeyboard(bool isNeedKeyboard, bool keepKeyboa
         auto inputMethodController = MiscServices::InputMethodController::GetInstance();
         if (inputMethodController) {
             inputMethodController->RequestHideInput(static_cast<uint32_t>(hostWindowId));
+            MiscServices::ClientType clientType = MiscServices::CLIENT_TYPE_END;
+            if (inputMethodController->GetClientType(clientType) == MiscServices::ErrorCode::NO_ERROR
+                && clientType == MiscServices::INNER_KIT_ARKUI) {
+                inputMethodController->Close();
+            }
             TLOGD(WmsLogTag::WMS_KEYBOARD, "Notify InputMethod framework close keyboard end.");
         }
 #endif
@@ -5483,7 +5502,7 @@ void WindowSessionImpl::NotifyUIContentHighlightStatus(bool isHighlighted)
     }
 }
 
-void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
+void WindowSessionImpl::NotifyUIContentDestroy()
 {
     auto task = [this]() {
         if (auto uiContent = GetUIContentSharedPtr()) {
@@ -5504,6 +5523,13 @@ void WindowSessionImpl::NotifyBeforeDestroy(std::string windowName)
         task();
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Release uicontent successfully, id: %{public}d.", GetPersistentId());
+}
+
+void WindowSessionImpl::NotifyBeforeDestroy(const std::string& windowName)
+{
+    if (!isAttachedOnFrameNode_ || (!WindowHelper::IsSubWindow(GetType()) || property_->GetIsUIExtFirstSubWindow())) {
+        NotifyUIContentDestroy();
+    }
     if (notifyNativeFunc_) {
         notifyNativeFunc_(windowName);
     }
@@ -5817,6 +5843,7 @@ void WindowSessionImpl::NotifyDisplayMove(DisplayId from, DisplayId to)
             }
         }
     }
+    NotifyDmsDisplayMove(to);
 }
  
 void WindowSessionImpl::NotifyDmsDisplayMove(DisplayId to)

@@ -130,12 +130,12 @@ public:
     DMError AddVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
     DMError RemoveVirtualScreenWhiteList(ScreenId screenId, const std::vector<uint64_t>& missionIds) override;
     std::vector<uint64_t> ProcessMissionIdsToSurfaceNodeIds(const std::vector<uint64_t>& missionIds);
-    bool IsOnboardDisplay(DisplayId displayId) override;
+    DMError IsOnboardDisplay(DisplayId displayId, bool& isOnboardDisplay) override;
     virtual DMError SetScreenPrivacyMaskImage(ScreenId screenId,
         const std::shared_ptr<Media::PixelMap>& privacyMaskImg) override;
     virtual DMError SetVirtualMirrorScreenCanvasRotation(ScreenId screenId, bool autoRotate) override;
     virtual DMError SetVirtualMirrorScreenScaleMode(ScreenId screenId, ScreenScaleMode scaleMode) override;
-    virtual DMError DestroyVirtualScreen(ScreenId screenId) override;
+    virtual DMError DestroyVirtualScreen(ScreenId screenId, bool isCallingByThirdParty = false) override;
     DMError ResizeVirtualScreen(ScreenId screenId, uint32_t width, uint32_t height) override;
     virtual DMError MakeMirror(ScreenId mainScreenId, std::vector<ScreenId> mirrorScreenIds,
         ScreenId& screenGroupId, const RotationOption& rotationOption = {Rotation::ROTATION_0, false},
@@ -343,7 +343,9 @@ public:
     void SetScreenPowerForFold(ScreenPowerStatus status);
     void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
     void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
-    void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status);
+    void CallRsSetScreenPowerStatusSync(
+        ScreenId screenId, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
     void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status);
     void TryToRecoverFoldDisplayMode(ScreenPowerStatus status);
     bool GetScreenLcdStatus(ScreenId screenId, PanelPowerStatus& status);
@@ -661,7 +663,7 @@ private:
     void RegisterBrightnessInfoChangeListener();
     void UnregisterBrightnessInfoChangeListener();
     void OnHgmRefreshRateChange(uint32_t refreshRate);
-    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession, int32_t activeIdx);
+    void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession, RSScreenModeInfo screenMode);
     int32_t GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
                           const SupportedScreenModes& edidInfo);
     void RecoverScreenActiveMode(ScreenId rsScreenId);
@@ -1020,8 +1022,12 @@ private:
     void ExitCoordination(const std::string& reason);
     void UpdateDisplayState(std::vector<ScreenId> screenIds, DisplayState state);
     void SetExtendPixelRatio(const float& dpi);
-    void CallRsSetScreenPowerStatusSyncForExtend(const std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
-    void SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& screenIds, ScreenPowerStatus status);
+    void CallRsSetScreenPowerStatusSyncForExtend(
+        const std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
+    void SetRsSetScreenPowerStatusSync(
+        std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
     AodStatus aodNotifyFlag_ { AodStatus::UNKNOWN };
     bool IsFakeDisplayExist();

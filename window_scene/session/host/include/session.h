@@ -872,7 +872,7 @@ protected:
         std::chrono::steady_clock::time_point startTime = std::chrono::steady_clock::now();
         bool running = false;
     };
-    void GeneratePersistentId(bool isExtension, int32_t persistentId);
+    void GeneratePersistentId(bool isExtension, int32_t persistentId, int32_t userId = 0);
     virtual void UpdateSessionState(SessionState state);
     void NotifySessionStateChange(const SessionState& state);
     void UpdateSessionTouchable(bool touchable);
@@ -1086,7 +1086,7 @@ protected:
      */
     std::atomic<bool> isAttach_ { false };
     std::atomic<bool> needNotifyAttachState_ = { false };
-    uint32_t lastSnapshotScreen_ = SCREEN_UNKNOWN;
+    int32_t lastSnapshotScreen_ = SCREEN_UNKNOWN;
     SnapshotStatus capacity_ = defaultCapacity;
 
     /*
@@ -1276,6 +1276,8 @@ private:
      */
     uint64_t screenIdOfRSUIContext_ = SCREEN_ID_INVALID;
     std::shared_ptr<RSUIContext> rsUIContext_;
+    // Above guarded by rsUIContextMutex_
+    std::mutex rsUIContextMutex_;
 
     /*
      * Window highligt outline

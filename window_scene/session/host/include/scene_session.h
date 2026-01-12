@@ -212,7 +212,7 @@ public:
         SetWindowPatternOpacityFunc setOpacityFunc_;
     };
 
-    SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
+    SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback, int32_t userId = 0);
     virtual ~SceneSession();
 
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
@@ -278,6 +278,7 @@ public:
     WSError UpdateClientRect(const WSRect& rect) override;
     WSError UpdateGlobalDisplayRectFromClient(const WSRect& rect, SizeChangeReason reason) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform);
+    void NotifyGlobalScaledRectChange();
     WSRect GetSessionGlobalRectWithSingleHandScale();
     WSRect GetMoveRectForWindowDrag();
     void UpdateSessionState(SessionState state) override;

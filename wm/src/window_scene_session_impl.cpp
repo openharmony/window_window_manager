@@ -2174,6 +2174,27 @@ void WindowSceneSessionImpl::SetDefaultProperty()
     }
 }
 
+void WindowSceneSessionImpl::ReleaseUIContentTimeoutCheck()
+{
+    handler_->PostTask(
+        [weakThis = wptr(this), where = __func__] {
+            auto window = weakThis.promote();
+            if (!window) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s window is nullptr", where);
+                return;
+            }
+            auto uiContent = window->GetUIContentSharedPtr();
+            if (uiContent == nullptr) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s id:%{public}d, uiContent is already destroy.",
+                    where, window->GetProperty()->GetPersistentId());
+                return;
+            }
+            TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s Destroy window timeout, id:%{public}d",
+                where, window->GetProperty()->GetPersistentId());
+            window->NotifyUIContentDestroy();
+        }, __func__, WINDOW_DETACH_TIMEOUT);
+}
+
 WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
 {
     WMError ret = WMError::WM_OK;
@@ -2186,7 +2207,9 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
             if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
                 return WMError::WM_ERROR_NULLPTR;
             }
-            ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
+            ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(
+                property_->GetPersistentId());
+            ReleaseUIContentTimeoutCheck();
         } else if (property_->GetIsUIExtFirstSubWindow()) {
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         }
@@ -3189,6 +3212,9 @@ WMError WindowSceneSessionImpl::SetLayoutFullScreenByApiVersion(bool status)
     }
     isIgnoreSafeArea_ = status;
     isIgnoreSafeAreaNeedNotify_ = true;
+    if (isIgnoreSafeArea_) {
+        maximizeLayoutFullScreen_.store(false);
+    }
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u status %{public}d",
@@ -3955,6 +3981,8 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
     hostSession->OnTitleAndDockHoverShowChange(titleHoverShowEnabled_, dockHoverShowEnabled_);
     SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
+    maximizeLayoutFullScreen_.store(presentation == MaximizePresentation::ENTER_IMMERSIVE ||
+        presentation == MaximizePresentation::ENTER_IMMERSIVE_DISABLE_TITLE_AND_DOCK_HOVER);
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "present: %{public}d, enableImmersiveMode_:%{public}d!",
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
@@ -6231,6 +6259,7 @@ void WindowSceneSessionImpl::PendingUpdateSupportWindowModesWhenSwitchMultiWindo
 void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEnable)
 {
     if (freeMultiWindowEnable && enableImmersiveMode_) {
+        maximizeLayoutFullScreen_.store(false);
         cacheEnableImmersiveMode_.store(true);
         enableImmersiveMode_.store(false);
         property_->SetIsLayoutFullScreen(enableImmersiveMode_);
@@ -6240,14 +6269,21 @@ void WindowSceneSessionImpl::UpdateImmersiveBySwitchMode(bool freeMultiWindowEna
             TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
         }
     }
-    if (!freeMultiWindowEnable && cacheEnableImmersiveMode_) {
-        enableImmersiveMode_.store(true);
-        cacheEnableImmersiveMode_.store(false);
-        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
-        if (auto hostSession = GetHostSession()) {
-            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
-        } else {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
+    if (!freeMultiWindowEnable) {
+        if (maximizeLayoutFullScreen_.load() && !cacheEnableImmersiveMode_) {
+            SetLayoutFullScreenByApiVersion(false);
+            maximizeLayoutFullScreen_.store(false);
+        }
+        if (cacheEnableImmersiveMode_) {
+            enableImmersiveMode_.store(true);
+            cacheEnableImmersiveMode_.store(false);
+            property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+            SetLayoutFullScreenByApiVersion(enableImmersiveMode_);
+            if (auto hostSession = GetHostSession()) {
+                hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+            } else {
+                TLOGE(WmsLogTag::WMS_LAYOUT, "host session is nullptr, id: %{public}d", GetPersistentId());
+            }
         }
     }
 }
@@ -6811,7 +6847,22 @@ WMError WindowSceneSessionImpl::UnregisterWindowAttachStateChangeListener()
 
 WSError WindowSceneSessionImpl::NotifyWindowAttachStateChange(bool isAttach)
 {
-    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", GetPersistentId());
+    TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d, isAttach:%{public}u.", GetPersistentId(), isAttach);
+    if (handler_) {
+        handler_->PostTask(
+            [weakThis = wptr(this), isAttach] {
+                auto window = weakThis.promote();
+                if (!window) {
+                    return;
+                }
+                window->isAttachedOnFrameNode_ = isAttach;
+                if (window->state_ == WindowState::STATE_DESTROYED && !isAttach &&
+                    WindowHelper::IsSubWindow(window->GetType()) &&
+                    !window->property_->GetIsUIExtFirstSubWindow()) {
+                    window->NotifyUIContentDestroy();
+                }
+            }, __func__);
+    }
     if (lifecycleCallback_) {
         TLOGI(WmsLogTag::WMS_SUB, "notifyAttachState id: %{public}d", GetPersistentId());
         lifecycleCallback_->OnNotifyAttachState(isAttach);
@@ -6861,7 +6912,6 @@ WSError WindowSceneSessionImpl::UpdateDisplayId(DisplayId displayId)
     if (displayIdChanged) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid: %{public}d, displayId: %{public}" PRIu64, GetPersistentId(), displayId);
         NotifyDisplayIdChange(displayId);
-        NotifyDmsDisplayMove(displayId);
     }
     return WSError::WS_OK;
 }

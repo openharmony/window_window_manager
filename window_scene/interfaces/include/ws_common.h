@@ -764,6 +764,17 @@ struct WSRectT {
     }
 
     /**
+     * @brief Compare if size is equal, check only width and height
+     *
+     * @param other The other rectangle to intersect with.
+     * @return bool Whether the size is equal
+     */
+    bool IsSizeEqual(const WSRectT<T>& other) const
+    {
+        return width_ == other.width_ && height_ == other.height_;
+    }
+
+    /**
      * @brief Returns a string in the format: [posX posY width height]
      *
      * @note Optimized for performance:
@@ -1107,6 +1118,8 @@ struct SessionEventParam {
     uint32_t gravity = 0;
     uint32_t waterfallResidentState = 0;
     uint32_t compatibleStyleMode = 0;
+    int32_t windowGlobalPosX_ = 0;
+    int32_t windowGlobalPosY_ = 0;
 };
 
 struct BackgroundParams {
@@ -1269,14 +1282,14 @@ enum class LifeCycleChangeReason {
 
     SCREEN_LOCK,
 
-    SCREEN_ROTATION,
-
     LAST_SCENE_TRANSFER,
 
     /*
      * Drive batch of windows go background quickly
      */
     QUICK_BATCH_BACKGROUND,
+
+    SCREEN_ROTATION,
 
     REASON_END,
 };
