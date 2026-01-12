@@ -196,7 +196,7 @@ std::vector<DMRect> FoldCreaseRegionController::ConvertToRectList(const std::vec
  * @return The rectangle in the target orientation (based on the 0,0 coordinate system of the top-left
  * corner of the target orientation)
  */
- DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect,
+DMRect FoldCreaseRegionController::RotateSingleRect(const DMRect& originalRect,
     uint32_t portraitWidth, uint32_t portraitHeight, Rotation targetRotation)
 {
     if (portraitWidth == 0 || portraitHeight == 0) {
