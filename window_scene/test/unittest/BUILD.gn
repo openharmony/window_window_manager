@@ -918,6 +918,7 @@ ohos_unittest("ws_scene_session_test") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_parameters.cpp",
     "scene_session_test.cpp",
     "scene_session_test2.cpp",
     "scene_session_test3.cpp",
