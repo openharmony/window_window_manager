@@ -532,10 +532,7 @@ public:
     virtual void SetSystemFocusable(bool systemFocusable); // Used by SCB
     bool GetSystemFocusable() const;
     bool CheckFocusable() const;
-    void SetStartingBeforeVisible(bool isStartingBeforeVisible);
-    bool GetStartingBeforeVisible() const;
     bool IsFocused() const;
-    bool GetFocused() const;
     bool IsNeedRequestToTop() const;
     void NotifyClickIfNeed();
     virtual WSError UpdateFocus(bool isFocused);
@@ -1052,9 +1049,9 @@ protected:
     /*
      * Window Focus
      */
-    bool isFocused_ = false;
-    bool blockingFocus_ { false };
-    bool isHighlighted_ { false };
+    std::atomic_bool isFocused_ = false;
+    std::atomic_bool blockingFocus_ = false;
+    std::atomic_bool isHighlighted_ = false;
 
     uint32_t uiNodeId_ = 0;
     std::map<MMI::WindowArea, WSRectF> windowAreas_;
@@ -1173,7 +1170,6 @@ private:
     bool focusedOnShow_ = true;
     std::atomic_bool systemFocusable_ = true;
     bool focusableOnShow_ = true; // if false, ignore request focus when session onAttach
-    bool isStartingBeforeVisible_ = false;
 
     bool showRecent_ = false;
     bool bufferAvailable_ = false;
