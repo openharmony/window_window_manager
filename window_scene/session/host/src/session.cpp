@@ -910,16 +910,6 @@ bool Session::IsFocusedOnShow() const
     return focusedOnShow_;
 }
 
-void Session::SetStartingBeforeVisible(bool isStartingBeforeVisible)
-{
-    isStartingBeforeVisible_ = isStartingBeforeVisible;
-}
-
-bool Session::GetStartingBeforeVisible() const
-{
-    return isStartingBeforeVisible_;
-}
-
 WSError Session::SetTouchable(bool touchable)
 {
     SetSystemTouchable(touchable);
@@ -995,11 +985,6 @@ WSError Session::SetRSVisible(bool isVisible)
 bool Session::GetRSVisible() const
 {
     return isRSVisible_;
-}
-
-bool Session::GetFocused() const
-{
-    return isFocused_;
 }
 
 WSError Session::SetVisibilityState(WindowVisibilityState state)
@@ -1713,7 +1698,6 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
         isActive_ = false;
     }
     isStarting_ = false;
-    isStartingBeforeVisible_ = false;
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background state invalid! state: %{public}u",
             GetPersistentId(), state);
@@ -1748,7 +1732,6 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken)
     TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] Disconnect session, state: %{public}u", GetPersistentId(), state);
     isActive_ = false;
     isStarting_ = false;
-    isStartingBeforeVisible_ = false;
     bufferAvailable_ = false;
     isNeedSyncSessionRect_ = true;
     if (mainHandler_) {
@@ -3816,7 +3799,7 @@ WSError Session::UpdateHighlightStatus(const sptr<HighlightNotifyInfo>& highligh
 {
     TLOGD(WmsLogTag::WMS_FOCUS,
         "windowId: %{public}d, currHighlight: %{public}d, nextHighlight: %{public}d, needBlockNotify:%{public}d",
-        persistentId_, isHighlighted_, isHighlight, needBlockHighlightNotify);
+        persistentId_, isHighlighted_.load(), isHighlight, needBlockHighlightNotify);
     if (isHighlighted_ == isHighlight) {
         return WSError::WS_DO_NOTHING;
     }
@@ -3849,7 +3832,7 @@ WSError Session::GetIsHighlighted(bool& isHighlighted)
 {
     isHighlighted = isHighlighted_;
     TLOGD(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isHighlighted: %{public}d",
-        GetPersistentId(), isHighlighted_);
+        GetPersistentId(), isHighlighted_.load());
     return WSError::WS_OK;
 }
 
