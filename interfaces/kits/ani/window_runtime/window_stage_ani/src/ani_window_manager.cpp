@@ -541,7 +541,7 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Boolean decorEnabled Failed");
             return false;
         }
-        bool dialogDecorEnable = static_cast<bool>(bool_value);
+        bool dialogDecorEnable = static_cast<bool>(boolValue);
         option.SetDialogDecorEnable(dialogDecorEnable);
     }
     if (!GetConfigProp(env, configuration, "displayId", result, isPropUndefined)) {
@@ -553,7 +553,7 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Long displayId Failed");
             return false;
         }
-        int64_t displayId = static_cast<int64_t>(long_value);
+        int64_t displayId = static_cast<int64_t>(longValue);
         if (displayId < 0 ||
             SingletonContainer::Get<DisplayManager>().GetDisplayById(static_cast<uint64_t>(displayId)) == nullptr) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] displayId is invalid");
@@ -571,7 +571,7 @@ bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOpt
             TLOGE(WmsLogTag::DEFAULT, "[ANI] Object_CallMethodByName_Int parentId Failed");
             return false;
         }
-        int64_t parentId = static_cast<int64_t>(int_value);
+        int64_t parentId = static_cast<int64_t>(intValue);
         option.SetParentId(parentId);
     }
     return true;
