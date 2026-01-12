@@ -1046,21 +1046,17 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, TestSize.L
  */
 HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode02, TestSize.Level1)
 {
-    controller_->lastSupportEnterWaterfallMode_ = false;
-    controller_->supportEnterWaterfallMode_ = false;
     controller_->UpdateSupportEnterWaterfallMode(false);
     EXPECT_FALSE(controller_->lastSupportEnterWaterfallMode_);
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
 
-    controller_->lastSupportEnterWaterfallMode_ = false;
-    controller_->supportEnterWaterfallMode_ = false;
     controller_->UpdateSupportEnterWaterfallMode(true);
     EXPECT_TRUE(controller_->lastSupportEnterWaterfallMode_);
     EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
 
-    mainSession_ = nullptr;
     controller_->lastSupportEnterWaterfallMode_ = false;
     controller_->supportEnterWaterfallMode_ = false;
+    mainSession_ = nullptr;
     controller_->UpdateSupportEnterWaterfallMode(true);
     EXPECT_FALSE(controller_->lastSupportEnterWaterfallMode_);
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
@@ -1076,19 +1072,16 @@ HWTEST_F(PcFoldScreenControllerTest, FoldStatusChangeForSupportEnterWaterfallMod
     DisplayId displayId = 0;
     SuperFoldStatus status = SuperFoldStatus::HALF_FOLDED;
     SuperFoldStatus prevStatus = SuperFoldStatus::EXPANDED;
-    controller_->supportEnterWaterfallMode_ = false;
     mainSession_->sessionInfo_.screenId_ = 11;
     controller_->FoldStatusChangeForSupportEnterWaterfallMode(displayId, status, prevStatus);
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
 
-    controller_->supportEnterWaterfallMode_ = false;
     mainSession_->sessionInfo_.screenId_ = DEFAULT_DISPLAY_ID;
     SetHalfFolded();
     manager_.UpdateSystemKeyboardStatus(true);
     controller_->FoldStatusChangeForSupportEnterWaterfallMode(displayId, status, prevStatus);
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
 
-    controller_->supportEnterWaterfallMode_ = false;
     mainSession_->sessionInfo_.screenId_ = DEFAULT_DISPLAY_ID;
     SetHalfFolded();
     manager_.UpdateSystemKeyboardStatus(false);
