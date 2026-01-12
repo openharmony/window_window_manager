@@ -517,7 +517,7 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
-    Rect GetGlobalScaledRectLocal();
+    Rect GetGlobalScaledRectLocal() const;
 
     /*
      * Free Multi Window
@@ -1197,7 +1197,7 @@ private:
     std::shared_mutex hookWindowInfoMutex_;
     HookWindowInfo hookWindowInfo_;
     std::atomic_bool notifySizeChangeFlag_ = false;
-    std::mutex globalScaledRectMutex_;
+    mutable std::mutex globalScaledRectMutex_;
     Rect globalScaledRect_;
 
     /*
