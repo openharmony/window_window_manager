@@ -905,7 +905,7 @@ public:
     void CalcSubWindowRectByAnchor(const WSRect& parentRect, WSRect& subRect);
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
-    bool IsToNotifyDragEventOnNextVsync() const;
+    bool IsNeedNotifyDragEventOnNextVsync() const;
     void NotifiedDragEventOnNextVsync();
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;

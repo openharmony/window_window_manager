@@ -4522,7 +4522,7 @@ void SceneSession::NotifyDragEventOnNextVsync(SizeChangeReason reason)
     RunOnNextVsync([weakThis = wptr(this), reason, where = __func__](int64_t, int64_t) {
         auto session = weakThis.promote();
         RETURN_IF_NULL_IMPL(session, WmsLogTag::WMS_LAYOUT, where);
-        if (session->GetSizeChangeReason() == reason && session->IsToNotifyDragEventOnNextVsync()) {
+        if (session->GetSizeChangeReason() == reason && session->IsNeedNotifyDragEventOnNextVsync()) {
             session->OnSessionEvent(SessionEvent::EVENT_DRAG);
             session->NotifiedDragEventOnNextVsync();
         }
@@ -7647,7 +7647,7 @@ void SceneSession::ResetDirtyDragFlags()
     isDragging_ = false;
 }
 
-bool SceneSession::IsToNotifyDragEventOnNextVsync() const
+bool SceneSession::IsNeedNotifyDragEventOnNextVsync() const
 {
     return needNotifyDragEventOnNextVsync_;
 }
