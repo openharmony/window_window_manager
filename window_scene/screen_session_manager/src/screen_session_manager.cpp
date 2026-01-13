@@ -5979,9 +5979,22 @@ void ScreenSessionManager::NotifyDisplayChanged(sptr<DisplayInfo> displayInfo, D
 
 void ScreenSessionManager::CheckAttributeChange(sptr<DisplayInfo> displayInfo)
 {
+    if (displayInfo == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "DisplayInfo is nullptr");
+        return;
+    }
     std::vector<std::string> attributes;
-    std::lock_guard<std::mutex> lock(lastDisplayInfoMutex_);
-    GetChangedListenableAttribute(lastDisplayInfo_, displayInfo, attributes);
+    std::lock_guard<std::mutex> lock(lastDisplayInfoMapMutex_);
+    DisplayId displayId = displayInfo->GetDisplayId();
+    if (lastDisplayInfoMap_.find(displayId) == lastDisplayInfoMap_.end()) {
+        lastDisplayInfoMap_.insert({displayId, std::move(new DisplayInfo())});
+    }
+    auto lastDisplayInfo = lastDisplayInfoMap_[displayId];
+    if (lastDisplayInfo == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "LastDisplayInfo of displayId: %{public}" PRIu64 "is nullptr", displayId);
+        return;
+    }
+    GetChangedListenableAttribute(lastDisplayInfo, displayInfo, attributes);
     if (attributes.empty()) {
         TLOGNFW(WmsLogTag::DMS, "No attribute changed");
         return;
@@ -5990,13 +6003,13 @@ void ScreenSessionManager::CheckAttributeChange(sptr<DisplayInfo> displayInfo)
 
     std::ostringstream oss;
     oss << "current changed attributes:[";
-    for (const auto attribute : attributes) {
+    for (const auto& attribute : attributes) {
         oss << attribute << ",";
     }
     TLOGD(WmsLogTag::DMS, "%{public}s]", oss.str().c_str());
 
     NotifyDisplayAttributeChanged(displayInfo, attributes);
-    lastDisplayInfo_ = displayInfo;
+    lastDisplayInfoMap_[displayId] = displayInfo;
 }
  
 void ScreenSessionManager::GetChangedListenableAttribute(sptr<DisplayInfo> displayInfo1, sptr<DisplayInfo> displayInfo2,
@@ -11092,6 +11105,41 @@ int ScreenSessionManager::NotifyFoldStatusChanged(const std::string& statusParam
 void ScreenSessionManager::NotifyAvailableAreaChanged(DMRect area, DisplayId displayId)
 {
     ScreenSessionManagerAdapter::GetInstance().NotifyAvailableAreaChanged(area, displayId);
+    NotifyAvailableAttributeChanged(area, displayId);
+}
+
+void ScreenSessionManager::NotifyAvailableAttributeChanged(const DMRect& area, DisplayId displayId)
+{
+    std::lock_guard<std::mutex> lock(lastDisplayInfoMapMutex_);
+    if (lastDisplayInfoMap_.find(displayId) == lastDisplayInfoMap_.end()) {
+        lastDisplayInfoMap_.insert({displayId, std::move(new DisplayInfo())});
+    }
+    auto lastDisplayInfo = lastDisplayInfoMap_[displayId];
+    if (lastDisplayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "LastDisplayInfo of displayId: %{public}" PRIu64 "is nullptr", displayId);
+        return;
+    }
+    
+    std::vector<std::string> attributes;
+    if (area.width_ != lastDisplayInfo->GetAvailableWidth()) {
+        TLOGD(WmsLogTag::DMS, "AvailableWidth changed");
+        attributes.push_back("availableWidth");
+    }
+    if (area.height_ != lastDisplayInfo->GetAvailableHeight()) {
+        TLOGD(WmsLogTag::DMS, "AvailableHeight changed");
+        attributes.push_back("availableHeight");
+    }
+    
+    if (attributes.empty()) {
+        TLOGI(WmsLogTag::DMS, "No available area attribute change");
+        return;
+    }
+    sptr<DisplayInfo> displayInfo = GetDisplayInfoById(displayId);
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Get displayInfo by displayId: %{public}" PRIu64 "failed", displayId);
+        return;
+    }
+    NotifyDisplayAttributeChanged(displayInfo, attributes);
 }
 
 DMError ScreenSessionManager::GetAvailableArea(DisplayId displayId, DMRect& area)
