@@ -296,8 +296,9 @@ public:
     virtual void SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool needFlush = true);
 
     virtual void OpenKeyboardSyncTransaction() {}
-    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect,
-        bool isKeyboardShow, const WindowAnimationInfo& animationInfo) {}
+    virtual void CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
+        const WindowAnimationInfo& animationInfo, const CallingWindowInfoData& callingWindowInfoData) {}
+    virtual void CallingWindowStateChange(const CallingWindowInfoData& callingWindowInfoData) {}
     virtual void ForceProcessKeyboardOccupiedAreaInfo(){};
     WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> info, bool visible) override;
     WSError PendingSessionActivation(const sptr<AAFwk::SessionInfo> info) override;
