@@ -7154,13 +7154,13 @@ void WindowSceneSessionImpl::HandleDownForCompatibleMode(const std::shared_ptr<M
         }
         eventMapTriggerByDisplay_[displayId][pointerId] = true;
         downPointerByDisplay_[displayId][pointerId] = {displayX, displayY};
-        const auto& globalRect = GetGlobalScaledRectLocal();
+        const auto& windowRect = GetGlobalScaledRectLocal();
         float xMappingScale = 1.0f;
-        if (globalRect.posX_ != 0) {
-            xMappingScale = static_cast<float>(globalRect.width_) / globalRect.posX_;
+        if (windowRect.posX_ != 0) {
+            xMappingScale = static_cast<float>(windowRect.width_) / windowRect.posX_;
         }
-        int32_t windowLeft = globalRect.posX_;
-        int32_t windowRight = globalRect.posX_ + globalRect.width_;
+        int32_t windowLeft = windowRect.posX_;
+        int32_t windowRight = windowRect.posX_ + windowRect.width_;
         int32_t transferX;
         if (displayX <= windowLeft) {
             transferX = windowRight - xMappingScale * (windowLeft - displayX);
@@ -7194,9 +7194,9 @@ void WindowSceneSessionImpl::HandleMoveForCompatibleMode(const std::shared_ptr<M
 
     int32_t displayX = pointerItem.GetDisplayX();
     int32_t displayY = pointerItem.GetDisplayY();
-    const auto& globalRect = GetGlobalScaledRectLocal();
-    if (!isOverTouchSlop_ && CheckTouchSlop(pointerId, displayX, displayY, globalRect.width_ / TOUCH_SLOP_RATIO)) {
-        TLOGD(WmsLogTag::WMS_COMPAT, "reach touch slop, threshold: %{public}d", globalRect.width_ / TOUCH_SLOP_RATIO);
+    const auto& windowRect = GetGlobalScaledRectLocal();
+    if (!isOverTouchSlop_ && CheckTouchSlop(pointerId, displayX, displayY, windowRect.width_ / TOUCH_SLOP_RATIO)) {
+        TLOGD(WmsLogTag::WMS_COMPAT, "reach touch slop, threshold: %{public}d", windowRect.width_ / TOUCH_SLOP_RATIO);
         isOverTouchSlop_ = true;
     }
     int32_t transferX = displayX + GetValueByKey(eventMapDeltaXByDisplay_, displayId)[pointerId];
@@ -7240,21 +7240,21 @@ void WindowSceneSessionImpl::HandleUpForCompatibleMode(const std::shared_ptr<MMI
 void WindowSceneSessionImpl::ConvertPointForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     MMI::PointerEvent::PointerItem& pointerItem, int32_t transferX)
 {
-    const auto& globalRect = GetGlobalScaledRectLocal();
+    const auto& windowRect = GetGlobalScaledRectLocal();
     int32_t pointerId = pointerEvent->GetPointerId();
 
     pointerItem.SetDisplayX(transferX);
     pointerItem.SetDisplayXPos(static_cast<double>(transferX));
-    pointerItem.SetWindowX(transferX - globalRect.posX_);
-    pointerItem.SetWindowXPos(static_cast<double>(transferX - globalRect.posX_));
+    pointerItem.SetWindowX(transferX - windowRect.posX_);
+    pointerItem.SetWindowXPos(static_cast<double>(transferX - windowRect.posX_));
     pointerEvent->UpdatePointerItem(pointerId, pointerItem);
 }
 
 bool WindowSceneSessionImpl::IsInMappingRegionForCompatibleMode(int32_t displayX, int32_t displayY)
 {
-    const auto& globalRect = GetGlobalScaledRectLocal();
+    const auto& windowRect = GetGlobalScaledRectLocal();
     Rect pointerRect = { displayX, displayY, 0, 0 };
-    return !pointerRect.IsInsideOf(globalRect);
+    return !pointerRect.IsInsideOf(windowRect);
 }
 
 bool WindowSceneSessionImpl::CheckTouchSlop(int32_t pointerId, int32_t displayX, int32_t displayY, int32_t threshold)
