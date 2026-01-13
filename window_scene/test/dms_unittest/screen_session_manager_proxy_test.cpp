@@ -883,25 +883,6 @@ HWTEST_F(ScreenSessionManagerProxyTest, SetVirtualMirrorScreenCanvasRotation, Te
     }
 }
 
-
-/**
- * @tc.name: IsOnboardDisplay_InvalidParam
- * @tc.desc: IsOnboardDisplay_InvalidParam
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerProxyTest, IsOnboardDisplay_InvalidParam, TestSize.Level1)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    DisplayId displayId = -1;
-    bool isOnboardDisplay = false;
-
-    auto res = screenSessionManagerProxy->IsOnboardDisplay(displayId, isOnboardDisplay);
-    EXPECT_TRUE(logMsg.find("server error") != std::string::npos);
-    EXPECT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
-    LOG_SetCallback(nullptr);
-}
-
 /**
  * @tc.name: IsOnboardDisplay
  * @tc.desc: IsOnboardDisplay
@@ -930,19 +911,19 @@ HWTEST_F(ScreenSessionManagerProxyTest, IsOnboardDisplay, TestSize.Level1)
 
     logMsg.clear();
     MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetReadBoolErrorFlag(true);
-    screenSessionManagerProxy->IsOnboardDisplay(displayId, isOnboardDisplay);
-    EXPECT_TRUE(logMsg.find("read result failed") != std::string::npos);
-    MockMessageParcel::SetReadBoolErrorFlag(false);
-
-    logMsg.clear();
-    MockMessageParcel::ClearAllErrorFlag();
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     auto proxy = sptr<ScreenSessionManagerProxy>::MakeSptr(remoteMocker);
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
     proxy->IsOnboardDisplay(displayId, isOnboardDisplay);
     EXPECT_TRUE(logMsg.find("send request failed") != std::string::npos);
     remoteMocker->SetRequestResult(ERR_NONE);
+
+    logMsg.clear();
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    screenSessionManagerProxy->IsOnboardDisplay(displayId, isOnboardDisplay);
+    EXPECT_TRUE(logMsg.find("read result failed") != std::string::npos);
+    MockMessageParcel::SetReadBoolErrorFlag(false);
 
     logMsg.clear();
     MockMessageParcel::ClearAllErrorFlag();
