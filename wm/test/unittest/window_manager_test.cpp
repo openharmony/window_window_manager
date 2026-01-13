@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
 #include "scene_board_judgement.h"
+#include "scene_session_manager.h"
 #include "singleton_mocker.h"
 #include "window_manager.cpp"
 #include "window_manager.h"
