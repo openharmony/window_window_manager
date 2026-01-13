@@ -507,7 +507,6 @@ private:
     std::unordered_map<WindowType, SystemBarProperty> nowsystemBarPropertyMap_;
     bool isAtomicServiceUseColor_ = false;
     bool isNavigationUseColor_ = false;
-    std::mutex statusBarColorHistoryMutex_;
     std::stack<std::pair<StatusBarColorConfigPair> statusBarColorHistory_;
     uint32_t UpdateStatusBarColorHistory(StatusBarColorChangeReason reason, std::optional<uint32_t> color);
 
