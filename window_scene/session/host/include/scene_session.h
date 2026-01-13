@@ -906,7 +906,7 @@ public:
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
     bool IsToNotifyDragEventOnNextVsync() const;
-    void ResetToNotifyDragEventOnNextVsyncFlags();
+    void NotifiedDragEventOnNextVsync();
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);

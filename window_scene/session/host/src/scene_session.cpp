@@ -4518,13 +4518,13 @@ bool SceneSession::DragResizeWhenEndFilter(SizeChangeReason reason)
 
 void SceneSession::NotifyDragEventOnNextVsync(SizeChangeReason reason)
 {
-    toNotifyDragEventOnNextVsyncFlag_ = true;
+    needNotifyDragEventOnNextVsync_ = true;
     RunOnNextVsync([weakThis = wptr(this), reason, where = __func__](int64_t, int64_t) {
         auto session = weakThis.promote();
         RETURN_IF_NULL_IMPL(session, WmsLogTag::WMS_LAYOUT, where);
         if (session->GetSizeChangeReason() == reason && session->IsToNotifyDragEventOnNextVsync()) {
             session->OnSessionEvent(SessionEvent::EVENT_DRAG);
-            session->ResetToNotifyDragEventOnNextVsyncFlags();
+            session->NotifiedDragEventOnNextVsync();
         }
     });
 }
@@ -7649,12 +7649,12 @@ void SceneSession::ResetDirtyDragFlags()
 
 bool SceneSession::IsToNotifyDragEventOnNextVsync() const
 {
-    return toNotifyDragEventOnNextVsyncFlag_;
+    return needNotifyDragEventOnNextVsync_;
 }
 
-void SceneSession::ResetToNotifyDragEventOnNextVsyncFlags()
+void SceneSession::NotifiedDragEventOnNextVsync()
 {
-    toNotifyDragEventOnNextVsyncFlag_ = false;
+    needNotifyDragEventOnNextVsync_ = false;
 }
 
 void SceneSession::NotifyUILostFocus()
