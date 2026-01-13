@@ -1159,6 +1159,17 @@ struct SystemBarPropertyFlag {
     bool enableAnimationFlag = false;
 };
 
+/*
+ * @enum StatusBarColorChangeReason
+ *
+ * @brief Configuration of statusBarColor
+ */
+enum class StatusBarColorChangeReason {
+    WINDOW_CONFIGURATION,
+    NAVIGATION_CONFIGURATION,
+    ATOMICSERVICE_CONFIGURATION,
+};
+
 /**
  * @struct Rect
  *

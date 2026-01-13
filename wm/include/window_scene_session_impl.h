@@ -26,6 +26,7 @@ namespace OHOS {
 namespace Rosen {
 using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSession,
     const WindowRecoverState& state)>;
+using StatusBarColorConfigPair = std::pair<StatusBarColorChangeReason, uint32_t>;
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
@@ -514,12 +515,7 @@ private:
     std::unordered_map<WindowType, SystemBarProperty> nowsystemBarPropertyMap_;
     bool isAtomicServiceUseColor_ = false;
     bool isNavigationUseColor_ = false;
-    enum class StatusBarColorChangeReason {
-        WINDOW_CONFIGURATION,
-        NAVIGATION_CONFIGURATION,
-        ATOMICSERVICE_CONFIGURATION,
-    };
-    std::stack<std::pair<StatusBarColorChangeReason, uint32_t>> statusBarColorHistory_;
+    std::stack<StatusBarColorConfigPair> statusBarColorHistory_;
     uint32_t UpdateStatusBarColorHistory(StatusBarColorChangeReason reason, std::optional<uint32_t> color);
 
     /*

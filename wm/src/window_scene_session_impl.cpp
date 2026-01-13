@@ -3602,7 +3602,7 @@ WMError WindowSceneSessionImpl::GetSystemBarProperties(std::map<WindowType, Syst
 uint32_t WindowSceneSessionImpl::UpdateStatusBarColorHistory(
     StatusBarColorChangeReason reason, std::optional<uint32_t> color)
 {
-    std::stack<std::pair<StatusBarColorChangeReason, uint32_t>> tmpStatusBarColorHistory;
+    std::stack<StatusBarColorConfigPair> tmpStatusBarColorHistory;
     while (!statusBarColorHistory_.empty()) {
         auto top = statusBarColorHistory_.top();
         statusBarColorHistory_.pop();
@@ -3616,14 +3616,13 @@ uint32_t WindowSceneSessionImpl::UpdateStatusBarColorHistory(
         tmpStatusBarColorHistory.pop();
     }
     if (color != std::nullopt) {
-        statusBarColorHistory_.push(std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value()));
+        statusBarColorHistory_.push(StatusBarColorConfigPair(reason, color.value()));
     }
     if (statusBarColorHistory_.empty()) {
         auto property = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        auto defaultConfig = std::pair<StatusBarColorChangeReason, uint32_t>(
+        auto defaultConfig = StatusBarColorConfigPair(
             StatusBarColorChangeReason::WINDOW_CONFIGURATION, property.contentColor_);
-        auto config = color == std::nullopt ?
-            defaultConfig : std::pair<StatusBarColorChangeReason, uint32_t>(reason, color.value());
+        auto config = color == std::nullopt ? defaultConfig : StatusBarColorConfigPair(reason, color.value());
         statusBarColorHistory_.push(config);
     }
     return statusBarColorHistory_.top().second;
@@ -3651,10 +3650,13 @@ WMError WindowSceneSessionImpl::SetSystemBarPropertyForPage(WindowType type, std
             nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
         } else {
             nowsystemBarPropertyMap_[type].enable_ = property.value().enable_;
-            nowsystemBarPropertyMap_[type].enableAnimation_ = newProperty.enableAnimation_;
+            nowsystemBarPropertyMap_[type].enableAnimation_ = property.value().enableAnimation_;
             nowsystemBarPropertyMap_[type].settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
         }
         newProperty = nowsystemBarPropertyMap_[type];
+        TLOGI(WmsLogTag::WMS_IMMS, "option:%{public}d, enable:%{public}d, enableAnimation:%{public}d",
+            property == std::nullopt ? 0 : property.value().enable_, nowsystemBarPropertyMap_[type].enable_,
+            nowsystemBarPropertyMap_[type].enableAnimation_);
     }
     return updateSystemBarproperty(type, newProperty);
 }
@@ -3675,19 +3677,15 @@ WMError WindowSceneSessionImpl::SetStatusBarColorForPage(const std::optional<uin
                     static_cast<uint32_t>(newProperty.settingFlag_);
                 nowsystemBarPropertyMap_[type].settingFlag_ = static_cast<SystemBarSettingFlag>(flag);
             }
-            auto statusBarColor =
-                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
-            if (!statusBarColorHistory_.empty() &&
-                statusBarColorHistory_.top().first == StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION) {
-                nowsystemBarPropertyMap_[type].contentColor_ = statusBarColor;
-            }
             isAtomicServiceUseColor_ = false;
         } else {
             nowsystemBarPropertyMap_[type].settingFlag_ |= SystemBarSettingFlag::COLOR_SETTING;
-            nowsystemBarPropertyMap_[type].contentColor_ =
-                UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
             isAtomicServiceUseColor_ = true;
         }
+        nowsystemBarPropertyMap_[type].contentColor_ =
+            UpdateStatusBarColorHistory(StatusBarColorChangeReason::ATOMICSERVICE_CONFIGURATION, color);
+        TLOGI(WmsLogTag::WMS_IMMS, "option:%{public}d, color:%{public}x",
+            color == std::nullopt ? 0 : color.value(), nowsystemBarPropertyMap_[type].contentColor_);
     }
     return updateSystemBarproperty(type, nowsystemBarPropertyMap_[type]);
 }
