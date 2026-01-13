@@ -410,14 +410,15 @@ void WindowInfoReporter::ReportWindowIO(const std::string& subScene, double size
     {
         std::lock_guard<std::mutex> lock(reportWindowIOMutex_);
         if (!firstIOTimeInitialized_) {
-            firstIOTime_ = std::chrono::floor<days>(std::chrono::system_clock::now());
+            firstIODayTime_ = std::chrono::floor<days>(std::chrono::system_clock::now());
+            firstIOSecondTime_ = std::chrono::system_clock::now();
             firstIOTimeInitialized_ = true;
         }
         // record event
         ioRecordMap_["TOTAL_WRITE_DATA"] += sizeKB;
         ioRecordMap_[subScene] += sizeKB;
-        const auto currentTime = std::chrono::floor<days>(std::chrono::system_clock::now());
-        sameDay = (firstIOTime_ == currentTime);
+        const auto currentDayTime = std::chrono::floor<days>(std::chrono::system_clock::now());
+        sameDay = (firstIODayTime_ == currentDayTime);
     }
     TLOGD(WmsLogTag::DEFAULT, "subScene: %{public}s, sizeKB: %{public}f, "
         "sameDay: %{public}d, REAL_TIME_ENABLED: %{public}s",
@@ -436,11 +437,11 @@ void WindowInfoReporter::ReportWindowIOPerDay()
 {
     // write event
     std::unordered_map<std::string, double> ioRecordMapCopy;
-    long long writeDate;
+    int64_t writeDate;
     {
         std::lock_guard<std::mutex> lock(reportWindowIOMutex_);
         ioRecordMapCopy = ioRecordMap_;
-        writeDate = firstIOTime_.time_since_epoch().count();
+        writeDate = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::seconds>(firstIOSecondTime_).count());
         firstIOTimeInitialized_ = false;
         ioRecordMap_.clear();
     }
