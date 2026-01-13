@@ -2937,7 +2937,8 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     return nullptr;
 }
 
-bool Session::CropSnapshotPixelMap(std::shared_ptr<Media::PixelMap> pixelMap, WSRect rect, float scaleValue) const
+bool Session::CropSnapshotPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, const WSRect& rect,
+    float scaleValue) const
 {
     if (pixelMap == nullptr) {
         return false;
