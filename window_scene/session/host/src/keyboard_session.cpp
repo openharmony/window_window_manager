@@ -46,7 +46,7 @@ KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSes
     if (info.persistentId_ != 0 && info.persistentId_ != GetPersistentId()) {
         // persistentId changed due to id conflicts. Need to rename the old snapshot if exists
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
-        TLOGI(WmsLogTag::WMS_KEYBOARD, "test RenameSnapshotFromOldPersistentId %{public}d", info.persistentId_);
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "RenameSnapshotFromOldPersistentId %{public}d", info.persistentId_);
     }
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Create KeyboardSession");
 }
