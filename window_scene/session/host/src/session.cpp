@@ -2907,8 +2907,10 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
     auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
-        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, id: %{public}d, uniqueId: %{public}d",
-            pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_, pixelMap->GetUniqueId());
+        bool isCropped = CropSnapshotPixelMap(pixelMap, lastLayoutRect_, scaleValue);
+        TLOGI(WmsLogTag::WMS_MAIN, "Save snapshot WxH=%{public}dx%{public}d, "
+            "id: %{public}d, uniqueId: %{public}d, isCropped: %{public}d",
+            pixelMap->GetWidth(), pixelMap->GetHeight(), persistentId_, pixelMap->GetUniqueId(), isCropped);
         if (notifySessionSnapshotFunc_) {
             notifySessionSnapshotFunc_(persistentId_);
         }
@@ -2916,6 +2918,24 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
     }
     TLOGE(WmsLogTag::WMS_MAIN, "Save snapshot failed, id: %{public}d", persistentId_);
     return nullptr;
+}
+
+bool Session::CropSnapshotPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, const WSRect& rect,
+    float scaleValue) const
+{
+    if (pixelMap == nullptr) {
+        return false;
+    }
+    bool needCropWidth = WSSnapshotHelper::NeedCrop(rect.width_, scaleValue);
+    bool needCropHeight = WSSnapshotHelper::NeedCrop(rect.height_, scaleValue);
+    auto width = needCropWidth ? pixelMap->GetWidth() - PIXEL_OFFSET : pixelMap->GetWidth();
+    auto height = needCropHeight ? pixelMap->GetHeight() - PIXEL_OFFSET : pixelMap->GetHeight();
+    bool needCrop = needCropWidth || needCropHeight;
+    if (needCrop) {
+        pixelMap->crop({ 0, 0, width, height });
+        return true;
+    }
+    return false;
 }
 
 bool Session::GetNeedUseBlurSnapshot() const
