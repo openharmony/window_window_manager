@@ -846,25 +846,25 @@ HWTEST_F(SceneSessionTest5, IsToNotifyDragEventOnNextVsync, Function | SmallTest
     info.bundleName_ = "IsToNotifyDragEventOnNextVsync";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    session->toNotifyDragEventOnNextVsyncFlag_ = false;
+    session->needNotifyDragEventOnNextVsync_ = false;
     EXPECT_EQ(session->IsToNotifyDragEventOnNextVsync(), false);
-    session->toNotifyDragEventOnNextVsyncFlag_ = true;
+    session->needNotifyDragEventOnNextVsync_ = true;
     EXPECT_EQ(session->IsToNotifyDragEventOnNextVsync(), true);
 }
  
 /**
- * @tc.name: ResetToNotifyDragEventOnNextVsyncFlags
- * @tc.desc: ResetToNotifyDragEventOnNextVsyncFlags function01
+ * @tc.name: NotifiedDragEventOnNextVsync
+ * @tc.desc: NotifiedDragEventOnNextVsync function01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest5, ResetToNotifyDragEventOnNextVsyncFlags, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionTest5, NotifiedDragEventOnNextVsync, Function | SmallTest | Level2)
 {
     SessionInfo info;
-    info.abilityName_ = "ResetToNotifyDragEventOnNextVsyncFlags";
-    info.bundleName_ = "ResetToNotifyDragEventOnNextVsyncFlags";
+    info.abilityName_ = "NotifiedDragEventOnNextVsync";
+    info.bundleName_ = "NotifiedDragEventOnNextVsync";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(session, nullptr);
-    session->ResetToNotifyDragEventOnNextVsyncFlags();
+    session->NotifiedDragEventOnNextVsync();
     EXPECT_EQ(session->IsToNotifyDragEventOnNextVsync(), false);
 }
 

@@ -1839,7 +1839,7 @@ HWTEST_F(SceneSessionTest2, IsDragResizeScale, Function | SmallTest | Level2)
     session->systemConfig_.freeMultiWindowEnable_ = true;
     session->dragResizeTypeDuringDrag_ = DragResizeType::RESIZE_SCALE;
     session->moveDragController_->isStartDrag_ = true;
-    session->toNotifyDragEventOnNextVsyncFlag_ = true;
+    session->needNotifyDragEventOnNextVsync_ = true;
     EXPECT_EQ(session->IsDragResizeScale(reason), true);
 }
 } // namespace
