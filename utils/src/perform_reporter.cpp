@@ -441,7 +441,8 @@ void WindowInfoReporter::ReportWindowIOPerDay()
     {
         std::lock_guard<std::mutex> lock(reportWindowIOMutex_);
         ioRecordMapCopy = ioRecordMap_;
-        writeDate = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::seconds>(firstIOSecondTime_).count());
+        writeDate = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::seconds>(
+            firstIOSecondTime_.time_since_epoch()).count());
         firstIOTimeInitialized_ = false;
         ioRecordMap_.clear();
     }
