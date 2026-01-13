@@ -1095,7 +1095,7 @@ protected:
     /*
      *CompatibleMode Window scale
      */
-    uint32_t compatibleDragScaleFlags_ = 0;
+    uint32_t needNotifyDragEventOnNextVsync_ = 0;
 
     /*
      * Keyboard Window
