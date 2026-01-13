@@ -764,6 +764,17 @@ struct WSRectT {
     }
 
     /**
+     * @brief Compare if size is equal, check only width and height
+     *
+     * @param other The other rectangle to intersect with.
+     * @return bool Whether the size is equal
+     */
+    bool IsSizeEqual(const WSRectT<T>& other) const
+    {
+        return width_ == other.width_ && height_ == other.height_;
+    }
+
+    /**
      * @brief Returns a string in the format: [posX posY width height]
      *
      * @note Optimized for performance:

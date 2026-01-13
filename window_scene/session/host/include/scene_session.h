@@ -1459,6 +1459,8 @@ private:
     bool ShouldNotifyWindowStatusChange(SessionEvent event) const;
     void ExecuteWindowStatusChangeNotification(const char* where);
     WindowLimits GetWindowLimits() const;
+    bool ShouldSkipUpdateRect(const WSRect& rect);
+    bool ShouldSkipUpdateRectNotify(const WSRect& rect);
 
     /*
      * Window Decor

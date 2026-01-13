@@ -760,6 +760,9 @@ public:
     WSError NotifyAppHookWindowInfoUpdated();
     void NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason reason);
     void SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func);
+    WSError UpdateClientRectInfo(const WSRect& rect, SizeChangeReason reason,
+                                 const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
+                                 const std::shared_ptr<RSTransaction>& rsTransaction);
 
     /*
      * Screen Lock
