@@ -105,8 +105,8 @@ private:
 using FullInfoMap = std::map<std::string, std::map<std::string, uint32_t>>;
 // the map form : <bundleName, count>
 using BundleNameMap = std::map<std::string, uint32_t>;
-// This defines a duration whose period is one day (86,400 seconds), using long long as the underlying representation.
-using days = std::chrono::duration<long long, std::ratio<86400>>;
+// This defines a duration whose period is one day, using long long as the underlying representation.
+using days = std::chrono::duration<long long, std::ratio<86400>>; // 86400 represents the number of seconds in a day
 class WindowInfoReporter {
 WM_DECLARE_SINGLE_INSTANCE(WindowInfoReporter);
 
@@ -163,7 +163,8 @@ private:
     std::mutex reportWindowIOMutex_;
     std::unordered_map<std::string, double> ioRecordMap_;
     bool firstIOTimeInitialized_ = false;
-    std::chrono::time_point<std::chrono::system_clock, days> firstIOTime_;
+    std::chrono::time_point<std::chrono::system_clock, days> firstIODayTime_;
+    std::chrono::time_point<std::chrono::system_clock> firstIOSecondTime_;
 };
 }
 }
