@@ -13199,7 +13199,7 @@ void ScreenSessionManager::CheckAnotherScreenStatus(ScreenId screenId, ScreenPow
         ScreenId secondScreenId = screenId == SCREEN_ID_MAIN ? SCREEN_ID_FULL : SCREEN_ID_MAIN;
         PanelPowerStatus secondScreenStatus = PanelPowerStatus::INVALID_PANEL_POWER_STATUS;
         GetScreenLcdStatus(secondScreenId, secondScreenStatus);
-        if (secondScreenStatus == PANEL_POWER_STATUS_ON) {
+        if (secondScreenStatus == PanelPowerStatus::PANEL_POWER_STATUS_ON) {
             TLOGNFI(WmsLogTag::DMS, "Another screen is on while set screen: %{public}" PRIu64 " on, do on and off",
                 screenId);
             rsInterface_.SetScreenPowerStatus(secondScreenId, ScreenPowerStatus::POWER_STATUS_ON);
@@ -13213,7 +13213,7 @@ void ScreenSessionManager::CheckAnotherScreenStatus(ScreenId screenId, ScreenPow
         ScreenId secondScreenId = screenId == SCREEN_ID_MAIN ? SCREEN_ID_FULL : SCREEN_ID_MAIN;
         PanelPowerStatus secondScreenStatus = PanelPowerStatus::INVALID_PANEL_POWER_STATUS;
         GetScreenLcdStatus(secondScreenId, secondScreenStatus);
-        if (secondScreenStatus == PANEL_POWER_STATUS_ON) {
+        if (secondScreenStatus == PanelPowerStatus::PANEL_POWER_STATUS_ON) {
             TLOGNFI(WmsLogTag::DMS, "Another screen is on while set screen: %{public}" PRIu64 " on advance, cancel",
                 screenId);
             isNeedToCancelSetScreenStatus = true;
