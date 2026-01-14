@@ -6441,6 +6441,21 @@ void SceneSession::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
     }, __func__);
 }
 
+void SceneSession::OnWaterfallButtonChange(bool isShow)
+{
+    PostTask([weakThis = wptr(this), isShow, where = __func__] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session is nullptr", where);
+            return;
+        }
+        if (session->pcFoldScreenController_ == nullptr) {
+            return;
+        }
+        session->pcFoldScreenController_->UpdateSupportEnterWaterfallMode(isShow);
+    }, __func__);
+}
+
 bool SceneSession::IsFullScreenWaterfallMode()
 {
     if (pcFoldScreenController_ == nullptr) {
@@ -7326,6 +7341,10 @@ WSError SceneSession::SendContainerModalEvent(const std::string& eventName, cons
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_EVENT, "sessionStage is null");
         return WSError::WS_ERROR_NULLPTR;
+    }
+    if (eventName == EVENT_NAME_CHANGE_WATER_FALL_BUTTON) {
+        OnWaterfallButtonChange(eventValue == WATER_FALL_BUTTON_SHOW);
+        return WSError::WS_OK;
     }
     return sessionStage_->SendContainerModalEvent(eventName, eventValue);
 }
