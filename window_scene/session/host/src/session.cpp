@@ -2982,7 +2982,7 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
         SaveSnapshot(true, true, nullptr, true);
         return;
     }
-    if (IsSessionForeground()) {
+    if (IsSessionForeground() || isVisible_) {
         NotifyRemoveSnapshot();
         return;
     }
