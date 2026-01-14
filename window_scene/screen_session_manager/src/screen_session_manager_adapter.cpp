@@ -403,7 +403,7 @@ void ScreenSessionManagerAdapter::NotifyDisplayModeChanged(FoldDisplayMode displ
     INIT_PROXY_CHECK_RETURN();
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER);
     TLOGNFI(WmsLogTag::DMS,
-          "DisplayMode:%{public}d, agent size: %{public}u", displayMode, static_cast<uint32_t>(agents.size()));
+        "DisplayMode:%{public}d, agent size: %{public}u", displayMode, static_cast<uint32_t>(agents.size()));
     if (agents.empty()) {
         TLOGE(WmsLogTag::DMS, "agent is null");
         return;
@@ -440,7 +440,7 @@ void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus)
     INIT_PROXY_CHECK_RETURN();
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
     TLOGNFI(WmsLogTag::DMS,
-          "foldStatus:%{public}d, agent size: %{public}u", foldStatus, static_cast<uint32_t>(agents.size()));
+        "foldStatus:%{public}d, agent size: %{public}u", foldStatus, static_cast<uint32_t>(agents.size()));
     if (agents.empty()) {
         TLOGE(WmsLogTag::DMS, "agent is null");
         return;
