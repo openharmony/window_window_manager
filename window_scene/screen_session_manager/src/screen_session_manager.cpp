@@ -5999,7 +5999,7 @@ void ScreenSessionManager::CheckAttributeChange(sptr<DisplayInfo> displayInfo)
         TLOGNFW(WmsLogTag::DMS, "No attribute changed");
         return;
     }
-    TLOGNFI(WmsLogTag::DMS, "has %{public}d attributes changed", (int32_t)attributes.size());
+    TLOGD(WmsLogTag::DMS, "has %{public}d attributes changed", (int32_t)attributes.size());
 
     std::ostringstream oss;
     oss << "current changed attributes:[";
@@ -8160,7 +8160,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         }
         realDisplayId = 0;
     }
-    TLOGNW(WmsLogTag::DMS, "dma=%{public}d, displayId:%{public}" PRIu64, isUseDma, realDisplayId);
+    TLOGNFW(WmsLogTag::DMS, "dma=%{public}d, displayId:%{public}" PRIu64, isUseDma, realDisplayId);
     std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
     if (displayNode == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "displayNode is null!");
@@ -8368,7 +8368,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
             if (SessionPermission::IsBetaVersion()) {
                 CheckAndSendHiSysEvent("GET_DISPLAY_SNAPSHOT", "hmos.screenshot");
             }
-            TLOGNI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
+            TLOGNFI(WmsLogTag::DMS, "isNeedNotify_:%{public}d", option.isNeedNotify_);
             if (option.isNeedNotify_) {
                 isScreenShot_ = true;
                 NotifyScreenshot(option.displayId_);
