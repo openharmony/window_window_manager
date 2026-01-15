@@ -7152,7 +7152,7 @@ void WindowSceneSessionImpl::HandleDownForCompatibleMode(const std::shared_ptr<M
         }
         eventMapTriggerByDisplay_[displayId][pointerId] = true;
         downPointerByDisplay_[displayId][pointerId] = {displayX, displayY};
-        const auto& windowRect = GetRect();
+        const auto& windowRect = GetGlobalScaledRectLocal();
         float xMappingScale = 1.0f;
         if (windowRect.posX_ != 0) {
             xMappingScale = static_cast<float>(windowRect.width_) / windowRect.posX_;
@@ -7192,7 +7192,7 @@ void WindowSceneSessionImpl::HandleMoveForCompatibleMode(const std::shared_ptr<M
 
     int32_t displayX = pointerItem.GetDisplayX();
     int32_t displayY = pointerItem.GetDisplayY();
-    const auto& windowRect = GetRect();
+    const auto& windowRect = GetGlobalScaledRectLocal();
     if (!isOverTouchSlop_ && CheckTouchSlop(pointerId, displayX, displayY, windowRect.width_ / TOUCH_SLOP_RATIO)) {
         TLOGD(WmsLogTag::WMS_COMPAT, "reach touch slop, threshold: %{public}d", windowRect.width_ / TOUCH_SLOP_RATIO);
         isOverTouchSlop_ = true;
@@ -7238,7 +7238,7 @@ void WindowSceneSessionImpl::HandleUpForCompatibleMode(const std::shared_ptr<MMI
 void WindowSceneSessionImpl::ConvertPointForCompatibleMode(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     MMI::PointerEvent::PointerItem& pointerItem, int32_t transferX)
 {
-    const auto& windowRect = GetRect();
+    const auto& windowRect = GetGlobalScaledRectLocal();
     int32_t pointerId = pointerEvent->GetPointerId();
 
     pointerItem.SetDisplayX(transferX);
@@ -7250,12 +7250,8 @@ void WindowSceneSessionImpl::ConvertPointForCompatibleMode(const std::shared_ptr
 
 bool WindowSceneSessionImpl::IsInMappingRegionForCompatibleMode(int32_t displayX, int32_t displayY)
 {
+    const auto& windowRect = GetGlobalScaledRectLocal();
     Rect pointerRect = { displayX, displayY, 0, 0 };
-    Rect globalRect {};
-    if (WMError::WM_OK == GetGlobalScaledRect(globalRect)) {
-        return !pointerRect.IsInsideOf(globalRect);
-    }
-    const auto& windowRect = GetRect();
     return !pointerRect.IsInsideOf(windowRect);
 }
 
