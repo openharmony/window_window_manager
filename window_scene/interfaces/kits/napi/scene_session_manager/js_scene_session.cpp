@@ -546,6 +546,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlank", moduleName, JsSceneSession::SetBlank);
     BindNativeFunction(env, objValue, "removeBlank", moduleName, JsSceneSession::RemoveBlank);
+    BindNativeFunction(env, objValue, "setOptimizationFlag", moduleName, JsSceneSession::SetOptimizationFlag);
     BindNativeFunction(env, objValue, "addSnapshot", moduleName, JsSceneSession::AddSnapshot);
     BindNativeFunction(env, objValue, "removeSnapshot", moduleName, JsSceneSession::RemoveSnapshot);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
@@ -2782,6 +2783,13 @@ napi_value JsSceneSession::RemoveBlank(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_SCB, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnRemoveBlank(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetOptimizationFlag(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetOptimizationFlag(env, info) : nullptr;
 }
 
 /*
@@ -6830,6 +6838,37 @@ napi_value JsSceneSession::OnRemoveBlank(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->NotifyRemoveBlank();
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetOptimizationFlag(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool flag = false;
+    if (!ConvertFromJsValue(env, argv[0], flag)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to flag");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "session is null, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetOptimizationFlag(flag);
+    session->NotifySetOptimizationFlag(flag);
     return NapiGetUndefined(env);
 }
 

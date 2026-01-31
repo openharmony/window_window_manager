@@ -663,6 +663,16 @@ void Session::NotifyRestart()
     }
 }
 
+void Session::NotifySetOptimizationFlag(bool flag)
+{
+    auto lifecycleListeners = GetListeners<ILifecycleListener>();
+    for (auto& listener : lifecycleListeners) {
+        if (auto listenerPtr = listener.lock()) {
+            listenerPtr->OnSetOptimizationFlag(flag);
+        }
+    }
+}
+
 void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist,
     bool needSaveSnapshot, std::function<void()>&& callback)
 {
@@ -4332,6 +4342,16 @@ WSRect Session::GetSessionRequestRect() const
     WSRect rect = SessionHelper::TransferToWSRect(GetSessionProperty()->GetRequestRect());
     WLOGFD("id: %{public}d, rect: %{public}s", persistentId_, rect.ToString().c_str());
     return rect;
+}
+
+void Session::SetOptimizationFlag(bool isOptimizePerformance)
+{
+    isOptimizePerformance_ = isOptimizePerformance;
+}
+
+bool Session::GetOptimizationFlag() const
+{
+    return isOptimizePerformance_;
 }
 
 /** @note @window.layout */
