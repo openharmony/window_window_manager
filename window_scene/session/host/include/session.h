@@ -147,6 +147,7 @@ public:
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
     virtual void OnRestart() {}
+    virtual void OnSetOptimizationFlag(bool flag) {}
     virtual void OnRemovePrelaunchStartingWindow() {}
 };
 
@@ -1294,6 +1295,11 @@ private:
      */
     uint64_t prelaunchStart_ = 0;
     bool prelaunchEnable_ = false;
+    /*
+    * performance optimization flag
+    */
+   bool isOptimizePerformance_ = false;
+
 };
 } // namespace OHOS::Rosen
 
