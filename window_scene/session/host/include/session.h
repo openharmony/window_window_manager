@@ -256,6 +256,7 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
+    void NotifySetOptimizationFlag(bool flag);
     void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true,
         std::function<void()>&& callback = nullptr);
     void NotifyRemoveSnapshot();
@@ -402,6 +403,8 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
+    void SetOptimizationFlag(bool isOptimizePerformance);
+    bool Session::GetOptimizationFlag() const;
     void SetRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     RectAnimationConfig GetRequestRectAnimationConfig() const;
     std::string GetWindowName() const;
