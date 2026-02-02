@@ -404,7 +404,7 @@ public:
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
     void SetOptimizationFlag(bool isOptimizePerformance);
-    bool Session::GetOptimizationFlag() const;
+    bool GetOptimizationFlag() const;
     void SetRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     RectAnimationConfig GetRequestRectAnimationConfig() const;
     std::string GetWindowName() const;
