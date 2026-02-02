@@ -1301,9 +1301,7 @@ private:
     /*
     * performance optimization flag
     */
-   bool isOptimizePerformance_ = false;
-
+    bool isOptimizePerformance_ = false;
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H
