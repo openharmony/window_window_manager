@@ -8887,8 +8887,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetDisplaySnapshotWithOpt
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:GetDisplaySnapshot(%" PRIu64")", option.displayId_);
         DMRect orgRect = CalcRectsWithRotation(option.displayId_, option.rect);
         Drawing::Rect rect = { static_cast<float>(orgRect.posX_), static_cast<float>(orgRect.posY_),
-            static_cast<float>(orgRect.posX_ + orgRect.width_),
-            static_cast<float>(orgRect.posY_ + orgRect.height_) };
+            static_cast<float>(orgRect.posX_ + static_cast<int32_t>(orgRect.width_)),
+            static_cast<float>(orgRect.posY_ + static_cast<int32_t>(orgRect.height_)) };
         SnapshotScaleInfo scaleInfo = {option.scaleX_, option.scaleY_, rect};
         auto res = GetScreenSnapshot(option.displayId_, true, option.isCaptureFullOfScreen_, option.surfaceNodesList_,
             scaleInfo);
