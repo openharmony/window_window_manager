@@ -1659,6 +1659,7 @@ bool SceneSessionManager::ConfigMoveDrag(const WindowSceneConfig::ConfigItem& mo
         return false;
     }
     ConfigMoveResample(moveDragConfig["moveResample"]);
+    ConfigMovingEvent(moveDragConfig["movingEvent"]);
     return true;
 }
 
@@ -1678,20 +1679,44 @@ bool SceneSessionManager::ConfigMoveResample(const WindowSceneConfig::ConfigItem
     if (!resampleFpsRangeConfig.IsInts() || !resampleFpsRangeConfig.intsValue_) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
               "The resampleFpsRange config is invalid (not int array), fallback to default.");
-        MoveDragController::SetMoveResampleSystemConfig(enable, std::nullopt, std::nullopt);
+        MoveDragController::SaveMoveResampleSystemConfig(enable, std::nullopt, std::nullopt);
         return true;
     }
     auto fpsRange = *resampleFpsRangeConfig.intsValue_;
     if (fpsRange.size() != 2) { // 2: only contain minFps and maxFps
         TLOGW(WmsLogTag::WMS_LAYOUT,
               "The resampleFpsRange config size is invalid (expect 2), fallback to default.");
-        MoveDragController::SetMoveResampleSystemConfig(enable, std::nullopt, std::nullopt);
+        MoveDragController::SaveMoveResampleSystemConfig(enable, std::nullopt, std::nullopt);
         return true;
     }
     int minVal = std::min(fpsRange[0], fpsRange[1]);
     int maxVal = std::max(fpsRange[0], fpsRange[1]);
-    MoveDragController::SetMoveResampleSystemConfig(
+    MoveDragController::SaveMoveResampleSystemConfig(
         enable, static_cast<uint32_t>(minVal), static_cast<uint32_t>(maxVal));
+    return true;
+}
+
+bool SceneSessionManager::ConfigMovingEvent(const WindowSceneConfig::ConfigItem& movingEventConfig)
+{
+    if (!movingEventConfig.IsMap()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The movingEvent config is invalid (not a map).");
+        return false;
+    }
+    const auto& resampleFpsRangeConfig = movingEventConfig["throttleInterval"];
+    if (!resampleFpsRangeConfig.IsInts() || !resampleFpsRangeConfig.intsValue_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The throttleInterval config is invalid (not int).");
+        return false;
+    }
+    if (resampleFpsRangeConfig.intsValue_->size() != 1) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The throttleInterval config size is invalid (expect 1).");
+        return false;
+    }
+    int interval = (*resampleFpsRangeConfig.intsValue_)[0];
+    if (interval < 0) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The throttleInterval config value is invalid (expect >= 0).");
+        return false;
+    }
+    MoveDragController::SaveMovingEventThrottleSystemConfig(static_cast<uint32_t>(interval));
     return true;
 }
 

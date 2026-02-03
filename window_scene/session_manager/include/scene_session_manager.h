@@ -953,6 +953,7 @@ private:
     bool ConfigWindowLayout(const WindowSceneConfig::ConfigItem& windowLayoutConfig);
     bool ConfigMoveDrag(const WindowSceneConfig::ConfigItem& moveDragConfig);
     bool ConfigMoveResample(const WindowSceneConfig::ConfigItem& moveResampleConfig);
+    bool ConfigMovingEvent(const WindowSceneConfig::ConfigItem& movingEventConfig);
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
