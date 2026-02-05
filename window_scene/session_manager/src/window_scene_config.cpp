@@ -113,6 +113,8 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "moveDrag",                                     WindowSceneConfig::ValueType::MAP },
     { "moveResample",                                 WindowSceneConfig::ValueType::MAP },
     { "resampleFpsRange",                             WindowSceneConfig::ValueType::INTS },
+    { "movingEvent",                                  WindowSceneConfig::ValueType::MAP },
+    { "throttleInterval",                             WindowSceneConfig::ValueType::INTS },
     // ========================================================================
     { "singleHandBackgroundLayout",                   WindowSceneConfig::ValueType::MAP },
     { "singleHandBackgroundSettingButton",            WindowSceneConfig::ValueType::MAP },

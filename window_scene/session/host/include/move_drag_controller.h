@@ -528,6 +528,17 @@ private:
     void ProcessMoveRectUpdate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SizeChangeReason reason);
 
     /**
+     * @brief Determine whether the current moving event should be throttled.
+     *
+     * Compares the timestamp of the current pointer event with that of the last
+     * processed moving event according to the configured throttle interval.
+     *
+     * @param pointerEvent The pointer event to evaluate.
+     * @return true if the event should be throttled; false otherwise.
+     */
+    bool ShouldThrottleMovingEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+    /**
      * @brief Handles the moving event (pointer move).
      *
      * @param pointerEvent Pointer event representing the movement.
@@ -852,6 +863,9 @@ private:
      * the input device reports events at a very high frequency (e.g., gaming
      * mice at 1000 Hz), to prevent excessively frequent window position updates,
      * reduce system load, and maintain smooth dragging behavior.
+     *
+     * An empirical value around 1500 us is usually sufficient. A value of 0
+     * disables throttling.
      */
     uint32_t movingEventThrottleIntervalUs_ = 0;
 

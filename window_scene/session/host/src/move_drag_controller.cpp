@@ -180,7 +180,7 @@ MoveDragController::MoveDragController(wptr<SceneSession> sceneSession) : sceneS
         MoveDragController::LoadMoveResampleSystemConfig();
 
     // Moving Event Throttle System Config
-    movingEventThrottleIntervalUs_ = MoveDragController::GetMovingEventThrottleIntervalUs();
+    movingEventThrottleIntervalUs_ = MoveDragController::LoadMovingEventThrottleSystemConfig();
 }
 
 void MoveDragController::OnConnect(ScreenId id)
