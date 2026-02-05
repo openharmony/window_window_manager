@@ -1702,16 +1702,16 @@ bool SceneSessionManager::ConfigMovingEvent(const WindowSceneConfig::ConfigItem&
         TLOGW(WmsLogTag::WMS_LAYOUT, "The movingEvent config is invalid (not a map).");
         return false;
     }
-    const auto& resampleFpsRangeConfig = movingEventConfig["throttleInterval"];
-    if (!resampleFpsRangeConfig.IsInts() || !resampleFpsRangeConfig.intsValue_) {
+    const auto& throttleIntervalConfig = movingEventConfig["throttleInterval"];
+    if (!throttleIntervalConfig.IsInts() || !throttleIntervalConfig.intsValue_) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "The throttleInterval config is invalid (not int).");
         return false;
     }
-    if (resampleFpsRangeConfig.intsValue_->size() != 1) {
+    if (throttleIntervalConfig.intsValue_->size() != 1) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "The throttleInterval config size is invalid (expect 1).");
         return false;
     }
-    int interval = (*resampleFpsRangeConfig.intsValue_)[0];
+    int interval = (*throttleIntervalConfig.intsValue_)[0];
     if (interval < 0) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "The throttleInterval config value is invalid (expect >= 0).");
         return false;
