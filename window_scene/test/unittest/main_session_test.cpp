@@ -1183,7 +1183,7 @@ HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated01, TestSize
     ASSERT_NE(session, nullptr);
     session->sessionStage_ = nullptr;
     
-    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated();
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1202,7 +1202,7 @@ HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated02, TestSize
     ASSERT_NE(session, nullptr);
     session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     
-    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated();
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false);
     EXPECT_EQ(res, WSError::WS_OK);
 }
 
