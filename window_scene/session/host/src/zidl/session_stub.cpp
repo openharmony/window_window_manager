@@ -2699,7 +2699,12 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
 int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "in");
-    NotifyAppForceLandscapeConfigEnableUpdated();
+    bool needUpdateViewport = false;
+    if (!data.ReadBool(needUpdateViewport)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
     return ERR_NONE;
 }
 

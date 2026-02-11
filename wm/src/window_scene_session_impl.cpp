@@ -8018,20 +8018,20 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
     WindowType winType = GetType();
     bool enableForceSplit = false;
     if (WindowHelper::IsMainWindow(winType) &&
         GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit);
+        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
 }
 
-void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
+void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport)
 {
     WindowType winType = GetType();
     if (!WindowHelper::IsMainWindow(winType)) {
@@ -8042,9 +8042,9 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
         TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
         return;
     }
-    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u",
-        enableForceSplit);
-    uiContent->SetForceSplitEnable(enableForceSplit);
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u",
+        enableForceSplit, needUpdateViewport);
+    uiContent->SetForceSplitEnable(enableForceSplit, needUpdateViewport);
 }
 
 void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()
