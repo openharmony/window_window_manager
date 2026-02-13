@@ -1092,7 +1092,7 @@ private:
     void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused, const sptr<FocusGroup>& focusGroup,
         const sptr<FocusNotifyInfo>& focusNotifyInfo);
     sptr<FocusNotifyInfo> GetFocusNotifyInfo(DisplayId displayId, const sptr<SceneSession>& nextSession);
-    int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
+    void NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
     void NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     void NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession);
     void NotifyFocusedByMission(const sptr<SceneSession>& sceneSession);
