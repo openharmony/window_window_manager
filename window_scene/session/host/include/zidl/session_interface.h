@@ -147,9 +147,8 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdateSessionRect(
-        const WSRect& rect, SizeChangeReason reason, bool isGlobal = false,
-        bool isFromMoveToGlobal = false, const MoveConfiguration& moveConfiguration = {},
-        const RectAnimationConfig& rectAnimationConfig = {}) { return WSError::WS_OK; }
+        const WSRect& rect, SizeChangeReason reason, bool isGlobal = false, bool isFromMoveToGlobal = false,
+        MoveConfiguration moveConfiguration = {}) { return WSError::WS_OK; }
     virtual WSError UpdateClientRect(const WSRect& rect) { return WSError::WS_OK; }
     virtual void NotifyWindowStatusDidChangeAfterShowWindow() {}
 
@@ -384,7 +383,7 @@ public:
     /**
      * @brief get is pip active
      *
-     * @return WSError
+     * @return WMError
      */
     virtual WMError IsPiPActive(bool& status) { return WMError::WM_OK; }
 
@@ -393,7 +392,7 @@ public:
         bool isExecuteDelayRaise = false) { return WSError::WS_OK; }
     virtual bool IsStartMoving() { return false; }
     virtual WSError ChangeSessionVisibilityWithStatusBar(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
-        bool isShow) { return WSError::WS_OK; }
+        bool visible) { return WSError::WS_OK; }
 
     /**
      * @brief Instruct the application to update the listening flag for registering rect changes.
@@ -496,7 +495,7 @@ public:
      *
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
-    virtual WSError OnSetImageForRecent() { return WSError::WS_OK; }
+    virtual WSError OnRemoveImageForRecent() { return WSError::WS_OK; }
 
     /**
      * @brief Callback for setting to radius of window.
@@ -537,15 +536,6 @@ public:
     virtual WSError GetWaterfallMode(bool& isWaterfallMode) { return WSError::WS_OK; }
 
     /**
-     * @brief Callback for setting the window support modes.
-     *
-     * @param supportedWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.
-     * @return Returns WSError::WS_OK if called success, otherwise failed.
-     */
-    virtual WSError NotifySupportWindowModesChange(
-        const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) { return WSError::WS_OK; }
-
-    /**
      * @brief set session label and icon
      *
      * @param label
@@ -560,6 +550,15 @@ public:
     virtual WSError ChangeKeyboardEffectOption(const KeyboardEffectOption& effectOption) { return WSError::WS_OK; };
 
     /**
+     * @brief Callback for setting the window support modes.
+     *
+     * @param supportedWindowModes Indicates the {@link AppExecFwk::SupportWindowMode}.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifySupportWindowModesChange(
+        const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes) { return WSError::WS_OK; }
+
+    /**
      * @brief Start Moving window with coordinate.
      *
      * @param offsetX expected pointer position x-axis offset in window when start moving.
@@ -572,18 +571,11 @@ public:
     virtual WSError StartMovingWithCoordinate(int32_t offsetX, int32_t offsetY,
         int32_t pointerPosX, int32_t pointerPosY, DisplayId displayId) { return WSError::WS_OK; }
     virtual WSError GetCrossAxisState(CrossAxisState& state) { return WSError::WS_OK; };
-
-    /**
-     * @brief Notify the window attach state listener is registered or not.
-     *
-     * @param registered true means register success.
-     */
-    virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
     virtual WSError SetFollowParentWindowLayoutEnabled(bool isFollow) { return WSError::WS_OK; };
     virtual WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) { return WSError::WS_OK; };
-    virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) { return WSError::WS_OK; }
     virtual WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) { return WMError::WM_OK; }
+    virtual WSError UpdateFlag(const std::string& flag) { return WSError::WS_OK; };
     virtual WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) { return WMError::WM_OK; }
     virtual WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) { return WMError::WM_OK; }
     virtual WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) { return WMError::WM_OK; }
@@ -594,12 +586,16 @@ public:
      *
      * This function is used to notify disableDelegator change.
      *
-     * @caller SA
-     * @permission SA permission
-     *
      * @return Successful call returns WMError::WS_OK, otherwise it indicates failure
      */
     virtual WMError NotifyDisableDelegatorChange() { return WMError::WM_OK; }
+
+    /**
+     * @brief Notify the window attach state listener is registered or not.
+     *
+     * @param registered true means register success.
+     */
+    virtual void NotifyWindowAttachStateListenerRegistered(bool registered) { }
 
     /**
      * @brief Use implict animation
@@ -628,7 +624,7 @@ public:
     * @param source source
     * @return Returns WSError::WS_OK if called success, otherwise failed.
     */
-    virtual WSError SetSubWindowSource(SubWindowSource source) { return WSError::WS_OK; }
+    virtual WSError SetSubWindowSource(SubWindowSource source) { return WSError::WS_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Set the frameRect in a partial zoom-in scene.

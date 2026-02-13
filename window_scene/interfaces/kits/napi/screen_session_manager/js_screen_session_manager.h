@@ -51,7 +51,6 @@ private:
     static napi_value GetPhyScreenProperty(napi_env env, napi_callback_info info);
     static napi_value NotifyScreenLockEvent(napi_env env, napi_callback_info info);
     static napi_value UpdateAvailableArea(napi_env env, napi_callback_info info);
-    static napi_value ExtraDestroyScreen(napi_env env, napi_callback_info info);
     static napi_value UpdateSuperFoldAvailableArea(napi_env env, napi_callback_info info);
     static napi_value UpdateSuperFoldExpandAvailableArea(napi_env env, napi_callback_info info);
     static napi_value SetScreenOffDelayTime(napi_env env, napi_callback_info info);
@@ -83,8 +82,8 @@ private:
     static napi_value RegisterSwitchUserAnimationNotification(napi_env env, napi_callback_info info);
 
     napi_value OnRegisterCallback(napi_env env, const napi_callback_info info);
-    void RegisterScreenConnectionCallback(napi_env env, const std::string& callbackType, napi_ref& callbackRef);
-    void RegisterTentModeCallback(napi_env env, const std::string& callbackType, napi_ref& callbackRef);
+    void RegisterScreenConnectionCallback(napi_env env, napi_ref& callbackRef);
+    void RegisterTentModeCallback(napi_env env, napi_ref& callbackRef);
     napi_value OnUpdateScreenRotationProperty(napi_env env, const napi_callback_info info);
     napi_value OnUpdateServerScreenProperty(napi_env env, const napi_callback_info info);
     napi_value OnGetCurvedCompressionArea(napi_env env, const napi_callback_info info);
@@ -93,7 +92,6 @@ private:
     napi_value OnGetPhyScreenProperty(napi_env env, const napi_callback_info info);
     napi_value OnNotifyScreenLockEvent(napi_env env, const napi_callback_info info);
     napi_value OnUpdateAvailableArea(napi_env env, const napi_callback_info info);
-    napi_value OnExtraDestroyScreen(napi_env env, const napi_callback_info info);
     napi_value OnUpdateSuperFoldAvailableArea(napi_env env, const napi_callback_info info);
     napi_value OnUpdateSuperFoldExpandAvailableArea(napi_env env, const napi_callback_info info);
     napi_value OnSetScreenOffDelayTime(napi_env env, const napi_callback_info info);

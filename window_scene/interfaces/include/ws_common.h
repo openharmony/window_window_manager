@@ -26,8 +26,8 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "pixel_map.h"
 #include "wm_animation_common.h"
+#include "pixel_map.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -54,8 +54,8 @@ constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
-const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
-const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
+extern const std::string WINDOW_SCREEN_LOCK_PREFIX;
+extern const std::string VIEW_SCREEN_LOCK_PREFIX;
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 
@@ -116,7 +116,6 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_NO_PERMISSION = 201,
     WS_ERROR_INVALID_PARAM = 401,
     WS_ERROR_DEVICE_NOT_SUPPORT = 801,
-    WS_ERROR_TIMEOUT = 901,
     WS_ERROR_NOT_REGISTER_SYNC_CALLBACK = 100011,
     WS_ERROR_TRANSFER_DATA_FAILED       = 100012,
     WS_ERROR_REPEAT_OPERATION = 1300001,
@@ -374,8 +373,8 @@ enum class StartWindowType : uint32_t {
 
 enum class SpecifiedReason : int32_t {
     DEFAULT = 0,
-    BY_SCB,
-    FROM_RENCENT,
+    FROM_ICON,
+    FROM_RECENT,
 };
 
 struct AtomicServiceInfo {
@@ -388,7 +387,9 @@ struct AtomicServiceInfo {
 };
 
 struct PendingSessionActivationConfig {
-    bool forceStart = false; // is compulsion open
+    // is compulsion open
+    bool forceStart = false;
+    // is execute new want callback
     bool forceNewWant = true;
 };
 
@@ -402,7 +403,7 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
-    uint64_t screenId_ = -1;
+    uint64_t screenId_ = -1ULL; // -1ULL: SCREEN_ID_INVALID
     bool isPersistentRecover_ = false;
     AtomicServiceInfo atomicServiceInfo_;
 
@@ -478,6 +479,7 @@ struct SessionInfo {
     std::string hostBundleName = "";
     int32_t hostAppIndex = 0;
     std::string hostAppInstanceKey = "";
+    std::string hostAbilityName = "";
 
     /*
      * Keyboard
@@ -524,6 +526,7 @@ struct SessionInfo {
      * Compatible Mode
      */
     std::string pageConfig = "";
+    std::string logicalDeviceConfig = "";
 
     AAFwk::Want GetWantSafely() const
     {
@@ -544,8 +547,12 @@ struct SessionInfo {
         *want = newWant;
     }
 
-    std::shared_ptr<StartAnimationOptions> startAnimationOptions = nullptr;
-    std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions = nullptr;
+    void SetWantSafely(const std::shared_ptr<AAFwk::Want>& newWant) const
+    {
+        std::lock_guard<std::mutex> lock(*wantMutex_);
+        want = newWant;
+    }
+
     std::shared_ptr<WindowCreateParams> windowCreateParams = nullptr;
 };
 
@@ -571,9 +578,7 @@ enum class SizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
-    RESIZE_WITH_ANIMATION,
     MOVE,
-    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -608,8 +613,7 @@ enum class SizeChangeReason : uint32_t {
 
 inline bool IsMoveToOrDragMove(SizeChangeReason reason)
 {
-    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE ||
-           reason == SizeChangeReason::MOVE_WITH_ANIMATION;
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
 }
 
 enum class SessionEvent : uint32_t {
@@ -1030,6 +1034,7 @@ struct WindowImmersive {
 
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
+    std::string uiType_ = "phone";
     std::string multiWindowUIType_ = "HandsetSmartWindow";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
@@ -1317,12 +1322,9 @@ enum class SnapshotNodeType : uint32_t {
 
 enum class SnapShotRecoverType : uint32_t {
     ROTATE = 0,
-    EXIT_SPLIT_ON_BACKGROUND,
+    EXIT_SPLIT_ON_BACKGROUND = 1,
 };
 
-/**
- * Adding or modifying enumeration values requires corresponding changes on the sceneboard side.
- */
 enum class LifeCycleChangeReason {
     DEFAULT = 0,
 
@@ -1398,11 +1400,6 @@ enum class CrossPlaneState : uint32_t {
     CROSS_VIRTUAL_CREASE_PLANE,
     CROSS_VIRTUAL_PLANE,
     CROSS_ALL_PLANE,
-};
-
-enum class SendTouchAction : uint32_t {
-    ACTION_NORMAL = 0,
-    ACTION_NOT_RECEIVE_PULL_CANCEL = 1,
 };
 
 /**

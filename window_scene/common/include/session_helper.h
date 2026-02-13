@@ -120,10 +120,9 @@ public:
         return usage == UIExtensionUsage::CONSTRAINED_EMBEDDED || usage == UIExtensionUsage::PREVIEW_EMBEDDED;
     }
 
-    static inline bool IsNeedSACalling(WindowType type)
+    static inline bool IsMagnificationWindow(WindowType type)
     {
-        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU ||
-            type == WindowType::WINDOW_TYPE_SELECTION;
+        return type == WindowType::WINDOW_TYPE_MAGNIFICATION || type == WindowType::WINDOW_TYPE_MAGNIFICATION_MENU;
     }
 
     static AreaType GetAreaType(int32_t pointWinX, int32_t pointWinY,
@@ -148,7 +147,7 @@ public:
         int32_t bottomCornerTouch = rect.height_ - insideCornerTouch;
         int32_t bottomIn = rect.height_ - insideEdge;
         int32_t bottomOut = rect.height_ + outside;
-
+ 
         auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
         auto isInRect = [pointWinX, pointWinY, &isInRange](int32_t xMin, int32_t xMax, int32_t yMin, int32_t yMax) {
             return isInRange(xMin, xMax, pointWinX) && isInRange(yMin, yMax, pointWinY);
@@ -208,9 +207,9 @@ public:
         int32_t rightOut = rect.width_ + outside;
         int32_t topOut = -outside;
         int32_t bottomOut = rect.height_ + outside;
-
+ 
         auto isInRange = [](int32_t min, int32_t max, int32_t value) { return min <= value && value <= max; };
-
+ 
         AreaType type;
         if (isInRange(leftOut, rightOut / HALF, pointWinX) &&
             isInRange(topOut, bottomOut / HALF, pointWinY)) {
