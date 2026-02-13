@@ -158,6 +158,13 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWindowModeChangedListener(const sptr<IWindowModeChangedListener>& listener);
+    /**
+     * @brief Get window mode type.
+     *
+     * @param void
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetWindowModeType(WindowModeType& windowModeType) const;
 
     /**
      * @brief Register camera window changed listener.
@@ -168,21 +175,28 @@ public:
     WMError RegisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
 
     /**
+     * @brief Set the animation speed for a specific process.
+     *
+     * @param pid Process id.
+     * @param speed The animation speed.
+     * @return WM_OK means set success, others means failed.
+     */
+    WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
+
+    /**
      * @brief Unregister camera window changed listener.
      *
      * @param listener ICameraWindowChangedListener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterCameraWindowChangedListener(const sptr<ICameraWindowChangedListener>& listener);
-
     /**
-     * @brief Get window mode type.
+     * @brief raise window to top by windowId
      *
-     * @param void
-     * @return WM_OK means get success, others means get failed.
+     * @param persistentId this window to raise
+     * @return WM_OK if raise success
      */
-    WMError GetWindowModeType(WindowModeType& windowModeType) const;
-
+    WMError RaiseWindowToTop(int32_t persistentId);
     /**
      * @brief Get top num main window info.
      *
@@ -193,13 +207,23 @@ public:
     WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
 
     /**
-     * @brief Set the animation speed for a specific process.
+     * @brief Register WMS connection status changed listener.
+     * @attention Callable only by u0 system user. A process only supports successful registration once.
+     * When the foundation service restarts, you need to re-register the listener.
+     * If you want to re-register, please call UnregisterWMSConnectionChangedListener first.
      *
-     * @param pid process id.
-     * @param speed The animation speed.
-     * @return WM_OK means set success, others means set failed.
+     * @param listener IWMSConnectionChangedListener.
+     * @return WM_OK means register success, others means register failed.
      */
-    WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
+    WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
+
+    /**
+     * @brief Unregister WMS connection status changed listener.
+     * @attention Callable only by u0 system user.
+     *
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterWMSConnectionChangedListener();
 
     /**
      * @brief Get keyboard calling window information.
@@ -242,33 +266,6 @@ public:
      * @return WM_OK means clear session success, others means clear failed.
      */
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
-
-    /**
-     * @brief raise window to top by windowId
-     *
-     * @param persistentId this window to raise
-     * @return WM_OK if raise success
-     */
-    WMError RaiseWindowToTop(int32_t persistentId);
-
-    /**
-     * @brief Register WMS connection status changed listener.
-     * @attention Callable only by u0 system user. A process only supports successful registration once.
-     * When the foundation service restarts, you need to re-register the listener.
-     * If you want to re-register, please call UnregisterWMSConnectionChangedListener first.
-     *
-     * @param listener IWMSConnectionChangedListener.
-     * @return WM_OK means register success, others means register failed.
-     */
-    WMError RegisterWMSConnectionChangedListener(const sptr<IWMSConnectionChangedListener>& listener);
-
-    /**
-     * @brief Unregister WMS connection status changed listener.
-     * @attention Callable only by u0 system user.
-     *
-     * @return WM_OK means unregister success, others means unregister failed.
-     */
-    WMError UnregisterWMSConnectionChangedListener();
 
     /**
      * @brief Register WindowStyle changed listener.
@@ -514,10 +511,10 @@ private:
      * Multi user and multi screen
      */
     friend class sptr<WindowManagerLite>;
-    WindowManagerLite(const int32_t userId = INVALID_USER_ID);
+    explicit WindowManagerLite(const int32_t userId = INVALID_USER_ID);
     ~WindowManagerLite() override;
 
-    int32_t userId_;
+    const int32_t userId_;
     static std::unordered_map<int32_t, sptr<WindowManagerLite>> windowManagerLiteMap_;
     static std::mutex windowManagerLiteMapMutex_;
 
@@ -537,7 +534,6 @@ private:
     WMError NotifyWindowStyleChange(WindowStyleType type);
     void NotifyAccessibilityWindowInfo(const std::vector<sptr<AccessibilityWindowInfo>>& infos,
         WindowUpdateType type) const;
-    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
     WMError ProcessRegisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
         const sptr<IWindowInfoChangedListener>& listener);
     WMError ProcessUnregisterWindowInfoChangeCallback(WindowInfoKey observedInfo,
@@ -546,6 +542,7 @@ private:
     WMError UnregisterVisibilityStateChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError RegisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener);
     WMError UnregisterMidSceneChangedListener(const sptr<IWindowInfoChangedListener>& listener);
+    WMError NotifyCallingWindowDisplayChanged(const CallingWindowInfo& callingWindowInfo);
 };
 } // namespace Rosen
 } // namespace OHOS

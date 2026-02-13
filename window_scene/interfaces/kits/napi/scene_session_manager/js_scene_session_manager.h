@@ -154,6 +154,7 @@ public:
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetIsDockAutoHide(napi_env env, napi_callback_info info);
     static napi_value SetTrayAppListInfo(napi_env env, napi_callback_info info);
+    static napi_value HandlePcAppStatus(napi_env env, napi_callback_info info);
 
     /*
      * Multi Instance
@@ -196,6 +197,11 @@ public:
     static napi_value SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info);
     static napi_value SetIsPipEnabled(napi_env env, napi_callback_info info);
     static napi_value GetPipDeviceCollaborationPolicy(napi_env env, napi_callback_info info);
+
+    /*
+     * Window Event
+     */
+    static napi_value SendAxisEvent(napi_env env, napi_callback_info info);
 
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
@@ -322,6 +328,7 @@ private:
      */
     napi_value OnInitUserInfo(napi_env env, napi_callback_info info);
     napi_value OnHandleUserSwitch(napi_env env, napi_callback_info info);
+    napi_value OnHandlePcAppStatus(napi_env env, napi_callback_info info);
 
     void OnRootSceneBackEvent();
     void OnStatusBarEnabledUpdate(bool enable, const std::string& bundleName);
@@ -396,6 +403,7 @@ private:
     void OnWatchGestureConsumeResult(int32_t keyCode, bool isConsumed);
     void RegisterWatchFocusActiveChangeCallback();
     void OnWatchFocusActiveChange(bool isActive);
+    napi_value OnSendAxisEvent(napi_env env, napi_callback_info info);
 
     /*
      * Window Lifecycle

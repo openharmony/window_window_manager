@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 #define OHOS_ROSEN_WINDOW_SCENE_SESSION_IMPL_H
 
+#include <list>
 #include <modifier/rs_property.h>
 
 #include "window_session_impl.h"
@@ -26,7 +27,7 @@ namespace OHOS {
 namespace Rosen {
 using NotifyWindowRecoverStateChangeFunc = std::function<void(bool isSpecificSession,
     const WindowRecoverState& state)>;
-using StatusBarColorConfigPair = std::pair<StatusBarColorChangeReason, uint32_t>;
+using OwnSystemBarPropertyPair = std::pair<SystemBarPropertyOwner, PartialSystemBarProperty>;
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
@@ -69,8 +70,7 @@ public:
     WMError MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError MoveWindowToGlobalDisplay(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
-    WMError Resize(uint32_t width, uint32_t height,
-        const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
     WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
@@ -118,6 +118,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual uint32_t GetWindowFlags() const override;
+    bool IsApplicationModalSubWindowShowing(int32_t parentId);
 
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
@@ -228,10 +229,10 @@ public:
     WmErrorCode StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY) override;
     WmErrorCode StopMoveWindow() override;
     WMError SetSupportedWindowModesInner(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes);
+    void MaximizeEvent(const sptr<ISession> &hostSession);
     void UpdateWindowModeWhenSupportTypeChange(uint32_t windowModeSupportType);
     bool haveSetSupportedWindowModes_ = false;
     uint32_t pendingWindowModeSupportType_ { WindowModeSupport::WINDOW_MODE_SUPPORT_ALL };
-    void MaximizeEvent(const sptr<ISession> &hostSession);
 
     /*
      * Compatible Mode
@@ -241,6 +242,7 @@ public:
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     void SetForceSplitConfigEnable(bool enableForceSplit) override;
+    void SendLogicalDeviceConfigToArkUI();
 
     /*
      * Free Multi Window
@@ -271,7 +273,6 @@ public:
     WSError SetFullScreenWaterfallMode(bool isWaterfallMode) override;
     WSError SetSupportEnterWaterfallMode(bool isSupportEnter) override;
     WMError OnContainerModalEvent(const std::string& eventName, const std::string& value) override;
-    void ReportHoverMaximizeMenu(const std::string& bundleName, const std::string& hoverType);
 
     /*
      * Window Property
@@ -300,6 +301,7 @@ public:
     WMError GetWindowStateSnapshot(std::string& winStateSnapshotJsonStr) override;
     WMError SetRotationLocked(bool locked) override;
     WMError GetRotationLocked(bool& locked) override;
+    WSError UpdatePropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property) override;
 
     /*
      * Window Decor
@@ -337,6 +339,10 @@ public:
     WMError UpdateSystemBarProperties(const std::unordered_map<WindowType, SystemBarProperty>& systemBarProperties,
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
     WMError SetStatusBarColorForPage(const std::optional<uint32_t> color) override;
+    WMError SetOwnSystemBarProperty(WindowType type, const PartialSystemBarProperty& prop,
+        SystemBarPropertyOwner owner) override;
+    WMError RemoveOwnSystemBarProperty(WindowType type, const SystemBarPropertyFlag& flag,
+        SystemBarPropertyOwner owner) override;
 
     /*
      * Window Pattern
@@ -389,6 +395,7 @@ protected:
     std::pair<WindowLimits, WindowLimits> GetSystemSizeLimits(uint32_t displayWidth,
         uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
+    uint32_t GetSupportedWindowModesConfiguration(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
         const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
@@ -492,7 +499,7 @@ private:
     void ApplyMaximizePresentation(MaximizePresentation presentation);
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
     bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);
-    bool isResizedByLimit_ = false;
+    std::atomic<bool> isResizedByLimit_ = false;
 
     /*
      * Window Immersive
@@ -511,13 +518,10 @@ private:
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
     WMError UpdateSystemBarPropertyForPage(WindowType type,
         const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
-    WMError updateSystemBarproperty(WindowType type, const SystemBarProperty& systemBarProperty);
-    std::mutex nowsystemBarPropertyMapMutex_;
-    std::unordered_map<WindowType, SystemBarProperty> nowSystemBarPropertyMap_;
-    bool isAtomicServiceUseColor_ = false;
-    bool isNavigationUseColor_ = false;
-    std::stack<StatusBarColorConfigPair> statusBarColorHistory_;
-    uint32_t UpdateStatusBarColorHistory(StatusBarColorChangeReason reason, std::optional<uint32_t> color);
+    WMError UpdateSystemBarProperty(WindowType type, const SystemBarProperty& systemBarProperty);
+    std::unordered_map<WindowType, std::list<OwnSystemBarPropertyPair>> ownSystemBarPropertyMap_;
+    std::mutex ownSystemBarPropertyMapMutex_;
+    SystemBarProperty GetCurrentActiveSystemBarProperty(WindowType type);
 
     /*
      * Window Animation
@@ -600,9 +604,22 @@ private:
     bool IsFullScreenEnable() const;
 
     /*
+     * PC Window UE report
+     */
+    void ReportHoverMaximizeMenu(const std::string& bundleName, const std::string& hoverType);
+    void ReportClickTitleMinimize(const std::string& bundleName);
+    void ReportClickTitleClose(const std::string& bundleName);
+    void ReportCompatibleTitleOperate(const std::string& bundleName, const std::string& operateType);
+
+    /*
      * Window Input Event
      */
     int32_t superFoldOffsetY_ = -1; // calculate the total height of the display_B area and crease area.
+
+    /*
+     * Window Compatible Mode
+     */
+    static std::atomic<bool> hasSentLogicalDeviceConfig_;
 
     /*
      * Window Scene
@@ -624,7 +641,6 @@ private:
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
     WindowLifeCycleInfo GetWindowLifecycleInfo() const;
-    void ReleaseUIContentTimeoutCheck();
 
     /**
      * Window Transition Animation For PC

@@ -40,6 +40,7 @@ sptr<SettingObserver> ScreenSettingHelper::correctionExemptionListObserver_;
 sptr<SettingObserver> ScreenSettingHelper::correctionWhiteListObserver_;
 sptr<SettingObserver> ScreenSettingHelper::borderingAreaPercentObserver_;
 sptr<SettingObserver> ScreenSettingHelper::coordinationReadyObserver_;
+sptr<SettingObserver> ScreenSettingHelper::wiredScreenGamutObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_ACTIVE_MODE_SIZE = 4;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
@@ -129,7 +130,7 @@ void ScreenSettingHelper::RegisterSettingOffScreenRenderObserver(SettingObserver
     }
 }
  
-bool ScreenSettingHelper::GetSettingOffScreenRenderValue(bool& offScreenRenderValue_, const std::string& key)
+bool ScreenSettingHelper::GetSettingOffScreenRenderValue(bool& offScreenRenderValue, const std::string& key)
 {
     SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     int32_t value;
@@ -138,7 +139,7 @@ bool ScreenSettingHelper::GetSettingOffScreenRenderValue(bool& offScreenRenderVa
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
         return false;
     }
-    offScreenRenderValue_ = (value == 1);
+    offScreenRenderValue = (value == 1);
     return true;
 }
 
@@ -621,6 +622,17 @@ std::map<std::string, std::string> ScreenSettingHelper::GetDpiMode(const std::st
     return dpiMap;
 }
 
+std::string ScreenSettingHelper::GetWiredScreenGamut(const std::string& key)
+{
+    std::string value{};
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetStringValueMultiUser(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    return value;
+}
+
 bool ScreenSettingHelper::GetScreenMode(MultiScreenInfo& info, const std::string& inputString)
 {
     std::vector<std::string> screenMode = {};
@@ -855,6 +867,35 @@ void ScreenSettingHelper::UnregisterSettingBorderingAreaPercentObserver()
     borderingAreaPercentObserver_ = nullptr;
 }
 
+void ScreenSettingHelper::RegisterSettingWiredScreenGamutObserver(SettingObserver::UpdateFunc func)
+{
+    SettingProvider& wiredScreenGamutProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    wiredScreenGamutObserver_ = wiredScreenGamutProvider.CreateObserver(SETTING_DISPLAY_WIRED_SCREEN_GAMUT, func);
+    if (wiredScreenGamutObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = wiredScreenGamutProvider.RegisterObserver(wiredScreenGamutObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        wiredScreenGamutObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingWiredScreenGamutObserver()
+{
+    if (wiredScreenGamutObserver_ == nullptr) {
+        TLOGW(WmsLogTag::DMS, "setting observer is nullptr");
+        return;
+    }
+    SettingProvider& wiredScreenGamutProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = wiredScreenGamutProvider.UnregisterObserver(wiredScreenGamutObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    wiredScreenGamutObserver_ = nullptr;
+}
+
 void ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(SettingObserver::UpdateFunc func)
 {
     if (extendScreenDpiObserver_ != nullptr) {
@@ -910,16 +951,15 @@ void ScreenSettingHelper::RegisterSettingExtendScreenIndepDpiObserver(SettingObs
 void ScreenSettingHelper::UnRegisterSettingExtendScreenIndepDpiObserver()
 {
     if (extendScreenIndepDpiObserver_ == nullptr) {
-        TLOGD(WmsLogTag::DMS, "extendScreenIndepDpiObserver_ is nullptr");
+        TLOGW(WmsLogTag::DMS, "extendScreenIndepDpiObserver_ is nullptr");
         return;
     }
     SettingProvider& extendScreenProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
     ErrCode ret = extendScreenProvider.UnregisterObserver(extendScreenIndepDpiObserver_);
     if (ret != ERR_OK) {
         TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
-    } else {
-        extendScreenIndepDpiObserver_ = nullptr;
     }
+    extendScreenIndepDpiObserver_ = nullptr;
 }
 
 bool ScreenSettingHelper::GetSettingExtendScreenDpi(float& coef, const std::string& key)
@@ -1287,9 +1327,11 @@ bool ScreenSettingHelper::ParseJsonObjectToEnumMap(const nlohmann::json& json,
 
 FoldDisplayMode ScreenSettingHelper::ConvertStringToFoldDisplayModeSafely(const std::string& str)
 {
-    auto it = STRING_TO_FOLD_DISPLAY_MODE.find(str);
-    if (it != STRING_TO_FOLD_DISPLAY_MODE.end()) {
-        return it->second;
+    int32_t displayMode = 0;
+    if (ConvertStrToInt32(str, displayMode) &&
+        static_cast<FoldDisplayMode>(displayMode) >= FoldDisplayMode::UNKNOWN &&
+        static_cast<FoldDisplayMode>(displayMode) <= FoldDisplayMode::GLOBAL_FULL) {
+        return static_cast<FoldDisplayMode>(displayMode);
     }
     TLOGW(WmsLogTag::DEFAULT, "[DMS] Unknown str: %{public}s", str.c_str());
     return FoldDisplayMode::UNKNOWN;

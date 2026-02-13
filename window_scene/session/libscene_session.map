@@ -161,6 +161,7 @@
             OHOS::Rosen::SceneSession::SetWindowCornerRadiusCallback*;
             OHOS::Rosen::SceneSession::SetWindowRectAutoSaveCallback*;
             OHOS::Rosen::SceneSession::UpdateFullScreenWaterfallMode*;
+            OHOS::Rosen::SceneSession::NotifyPendingSessionActivation*;
             OHOS::Rosen::SceneSession::RegisterShowWhenLockedCallback*;
             OHOS::Rosen::SceneSession::SetDefaultRequestedOrientation*;
             OHOS::Rosen::SceneSession::SetMousePointerDownEventStatus*;
@@ -227,6 +228,9 @@
             OHOS::Rosen::SceneSession::SceneSession*;
             OHOS::Rosen::SceneSession::RegisterGetAppUseControlDisplayMapFunc*;
             OHOS::Rosen::SceneSession::NotifyRemoveAppLockSnapshot*;
+            OHOS::Rosen::SceneSession::ClearAllModifiers*;
+            OHOS::Rosen::SceneSession::NotifyModeSwitchInfo*;
+            OHOS::Rosen::SceneSession::UpdatePropertyWhenTriggerMode*;
             OHOS::Rosen::SessionUtils::SetMoveResampleEnabled*;
             OHOS::Rosen::SystemSession::SystemSession*;
             OHOS::Rosen::KeyboardSession::KeyboardSession*;
@@ -252,7 +256,7 @@
             OHOS::Rosen::AbilityInfoManager::SetCurrentUserId*;
             OHOS::Rosen::AbilityInfoManager::Init*;
             OHOS::Rosen::AbilityInfoManager::IsAnco*;
-            OHOS::Rosen::AbilityInfoManager::RemoveAppInfo*;
+            OHOS::Rosen::AbilityInfoManager::RefreshAppInfo*;
             OHOS::Rosen::WindowEventChannel::SetIsUIExtension*;
             OHOS::Rosen::WindowEventChannel::SetUIExtensionUsage*;
             OHOS::Rosen::PcFoldScreenManager::GetInstance*;
@@ -333,6 +337,8 @@
             OHOS::Rosen::ScenePersistence::HasSnapshot*;
             OHOS::Rosen::ScenePersistence::GetSnapshotSize*;
             OHOS::Rosen::ScenePersistence::ScenePersistence*;
+            OHOS::Rosen::ScenePersistence::CreateStartWindowDir*;
+            OHOS::Rosen::ScenePersistence::SaveStartWindow*;
             OHOS::Rosen::SceneSession::SetVsyncStation*;
             OHOS::Rosen::PcFoldScreenManager::IsHalfFolded*;
             OHOS::Rosen::PcFoldScreenManager::GetDisplayRects*;
@@ -348,6 +354,7 @@
             OHOS::Rosen::SessionStub::OnRemoteRequest*;
             OHOS::Rosen::Session::*;
             OHOS::Rosen::ExtensionSession::*;
+            OHOS::Rosen::PARAM_KEY::*;
             
             virtual?thunk?to?OHOS::Rosen::Session::~Session*;
             non-virtual?thunk?to?OHOS::Rosen::Session::*;
