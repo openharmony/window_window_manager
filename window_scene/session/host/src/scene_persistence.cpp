@@ -149,7 +149,8 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
     snapshotFreeMultiWindowPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
         std::to_string(persistentId) + suffix;
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
-    abilityIconPath_ = abilityIconDirectory_ + bundleName + IMAGE_SUFFIX;
+    abilityIconPath_ = abilityIconDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+        std::to_string(persistentId) + IMAGE_SUFFIX;
     if (snapshotFfrtHelper_ == nullptr) {
         snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
