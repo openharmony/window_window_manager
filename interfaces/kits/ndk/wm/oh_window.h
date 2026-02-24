@@ -345,6 +345,44 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList);
 
 /**
+ * @brief Callback interface for frame metrics changed.
+ *
+ * @param metrics Frame metrics info.
+ * @since 22
+ */
+typedef void (*OH_WindowManager_FrameMetricsChangedCallback)(WindowManager_FrameMetrics metrics);
+
+/**
+ * @brief Register frame metrics changed listener for the target window.
+ *
+ * @param windowId WindowId when window is created.
+ * @param callback Callback object.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
+ * @since 22
+ */
+int32_t OH_WindowManager_RegisterFrameMetricsChangedListener(
+    int32_t windowId, OH_WindowManager_FrameMetricsChangedCallback callback);
+
+/**
+ * @brief Unregister frame metrics changed listener for the target window.
+ *
+ * @param windowId WindowId when window is created.
+ * @param callback Callback object.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
+ * @since 22
+ */
+int32_t OH_WindowManager_UnregisterFrameMetricsChangedListener(
+    int32_t windowId, OH_WindowManager_FrameMetricsChangedCallback callback);
+
+/**
  * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor follows
  *        movement. Only supported by the focus window; the lock is automatically released when the window loses focus.
  *

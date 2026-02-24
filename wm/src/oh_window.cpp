@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <mutex>
+#include <unordered_map>
 
 #include "image/pixelmap_native.h"
 #include "pixelmap_native_impl.h"
@@ -160,6 +161,42 @@ const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WIND
     { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
     { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
 };
+
+class OHWindowFrameMetricsChangedListener : public IFrameMetricsChangedListener {
+public:
+    explicit OHWindowFrameMetricsChangedListener(OH_WindowManager_FrameMetricsChangedCallback callback)
+        : callback_(callback) {}
+    ~OHWindowFrameMetricsChangedListener() override = default;
+
+    void OnFrameMetricsChanged(const FrameMetrics& metrics) override
+    {
+        if (callback_ == nullptr) {
+            return;
+        }
+        WindowManager_FrameMetrics frameMetrics;
+        frameMetrics.firstDrawFrame = metrics.firstDrawFrame_;
+        frameMetrics.inputHandlingDuration = metrics.inputHandlingDuration_;
+        frameMetrics.layoutMeasureDuration = metrics.layoutMeasureDuration_;
+        frameMetrics.vsyncTimestamp = metrics.vsyncTimestamp_;
+        callback_(frameMetrics);
+    }
+
+private:
+    OH_WindowManager_FrameMetricsChangedCallback callback_ = nullptr;
+};
+
+std::mutex g_frameMetricsCbMutex;
+std::unordered_map<int32_t,
+    std::unordered_map<uintptr_t, sptr<OHWindowFrameMetricsChangedListener>>> g_frameMetricsCbMap;
+
+inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
+{
+    auto iter = OH_WINDOW_TO_ERROR_CODE_MAP.find(wmError);
+    if (iter == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    return iter->second;
+}
 
 void TransformedToWindowManagerRect(const Rect& rect, WindowManager_Rect& wmRect)
 {
@@ -723,6 +760,119 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList)
 {
     WINDOW_MANAGER_FREE_MEMORY(snapshotPixelMapList);
+}
+
+int32_t OH_WindowManager_RegisterFrameMetricsChangedListener(
+    int32_t windowId, OH_WindowManager_FrameMetricsChangedCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto callbackId = reinterpret_cast<uintptr_t>(callback);
+        {
+            std::lock_guard<std::mutex> lock(g_frameMetricsCbMutex);
+            auto windowIter = g_frameMetricsCbMap.find(windowId);
+            if (windowIter != g_frameMetricsCbMap.end() &&
+                windowIter->second.find(callbackId) != windowIter->second.end()) {
+                errCode = WindowManager_ErrorCode::OK;
+                return;
+            }
+        }
+        auto listener = sptr<OHWindowFrameMetricsChangedListener>::MakeSptr(callback);
+        if (listener == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s create listener failed, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            return;
+        }
+        auto ret = window->RegisterFrameMetricsChangeListener(listener);
+        errCode = GetWindowManagerErrorCode(ret);
+        if (ret != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s register failed, windowId:%{public}d, ret:%{public}d",
+                where, windowId, static_cast<int32_t>(ret));
+            return;
+        }
+        std::lock_guard<std::mutex> lock(g_frameMetricsCbMutex);
+        g_frameMetricsCbMap[windowId][callbackId] = listener;
+    }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_UnregisterFrameMetricsChangedListener(
+    int32_t windowId, OH_WindowManager_FrameMetricsChangedCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
+        sptr<OHWindowFrameMetricsChangedListener> listener = nullptr;
+        auto callbackId = reinterpret_cast<uintptr_t>(callback);
+        {
+            std::lock_guard<std::mutex> lock(g_frameMetricsCbMutex);
+            auto windowIter = g_frameMetricsCbMap.find(windowId);
+            if (windowIter == g_frameMetricsCbMap.end()) {
+                errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+                return;
+            }
+            auto callbackIter = windowIter->second.find(callbackId);
+            if (callbackIter == windowIter->second.end()) {
+                errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+                return;
+            }
+            listener = callbackIter->second;
+        }
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            std::lock_guard<std::mutex> lock(g_frameMetricsCbMutex);
+            auto windowIter = g_frameMetricsCbMap.find(windowId);
+            if (windowIter != g_frameMetricsCbMap.end()) {
+                windowIter->second.erase(callbackId);
+                if (windowIter->second.empty()) {
+                    g_frameMetricsCbMap.erase(windowIter);
+                }
+            }
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto ret = window->UnregisterFrameMetricsChangeListener(listener);
+        errCode = GetWindowManagerErrorCode(ret);
+        if (ret != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s unregister failed, windowId:%{public}d, ret:%{public}d",
+                where, windowId, static_cast<int32_t>(ret));
+            return;
+        }
+        std::lock_guard<std::mutex> lock(g_frameMetricsCbMutex);
+        auto windowIter = g_frameMetricsCbMap.find(windowId);
+        if (windowIter == g_frameMetricsCbMap.end()) {
+            return;
+        }
+        windowIter->second.erase(callbackId);
+        if (windowIter->second.empty()) {
+            g_frameMetricsCbMap.erase(windowIter);
+        }
+    }, __func__);
+    return errCode;
 }
 
 int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovement)
