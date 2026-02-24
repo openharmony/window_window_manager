@@ -2462,7 +2462,7 @@ napi_value JsSceneSession::UpdatePropertyWhenTriggerMode(napi_env env, napi_call
 
 napi_value JsSceneSession::SetPrivacyMode(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetPrivacyMode(env, info) : nullptr;
 }
@@ -3491,7 +3491,7 @@ napi_value JsSceneSession::OnSetPrivacyMode(napi_env env, napi_callback_info inf
     }
     session->SetPrivacyMode(isPrivacy);
     SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
-    TLOGD(WmsLogTag::DEFAULT, "end");
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isPrivacy=%{public}d", isPrivacy);
     return NapiGetUndefined(env);
 }
 
