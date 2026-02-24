@@ -265,10 +265,6 @@ public:
     static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
-    static bool ParseSubWindowOption(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
-    static bool ParseRectParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
-    static bool ParseModalityParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
-    static bool ParseZLevelParams(ani_env* env, ani_object jsObject, const sptr<WindowOption>& windowOption);
     template<typename T>
     static ani_object CreateBaseTypeObject(ani_env* env, T value);
 };
