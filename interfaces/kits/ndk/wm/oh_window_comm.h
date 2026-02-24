@@ -234,6 +234,22 @@ typedef struct {
     bool useCache;
 } WindowManager_WindowSnapshotConfig;
 
+/**
+ * @brief Frame metrics info.
+ *
+ * @since 22
+ */
+typedef struct {
+    /** Whether this frame is first draw frame. */
+    bool firstDrawFrame;
+    /** Input handling duration in ns. */
+    uint64_t inputHandlingDuration;
+    /** Layout and measure duration in ns. */
+    uint64_t layoutMeasureDuration;
+    /** Vsync timestamp in ns. */
+    uint64_t vsyncTimestamp;
+} WindowManager_FrameMetrics;
+
 #ifdef __cplusplus
 }
 #endif

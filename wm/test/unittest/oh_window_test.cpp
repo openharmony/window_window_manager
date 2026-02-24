@@ -80,6 +80,11 @@ void OHWindowTest::TearDown()
 }
 
 namespace {
+void FrameMetricsChangedCallback(WindowManager_FrameMetrics metrics)
+{
+    (void)metrics;
+}
+
 /**
  * @tc.name: ShowWindow01
  * @tc.desc: return OK when show window
@@ -218,6 +223,80 @@ HWTEST_F(OHWindowTest, OH_WindowManager_GetMainWindowSnapshot, TestSize.Level0)
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
     free(windowIdList);
     windowIdList = nullptr;
+}
+
+/**
+ * @tc.name: RegisterFrameMetricsChangedListener_NullCallback
+ * @tc.desc: register frame metrics changed listener with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, RegisterFrameMetricsChangedListener_NullCallback, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    ASSERT_NE(nullptr, scene_->GetMainWindow());
+    int32_t windowId = scene_->GetMainWindow()->GetWindowId();
+    auto ret = OH_WindowManager_RegisterFrameMetricsChangedListener(windowId, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+}
+
+/**
+ * @tc.name: UnregisterFrameMetricsChangedListener_NullCallback
+ * @tc.desc: unregister frame metrics changed listener with null callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, UnregisterFrameMetricsChangedListener_NullCallback, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    ASSERT_NE(nullptr, scene_->GetMainWindow());
+    int32_t windowId = scene_->GetMainWindow()->GetWindowId();
+    auto ret = OH_WindowManager_UnregisterFrameMetricsChangedListener(windowId, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+}
+
+/**
+ * @tc.name: RegisterFrameMetricsChangedListener_InvalidWindow
+ * @tc.desc: register frame metrics changed listener with invalid window id
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, RegisterFrameMetricsChangedListener_InvalidWindow, TestSize.Level0)
+{
+    auto ret = OH_WindowManager_RegisterFrameMetricsChangedListener(-1, FrameMetricsChangedCallback);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
+}
+
+/**
+ * @tc.name: RegisterUnregisterFrameMetricsChangedListener_Normal
+ * @tc.desc: register/unregister frame metrics changed listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsChangedListener_Normal, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    ASSERT_NE(nullptr, scene_->GetMainWindow());
+    int32_t windowId = scene_->GetMainWindow()->GetWindowId();
+    auto ret = OH_WindowManager_RegisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+    if (ret == static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
+        auto ret2 = OH_WindowManager_RegisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret2);
+        auto ret3 = OH_WindowManager_UnregisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret3);
+        return;
+    }
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED), ret);
+}
+
+/**
+ * @tc.name: UnregisterFrameMetricsChangedListener_NotRegistered
+ * @tc.desc: unregister frame metrics changed listener which is not registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, UnregisterFrameMetricsChangedListener_NotRegistered, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    ASSERT_NE(nullptr, scene_->GetMainWindow());
+    int32_t windowId = scene_->GetMainWindow()->GetWindowId();
+    auto ret = OH_WindowManager_UnregisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
 }
 }
 } // namespace Rosen
