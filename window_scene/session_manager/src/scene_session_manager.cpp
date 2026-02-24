@@ -5797,6 +5797,9 @@ WSError SceneSessionManager::InitUserInfo(int32_t userId, std::string& fileDir)
         if (!ScenePersistence::CreateUpdatedIconDir(fileDir)) {
             TLOGND(WmsLogTag::WMS_MAIN, "Create icon directory failed");
         }
+        if (!ScenePersistence::CreateAbilityIconDir(fileDir)) {
+            TLOGND(WmsLogTag::WMS_MAIN, "Create ability icon directory failed");
+        }
         if (!ScenePersistence::CreateStartWindowDir(fileDir)) {
             TLOGND(WmsLogTag::WMS_MAIN, "Create start window directory failed");
         }

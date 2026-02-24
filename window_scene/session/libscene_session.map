@@ -246,6 +246,7 @@
             OHOS::Rosen::ScenePersistence::CreateSnapshotDir*;
             OHOS::Rosen::ScenePersistence::GetSnapshotFilePath*;
             OHOS::Rosen::ScenePersistence::CreateUpdatedIconDir*;
+            OHOS::Rosen::ScenePersistence::CreateAbilityIconDir*;
             OHOS::Rosen::SessionStageStub::OnRemoteRequest*;
             OHOS::Rosen::WSSnapshotHelper::GetInstance*;
             OHOS::Rosen::WSSnapshotHelper::SetWindowScreenStatus*;
