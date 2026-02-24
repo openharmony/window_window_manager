@@ -43,6 +43,7 @@ constexpr uint8_t SUCCESS = 0;
 
 std::string ScenePersistence::snapshotDirectory_;
 std::string ScenePersistence::updatedIconDirectory_;
+std::string ScenePersistence::abilityIconDirectory_;
 std::string ScenePersistence::startWindowDirectory_;
 std::shared_ptr<WSFFRTHelper> ScenePersistence::snapshotFfrtHelper_;
 bool ScenePersistence::isAstcEnabled_ = false;
@@ -61,6 +62,16 @@ bool ScenePersistence::CreateUpdatedIconDir(const std::string& directory)
 {
     updatedIconDirectory_ = directory + "/UpdatedIcon/";
     if (mkdir(updatedIconDirectory_.c_str(), S_IRWXU)) {
+        TLOGD(WmsLogTag::DEFAULT, "mkdir failed or the directory already exists");
+        return false;
+    }
+    return true;
+}
+
+bool ScenePersistence::CreateAbilityIconDir(const std::string& directory)
+{
+    abilityIconDirectory_ = directory + "/AbilityIcon/";
+    if (mkdir(abilityIconDirectory_.c_str(), S_IRWXU)) {
         TLOGD(WmsLogTag::DEFAULT, "mkdir failed or the directory already exists");
         return false;
     }
@@ -138,6 +149,7 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
     snapshotFreeMultiWindowPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
         std::to_string(persistentId) + suffix;
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
+    abilityIconPath_ = abilityIconDirectory_ + bundleName + IMAGE_SUFFIX;
     if (snapshotFfrtHelper_ == nullptr) {
         snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
@@ -375,6 +387,49 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
 std::string ScenePersistence::GetUpdatedIconPath() const
 {
     return updatedIconPath_;
+}
+
+void ScenePersistence::SaveAbilityIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (pixelMap == nullptr || abilityIconPath_.find('/') == std::string::npos) {
+        return;
+    }
+
+    OHOS::Media::ImagePacker imagePacker;
+    OHOS::Media::PackOption option;
+    option.format = IMAGE_FORMAT;
+    option.quality = IMAGE_QUALITY;
+    option.numberHint = 1;
+    if (pixelMap->GetWidth() > ICON_IMAGE_WIDTH_HEIGHT_SIZE || pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE) {
+        // large image need scale
+        double xScale = pixelMap->GetWidth() > ICON_IMAGE_WIDTH_HEIGHT_SIZE ?
+            ICON_IMAGE_WIDTH_HEIGHT_SIZE / ((double) pixelMap->GetWidth()) : ICON_IMAGE_MAX_SCALE;
+        double yScale = pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE ?
+            ICON_IMAGE_WIDTH_HEIGHT_SIZE / ((double) pixelMap->GetHeight()) : ICON_IMAGE_MAX_SCALE;
+        pixelMap->scale(xScale, yScale, Media::AntiAliasingOption::MEDIUM);
+    }
+    if (remove(abilityIconPath_.c_str())) {
+        TLOGD(WmsLogTag::DEFAULT, "Failed to delete old file");
+    }
+    if (imagePacker.StartPacking(GetAbilityIconPath(), option)) {
+        TLOGE(WmsLogTag::DEFAULT, "Save ability icon failed, starting packing error");
+        return;
+    }
+    if (imagePacker.AddImage(*pixelMap)) {
+        TLOGE(WmsLogTag::DEFAULT, "Save ability icon failed, adding image error");
+        return;
+    }
+    int64_t packedSize = 0;
+    if (imagePacker.FinalizePacking(packedSize)) {
+        TLOGE(WmsLogTag::DEFAULT, "Save ability icon failed, finalizing packing error");
+        return;
+    }
+    TLOGD(WmsLogTag::DEFAULT, "SaveAbilityIcon finished");
+}
+
+std::string ScenePersistence::GetAbilityIconPath() const
+{
+    return abilityIconPath_;
 }
 
 void ScenePersistence::SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow, std::pair<uint32_t, uint32_t> size)
