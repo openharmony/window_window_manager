@@ -187,7 +187,7 @@ private:
 
 std::mutex g_frameMetricsCbMutex;
 std::unordered_map<int32_t,
-    std::unordered_map<uintptr_t, sptr<OHWindowFrameMetricsChangedListener>>> g_frameMetricsCbMap;
+    std::unordered_map<uintptr_t, OHOS::sptr<OHWindowFrameMetricsChangedListener>>> g_frameMetricsCbMap;
 
 inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
 {
@@ -792,7 +792,7 @@ int32_t OH_WindowManager_RegisterFrameMetricsChangedListener(
                 return;
             }
         }
-        auto listener = sptr<OHWindowFrameMetricsChangedListener>::MakeSptr(callback);
+        auto listener = OHOS::sptr<OHWindowFrameMetricsChangedListener>::MakeSptr(callback);
         if (listener == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s create listener failed, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
@@ -825,7 +825,7 @@ int32_t OH_WindowManager_UnregisterFrameMetricsChangedListener(
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
-        sptr<OHWindowFrameMetricsChangedListener> listener = nullptr;
+        OHOS::sptr<OHWindowFrameMetricsChangedListener> listener = nullptr;
         auto callbackId = reinterpret_cast<uintptr_t>(callback);
         {
             std::lock_guard<std::mutex> lock(g_frameMetricsCbMutex);
