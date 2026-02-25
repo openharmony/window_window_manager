@@ -1514,6 +1514,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, TestSize.Level0)
     ASSERT_EQ(ret.first.flags, 0);
     ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
+    session->SetSessionInfoExpandInputFlag(MMI::WindowInputPolicy::FLAG_DISABLE_USER_ACTION);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ASSERT_EQ(ret.first.id, session->GetWindowId());
 }
 
 /**
