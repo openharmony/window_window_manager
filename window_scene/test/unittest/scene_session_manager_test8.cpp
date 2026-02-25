@@ -697,11 +697,11 @@ HWTEST_F(SceneSessionManagerTest8, GetWindowModeType, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetHostWindowRect
- * @tc.desc: test function : GetHostWindowRect
+ * @tc.name: GetHostWindowRect01
+ * @tc.desc: test function : GetHostWindowRect01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect01, TestSize.Level1)
 {
     sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
     ASSERT_NE(nullptr, listener);
@@ -725,12 +725,15 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     auto ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 0);
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::KEYBOARD, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     sceneSession->GetLayoutController()->SetSessionRect({ 0, 100, 0, 0 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
+    usleep(NOT_WAIT_SYNC_IN_NS);
 
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
@@ -745,6 +748,39 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, hostRect.posY_);
 
+}
+
+/**
+ * @tc.name: GetHostWindowRect02
+ * @tc.desc: test function : GetHostWindowRect02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect02, TestSize.Level1)
+{
+    sptr<IDisplayChangeListener> listener = sptr<DisplayChangeListener>::MakeSptr();
+    ASSERT_NE(nullptr, listener);
+    DisplayId displayId = 1;
+    listener->OnScreenshot(displayId);
+    constexpr uint32_t NOT_WAIT_SYNC_IN_NS = 500000;
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
+    int32_t hostWindowId = 0;
+    Rect rect = { 0, 0, 0, 0 };
+    SessionInfo info;
+    info.bundleName_ = "GetHostWindowRect";
+    info.abilityName_ = "GetHostWindowRect";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->sessionInfo_.screenId_ = 0;
+    EXPECT_EQ(sceneSession->GetScreenId(), 0);
+    ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::EXPANDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+    auto ret = ssm_->GetHostWindowRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_EQ(rect.posY_, 0);
+    usleep(NOT_WAIT_SYNC_IN_NS);
+    
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(false);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::UNKNOWN, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
@@ -752,12 +788,15 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 0);
+    usleep(NOT_WAIT_SYNC_IN_NS);
+
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
         0, SuperFoldStatus::FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
     sceneSession->GetLayoutController()->SetSessionRect({ 0, 100, 0, 0 });
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 100);
+    usleep(NOT_WAIT_SYNC_IN_NS);
 
     sceneSession->GetSessionProperty()->SetIsSystemKeyboard(true);
     PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
@@ -766,6 +805,7 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect, TestSize.Level1)
     ret = ssm_->GetHostWindowRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, 1000);
+    usleep(NOT_WAIT_SYNC_IN_NS);
 }
 
 /**
