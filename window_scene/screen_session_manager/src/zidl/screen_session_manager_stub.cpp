@@ -336,6 +336,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             int32_t userId = data.ReadInt32();
             uint32_t phyWidth = data.ReadUint32();
             uint32_t phyHeight = data.ReadUint32();
+            int32_t screenId = data.ReadInt32();
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -362,7 +363,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 .serialNumber_ = serialNumber,
                 .phyWidth_ = phyWidth,
                 .phyHeight_ = phyHeight,
-                .userId_ = userId
+                .userId_ = userId,
+                .screenId_ = screenId
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));

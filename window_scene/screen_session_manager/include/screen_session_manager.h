@@ -887,6 +887,7 @@ private:
         ~ScreenIdManager() = default;
         WM_DISALLOW_COPY_AND_MOVE(ScreenIdManager);
         ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
+        void CreateScreenId(ScreenId smsScreenId, ScreenId rsScreenId);
         void UpdateScreenId(ScreenId rsScreenId, ScreenId smsScreenId);
         bool DeleteScreenId(ScreenId smsScreenId);
         bool HasRsScreenId(ScreenId smsScreenId) const;
