@@ -1775,7 +1775,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background state invalid! state: %{public}u",
             GetPersistentId(), state);
-        if (state == SessionState::STATE_DISCONNECT) {
+        if (state == SessionState::STATE_DISCONNECT && systemConfig_.IsPcWindow()) {
             SetNeedBackgroundAfterConnect(true);
         }
         return WSError::WS_ERROR_INVALID_SESSION;
