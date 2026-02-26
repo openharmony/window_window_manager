@@ -479,7 +479,28 @@ void AniWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
-            nullptr, thisListener->aniCallback_, ani_boolean(showWaterMark));
+                                            nullptr, thisListener->aniCallback_, ani_boolean(showWaterMark));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::HIGH);
+}
+
+void AniWindowListener::OnApplicationFocusUpdate(bool isFocus)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    auto task = [self = weakRef_, vm = vm_, isFocus] {
+        auto thisListener = self.promote();
+        auto aniVm = AniVm(vm);
+        auto eng = aniVm.GetAniEnv();
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener, eng or callback is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
+                                            nullptr, thisListener->aniCallback_, ani_boolean(isFocus));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");

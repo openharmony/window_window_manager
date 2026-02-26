@@ -5959,6 +5959,14 @@ export function offWaterMarkFlagChange(callback?: Callback<boolean>): void {
   offSync(nativeObj, 'waterMarkFlagChange', callback);
 }
 
+export function onApplicationFocusStateChange(callback: Callback<boolean>): void {
+  onSync(nativeObj, 'applicationFocusStateChange', callback);
+}
+
+export function offApplicationFocusStateChange(callback?: Callback<boolean>): void {
+  offSync(nativeObj, 'applicationFocusStateChange', callback);
+}
+
 function runWindowListenerVoidArgCallback(cb: object): void {
   const func = cb as () => void;
   func();

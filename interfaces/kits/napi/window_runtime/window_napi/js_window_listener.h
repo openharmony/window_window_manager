@@ -69,6 +69,7 @@ extern const std::string WINDOW_HIGHLIGHT_CHANGE_CB;
 extern const std::string WINDOW_WILL_CLOSE_CB;
 extern const std::string WINDOW_ROTATION_CHANGE_CB;
 extern const std::string FREE_WINDOW_MODE_CHANGE_CB;
+extern const std::string APPLICATION_FOCUS_CHANGE_CB;
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
@@ -82,6 +83,7 @@ class JsWindowListener : public IWindowChangeListener,
                          public IDialogTargetTouchListener,
                          public IDialogDeathRecipientListener,
                          public IWaterMarkFlagChangedListener,
+                         public IApplicationFocusChangedListener,
                          public IGestureNavigationEnabledChangedListener,
                          public IWindowVisibilityChangedListener,
                          public IOcclusionStateChangedListener,
@@ -142,6 +144,7 @@ public:
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
+    void OnApplicationFocusUpdate(bool isFocus) override;
     napi_value CallJsMethod(const char* methodName, napi_value const * argv = nullptr, size_t argc = 0);
     void SetMainEventHandler();
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
