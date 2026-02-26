@@ -9050,6 +9050,7 @@ sptr<FocusNotifyInfo> SceneSessionManager::GetFocusNotifyInfo(DisplayId displayI
     if (focusedSession && nextSession) {
         focusNotifyInfo->isSyncNotify_ = focusedSession->GetCallingPid() == nextSession->GetCallingPid() &&
             !focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
+        focusNotifyInfo->isSameCallingPid_ = focusedSession->GetCallingPid() == nextSession->GetCallingPid();
     }
     return focusNotifyInfo;
 }
@@ -10018,6 +10019,10 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
             focusGroup->SetNeedBlockNotifyUnfocusStatus(false);
             auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
                 focusGroup->GetLastFocusedSessionId(), sceneSession->GetPersistentId(), false);
+            sptr<SceneSession> lastFocusedSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
+            if(lastFocusedSession != nullptr){
+                focusNotifyInfo->isSameCallingPid_ = lastFocusedSession->GetCallingPid() == sceneSession->GetCallingPid();
+            }
             NotifyFocusStatus(sceneSession, true, focusGroup, focusNotifyInfo);
             auto highlightNotifyInfo = sptr<HighlightNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
                 std::vector<int32_t>(), sceneSession->GetPersistentId(), false);
@@ -10214,6 +10219,10 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
             focusGroup->SetNeedBlockNotifyUnfocusStatus(false);
             auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
                 focusGroup->GetLastFocusedSessionId(), modalSession->GetPersistentId(), false);
+            sptr<SceneSession> lastFocusedSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
+            if(lastFocusedSession != nullptr){
+                focusNotifyInfo->isSameCallingPid_ = lastFocusedSession->GetCallingPid() == modalSession->GetCallingPid();
+            }
             NotifyFocusStatus(modalSession, true, focusGroup, focusNotifyInfo);
         }
         HandleKeepScreenOn(modalSession, modalSession->IsKeepScreenOn(), WINDOW_SCREEN_LOCK_PREFIX,

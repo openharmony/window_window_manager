@@ -724,6 +724,11 @@ HWTEST_F(SceneSessionManagerTest9, ProcessFocusWhenForeground, TestSize.Level1)
     sceneSession->isVisible_ = true;
     sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->ProcessFocusWhenForeground(sceneSession);
+
+    ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
+    focusGroup->SetFocusedSessionId(1);
+    ssm_->ProcessFocusWhenForeground(sceneSession);
+    ASSERT_NE(focusGroup->GetLastFocusedSessionId(), INVALID_SESSION_ID);
 }
 
 /**

@@ -32,6 +32,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
     {SYSTEM_BAR_TINT_CHANGE_CB, RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB},
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
     {WATER_MARK_FLAG_CHANGE_CB, RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB},
+    {APPLICATION_FOCUS_CHANGE_CB, RegisterListenerType::APPLICATION_FOCUS_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     // white register list for window
@@ -344,6 +345,25 @@ WmErrorCode AniWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<An
     }
     return ret;
 }
+
+WmErrorCode AniWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr<AniWindowListener> listener,
+                                                                         sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IApplicationFocusChangedListener> thisListener(listener);
+    WmErrorCode ret;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().RegisterApplicationFocusChangedListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(
+            SingletonContainer::Get<WindowManager>().UnregisterApplicationFocusChangedListener(thisListener));
+    }
+    return ret;
+}
+
 WmErrorCode AniWindowRegisterManager::ProcessTouchOutsideRegister(sptr<AniWindowListener> listener,
     sptr<Window> window, bool isRegister, ani_env* env)
 {
@@ -699,6 +719,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowManagerListener(RegisterListe
                 env);
         case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
             return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env);
+        case static_cast<uint32_t>(RegisterListenerType::APPLICATION_FOCUS_CHANGE_CB):
+            return ProcessApplicationFocusChangeRegister(windowManagerListener, window, isRegister, env);
         default:
             TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
                 static_cast<uint32_t>(registerListenerType));
