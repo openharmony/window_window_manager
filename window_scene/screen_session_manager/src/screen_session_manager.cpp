@@ -7113,9 +7113,23 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     TLOGNFW(WmsLogTag::DMS, "rsId: %{public}" PRIu64"", rsId);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:CreateVirtualScreen(%s)", option.name_.c_str());
     ScreenId smsScreenId = SCREEN_ID_INVALID;
+    
+    if (option.screenId_ != -1) {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        if (screenSessionMap_.find(option.screenId_) != screenSessionMap_.end()) {
+            TLOGNFE(WmsLogTag::DMS, "screenId_ %{public}d already exists", option.screenId_);
+            return SCREEN_ID_INVALID;
+        }
+        smsScreenId = option.screenId_;
+    }
+    
     if (!screenIdManager_.ConvertToSmsScreenId(rsId, smsScreenId)) {
         TLOGNFW(WmsLogTag::DMS, "!ConvertToSmsScreenId(rsId, smsScreenId)");
-        smsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
+        if (option.screenId_ == -1) {
+            smsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsId);
+        } else {
+            screenIdManager_.CreateScreenId(smsScreenId, rsId);
+        }
         auto screenSession = InitVirtualScreen(smsScreenId, rsId, option);
         if (screenSession == nullptr) {
             TLOGNFW(WmsLogTag::DMS, "screenSession is nullptr");
@@ -8242,6 +8256,23 @@ ScreenId ScreenSessionManager::ScreenIdManager::CreateAndGetNewScreenId(ScreenId
     }
     rs2SmsScreenIdMap_[rsScreenId] = smsScreenId;
     return smsScreenId;
+}
+
+void ScreenSessionManager::ScreenIdManager::CreateScreenId(ScreenId smsScreenId, ScreenId rsScreenId)
+{
+    std::unique_lock lock(screenIdMapMutex_);
+    TLOGNFI(WmsLogTag::DMS, "screenId: %{public}" PRIu64"", smsScreenId);
+    if (sms2RsScreenIdMap_.find(smsScreenId) != sms2RsScreenIdMap_.end()) {
+        TLOGNFW(WmsLogTag::DMS, "screenId: %{public}" PRIu64" exit", smsScreenId);
+    }
+    sms2RsScreenIdMap_[smsScreenId] = rsScreenId;
+    if (rsScreenId == SCREEN_ID_INVALID) {
+        return;
+    }
+    if (rs2SmsScreenIdMap_.find(rsScreenId) != rs2SmsScreenIdMap_.end()) {
+        TLOGNFW(WmsLogTag::DMS, "rsScreenId: %{public}" PRIu64" exit", rsScreenId);
+    }
+    rs2SmsScreenIdMap_[rsScreenId] = smsScreenId;
 }
 
 void ScreenSessionManager::ScreenIdManager::UpdateScreenId(ScreenId rsScreenId, ScreenId smsScreenId)

@@ -715,6 +715,12 @@ ScreenId ScreenManager::CreateVirtualScreen(VirtualScreenOption option)
 
 ScreenId ScreenManager::Impl::CreateVirtualScreen(VirtualScreenOption option)
 {
+    if (option.screenId_ != -1) {
+        if (option.screenId_ < 300 || option.screenId_ > 900) {
+            TLOGFE(WmsLogTag::DMS, "screenId_ %{public}d is out of range [300, 900]", option.screenId_);
+            return SCREEN_ID_INVALID;
+        }
+    }
     //  After the process creating the virtual screen is killed, DMS needs to delete the virtual screen
     std::lock_guard<std::mutex> agentLock(virtualScreenAgentMutex_);
     if (virtualScreenAgent_ == nullptr) {
