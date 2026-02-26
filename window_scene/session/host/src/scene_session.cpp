@@ -521,7 +521,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
         session->DisableUIFirstIfNeed();
-        if (session->GetNeedBackgroundAfterConnect()) {
+        if (session->GetNeedBackgroundAfterConnect() && systemConfig_.IsPcWindow()) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Need background after connect, id:%{public}d",
                 where, persistentId);
             session->SetNeedBackgroundAfterConnect(false);
