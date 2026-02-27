@@ -347,7 +347,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<An
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr<AniWindowListener> listener,
-                                                                         sptr<Window> window, bool isRegister, ani_env* env)
+     sptr<Window> window, bool isRegister, ani_env* env)
 {
     if (listener == nullptr) {
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;

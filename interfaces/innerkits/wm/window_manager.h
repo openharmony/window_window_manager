@@ -548,7 +548,7 @@ public:
 /**
  * @class IApplicationFocusChangedListener
  *
- * @brief Listener to observe water mark flag changed.
+ * @brief Listener to observe application process focus changed.
  */
 class IApplicationFocusChangedListener : virtual public RefBase {
 public:
@@ -557,7 +557,7 @@ public:
      *
      * @param isFocus True means application process focused, false application process unfocused.
      */
-    virtual void OnApplicationFocusUpdate(bool isFocus) = 0;
+    virtual void OnApplicationFocusUpdate(bool isFocused) = 0;
 };
 
 /**

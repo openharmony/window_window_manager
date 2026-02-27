@@ -102,7 +102,7 @@ public:
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
-    void OnApplicationFocusUpdate(bool isFocus) override;
+    void OnApplicationFocusUpdate(bool isFocused) override;
     void SetMainEventHandler();
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;

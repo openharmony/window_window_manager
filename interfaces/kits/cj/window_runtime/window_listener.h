@@ -96,7 +96,7 @@ public:
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
-    void OnApplicationFocusUpdate(bool isFocus) override;
+    void OnApplicationFocusUpdate(bool isFocused) override;
     void OnWindowVisibilityChangedCallback(const bool isVisible) override;
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
