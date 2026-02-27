@@ -1501,7 +1501,7 @@ public:
      * @brief notify application focus changed.
      * @param isFocus application focus state.
      */
-    void NotifyApplicationFocusChangedResult(bool isFocus);
+    void NotifyApplicationFocusChangedResult(bool isFocused);
 
     /**
      * @brief Add BundleNames to the list that will hide on virtual screen.

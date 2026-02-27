@@ -58,7 +58,7 @@ public:
         windowDrawingContentInfos);
     void UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool isShowing);
     void NotifyWaterMarkFlagChangedResult(bool showWaterMark);
-    void NotifyApplicationFocusChangedResult(bool showWaterMark);
+    void NotifyApplicationFocusChangedResult(bool isFocused);
     void NotifyVisibleWindowNumChanged(const std::vector<VisibleWindowNumInfo>& visibleWindowNumInfo);
     void NotifyGestureNavigationEnabledResult(bool enable);
     void NotifyDisplayInfoChanged(const sptr<IRemoteObject>& token, DisplayId displayId,
@@ -2126,9 +2126,9 @@ void WindowManager::NotifyWaterMarkFlagChangedResult(bool showWaterMark) const
     pImpl_->NotifyWaterMarkFlagChangedResult(showWaterMark);
 }
 
-void WindowManager::NotifyApplicationFocusChangedResult(bool isFocus) const
+void WindowManager::NotifyApplicationFocusChangedResult(bool isFocused) const
 {
-    pImpl_->NotifyApplicationFocusChangedResult(isFocus);
+    pImpl_->NotifyApplicationFocusChangedResult(isFocused);
 }
 
 void WindowManager::NotifyGestureNavigationEnabledResult(bool enable) const
