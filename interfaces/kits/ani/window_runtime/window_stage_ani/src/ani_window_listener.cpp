@@ -479,7 +479,7 @@ void AniWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
-                                            nullptr, thisListener->aniCallback_, ani_boolean(showWaterMark));
+            nullptr, thisListener->aniCallback_, ani_boolean(showWaterMark));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
@@ -500,7 +500,7 @@ void AniWindowListener::OnApplicationFocusUpdate(bool isFocused)
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
-                                            nullptr, thisListener->aniCallback_, ani_boolean(isFocused));
+            nullptr, thisListener->aniCallback_, ani_boolean(isFocused));
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::DEFAULT, "get main event handler failed!");
