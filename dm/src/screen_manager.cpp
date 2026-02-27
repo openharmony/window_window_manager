@@ -719,7 +719,7 @@ ScreenId ScreenManager::Impl::CreateVirtualScreen(VirtualScreenOption option)
 {
     if (option.screenId_ != -1) {
         if (option.screenId_ < MIN_VIRTUAL_SCREEN_ID || option.screenId_ > MAX_VIRTUAL_SCREEN_ID) {
-            TLOGFE(WmsLogTag::DMS, "screenId_ %{public}d is out of range [%{public}d, %{public}d]", 
+            TLOGE(WmsLogTag::DMS, "screenId_ %{public}d is out of range [%{public}d, %{public}d]", 
                 option.screenId_, MIN_VIRTUAL_SCREEN_ID, MAX_VIRTUAL_SCREEN_ID);
             return SCREEN_ID_INVALID;
         }
