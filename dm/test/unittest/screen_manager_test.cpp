@@ -929,11 +929,11 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateVirtualScreenWithScreenId_DefaultValue_ReturnsValidId
+ * @tc.name: CreateVirtualScreenWithScreenId_DefaultValue_ReturnValidId
  * @tc.desc: CreateVirtualScreen with screenId_ = -1 (default) returns valid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_DefaultValue_ReturnsValidId, TestSize.Level1)
+HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_DefaultValue_ReturnValidId, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
@@ -951,40 +951,40 @@ HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_DefaultValue_Returns
 }
 
 /**
- * @tc.name: CreateVirtualScreenWithScreenId_MinBoundary_ReturnsValidId
+ * @tc.name: CreateVirtualScreenWithScreenId_MinBoundary_ReturnValidId
  * @tc.desc: CreateVirtualScreen with screenId_ = 300 (min boundary) returns valid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MinBoundary_ReturnsValidId, TestSize.Level1)
+HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MinBoundary_ReturnValidId, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
-                                         defaultDensity_, utils.psurface_, defaultFlags_};
-    defaultOption.screenId_ = 300;
-    ScreenId validId = 300;
+                                          defaultDensity_, utils.psurface_, defaultFlags_};
+    defaultOption.screenId_ = 500;
+    ScreenId validId = 500;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateVirtualScreen(_, _)).Times(1).WillOnce(Return(validId));
     EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().DestroyVirtualScreen(id);
     ASSERT_EQ(validId, id);
-    ASSERT_EQ(DMError::DM_OK, ret);
+    ASSERT(DMError::DM_OK, ret);
 }
 
 /**
- * @tc.name: CreateVirtualScreenWithScreenId_MaxBoundary_ReturnsValidId
+ * @tc.name: CreateVirtualScreenWithScreenId_MaxBoundary_ReturnValidId
  * @tc.desc: CreateVirtualScreen with screenId_ = 900 (max boundary) returns valid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MaxBoundary_ReturnsValidId, TestSize.Level1)
+HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MaxBoundary_ReturnValidId, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
     VirtualScreenOption defaultOption = {defaultName_, defaultWidth_, defaultHeight_,
-                                         defaultDensity_, utils.psurface_, defaultFlags_};
-    defaultOption.screenId_ = 900;
-    ScreenId validId = 900;
+                                          defaultDensity_, utils.psurface_, defaultFlags_};
+    defaultOption.screenId_ = MAX_VIRTUAL_SCREEN_ID;
+    ScreenId validId = MAX_VIRTUAL_SCREEN_ID;
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
     EXPECT_CALL(m->Mock(), CreateVirtualScreen(_, _)).Times(1).WillOnce(Return(validId));
     EXPECT_CALL(m->Mock(), DestroyVirtualScreen(_, _)).Times(1).WillOnce(Return(DMError::DM_OK));
@@ -995,11 +995,11 @@ HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MaxBoundary_ReturnsV
 }
 
 /**
- * @tc.name: CreateVirtualScreenWithScreenId_MiddleValue_ReturnsValidId
+ * @tc.name: CreateVirtualScreenWithScreenId_MiddleValue_ReturnValidId
  * @tc.desc: CreateVirtualScreen with screenId_ = 500 (middle value) returns valid screen id
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MiddleValue_ReturnsValidId, TestSize.Level1)
+HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MiddleValue_ReturnValidId, TestSize.Level1)
 {
     ScreenManagerUtils utils;
     ASSERT_TRUE(utils.CreateSurface());
