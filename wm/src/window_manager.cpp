@@ -361,16 +361,16 @@ void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
     }
 }
 
-void WindowManager::Impl::NotifyApplicationFocusChangedResult(bool isFocus)
+void WindowManager::Impl::NotifyApplicationFocusChangedResult(bool isFocused)
 {
-    TLOGI(WmsLogTag::DEFAULT, "%{public}d", isFocus);
+    TLOGI(WmsLogTag::DEFAULT, "%{public}d", isFocused);
     std::vector<sptr<IApplicationFocusChangedListener>> applicationFocusChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         applicationFocusChangeListeners = applicationFocusChangeListeners_;
     }
     for (auto& listener : applicationFocusChangeListeners) {
-        listener->OnApplicationFocusUpdate(showWaterMark);
+        listener->OnApplicationFocusUpdate(isFocused);
     }
 }
 

@@ -632,7 +632,7 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
     }
 }
 
-void JsWindowListener::OnApplicationFocusUpdate(bool isFocus)
+void JsWindowListener::OnApplicationFocusUpdate(bool isFocused)
 {
     auto jsCallback = [self = weakRef_, isFocus, eng = env_] {
         auto thisListener = self.promote();

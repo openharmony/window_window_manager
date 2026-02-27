@@ -161,7 +161,7 @@ public:
 
 class TestApplicationFocusChangedListener : public IApplicationFocusChangedListener {
 public:
-    void OnApplicationFocusUpdate(bool isFocus) override
+    void OnApplicationFocusUpdate(bool isFocused) override
     {
         WLOGI("TestApplicationFocusChangedListener");
     };
