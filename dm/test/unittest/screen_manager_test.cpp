@@ -982,7 +982,7 @@ HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_MinBoundary_ReturnVa
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     DMError ret = ScreenManager::GetInstance().DestroyVirtualScreen(id);
     ASSERT_EQ(validId, id);
-    ASSERT(DMError::DM_OK, ret);
+    ASSERT_EQ(DMError::DM_OK, ret);
 }
 
 /**
