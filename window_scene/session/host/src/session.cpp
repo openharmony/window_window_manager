@@ -622,6 +622,7 @@ void Session::NotifyActivation()
             listenerPtr->OnActivation();
         }
     }
+    lastSnapshotScreen_ = WSSnapshotHelper::GetInstance()->GetScreenStatus();
     snapshotNeedCancel_.store(true);
 }
 
@@ -1437,6 +1438,9 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     }
     WSRect updateRect = IsNeedConvertToRelativeRect(reason) ?
         GetLayoutController()->ConvertGlobalRectToRelative(rect, GetDisplayId()) : rect;
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "id:[%d]rect[%d,%d,%d,%d]ConvertToRelativeRect[%d,%d,%d,%d]",
+        persistentId, rect.posX_, rect.posY_, rect.width_, rect.height_, updateRect.posX_, updateRect.posY_,
+        updateRect.width_, updateRect.height_);
 
     // Window Layout Global Coordinate System
     auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), updateRect);

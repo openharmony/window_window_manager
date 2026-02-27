@@ -3230,14 +3230,14 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation start";
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(screenSession, nullptr);
-    screenSession->UpdateDisplayNodeRotation(1);
+    screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
     ASSERT_EQ(screenSession->isExtended_, false);
 
     Rosen::RSDisplayNodeConfig rsConfig;
     rsConfig.isMirrored = true;
     rsConfig.screenId = 101;
     screenSession->CreateDisplayNode(rsConfig);
-    screenSession->UpdateDisplayNodeRotation(1);
+    screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
     ASSERT_EQ(screenSession->isExtended_, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
 }
@@ -5192,6 +5192,20 @@ HWTEST_F(ScreenSessionTest, ProcPropertyChange, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
     session->ProcPropertyChange(screenProperty, eventPara);
     EXPECT_EQ(screenProperty.GetPropertyChangeReason(), eventPara.GetPropertyChangeReason());
+}
+
+/**
+ * @tc.name: SetBootingConnect
+ * @tc.desc: SetBootingConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetBootingConnect, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetBootingConnect(true);
+    EXPECT_TRUE(session->IsBootingConnect());
 }
 } // namespace
 } // namespace Rosen

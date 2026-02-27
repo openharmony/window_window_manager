@@ -15109,8 +15109,12 @@ void SceneSessionManager::PostProcessProperty(uint32_t dirty)
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::PostProcessProperty");
     if (dirty == static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA)) {
         // only trigger update avoid area
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (auto& iter : sceneSessionMap_) {
+        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMapCopy = sceneSessionMap_;
+        }
+        for (auto& iter : sceneSessionMapCopy) {
             auto session = iter.second;
             if (session == nullptr) {
                 continue;
@@ -15151,15 +15155,17 @@ void SceneSessionManager::PostProcessProperty(uint32_t dirty)
     }
 
     // update avoid area
+    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (auto& iter : sceneSessionMap_) {
-            auto session = iter.second;
-            if (session == nullptr) {
-                continue;
-            }
-            session->PostProcessNotifyAvoidArea();
+        sceneSessionMapCopy = sceneSessionMap_;
+    }
+    for (auto& iter : sceneSessionMapCopy) {
+        auto session = iter.second;
+        if (session == nullptr) {
+            continue;
         }
+        session->PostProcessNotifyAvoidArea();
     }
 }
 
@@ -17280,6 +17286,9 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
     dmHookInfo.enableHookRotation_ = enable ? hookInfo.enableHookRotation_ : false;
     dmHookInfo.displayOrientation_ = hookInfo.displayOrientation_;
     dmHookInfo.enableHookDisplayOrientation_ = enable ? hookInfo.enableHookDisplayOrientation_ : false;
+    dmHookInfo.actualRect_ = { 
+        .posX_ = hookInfo.actualRect_.posX_, .posY_ = hookInfo.actualRect_.posY_,
+    .width_ = hookInfo.actualRect_.width_, .height_ = hookInfo.actualRect_.height_};
     {
         std::shared_lock lock(appHookWindowInfoMapMutex_);
         dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();

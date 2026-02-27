@@ -141,11 +141,6 @@ bool isMainOrExtendScreenMode(const ScreenSourceMode& screenSourceMode)
 }
 } // namespace
 
-namespace PARAM_KEY {
-const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
-const std::string PARAM_DMS_CONTINUE_SESSION_ID_KEY = "ohos.dms.continueSessionId";
-const std::string PARAM_DMS_PERSISTENT_ID_KEY = "ohos.dms.persistentId";
-}
 MaximizeMode SceneSession::maximizeMode_ = MaximizeMode::MODE_RECOVER;
 std::shared_mutex SceneSession::windowDragHotAreaMutex_;
 std::map<uint64_t, std::map<uint32_t, WSRect>> SceneSession::windowDragHotAreaMap_;
@@ -4118,7 +4113,13 @@ bool SceneSession::IsDraggable() const
         (GetSessionProperty()->GetIsPcAppInPad() && !isMainWindow));
     bool isPhoneWindowCanDrag = isFloatingDragAccessible && (isSystemWindow || isSubWindow) &&
         (systemConfig_.IsPhoneWindow() || (systemConfig_.IsPadWindow() && !IsFreeMultiWindowMode()));
-    return isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag;
+    bool isDraggable = isPcOrFreeMultiWindowCanDrag || isPhoneWindowCanDrag;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "IsDraggable: %{public}d, isPcOrFreeMultiWindowCanDrag: %{public}d, "
+        "isPhoneWindowCanDrag: %{public}d, isFloatingDragAccessible: %{public}d, "
+        "isDragAccessibleSystemWindow: %{public}d, id: %{public}d",
+        isDraggable, isPcOrFreeMultiWindowCanDrag, isPhoneWindowCanDrag,
+        isFloatingDragAccessible, isDragAccessibleSystemWindow, GetPersistentId());
+    return isDraggable;
 }
 
 WSError SceneSession::RequestSessionBack(bool needMoveToBackground)

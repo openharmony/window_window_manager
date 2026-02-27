@@ -635,6 +635,11 @@ public:
 
     static bool GetScreenSessionMngSystemAbility();
     void RunFinishTask();
+    bool IsHook(int32_t uid = INVALID_UID);
+    void HookRadius(DisplayId displayId, int& radius);
+
+    void SetOnBootAnimation(const bool onBootAnimation);
+    bool IsOnBootAnimation() const;
 
 protected:
     ScreenSessionManager();
@@ -916,6 +921,8 @@ private:
     std::vector<int32_t> oldScbPids_ {};
     std::map<int32_t, sptr<IScreenSessionManagerClient>> multiClientProxyMap_;
     std::mutex multiClientProxyMapMutex_;
+    std::mutex clientProxyPidMapMutex_;
+    std::map<int32_t, sptr<IScreenSessionManagerClient>> clientProxyPidMap_;
 
     /*
      * This map stores per-display and per-user information specifically for concurrent scenarios
@@ -1195,6 +1202,7 @@ private:
     std::mutex callbackMutex_;
     bool isSupportCapture_ = false;
     std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;
+    std::atomic<bool> onBootAnimation_ = false;
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
