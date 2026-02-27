@@ -929,6 +929,19 @@ HWTEST_F(ScreenManagerTest, MakeMirrorForRecord03, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetScreenPrivacyWindowTagSwitch
+ * @tc.desc: SetScreenPrivacyWindowTagSwitch test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenManagerTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
+{
+    ScreenId mainScreenId = 1;
+    std::vector<std::string> privacyWindowTag{"test1", "test2"};
+    DMError res = ScreenManager::GetInstance().SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
+    EXPECT_NE(result, DMError::DM_OK);
+}
+
+/**
  * @tc.name: CreateVirtualScreenWithScreenId_DefaultValue_ReturnValidId
  * @tc.desc: CreateVirtualScreen with screenId_ = -1 (default) returns valid screen id
  * @tc.type: FUNC
@@ -1078,19 +1091,6 @@ HWTEST_F(ScreenManagerTest, CreateVirtualScreenWithScreenId_LargeValue_ReturnsIn
     defaultOption.screenId_ = 1000;
     ScreenId id = ScreenManager::GetInstance().CreateVirtualScreen(defaultOption);
     ASSERT_EQ(SCREEN_ID_INVALID, id);
-}
-
-/**
- * @tc.name: SetScreenPrivacyWindowTagSwitch
- * @tc.desc: SetScreenPrivacyWindowTagSwitch test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenManagerTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
-{
-    ScreenId mainScreenId = 1;
-    std::vector<std::string> privacyWindowTag{"test1", "test2"};
-    DMError res = ScreenManager::GetInstance().SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
-    EXPECT_NE(result, DMError::DM_OK);
 }
 } // namespace
 } // namespace Rosen
