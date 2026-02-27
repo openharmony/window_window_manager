@@ -63,7 +63,7 @@ public:
         std::unique_ptr<FocusNotifyInfo> focusNotifyInfo = std::make_unique<FocusNotifyInfo>();
         bool res = parcel.ReadInt64(focusNotifyInfo->timeStamp_) &&
             parcel.ReadInt32(focusNotifyInfo->unfocusWindowId_) && parcel.ReadInt32(focusNotifyInfo->focusWindowId_) &&
-            parcel.ReadBool(focusNotifyInfo->isSyncNotify_) && parcel.ReadBool(isSameCallingPid_);
+            parcel.ReadBool(focusNotifyInfo->isSyncNotify_) && parcel.ReadBool(focusNotifyInfo->isSameCallingPid_);
         if (!res) {
             return nullptr;
         }
