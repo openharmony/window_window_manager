@@ -1741,7 +1741,7 @@ WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
 
 WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
 {
-    if (focusNotifyInfo == nullptr || !focusNotifyInfo->isSameCallingPid_) {
+    if (focusNotifyInfo != nullptr && !focusNotifyInfo->isSameCallingPid_) {
         SingletonContainer::Get<WindowManager>().NotifyApplicationFocusChangedResult(isFocused));
     }
     if (focusNotifyInfo == nullptr || !focusNotifyInfo->isSyncNotify_) {
