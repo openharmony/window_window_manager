@@ -300,15 +300,15 @@ void CjWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
     thisListener->CallCjMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), &waterMarkFlag);
 }
 
-void CjWindowListener::OnWaterMarkFlagUpdate(bool isFocus)
+void CjWindowListener::OnApplicationFocusUpdate(bool isFocused)
 {
     auto thisListener = weakRef_.promote();
     if (thisListener == nullptr) {
         return;
     }
 
-    bool isFocusFlag = isFocus;
-    thisListener->CallCjMethod(APPLICATION_FOCUS_CHANGE_CB.c_str(), &waterMarkFlag);
+    bool isFocusFlag = isFocused;
+    thisListener->CallCjMethod(APPLICATION_FOCUS_CHANGE_CB.c_str(), &isFocusFlag);
 }
 
 void CjWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)
