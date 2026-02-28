@@ -52,6 +52,7 @@
 #include "wm_common.h"
 #include "wm_math.h"
 #include "scene_board_judgement.h"
+#include "mock_permission.h"
 
 
 using namespace testing;
@@ -655,7 +656,7 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus, TestSize.Level1)
 
 /**
  * @tc.name: RequestFocus01
- * @tc.desc: RequestFocus with invalid permission test
+ * @tc.desc: RequestFocus with valid permission test
  * @tc.type: FUNC
  */
 HWTEST_F(WindowManagerServiceTest, RequestFocus01, TestSize.Level1)
@@ -669,6 +670,24 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus01, TestSize.Level1)
         ASSERT_EQ(res, WMError::WM_OK);
     }
     wms->accessTokenIdMaps_.clear();
+}
+
+/**
+ * @tc.name: RequestFocus02
+ * @tc.desc: RequestFocus with system calling permission test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, RequestFocus02, TestSize.Level1)
+{
+    uint32_t windowId = 1;
+    MockPermission::MockIsSystemCalling(true);
+    WMError res = wms->RequestFocus(windowId);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_NE(res, WMError::WM_ERROR_INVALID_OPERATION);
+    } else {
+        ASSERT_EQ(res, WMError::WM_OK);
+    }
+    MockPermission::ChangeMockStateToInit();
 }
 
 /**
@@ -861,7 +880,7 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, TestSize.Level1)
  * @tc.desc: RaiseToAppTop with valid permission test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowManagerServiceTest, RaiseToAppTop02, TestSize.Level1)
+HWTEST_F(WindowManagerServiceTest, RaiseToAppTop01, TestSize.Level1)
 {
     uint32_t windowId = 1;
     wms->accessTokenIdMaps_.insert(windowId, IPCSkeleton::GetCallingTokenID());
@@ -872,6 +891,24 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop02, TestSize.Level1)
         ASSERT_NE(WMError::WM_DO_NOTHING, res);
     }
     wms->accessTokenIdMaps_.clear();
+}
+
+/**
+ * @tc.name: RaiseToAppTop02
+ * @tc.desc: RaiseToAppTop with system calling permission test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, RaiseToAppTop02, TestSize.Level1)
+{
+    uint32_t windowId = 1;
+    MockPermission::MockIsSystemCalling(true);
+    WMError res = wms->RaiseToAppTop(windowId);
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ASSERT_EQ(WMError::WM_OK, res);
+    } else {
+        ASSERT_NE(WMError::WM_DO_NOTHING, res);
+    }
+    MockPermission::ChangeMockStateToInit();
 }
 
 /**
