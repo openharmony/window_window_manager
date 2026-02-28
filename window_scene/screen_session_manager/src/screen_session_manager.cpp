@@ -129,7 +129,9 @@ const ScreenId RS_ID_DEFAULT = 0;
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
 const ScreenId SCREEN_ID_PC_MAIN = 9;
-const ScreenId MINIMUM_VIRTUAL_SCREEN_ID = 1000;
+constexpr uint64_t MINIMUM_VIRTUAL_SCREEN_ID = 1000;
+constexpr uint64_t MIN_SET_VIRTUAL_SCREEN_ID = 500;
+constexpr uint64_t MAX_SET_VIRTUAL_SCREEN_ID = 900;
 const ScreenId CONTROL_PANEL_PHYSICAL_ID = 0;
 const ScreenId CO_DRIVER_PANEL_PHYSICAL_ID = 6;
 constexpr int32_t INVALID_SCB_PID = -1;
@@ -7526,7 +7528,9 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId, bool isCal
             return DMError::DM_ERROR_NOT_SYSTEM_APP;
         }
     }
-    if (static_cast<uint64_t>(screenId) < static_cast<uint64_t>(MINIMUM_VIRTUAL_SCREEN_ID)) {
+    uint64_t curScreenId = static_cast<uint64_t>(screenId);
+    if (curScreenId < MIN_SET_VIRTUAL_SCREEN_ID ||
+        (curScreenId > MAX_SET_VIRTUAL_SCREEN_ID && curScreenId < MINIMUM_VIRTUAL_SCREEN_ID)) {
         TLOGNFE(WmsLogTag::DMS, "virtual screenId is invalid, id: %{public}" PRIu64"", static_cast<uint64_t>(screenId));
         return DMError::DM_ERROR_INVALID_PARAM;
     }
