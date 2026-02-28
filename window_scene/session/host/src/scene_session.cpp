@@ -1855,7 +1855,6 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
 {
     PostTask([weakThis = wptr(this), rect, reason, rsTransaction, updateReason, where = __func__] {
         auto session = weakThis.promote();
-        int32_t persistentId = session->GetPersistentId();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
             return;
@@ -1866,6 +1865,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             return;
         }
 
+        int32_t persistentId = session->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdateRect %d [%d, %d, %u, %u]",
             persistentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
         // check whether to notify the client rect update
