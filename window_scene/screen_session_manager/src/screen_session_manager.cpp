@@ -7515,69 +7515,33 @@ DMError ScreenSessionManager::ResizeVirtualScreen(ScreenId screenId, uint32_t wi
 
 DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId, bool isCallingByThirdParty)
 {
-    if (isCallingByThirdParty) {
-        if (!Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
-            TLOGNFE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
-                SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-            return DMError::DM_ERROR_INVALID_PERMISSION;
-        }
-    } else {
-        if (!SessionPermission::IsSystemCalling()) {
-            TLOGNFE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
-                SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
-            return DMError::DM_ERROR_NOT_SYSTEM_APP;
-        }
+    DMError error = CheckDestroyVirtualScreenPermission(isCallingByThirdParty);
+    if (error != DMError::DM_OK) {
+        return error;
     }
-    uint64_t curScreenId = static_cast<uint64_t>(screenId);
-    if (curScreenId < MIN_SET_VIRTUAL_SCREEN_ID ||
-        (curScreenId > MAX_SET_VIRTUAL_SCREEN_ID && curScreenId < MINIMUM_VIRTUAL_SCREEN_ID)) {
-        TLOGNFE(WmsLogTag::DMS, "virtual screenId is invalid, id: %{public}" PRIu64"", static_cast<uint64_t>(screenId));
-        return DMError::DM_ERROR_INVALID_PARAM;
+
+    error = ValidateVirtualScreenId(screenId);
+    if (error != DMError::DM_OK) {
+        return error;
     }
-    // virtual screen destroy callback to notify scb
+
     TLOGNFW(WmsLogTag::DMS, "start");
     OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
-    {
-        std::lock_guard<std::mutex> lock(screenAgentMapMutex_);
-        screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
-        for (auto &agentIter : screenAgentMap_) {
-            auto iter = std::find(agentIter.second.begin(), agentIter.second.end(), screenId);
-            if (iter != agentIter.second.end()) {
-                iter = agentIter.second.erase(iter);
-                if (agentIter.first != nullptr && agentIter.second.empty()) {
-                    screenAgentMap_.erase(agentIter.first);
-                }
-                break;
-            }
-        }
-    }
+    screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
+    RemoveScreenFromAgentMap(screenId);
+
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyVirtualScreen(%" PRIu64")", screenId);
     auto screen = GetScreenSession(screenId);
-    if (rsScreenId != SCREEN_ID_INVALID && screen != nullptr) {
-        {
-            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
-            auto screenGroup = RemoveFromGroupLocked(screen);
-            if (screenGroup != nullptr) {
-                NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
-            }
-            screenSessionMap_.erase(screenId);
-        }
-        RemoveScreenCastInfo(screenId);
-        NotifyDisplayDestroy(screenId);
-        NotifyScreenDisconnected(screenId);
-        if (auto clientProxy = GetClientProxy()) {
-            clientProxy->OnVirtualScreenDisconnected(rsScreenId);
-        }
-        NotifyCaptureStatusChanged();
-    }
+    ProcessVirtualScreenDestroy(screenId, rsScreenId, screen);
+
     if (rsScreenId == SCREEN_ID_INVALID) {
         TLOGNFE(WmsLogTag::DMS, "No corresponding rsScreenId");
         return isCallingByThirdParty ? DMError::DM_ERROR_NULLPTR : DMError::DM_ERROR_INVALID_PARAM;
     }
     screenIdManager_.DeleteScreenId(screenId);
-    TLOGNFW(WmsLogTag::DMS, "destroy success, id: %{public}" PRIu64 ", rsId: %{public}" PRIu64, screenId, rsScreenId);
     virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;
+    NotifyCaptureStatusChanged();
     rsInterface_.RemoveVirtualScreen(rsScreenId);
     return DMError::DM_OK;
 }
@@ -15434,6 +15398,75 @@ void ScreenSessionManager::SetOnBootAnimation(const bool onBootAnimation)
 bool ScreenSessionManager::IsOnBootAnimation() const
 {
     return onBootAnimation_.load();
+}
+
+DMError ScreenSessionManager::CheckDestroyVirtualScreenPermission(bool isCallingByThirdParty)
+{
+    if (isCallingByThirdParty) {
+        if (!Permission::CheckCallingPermission(ACCESS_VIRTUAL_SCREEN_PERMISSION)) {
+            TLOGNFE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+                SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+            return DMError::DM_ERROR_INVALID_PERMISSION;
+        }
+    } else {
+        if (!SessionPermission::IsSystemCalling()) {
+            TLOGNFE(WmsLogTag::DMS, "Permission Denied! calling: %{public}s, pid: %{public}d",
+                SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
+            return DMError::DM_ERROR_NOT_SYSTEM_APP;
+        }
+    }
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::ValidateVirtualScreenId(ScreenId screenId)
+{
+    uint64_t curScreenId = static_cast<uint64_t>(screenId);
+    if (curScreenId < MIN_SET_VIRTUAL_SCREEN_ID ||
+        (curScreenId > MAX_SET_VIRTUAL_SCREEN_ID && curScreenId < MINIMUM_VIRTUAL_SCREEN_ID)) {
+        TLOGNFE(WmsLogTag::DMS, "virtual screenId is invalid, id: %{public}" PRIu64"", static_cast<uint64_t>(screenId));
+        return DMError::DM_ERROR_INVALID_PARAM;
+    }
+    return DMError::DM_OK;
+}
+
+void ScreenSessionManager::RemoveScreenFromAgentMap(ScreenId screenId)
+{
+    std::lock_guard<std::mutex> lock(screenAgentMapMutex_);
+    for (auto &agentIter : screenAgentMap_) {
+        auto iter = std::find(agentIter.second.begin(), agentIter.second.end(), screenId);
+        if (iter != agentIter.second.end()) {
+            iter = agentIter.second.erase(iter);
+            if (agentIter.first != nullptr && agentIter.second.empty()) {
+                screenAgentMap_.erase(agentIter.first);
+            }
+            break;
+        }
+    }
+}
+
+void ScreenSessionManager::ProcessVirtualScreenDestroy(ScreenId screenId, ScreenId rsScreenId, sptr<ScreenSession> screen)
+{
+    if (rsScreenId != SCREEN_ID_INVALID && screen != nullptr) {
+        {
+            std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+            auto screenGroup = RemoveFromGroupLocked(screen);
+            if (screenGroup != nullptr) {
+                NotifyScreenGroupChanged(screen->ConvertToScreenInfo(), ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+            }
+            screenSessionMap_.erase(screenId);
+        }
+        RemoveScreenCastInfo(screenId);
+        NotifyDisplayDestroy(screenId);
+        NotifyScreenDisconnected(screenId);
+        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screen->GetIsExtendVirtual()) {
+            SetIsExtendModelocked(false);
+            SetExpandAndHorizontalLocked(false);
+        }
+        if (auto clientProxy = GetClientProxy()) {
+            clientProxy->OnVirtualScreenDisconnected(rsScreenId);
+        }
+        TLOGNFW(WmsLogTag::DMS, "destroy success, id: %{public}" PRIu64 ", rsId: %{public}" PRIu64, screenId, rsScreenId);
+    }
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

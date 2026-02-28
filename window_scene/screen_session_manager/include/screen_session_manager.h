@@ -805,6 +805,10 @@ private:
 
         sptr<ScreenSession> secondaryScreenSession);
     bool IsSpecialApp();
+    DMError CheckDestroyVirtualScreenPermission(bool isCallingByThirdParty);
+    DMError ValidateVirtualScreenId(ScreenId screenId);
+    void RemoveScreenFromAgentMap(ScreenId screenId);
+    void ProcessVirtualScreenDestroy(ScreenId screenId, ScreenId rsScreenId, sptr<ScreenSession> screen);
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
