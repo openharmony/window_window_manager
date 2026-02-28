@@ -111,6 +111,7 @@ public:
     static void BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_object argv, ani_ref deathCallback);
     static void DestroyWindow(ani_env* env, ani_object obj, ani_long nativeObj);
+    static void CloseDirectly(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_boolean IsWindowHighlighted(ani_env* env, ani_object obj, ani_long nativeObj);
     static void HideWithAnimation(ani_env* env, ani_object obj, ani_long nativeObj);
@@ -294,6 +295,7 @@ private:
     void OnShowWindowWithOptions(ani_env* env, ani_object aniShowWindowOptions);
     void OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathCallback);
     void OnDestroyWindow(ani_env* env);
+    void OnCloseDirectly(ani_env* env);
     ani_boolean OnIsWindowShowing(ani_env* env);
     ani_boolean OnIsWindowHighlighted(ani_env* env);
     void OnHideWithAnimation(ani_env* env);
