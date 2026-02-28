@@ -690,13 +690,15 @@ void AniWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
 {
     TLOGI(WmsLogTag::WMS_PC, "[ANI]");
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr || thisListener->aniCallback_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "[ANI]this listener, env_ or callback is nullptr");
+    auto aniVm = AniVm(vm_);
+    auto env = aniVm.GetAniEnv();
+    if (thisListener == nullptr || env == nullptr || thisListener->aniCallback_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI]this listener, env or callback is nullptr");
         return;
     }
     ani_ref preClose;
-    AniWindowUtils::CallAniFunctionRef(env_, preClose, thisListener->aniCallback_, 0);
-    auto aniRet = AniWindowUtils::GetBooleanObject(env_, static_cast<ani_object>(preClose), terminateCloseProcess);
+    AniWindowUtils::CallAniFunctionRef(env, preClose, thisListener->aniCallback_, 0);
+    auto aniRet = AniWindowUtils::GetBooleanObject(env, static_cast<ani_object>(preClose), terminateCloseProcess);
     if (aniRet != ANI_OK) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]Get terminateCloseProcess failed, ret: %{public}u", aniRet);
     }

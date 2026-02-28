@@ -2971,9 +2971,10 @@ void AniWindow::CloseDirectly(ani_env* env, ani_object obj, ani_long nativeObj)
     TLOGI(WmsLogTag::WMS_PC, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow != nullptr) {
-        aniWindow->OnDestroyWindow(env);
+        aniWindow->OnCloseDirectly(env);
     } else {
         TLOGE(WmsLogTag::WMS_PC, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
 
