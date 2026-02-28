@@ -16,8 +16,8 @@
 #include "mock_permission.h"
 #include "permission.h"
 
-using namespace OHOS::Security::AccessToken;
-namespace OHOS::Rosen {
+namespace OHOS {
+namespace Rosen {
 namespace {
 bool g_isSystemCalling = false;
 }
@@ -31,11 +31,11 @@ void MockPermission::ChangeMockStateToInit()
 {
     g_isSystemCalling = true;
 }
+
+bool Permission::IsSystemCalling(bool isLocalSysCalling)
+{
+    return g_isSystemCalling;
 }
 
-namespace OHOS::Security::AccessToken {
-bool TokenIdKit::IsSystemAppByFullTokenID(uint64_t tokenId)
-{
-    return Rosen::g_isSystemCalling;
-}
-} // namespace OHOS::Security::AccessToken
+}  // Rosen
+}  // OHOS
