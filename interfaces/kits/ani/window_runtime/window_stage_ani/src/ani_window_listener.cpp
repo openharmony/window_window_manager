@@ -69,7 +69,7 @@ void AniWindowListener::OnSizeChange(Rect rect, WindowSizeChangeReason reason,
     }
     currRect_ = rect;
 
-    auto task = [self = weakRef_, rect, vm = vm_] () {
+    auto task = [self = weakRef_, rect, vm = vm_] {
         auto listener = self.promote();
         RETURN_IF_NULL(listener);
         RETURN_IF_NULL(listener->aniCallback_);
@@ -487,7 +487,7 @@ void AniWindowListener::OnWindowStatusChange(WindowStatus windowstatus)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI] windowstatus: %{public}u", windowstatus);
 
-    auto task = [self = weakRef_, windowstatus, vm = vm_] () {
+    auto task = [self = weakRef_, windowstatus, vm = vm_] {
         auto listener = self.promote();
         RETURN_IF_NULL(listener);
         RETURN_IF_NULL(listener->aniCallback_);
@@ -632,7 +632,7 @@ void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
         rectChangeReason = RectChangeReason::MOVE;
     }
 
-    auto task = [self = weakRef_, rect, rectChangeReason, vm = vm_] () {
+    auto task = [self = weakRef_, rect, rectChangeReason, vm = vm_] {
         auto listener = self.promote();
         RETURN_IF_NULL(listener);
         RETURN_IF_NULL(listener->aniCallback_);
@@ -766,7 +766,7 @@ void AniWindowListener::OnRectChangeInGlobalDisplay(const Rect& rect, WindowSize
     auto it = JS_SIZE_CHANGE_REASON.find(reason);
     RectChangeReason rectChangeReason = (it != JS_SIZE_CHANGE_REASON.end()) ? it->second : RectChangeReason::UNDEFINED;
 
-    auto task = [self = weakRef_, rect, rectChangeReason, vm = vm_] () {
+    auto task = [self = weakRef_, rect, rectChangeReason, vm = vm_] {
         auto listener = self.promote();
         RETURN_IF_NULL(listener);
         RETURN_IF_NULL(listener->aniCallback_);
@@ -814,7 +814,7 @@ void AniWindowListener::OnWindowStatusDidChange(WindowStatus status)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI] status: %{public}u", status);
 
-    auto task = [self = weakRef_, status, vm = vm_] () {
+    auto task = [self = weakRef_, status, vm = vm_] {
         auto listener = self.promote();
         RETURN_IF_NULL(listener);
         RETURN_IF_NULL(listener->aniCallback_);
