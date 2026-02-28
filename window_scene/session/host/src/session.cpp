@@ -1342,7 +1342,6 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
         updatedDisplayId = VIRTUAL_DISPLAY_ID;
         rect.posY_ -= lowerScreenPosY;
     }
-
     return updatedDisplayId;
 }
 
