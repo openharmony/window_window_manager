@@ -188,7 +188,8 @@ void AniWindowListener::OnDisplayIdChanged(DisplayId displayId)
 void AniWindowListener::LifeCycleCallback(LifeCycleEventType eventType)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]LifeCycleCallback, envent type: %{public}u", eventType);
-    auto task = [self = weakRef_, eventType, caseType = caseType_, vm = vm_] () {
+    const char* const where = __func__;
+    auto task = [self = weakRef_, where, eventType, caseType = caseType_, vm = vm_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::LifeCycleCallback");
         auto thisListener = self.promote();
         auto aniVm = AniVm(vm);
@@ -212,7 +213,8 @@ void AniWindowListener::LifeCycleCallback(LifeCycleEventType eventType)
 void AniWindowListener::WindowStageLifecycleCallback(WindowStageLifecycleEventType eventType)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]windowStageLifecycleCallback, envent type: %{public}u", eventType);
-    auto task = [self = weakRef_, eventType, vm = vm_] () {
+    const char* const where = __func__;
+    auto task = [self = weakRef_, where, eventType, vm = vm_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::windowStageLifecycleCallback");
         auto thisListener = self.promote();
         auto aniVm = AniVm(vm);
