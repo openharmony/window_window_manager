@@ -4558,13 +4558,13 @@ bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!CheckCanMoveWindowTypeByDevice()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "invalid window type:%{public}u", GetType());
-        return WmErrorCode::WM_ERROR_INVALID_CALLING;
-    }
     if (!CalcWindowShouldMove()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
         return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (!CheckCanMoveWindowTypeByDevice()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "invalid window type:%{public}u", GetType());
+        return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
     if (CheckIsPcAppInPadFullScreenOnMobileWindowMode()) {
         return WmErrorCode::WM_OK;

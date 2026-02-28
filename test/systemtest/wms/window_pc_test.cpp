@@ -360,11 +360,11 @@ HWTEST_F(WindowPCTest, StartMoveWindow01, TestSize.Level1)
     ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
 
     window->Destroy(true, true);
 }
