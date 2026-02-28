@@ -1029,7 +1029,6 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
 TopWindowInfo DoGetTopWindow(AppExecFwk::Ability* ability, bool isOldApi, bool newApi, void* contextPtr)
 {
     TopWindowInfo info;
-    std::string errMsg = "";
     int32_t errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
         static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
     if (isOldApi) {
