@@ -792,6 +792,8 @@ public:
     WSError UpdateClientRectInfo(const WSRect& rect, SizeChangeReason reason,
                                  const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
                                  const std::shared_ptr<RSTransaction>& rsTransaction);
+    bool IsCompatibilityModeSubWin() const;
+    virtual bool IsCrossAxisOfLayout() const { return false; }
 
     /*
      * Screen Lock
