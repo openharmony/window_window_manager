@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ani_window.h"
 #include "ani_window_listener.h"
 
 #include <hitrace_meter.h>
@@ -600,8 +601,10 @@ void AniWindowListener::OnFrameMetricsChanged(const FrameMetrics& metrics)
 
 void AniWindowListener::OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect)
 {
-    auto task = [self = weakRef_, titleButtonRect, eng = env_] () {
+    auto task = [self = weakRef_, titleButtonRect, vm = vm_] () {
         auto thisListener = self.promote();
+        auto aniVm = AniVm(vm);
+        auto eng = aniVm.GetAniEnv();
         if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
             TLOGE(WmsLogTag::WMS_DECOR, "[ANI]this listener, eng or callback is nullptr");
             return;
@@ -697,6 +700,28 @@ void AniWindowListener::OnMainWindowClose(bool& terminateCloseProcess)
     if (aniRet != ANI_OK) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]Get terminateCloseProcess failed, ret: %{public}u", aniRet);
     }
+}
+
+void AniWindowListener::OnWindowWillClose(sptr<Window> window)
+{
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]");
+    auto task = [self = weakRef_, vm = vm_, weakWindow = wptr<Window>(window)] {
+        auto thisListener = self.promote();
+        auto aniVm = AniVm(vm);
+        auto eng = aniVm.GetAniEnv();
+        auto window = weakWindow.promote();
+        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::WMS_PC, "[ANI]this listener, eng or callback is nullptr");
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowWillCloseListenerCallback",
+            nullptr, thisListener->aniCallback_, AniWindow::CreateAniWindow(eng, window));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_PC, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 void AniWindowListener::AfterLifecycleForeground()

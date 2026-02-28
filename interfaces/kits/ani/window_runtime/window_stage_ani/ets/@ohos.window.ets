@@ -3055,6 +3055,7 @@ export class WindowInternal implements Window {
     private native showWindowSync(nativeObj: long): void;
     private native showWindowWithOptions(nativeObj: long, options: ShowWindowOptions): void;
     private native destroyWindowSync(nativeObj: long): void;
+    private native closeDirectlySync(nativeObj: long): void;
     private native isWindowShowingSync(nativeObj: long): boolean;
     private native isWindowHighlightedSync(nativeObj: long): boolean;
     private native hideWithAnimationSync(nativeObj: long): void;
@@ -4634,6 +4635,10 @@ export class WindowInternal implements Window {
       });
     }
 
+    public closeDirectly(): void {
+      this.closeDirectlySync(this.nativeObj);
+    }
+
     public isWindowShowing(): boolean {
       return this.isWindowShowingSync(this.nativeObj);
     }
@@ -5967,6 +5972,20 @@ function runWindowListenerVoidArgCallback(cb: object): void {
 function runWindowListenerBooleanArgCallback(cb: object, cbArg: boolean): void {
   const func = cb as (cbArg: boolean) => void;
   func(cbArg);
+}
+
+function runWindowWillCloseListenerCallback(cb: object, cbArg: object): void {
+  const func = cb as () => Promise<boolean>;
+  const window = cbArg as WindowInternal;
+  func().then((result: boolean) => {
+    if (!result) {
+      window.closeDirectly();
+    }
+  }).catch((error: Error) => {
+    hilog.error(DOMAIN, TAG,
+      `runWindowWillCloseListenerCallback errorCode = ${error.code}, message = ${error.message}`);
+    window.closeDirectly();
+  });
 }
 
 function runSystemDensityChangeCallback(cb: object, density: double): void {
