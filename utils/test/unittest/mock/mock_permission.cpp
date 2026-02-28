@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,10 @@
  */
 
 #include "mock_permission.h"
-#include "permission.h"
+#include "tokenid_kit.h"
 
-namespace OHOS {
-namespace Rosen {
+using namespace OHOS::Security::AccessToken;
+namespace OHOS::Rosen {
 namespace {
 bool g_isSystemCalling = false;
 }
@@ -29,13 +29,13 @@ void MockPermission::MockIsSystemCalling(const bool isSystemCalling)
 
 void MockPermission::ChangeMockStateToInit()
 {
-    g_isSystemCalling = true;
+    g_isSystemCalling = false;
+}
 }
 
-bool Permission::IsSystemCalling(bool isLocalSysCalling)
+namespace OHOS::Security::AccessToken {
+bool TokenIdKit::IsSystemAppByFullTokenID(uint64_t tokenId)
 {
-    return g_isSystemCalling;
+    return Rosen::g_isSystemCalling;
 }
-
-}  // Rosen
-}  // OHOS
+} // namespace OHOS::Security::AccessToken
