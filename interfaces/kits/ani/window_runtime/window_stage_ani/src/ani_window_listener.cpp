@@ -195,7 +195,7 @@ void AniWindowListener::LifeCycleCallback(LifeCycleEventType eventType)
         auto aniVm = AniVm(vm);
         auto env = aniVm.GetAniEnv();
         if (thisListener == nullptr || env == nullptr || thisListener->aniCallback_ == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "[ANI] %{public}s: listener or env is null", where);
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s: listener or env is null", where);
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window",
@@ -220,7 +220,7 @@ void AniWindowListener::WindowStageLifecycleCallback(WindowStageLifecycleEventTy
         auto aniVm = AniVm(vm);
         auto env = aniVm.GetAniEnv();
         if (thisListener == nullptr || env == nullptr || thisListener->aniCallback_ == nullptr) {
-            TLOGNE(WmsLogTag::DEFAULT, "[ANI] %{public}s: listener or env is null", where);
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s: listener or env is null", where);
             return;
         }
         AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runWindowStageLifecycleEventCallback",
