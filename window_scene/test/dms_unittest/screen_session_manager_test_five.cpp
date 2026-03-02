@@ -1212,7 +1212,7 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition06, TestSize.Le
  */
 HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ASSERT_EQ(ssm_->isCoordinationFlag_, false);
     ssm_->SetCoordinationFlag(true);
     ASSERT_EQ(ssm_->isCoordinationFlag_, true);
