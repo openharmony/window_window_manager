@@ -188,14 +188,17 @@ void AniWindowListener::OnDisplayIdChanged(DisplayId displayId)
 void AniWindowListener::LifeCycleCallback(LifeCycleEventType eventType)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]LifeCycleCallback, envent type: %{public}u", eventType);
-    auto task = [self = weakRef_, eventType, caseType = caseType_, eng = env_] () {
+    const char* const where = __func__;
+    auto task = [self = weakRef_, where, eventType, caseType = caseType_, vm = vm_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::LifeCycleCallback");
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener or eng is nullptr");
+        auto aniVm = AniVm(vm);
+        auto env = aniVm.GetAniEnv();
+        if (thisListener == nullptr || env == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s: listener or env is null", where);
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window",
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window",
             caseType == CaseType::CASE_STAGE ? "runWindowStageEventCallback" : "runWindowEventCallback",
             nullptr, thisListener->aniCallback_, static_cast<ani_int>(eventType));
     };
@@ -210,14 +213,17 @@ void AniWindowListener::LifeCycleCallback(LifeCycleEventType eventType)
 void AniWindowListener::WindowStageLifecycleCallback(WindowStageLifecycleEventType eventType)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]windowStageLifecycleCallback, envent type: %{public}u", eventType);
-    auto task = [self = weakRef_, eventType, eng = env_] () {
+    const char* const where = __func__;
+    auto task = [self = weakRef_, where, eventType, vm = vm_] () {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "AniWindowListener::windowStageLifecycleCallback");
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener or eng is nullptr");
+        auto aniVm = AniVm(vm);
+        auto env = aniVm.GetAniEnv();
+        if (thisListener == nullptr || env == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] %{public}s: listener or env is null", where);
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowStageLifecycleEventCallback",
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runWindowStageLifecycleEventCallback",
             nullptr, thisListener->aniCallback_, static_cast<ani_int>(eventType));
     };
     if (!eventHandler_) {
@@ -681,13 +687,15 @@ void AniWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason reason)
 void AniWindowListener::OnSubWindowClose(bool& terminateCloseProcess)
 {
     TLOGI(WmsLogTag::WMS_SUB, "[ANI]");
-    auto task = [self = weakRef_, eng = env_, terminateCloseProcess] {
+    auto task = [self = weakRef_, vm = vm_, terminateCloseProcess] {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr || thisListener->aniCallback_ == nullptr) {
-            TLOGE(WmsLogTag::WMS_SUB, "[ANI]this listener, eng or callback is nullptr");
+        auto aniVm = AniVm(vm);
+        auto env = aniVm.GetAniEnv();
+        if (thisListener == nullptr || env == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI]this listener, env or callback is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runWindowListenerBooleanArgCallback",
             nullptr, thisListener->aniCallback_, ani_boolean(terminateCloseProcess));
     };
     if (!eventHandler_) {
