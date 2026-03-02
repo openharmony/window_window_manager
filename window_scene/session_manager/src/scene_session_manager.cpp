@@ -9050,7 +9050,7 @@ sptr<FocusNotifyInfo> SceneSessionManager::GetFocusNotifyInfo(DisplayId displayI
         nextSessionId, false);
     if (focusedSession && nextSession) {
         focusNotifyInfo->isSameCallingPid_ = focusedSession->GetCallingPid() == nextSession->GetCallingPid();
-        focusNotifyInfo->isSyncNotify_ = isSameCallingPid_ &&
+        focusNotifyInfo->isSyncNotify_ = focusNotifyInfo->isSameCallingPid_ &&
             !focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
     }
     return focusNotifyInfo;
