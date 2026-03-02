@@ -11297,14 +11297,23 @@ bool ScreenSessionManager::HandleSwitchPcMode()
         }
         TLOGNFI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
+        ChangeWatchDogTimeInterval(SCREEN_SESSION_MANAGER_THREAD, PC_WATCH_DOG_TIME_INTERVAL);
     } else {
         if (isPhyScreenConnected_) {
             RegisterSettingWiredScreenGamutObserver();
         }
         TLOGNFI(WmsLogTag::DMS, "PadMode change isPcDevice false");
         g_isPcDevice = false;
+        ChangeWatchDogTimeInterval(SCREEN_SESSION_MANAGER_THREAD, NON_PC_WATCH_DOG_TIME_INTERVAL);
     }
     return g_isPcDevice;
+}
+
+void ScreenSessionManager::ChangeWatchDogTimeInterval(const std::string& name, uint64_t interval)
+{
+    HiviewDFX::Watchdog::GetInstance().RemoveThread(SCREEN_SESSION_MANAGER_THREAD);
+    HiviewDFX::Watchdog::GetInstance().AddThread(SCREEN_SESSION_MANAGER_THREAD,
+            taskScheduler_->GetEventHandler(), interval);
 }
 
 void ScreenSessionManager::SwitchModeHandleExternalScreen(bool isSwitchToPcMode)
