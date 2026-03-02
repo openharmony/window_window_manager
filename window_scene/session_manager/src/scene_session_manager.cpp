@@ -17674,7 +17674,7 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
 }
 
 WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string& bundleName,
-    const bool enableForceSplit)
+    const bool enableForceSplit, bool needUpdateViewport)
 {
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_COMPAT, "bundle name is empty");
@@ -17701,10 +17701,11 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
         auto& session = iter.second;
         if (session && session->GetSessionInfo().bundleName_ == bundleName &&
             SessionHelper::IsMainWindow(session->GetWindowType())) {
-            session->NotifyAppForceLandscapeConfigEnableUpdated();
+            session->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
         }
     }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d", bundleName.c_str(), enableForceSplit);
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d, needUpdateViewport:%{public}d",
+        bundleName.c_str(), enableForceSplit, needUpdateViewport);
     return WSError::WS_OK;
 }
 

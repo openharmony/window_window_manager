@@ -702,7 +702,8 @@ public:
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, AppForceLandscapeConfig& config);
-    WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape);
+    WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape,
+        bool needUpdateViewport = false);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
     bool GetAppForceLandscapeConfigEnable(const std::string& bundleName);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
