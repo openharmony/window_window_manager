@@ -109,7 +109,7 @@ test_public_config = [
 ohos_unittest("wmserver_window_manager_service_test") {
   module_out_path = module_out_path
 
-  sources = ["window_manager_service_test.cpp"]
+  sources = [ "window_manager_service_test.cpp" ]
   configs = test_public_config
 
   deps = test_inner_deps
