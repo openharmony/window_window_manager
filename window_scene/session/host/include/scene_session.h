@@ -1653,6 +1653,7 @@ private:
     * Window Lifecycle
     */
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
+    void SyncUISessionState();
 
     /**
      * Window Transition Animation For PC
