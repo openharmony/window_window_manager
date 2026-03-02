@@ -5961,7 +5961,7 @@ export function offWaterMarkFlagChange(callback?: Callback<boolean>): void {
 
 export function onApplicationFocusStateChange(callback: Callback<boolean>): void {
   onSync(nativeObj, 'applicationFocusStateChange', callback);
-}
+} 
 
 export function offApplicationFocusStateChange(callback?: Callback<boolean>): void {
   offSync(nativeObj, 'applicationFocusStateChange', callback);

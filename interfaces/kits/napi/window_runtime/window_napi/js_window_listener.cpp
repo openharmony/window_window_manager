@@ -69,7 +69,7 @@ const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
 const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
 const std::string FREE_WINDOW_MODE_CHANGE_CB = "freeWindowModeChange";
-const std::string APPLICATION_FOCUS_CHANGE_CB = "applicationFocusStageChange";
+const std::string APPLICATION_FOCUS_STATE_CHANGE_CB = "applicationFocusStageChange";
 
 JsWindowListener::~JsWindowListener()
 {
@@ -634,17 +634,17 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
 
 void JsWindowListener::OnApplicationFocusUpdate(bool isFocused)
 {
-    auto jsCallback = [self = weakRef_, isFocus, eng = env_] {
+    auto jsCallback = [self = weakRef_, isFocus, env = env_] {
         auto thisListener = self.promote();
-        if (thisListener == nullptr || eng == nullptr) {
-            WLOGFE("this listener or eng is nullptr");
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "this listener or eng is nullptr");
             return;
         }
-        napi_value argv[] = {CreateJsValue(eng, isFocus)};
-        thisListener->CallJsMethod(WATER_MARK_FLAG_CHANGE_CB.c_str(), argv, ArraySize(argv));
+        napi_value argv[] = {CreateJsValue(env, isFocused)};
+        thisListener->CallJsMethod(APPLICATION_FOCUS_STATE_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnApplicationFocusUpdate") != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Failed to send event");
     }
 }
 

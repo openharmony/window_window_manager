@@ -308,7 +308,7 @@ void CjWindowListener::OnApplicationFocusUpdate(bool isFocused)
     }
 
     bool isFocusFlag = isFocused;
-    thisListener->CallCjMethod(APPLICATION_FOCUS_CHANGE_CB.c_str(), &isFocusFlag);
+    thisListener->CallCjMethod(APPLICATION_FOCUS_STATE_CHANGE_CB.c_str(), &isFocusFlag);
 }
 
 void CjWindowListener::OnWindowVisibilityChangedCallback(const bool isVisible)

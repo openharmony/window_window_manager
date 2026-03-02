@@ -48,7 +48,7 @@ const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
 const std::string WINDOW_SUB_WINDOW_CLOSE_CB = "subWindowClose";
 const std::string WINDOW_STAGE_CLOSE_CB = "windowStageClose";
 const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
-const std::string APPLICATION_FOCUS_CHANGE_CB = "applicationFocusStageChange";
+const std::string APPLICATION_FOCUS_STATE_CHANGE_CB = "applicationFocusStageChange";
 
 class CjWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,
