@@ -3749,6 +3749,25 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleOsSwitchStatusChange
+ * @tc.desc: HandleOsSwitchStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleOsSwitchStatusChange, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
+        GTEST_SKIP();
+    }
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+ 
+    ssm_->HandleOsSwitchStatusChange();
+    EXPECT_TRUE(g_errLog.find("Os Switch change") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
  * @tc.name: HandleResolutionEffectAfterSwitchUser
  * @tc.desc: HandleResolutionEffectAfterSwitchUser
  * @tc.type: FUNC
