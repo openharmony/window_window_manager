@@ -1078,7 +1078,7 @@ WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
     if (!accessTokenIdMaps_.isExist(windowId, IPCSkeleton::GetCallingTokenID()) &&
         !Permission::IsSystemCalling()) {
-        WLOGE("RequestFocus operation rejected");
+        TLOGE(WmsLogTag::WMS_FOCUS, "Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     auto task = [this, windowId]() {
@@ -1472,7 +1472,7 @@ WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
     if (!accessTokenIdMaps_.isExist(windowId, IPCSkeleton::GetCallingTokenID()) &&
         !Permission::IsSystemCalling()) {
-        WLOGE("RaiseToAppTop operation rejected");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Operation rejected");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     auto task = [this, windowId]() {
