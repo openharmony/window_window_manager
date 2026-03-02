@@ -705,13 +705,13 @@ WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
     return WMError::WM_OK;
 }
 
-WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
+    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
 }
 
 bool MainSession::GetSessionBoundedSystemTray(
