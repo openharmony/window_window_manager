@@ -1749,15 +1749,15 @@ napi_value JsWindowManager::OnGetVisibleWindowInfo(napi_env env, napi_callback_i
     napi_value lastParam = argc <= 0 || GetType(env, argv[0]) != napi_function ? nullptr : argv[0];
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [env, task = napiAsyncTask]() {
+    auto asyncTask = [env, apiVersion, task = napiAsyncTask, where = __func__]() {
         std::vector<sptr<WindowVisibilityInfo>> infos;
         WmErrorCode ret =
             WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().GetVisibilityWindowInfo(infos));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, CreateJsWindowInfoArrayObject(env, infos));
-            TLOGND(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo success");
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success: api=%{public}u", where, apiVersion);
         } else {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "OnGetVisibleWindowInfo failed");
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed: api=%{public}u", where, apiVersion);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
                 "[window][getVisibleWindowInfo]"));
         }
