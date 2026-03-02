@@ -852,11 +852,11 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubSessionForeground04, TestSize.Level
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "ProcessSubSessionForeground04";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    EXPECT_NE(nullptr, sceneSession);
 
     SessionInfo subSessionInfo;
     sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
-    ASSERT_NE(nullptr, subSceneSession);
+    EXPECT_NE(nullptr, subSceneSession);
     subSceneSession->SetTopmost(true);
     subSceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     subSceneSession->persistentId_ = 100;
@@ -867,7 +867,7 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubSessionForeground04, TestSize.Level
     focusGroup->SetFocusedSessionId(100);
     ssm_->needBlockNotifyFocusStatusUntilForeground_ = true;
     ssm_->ProcessSubSessionForeground(sceneSession);
-    ASSERT_NE(nullptr, ssm_->GetSceneSession(focusGroup->GetFocusedSessionId()));
+    EXPECT_NE(nullptr, ssm_->GetSceneSession(focusGroup->GetFocusedSessionId()));
 }
 
 /**

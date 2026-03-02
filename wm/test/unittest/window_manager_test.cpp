@@ -163,7 +163,7 @@ class TestApplicationFocusChangedListener : public IApplicationFocusChangedListe
 public:
     void OnApplicationFocusUpdate(bool isFocused) override
     {
-        WLOGI("TestApplicationFocusChangedListener");
+        TLOGI(WmslogtaG::WMS_FOCUS,"TestApplicationFocusChangedListener");
     };
 };
 
@@ -356,18 +356,17 @@ HWTEST_F(WindowManagerTest, NotifyApplicationFocusChangedResult, TestSize.Level1
  */
 HWTEST_F(WindowManagerTest, RegisterApplicationFocusChangedListener01, TestSize.Level1)
 {
-    ASSERT_NE(instance_, nullptr);
     instance_->pImpl_->applicationFocusChangeListeners_.clear();
 
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterApplicationFocusChangedListener(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->RegisterApplicationFocusChangedListener(nullptr));
 
     auto listener = sptr<TestApplicationFocusChangedListener>::MakeSptr();
     instance_->RegisterApplicationFocusChangedListener(listener);
-    ASSERT_EQ(1, instance_->pImpl_->applicationFocusChangeListeners_.size());
+    EXPECT_EQ(1, instance_->pImpl_->applicationFocusChangeListeners_.size());
 
     // to check that the same listner can not be registered twice
     instance_->RegisterApplicationFocusChangedListener(listener);
-    ASSERT_EQ(1, instance_->pImpl_->applicationFocusChangeListeners_.size());
+    EXPECT_EQ(1, instance_->pImpl_->applicationFocusChangeListeners_.size());
 }
 
 /**
@@ -377,23 +376,22 @@ HWTEST_F(WindowManagerTest, RegisterApplicationFocusChangedListener01, TestSize.
  */
 HWTEST_F(WindowManagerTest, UnregisterApplicationFocusChangedListener, TestSize.Level1)
 {
-    ASSERT_NE(instance_, nullptr);
     instance_->pImpl_->waterMarkFlagChangeListeners_.clear();
 
     // check nullpter
-    ASSERT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterApplicationFocusChangedListener(nullptr));
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, instance_->UnregisterApplicationFocusChangedListener(nullptr));
 
     sptr<TestApplicationFocusChangedListener> listener1 = sptr<TestApplicationFocusChangedListener>::MakeSptr();
     sptr<TestApplicationFocusChangedListener> listener2 = sptr<TestApplicationFocusChangedListener>::MakeSptr();
-    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener1));
 
     instance_->RegisterApplicationFocusChangedListener(listener1);
     instance_->RegisterApplicationFocusChangedListener(listener2);
-    ASSERT_EQ(2, instance_->pImpl_->applicationFocusChangeListeners_.size());
+    EXPECT_EQ(2, instance_->pImpl_->applicationFocusChangeListeners_.size());
 
-    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener1));
-    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener2));
-    ASSERT_EQ(0, instance_->pImpl_->applicationFocusChangeListeners_.size());
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener1));
+    EXPECT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener2));
+    EXPECT_EQ(0, instance_->pImpl_->applicationFocusChangeListeners_.size());
 }
 
 /**
