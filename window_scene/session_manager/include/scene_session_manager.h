@@ -960,9 +960,69 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+
+    /**
+     * @brief Configure window layout related settings.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <!-- window layout related configs -->
+     *   </windowLayout>
+     *
+     * @param windowLayoutConfig The window layout configuration item.
+     * @return Returns true if the config is valid and processed; returns false otherwise.
+     */
     bool ConfigWindowLayout(const WindowSceneConfig::ConfigItem& windowLayoutConfig);
+
+    /**
+     * @brief Configure move-drag related settings.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <moveDrag>
+     *       <!-- move drag related configs -->
+     *     </moveDrag>
+     *   </windowLayout>
+     *
+     * @param moveDragConfig The move-drag configuration item.
+     * @return Returns true if the config is valid and processed; returns false otherwise.
+     */
     bool ConfigMoveDrag(const WindowSceneConfig::ConfigItem& moveDragConfig);
+
+    /**
+     * @brief Configure move resampling behavior during drag.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <moveDrag>
+     *       <moveResample enable="true">
+     *         <resampleFpsRange>29 91</resampleFpsRange>
+     *       </moveResample>
+     *     </moveDrag>
+     *   </windowLayout>
+     *
+     * @param moveResampleConfig The move-resample configuration item.
+     * @return Returns true if the config is valid and processed; returns false otherwise.
+     */
     bool ConfigMoveResample(const WindowSceneConfig::ConfigItem& moveResampleConfig);
+
+    /**
+     * @brief Configure moving event throttling behavior.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <moveDrag>
+     *       <movingEvent>
+     *         <throttleInterval>1500</throttleInterval>
+     *       </movingEvent>
+     *     </moveDrag>
+     *   </windowLayout>
+     *
+     * @param movingEventConfig The moving-event configuration item.
+     * @return Returns true if the config is valid and applied; returns false otherwise.
+     */
+    bool ConfigMovingEvent(const WindowSceneConfig::ConfigItem& movingEventConfig);
+
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
