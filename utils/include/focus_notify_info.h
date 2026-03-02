@@ -34,7 +34,7 @@ public:
      * @brief Constructor of FocusNotifyInfo
      */
     FocusNotifyInfo(int64_t timeStamp, int32_t unfocusWindowId, int32_t focusWindowId,
-        bool isSyncNotify, bool isSameCallingPid)
+        bool isSyncNotify, bool isSameCallingPid = true)
         : timeStamp_(timeStamp),
           unfocusWindowId_(unfocusWindowId),
           focusWindowId_(focusWindowId),

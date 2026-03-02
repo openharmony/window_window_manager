@@ -33,7 +33,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
     {SYSTEM_BAR_TINT_CHANGE_CB, RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB},
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
     {WATER_MARK_FLAG_CHANGE_CB, RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB},
-    {APPLICATION_FOCUS_CHANGE_CB, RegisterListenerType::APPLICATION_FOCUS_CHANGE_CB},
+    {APPLICATION_FOCUS_STATE_CHANGE_CB, RegisterListenerType::APPLICATION_FOCUS_STATE_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     // white register list for window
@@ -318,7 +318,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<JsW
 WmErrorCode JsWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
-    WLOGD("called");
+    TLOGI(WmsLogTag::WMS_FOCUS, "called");
     sptr<IApplicationFocusChangedListener> thisListener(listener);
     WmErrorCode ret;
     if (isRegister) {
@@ -326,7 +326,7 @@ WmErrorCode JsWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr<
             SingletonContainer::Get<WindowManager>().RegisterApplicationFocusChangedListener(thisListener));
     } else {
         ret = MappingWmErrorCodeSafely(
-            SingletonContainer::Get<WindowManager>().UnregisterApplicationFocusChangedListenerr(thisListener));
+            SingletonContainer::Get<WindowManager>().UnregisterApplicationFocusChangedListener(thisListener));
     }
     return ret;
 }
@@ -638,7 +638,7 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                     env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env, parameter);
-            case static_cast<uint32_t>(RegisterListenerType::APPLICATION_FOCUS_CHANGE_CB):
+            case static_cast<uint32_t>(RegisterListenerType::APPLICATION_FOCUS_STATE_CHANGE_CB):
                 return ProcessApplicationFocusChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
                 WLOGFE("RegisterListenerType %{public}u is not supported",

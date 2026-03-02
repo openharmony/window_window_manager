@@ -9049,9 +9049,9 @@ sptr<FocusNotifyInfo> SceneSessionManager::GetFocusNotifyInfo(DisplayId displayI
     auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(), focusedSessionId,
         nextSessionId, false);
     if (focusedSession && nextSession) {
-        focusNotifyInfo->isSyncNotify_ = focusedSession->GetCallingPid() == nextSession->GetCallingPid() &&
-            !focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
         focusNotifyInfo->isSameCallingPid_ = focusedSession->GetCallingPid() == nextSession->GetCallingPid();
+        focusNotifyInfo->isSyncNotify_ = isSameCallingPid_ &&
+            !focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground();
     }
     return focusNotifyInfo;
 }
@@ -10018,10 +10018,11 @@ void SceneSessionManager::ProcessFocusWhenForeground(sptr<SceneSession>& sceneSe
         if (focusGroup->GetNeedBlockNotifyFocusStatusUntilForeground()) {
             focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
             focusGroup->SetNeedBlockNotifyUnfocusStatus(false);
+            auto lastFocusedSessionId = focusGroup->GetLastFocusedSessionId();
             auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
-                focusGroup->GetLastFocusedSessionId(), sceneSession->GetPersistentId(), false);
-            sptr<SceneSession> lastFocusedSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
-            if(lastFocusedSession != nullptr){
+                lastFocusedSessionId, sceneSession->GetPersistentId(), false);
+            sptr<SceneSession> lastFocusedSession = GetSceneSession(lastFocusedSessionId);
+            if(lastFocusedSessionId != INVALID_SESSION_ID && lastFocusedSession != nullptr){
                 focusNotifyInfo->isSameCallingPid_ = lastFocusedSession->GetCallingPid() == sceneSession->GetCallingPid();
             }
             NotifyFocusStatus(sceneSession, true, focusGroup, focusNotifyInfo);
@@ -10218,10 +10219,11 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
         if (modal->GetPersistentId() == focusedSessionId && needBlockNotifyFocusStatusUntilForeground) {
             focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(false);
             focusGroup->SetNeedBlockNotifyUnfocusStatus(false);
+            auto lastFocusedSessionId = focusGroup->GetLastFocusedSessionId();
             auto focusNotifyInfo = sptr<FocusNotifyInfo>::MakeSptr(focusGroup->GetUpdateFocusTimeStamp(),
-                focusGroup->GetLastFocusedSessionId(), modalSession->GetPersistentId(), false);
-            sptr<SceneSession> lastFocusedSession = GetSceneSession(focusGroup->GetLastFocusedSessionId());
-            if(lastFocusedSession != nullptr){
+                lastFocusedSessionId, modalSession->GetPersistentId(), false);
+            sptr<SceneSession> lastFocusedSession = GetSceneSession(lastFocusedSessionId);
+            if(lastFocusedSessionId != INVALID_SESSION_ID && lastFocusedSession != nullptr){
                 focusNotifyInfo->isSameCallingPid_ = lastFocusedSession->GetCallingPid() == modalSession->GetCallingPid();
             }
             NotifyFocusStatus(modalSession, true, focusGroup, focusNotifyInfo);

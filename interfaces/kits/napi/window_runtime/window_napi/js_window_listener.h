@@ -69,7 +69,7 @@ extern const std::string WINDOW_HIGHLIGHT_CHANGE_CB;
 extern const std::string WINDOW_WILL_CLOSE_CB;
 extern const std::string WINDOW_ROTATION_CHANGE_CB;
 extern const std::string FREE_WINDOW_MODE_CHANGE_CB;
-extern const std::string APPLICATION_FOCUS_CHANGE_CB;
+extern const std::string APPLICATION_FOCUS_STATE_CHANGE_CB;
 
 class JsWindowListener : public IWindowChangeListener,
                          public ISystemBarChangedListener,

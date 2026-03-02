@@ -391,9 +391,9 @@ HWTEST_F(WindowManagerTest, UnregisterApplicationFocusChangedListener, TestSize.
     instance_->RegisterApplicationFocusChangedListener(listener2);
     ASSERT_EQ(2, instance_->pImpl_->applicationFocusChangeListeners_.size());
 
-    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWaterMarkFlagChangedListener(listener1));
-    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWaterMarkFlagChangedListener(listener2));
-    ASSERT_EQ(0, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
+    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener1));
+    ASSERT_EQ(WMError::WM_OK, instance_->UnregisterApplicationFocusChangedListener(listener2));
+    ASSERT_EQ(0, instance_->pImpl_->applicationFocusChangeListeners_.size());
 }
 
 /**

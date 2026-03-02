@@ -363,7 +363,7 @@ void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
 
 void WindowManager::Impl::NotifyApplicationFocusChangedResult(bool isFocused)
 {
-    TLOGI(WmsLogTag::DEFAULT, "%{public}d", isFocused);
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}d", isFocused);
     std::vector<sptr<IApplicationFocusChangedListener>> applicationFocusChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -1640,7 +1640,7 @@ WMError WindowManager::UnregisterWaterMarkFlagChangedListener(const sptr<IWaterM
 WMError WindowManager::RegisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -1648,18 +1648,18 @@ WMError WindowManager::RegisterApplicationFocusChangedListener(const sptr<IAppli
     auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
         pImpl_->applicationFocusChangeListeners_.end(), listener);
     if (iter != pImpl_->applicationFocusChangeListeners_.end()) {
-        WLOGFW("Listener is already registered.");
+        TLOGW((WmsLogTag::WMS_FOCUS, "Listener is already registered.");
         return WMError::WM_OK;
     }
     pImpl_->applicationFocusChangeListeners_.push_back(listener);
-    WLOGFD("Try to registerApplicationFocusChangedListener end");
+    TLOGD(WmsLogTag::WMS_FOCUS, "Try to registerApplicationFocusChangedListener end");
     return WMError::WM_OK;
 }
 
 WMError WindowManager::UnregisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener)
 {
     if (listener == nullptr) {
-        WLOGFE("listener could not be null");
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
         return WMError::WM_ERROR_NULLPTR;
     }
 
@@ -1667,11 +1667,11 @@ WMError WindowManager::UnregisterApplicationFocusChangedListener(const sptr<IApp
     auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
                           pImpl_->applicationFocusChangeListeners_.end(), listener);
     if (iter == pImpl_->applicationFocusChangeListeners_.end()) {
-        WLOGFE("could not find this listener");
+        TLOGW((WmsLogTag::WMS_FOCUS, "could not find this listener");
         return WMError::WM_OK;
     }
     pImpl_->applicationFocusChangeListeners_.erase(iter);
-    WLOGFD("Try to registerApplicationFocusChangedListener end");
+    TLOGD(WmsLogTag::WMS_FOCUS, "Try to registerApplicationFocusChangedListener end");
     return WMError::WM_OK;
 }
 

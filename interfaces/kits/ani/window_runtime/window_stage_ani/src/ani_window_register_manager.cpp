@@ -32,7 +32,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
     {SYSTEM_BAR_TINT_CHANGE_CB, RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB},
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
     {WATER_MARK_FLAG_CHANGE_CB, RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB},
-    {APPLICATION_FOCUS_CHANGE_CB, RegisterListenerType::APPLICATION_FOCUS_CHANGE_CB},
+    {APPLICATION_FOCUS_STATE_CHANGE_CB, RegisterListenerType::APPLICATION_FOCUS_STATE_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     // white register list for window
@@ -719,7 +719,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowManagerListener(RegisterListe
                 env);
         case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
             return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env);
-        case static_cast<uint32_t>(RegisterListenerType::APPLICATION_FOCUS_CHANGE_CB):
+        case static_cast<uint32_t>(RegisterListenerType::APPLICATION_FOCUS_STATE_CHANGE_CB):
             return ProcessApplicationFocusChangeRegister(windowManagerListener, window, isRegister, env);
         default:
             TLOGE(WmsLogTag::DEFAULT, "[ANI]RegisterListenerType %{public}u is not supported",
