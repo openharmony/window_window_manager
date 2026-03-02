@@ -11565,7 +11565,7 @@ void ScreenSessionManager::SwitchUserResetDisplayNodeScreenId()
 }
 
 void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
-    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
+    if (!RESOLUTION_EFFECT_FEATURE_EN) {
         return;
     }
     if (!IS_SUPPORT_PC_MODE) {
