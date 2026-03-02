@@ -3756,7 +3756,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level
 HWTEST_F(ScreenSessionManagerTest, HandleOsSwitchStatusChange, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
+    if (!RESOLUTION_EFFECT_FEATURE_EN) {
         GTEST_SKIP();
     }
     LOG_SetCallback(MyLogCallback);
