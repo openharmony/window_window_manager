@@ -65,7 +65,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_HIGHLIGHT_CHANGE_CB,
     WINDOW_ROTATION_CHANGE_CB,
     FREE_WINDOW_MODE_CHANGE_CB,
-    APPLICATION_FOCUS_CHANGE_CB,
+    APPLICATION_FOCUS_STATE_CHANGE_CB,
 };
 
 class JsWindowRegisterManager {

@@ -634,7 +634,7 @@ void JsWindowListener::OnWaterMarkFlagUpdate(bool showWaterMark)
 
 void JsWindowListener::OnApplicationFocusUpdate(bool isFocused)
 {
-    auto jsCallback = [self = weakRef_, isFocus, env = env_] {
+    auto jsCallback = [self = weakRef_, isFocused, env = env_] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
             TLOGE(WmsLogTag::WMS_FOCUS, "this listener or eng is nullptr");
