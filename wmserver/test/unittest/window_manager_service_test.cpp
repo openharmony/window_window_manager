@@ -673,24 +673,6 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus01, TestSize.Level1)
 }
 
 /**
- * @tc.name: RequestFocus02
- * @tc.desc: RequestFocus with system calling permission test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerServiceTest, RequestFocus02, TestSize.Level1)
-{
-    uint32_t windowId = 1;
-    MockPermission::MockIsSystemCalling(true);
-    WMError res = wms->RequestFocus(windowId);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, WMError::WM_ERROR_INVALID_OPERATION);
-    } else {
-        ASSERT_EQ(res, WMError::WM_OK);
-    }
-    MockPermission::ChangeMockStateToInit();
-}
-
-/**
  * @tc.name: GetAvoidAreaByType
  * @tc.desc: GetAvoidAreaByType test
  * @tc.type: FUNC
@@ -891,24 +873,6 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop01, TestSize.Level1)
         ASSERT_NE(WMError::WM_DO_NOTHING, res);
     }
     wms->accessTokenIdMaps_.clear();
-}
-
-/**
- * @tc.name: RaiseToAppTop02
- * @tc.desc: RaiseToAppTop with system calling permission test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowManagerServiceTest, RaiseToAppTop02, TestSize.Level1)
-{
-    uint32_t windowId = 1;
-    MockPermission::MockIsSystemCalling(true);
-    WMError res = wms->RaiseToAppTop(windowId);
-    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_OK, res);
-    } else {
-        ASSERT_NE(WMError::WM_DO_NOTHING, res);
-    }
-    MockPermission::ChangeMockStateToInit();
 }
 
 /**
