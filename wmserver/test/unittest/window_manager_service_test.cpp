@@ -52,7 +52,6 @@
 #include "wm_common.h"
 #include "wm_math.h"
 #include "scene_board_judgement.h"
-#include "mock_permission.h"
 
 
 using namespace testing;
