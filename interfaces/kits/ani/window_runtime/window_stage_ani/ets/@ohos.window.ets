@@ -5984,6 +5984,7 @@ function runWindowWillCloseListenerCallback(cb: object, cbArg: object): void {
   }).catch((error: Error) => {
     hilog.error(DOMAIN, TAG,
       `runWindowWillCloseListenerCallback errorCode = ${error.code}, message = ${error.message}`);
+    window.closeDirectly();
   });
 }
 
