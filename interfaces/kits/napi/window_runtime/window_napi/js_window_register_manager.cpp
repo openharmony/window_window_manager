@@ -318,7 +318,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<JsW
 WmErrorCode JsWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "called");
+    TLOGD(WmsLogTag::WMS_FOCUS, "called");
     sptr<IApplicationFocusChangedListener> thisListener(listener);
     WmErrorCode ret;
     if (isRegister) {
