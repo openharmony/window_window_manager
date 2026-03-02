@@ -101,7 +101,9 @@ void DisplayAni::GetRoundedCorner(ani_env* env, ani_object obj, ani_object round
         TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+    ani_long id;
+    env->Object_GetFieldByName_Long(obj, Builder::BuildPropertyName("id").c_str(), &id);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "Invalid display or screen.");
         return;
@@ -113,12 +115,7 @@ void DisplayAni::GetRoundedCorner(ani_env* env, ani_object obj, ani_object round
         AniErrUtils::ThrowBusinessError(env, errCode, "Display get rounded corner failed.");
         return;
     }
-    if (roundedCorner.empty()) {
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,
-            "This display manager service works abnormally.");
-    } else {
-        DisplayAniUtils::ConvertRoundedCorner(roundedCorner, roundedCornerObj, env);
-    }
+    DisplayAniUtils::ConvertRoundedCorner(roundedCorner, roundedCornerObj, env);
 }
 
 void DisplayAni::GetDisplayInfoRef(ani_env* env, ani_object displayObj)
