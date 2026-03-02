@@ -425,7 +425,8 @@ void WindowRoot::GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<Unre
 void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
-        WLOGFE("Get Visible Window Permission Denied");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Get Visible Window Permission Denied");
+        return;
     }
     for (auto [surfaceId, _] : lastVisibleData_) {
         auto iter = surfaceIdWindowNodeMap_.find(surfaceId);
