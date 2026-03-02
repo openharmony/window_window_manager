@@ -587,9 +587,9 @@ private:
     /*
      * Move Drag
      */
-    bool CalcWindowShouldMove();
     bool CheckCanMoveWindowType();
-    bool CheckCanMoveWindowTypeByDevice();
+    bool CheckCanStartMoveWindowByDevice();
+    bool CheckCanStartMoveWindowByWindowType();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
     AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);
