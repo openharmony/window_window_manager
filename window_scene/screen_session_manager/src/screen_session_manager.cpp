@@ -5959,6 +5959,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         that.SetOnBootAnimation(false);
         that.RegisterSettingRotationObserver();
         that.RegisterSettingResolutionEffectObserver();
+        that.RegisterSettingOsSwitchStatusObserver();
         that.RegisterSettingCoordinationReadyObserver();
         if (that.defaultDpi) {
             uint32_t initDefaultDpi;
@@ -6085,6 +6086,27 @@ void ScreenSessionManager::SetResolutionEffectFromSettingData()
 {
     TLOGNFI(WmsLogTag::DMS, "update ResolutionEffect enable");
     HandleResolutionEffectChange();
+}
+
+void ScreenSessionManager::RegisterSettingOsSwitchStatusObserver()
+{
+    TLOGNFI(WmsLogTag::DMS, "Register Setting Observer");
+    SettingObserver::UpdateFunc updateFunc = [&](const std::string& key) { HandleOsSwitchStatusChange(); };
+    ScreenSettingHelper::RegisterSettingOsSwitchStatusObserver(DmUtils::wrap_callback(updateFunc));
+}
+
+void ScreenSessionManager::HandleOsSwitchStatusChange()
+{
+    TLOGNFI(WmsLogTag::DMS, "Os Switch change");
+    std::string status = "";
+    ScreenSettingHelper::GetOsSwitchStatus(status);
+    bool isOsSwitchToPadNeedRecovery = IS_SUPPORT_PC_MODE && g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER;
+    if (status == "start" && isOsSwitchToPadNeedRecovery) {
+        RecoveryResolutionEffect();
+    }
+    if (status == "end" && g_isPcDevice) {
+        HandleResolutionEffectChange();
+    }
 }
 
 void ScreenSessionManager::RegisterSettingDpiObserver()
@@ -11543,14 +11565,22 @@ void ScreenSessionManager::SwitchUserResetDisplayNodeScreenId()
 }
 
 void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
-    if (!RESOLUTION_EFFECT_FEATURE_EN) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         return;
     }
-    // After switching users, the listener will become invalid and needs to be re-registered. 
-    ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
-    RegisterSettingResolutionEffectObserver();
+    if (!IS_SUPPORT_PC_MODE) {
+        // After switching users, the listener will become invalid and needs to be re-registered. 
+        ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
+        RegisterSettingResolutionEffectObserver();
+    }
     //ensure updateavilibearea success after switch user
     RecoveryResolutionEffect();
+    auto internalSession = GetInternalScreenSession();
+    if (internalSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Internal Session null");
+        return;
+    }
+    internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
 }
 
 void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot)
