@@ -127,7 +127,7 @@ namespace {
  */
 HWTEST_F(ScreenSessionManagerTest, CalcDisplayNodeTranslateOnRotation04, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -151,7 +151,7 @@ HWTEST_F(ScreenSessionManagerTest, CalcDisplayNodeTranslateOnRotation04, Functio
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenChangeInner, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -169,7 +169,7 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenChangeInner, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -186,7 +186,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber01, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -205,7 +205,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber02, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber03, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -224,7 +224,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber03, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber04, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -243,7 +243,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber04, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyFromSettingData01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -260,7 +260,7 @@ HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyFromSettingData01, Function | S
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -278,7 +278,7 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend01, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
@@ -298,7 +298,7 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend02, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend03, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -318,7 +318,7 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend03, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend04, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -338,7 +338,7 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend04, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
     ssm_->SetExtendPixelRatio(dpi);
     ScreenId id = 50;
@@ -356,7 +356,7 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio01, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
@@ -375,7 +375,7 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio02, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio03, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
@@ -394,7 +394,7 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio03, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio04, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
@@ -413,7 +413,7 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio04, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetRotation01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -432,7 +432,7 @@ HWTEST_F(ScreenSessionManagerTest, SetRotation01, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSessionManagerTest, SetRotation02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -452,7 +452,7 @@ HWTEST_F(ScreenSessionManagerTest, SetRotation02, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSessionManagerTest, OnMakeExpand01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -471,7 +471,7 @@ HWTEST_F(ScreenSessionManagerTest, OnMakeExpand01, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, OnMakeExpand02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -498,7 +498,7 @@ HWTEST_F(ScreenSessionManagerTest, OnMakeExpand02, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, IsExtendMode01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -514,7 +514,7 @@ HWTEST_F(ScreenSessionManagerTest, IsExtendMode01, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, IsExtendMode02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -535,7 +535,7 @@ HWTEST_F(ScreenSessionManagerTest, IsExtendMode02, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -553,7 +553,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie01, Function | SmallTes
  */
 HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -571,7 +571,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie02, Function | SmallTes
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror01, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
@@ -588,7 +588,7 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror01, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror02, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -610,7 +610,7 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror02, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror03, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -632,7 +632,7 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror03, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror04, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 9;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -651,7 +651,7 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror04, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HotSwitch, Function | SmallTest | Level3)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     int32_t newUserId = 0;
     int32_t newScbPid = 1;
     ssm_->HotSwitch(newUserId, newScbPid);
@@ -688,7 +688,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenStatus, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, SetClient, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     sptr<IScreenSessionManagerClient> client = nullptr;
     ssm_->SetClient(client);
 }
@@ -700,7 +700,7 @@ HWTEST_F(ScreenSessionManagerTest, SetClient, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, SwitchUser, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ssm_->SwitchUser();
 }
 
@@ -723,7 +723,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyMaskImage001, TestSize.Level1
  */
 HWTEST_F(ScreenSessionManagerTest, ScbClientDeathCallback, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     int32_t deathScbPid = ssm_->currentScbPId_;
     ssm_->currentScbPId_ = -1;     // INVALID_SCB_PID
     ssm_->ScbClientDeathCallback(deathScbPid);
@@ -752,7 +752,7 @@ HWTEST_F(ScreenSessionManagerTest, ScbClientDeathCallback, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyClientProxyUpdateFoldDisplayMode, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
     ASSERT_EQ(ssm_->clientProxy_, nullptr);
     ssm_->NotifyClientProxyUpdateFoldDisplayMode(displayMode);
@@ -765,7 +765,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyClientProxyUpdateFoldDisplayMode, TestS
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenRotationLockedChange, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     bool isLocked = false;
     ScreenId screenId = 1050;
     ASSERT_EQ(ssm_->clientProxy_, nullptr);
@@ -779,7 +779,7 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenRotationLockedChange, TestSize.Level1
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenOrientationChange, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     
     float screenOrientation = 75.2f;
     ScreenId screenId = 1050;
@@ -794,7 +794,7 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenOrientationChange, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyDisplayModeChanged, TestSize.Level1)
 {
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ssm_->NotifyDisplayModeChanged(FoldDisplayMode::MAIN);
 }
 
@@ -881,7 +881,7 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode03, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay01, TestSize.Level0)
 {
     ssm_->screenSessionMap_.erase(50);
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     DisplayId id = 50;
     bool isOnboardDisplay = false;
     auto res = ssm_->IsOnboardDisplay(id, isOnboardDisplay);
@@ -898,7 +898,7 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay01, TestSize.Level0)
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay02, TestSize.Level0)
 {
     ssm_->screenSessionMap_.erase(0);
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     bool isPcNow = ssm_->GetPcStatus();
     ssm_->SetPcStatus(true);
     DisplayId id = 0;
@@ -922,7 +922,7 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay02, TestSize.Level0)
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay03, TestSize.Level0)
 {
     ssm_->screenSessionMap_.erase(100);
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     bool isPcNow = ssm_->GetPcStatus();
     ssm_->SetPcStatus(true);
     DisplayId id = 100;
@@ -944,7 +944,7 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay03, TestSize.Level0)
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay04, TestSize.Level0)
 {
     ssm_->screenSessionMap_.erase(0);
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     bool isPcNow = ssm_->GetPcStatus();
     ssm_->SetPcStatus(false);
     DisplayId id = 0;
@@ -966,7 +966,7 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay04, TestSize.Level0)
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay05, TestSize.Level0)
 {
     ssm_->screenSessionMap_.erase(100);
-    ASSERT_NE(ssm_,nullptr);
+    ASSERT_NE(ssm_, nullptr);
     bool isPcNow = ssm_->GetPcStatus();
     ssm_->SetPcStatus(false);
     DisplayId id = 100;
