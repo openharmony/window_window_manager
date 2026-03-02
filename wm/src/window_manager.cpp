@@ -1648,7 +1648,7 @@ WMError WindowManager::RegisterApplicationFocusChangedListener(const sptr<IAppli
     auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
         pImpl_->applicationFocusChangeListeners_.end(), listener);
     if (iter != pImpl_->applicationFocusChangeListeners_.end()) {
-        TLOGW((WmsLogTag::WMS_FOCUS, "Listener is already registered.");
+        TLOGW(WmsLogTag::WMS_FOCUS, "Listener is already registered.");
         return WMError::WM_OK;
     }
     pImpl_->applicationFocusChangeListeners_.push_back(listener);
