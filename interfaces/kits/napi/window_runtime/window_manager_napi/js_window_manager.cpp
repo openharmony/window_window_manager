@@ -357,6 +357,13 @@ static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windo
         WLOGFE("Context is nullptr");
         return;
     }
+    auto contextConvert = Context::ConvertTo<AbilityRuntime::Context>(context->lock());
+    if (contextConvert == nullptr) {
+        task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY,
+            "Convert context is nullptr"));
+        TLOGE(WmsLogTag::WMS_LIFE, "Convert context is nullptr");
+        return;
+    }
     if (windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT ||
         windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
         auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
@@ -387,6 +394,12 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
     if (contextPtr == nullptr || context == nullptr) {
         task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Context is nullptr"));
         WLOGFE("Context is nullptr");
+        return;
+    }
+    auto contextConvert = Context::ConvertTo<AbilityRuntime::Context>(context->lock());
+    if (contextConvert == nullptr) {
+        task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Convert context is nullptr"));
+        TLOGE(WmsLogTag::WMS_LIFE, "Convert Context is nullptr");
         return;
     }
     if (winType == WindowType::WINDOW_TYPE_FLOAT || winType == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
@@ -1025,6 +1038,39 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
     return NapiGetUndefined(env);
 }
 
+
+TopWindowInfo DoGetTopWindow(AppExecFwk::Ability* ability, bool isOldApi, bool newApi, void* contextPtr)
+{
+    TopWindowInfo info;
+    std::string errMsg = "";
+    int32_t errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+        static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+    if (isOldApi) {
+        if (ability == nullptr || ability->GetWindow() == nullptr) {
+            info.errorCode = errorCode;
+            info.errMsg = "[window][getLastWindow]msg: FA mode can not get ability window";
+            return info;
+        }
+        info.window = Window::GetTopWindowWithId(ability->GetWindow()->GetWindowId());
+        return info;
+    }
+    auto contextTmp = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+    if (contextPtr == nullptr || contextTmp == nullptr) {
+        info.errorCode = errorCode;
+        info.errMsg = "[window][getLastWindow]msg: Stage mode without context";
+        return info;
+    }
+    auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::Context>(contextTmp->lock());
+    if (context == nullptr) {
+        info.errorCode = errorCode;
+        info.errMsg = "[window][getLastWindow]msg: Stage mode without context";
+        return info;
+    }
+    info.window = Window::GetTopWindowWithContext(context);
+    return info;
+}
+
+
 static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_value callback, bool newApi)
 {
     void* contextPtr = nullptr;
@@ -1043,36 +1089,17 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, callback, &result);
     auto asyncTask = [env, task = napiAsyncTask, ability, isOldApi, newApi, contextPtr, ctxRef, where = __func__] {
-        sptr<Window> window = nullptr;
-        int32_t errorCode = 0;
-        std::string errMsg = "";
-        if (isOldApi) {
-            if (ability == nullptr || ability->GetWindow() == nullptr) {
-                errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
-                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                errMsg = "[window][getLastWindow]msg: FA mode can not get ability window";
-                return;
-            }
-            window = Window::GetTopWindowWithId(ability->GetWindow()->GetWindowId());
-        } else {
-            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
-            if (contextPtr == nullptr || context == nullptr) {
-                errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
-                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                errMsg = "[window][getLastWindow]msg: Stage mode without context";
-                return;
-            }
-            window = Window::GetTopWindowWithContext(context->lock());
-        }
-        if (errorCode != 0) {
+        TopWindowInfo info = DoGetTopWindow(ability, isOldApi, newApi, contextPtr);
+        if (info.errorCode != 0) {
             if (newApi) {
-                task->Reject(env, JsErrUtils::CreateJsError(env, static_cast<WmErrorCode>(errorCode), errMsg));
+                task->Reject(env, JsErrUtils::CreateJsError(env, static_cast<WmErrorCode>(info.errorCode),
+                    info.errMsg));
             } else {
-                task->Reject(env, JsErrUtils::CreateJsError(env, static_cast<WMError>(errorCode), errMsg));
+                task->Reject(env, JsErrUtils::CreateJsError(env, static_cast<WMError>(info.errorCode), info.errMsg));
             }
             return;
         }
-        if (window == nullptr || window->GetWindowState() == WindowState::STATE_DESTROYED) {
+        if (info.window == nullptr || info.window->GetWindowState() == WindowState::STATE_DESTROYED) {
             if (newApi) {
                 task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "[window][getLastWindow]msg: Get top window failed"));
@@ -1082,7 +1109,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
             }
             return;
         }
-        task->Resolve(env, CreateJsWindowObject(env, window));
+        task->Resolve(env, CreateJsWindowObject(env, info.window));
         TLOGD(WmsLogTag::WMS_FOCUS, "%{public}s: Get top window success", where);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetTopWindow") != napi_status::napi_ok) {
