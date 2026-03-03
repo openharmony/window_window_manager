@@ -44,15 +44,17 @@ constexpr ScreenId SCREEN_ID_FULL = 0;
 constexpr ScreenId SCREEN_ID_MAIN = 5;
 const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
+const bool SUPPORT_COMPATIBLE_MODE =
+    (system::GetIntParameter<int32_t>("const.settings.extend_display_function_list", 0) & 0x4) == 4;
 bool g_isPcDevice = ScreenSceneConfig::GetExternalScreenDefaultMode() == "none";
 const int32_t EXTEND_DISPLAY_FUNCTIONS = system::GetIntParameter("const.settings.extend_display_function_list", 0);
 const int32_t RESOLUTION_EFFECT_OS_MODE_RECOVER =
     system::GetIntParameter("const.product.os_mode_restore_resolution", 0);
 const int32_t RESOLUTION_EFFECT_FEATURE_MASK = 2;
-const int32_t RESOLUTION_EFFECT_OS_SWITCH_PAD_RECOVER_MASK = 1;
-const bool RESOLUTION_EFFECT_FEATURE_EN = EXTEND_DISPLAY_FUNCTIONS & RESOLUTION_EFFECT_FEATURE_MASK;
-const bool RESOLUTION_EFFECT_OS_SWITCH_PAD_RECOVER =
-    RESOLUTION_EFFECT_OS_MODE_RECOVER & RESOLUTION_EFFECT_OS_SWITCH_PAD_RECOVER_MASK;
+const int32_t IS_OS_SWITCH_PAD_NEED_RECOVER_MASK = 1;
+const bool IS_SUPPORT_RESOLUTION_EFFECT_CHANGE = EXTEND_DISPLAY_FUNCTIONS & RESOLUTION_EFFECT_FEATURE_MASK;
+const bool IS_OS_SWITCH_PAD_NEED_RECOVER =
+    RESOLUTION_EFFECT_OS_MODE_RECOVER & IS_OS_SWITCH_PAD_NEED_RECOVER_MASK;
 }
 namespace {
     std::string g_errLog;
@@ -108,12 +110,18 @@ namespace {
  */
 HWTEST_F(ScreenSessionManagerTest, CalDefaultExtendScreenDensity, TestSize.Level1)
 {
+    if (!SUPPORT_COMPATIBLE_MODE) {
+        GTEST_SKIP();
+    }
     auto ssm = new ScreenSessionManager();
     ASSERT_NE(ssm, nullptr);
     ssm->InitExtendScreenDpiOptions();
     ScreenProperty property = ScreenProperty();
+    property.screenRealPPI_ = 0.0f;
+    ssm->densityDpi_ = 1.0f;
+    EXPECT_EQ(ssm->CalDefaultExtendScreenDensity(property), 1.0f);
     property.screenRealPPI_ = 160.0f;
-    EXPECT_EQ(ssm->CalDefaultExtendScreenDensity(property), 160.0f);
+    EXPECT_EQ(ssm->CalDefaultExtendScreenDensity(property), 1.6f);
 }
  
 /**
@@ -142,6 +150,7 @@ HWTEST_F(ScreenSessionManagerTest, GetOrCalExtendScreenDefaultDensity, TestSize.
     auto property = screenSession->GetScreenProperty();
     float density = 1.0f;
     ssm_->GetOrCalExtendScreenDefaultDensity(screenSession, property, density);
+    EXPECT_EQ(density, 1.0f);
 }
  
 /**
@@ -2717,7 +2726,7 @@ HWTEST_F(ScreenSessionManagerTest, FirstSCBConnect, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChangeWhenRotate, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!RESOLUTION_EFFECT_FEATURE_EN || !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE || !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         GTEST_SKIP();
     }
     LOG_SetCallback(MyLogCallback);
@@ -2804,7 +2813,7 @@ HWTEST_F(ScreenSessionManagerTest, CalculateTargetResolution1, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!RESOLUTION_EFFECT_FEATURE_EN) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         GTEST_SKIP();
     }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
@@ -2852,7 +2861,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange, TestSize.Level1
 HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange002, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!RESOLUTION_EFFECT_FEATURE_EN || !IS_SUPPORT_PC_MODE) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE || !IS_SUPPORT_PC_MODE) {
         GTEST_SKIP();
     }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
@@ -2870,7 +2879,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange002, TestSize.Lev
     ssm_->screenSessionMap_[52] = screenSession2;
     screenSession2->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
     bool ret = ssm_->HandleResolutionEffectChange();
-    bool osSwitchPadRecovery = !g_isPcDevice && RESOLUTION_EFFECT_OS_SWITCH_PAD_RECOVER;
+    bool osSwitchPadRecovery = !g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER;
     if (IS_SUPPORT_PC_MODE) {
         EXPECT_EQ(ret, !osSwitchPadRecovery);
     }
@@ -2885,7 +2894,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChange002, TestSize.Lev
 HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!RESOLUTION_EFFECT_FEATURE_EN) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         GTEST_SKIP();
     }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
@@ -2935,7 +2944,7 @@ HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!RESOLUTION_EFFECT_FEATURE_EN) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         GTEST_SKIP();
     }
     sptr<ScreenSession> screenSession1 = new ScreenSession(51, ScreenProperty(), 0);
@@ -3101,7 +3110,7 @@ HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect002, TestSiz
 HWTEST_F(ScreenSessionManagerTest, HandleCastVirtualScreenMirrorRegion, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!RESOLUTION_EFFECT_FEATURE_EN) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         GTEST_SKIP();
     }
     sptr<ScreenSession> virtualSession = new ScreenSession(51, ScreenProperty(), 0);
@@ -3659,6 +3668,70 @@ HWTEST_F(ScreenSessionManagerTest, VirtualScreenWhiteList_UniqueScreen, TestSize
 }
 
 /**
+ * @tc.name: CheckAttributeChangeWithUid01
+ * @tc.desc: CheckAttributeChangeWithUid01 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckAttributeChangeWithUid01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->CheckAttributeChangeWithUid(nullptr, 0);
+    EXPECT_TRUE(g_errLog.find("DisplayInfo is nullptr") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: CheckAttributeChangeWithUid02
+ * @tc.desc: CheckAttributeChangeWithUid02 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckAttributeChangeWithUid02, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+ 
+    DisplayId displayId = 985;
+    int32_t uid = 123456;
+    ssm_->lastDisplayInfoHookMap_[uid][displayId] = new DisplayInfo();
+    sptr<DisplayInfo> displayInfo1 = ssm_->lastDisplayInfoHookMap_[uid][displayId];
+    displayInfo1->SetDisplayId(displayId);
+    ssm_->CheckAttributeChangeWithUid(displayInfo1, uid);
+    EXPECT_TRUE(g_errLog.find("No attribute changed") != std::string::npos);
+    ssm_->lastDisplayInfoHookMap_[uid].erase(displayId);
+    g_errLog.clear();
+}
+
+/**
+ * @tc.name: CheckAttributeChangeWithUid03
+ * @tc.desc: CheckAttributeChangeWithUid03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CheckAttributeChangeWithUid03, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+ 
+    DisplayId displayId = 985;
+    int32_t uid = 123456;
+    ssm_->lastDisplayInfoHookMap_[uid][displayId] = new DisplayInfo();
+    sptr<DisplayInfo> displayInfo1 = ssm_->lastDisplayInfoHookMap_[uid][displayId];
+    displayInfo1->SetDisplayId(displayId);
+    displayInfo1->SetRotation(Rotation::ROTATION_180);
+    sptr<DisplayInfo> displayInfo2 = new DisplayInfo();
+    displayInfo2->SetRotation(Rotation::ROTATION_270);
+    displayInfo2->SetDisplayId(displayId);
+    ssm_->CheckAttributeChangeWithUid(displayInfo2, uid);
+    EXPECT_TRUE(g_errLog.find("No attribute changed") == std::string::npos);
+    ssm_->lastDisplayInfoHookMap_[uid].erase(displayId);
+    g_errLog.clear();
+}
+
+/**
  * @tc.name: NotifyDisplayAttributeChanged
  * @tc.desc: NotifyDisplayAttributeChanged test
  * @tc.type: FUNC
@@ -3676,6 +3749,25 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleOsSwitchStatusChange
+ * @tc.desc: HandleOsSwitchStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleOsSwitchStatusChange, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
+        GTEST_SKIP();
+    }
+    LOG_SetCallback(MyLogCallback);
+    g_errLog.clear();
+ 
+    ssm_->HandleOsSwitchStatusChange();
+    EXPECT_TRUE(g_errLog.find("Os Switch change") != std::string::npos);
+    g_errLog.clear();
+}
+
+/**
  * @tc.name: HandleResolutionEffectAfterSwitchUser
  * @tc.desc: HandleResolutionEffectAfterSwitchUser
  * @tc.type: FUNC
@@ -3683,7 +3775,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyDisplayAttributeChanged, TestSize.Level
 HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectAfterSwitchUser, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
-    if (!RESOLUTION_EFFECT_FEATURE_EN) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         GTEST_SKIP();
     }
     LOG_SetCallback(MyLogCallback);

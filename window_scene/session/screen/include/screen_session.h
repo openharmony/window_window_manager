@@ -366,7 +366,7 @@ public:
     bool GetIsEnableRegionRotation();
     void SetIsEnableCanvasRotation(bool isEnableCanvasRotation);
     bool GetIsEnableCanvasRotation();
-    void UpdateDisplayNodeRotation(int rotation);
+    void UpdateDisplayNodeRotation(FoldDisplayMode foldDisplayMode);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
     void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
     void FreezeScreen(bool isFreeze);
@@ -386,6 +386,7 @@ public:
 
     void SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode);
     void SetScreenOffScreenRendering();
+    void SetExtendPhysicalScreenResolution(bool offScreenRenderValue);
     void SetScreenOffScreenRenderingInner();
     void SetScreenProperty(ScreenProperty property);
 
@@ -457,6 +458,9 @@ public:
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
     void ClearPropertyChangeReasonAndEvent();
 
+    void SetBootingConnect(const bool bootingConnect);
+    bool IsBootingConnect() const;
+
 private:
     bool IsVertical(Rotation rotation) const;
     Orientation CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const;
@@ -485,7 +489,7 @@ private:
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { -1.0f };
-    float currentValidSensorRotation_ { -1.0f };
+    std::atomic<float> currentValidSensorRotation_ { -1.0f };
     mutable std::shared_mutex hdrFormatsMutex_;
     std::vector<uint32_t> hdrFormats_;
     mutable std::shared_mutex colorSpacesMutex_;
@@ -539,6 +543,8 @@ private:
     std::atomic<bool> supportsFocus_ { true };
     std::atomic<bool> supportsInput_ { true };
     std::string bundleName_ = "";
+
+    std::atomic<bool> bootingConnect_ { false };
 };
 
 class ScreenSessionGroup : public ScreenSession {

@@ -18,6 +18,10 @@
 #include "singleton_container.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "sys_cap_util.h"
+#include <cstdint>
+
+constexpr uint32_t API_VERSION_23 = 23;
 
 namespace OHOS {
 namespace Rosen {
@@ -126,23 +130,6 @@ WmErrorCode AniWindowRegisterManager::ProcessSystemAvoidAreaChangeRegister(sptr<
     return ret;
 }
 
-WmErrorCode AniWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniWindowListener> listener,
-    sptr<Window> window, bool isRegister, ani_env* env)
-{
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
-        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-    }
-    sptr<IAvoidAreaChangedListener> thisListener(listener);
-    WmErrorCode ret = WmErrorCode::WM_OK;
-    if (isRegister) {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAvoidAreaChangeListener(thisListener));
-    } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterAvoidAreaChangeListener(thisListener));
-    }
-    return ret;
-}
-
 WmErrorCode AniWindowRegisterManager::ProcessSystemDensityChangeRegister(sptr<AniWindowListener> listener,
     sptr<Window> window, bool isRegister, ani_env* env)
 {
@@ -173,6 +160,23 @@ WmErrorCode AniWindowRegisterManager::ProcessDisplayIdChangeRegister(sptr<AniWin
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterDisplayIdChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterDisplayIdChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode AniWindowRegisterManager::ProcessAvoidAreaChangeRegister(sptr<AniWindowListener> listener,
+    sptr<Window> window, bool isRegister, ani_env* env)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IAvoidAreaChangedListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAvoidAreaChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterAvoidAreaChangeListener(thisListener));
     }
     return ret;
 }
@@ -873,7 +877,11 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowRotationChangeRegister(const 
     sptr<IWindowRotationChangeListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (window->IsPcWindow()) {
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
+        if (apiVersion < API_VERSION_23) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "rotationChange not support on pc, api%{public}u", apiVersion);
+            return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        }
     }
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowRotationChangeListener(thisListener));
@@ -942,7 +950,7 @@ WmErrorCode AniWindowRegisterManager::ProcessAcrossDisplaysChangeRegister(const 
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterAcrossDisplaysChangeListener(listener));
     } else {
-        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnRegisterAcrossDisplaysChangeListener(listener));
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterAcrossDisplaysChangeListener(listener));
     }
     return ret;
 }

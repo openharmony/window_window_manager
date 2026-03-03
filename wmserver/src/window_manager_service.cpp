@@ -936,7 +936,8 @@ bool WindowManagerService::CheckSystemWindowPermission(const sptr<WindowProperty
         return true;
     }
     if (type == WindowType::WINDOW_TYPE_DRAGGING_EFFECT || type == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW ||
-        type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DIALOG) {
+        type == WindowType::WINDOW_TYPE_TOAST || type == WindowType::WINDOW_TYPE_DIALOG ||
+        type == WindowType::WINDOW_TYPE_SELECTION) {
         // some system types counld be created by normal app
         return true;
     }
@@ -1075,6 +1076,11 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
+    if (!accessTokenIdMaps_.isExist(windowId, IPCSkeleton::GetCallingTokenID()) &&
+        !Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Operation rejected");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     auto task = [this, windowId]() {
         WLOGI("[WMS] RequestFocus: %{public}u", windowId);
         return windowController_->RequestFocus(windowId);
@@ -1464,6 +1470,11 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
 /** @note @window.hierarchy */
 WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
+    if (!accessTokenIdMaps_.isExist(windowId, IPCSkeleton::GetCallingTokenID()) &&
+        !Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Operation rejected");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     auto task = [this, windowId]() {
         return windowController_->RaiseToAppTop(windowId);
     };

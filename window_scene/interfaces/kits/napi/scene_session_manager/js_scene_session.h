@@ -91,17 +91,17 @@ enum class ListenerFuncType : uint32_t {
     SESSION_DISPLAY_ID_CHANGE_CB,
     SET_SUPPORT_WINDOW_MODES_CB,
     WINDOW_MOVING_CB,
-    SESSION_LOCK_STATE_CHANGE_CB,
     UPDATE_SESSION_LABEL_AND_ICON_CB,
     KEYBOARD_STATE_CHANGE_CB,
     KEYBOARD_EFFECT_OPTION_CHANGE_CB,
+    SESSION_LOCK_STATE_CHANGE_CB,
     SET_WINDOW_CORNER_RADIUS_CB,
     HIGHLIGHT_CHANGE_CB,
     FOLLOW_PARENT_RECT_CB,
     SET_PARENT_SESSION_CB,
     UPDATE_FLAG_CB,
-    Z_LEVEL_CHANGE_CB,
     SESSION_GET_TARGET_ORIENTATION_CONFIG_INFO_CB,
+    Z_LEVEL_CHANGE_CB,
     UPDATE_PIP_TEMPLATE_INFO_CB,
     SET_PIP_PARENT_WINDOWID_CB,
     UPDATE_FOLLOW_SCREEN_CHANGE_CB,
@@ -117,8 +117,8 @@ enum class ListenerFuncType : uint32_t {
     FLOATING_BALL_RESTORE_MAIN_WINDOW_CB,
     SCENE_OUTLINE_PARAMS_CHANGE_CB,
     RESTART_APP_CB,
-    CALLING_SESSION_ID_CHANGE_CB,
     ROTATION_LOCK_CHANGE_CB,
+    CALLING_SESSION_ID_CHANGE_CB,
     SNAPSHOT_SKIP_CHANGE_CB,
     COMPATIBLE_MODE_CHANGE_CB,
     RECOVER_WINDOW_EFFECT_CB,
@@ -179,6 +179,8 @@ private:
     static napi_value ActivateDragBySystem(napi_env env, napi_callback_info info);
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UpdateNativeVisibility(napi_env env, napi_callback_info info);
+    static napi_value ClearAllModifiers(napi_env env, napi_callback_info info);
+    static napi_value UpdatePropertyWhenTriggerMode(napi_env env, napi_callback_info info);
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
     static napi_value SetZOrder(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
@@ -247,8 +249,8 @@ private:
     static napi_value SetStartingWindowExitAnimationFlag(napi_env env, napi_callback_info info);
     static napi_value PcAppInPadNormalClose(napi_env env, napi_callback_info info);
     static napi_value SetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
-    static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     static napi_value SetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
+    static napi_value SetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     static napi_value SetLabel(napi_env env, napi_callback_info info);
     static napi_value SetFrameGravity(napi_env env, napi_callback_info info);
     static napi_value SetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
@@ -263,9 +265,9 @@ private:
     static napi_value ThrowSlipDirectly(napi_env env, napi_callback_info info);
     static napi_value AddSidebarBlur(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlur(napi_env env, napi_callback_info info);
+    static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
     static napi_value NotifyRotationProperty(napi_env env, napi_callback_info info);
     static napi_value NotifyPageRotationIsIgnored(napi_env env, napi_callback_info info);
-    static napi_value SetCurrentRotation(napi_env env, napi_callback_info info);
     static napi_value SetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value RequestSpecificSessionClose(napi_env env, napi_callback_info info);
     static napi_value SendFbActionEvent(napi_env env, napi_callback_info info);
@@ -288,6 +290,8 @@ private:
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateNativeVisibility(napi_env env, napi_callback_info info);
+    napi_value OnClearAllModifiers(napi_env env, napi_callback_info info);
+    napi_value OnUpdatePropertyWhenTriggerMode(napi_env env, napi_callback_info info);
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
@@ -331,7 +335,7 @@ private:
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
-    napi_value OnToggleCompatibleMode(napi_env env, napi_callback_info info);
+    napi_value OnToggleCompatibleMode(napi_env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlank(napi_env env, napi_callback_info info);
@@ -348,8 +352,8 @@ private:
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);
     napi_value OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
-    napi_value OnSetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     napi_value OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
+    napi_value OnSetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
     napi_value OnSetLabel(napi_env env, napi_callback_info info);
     napi_value OnSetFrameGravity(napi_env env, napi_callback_info info);
     napi_value OnSetUseStartingWindowAboveLocked(napi_env env, napi_callback_info info);
@@ -357,19 +361,19 @@ private:
     napi_value OnSaveSnapshotAsync(napi_env env, napi_callback_info info);
     napi_value OnSetBorderUnoccupied(napi_env env, napi_callback_info info);
     napi_value OnSetFreezeImmediately(napi_env env, napi_callback_info info);
+    napi_value OnSendContainerModalEvent(napi_env env, napi_callback_info info);
     napi_value OnMaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
     napi_value OnUpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
-    napi_value OnSendContainerModalEvent(napi_env env, napi_callback_info info);
-    napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     napi_value OnSetColorSpace(napi_env env, napi_callback_info info);
     napi_value OnSetSnapshotSkip(napi_env env, napi_callback_info info);
+    napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     napi_value OnThrowSlipDirectly(napi_env env, napi_callback_info info);
     napi_value OnAddSidebarBlur(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlur(napi_env env, napi_callback_info info);
+    napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationProperty(napi_env env, napi_callback_info info);
     napi_value OnNotifyPageRotationIsIgnored(napi_env env, napi_callback_info info);
     napi_value OnNotifyRotationChange(napi_env env, napi_callback_info info);
-    napi_value OnSetCurrentRotation(napi_env env, napi_callback_info info);
     napi_value OnSetSidebarBlurMaximize(napi_env env, napi_callback_info info);
     static napi_value GetJsPanelSessionObj(napi_env env, const sptr<SceneSession>& session);
     napi_value OnRequestSpecificSessionClose(napi_env env, napi_callback_info info);
@@ -487,13 +491,12 @@ private:
     void OnClearSubSession(int32_t subPersistentId);
     void OnBindDialogTarget(const sptr<SceneSession>& sceneSession);
     void OnSessionRectChange(const WSRect& rect,
-        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID,
-        const RectAnimationConfig& rectAnimationConfig = {});
+        SizeChangeReason reason = SizeChangeReason::UNDEFINED, DisplayId displayId = DISPLAY_ID_INVALID);
     void OnSessionWindowLimitsChange(const WindowLimits& windowlimits);
+    void OnSessionDisplayIdChange(uint64_t displayId);
     void OnFloatingBallUpdate(const FloatingBallTemplateInfo& fbTemplateInfo);
     void OnFloatingBallStop();
     void OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk::Want>& want);
-    void OnSessionDisplayIdChange(uint64_t displayId);
     void OnSessionPiPControlStatusChange(WsPiPControlType controlType, WsPiPControlStatus status);
     void OnAutoStartPiPStatusChange(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height);
     void OnRaiseToTop();
@@ -521,7 +524,7 @@ private:
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true);
     void OnForceHideChange(bool hide);
-    void OnWindowDragHotArea(DisplayId displayId, uint32_t type, SizeChangeReason reason);
+    void OnWindowDragHotArea(uint32_t type, SizeChangeReason reason, DisplayId displayId);
     void OnTouchOutside();
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();

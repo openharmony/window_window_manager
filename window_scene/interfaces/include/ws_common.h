@@ -26,8 +26,8 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "pixel_map.h"
 #include "wm_animation_common.h"
+#include "pixel_map.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -54,8 +54,8 @@ constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
-const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
-const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
+extern const std::string WINDOW_SCREEN_LOCK_PREFIX;
+extern const std::string VIEW_SCREEN_LOCK_PREFIX;
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 
@@ -116,7 +116,6 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_NO_PERMISSION = 201,
     WS_ERROR_INVALID_PARAM = 401,
     WS_ERROR_DEVICE_NOT_SUPPORT = 801,
-    WS_ERROR_TIMEOUT = 901,
     WS_ERROR_NOT_REGISTER_SYNC_CALLBACK = 100011,
     WS_ERROR_TRANSFER_DATA_FAILED       = 100012,
     WS_ERROR_REPEAT_OPERATION = 1300001,
@@ -374,8 +373,8 @@ enum class StartWindowType : uint32_t {
 
 enum class SpecifiedReason : int32_t {
     DEFAULT = 0,
-    BY_SCB,
-    FROM_RENCENT,
+    FROM_ICON,
+    FROM_RECENT,
 };
 
 struct AtomicServiceInfo {
@@ -388,7 +387,9 @@ struct AtomicServiceInfo {
 };
 
 struct PendingSessionActivationConfig {
-    bool forceStart = false; // is compulsion open
+    // is compulsion open
+    bool forceStart = false;
+    // is execute new want callback
     bool forceNewWant = true;
 };
 
@@ -402,7 +403,7 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
-    uint64_t screenId_ = -1;
+    uint64_t screenId_ = -1ULL; // -1ULL：SCREEN_ID_INVALID
     bool isPersistentRecover_ = false;
     AtomicServiceInfo atomicServiceInfo_;
 
@@ -424,6 +425,7 @@ struct SessionInfo {
     std::string callerAbilityName_ = "";
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
+    int32_t callerTypeForAnco = 0;
     bool reuse = false;
     int32_t windowMode = 0;
     StartMethod startMethod = StartMethod::START_NORMAL;
@@ -462,6 +464,7 @@ struct SessionInfo {
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
     bool isAbilityHook_ = false;
+    int32_t scenarios = 0;
     bool isRestartApp_ = false;
     bool isRestartInSameProcess_ = true;
     int32_t restartCallerPersistentId_ = INVALID_SESSION_ID;
@@ -471,7 +474,6 @@ struct SessionInfo {
     SpecifiedReason specifiedReason_ = SpecifiedReason::DEFAULT;
     // only init when requestSceneSession from SCB
     bool isAncoApplication_ = false;
-    int32_t scenarios = 0;
     bool isPrelaunch_ = false;
     int32_t frameNum_ = 0;
     bool isTargetPlugin = false;
@@ -546,8 +548,12 @@ struct SessionInfo {
         *want = newWant;
     }
 
-    std::shared_ptr<StartAnimationOptions> startAnimationOptions = nullptr;
-    std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions = nullptr;
+    void SetWantSafely(const std::shared_ptr<AAFwk::Want>& newWant) const
+    {
+        std::lock_guard<std::mutex> lock(*wantMutex_);
+        want = newWant;
+    }
+
     std::shared_ptr<WindowCreateParams> windowCreateParams = nullptr;
 };
 
@@ -573,9 +579,7 @@ enum class SizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
-    RESIZE_WITH_ANIMATION,
     MOVE,
-    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -610,8 +614,7 @@ enum class SizeChangeReason : uint32_t {
 
 inline bool IsMoveToOrDragMove(SizeChangeReason reason)
 {
-    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE ||
-           reason == SizeChangeReason::MOVE_WITH_ANIMATION;
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
 }
 
 enum class SessionEvent : uint32_t {
@@ -635,6 +638,7 @@ enum class SessionEvent : uint32_t {
     EVENT_COMPATIBLE_TO_RECOVER,
     EVENT_MAXIMIZE_FULLSCREEN,
     EVENT_SWITCH_COMPATIBLE_MODE = 200,
+    EVENT_NOTIFY_WINDOW_STAGE_CREATE_FINISHED,
     EVENT_END
 };
 
@@ -1032,6 +1036,7 @@ struct WindowImmersive {
 
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
+    std::string uiType_ = "phone";
     std::string multiWindowUIType_ = "HandsetSmartWindow";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
@@ -1322,9 +1327,6 @@ enum class SnapShotRecoverType : uint32_t {
     EXIT_SPLIT_ON_BACKGROUND = 1,
 };
 
-/**
- * Adding or modifying enumeration values requires corresponding changes on the sceneboard side.
- */
 enum class LifeCycleChangeReason {
     DEFAULT = 0,
 
@@ -1400,11 +1402,6 @@ enum class CrossPlaneState : uint32_t {
     CROSS_VIRTUAL_CREASE_PLANE,
     CROSS_VIRTUAL_PLANE,
     CROSS_ALL_PLANE,
-};
-
-enum class SendTouchAction : uint32_t {
-    ACTION_NORMAL = 0,
-    ACTION_NOT_RECEIVE_PULL_CANCEL = 1,
 };
 
 /**

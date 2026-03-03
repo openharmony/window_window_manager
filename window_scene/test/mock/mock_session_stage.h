@@ -94,7 +94,7 @@ public:
     MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
-    MOCK_METHOD0(NotifyAppForceLandscapeConfigEnableUpdated, WSError(void));
+    MOCK_METHOD1(NotifyAppForceLandscapeConfigEnableUpdated, WSError(bool needUpdateViewport));
     MOCK_METHOD0(NotifyAppHookWindowInfoUpdated, WSError(void));
     MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
@@ -102,6 +102,8 @@ public:
     MOCK_METHOD1(UpdateBrightness, WSError(float brightness));
     MOCK_METHOD0(AddSidebarBlur, WSError(void));
     MOCK_METHOD1(SetSidebarBlurStyleWithType, WSError(SidebarBlurType type));
+    MOCK_METHOD1(UpdateWindowUIType, WSError(WindowUIType windowUIType));
+    MOCK_METHOD1(UpdatePropertyWhenTriggerMode, WSError(const sptr<WindowSessionProperty>& property));
 };
 } // namespace Rosen
 } // namespace OHOS

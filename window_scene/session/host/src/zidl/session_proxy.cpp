@@ -166,9 +166,10 @@ WSError SessionProxy::Show(sptr<WindowSessionProperty> property)
         WLOGFE("remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SHOW),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -190,9 +191,10 @@ WSError SessionProxy::Hide()
         WLOGFE("remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE),
-        data, reply, option) != ERR_NONE) {
-        WLOGFE("SendRequest failed");
+    int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_HIDE),
+        data, reply, option);
+    if (sendCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed, code: %{public}d", sendCode);
         return WSError::WS_ERROR_IPC_FAILED;
     }
     int32_t ret = reply.ReadInt32();
@@ -342,13 +344,13 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetUseControlState(reply.ReadBool());
         property->SetAncoRealBundleName(reply.ReadString());
         property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
+        property->SetLogicalDeviceConfig(reply.ReadString());
         sptr<MissionInfo> missionInfo = reply.ReadParcelable<MissionInfo>();
         if (missionInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "read missionInfo is nullptr.");
             return WSError::WS_ERROR_IPC_FAILED;
         }
         property->SetMissionInfo(*missionInfo);
-        property->SetLogicalDeviceConfig(reply.ReadString());
         property->SetPrelaunch(reply.ReadBool());
         property->SetFrameNum(reply.ReadInt32());
     }
@@ -613,7 +615,7 @@ WSError SessionProxy::BatchPendingSessionsActivation(
         TLOGE(WmsLogTag::WMS_LIFE, "Write ability session info list size failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    for (auto abilitySessionInfo : abilitySessionInfos) {
+    for (const auto& abilitySessionInfo : abilitySessionInfos) {
         WSError writeRet = WriteOneSessionInfo(data, abilitySessionInfo);
         if (writeRet != WSError::WS_OK) {
             return writeRet;
@@ -1101,8 +1103,7 @@ WMError SessionProxy::RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantPa
 
 /** @note @window.layout */
 WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason reason,
-    bool isGlobal, bool isFromMoveToGlobal, const MoveConfiguration& moveConfiguration,
-    const RectAnimationConfig& rectAnimationConfig)
+    bool isGlobal, bool isFromMoveToGlobal, MoveConfiguration moveConfiguration)
 {
     TLOGI_LMT(TEN_SECONDS, RECORD_100_TIMES, WmsLogTag::WMS_LAYOUT,
         "Rect:%{public}s global:%{public}d isFromMoveToGlobal:%{public}d cfg:%{public}s",
@@ -1140,15 +1141,6 @@ WSError SessionProxy::UpdateSessionRect(const WSRect& rect, SizeChangeReason rea
     if (!data.WriteUint64(static_cast<uint64_t>(moveConfiguration.displayId))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write session displayId failed");
         return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
-        if (!data.WriteUint32(rectAnimationConfig.duration) || !data.WriteFloat(rectAnimationConfig.x1) ||
-            !data.WriteFloat(rectAnimationConfig.y1) || !data.WriteFloat(rectAnimationConfig.x2) ||
-            !data.WriteFloat(rectAnimationConfig.y2)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Write rectAnimationConfig failed");
-            return WSError::WS_ERROR_IPC_FAILED;
-        }
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -2931,12 +2923,12 @@ int32_t SessionProxy::GetStatusBarHeight()
     MessageOption option(MessageOption::TF_SYNC);
     int32_t height = 0;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        TLOGE(WmsLogTag::DEFAULT, "WriteInterfaceToken failed");
         return height;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        TLOGE(WmsLogTag::DEFAULT, "remote is null");
         return height;
     }
     int sendCode = remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_STATUSBAR_HEIGHT),
@@ -4282,13 +4274,17 @@ WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(needUpdateViewport)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write needUpdateViewport failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 

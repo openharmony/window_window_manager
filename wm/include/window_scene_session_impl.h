@@ -70,8 +70,7 @@ public:
     WMError MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError MoveWindowToGlobalDisplay(int32_t x, int32_t y, MoveConfiguration moveConfiguration = {}) override;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
-    WMError Resize(uint32_t width, uint32_t height,
-        const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
     WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
@@ -119,6 +118,7 @@ public:
     virtual WMError RemoveWindowFlag(WindowFlag flag) override;
     virtual WMError SetWindowFlags(uint32_t flags) override;
     virtual uint32_t GetWindowFlags() const override;
+    bool IsApplicationModalSubWindowShowing(int32_t parentId);
 
     virtual WMError SetTransparent(bool isTransparent) override;
     virtual WMError SetTurnScreenOn(bool turnScreenOn) override;
@@ -186,7 +186,7 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
 
     /*
      * Sub Window
@@ -241,7 +241,7 @@ public:
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
-    void SetForceSplitConfigEnable(bool enableForceSplit) override;
+    void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false) override;
     void SendLogicalDeviceConfigToArkUI();
 
     /*
@@ -301,6 +301,7 @@ public:
     WMError GetWindowStateSnapshot(std::string& winStateSnapshotJsonStr) override;
     WMError SetRotationLocked(bool locked) override;
     WMError GetRotationLocked(bool& locked) override;
+    WSError UpdatePropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property) override;
 
     /*
      * Window Decor
@@ -394,6 +395,7 @@ protected:
     std::pair<WindowLimits, WindowLimits> GetSystemSizeLimits(uint32_t displayWidth,
         uint32_t displayHeight, float vpr);
     void GetConfigurationFromAbilityInfo();
+    uint32_t GetSupportedWindowModesConfiguration(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
         const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     std::vector<AppExecFwk::SupportWindowMode> ParseWindowModeFromMetaData(
@@ -639,7 +641,6 @@ private:
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
     void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
     WindowLifeCycleInfo GetWindowLifecycleInfo() const;
-    void ReleaseUIContentTimeoutCheck();
 
     /**
      * Window Transition Animation For PC
