@@ -546,7 +546,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlank", moduleName, JsSceneSession::SetBlank);
     BindNativeFunction(env, objValue, "removeBlank", moduleName, JsSceneSession::RemoveBlank);
-    BindNativeFunction(env, objValue, "setOptimizationFlag", moduleName, JsSceneSession::SetOptimizationFlag);
+    BindNativeFunction(env, objValue, "layerPartRender", moduleName, JsSceneSession::LayerPartRender);
     BindNativeFunction(env, objValue, "addSnapshot", moduleName, JsSceneSession::AddSnapshot);
     BindNativeFunction(env, objValue, "removeSnapshot", moduleName, JsSceneSession::RemoveSnapshot);
     BindNativeFunction(env, objValue, "setBufferAvailableCallbackEnable", moduleName,
@@ -2785,11 +2785,11 @@ napi_value JsSceneSession::RemoveBlank(napi_env env, napi_callback_info info)
     return (me != nullptr) ? me->OnRemoveBlank(env, info) : nullptr;
 }
 
-napi_value JsSceneSession::SetOptimizationFlag(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::LayerPartRender(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
-    return (me != nullptr) ? me->OnSetOptimizationFlag(env, info) : nullptr;
+    return (me != nullptr) ? me->OnLayerPartRender(env, info) : nullptr;
 }
 
 /*
@@ -6841,7 +6841,7 @@ napi_value JsSceneSession::OnRemoveBlank(napi_env env, napi_callback_info info)
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSession::OnSetOptimizationFlag(napi_env env, napi_callback_info info)
+napi_value JsSceneSession::OnLayerPartRender(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
