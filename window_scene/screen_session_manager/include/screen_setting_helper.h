@@ -136,6 +136,9 @@ public:
     static bool ParseJsonObjectToEnumMap(const nlohmann::json& j,
         std::unordered_map<FoldDisplayMode, int32_t>& resultMap);
     static FoldDisplayMode ConvertStringToFoldDisplayModeSafely(const std::string& str);
+    static void RegisterSettingOsSwitchStatusObserver(SettingObserver::UpdateFunc func);
+    static void UnregisterSettingOsSwitchStatusObserver();
+    static bool GetOsSwitchStatus(std::string& status, const std::string& key = SETTING_OS_SWITCH_STATUS);
 private:
     static const constexpr char* SETTING_DPI_KEY {"user_set_dpi_value"};
     static const constexpr char* SETTING_CAST_KEY {"huaweicast.data.privacy_projection_state"};
@@ -152,6 +155,7 @@ private:
     static const constexpr char* SETTING_SCREEN_BORDERING_AREA_PERCENT_KEY {"bordering_area_percent"};
     static const constexpr char* SETTING_DUAL_DISPLAY_READY_KEY {"settings.display.dual_display_ready"};
     static const constexpr char* SETTING_DISPLAY_WIRED_SCREEN_GAMUT {"settings.display.wired_screen_gamut"};
+    static const constexpr char* SETTING_OS_SWITCH_STATUS {"os_switch_status"};
     static const constexpr uint32_t BASE_TEN = 10;
     static sptr<SettingObserver> dpiObserver_;
     static sptr<SettingObserver> offScreenRenderObserver_;
@@ -167,6 +171,7 @@ private:
     static sptr<SettingObserver> borderingAreaPercentObserver_;
     static sptr<SettingObserver> coordinationReadyObserver_;
     static sptr<SettingObserver> wiredScreenGamutObserver_;
+    static sptr<SettingObserver> osSwitchStatusObserver_;
 };
 } // namespace Rosen
 } // namespace OHOS
