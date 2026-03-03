@@ -6097,9 +6097,9 @@ void ScreenSessionManager::RegisterSettingOsSwitchStatusObserver()
 
 void ScreenSessionManager::HandleOsSwitchStatusChange()
 {
-    TLOGNFI(WmsLogTag::DMS, "Os Switch change");
     std::string status = "";
     ScreenSettingHelper::GetOsSwitchStatus(status);
+    TLOGNFI(WmsLogTag::DMS, "Os Switch change, status:%{public}s, ispcmode:%{public}d", status.c_str(), g_isPcDevice);
     bool isOsSwitchToPadNeedRecovery = IS_SUPPORT_PC_MODE && g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER;
     if (status == "start" && isOsSwitchToPadNeedRecovery) {
         RecoveryResolutionEffect();
