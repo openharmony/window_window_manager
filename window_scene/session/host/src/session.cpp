@@ -189,6 +189,9 @@ void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
+    if (surfaceNode_) {
+        surfaceNode_->MarkLayerPartRender(isLayerPartRender_);
+    }
     shadowSurfaceNode_ = RSAdapterUtil::IsClientMultiInstanceEnabled() && surfaceNode_ ?
         surfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
@@ -4344,14 +4347,23 @@ WSRect Session::GetSessionRequestRect() const
     return rect;
 }
 
-void Session::SetOptimizationFlag(bool isOptimizePerformance)
+void Session::SetLayerPartRender(bool isLayerPartRender)
 {
-    isOptimizePerformance_ = isOptimizePerformance;
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SetLayerPartRender id[%d] flag[%d]",
+        persistentId_, isLayerPartRender);
+    isLayerPartRender_ = isLayerPartRender;
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, flag: %{public}d", persistentId_, isLayerPartRender);
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode != nullptr) {
+        surfaceNode->MarkLayerPartRender(isLayerPartRender_);
+    } else {
+        TLOGE(WmsLogTag::WMS_PATTERN, "id: %{public}d, surfaceNode nullptr", persistentId_);
+    }
 }
 
-bool Session::GetOptimizationFlag() const
+bool Session::GetLayerPartRender() const
 {
-    return isOptimizePerformance_;
+    return isLayerPartRender_;
 }
 
 /** @note @window.layout */

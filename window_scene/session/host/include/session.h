@@ -147,7 +147,7 @@ public:
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
     virtual void OnRestart() {}
-    virtual void OnSetOptimizationFlag(bool flag) {}
+    virtual void OnLayerPartRender(bool flag) {}
     virtual void OnRemovePrelaunchStartingWindow() {}
 };
 
@@ -256,7 +256,6 @@ public:
     void NotifyDisconnect();
     void NotifyLayoutFinished();
     void NotifyRemoveBlank();
-    void NotifySetOptimizationFlag(bool flag);
     void NotifyAddSnapshot(bool useFfrt = false, bool needPersist = false, bool needSaveSnapshot = true,
         std::function<void()>&& callback = nullptr);
     void NotifyRemoveSnapshot();
@@ -403,8 +402,8 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
-    void SetOptimizationFlag(bool isOptimizePerformance);
-    bool GetOptimizationFlag() const;
+    void SetLayerPartRender(bool isOptimizePerformance);
+    bool GetLayerPartRender() const;
     void SetRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     RectAnimationConfig GetRequestRectAnimationConfig() const;
     std::string GetWindowName() const;
@@ -1301,7 +1300,7 @@ private:
     /*
     * performance optimization flag
     */
-    bool isOptimizePerformance_ = false;
+    bool isLayerPartRender_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H
