@@ -6924,8 +6924,7 @@ napi_value JsSceneSession::OnLayerPartRender(napi_env env, napi_callback_info in
         TLOGE(WmsLogTag::WMS_PATTERN, "session is null, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SetOptimizationFlag(flag);
-    session->NotifySetOptimizationFlag(flag);
+    session->SetLayerPartRender(flag);
     return NapiGetUndefined(env);
 }
 
