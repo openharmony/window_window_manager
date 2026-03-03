@@ -402,7 +402,7 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
-    void SetLayerPartRender(bool isOptimizePerformance);
+    void SetLayerPartRender(bool isLayerPartRender);
     bool GetLayerPartRender() const;
     void SetRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     RectAnimationConfig GetRequestRectAnimationConfig() const;
