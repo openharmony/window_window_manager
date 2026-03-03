@@ -16268,8 +16268,9 @@ WSError SceneSessionManager::GetHostWindowRect(int32_t hostWindowId, Rect& rect)
 WSError SceneSessionManager::GetHostGlobalScaledRect(int32_t hostWindowId, Rect& globalScaledRect)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId:%{public}d", hostWindowId);
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     auto sceneSession = GetSceneSession(hostWindowId);
-    if (sceneSession == nullptr) {
+    if (sceneSession == nullptr || !session->HasExtensionTokenInfoWithTokenID(callingTokenId)) {
         TLOGNE(WmsLogTag::WMS_UIEXT, "Session with persistentId %{public}d not found", hostWindowId);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
