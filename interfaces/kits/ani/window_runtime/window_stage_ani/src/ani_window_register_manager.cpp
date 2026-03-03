@@ -356,10 +356,10 @@ WmErrorCode AniWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr
     WmErrorCode ret;
     if (isRegister) {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<WindowManager>().RegisterApplicationFocusChangedListener(thisListener));
+            WindowManager::GetInstance().RegisterApplicationFocusChangedListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<WindowManager>().UnregisterApplicationFocusChangedListener(thisListener));
+            WindowManager::GetInstance().UnregisterApplicationFocusChangedListener(thisListener));
     }
     return ret;
 }
