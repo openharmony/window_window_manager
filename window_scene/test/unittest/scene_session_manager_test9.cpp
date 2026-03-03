@@ -852,11 +852,9 @@ HWTEST_F(SceneSessionManagerTest9, ProcessSubSessionForeground04, TestSize.Level
     sessionInfo.bundleName_ = "SceneSessionManagerTest9";
     sessionInfo.abilityName_ = "ProcessSubSessionForeground04";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
 
     SessionInfo subSessionInfo;
     sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(subSessionInfo, nullptr);
-    EXPECT_NE(nullptr, subSceneSession);
     subSceneSession->SetTopmost(true);
     subSceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
     subSceneSession->persistentId_ = 100;
