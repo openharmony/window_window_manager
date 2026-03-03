@@ -630,7 +630,7 @@ napi_value JsWindow::SetPrivacyMode(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::SetWindowPrivacyMode(napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SetPrivacyMode");
+    TLOGD(WmsLogTag::DEFAULT, "SetPrivacyMode");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowPrivacyMode(env, info) : nullptr;
 }
