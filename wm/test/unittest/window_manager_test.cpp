@@ -163,7 +163,7 @@ class TestApplicationFocusChangedListener : public IApplicationFocusChangedListe
 public:
     void OnApplicationFocusUpdate(bool isFocused) override
     {
-        TLOGI(WmslogtaG::WMS_FOCUS,"TestApplicationFocusChangedListener");
+        TLOGI(WmslogtaG::WMS_FOCUS, "TestApplicationFocusChangedListener");
     };
 };
 
