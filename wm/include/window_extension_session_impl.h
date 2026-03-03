@@ -47,7 +47,7 @@ public:
         bool isModuleAbilityHookEnd = false) override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
-    WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
@@ -175,6 +175,7 @@ public:
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WSError SetUIExtensionTransparent() override;
 
     /*
      * PC Window
@@ -293,6 +294,7 @@ private:
     std::vector<sptr<IRectChangeInGlobalDisplayListener>> hostRectChangeInGlobalDisplayListenerList_;
     uint32_t hostStatusBarContentColor_ { 0 };
     int64_t startModalExtensionTimeStamp_ = -1;
+    std::atomic<bool> transparentUIExtensionFlag_ { false };
 
     /*
      * PC Fold Screen

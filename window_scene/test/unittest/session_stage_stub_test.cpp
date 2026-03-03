@@ -1240,31 +1240,6 @@ HWTEST_F(SessionStageStubTest, HandleNotifyPiPActiveStatusChange, TestSize.Level
 }
 
 /**
- * @tc.name: HandleNotifyRotationChange
- * @tc.desc: test function : HandleNotifyRotationChange
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyRotationChange, Function | SmallTest | Level1)
-{
-    sptr<SessionStageMocker> sessionStageStub = sptr<SessionStageMocker>::MakeSptr();
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    data.WriteUint32(static_cast<uint32_t>(info.type_));
-    data.WriteUint32(info.orientation_);
-    data.WriteUint64(info.displayId_);
-    data.WriteInt32(info.displayRect_.posX_);
-    data.WriteInt32(info.displayRect_.posY_);
-    data.WriteUint32(info.displayRect_.width_);
-    data.WriteUint32(info.displayRect_.height_);
-    sessionStageStub->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
-}
-
-/**
  * @tc.name: HandleLinkKeyFrameNode
  * @tc.desc: test function : HandleLinkKeyFrameNode
  * @tc.type: FUNC
@@ -1653,6 +1628,73 @@ HWTEST_F(SessionStageStubTest, HandleSetSidebarBlurStyleWithType03, TestSize.Lev
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteUint32(static_cast<uint32_t>(SidebarBlurType::END));
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SIDEBAR_BLUR_STYLE);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateWindowUIType01
+ * @tc.desc: test function : HandleUpdateWindowUIType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateWindowUIType01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint8(0);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_UI_TYPE);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateWindowUIType02
+ * @tc.desc: test function : HandleUpdateWindowUIType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateWindowUIType02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_UI_TYPE);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdatePropertyWhenTriggerMode01
+ * @tc.desc: test function : HandleUpdatePropertyWhenTriggerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdatePropertyWhenTriggerMode01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    data.WriteParcelable(property.GetRefPtr());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_PROPERTY_WHEN_TRIGGER_MODE);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdatePropertyWhenTriggerMode02
+ * @tc.desc: test function : HandleUpdatePropertyWhenTriggerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdatePropertyWhenTriggerMode02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_PROPERTY_WHEN_TRIGGER_MODE);
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }

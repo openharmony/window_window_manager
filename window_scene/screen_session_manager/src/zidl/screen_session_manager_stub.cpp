@@ -546,6 +546,21 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenGroupId)));
             break;
         }
+        case DisplayManagerMessage::TRANS_ID_QUERY_MULTI_SCREEN_CAPTURE: {
+            std::vector<ScreenId> screenIds;
+            if (!data.ReadUInt64Vector(&screenIds)) {
+                TLOGE(WmsLogTag::DMS, "fail to receive main screen in stub.");
+                break;
+            }
+            DMRect rect;
+            DMError ret = QueryMultiScreenCapture(screenIds, rect);
+            reply.WriteInt32(rect.posX_);
+            reply.WriteInt32(rect.posY_);
+            reply.WriteUint32(rect.width_);
+            reply.WriteUint32(rect.height_);
+            reply.WriteUint32(static_cast<int32_t>(ret));
+            break;
+        }
         case DisplayManagerMessage::TRANS_ID_SCREEN_MAKE_MIRROR_WITH_REGION: {
             ScreenId mainScreenId = static_cast<ScreenId>(data.ReadUint64());
             std::vector<ScreenId> mirrorScreenId;
@@ -1383,6 +1398,10 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             hookInfo.displayOrientation_ = data.ReadUint32();
             hookInfo.enableHookDisplayOrientation_ = data.ReadBool();
             hookInfo.isFullScreenInForceSplit_ = data.ReadBool();
+            hookInfo.actualRect_.posX_ = data.ReadInt32();
+            hookInfo.actualRect_.posY_ = data.ReadInt32();
+            hookInfo.actualRect_.width_ = data.ReadUint32();
+            hookInfo.actualRect_.height_ = data.ReadUint32();
             UpdateDisplayHookInfo(uid, enable, hookInfo);
             break;
         }

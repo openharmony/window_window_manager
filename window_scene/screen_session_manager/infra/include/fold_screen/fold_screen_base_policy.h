@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen::DMS {
 namespace {
-    static const uint32_t FOLD_TASK_NUM = 3;
+    static const uint32_t FOLD_TASK_NUM = 4;
     static const uint32_t FOLD_TASK_NUM_ONBOOTANIMATION = 1;
 }
 class FoldScreenBasePolicy {
@@ -38,6 +38,7 @@ public:
 
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
+    FoldDisplayMode GetCurrentDisplayMode() const;
     virtual FoldStatus GetFoldStatus();
     void SetFoldStatus(FoldStatus foldStatus);
     std::chrono::steady_clock::time_point GetStartTimePoint();

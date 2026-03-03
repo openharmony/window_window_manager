@@ -24,6 +24,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_accesstoken_kit.h"
+#include "mock/mock_collaborator_dll_manager.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_scene_session.h"
 #include "mock/mock_window_event_channel.h"
@@ -541,6 +542,23 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_014, TestSiz
     property->SetWindowType(WindowType::WINDOW_TYPE_MAGNIFICATION_MENU);
     MockAccesstokenKit::MockIsSACalling(false);
     EXPECT_EQ(false, ssm_->CheckSystemWindowPermission(property));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
+}
+
+/**
+ * @tc.name: TestCheckSystemWindowPermission_016
+ * @tc.desc: Test CheckSystemWindowPermission with windowType WINDOW_TYPE_MAGNIFICATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_016, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetWindowType(WindowType::WINDOW_TYPE_SELECTION);
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
 
     MockAccesstokenKit::MockIsSACalling(true);
     EXPECT_EQ(true, ssm_->CheckSystemWindowPermission(property));
@@ -1996,25 +2014,6 @@ HWTEST_F(SceneSessionManagerTest12, SetFocusedSessionDisplayIdIfNeededTest001, T
     sptr<SceneSession> sceneSession = static_cast<sptr<SceneSession>>(sceneSessionMock);
     ssm_->SetFocusedSessionDisplayIdIfNeeded(sceneSession);
 }
-
-/**
- * @tc.name: GetActiveSceneSessionCopy
- * @tc.desc: test function : GetActiveSceneSessionCopy
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest12, GetActiveSceneSessionCopy, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetActiveSceneSessionCopy";
-    info.bundleName_ = "GetActiveSceneSessionCopy";
-    info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
-    sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
-    std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
-    EXPECT_EQ(activeSession.empty(), false);
-}
-
 /**
  * @tc.name: GetHookedSessionByModuleName
  * @tc.desc: test function : GetHookedSessionByModuleName
@@ -2320,6 +2319,8 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId1, TestSize.Level0)
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     ssm_->UpdateSessionDisplayId(86, 12);
+    SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
 }
 
 /**
@@ -2349,6 +2350,8 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId2, TestSize.Level0)
     // Change display id of non-callingWindow
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     ssm_->UpdateSessionDisplayId(90, 12);
+    SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
 }
 
 /**
@@ -2366,6 +2369,8 @@ HWTEST_F(SceneSessionManagerTest12, UpdateSessionDisplayId3, TestSize.Level1)
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     ssm_->UpdateSessionDisplayId(86, 12);
+    SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
 }
 
 /**
@@ -2383,8 +2388,8 @@ HWTEST_F(SceneSessionManagerTest12, NotifyDisplayIdChanged, TestSize.Level1)
     ConstructKeyboardCallingWindowTestData(keyboardTestData);
     EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(0);
     ssm_->NotifyDisplayIdChanged(85, 12);
-    EXPECT_CALL(*wmAgentLiteMocker, NotifyCallingWindowDisplayChanged(_)).Times(1);
-    ssm_->NotifyDisplayIdChanged(86, 12);
+    SessionManagerAgentController::GetInstance().UnregisterWindowManagerAgent(
+        wmAgentLiteMocker, WindowManagerAgentType::WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY, 12345);
 }
 
 /**
@@ -3289,6 +3294,33 @@ HWTEST_F(SceneSessionManagerTest12, DeleteAllOutline, Function | SmallTest | Lev
     EXPECT_EQ(ssm->outlineRemoteObject_, nullptr);
 }
 
+/**
+ * @tc.name: CheckBrokeNotAliveAndRefresh_01
+ * @tc.desc: test function : CheckBrokeNotAliveAndRefresh_01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh01, Function | SmallTest | Level2)
+{
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "CheckBrokeNotAliveAndRefresh01";
+    info.bundleName_ = "CheckBrokeNotAliveAndRefresh01";
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    info.SetWantSafely(wantPtr);
+    info.callerTypeForAnco = 0;
+    ssm->CheckBrokeNotAliveAndRefresh(info);
+    EXPECT_EQ(info.callerTypeForAnco, 0);
+ 
+    MockCollaboratorDllManager::MockPreHandleStartAbility(1);
+    ssm->CheckBrokeNotAliveAndRefresh(info);
+    EXPECT_EQ(info.callerTypeForAnco, 1);
+ 
+    MockCollaboratorDllManager::MockPreHandleStartAbility(2);
+    ssm->CheckBrokeNotAliveAndRefresh(info);
+    EXPECT_EQ(info.callerTypeForAnco, 2);
+ 
+    MockCollaboratorDllManager::MockPreHandleStartAbility(0);
+}
 
 /**
  * @tc.name: RecoverOutline

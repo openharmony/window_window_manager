@@ -161,6 +161,7 @@
             OHOS::Rosen::SceneSession::SetWindowCornerRadiusCallback*;
             OHOS::Rosen::SceneSession::SetWindowRectAutoSaveCallback*;
             OHOS::Rosen::SceneSession::UpdateFullScreenWaterfallMode*;
+            OHOS::Rosen::SceneSession::NotifyPendingSessionActivation*;
             OHOS::Rosen::SceneSession::RegisterShowWhenLockedCallback*;
             OHOS::Rosen::SceneSession::SetDefaultRequestedOrientation*;
             OHOS::Rosen::SceneSession::SetMousePointerDownEventStatus*;
@@ -227,6 +228,9 @@
             OHOS::Rosen::SceneSession::SceneSession*;
             OHOS::Rosen::SceneSession::RegisterGetAppUseControlDisplayMapFunc*;
             OHOS::Rosen::SceneSession::NotifyRemoveAppLockSnapshot*;
+            OHOS::Rosen::SceneSession::ClearAllModifiers*;
+            OHOS::Rosen::SceneSession::NotifyModeSwitchInfo*;
+            OHOS::Rosen::SceneSession::UpdatePropertyWhenTriggerMode*;
             OHOS::Rosen::SessionUtils::SetMoveResampleEnabled*;
             OHOS::Rosen::SystemSession::SystemSession*;
             OHOS::Rosen::KeyboardSession::KeyboardSession*;
@@ -333,6 +337,8 @@
             OHOS::Rosen::ScenePersistence::HasSnapshot*;
             OHOS::Rosen::ScenePersistence::GetSnapshotSize*;
             OHOS::Rosen::ScenePersistence::ScenePersistence*;
+            OHOS::Rosen::ScenePersistence::CreateStartWindowDir*;
+            OHOS::Rosen::ScenePersistence::SaveStartWindow*;
             OHOS::Rosen::SceneSession::SetVsyncStation*;
             OHOS::Rosen::PcFoldScreenManager::IsHalfFolded*;
             OHOS::Rosen::PcFoldScreenManager::GetDisplayRects*;
@@ -344,7 +350,8 @@
             OHOS::Rosen::SceneSession::SetIsUserRequestedExit*;
             OHOS::Rosen::SceneSession::RegisterNotifyOccupiedAreaChangeCallback*;
             OHOS::Rosen::SceneSession::RegisterRecoverWindowEffectCallback*;
-            OHOS::Rosen::MoveDragController::SetMoveResampleSystemConfig*;
+            OHOS::Rosen::MoveDragController::SaveMoveResampleSystemConfig*;
+            OHOS::Rosen::MoveDragController::SaveMovingEventThrottleSystemConfig*;
             OHOS::Rosen::SessionStub::OnRemoteRequest*;
             OHOS::Rosen::Session::*;
             OHOS::Rosen::ExtensionSession::*;

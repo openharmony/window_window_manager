@@ -108,8 +108,6 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::UpdateAvailableArea);
     BindNativeFunction(env, exportObj, "updateSuperFoldAvailableArea", moduleName,
         JsScreenSessionManager::UpdateSuperFoldAvailableArea);
-    BindNativeFunction(env, exportObj, "extraDestroyScreen", moduleName,
-        JsScreenSessionManager::ExtraDestroyScreen);
     BindNativeFunction(env, exportObj, "updateSuperFoldExpandAvailableArea", moduleName,
         JsScreenSessionManager::UpdateSuperFoldExpandAvailableArea);
     BindNativeFunction(env, exportObj, "setScreenOffDelayTime", moduleName,
@@ -120,6 +118,8 @@ napi_value JsScreenSessionManager::Init(napi_env env, napi_value exportObj)
         JsScreenSessionManager::NotifyScreenConnectCompletion);
     BindNativeFunction(env, exportObj, "notifyAodOpCompletion", moduleName,
         JsScreenSessionManager::NotifyAodOpCompletion);
+    BindNativeFunction(env, exportObj, "setPhysicalVisibleMaskToDisplayNode", moduleName,
+        JsScreenSessionManager::SetPhysicalVisibleMaskToDisplayNode);
     BindNativeFunction(env, exportObj, "setPowerStateForAod", moduleName,
         JsScreenSessionManager::SetPowerStateForAod);
     BindNativeFunction(env, exportObj, "recordEventFromScb", moduleName,
@@ -253,13 +253,6 @@ napi_value JsScreenSessionManager::UpdateSuperFoldAvailableArea(napi_env env, na
     return (me != nullptr) ? me->OnUpdateSuperFoldAvailableArea(env, info) : nullptr;
 }
 
-napi_value JsScreenSessionManager::ExtraDestroyScreen(napi_env env, napi_callback_info info)
-{
-    TLOGD(WmsLogTag::DMS, "[NAPI]ExtraDestroyScreen");
-    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
-    return (me != nullptr) ? me->OnExtraDestroyScreen(env, info) : nullptr;
-}
-
 napi_value JsScreenSessionManager::UpdateSuperFoldExpandAvailableArea(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]UpdateSuperFoldExpandAvailableArea");
@@ -299,6 +292,13 @@ napi_value JsScreenSessionManager::NotifyAodOpCompletion(napi_env env, napi_call
     TLOGD(WmsLogTag::DMS, "[NAPI]NotifyAodOpCompletion");
     JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
     return (me != nullptr) ? me->OnNotifyAodOpCompletion(env, info) : nullptr;
+}
+
+napi_value JsScreenSessionManager::SetPhysicalVisibleMaskToDisplayNode(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetPhysicalVisibleMaskToDisplayNode");
+    JsScreenSessionManager* me = CheckParamsAndGetThis<JsScreenSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetPhysicalVisibleMaskToDisplayNode(env, info) : nullptr;
 }
 
 napi_value JsScreenSessionManager::SetPowerStateForAod(napi_env env, napi_callback_info info)
@@ -681,9 +681,9 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
         return NapiGetUndefined(env);
     }
     if (callbackType == ON_SCREEN_CONNECTION_CHANGE_CALLBACK) {
-        RegisterScreenConnectionCallback(env, callbackType, callbackRef);
+        RegisterScreenConnectionCallback(env, callbackRef);
     } else if (callbackType == ON_TENT_MODE_CHANGE_CALLBACK) {
-        RegisterTentModeCallback(env, callbackType, callbackRef);
+        RegisterTentModeCallback(env, callbackRef);
     } else {
         TLOGE(WmsLogTag::DMS, "Unsupported callback type: %{public}s.", callbackType.c_str());
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
@@ -691,8 +691,7 @@ napi_value JsScreenSessionManager::OnRegisterCallback(napi_env env, const napi_c
     return NapiGetUndefined(env);
 }
 
-void JsScreenSessionManager::RegisterScreenConnectionCallback(napi_env env,
-    const std::string& callbackType, napi_ref& callback)
+void JsScreenSessionManager::RegisterScreenConnectionCallback(napi_env env, napi_ref& callback)
 {
     TLOGI(WmsLogTag::DMS, "[NAPI] begin");
     if (screenConnectionCallback_ != nullptr) {
@@ -703,8 +702,7 @@ void JsScreenSessionManager::RegisterScreenConnectionCallback(napi_env env,
     ScreenSessionManagerClient::GetInstance().RegisterScreenConnectionListener(this);
 }
 
-void JsScreenSessionManager::RegisterTentModeCallback(napi_env env,
-    const std::string& callbackType, napi_ref& callback)
+void JsScreenSessionManager::RegisterTentModeCallback(napi_env env, napi_ref& callback)
 {
     TLOGI(WmsLogTag::DMS, "[NAPI] begin");
     std::shared_ptr<NativeReference> callbackRef(reinterpret_cast<NativeReference*>(callback));
@@ -963,29 +961,6 @@ napi_value JsScreenSessionManager::OnUpdateSuperFoldAvailableArea(napi_env env, 
     return NapiGetUndefined(env);
 }
 
-napi_value JsScreenSessionManager::OnExtraDestroyScreen(napi_env env, const napi_callback_info info)
-{
-    TLOGD(WmsLogTag::DMS, "[NAPI]OnExtraDestroyScreen");
-    size_t argc = 1;
-    napi_value argv[1] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 1) { // 1: params num
-        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    int32_t screenId;
-    if (!ConvertFromJsValue(env, argv[0], screenId)) {
-        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to screenId");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
-    ScreenSessionManagerClient::GetInstance().ExtraDestroyScreen(static_cast<ScreenId>(screenId));
-    return NapiGetUndefined(env);
-}
-
 napi_value JsScreenSessionManager::OnUpdateSuperFoldExpandAvailableArea(napi_env env, const napi_callback_info info)
 {
     TLOGD(WmsLogTag::DMS, "[NAPI]OnUpdateSuperFoldExpandAvailableArea");
@@ -1154,6 +1129,36 @@ napi_value JsScreenSessionManager::OnNotifyAodOpCompletion(napi_env env, const n
         return NapiGetUndefined(env);
     }
     ScreenSessionManagerClient::GetInstance().NotifyAodOpCompletion(op, result);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsScreenSessionManager::OnSetPhysicalVisibleMaskToDisplayNode(napi_env env, const napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DMS, "[NAPI]SetPhysicalVisibleMaskToDisplayNode Enter");
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = {nullptr, nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    int32_t width;
+    int32_t height;
+    if (!ConvertFromJsValue(env, argv[0], width)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to width");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[1], height)) {
+        TLOGE(WmsLogTag::DMS, "[NAPI]Failed to convert parameter to height");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    ScreenSessionManagerClient::GetInstance().SetPhysicalVisibleMaskToDisplayNode(width, height);
     return NapiGetUndefined(env);
 }
 

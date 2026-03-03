@@ -85,8 +85,15 @@ void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
+    ani_vm* vm = nullptr;
+    ani_status aniRet = env->GetVM(&vm);
+    if (aniRet != ANI_OK || vm == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Get vm failed, aniRet: %{public}u", aniRet);
+        env->GlobalReference_Delete(cbRef);
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "create listener");
-    sptr<ScreenAniListener> screenAniListener = new (std::nothrow) ScreenAniListener(env);
+    sptr<ScreenAniListener> screenAniListener = new (std::nothrow) ScreenAniListener(env, vm);
     if (screenAniListener == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] screenListener is nullptr");
         env->GlobalReference_Delete(cbRef);
@@ -327,6 +334,8 @@ void ScreenManagerAni::CreateVirtualScreen(ani_env* env, ani_object options, ani
             ret = DmErrorCode::DM_ERROR_NOT_SYSTEM_APP;
         } else if (screenId == ERROR_ID_NO_PERMISSION) {
             ret = DmErrorCode::DM_ERROR_NO_PERMISSION;
+        } else if (screenId == ERROR_INVALID_PARAM) {
+            ret = DmErrorCode::DM_ERROR_INVALID_PARAM;
         }
         TLOGE(WmsLogTag::DMS, "[ANI] Get virtual screen failed");
         AniErrUtils::ThrowBusinessError(env, ret, "Get virtual screen failed");
@@ -716,6 +725,8 @@ ani_status ScreenManagerAni::NspBindNativeFunctions(ani_env* env, ani_namespace 
                              nullptr,
                              reinterpret_cast<void*>(ScreenManagerAni::SetScreenPrivacyMaskImage) },
         ani_native_function{ "makeUniqueInternal", nullptr, reinterpret_cast<void*>(ScreenManagerAni::MakeUnique) },
+        ani_native_function{
+            "resizeVirtualScreenInternal", nullptr, reinterpret_cast<void*>(ScreenManagerAni::ResizeVirtualScreen) },
         ani_native_function{
             "makeMirrorWithRegionInternal", nullptr, reinterpret_cast<void*>(ScreenManagerAni::MakeMirrorWithRegion) },
         ani_native_function{ "stopMirrorInternal", nullptr, reinterpret_cast<void*>(ScreenManagerAni::StopMirror) },

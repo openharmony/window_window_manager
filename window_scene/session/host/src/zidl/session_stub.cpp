@@ -41,6 +41,10 @@ constexpr int32_t MAX_ABILITY_SESSION_INFOS = 4;
 
 int ReadBasicAbilitySessionInfo(MessageParcel& data, sptr<AAFwk::SessionInfo> abilitySessionInfo)
 {
+    if (abilitySessionInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "abilitySessionInfo is nullptr");
+        return ERR_INVALID_DATA;
+    }
     sptr<AAFwk::Want> localWant = data.ReadParcelable<AAFwk::Want>();
     if (localWant == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "localWant is nullptr");
@@ -389,7 +393,7 @@ int SessionStub::HandleForeground(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
         return ERR_INVALID_DATA;
     }
-    const WSError errCode = Foreground(property, true, identityToken);
+    const WSError errCode = Foreground(property, isFromClient, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -403,7 +407,7 @@ int SessionStub::HandleBackground(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
         return ERR_INVALID_DATA;
     }
-    const WSError errCode = Background(true, identityToken);
+    const WSError errCode = Background(isFromClient, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -417,7 +421,7 @@ int SessionStub::HandleDisconnect(MessageParcel& data, MessageParcel& reply)
         TLOGE(WmsLogTag::WMS_LIFE, "Read identityToken failed.");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = Disconnect(true, identityToken);
+    WSError errCode = Disconnect(isFromClient, identityToken);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -542,9 +546,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetUseControlState());
         reply.WriteString(property->GetAncoRealBundleName());
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
+        reply.WriteString(property->GetLogicalDeviceConfig());
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);
-        reply.WriteString(property->GetLogicalDeviceConfig());
         reply.WriteBool(property->IsPrelaunch());
         reply.WriteInt32(property->GetFrameNum());
     }
@@ -1107,23 +1111,7 @@ int SessionStub::HandleUpdateSessionRect(MessageParcel& data, MessageParcel& rep
     }
     MoveConfiguration moveConfiguration;
     moveConfiguration.displayId = static_cast<DisplayId>(displayId);
-    RectAnimationConfig rectAnimationConfig;
-    if (reason == SizeChangeReason::MOVE_WITH_ANIMATION || reason == SizeChangeReason::RESIZE_WITH_ANIMATION) {
-        if (!data.ReadUint32(rectAnimationConfig.duration) || !data.ReadFloat(rectAnimationConfig.x1) ||
-            !data.ReadFloat(rectAnimationConfig.y1) || !data.ReadFloat(rectAnimationConfig.x2) ||
-            !data.ReadFloat(rectAnimationConfig.y2)) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "failed to read animation config");
-            return ERR_INVALID_DATA;
-        }
-        if (reason == SizeChangeReason::MOVE_WITH_ANIMATION) {
-            moveConfiguration.rectAnimationConfig = rectAnimationConfig;
-        }
-    }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "rectAnimationConfig:[%{public}u, %{public}f, %{public}f, %{public}f, %{public}f]",
-        rectAnimationConfig.duration, rectAnimationConfig.x1, rectAnimationConfig.y1, rectAnimationConfig.x2,
-        rectAnimationConfig.y2);
-    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, moveConfiguration,
-        rectAnimationConfig);
+    WSError errCode = UpdateSessionRect(rect, reason, isGlobal, isFromMoveToGlobal, moveConfiguration);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
 }
@@ -1196,9 +1184,9 @@ int SessionStub::HandleRaiseMainWindowAboveTarget(MessageParcel& data, MessagePa
     }
     WSError errCode = RaiseMainWindowAboveTarget(targetId);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_HIERARCHY, "write errCode failed");
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "write errCode failed.");
         return ERR_INVALID_DATA;
-    };
+    }
     return ERR_NONE;
 }
 
@@ -2387,7 +2375,7 @@ int SessionStub::HandleGetCrossAxisState(MessageParcel& data, MessageParcel& rep
     CrossAxisState state = CrossAxisState::STATE_INVALID;
     GetCrossAxisState(state);
     if (!reply.WriteUint32(static_cast<uint32_t>(state))) {
-        TLOGE(WmsLogTag::WMS_MAIN, "write errCode fail.");
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
@@ -2711,7 +2699,12 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
 int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "in");
-    NotifyAppForceLandscapeConfigEnableUpdated();
+    bool needUpdateViewport = false;
+    if (!data.ReadBool(needUpdateViewport)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
     return ERR_NONE;
 }
 

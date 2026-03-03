@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -335,6 +335,50 @@ namespace window {
     bottomRect: Rect;
   }
 
+  export interface UIEnvAvoidAreaVP {
+    visible: boolean;
+    leftRect: RectInVP;
+    topRect: RectInVP;
+    rightRect: RectInVP;
+    bottomRect: RectInVP;
+  }
+
+  export class UIEnvAvoidAreaVPInternal implements UIEnvAvoidAreaVP {
+    visible: boolean;
+    leftRect: RectInVP;
+    topRect: RectInVP;
+    rightRect: RectInVP;
+    bottomRect: RectInVP;
+  }
+
+  export interface UIEnvWindowAvoidAreaInfoPX {
+    statusBar: AvoidArea;
+    cutout: AvoidArea;
+    keyboard: AvoidArea;
+    navigationIndicator: AvoidArea;
+  }
+
+  export class UIEnvWindowAvoidAreaInfoPXInternal implements UIEnvWindowAvoidAreaInfoPX {
+    statusBar: AvoidArea;
+    cutout: AvoidArea;
+    keyboard: AvoidArea;
+    navigationIndicator: AvoidArea;
+  }
+
+  export interface UIEnvWindowAvoidAreaInfoVP {
+    statusBar: UIEnvAvoidAreaVP;
+    cutout: UIEnvAvoidAreaVP;
+    keyboard: UIEnvAvoidAreaVP;
+    navigationIndicator: UIEnvAvoidAreaVP;
+  }
+
+  export class UIEnvWindowAvoidAreaInfoVPInternal implements UIEnvWindowAvoidAreaInfoVP {
+    statusBar: UIEnvAvoidAreaVP;
+    cutout: UIEnvAvoidAreaVP;
+    keyboard: UIEnvAvoidAreaVP;
+    navigationIndicator: UIEnvAvoidAreaVP;
+  }
+
   /**
    * System bar tint of region
    *
@@ -357,7 +401,7 @@ namespace window {
     /**
      * The visibility of system bar
      *
-     * @type { ?boolean }
+     * @type { boolean }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @systemapi Hide this for inner system use.
      * @since 8
@@ -367,7 +411,7 @@ namespace window {
     /**
      * The region of system bar
      *
-     * @type { ?Rect }
+     * @type { Rect }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @systemapi Hide this for inner system use.
      * @since 8
@@ -377,7 +421,7 @@ namespace window {
     /**
      * The background color of the system bar.
      *
-     * @type { ?string }
+     * @type { string }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @systemapi Hide this for inner system use.
      * @since 8
@@ -387,7 +431,7 @@ namespace window {
     /**
      * The content color of the system bar.
      *
-     * @type { ?string }
+     * @type { string }
      * @syscap SystemCapability.WindowManager.WindowManager.Core
      * @systemapi Hide this for inner system use.
      * @since 8
@@ -625,6 +669,20 @@ namespace window {
     }
   }
 
+  export interface RectInVP {
+    left: double;
+    top: double;
+    width: double;
+    height: double;
+  }
+
+  export class RectInVPInternal implements RectInVP {
+    left: double;
+    top: double;
+    width: double;
+    height: double;
+  }
+
   export interface RectChangeOptions {
     rect: Rect;
     reason: RectChangeReason;
@@ -633,6 +691,16 @@ namespace window {
   export class SizeInternal implements Size {
     width: int;
     height: int;
+  }
+
+  export interface SizeInVP {
+    width: double;
+    height: double;
+  }
+
+  export class SizeInVPInternal implements SizeInVP {
+    width: double;
+    height: double;
   }
 
   export interface Position {
@@ -810,10 +878,10 @@ export enum Orientation {
     FOLLOW_DESKTOP = 17
 }
 
-export enum  RotationInfoType {
-    WINDOW_ORIENTATION = 0,
-    DISPLAY_ORIENTATION = 1,
-    DISPLAY_ROTATION = 2,
+export enum RotationInfoType {
+  WINDOW_ORIENTATION = 0,
+  DISPLAY_ORIENTATION = 1,
+  DISPLAY_ROTATION = 2
 }
 
 export enum WindowEventType {
@@ -824,11 +892,11 @@ export enum WindowEventType {
     WINDOW_DESTROYED = 7
 }
 
-export enum WindowStageLifeCycleEventType {
-    FOREGROUND = 1,
+export enum WindowStageLifecycleEventType {
+    SHOWN = 1,
     RESUMED = 2,
     PAUSED = 3,
-    BACKGROUND = 4,
+    HIDDEN = 4,
 }
 
 export enum WindowMode {
@@ -1094,49 +1162,49 @@ export interface WindowProperties {
 }
 
 export class WindowPropertiesInternal implements WindowProperties {
-    windowRect: Rect;
-    drawableRect: Rect;
-    isFullScreen: boolean;
-    isLayoutFullScreen: boolean;
-    focusable: boolean;
-    touchable: boolean;
-    brightness: double;
-    dimBehindValue: number;
-    isKeepScreenOn: boolean;
-    isPrivacyMode: boolean;
-    isRoundCorner: boolean;
-    isTransparent: boolean;
-    type: WindowType;
-    id: int;
-    displayId?: long;
-    name?: string;
-    globalDisplayRect?: Rect;
+  windowRect: Rect;
+  drawableRect: Rect;
+  isFullScreen: boolean;
+  isLayoutFullScreen: boolean;
+  focusable: boolean;
+  touchable: boolean;
+  brightness: double;
+  dimBehindValue: number;
+  isKeepScreenOn: boolean;
+  isPrivacyMode: boolean;
+  isRoundCorner: boolean;
+  isTransparent: boolean;
+  type: WindowType;
+  id: int;
+  displayId?: long;
+  name?: string;
+  globalDisplayRect?: Rect;
 
-    constructor(windowRect: Rect, drawableRect: Rect, isFullScreen: boolean, isLayoutFullScreen: boolean,
-      focusable: boolean, touchable: boolean, brightness: double, dimBehindValue: number, isKeepScreenOn: boolean,
-      isPrivacyMode: boolean, isRoundCorner: boolean, isTransparent: boolean, typeInternal: int, id: int,
-      displayId: long, name: string, globalDisplayRect: Rect)
-    {
-      this.windowRect = windowRect;
-      this.drawableRect = drawableRect;
-      this.globalDisplayRect = globalDisplayRect;
-      this.isFullScreen = isFullScreen;
-      this.isLayoutFullScreen = isLayoutFullScreen;
-      this.focusable = focusable;
-      this.touchable = touchable;
-      this.brightness = brightness;
-      this.dimBehindValue = dimBehindValue;
-      this.isKeepScreenOn = isKeepScreenOn;
-      this.isPrivacyMode = isPrivacyMode;
-      this.isRoundCorner = isRoundCorner;
-      this.isTransparent = isTransparent;
-      this.type = typeInternal as WindowType;
-      this.id = id;
-      this.displayId = displayId;
-      this.name = name;
-    }
+  constructor(windowRect: Rect, drawableRect: Rect, isFullScreen: boolean, isLayoutFullScreen: boolean,
+    focusable: boolean, touchable: boolean, brightness: double, dimBehindValue: number, isKeepScreenOn: boolean,
+    isPrivacyMode: boolean, isRoundCorner: boolean, isTransparent: boolean, typeInternal: int, id: int,
+    displayId: long, name: string, globalDisplayRect: Rect)
+  {
+    this.windowRect = windowRect;
+    this.drawableRect = drawableRect;
+    this.globalDisplayRect = globalDisplayRect;
+    this.isFullScreen = isFullScreen;
+    this.isLayoutFullScreen = isLayoutFullScreen;
+    this.focusable = focusable;
+    this.touchable = touchable;
+    this.brightness = brightness;
+    this.dimBehindValue = dimBehindValue;
+    this.isKeepScreenOn = isKeepScreenOn;
+    this.isPrivacyMode = isPrivacyMode;
+    this.isRoundCorner = isRoundCorner;
+    this.isTransparent = isTransparent;
+    this.type = typeInternal as WindowType;
+    this.id = id;
+    this.displayId = displayId;
+    this.name = name;
+  }
 
-    constructor() {}
+  constructor() {}
 }
 
 /**
@@ -2463,6 +2531,7 @@ export class WindowStageInternal implements WindowStage {
     private static native nativeTransferDynamic(nativeObj: long): ESValue;
     public native loadContentSync(nativeObj: long, path: string, storage?: LocalStorage): void;
     public native loadContentByNameSync(nativeObj: long, path: string, storage?: LocalStorage): void;
+    public native releaseUIContentSync(nativeObj: long): void;
     public native disableWindowDecorSync(nativeObj:long): void;
     public native setShowOnLockScreenSync(nativeObj:long, showOnLockScreen: boolean): void;
     public native setWindowModal(nativeObj: long, isModal: boolean): void;
@@ -2491,7 +2560,7 @@ export class WindowStageInternal implements WindowStage {
       try {
         this.loadContentSync(this.nativeObj, path, storage);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -2501,7 +2570,7 @@ export class WindowStageInternal implements WindowStage {
         try {
           this.loadContentSync(this.nativeObj, path, storage);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -2511,7 +2580,7 @@ export class WindowStageInternal implements WindowStage {
       try {
         this.loadContentSync(this.nativeObj, path, undefined);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -2520,7 +2589,7 @@ export class WindowStageInternal implements WindowStage {
       try {
         this.loadContentByNameSync(this.nativeObj, name, storage);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -2530,7 +2599,7 @@ export class WindowStageInternal implements WindowStage {
         try {
           this.loadContentByNameSync(this.nativeObj, name, storage);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -2540,9 +2609,20 @@ export class WindowStageInternal implements WindowStage {
       try {
         this.loadContentByNameSync(this.nativeObj, name, undefined);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
+    }
+
+    public releaseUIContent(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.releaseUIContentSync(this.nativeObj);
+          resolve(undefined);
+        } catch (err) {
+          reject(err as BusinessError);
+        }
+      });
     }
 
     public disableWindowDecor(): void {
@@ -2744,7 +2824,7 @@ export class WindowStageInternal implements WindowStage {
         try {
           this.removeImageForRecentSync(this.nativeObj);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -2803,6 +2883,14 @@ export class WindowStageInternal implements WindowStage {
     public offWindowStageEvent(callback?: Callback<WindowStageEventType>): void {
       this.offSync(this.nativeObj, 'windowStageEvent', callback);
     }
+
+    public onWindowStageLifecycleEvent(callback: Callback<WindowStageLifecycleEventType>): void {
+      this.onSync(this.nativeObj, 'windowStageLifecycleEvent', callback);
+    }
+
+    public offWindowStageLifecycleEvent(callback?: Callback<WindowStageLifecycleEventType>): void {
+      this.offSync(this.nativeObj, 'windowStageLifecycleEvent', callback);
+    }
 }
 
 export interface WindowStage {
@@ -2812,6 +2900,7 @@ export interface WindowStage {
     loadContentByName(name: string, storage: LocalStorage, callback: AsyncCallback<void>): void;
     loadContentByName(name: string, storage?: LocalStorage): Promise<void>;
     loadContentByName(name: string, callback: AsyncCallback<void>): void;
+    releaseUIContent(): Promise<void>;
     getMainWindowSync(): Window;
     getMainWindow(): Promise<Window>;
     getMainWindow(callback: AsyncCallback<Window>): void;
@@ -2842,6 +2931,8 @@ export interface WindowStage {
     off<T>(eventType: string, callback?: Callback<T>): void;
     onWindowStageEvent(callback: Callback<WindowStageEventType>): void;
     offWindowStageEvent(callback?: Callback<WindowStageEventType>): void;
+    onWindowStageLifecycleEvent(callback: Callback<WindowStageLifecycleEventType>): void;
+    offWindowStageLifecycleEvent(callback?: Callback<WindowStageLifecycleEventType>): void;
 }
 
 export class WindowInternal implements Window {
@@ -3016,6 +3107,8 @@ export class WindowInternal implements Window {
     private native setWindowShadowEnabledSync(nativeObj: long, enable: boolean): void;
     private native isImmersiveLayoutSync(nativeObj: long): boolean;
     private native keepKeyboardOnFocusSync(nativeObj: long, enable: boolean): void;
+    private native enableLandscapeMultiWindow(nativeObj: long): void;
+    private native disableLandscapeMultiWindow(nativeObj: long): void;
 
     private native setWindowTransitionAnimation(nativeObj: long, transitionType: WindowTransitionType,
         animation: TransitionAnimation): void;
@@ -3171,7 +3264,7 @@ export class WindowInternal implements Window {
             try {
                 this.setWindowTitle(this.nativeObj, titleName);
                 resolve(undefined);
-            } catch (err: Error) {
+            } catch (err) {
                 reject(err as BusinessError);
             }
         });
@@ -3655,7 +3748,7 @@ export class WindowInternal implements Window {
         try {
           this.setUIContentSync(this.nativeObj, path);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -3665,7 +3758,7 @@ export class WindowInternal implements Window {
       try {
         this.setUIContentSync(this.nativeObj, path);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -3675,7 +3768,7 @@ export class WindowInternal implements Window {
         try {
           this.loadContentSync(this.nativeObj, path, storage);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -3685,7 +3778,7 @@ export class WindowInternal implements Window {
       try {
         this.loadContentSync(this.nativeObj, path, storage);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -3695,7 +3788,7 @@ export class WindowInternal implements Window {
         try {
           this.loadContentSync(this.nativeObj, path, undefined);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -3705,7 +3798,7 @@ export class WindowInternal implements Window {
       try {
         this.loadContentSync(this.nativeObj, path, undefined);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -3714,7 +3807,7 @@ export class WindowInternal implements Window {
       try {
         this.loadContentByNameSync(this.nativeObj, name, storage);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -3724,7 +3817,7 @@ export class WindowInternal implements Window {
         try {
           this.loadContentByNameSync(this.nativeObj, name, storage);
           resolve(undefined);
-        } catch (err: Error) {
+        } catch (err) {
           reject(err as BusinessError);
         }
       });
@@ -3734,7 +3827,7 @@ export class WindowInternal implements Window {
       try {
         this.loadContentByNameSync(this.nativeObj, name, undefined);
         callback(new BusinessError(), undefined);
-      } catch (err: Error) {
+      } catch (err) {
         callback(err as BusinessError, undefined);
       }
     }
@@ -4821,6 +4914,30 @@ export class WindowInternal implements Window {
       });
     }
 
+    public enableLandscapeMultiWindow(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute(() => {
+          this.enableLandscapeMultiWindow(this.nativeObj);
+        }).then((ret: Any) => {
+          resolve(undefined);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public disableLandscapeMultiWindow(): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute(() => {
+          this.disableLandscapeMultiWindow(this.nativeObj);
+        }).then((ret: Any) => {
+          resolve(undefined);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
     public setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>) {
       taskpool.execute(() => {
         this.setResizeByDragEnabled(this.nativeObj, enable);
@@ -5318,6 +5435,8 @@ export interface Window {
     startMoving(): Promise<void>;
     startMoving(offsetX: int, offsetY: int): Promise<void>;
     stopMoving(): Promise<void>;
+    enableLandscapeMultiWindow(): Promise<void>;
+    disableLandscapeMultiWindow(): Promise<void>;
     setResizeByDragEnabled(enable: boolean, callback: AsyncCallback<void>): void;
     setResizeByDragEnabled(enable: boolean): Promise<void>;
     enableDrag(enable: boolean): Promise<void>;
@@ -5756,15 +5875,15 @@ export function setWindowLayoutMode(mode: WindowLayoutMode): Promise<void> {
 }
 
 export interface MainWindowInfo {
-  displayId: number;
-  windowId: number;
+  displayId: long;
+  windowId: int;
   showing: boolean;
   label: string;
 }
 
 export class MainWindowInfoInternal implements MainWindowInfo {
-  displayId: number;
-  windowId: number;
+  displayId: long;
+  windowId: int;
   showing: boolean;
   label: string;
 }
@@ -5871,8 +5990,8 @@ function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
 }
 
 function runWindowStageLifecycleEventCallback(cb: object, cbArg: int): void {
-    const func = cb as (cbArg: WindowStageLifeCycleEventType) => void;
-    func(cbArg as WindowStageLifeCycleEventType);
+    const func = cb as (cbArg: WindowStageLifecycleEventType) => void;
+    func(cbArg as WindowStageLifecycleEventType);
 }
 
 function runWindowEventCallback(cb: object, cbArg: int): void {

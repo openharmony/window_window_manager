@@ -201,7 +201,7 @@ void FoldScreenBasePolicy::ChangeOffTentMode()
  */
  void FoldScreenBasePolicy::ChangeScreenDisplayModeToCoordination()
 {
-    std::lock_guard<std::mutex> lock(coordinationMutex_);
+    std::unique_lock<std::mutex> lock(coordinationMutex_);
     if (ScreenSessionManager::GetInstance().GetCoordinationFlag()) {
         TLOGW(WmsLogTag::DMS, "change displaymode to coordination skipped, current coordination flag is true");
         return;
@@ -215,12 +215,12 @@ void FoldScreenBasePolicy::ChangeOffTentMode()
         TLOGI(WmsLogTag::DMS, "EnterCoordination skipped, is waiting for coordination ready");
         return;
     }
-    ScreenSessionManager::GetInstance().WaitForCoordinationReady();
+    ScreenSessionManager::GetInstance().WaitForCoordinationReady(lock);
     if (!ScreenSessionManager::GetInstance().GetCoordinationFlag()) {
         TLOGW(WmsLogTag::DMS, "EnterCoordination skipped, current coordination flag is false");
         return;
     }
- 
+
     ScreenSessionManager::GetInstance().OnScreenChange(SCREEN_ID_MAIN, ScreenEvent::CONNECTED);
 
     // on main screen
@@ -228,7 +228,7 @@ void FoldScreenBasePolicy::ChangeOffTentMode()
         TLOGNI(WmsLogTag::DMS, "ChangeScreenDisplayModeToCoordination: screenIdMain ON.");
         NotifyRefreshRateEvent(true);
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-        ScreenSessionManager::GetInstance().SetScreenPowerForFold(SCREEN_ID_MAIN,
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_MAIN,
             ScreenPowerStatus::POWER_STATUS_ON);
         PowerMgr::PowerMgrClient::GetInstance().RefreshActivity();
     };
@@ -254,7 +254,7 @@ void FoldScreenBasePolicy::ChangeScreenPowerOnFold(
 
 void FoldScreenBasePolicy::CloseCoordinationScreen()
 {
-    std::lock_guard<std::mutex> lock(coordinationMutex_);
+    std::unique_lock<std::mutex> lock(coordinationMutex_);
     if (!ScreenSessionManager::GetInstance().GetCoordinationFlag()) {
         TLOGW(WmsLogTag::DMS, "CloseCoordinationScreen skipped, current coordination flag is false");
         return;
@@ -273,7 +273,7 @@ void FoldScreenBasePolicy::CloseCoordinationScreen()
     auto taskScreenOnMainOFF = [=] {
         TLOGNI(WmsLogTag::DMS, "CloseCoordinationScreen: screenIdMain OFF.");
         ScreenSessionManager::GetInstance().SetKeyguardDrawnDoneFlag(false);
-        ScreenSessionManager::GetInstance().SetScreenPowerForFold(SCREEN_ID_MAIN,
+        ScreenSessionManager::GetInstance().SetRSScreenPowerStatusExt(SCREEN_ID_MAIN,
             ScreenPowerStatus::POWER_STATUS_OFF);
         NotifyRefreshRateEvent(false);
     };
@@ -287,7 +287,7 @@ void FoldScreenBasePolicy::CloseCoordinationScreen()
 
 void FoldScreenBasePolicy::ExitCoordination()
 {
-    std::lock_guard<std::mutex> lock(coordinationMutex_);
+    std::unique_lock<std::mutex> lock(coordinationMutex_);
     if (!ScreenSessionManager::GetInstance().GetCoordinationFlag()) {
         TLOGW(WmsLogTag::DMS, "ExitCoordination skipped, current coordination flag is false");
         return;
@@ -901,5 +901,11 @@ void FoldScreenBasePolicy::SetCurrentDisplayMode(FoldDisplayMode mode)
 float FoldScreenBasePolicy::GetSpecialVirtualPixelRatio()
 {
     return -1.0f;
+}
+
+FoldDisplayMode FoldScreenBasePolicy::GetCurrentDisplayMode() const
+{
+    std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
+    return currentDisplayMode_;
 }
 } // namespace OHOS::Rosen

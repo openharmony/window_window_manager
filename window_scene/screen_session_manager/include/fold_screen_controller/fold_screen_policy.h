@@ -28,7 +28,7 @@
 namespace OHOS::Rosen {
 namespace {
     const uint32_t FOLD_TO_EXPAND_ONBOOTANIMATION_TASK_NUM = 1;
-    const uint32_t FOLD_TO_EXPAND_TASK_NUM = 3;
+    const uint32_t FOLD_TO_EXPAND_TASK_NUM = 4;
     constexpr uint32_t SECONDARY_FOLD_TO_EXPAND_TASK_NUM = 3;
 }
 
@@ -67,6 +67,7 @@ public:
     virtual bool IsFoldStatusSupported(const std::unordered_set<FoldStatus>& supportedFoldStatus,
         FoldStatus targetFoldStatus) const;
     FoldDisplayMode GetScreenDisplayMode();
+    FoldDisplayMode GetCurrentDisplayMode() const;
     virtual FoldStatus GetFoldStatus();
     virtual FoldStatus GetPhysicalFoldStatus();
     std::chrono::steady_clock::time_point GetStartTimePoint();

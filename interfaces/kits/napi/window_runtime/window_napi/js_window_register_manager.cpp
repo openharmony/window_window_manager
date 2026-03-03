@@ -15,15 +15,18 @@
 
 #include "js_window_register_manager.h"
 #include "singleton_container.h"
+#include "sys_cap_util.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "js_runtime_utils.h"
+#include <cstdint>
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRegisterManager"};
+constexpr uint32_t API_VERSION_23 = 23;
 
 const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
     // white register list for window manager
@@ -62,8 +65,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {RECT_CHANGE_IN_GLOBAL_DISPLAY_CB, RegisterListenerType::RECT_CHANGE_IN_GLOBAL_DISPLAY_CB},
     {EXTENSION_SECURE_LIMIT_CHANGE_CB, RegisterListenerType::EXTENSION_SECURE_LIMIT_CHANGE_CB},
     {SUB_WINDOW_CLOSE_CB, RegisterListenerType::SUB_WINDOW_CLOSE_CB},
-    {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
     {WINDOW_WILL_CLOSE_CB, RegisterListenerType::WINDOW_WILL_CLOSE_CB},
+    {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
     {WINDOW_ROTATION_CHANGE_CB, RegisterListenerType::WINDOW_ROTATION_CHANGE_CB},
     {FREE_WINDOW_MODE_CHANGE_CB, RegisterListenerType::FREE_WINDOW_MODE_CHANGE_CB},
 };
@@ -430,7 +433,7 @@ WmErrorCode JsWindowRegisterManager::ProcessAcrossDisplaysChangeRegister(const s
     }
     return isRegister ?
         MappingWmErrorCodeSafely(window->RegisterAcrossDisplaysChangeListener(listener)) :
-        MappingWmErrorCodeSafely(window->UnRegisterAcrossDisplaysChangeListener(listener));
+        MappingWmErrorCodeSafely(window->UnregisterAcrossDisplaysChangeListener(listener));
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsWindowListener> listener,
@@ -686,10 +689,10 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                     windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::SUB_WINDOW_CLOSE_CB):
                 return ProcessSubWindowCloseRegister(windowManagerListener, window, isRegister, env, parameter);
-            case static_cast<uint32_t>(RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB):
-                return ProcessWindowHighlightChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_WILL_CLOSE_CB):
                 return ProcessWindowWillCloseRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB):
+                return ProcessWindowHighlightChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_ROTATION_CHANGE_CB):
                 return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::FREE_WINDOW_MODE_CHANGE_CB):
@@ -933,7 +936,11 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRotationChangeRegister(const s
     sptr<IWindowRotationChangeListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (window->IsPcWindow()) {
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
+        if (apiVersion < API_VERSION_23) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "rotationChange not support on pc, api%{public}u", apiVersion);
+            return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        }
     }
     if (isRegister) {
         ret = MappingWmErrorCodeSafely(window->RegisterWindowRotationChangeListener(thisListener));

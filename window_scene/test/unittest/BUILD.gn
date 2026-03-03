@@ -21,6 +21,7 @@ group("unittest") {
   deps = [
     ":ws_ability_info_manager_test",
     ":ws_anomaly_detection_test",
+    ":ws_collaborator_dll_manager_test",
     ":ws_compatible_mode_main_session_test",
     ":ws_compatible_mode_property_test",
     ":ws_dfx_hisysevent_test",
@@ -53,6 +54,7 @@ group("unittest") {
     "event_distribution:ws_scene_input_manager_test",
     "event_distribution:ws_scene_session_dirty_manager_test2",
     "event_distribution:ws_scene_session_event_test",
+    "event_distribution:ws_scene_session_manager_event_test",
     "event_distribution:ws_session_event_test",
     "event_distribution:ws_window_session_property_event_test",
     "rotation:ws_scene_session_manager_rotation_test",
@@ -63,7 +65,6 @@ group("unittest") {
     "window_immersive:window_scene_immersive_test",
     "window_pattern:window_pattern_starting_window_rdb_test",
     "scene_session_pattern:scene_session_pattern_test",
-    "scene_session_manager_pattern:scene_session_manager_pattern_test",
   ]
 
   if (window_manager_feature_support_dmsfwk) {
@@ -139,12 +140,15 @@ group("unittest") {
       "event_distribution:ws_session_stub_event_test",
       "layout:ws_layout_test",
       "multi_user:unittest",
+      "rotation:ws_session_proxy_rotation_test",
+      "rotation:ws_session_stub_rotation_test",
       "rotation:ws_session_stage_proxy_rotation_test",
       "rotation:ws_session_stage_stub_rotation_test",
       "window_pattern:window_pattern_snapshot_test",
       "window_pattern:window_pattern_starting_window_test",
       "window_recover:ws_window_recover_session_test",
       ":ws_session_manager_ut_test",
+      "scene_session_manager_pattern:scene_session_manager_pattern_test",
     ]
   } else {
     deps += [
@@ -654,9 +658,43 @@ ohos_unittest("ws_scene_session_manager_two_test") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_collaborator_dll_manager.cpp",
     "scene_session_manager_test10.cpp",
     "scene_session_manager_test11.cpp",
     "scene_session_manager_test12.cpp",
+  ]
+
+  cflags_cc = [ "-Wno-thread-safety" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+  external_deps += [
+    "ability_base:configuration",
+    "ability_base:session_info",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_context",
+    "ability_runtime:mission_info",
+    "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
+    "safwk:system_ability_fwk",
+  ]
+}
+
+ohos_unittest("ws_uea_list_config_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/test/common/utils/include/",
+    "${window_base_path}/window_scene/test/mock",
+  ]
+
+  sources = [
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "uea_list_config_test.cpp",
   ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
@@ -1737,5 +1775,33 @@ ohos_unittest("ws_compatible_mode_session_stub_test") {
   deps = [ ":ws_unittest_common" ]
 
   external_deps = test_external_deps
+}
+
+ohos_unittest("ws_collaborator_dll_manager_test") {
+  module_out_path = module_out_path
+ 
+  include_dirs = [
+    "${window_base_path}/utils/include/",
+  ]
+ 
+  sources = [
+  "${window_base_path}/window_scene/test/unittest/collaborator_dll_manager_test.cpp"
+  ]
+ 
+  deps = [ ":ws_unittest_common" ]
+ 
+  external_deps = [
+  "ability_base:configuration",
+  "ability_base:session_info",
+  "ability_base:want",
+  "ability_runtime:ability_context_native",
+  "ability_runtime:ability_manager",
+  "ability_runtime:app_context",
+  "ability_runtime:mission_info",
+  "ability_runtime:runtime",
+  "hilog:libhilog",
+  "ipc:ipc_single",
+  "c_utils:utils",
+  ]
 }
 ## Build ws_unittest_common.a }}}

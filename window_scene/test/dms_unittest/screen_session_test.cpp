@@ -31,6 +31,8 @@ namespace Rosen {
 namespace {
     constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
     std::string g_errLog;
+    const bool SUPPORT_COMPATIBLE_MODE =
+        (system::GetIntParameter<int32_t>("const.settings.extend_display_function_list", 0) & 0x4) == 4;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
     {
@@ -2192,6 +2194,43 @@ HWTEST_F(ScreenSessionTest, screen_session_test012, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetExtendPhysicalScreenResolution
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetExtendPhysicalScreenResolution, TestSize.Level1)
+{
+    if (!SUPPORT_COMPATIBLE_MODE) {
+        GTEST_SKIP();
+    }
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    LOG_SetCallback(MyLogCallbackWithAllLog);
+    g_errLog.clear();
+    session->SetIsInternal(true);
+    session->SetExtendPhysicalScreenResolution(true);
+    EXPECT_TRUE(g_errLog.find("screen is internal") != std::string::npos);
+    g_errLog.clear();
+ 
+    session->SetIsInternal(false);
+    session->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
+    session->SetExtendPhysicalScreenResolution(true);
+    EXPECT_TRUE(g_errLog.find("screen mirror change") != std::string::npos);
+    g_errLog.clear();
+    session->SetExtendPhysicalScreenResolution(false);
+    EXPECT_TRUE(g_errLog.find("screen mirror change") != std::string::npos);
+    g_errLog.clear();
+ 
+    session->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
+    session->SetExtendPhysicalScreenResolution(true);
+    EXPECT_TRUE(g_errLog.find("screen mirror change") == std::string::npos);
+    g_errLog.clear();
+    session->SetExtendPhysicalScreenResolution(false);
+    EXPECT_TRUE(g_errLog.find("screen mirror change") == std::string::npos);
+    g_errLog.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: GetName
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2284,6 +2323,8 @@ HWTEST_F(ScreenSessionTest, CalcRotation, TestSize.Level1)
     property.UpdateDeviceRotation(Rotation::ROTATION_90);
     session->SetScreenProperty(property);
     res = session->CalcRotation(orientation, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
+    res = session->CalcRotation(Orientation::UNSPECIFIED, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
 }
 
@@ -3191,14 +3232,14 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation start";
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(screenSession, nullptr);
-    screenSession->UpdateDisplayNodeRotation(1);
+    screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
     ASSERT_EQ(screenSession->isExtended_, false);
 
     Rosen::RSDisplayNodeConfig rsConfig;
     rsConfig.isMirrored = true;
     rsConfig.screenId = 101;
     screenSession->CreateDisplayNode(rsConfig);
-    screenSession->UpdateDisplayNodeRotation(1);
+    screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
     ASSERT_EQ(screenSession->isExtended_, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
 }
@@ -5153,6 +5194,42 @@ HWTEST_F(ScreenSessionTest, ProcPropertyChange, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
     session->ProcPropertyChange(screenProperty, eventPara);
     EXPECT_EQ(screenProperty.GetPropertyChangeReason(), eventPara.GetPropertyChangeReason());
+}
+
+/**
+ * @tc.name: SetBootingConnect
+ * @tc.desc: SetBootingConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetBootingConnect, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetBootingConnect(true);
+    EXPECT_TRUE(session->IsBootingConnect());
+}
+
+/**
+ * @tc.name: UpdatePropertyByResolution by rect
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution2, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    EXPECT_NE(nullptr, screenSession);
+    DMRect rect = {0, 0, 3120, 2080};
+    screenSession->SetRotation(Rotation::ROTATION_0);
+    screenSession->UpdatePropertyByResolution(rect);
+    auto bounds = screenSession->GetScreenProperty().GetBounds();
+    EXPECT_EQ(bounds.rect_.width_, 3120);
+    screenSession->SetRotation(Rotation::ROTATION_90);
+    screenSession->UpdatePropertyByResolution(rect);
+    bounds = screenSession->GetScreenProperty().GetBounds();
+    EXPECT_EQ(bounds.rect_.width_, 2080);
 }
 } // namespace
 } // namespace Rosen

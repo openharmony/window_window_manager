@@ -143,13 +143,15 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 
 void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
 {
-    if (displayNode_) {
+    {
         std::unique_lock<std::shared_mutex> lock(displayNodeMutex_);
-        displayNode_->SetDisplayNodeMirrorConfig(config);
-        RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
-    } else {
-        CreateDisplayNode(config);
+        if (displayNode_) {
+            displayNode_->SetDisplayNodeMirrorConfig(config);
+            RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
+            return;
+        }
     }
+    CreateDisplayNode(config);
 }
 
 ScreenSession::~ScreenSession()
@@ -804,15 +806,19 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
 
 void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
 {
+    auto logicalRect = rect;
+    if (!IsVertical(property_.GetScreenRotation())) {
+        std::swap(logicalRect.width_, logicalRect.height_);
+    }
     auto screenBounds = property_.GetBounds();
-    screenBounds.rect_.left_ = rect.posX_;
-    screenBounds.rect_.top_ = rect.posY_;
-    screenBounds.rect_.width_ = rect.width_;
-    screenBounds.rect_.height_ = rect.height_;
+    screenBounds.rect_.left_ = logicalRect.posX_;
+    screenBounds.rect_.top_ = logicalRect.posY_;
+    screenBounds.rect_.width_ = logicalRect.width_;
+    screenBounds.rect_.height_ = logicalRect.height_;
     property_.SetBounds(screenBounds);
     // Determine whether the touch is in a valid area.
-    property_.SetValidWidth(rect.width_);
-    property_.SetValidHeight(rect.height_);
+    property_.SetValidWidth(logicalRect.width_);
+    property_.SetValidHeight(logicalRect.height_);
     property_.SetInputOffset(rect.posX_, rect.posY_);
     // It is used to calculate the original screen size
     property_.SetScreenAreaWidth(rect.width_);
@@ -1125,7 +1131,7 @@ void ScreenSession::SensorRotationChange(float sensorRotation, bool isSwitchUser
 
 float ScreenSession::GetValidSensorRotation()
 {
-    return currentValidSensorRotation_;
+    return currentValidSensorRotation_.load();
 }
 
 void ScreenSession::HandleHoverStatusChange(int32_t hoverStatus, bool needRotate)
@@ -1339,13 +1345,7 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
             return;
         }
     }
-    {
-        Rotation deviceRotation = property_.GetDeviceRotation();
-        RemoveRotationCorrection(deviceRotation, foldDisplayMode);
-        AutoRSTransaction trans(GetRSUIContext());
-        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-        displayNode_->SetScreenRotation(static_cast<uint32_t>(deviceRotation));
-    }
+    UpdateDisplayNodeRotation(foldDisplayMode);
     TLOGI(WmsLogTag::DMS, "bounds:[%{public}f %{public}f %{public}f %{public}f],rotation:%{public}d,\
         displayOrientation:%{public}u, foldDisplayMode:%{public}u",
         property_.GetBounds().rect_.GetLeft(), property_.GetBounds().rect_.GetTop(),
@@ -1354,14 +1354,15 @@ void ScreenSession::UpdatePropertyAfterRotation(RRect bounds, int rotation, Fold
     ReportNotifyModeChange(displayOrientation);
 }
 
-void ScreenSession::UpdateDisplayNodeRotation(int rotation)
+void ScreenSession::UpdateDisplayNodeRotation(FoldDisplayMode foldDisplayMode)
 {
-    Rotation targetRotation = ConvertIntToRotation(rotation);
+    Rotation deviceRotation = property_.GetDeviceRotation();
+    RemoveRotationCorrection(deviceRotation, foldDisplayMode);
     AutoRSTransaction trans(GetRSUIContext());
     std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
-        displayNode_->SetScreenRotation(static_cast<uint32_t>(targetRotation));
-        TLOGI(WmsLogTag::DMS, "Set RS screen rotation:%{public}d", targetRotation);
+        displayNode_->SetScreenRotation(static_cast<uint32_t>(deviceRotation));
+        TLOGI(WmsLogTag::DMS, "Set RS screen rotation:%{public}d", deviceRotation);
     }
 }
 
@@ -1427,8 +1428,8 @@ void ScreenSession::UpdateRotationAfterBoot(bool foldToExpand)
 
 void ScreenSession::UpdateValidRotationToScb()
 {
-    TLOGI(WmsLogTag::DMS, "Rotation: %{public}f", currentValidSensorRotation_);
-    SensorRotationChange(currentValidSensorRotation_, true);
+    TLOGI(WmsLogTag::DMS, "Rotation: %{public}f", currentValidSensorRotation_.load());
+    SensorRotationChange(currentValidSensorRotation_.load(), true);
 }
 
 sptr<SupportedScreenModes> ScreenSession::GetActiveScreenMode() const
@@ -1643,6 +1644,11 @@ Rotation ScreenSession::CalcRotationSystemInner(Orientation orientation, FoldDis
  
 Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode)
 {
+    if (orientation == Orientation::UNSPECIFIED) {
+        Rotation rotation = Rotation::ROTATION_0;
+        AddRotationCorrection(rotation, foldDisplayMode);
+        return rotation;
+    }
     RRect boundsInRotationZero = CalcBoundsInRotationZero(foldDisplayMode);
     DisplayOrientation displayOrientation = CalcOrientationToDisplayOrientation(orientation);
     return CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, boundsInRotationZero);
@@ -3055,6 +3061,39 @@ void ScreenSession::SetScreenOffScreenRendering()
         rsId_, offWidth, offHeight, offScreenResult.c_str());
 }
 
+void ScreenSession::SetExtendPhysicalScreenResolution(bool offScreenRenderValue)
+{
+    TLOGD(WmsLogTag::DMS, "screen extend Physical Screen Resolution come in.");
+    if (GetIsInternal()) {
+        TLOGW(WmsLogTag::DMS, "screen is internal");
+        return;
+    }
+    uint32_t offWidth = 0;
+    uint32_t offHeight = 0;
+    if (offScreenRenderValue) {
+        offWidth = property_.GetBounds().rect_.GetWidth();
+        offHeight = property_.GetBounds().rect_.GetHeight();
+    } else {
+        offWidth = property_.GetPhyBounds().rect_.GetWidth();
+        offHeight = property_.GetPhyBounds().rect_.GetHeight();
+    }
+    if (GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        TLOGW(WmsLogTag::DMS, "screen mirror change.");
+        offWidth = property_.GetScreenRealWidth();
+        offHeight = property_.GetScreenRealHeight();
+    }
+    int32_t res = RSInterfaces::GetInstance().SetPhysicalScreenResolution(rsId_, offWidth, offHeight);
+    if (GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
+        SetFrameGravity(Rosen::Gravity::TOP_LEFT);
+    } else {
+        SetFrameGravity(Rosen::Gravity::RESIZE);
+        PropertyChange(GetScreenProperty(), ScreenPropertyChangeReason::UNDEFINED);
+    }
+    std::string offScreenResult = (res == StatusCode::SUCCESS) ? "success" : "failed";
+    TLOGW(WmsLogTag::DMS, "rsId=%{public}" PRIu64" offScreen width=%{public}u height=%{public}u %{public}s",
+        rsId_, offWidth, offHeight, offScreenResult.c_str());
+}
+
 void ScreenSession::SetScreenOffScreenRenderingInner()
 {
     TLOGW(WmsLogTag::DMS, "screen off rendering inner come in.");
@@ -3367,6 +3406,8 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
 
     property_.SetRotation(screenProperty.GetRotation());
     property_.SetBounds(screenProperty.GetBounds());
+    property_.UpdateScreenRotation(screenProperty.GetScreenRotation());
+    property_.UpdateDeviceRotation(screenProperty.GetDeviceRotation());
     property_.SetDpiPhyBounds(screenProperty.GetPhyWidth(), screenProperty.GetPhyHeight());
     property_.SetPhyBounds(screenProperty.GetPhyBounds());
 
@@ -3505,5 +3546,15 @@ void ScreenSession::ClearPropertyChangeReasonAndEvent()
 {
     property_.SetPropertyChangeReason(ScreenPropertyChangeReason::UNDEFINED);
     property_.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::UNDEFINED);
+}
+
+void ScreenSession::SetBootingConnect(const bool bootingConnect)
+{
+    bootingConnect_.store(bootingConnect);
+}
+
+bool ScreenSession::IsBootingConnect() const
+{
+    return bootingConnect_.load();
 }
 } // namespace OHOS::Rosen

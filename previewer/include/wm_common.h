@@ -424,9 +424,7 @@ enum class WindowSizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
-    RESIZE_WITH_ANIMATION,
     MOVE,
-    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -761,19 +759,6 @@ private:
 };
 
 /**
- * @struct RectAnimationConfig
- *
- * @brief Window RectAnimationConfig
- */
-struct RectAnimationConfig {
-    uint32_t duration = 0; // Duartion of the animation, in milliseconds.
-    float x1 = 0.0f;       // X coordinate of the first point on the Bezier curve.
-    float y1 = 0.0f;       // Y coordinate of the first point on the Bezier curve.
-    float x2 = 0.0f;       // X coordinate of the second point on the Bezier curve.
-    float y2 = 0.0f;       // Y coordinate of the second point on the Bezier curve.
-};
-
-/**
  * @struct SystemBarPropertyFlag
  *
  * @brief Flag of system bar
@@ -830,10 +815,10 @@ enum class SystemBarPropertyOwner {
  * @brief Window Rect.
  */
 struct Rect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const Rect& a) const
     {
@@ -1693,15 +1678,12 @@ struct KeyboardAnimationConfig {
 
 struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
-    RectAnimationConfig rectAnimationConfig = { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     std::string ToString() const
     {
         std::string str;
-        constexpr int BUFFER_SIZE = 1024;
+        constexpr int BUFFER_SIZE = 11;
         char buffer[BUFFER_SIZE] = { 0 };
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
-            "[displayId: %llu, rectAnimationConfig: [%u, %f, %f, %f, %f]]", displayId, rectAnimationConfig.duration,
-            rectAnimationConfig.x1, rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2) > 0) {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
             str.append(buffer);
         }
         return str;

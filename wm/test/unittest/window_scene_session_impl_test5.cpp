@@ -2287,6 +2287,10 @@ HWTEST_F(WindowSceneSessionImplTest5, GetConfigurationFromAbilityInfo02, TestSiz
     window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::RESERVE_TYPE));
     window->GetConfigurationFromAbilityInfo();
     EXPECT_EQ(window->enableImmersiveMode_, false);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->GetConfigurationFromAbilityInfo();
+    EXPECT_EQ(window->enableImmersiveMode_, false);
 }
 
 /**
@@ -3045,7 +3049,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated();
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false);
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 }
 
@@ -3067,7 +3071,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated
     window->hostSession_ = session;
     
     // GetAppForceLandscapeConfigEnable will fail if listener is not registered
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated();
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false);
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 }
 }

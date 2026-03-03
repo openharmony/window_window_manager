@@ -94,6 +94,11 @@ constexpr float COMPACT_SIMULATION_SCALE_DPI = 3.25f;
 constexpr float COMPACT_NORMAL_SCALE = 1.0f;
 
 /*
+ * Sub Window
+ */
+constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
+
+/*
  * Window outline
  */
 constexpr uint32_t OUTLINE_COLOR_DEFAULT = 0xff64bb5c; // Default color, ARGB format.
@@ -103,38 +108,7 @@ constexpr uint32_t OUTLINE_WIDTH_MAX = 8; // vp
 constexpr uint32_t OUTLINE_FOR_WINDOW_MAX_NUM = 256; // Up to 256 windows can show simultaneously.
 constexpr uint32_t OUTLINE_COLOR_OPAQUE_OFFSET = 24; // Shift right 24 bits.
 constexpr uint32_t OUTLINE_COLOR_OPAQUE = 0xff; // Color opaque byte.
-
-/*
- * Sub Window
- */
-constexpr uint32_t MAX_SUB_WINDOW_LEVEL = 10;
 }
-
-/**
- * @brief Enumerates type of window manager agent.
- */
-enum class WindowManagerAgentType : uint32_t {
-    WINDOW_MANAGER_AGENT_TYPE_FOCUS,
-    WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
-    WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE,
-    WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
-    WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
-    WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
-    WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
-    WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM = 7,
-    WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
-    WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
-    WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
-    WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE,
-    WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
-    WINDOW_MANAGER_AGENT_TYPE_PIP,
-    WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
-    WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
-    WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
-    WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
-    WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
-    WINDOW_MANAGER_AGENT_TYPE_END,
-};
 
 /**
  * @brief Enumerates type of window.
@@ -225,32 +199,6 @@ enum class WindowType : uint32_t {
 struct RealTimeSwitchInfo {
     bool isNeedChange_{false};
     uint32_t showTypes_{0};
-};
-
-/**
- * @struct HookInfo.
- *
- * @brief hook diaplayinfo deepending on the window size.
- */
-struct HookInfo {
-    uint32_t width_;
-    uint32_t height_;
-    float_t density_;
-    uint32_t rotation_;
-    bool enableHookRotation_;
-    uint32_t displayOrientation_;
-    bool enableHookDisplayOrientation_;
-
-    std::string ToString() const
-    {
-        std::ostringstream oss;
-        oss << "width: " << width_ << ", height: " << height_ << ", density: " << density_
-            << ", rotation: " << rotation_
-            << ", enableHookRotation: " << (enableHookRotation_ ? "true" : "false")
-            << ", orientation: " << displayOrientation_
-            << ", enableHookOrientation: " << (enableHookDisplayOrientation_ ? "true" : "false");
-        return oss.str();
-    }
 };
 
 /**
@@ -583,9 +531,7 @@ enum class WindowSizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
-    RESIZE_WITH_ANIMATION,
     MOVE,
-    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -926,7 +872,7 @@ struct WindowSnapshotConfiguration : public Parcelable {
 /**
  * @struct MainWindowState.
  *
- * @brief main window state info.
+ * @brief Main window state info.
  */
 struct MainWindowState : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
@@ -1206,10 +1152,10 @@ enum class SystemBarPropertyOwner {
  * @brief Window Rect
  */
 struct Rect {
-    int32_t posX_;
-    int32_t posY_;
-    uint32_t width_;
-    uint32_t height_;
+    int32_t posX_ = 0;
+    int32_t posY_ = 0;
+    uint32_t width_ = 0;
+    uint32_t height_ = 0;
 
     bool operator==(const Rect& a) const
     {
@@ -1285,16 +1231,32 @@ struct Rect {
 inline constexpr Rect Rect::EMPTY_RECT { 0, 0, 0, 0 };
 
 /**
- * @struct RectAnimationConfig
+ * @struct HookInfo.
  *
- * @brief Window RectAnimationConfig
+ * @brief hook diaplayinfo deepending on the window size.
  */
-struct RectAnimationConfig {
-    uint32_t duration = 0; // Duartion of the animation, in milliseconds.
-    float x1 = 0.0f;       // X coordinate of the first point on the Bezier curve.
-    float y1 = 0.0f;       // Y coordinate of the first point on the Bezier curve.
-    float x2 = 0.0f;       // X coordinate of the second point on the Bezier curve.
-    float y2 = 0.0f;       // Y coordinate of the second point on the Bezier curve.
+struct HookInfo {
+    uint32_t width_;
+    uint32_t height_;
+    float_t density_;
+    uint32_t rotation_;
+    bool enableHookRotation_;
+    uint32_t displayOrientation_;
+    bool enableHookDisplayOrientation_;
+    Rect actualRect_ = { 0, 0, 0, 0};
+    
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "width: " << width_ << ", height: " << height_ << ", density: " << density_
+            << ", rotation: " << rotation_
+            << ", enableHookRotation: " << (enableHookRotation_ ? "true" : "false")
+            << ", displayOrientation: " << displayOrientation_
+            << ", enableHookDisplayOrientation: " << (enableHookDisplayOrientation_ ? "true" : "false")
+            << ", actualPosX: " << actualRect_.posX_ << ", actualPosY: " << actualRect_.posY_
+            << ", actualWidth: " << actualRect_.width_ << ", actualHeight :" << actualRect_.height_;
+        return oss.str();
+    }
 };
 
 /**
@@ -2490,15 +2452,12 @@ struct KeyboardAnimationConfig {
 
 struct MoveConfiguration {
     DisplayId displayId = DISPLAY_ID_INVALID;
-    RectAnimationConfig rectAnimationConfig = { 0, 0.0f, 0.0f, 0.0f, 0.0f };
     std::string ToString() const
     {
         std::string str;
-        constexpr int BUFFER_SIZE = 1024;
+        constexpr int BUFFER_SIZE = 11;
         char buffer[BUFFER_SIZE] = { 0 };
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
-            "[displayId: %llu, rectAnimationConfig: [%u, %f, %f, %f, %f]]", displayId, rectAnimationConfig.duration,
-            rectAnimationConfig.x1, rectAnimationConfig.y1, rectAnimationConfig.x2, rectAnimationConfig.y2) > 0) {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "[%llu]", displayId) > 0) {
             str.append(buffer);
         }
         return str;
@@ -3034,21 +2993,6 @@ enum DefaultSpecificZIndex {
 };
 
 /**
- * @brief Enumerates support function type
- */
-enum SupportFunctionType : uint32_t {
-    /**
-     * Supports callbacks triggered before the keyboard show/hide animations begin.
-     */
-    ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION = 1 << 0,
-
-    /**
-     * Supports callbacks triggered after the keyboard show/hide animations complete.
-     */
-    ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION = 1 << 1,
-};
-
-/**
  * @struct ShadowsInfo
  *
  * @brief window shadows info
@@ -3256,14 +3200,6 @@ struct RecentSessionInfo : public Parcelable {
 };
 
 /**
- * @brief Enumerates source of sub session.
- */
-enum class SubWindowSource : uint32_t {
-    SUB_WINDOW_SOURCE_UNKNOWN = 0,
-    SUB_WINDOW_SOURCE_ARKUI = 1,
-};
-
-/**
  * @brief Screenshot event type.
  */
 enum class ScreenshotEventType : int32_t {
@@ -3295,6 +3231,29 @@ enum class ScreenshotEventType : int32_t {
     SCROLL_SHOT_ABORT = 4,
 
     END,
+};
+
+/**
+ * @brief Enumerates support function type
+ */
+enum SupportFunctionType : uint32_t {
+    /**
+     * Supports callbacks triggered before the keyboard show/hide animations begin.
+     */
+    ALLOW_KEYBOARD_WILL_ANIMATION_NOTIFICATION = 1 << 0,
+
+    /**
+     * Supports callbacks triggered after the keyboard show/hide animations complete.
+     */
+    ALLOW_KEYBOARD_DID_ANIMATION_NOTIFICATION = 1 << 1,
+};
+
+/**
+ * @brief Enumerates source of sub session.
+ */
+enum class SubWindowSource : uint32_t {
+    SUB_WINDOW_SOURCE_UNKNOWN = 0,
+    SUB_WINDOW_SOURCE_ARKUI = 1,
 };
 
 enum class RequestResultCode: uint32_t {
@@ -3550,6 +3509,29 @@ enum class CompatibleStyleMode : uint32_t {
     LANDSCAPE_2_3 = 4,
     // split aspect ratio
     LANDSCAPE_SPLIT = 5,
+};
+
+enum class WindowManagerAgentType : uint32_t {
+    WINDOW_MANAGER_AGENT_TYPE_FOCUS,
+    WINDOW_MANAGER_AGENT_TYPE_SYSTEM_BAR,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_UPDATE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_DRAWING_STATE,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_FLOAT,
+    WINDOW_MANAGER_AGENT_TYPE_WATER_MARK_FLAG,
+    WINDOW_MANAGER_AGENT_TYPE_VISIBLE_WINDOW_NUM = 7,
+    WINDOW_MANAGER_AGENT_TYPE_GESTURE_NAVIGATION_ENABLED,
+    WINDOW_MANAGER_AGENT_TYPE_CAMERA_WINDOW,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_MODE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_STYLE,
+    WINDOW_MANAGER_AGENT_TYPE_WINDOW_PID_VISIBILITY,
+    WINDOW_MANAGER_AGENT_TYPE_PIP,
+    WINDOW_MANAGER_AGENT_TYPE_CALLING_DISPLAY,
+    WINDOW_MANAGER_AGENT_TYPE_PROPERTY,
+    WINDOW_MANAGER_AGENT_STATUS_BAR_PROPERTY,
+    WINDOW_MANAGER_AGENT_SUPPORT_ROTATION,
+    WINDOW_MANAGER_AGENT_TYPE_DISPLAYGROUP_INFO,
+    WINDOW_MANAGER_AGENT_TYPE_END,
 };
 
 struct StateChangeOption {
