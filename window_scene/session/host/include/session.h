@@ -149,7 +149,6 @@ public:
     virtual void OnUpdateSnapshotWindow() {}
     virtual void OnPreLoadStartingWindowFinished() {}
     virtual void OnRestart() {}
-    virtual void OnLayerPartRender(bool flag) {}
     virtual void OnRemovePrelaunchStartingWindow() {}
 };
 
@@ -1322,14 +1321,6 @@ private:
     bool isOutlineEnabled_ = false;
     OutlineStyleParams outlineStyleParams_;
     OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
-    /*
-     * Prelaunch check
-     */
-    uint64_t prelaunchStart_ = 0;
-    bool prelaunchEnable_ = false;
-    /*
-    * performance optimization flag
-    */
     bool isLayerPartRender_ = false;
 };
 } // namespace OHOS::Rosen
