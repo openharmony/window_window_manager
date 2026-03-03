@@ -1667,7 +1667,7 @@ WMError WindowManager::UnregisterApplicationFocusChangedListener(const sptr<IApp
     auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
                           pImpl_->applicationFocusChangeListeners_.end(), listener);
     if (iter == pImpl_->applicationFocusChangeListeners_.end()) {
-        TLOGW((WmsLogTag::WMS_FOCUS, "could not find this listener");
+        TLOGW(WmsLogTag::WMS_FOCUS, "could not find this listener");
         return WMError::WM_OK;
     }
     pImpl_->applicationFocusChangeListeners_.erase(iter);
