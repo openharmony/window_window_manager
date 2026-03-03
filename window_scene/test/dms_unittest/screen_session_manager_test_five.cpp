@@ -127,8 +127,7 @@ namespace {
  */
 HWTEST_F(ScreenSessionManagerTest, CalcDisplayNodeTranslateOnRotation04, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -139,10 +138,10 @@ HWTEST_F(ScreenSessionManagerTest, CalcDisplayNodeTranslateOnRotation04, Functio
     float pivotY = 0.5f;
     float translateX = 0.0f;
     float translateY = 0.0f;
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->CalcDisplayNodeTranslateOnRotation(screenSession, scaleX, scaleY, pivotX, pivotY, translateX,
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->CalcDisplayNodeTranslateOnRotation(screenSession, scaleX, scaleY, pivotX, pivotY, translateX,
         translateY);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -152,16 +151,15 @@ HWTEST_F(ScreenSessionManagerTest, CalcDisplayNodeTranslateOnRotation04, Functio
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenChangeInner, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ScreenChangeReason reason = ScreenChangeReason::HWCDEAD;
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->OnScreenChangeInner(id, screenEvent, reason);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->OnScreenChangeInner(id, screenEvent, reason);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -171,15 +169,14 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenChangeInner, Function | SmallTest | L
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->GetCurrentInUseScreenNumber();
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->GetCurrentInUseScreenNumber();
     ASSERT_EQ(0, res);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -189,17 +186,16 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber01, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetIsCurrentInUse(false);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->GetCurrentInUseScreenNumber();
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->GetCurrentInUseScreenNumber();
     ASSERT_EQ(0, res);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -209,17 +205,16 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber02, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber03, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetIsCurrentInUse(true);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->GetCurrentInUseScreenNumber();
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->GetCurrentInUseScreenNumber();
     ASSERT_EQ(1, res);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -229,17 +224,16 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber03, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber04, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::UNDEFINED);
     screenSession->SetIsCurrentInUse(true);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->GetCurrentInUseScreenNumber();
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->GetCurrentInUseScreenNumber();
     ASSERT_EQ(0, res);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -249,15 +243,14 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentInUseScreenNumber04, Function | Sma
  */
 HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyFromSettingData01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->SetCastPrivacyFromSettingData();
-    ssm->GetAllDisplayIds();
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->SetCastPrivacyFromSettingData();
+    ssm_->GetAllDisplayIds();
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -267,16 +260,15 @@ HWTEST_F(ScreenSessionManagerTest, SetCastPrivacyFromSettingData01, Function | S
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIds = {50};
     ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_ON;
-    ssm->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -286,17 +278,17 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend01, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
+    
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::UNDEFINED);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIds = {50};
     ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_ON;
-    ssm->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -306,18 +298,17 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend02, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend03, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetIsInternal(true);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIds = {50};
     ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_ON;
-    ssm->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -327,18 +318,17 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend03, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend04, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetIsInternal(false);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIds = {50};
     ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_ON;
-    ssm->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->CallRsSetScreenPowerStatusSyncForExtend(screenIds, status);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -348,16 +338,15 @@ HWTEST_F(ScreenSessionManagerTest, CallRsSetScreenPowerStatusSyncForExtend04, Fu
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
-    ssm->SetExtendPixelRatio(dpi);
+    ssm_->SetExtendPixelRatio(dpi);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->SetExtendPixelRatio(dpi);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->SetExtendPixelRatio(dpi);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -367,17 +356,16 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio01, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetIsInternal(false);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->SetExtendPixelRatio(dpi);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->SetExtendPixelRatio(dpi);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -387,17 +375,16 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio02, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio03, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->SetIsInternal(true);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->SetExtendPixelRatio(dpi);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->SetExtendPixelRatio(dpi);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -407,17 +394,16 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio03, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio04, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     float dpi = 1.0f;
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::UNDEFINED);
     screenSession->SetIsInternal(true);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->SetExtendPixelRatio(dpi);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->SetExtendPixelRatio(dpi);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -427,17 +413,16 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendPixelRatio04, Function | SmallTest |
  */
 HWTEST_F(ScreenSessionManagerTest, SetRotation01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     Rotation rotationAfter = Rotation::ROTATION_0;
     bool isFromWindow = true;
-    auto res = ssm->SetRotation(id, rotationAfter, isFromWindow);
+    auto res = ssm_->SetRotation(id, rotationAfter, isFromWindow);
     ASSERT_EQ(false, res);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -447,18 +432,17 @@ HWTEST_F(ScreenSessionManagerTest, SetRotation01, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSessionManagerTest, SetRotation02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetRotation(Rotation::ROTATION_90);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     Rotation rotationAfter = Rotation::ROTATION_0;
     bool isFromWindow = true;
-    auto res = ssm->SetRotation(id, rotationAfter, isFromWindow);
+    auto res = ssm_->SetRotation(id, rotationAfter, isFromWindow);
     ASSERT_EQ(true, res);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -468,17 +452,16 @@ HWTEST_F(ScreenSessionManagerTest, SetRotation02, Function | SmallTest | Level3)
  */
 HWTEST_F(ScreenSessionManagerTest, OnMakeExpand01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenId = {1001, 1002};
     std::vector<Point> startPoint(1);
-    auto res = ssm->OnMakeExpand(screenId, startPoint);
+    auto res = ssm_->OnMakeExpand(screenId, startPoint);
     ASSERT_EQ(false, res);
-    ssm->screenSessionMap_.erase(0);
+    ssm_->screenSessionMap_.erase(0);
 }
 
 /**
@@ -488,8 +471,7 @@ HWTEST_F(ScreenSessionManagerTest, OnMakeExpand01, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, OnMakeExpand02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
@@ -499,14 +481,14 @@ HWTEST_F(ScreenSessionManagerTest, OnMakeExpand02, Function | SmallTest | Level3
     std::string name = "ok";
     sptr<ScreenSessionGroup> groupSession = new ScreenSessionGroup(50, rsId, name, combination);
     ASSERT_NE(nullptr, groupSession);
-    ssm->smsScreenGroupMap_.insert(std::make_pair(50, groupSession));
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->smsScreenGroupMap_.insert(std::make_pair(50, groupSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenId = {1001, 1002};
     std::vector<Point> startPoint(1);
-    auto res = ssm->OnMakeExpand(screenId, startPoint);
+    auto res = ssm_->OnMakeExpand(screenId, startPoint);
     ASSERT_EQ(true, res);
-    ssm->screenSessionMap_.erase(0);
-    ssm->smsScreenGroupMap_.erase(50);
+    ssm_->screenSessionMap_.erase(0);
+    ssm_->smsScreenGroupMap_.erase(50);
 }
 
 /**
@@ -516,14 +498,13 @@ HWTEST_F(ScreenSessionManagerTest, OnMakeExpand02, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, IsExtendMode01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->IsExtendMode();
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->IsExtendMode();
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -533,19 +514,18 @@ HWTEST_F(ScreenSessionManagerTest, IsExtendMode01, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, IsExtendMode02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MIRROR);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->IsExtendMode();
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->IsExtendMode();
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
-    ssm->IsExtendMode();
+    ssm_->IsExtendMode();
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_MAIN);
-    ssm->IsExtendMode();
-    ssm->screenSessionMap_.erase(50);
+    ssm_->IsExtendMode();
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -555,16 +535,15 @@ HWTEST_F(ScreenSessionManagerTest, IsExtendMode02, Function | SmallTest | Level3
  */
 HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     bool isCameraBackSelfie = true;
-    ssm->UpdateCameraBackSelfie(isCameraBackSelfie);
-    ssm->UpdateCameraBackSelfie(true);
-    ssm->screenSessionMap_.erase(0);
+    ssm_->UpdateCameraBackSelfie(isCameraBackSelfie);
+    ssm_->UpdateCameraBackSelfie(true);
+    ssm_->screenSessionMap_.erase(0);
 }
 
 /**
@@ -574,16 +553,15 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie01, Function | SmallTes
  */
 HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     bool isCameraBackSelfie = true;
-    ssm->UpdateCameraBackSelfie(isCameraBackSelfie);
-    ssm->UpdateCameraBackSelfie(false);
-    ssm->screenSessionMap_.erase(0);
+    ssm_->UpdateCameraBackSelfie(isCameraBackSelfie);
+    ssm_->UpdateCameraBackSelfie(false);
+    ssm_->screenSessionMap_.erase(0);
 }
 
 /**
@@ -593,15 +571,14 @@ HWTEST_F(ScreenSessionManagerTest, UpdateCameraBackSelfie02, Function | SmallTes
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror01, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = nullptr;
     ASSERT_EQ(nullptr, screenSession);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIdsToExclude = {100};
-    ssm->HasCastEngineOrPhyMirror(screenIdsToExclude);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->HasCastEngineOrPhyMirror(screenIdsToExclude);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -611,20 +588,19 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror01, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror02, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::VIRTUAL);
     screenSession->SetName("CastEngine");
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIdsToExclude = {100};
-    auto res = ssm->HasCastEngineOrPhyMirror(screenIdsToExclude);
+    auto res = ssm_->HasCastEngineOrPhyMirror(screenIdsToExclude);
     ASSERT_EQ(true, res);
     std::vector<ScreenId> idsToExclude = {100, 50};
-    ssm->HasCastEngineOrPhyMirror(idsToExclude);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->HasCastEngineOrPhyMirror(idsToExclude);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -634,20 +610,19 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror02, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror03, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 50;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::VIRTUAL);
     screenSession->SetName("TestCastEngine");
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIdsToExclude = {100};
-    auto res = ssm->HasCastEngineOrPhyMirror(screenIdsToExclude);
+    auto res = ssm_->HasCastEngineOrPhyMirror(screenIdsToExclude);
     ASSERT_EQ(false, res);
     screenSession->SetScreenType(ScreenType::REAL);
-    ssm->HasCastEngineOrPhyMirror(screenIdsToExclude);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->HasCastEngineOrPhyMirror(screenIdsToExclude);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -657,17 +632,16 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror03, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror04, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     ScreenId id = 9;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
     ASSERT_NE(nullptr, screenSession);
     screenSession->SetScreenType(ScreenType::VIRTUAL);
     screenSession->SetName("CastEngine");
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
     std::vector<ScreenId> screenIdsToExclude = {100};
-    ssm->HasCastEngineOrPhyMirror(screenIdsToExclude);
-    ssm->screenSessionMap_.erase(9);
+    ssm_->HasCastEngineOrPhyMirror(screenIdsToExclude);
+    ssm_->screenSessionMap_.erase(9);
 }
 
 /**
@@ -677,16 +651,15 @@ HWTEST_F(ScreenSessionManagerTest, HasCastEngineOrPhyMirror04, Function | SmallT
  */
 HWTEST_F(ScreenSessionManagerTest, HotSwitch, Function | SmallTest | Level3)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     int32_t newUserId = 0;
     int32_t newScbPid = 1;
-    ssm->HotSwitch(newUserId, newScbPid);
+    ssm_->HotSwitch(newUserId, newScbPid);
     sptr<IScreenSessionManagerClient> client = nullptr;
-    ssm->clientProxyMap_.insert(std::make_pair(newUserId, client));
-    ssm->HotSwitch(newUserId, newScbPid);
-    ssm->clientProxyMap_.insert(std::make_pair(1, client));
-    ssm->HotSwitch(1, newScbPid);
+    ssm_->clientProxyMap_.insert(std::make_pair(newUserId, client));
+    ssm_->HotSwitch(newUserId, newScbPid);
+    ssm_->clientProxyMap_.insert(std::make_pair(1, client));
+    ssm_->HotSwitch(1, newScbPid);
 }
 
 /**
@@ -715,10 +688,9 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenStatus, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, SetClient, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     sptr<IScreenSessionManagerClient> client = nullptr;
-    ssm->SetClient(client);
+    ssm_->SetClient(client);
 }
 
 /**
@@ -728,9 +700,8 @@ HWTEST_F(ScreenSessionManagerTest, SetClient, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, SwitchUser, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
-    ssm->SwitchUser();
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SwitchUser();
 }
 
 /**
@@ -752,27 +723,26 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyMaskImage001, TestSize.Level1
  */
 HWTEST_F(ScreenSessionManagerTest, ScbClientDeathCallback, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
-    int32_t deathScbPid = ssm->currentScbPId_;
-    ssm->currentScbPId_ = -1;     // INVALID_SCB_PID
-    ssm->ScbClientDeathCallback(deathScbPid);
-    ASSERT_EQ(ssm->clientProxy_, nullptr);
+    ASSERT_NE(ssm_, nullptr);
+    int32_t deathScbPid = ssm_->currentScbPId_;
+    ssm_->currentScbPId_ = -1;     // INVALID_SCB_PID
+    ssm_->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
 
-    deathScbPid = ssm->currentScbPId_;
-    ssm->currentScbPId_ = 0;
-    ssm->ScbClientDeathCallback(deathScbPid);
-    ASSERT_EQ(ssm->clientProxy_, nullptr);
-
-    deathScbPid = 0;
-    ssm->currentScbPId_ = -1;     // INVALID_SCB_PID
-    ssm->ScbClientDeathCallback(deathScbPid);
-    ASSERT_EQ(ssm->clientProxy_, nullptr);
+    deathScbPid = ssm_->currentScbPId_;
+    ssm_->currentScbPId_ = 0;
+    ssm_->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
 
     deathScbPid = 0;
-    ssm->currentScbPId_ = 0;
-    ssm->ScbClientDeathCallback(deathScbPid);
-    ASSERT_EQ(ssm->clientProxy_, nullptr);
+    ssm_->currentScbPId_ = -1;     // INVALID_SCB_PID
+    ssm_->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    deathScbPid = 0;
+    ssm_->currentScbPId_ = 0;
+    ssm_->ScbClientDeathCallback(deathScbPid);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
 }
 
 /**
@@ -782,11 +752,10 @@ HWTEST_F(ScreenSessionManagerTest, ScbClientDeathCallback, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyClientProxyUpdateFoldDisplayMode, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
-    ASSERT_EQ(ssm->clientProxy_, nullptr);
-    ssm->NotifyClientProxyUpdateFoldDisplayMode(displayMode);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+    ssm_->NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 }
 
 /**
@@ -796,12 +765,11 @@ HWTEST_F(ScreenSessionManagerTest, NotifyClientProxyUpdateFoldDisplayMode, TestS
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenRotationLockedChange, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
     bool isLocked = false;
     ScreenId screenId = 1050;
-    ASSERT_EQ(ssm->clientProxy_, nullptr);
-    ssm->OnScreenRotationLockedChange(isLocked, screenId);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+    ssm_->OnScreenRotationLockedChange(isLocked, screenId);
 }
 
 /**
@@ -811,12 +779,12 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenRotationLockedChange, TestSize.Level1
  */
 HWTEST_F(ScreenSessionManagerTest, OnScreenOrientationChange, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
+    ASSERT_NE(ssm_, nullptr);
+    
     float screenOrientation = 75.2f;
     ScreenId screenId = 1050;
-    ASSERT_EQ(ssm->clientProxy_, nullptr);
-    ssm->OnScreenOrientationChange(screenOrientation, screenId);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+    ssm_->OnScreenOrientationChange(screenOrientation, screenId);
 }
 
 /**
@@ -826,9 +794,8 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenOrientationChange, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyDisplayModeChanged, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
-    ssm->NotifyDisplayModeChanged(FoldDisplayMode::MAIN);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->NotifyDisplayModeChanged(FoldDisplayMode::MAIN);
 }
 
 /**
@@ -913,15 +880,14 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenMode03, TestSize.Level1)
  */
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay01, TestSize.Level0)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ssm->screenSessionMap_.erase(50);
-    EXPECT_NE(ssm, nullptr);
+    ssm_->screenSessionMap_.erase(50);
+    ASSERT_NE(ssm_, nullptr);
     DisplayId id = 50;
     bool isOnboardDisplay = false;
-    auto res = ssm->IsOnboardDisplay(id, isOnboardDisplay);
+    auto res = ssm_->IsOnboardDisplay(id, isOnboardDisplay);
     EXPECT_EQ(isOnboardDisplay, false);
     EXPECT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
-    ssm->screenSessionMap_.erase(50);
+    ssm_->screenSessionMap_.erase(50);
 }
 
 /**
@@ -931,22 +897,21 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay01, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay02, TestSize.Level0)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ssm->screenSessionMap_.erase(0);
-    EXPECT_NE(ssm, nullptr);
-    bool isPcNow = ssm->GetPcStatus();
-    ssm->SetPcStatus(true);
+    ssm_->screenSessionMap_.erase(0);
+    ASSERT_NE(ssm_, nullptr);
+    bool isPcNow = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(true);
     DisplayId id = 0;
     bool isOnboardDisplay = false;
-    ssm->screenIdManager_.sms2RsScreenIdMap_[id] = 0;
+    ssm_->screenIdManager_.sms2RsScreenIdMap_[id] = 0;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->IsOnboardDisplay(id, isOnboardDisplay);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->IsOnboardDisplay(id, isOnboardDisplay);
     EXPECT_EQ(isOnboardDisplay, true);
     EXPECT_EQ(res, DMError::DM_OK);
-    ssm->screenIdManager_.sms2RsScreenIdMap_.clear();
-    ssm->screenSessionMap_.erase(0);
-    ssm->SetPcStatus(isPcNow);
+    ssm_->screenIdManager_.sms2RsScreenIdMap_.clear();
+    ssm_->screenSessionMap_.erase(0);
+    ssm_->SetPcStatus(isPcNow);
 }
 
 /**
@@ -956,20 +921,19 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay02, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay03, TestSize.Level0)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ssm->screenSessionMap_.erase(100);
-    EXPECT_NE(ssm, nullptr);
-    bool isPcNow = ssm->GetPcStatus();
-    ssm->SetPcStatus(true);
+    ssm_->screenSessionMap_.erase(100);
+    ASSERT_NE(ssm_, nullptr);
+    bool isPcNow = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(true);
     DisplayId id = 100;
     bool isOnboardDisplay = false;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->IsOnboardDisplay(id, isOnboardDisplay);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->IsOnboardDisplay(id, isOnboardDisplay);
     EXPECT_EQ(isOnboardDisplay, false);
     EXPECT_EQ(res, DMError::DM_ERROR_INVALID_PARAM);
-    ssm->screenSessionMap_.erase(100);
-    ssm->SetPcStatus(isPcNow);
+    ssm_->screenSessionMap_.erase(100);
+    ssm_->SetPcStatus(isPcNow);
 }
 
 /**
@@ -979,20 +943,19 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay03, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay04, TestSize.Level0)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ssm->screenSessionMap_.erase(0);
-    EXPECT_NE(ssm, nullptr);
-    bool isPcNow = ssm->GetPcStatus();
-    ssm->SetPcStatus(false);
+    ssm_->screenSessionMap_.erase(0);
+    ASSERT_NE(ssm_, nullptr);
+    bool isPcNow = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(false);
     DisplayId id = 0;
     bool isOnboardDisplay = false;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->IsOnboardDisplay(id, isOnboardDisplay);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->IsOnboardDisplay(id, isOnboardDisplay);
     EXPECT_EQ(isOnboardDisplay, true);
     EXPECT_EQ(res, DMError::DM_OK);
-    ssm->screenSessionMap_.erase(0);
-    ssm->SetPcStatus(isPcNow);
+    ssm_->screenSessionMap_.erase(0);
+    ssm_->SetPcStatus(isPcNow);
 }
 
 /**
@@ -1002,20 +965,19 @@ HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay04, TestSize.Level0)
  */
 HWTEST_F(ScreenSessionManagerTest, IsOnboardDisplay05, TestSize.Level0)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ssm->screenSessionMap_.erase(100);
-    EXPECT_NE(ssm, nullptr);
-    bool isPcNow = ssm->GetPcStatus();
-    ssm->SetPcStatus(false);
+    ssm_->screenSessionMap_.erase(100);
+    ASSERT_NE(ssm_, nullptr);
+    bool isPcNow = ssm_->GetPcStatus();
+    ssm_->SetPcStatus(false);
     DisplayId id = 100;
     bool isOnboardDisplay = false;
     sptr<ScreenSession> screenSession = new ScreenSession(id, ScreenProperty(), 0);
-    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    auto res = ssm->IsOnboardDisplay(id, isOnboardDisplay);
+    ssm_->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm_->IsOnboardDisplay(id, isOnboardDisplay);
     EXPECT_EQ(isOnboardDisplay, false);
     EXPECT_EQ(res, DMError::DM_OK);
-    ssm->screenSessionMap_.erase(100);
-    ssm->SetPcStatus(isPcNow);
+    ssm_->screenSessionMap_.erase(100);
+    ssm_->SetPcStatus(isPcNow);
 }
 
 /**
@@ -1250,11 +1212,10 @@ HWTEST_F(ScreenSessionManagerTest, SetMultiScreenRelativePosition06, TestSize.Le
  */
 HWTEST_F(ScreenSessionManagerTest, SetCoordinationFlag, TestSize.Level1)
 {
-    ScreenSessionManager* ssm = new ScreenSessionManager();
-    ASSERT_NE(ssm, nullptr);
-    ASSERT_EQ(ssm->isCoordinationFlag_, false);
-    ssm->SetCoordinationFlag(true);
-    ASSERT_EQ(ssm->isCoordinationFlag_, true);
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->isCoordinationFlag_, false);
+    ssm_->SetCoordinationFlag(true);
+    ASSERT_EQ(ssm_->isCoordinationFlag_, true);
 }
 }
 } // namespace Rosen
