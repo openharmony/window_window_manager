@@ -323,10 +323,10 @@ WmErrorCode JsWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr<
     WmErrorCode ret;
     if (isRegister) {
         ret = MappingWmErrorCodeSafely(
-            WindowManager::GetInstance().RegisterApplicationFocusChangedListener(thisListener));
+            WindowManager::GetInstance().RegisterApplicationFocusChangedListener(thisListener);
     } else {
         ret = MappingWmErrorCodeSafely(
-            WindowManager::GetInstance().UnregisterApplicationFocusChangedListener(thisListener));
+            WindowManager::GetInstance().UnregisterApplicationFocusChangedListener(thisListener);
     }
     return ret;
 }
