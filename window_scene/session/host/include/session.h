@@ -1322,7 +1322,6 @@ private:
     bool isOutlineEnabled_ = false;
     OutlineStyleParams outlineStyleParams_;
     OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
-
     /*
      * Prelaunch check
      */

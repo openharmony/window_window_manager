@@ -709,16 +709,6 @@ void Session::NotifyRestart()
     }
 }
 
-void Session::NotifySetOptimizationFlag(bool flag)
-{
-    auto lifecycleListeners = GetListeners<ILifecycleListener>();
-    for (auto& listener : lifecycleListeners) {
-        if (auto listenerPtr = listener.lock()) {
-            listenerPtr->OnSetOptimizationFlag(flag);
-        }
-    }
-}
-
 void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist,
     bool needSaveSnapshot, std::function<void()>&& callback)
 {
