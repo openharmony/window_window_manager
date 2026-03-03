@@ -426,8 +426,6 @@ public:
     WSRect GetSessionRequestRect() const;
     void SetLayerPartRender(bool isLayerPartRender);
     bool GetLayerPartRender() const;
-    void SetRequestRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
-    RectAnimationConfig GetRequestRectAnimationConfig() const;
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
