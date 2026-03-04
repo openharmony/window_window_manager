@@ -80,8 +80,9 @@ void OHWindowTest::TearDown()
 }
 
 namespace {
-void FrameMetricsMeasuredCallback(WindowManager_FrameMetrics metrics)
+void FrameMetricsMeasuredCallback(int32_t windowId, OH_WindowManager_FrameMetrics* metrics)
 {
+    (void)windowId;
     (void)metrics;
 }
 
