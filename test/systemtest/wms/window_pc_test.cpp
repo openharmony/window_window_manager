@@ -357,14 +357,22 @@ HWTEST_F(WindowPCTest, StartMoveWindow01, TestSize.Level1)
     window->property_->SetPersistentId(10071);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
+    // windowUIType_ is not set, CheckCanStartMoveWindowByDevice returns false
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    // PHONE_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+    // but CheckCanStartMoveWindowByWindowType returns false for MAIN_WINDOW
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
+
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    // PC_WINDOW: IsPcOrFreeMultiWindowCapabilityEnabled returns true
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    // PAD_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+    // but CheckCanStartMoveWindowByWindowType returns false for MAIN_WINDOW (not PC/FreeMultiWindow mode)
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
 
     window->Destroy(true, true);
 }
@@ -390,14 +398,22 @@ HWTEST_F(WindowPCTest, StartMoveWindow02, TestSize.Level1)
     window->property_->SetPersistentId(10072);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
+    // windowUIType_ is not set, CheckCanStartMoveWindowByDevice returns false
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    // PHONE_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+    // CheckCanStartMoveWindowByWindowType returns true for SUB_WINDOW
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    // PC_WINDOW: IsPcOrFreeMultiWindowCapabilityEnabled returns true
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    // PAD_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+    // CheckCanStartMoveWindowByWindowType returns true for SUB_WINDOW
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
 
     window->Destroy(true, true);
 }
@@ -423,14 +439,22 @@ HWTEST_F(WindowPCTest, StartMoveWindow03, TestSize.Level1)
     window->property_->SetPersistentId(10073);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
+    // windowUIType_ is not set, CheckCanStartMoveWindowByDevice returns false
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    // PHONE_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+    // CheckCanStartMoveWindowByWindowType returns true for SYSTEM_SUB_WINDOW
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    // PC_WINDOW: IsPcOrFreeMultiWindowCapabilityEnabled returns true
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+    // PAD_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+    // CheckCanStartMoveWindowByWindowType returns true for SYSTEM_SUB_WINDOW
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
 
     window->Destroy(true, true);
 }
