@@ -793,6 +793,13 @@ HWTEST_F(SceneSessionManagerTest8, GetHostGlobalScaledRect, TestSize.Level1)
     EXPECT_EQ(sceneSession->GetScreenId(), 0);
     ssm_->sceneSessionMap_.insert(std::make_pair(hostWindowId, sceneSession));
     auto ret = ssm_->GetHostGlobalScaledRect(hostWindowId, rect);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, ret);
+
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    UIExtensionTokenInfo tokenInfo;
+    tokenInfo.callingTokenId = callingTokenId;
+    sceneSession->AddExtensionTokenInfo(tokenInfo);
+    ret = ssm_->GetHostGlobalScaledRect(hostWindowId, rect);
     EXPECT_EQ(WSError::WS_OK, ret);
 }
 
