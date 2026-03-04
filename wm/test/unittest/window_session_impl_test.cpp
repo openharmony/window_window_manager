@@ -582,6 +582,10 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus, TestSize.Level1)
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
 
+    info->isSameCallingPid_ = false;
+    res = window->UpdateFocus(info, false);
+    EXPECT_EQ(res, WSError::WS_OK);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFocus end";
 }
 
