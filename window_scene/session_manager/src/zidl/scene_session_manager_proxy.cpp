@@ -2559,7 +2559,7 @@ WMError SceneSessionManagerProxy::GetTopNavDestinationName(int32_t windowId, std
     }
     if (!reply.ReadString(topNavDestName)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read topNavDestName failed");
-        return ERR_INVALID_DATA;
+        return WMError::WM_ERROR_IPC_FAILED;
     }
     int32_t errCode = 0;
     if (!reply.ReadInt32(errCode)) {
