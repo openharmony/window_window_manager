@@ -423,6 +423,8 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
+    void SetLayerPartRender(bool isLayerPartRender);
+    bool GetLayerPartRender() const;
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
@@ -1319,7 +1321,7 @@ private:
     bool isOutlineEnabled_ = false;
     OutlineStyleParams outlineStyleParams_;
     OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
+    bool isLayerPartRender_ = false;
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H
