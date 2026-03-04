@@ -1036,7 +1036,7 @@ private:
     std::mutex screenPowerMutex_;
     std::mutex screenMaskMutex_;
     std::condition_variable screenMaskCV_;
-    std::mutex screenModeChangeMutex_;
+    std::recursive_mutex screenModeChangeMutex_;
     std::condition_variable displayAddCV_;
     mutable std::mutex setPcStatusMutex_;
 
