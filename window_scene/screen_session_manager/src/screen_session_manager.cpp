@@ -3502,7 +3502,7 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     }
 #ifdef FOLD_ABILITY_ENABLE
     // deal device special config
-    if (foldScreenController_ != nullptr) {
+    if (foldScreenController_ != nullptr && screenId == SCREEN_ID_FULL) {
         float specialVpr = foldScreenController_->GetSpecialVirtualPixelRatio();
         if (fabs(specialVpr - (-1.0f)) > 1e-6) {
             TLOGNFI(WmsLogTag::DMS, "current device need set special vpr: %{public}f", specialVpr);
@@ -15230,6 +15230,13 @@ void ScreenSessionManager::SetPowerStateForAod(ScreenPowerState state)
     bool isSuccess = ScreenStateMachine::GetInstance().HandlePowerStateChange(event, curType);
     if (!isSuccess) {
         TLOGNFE(WmsLogTag::DMS, "[UL_POWER]set false, state: %{public}u", state);
+        if (state == ScreenPowerState::POWER_OFF) {
+            // try deal false screen off state, ap need to set force power screen off again
+            event = ScreenPowerEvent::SET_SCREEN_POWER_FOR_ALL_FORCE_POWER_OFF;
+            curType = std::make_pair(state, PowerStateChangeReason::STATE_CHANGE_REASON_AOD_SET_FORCE_OFF);
+            isSuccess = ScreenStateMachine::GetInstance().HandlePowerStateChange(event, curType);
+            TLOGNFE(WmsLogTag::DMS, "[UL_POWER]set force power off false");
+        }
         return;
     }
     TLOGD(WmsLogTag::DMS, "[UL_POWER]set state success: %{public}u", state);
