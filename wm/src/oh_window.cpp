@@ -164,8 +164,8 @@ const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WIND
 
 class OHWindowFrameMetricsMeasuredListener : public IFrameMetricsChangedListener {
 public:
-    explicit OHWindowFrameMetricsMeasuredListener(OH_WindowManager_FrameMetricsMeasuredCallback callback)
-        : measuredCallback_(callback) {}
+    OHWindowFrameMetricsMeasuredListener(int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
+        : windowId_(windowId), measuredCallback_(callback) {}
     ~OHWindowFrameMetricsMeasuredListener() override = default;
 
     void OnFrameMetricsChanged(const FrameMetrics& metrics) override
@@ -173,15 +173,16 @@ public:
         if (measuredCallback_ == nullptr) {
             return;
         }
-        WindowManager_FrameMetrics frameMetrics;
+        OH_WindowManager_FrameMetrics frameMetrics;
         frameMetrics.firstDrawFrame = metrics.firstDrawFrame_;
         frameMetrics.inputHandlingDuration = metrics.inputHandlingDuration_;
         frameMetrics.layoutMeasureDuration = metrics.layoutMeasureDuration_;
         frameMetrics.vsyncTimestamp = metrics.vsyncTimestamp_;
-        measuredCallback_(frameMetrics);
+        measuredCallback_(windowId_, &frameMetrics);
     }
 
 private:
+    int32_t windowId_ = 0;
     OH_WindowManager_FrameMetricsMeasuredCallback measuredCallback_ = nullptr;
 };
 
@@ -792,7 +793,7 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
                 return;
             }
         }
-        auto listener = OHOS::sptr<OHWindowFrameMetricsMeasuredListener>::MakeSptr(callback);
+        auto listener = OHOS::sptr<OHWindowFrameMetricsMeasuredListener>::MakeSptr(windowId, callback);
         if (listener == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s create listener failed, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;

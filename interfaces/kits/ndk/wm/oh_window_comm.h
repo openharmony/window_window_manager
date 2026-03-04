@@ -235,11 +235,11 @@ typedef struct {
 } WindowManager_WindowSnapshotConfig;
 
 /**
- * @brief Frame metrics info.
+ * @brief Frame metrics data object.
  *
- * @since 22
+ * @since 26.0.0
  */
-typedef struct {
+typedef struct OH_WindowManager_FrameMetrics {
     /** Whether this frame is first draw frame. */
     bool firstDrawFrame;
     /** Input handling duration in ns. */
@@ -248,7 +248,17 @@ typedef struct {
     uint64_t layoutMeasureDuration;
     /** Vsync timestamp in ns. */
     uint64_t vsyncTimestamp;
-} WindowManager_FrameMetrics;
+} OH_WindowManager_FrameMetrics;
+
+/**
+ * @brief Frame metrics callback type.
+ *
+ * @param windowId WindowId when window is created.
+ * @param metrics Frame metrics info.
+ * @since 26.0.0
+ */
+typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(
+    int32_t windowId, OH_WindowManager_FrameMetrics* metrics);
 
 #ifdef __cplusplus
 }

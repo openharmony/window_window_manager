@@ -345,14 +345,6 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList);
 
 /**
- * @brief Callback interface for frame metrics measured.
- *
- * @param metrics Frame metrics info.
- * @since 26
- */
-typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(WindowManager_FrameMetrics metrics);
-
-/**
  * @brief Register frame metrics measured callback for the target window.
  *
  * @param windowId WindowId when window is created.
@@ -362,7 +354,7 @@ typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(WindowManager_Fram
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
- * @since 26
+ * @since 26.0.0
  */
 int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
     int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback);
@@ -377,7 +369,7 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
  *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
  *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
- * @since 26
+ * @since 26.0.0
  */
 int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
     int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback);
