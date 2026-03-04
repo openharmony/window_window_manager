@@ -336,15 +336,17 @@ HWTEST_F(WindowPCTest, SetWindowTitleMoveEnabled03, TestSize.Level1)
     window->Destroy(true, true);
 }
 
+// ==================== StartMoveWindow MAIN_WINDOW tests ====================
+
 /**
- * @tc.name: StartMoveWindow01
- * @tc.desc: startMoving MAIN_WINDOW
+ * @tc.name: StartMoveWindow_MainWindow_DeviceNotSupport
+ * @tc.desc: MAIN_WINDOW with unset windowUIType returns DEVICE_NOT_SUPPORT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, StartMoveWindow01, TestSize.Level1)
+HWTEST_F(WindowPCTest, StartMoveWindow_MainWindow_DeviceNotSupport, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Window7_1");
+    option->SetWindowName("StartMoveWindow_MainWindow_DeviceNotSupport");
     option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
@@ -360,33 +362,19 @@ HWTEST_F(WindowPCTest, StartMoveWindow01, TestSize.Level1)
     // windowUIType_ is not set, CheckCanStartMoveWindowByDevice returns false
     ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    // PHONE_WINDOW: CheckCanStartMoveWindowByDevice returns true,
-    // but CheckCanStartMoveWindowByWindowType returns false for MAIN_WINDOW
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    // PC_WINDOW: IsPcOrFreeMultiWindowCapabilityEnabled returns true
-    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    // PAD_WINDOW: CheckCanStartMoveWindowByDevice returns true,
-    // but CheckCanStartMoveWindowByWindowType returns false for MAIN_WINDOW (not PC/FreeMultiWindow mode)
-    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
-
     window->Destroy(true, true);
 }
 
 /**
- * @tc.name: StartMoveWindow02
- * @tc.desc: startMoving SUB_WINDOW
+ * @tc.name: StartMoveWindow_MainWindow_PhoneWindow
+ * @tc.desc: MAIN_WINDOW with PHONE_WINDOW returns INVALID_CALLING
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, StartMoveWindow02, TestSize.Level1)
+HWTEST_F(WindowPCTest, StartMoveWindow_MainWindow_PhoneWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Window7_2");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowName("StartMoveWindow_MainWindow_PhoneWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -397,37 +385,24 @@ HWTEST_F(WindowPCTest, StartMoveWindow02, TestSize.Level1)
     window->hostSession_ = session;
     window->property_->SetPersistentId(10072);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-
-    // windowUIType_ is not set, CheckCanStartMoveWindowByDevice returns false
-    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
-
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    // PHONE_WINDOW: CheckCanStartMoveWindowByDevice returns true,
-    // CheckCanStartMoveWindowByWindowType returns true for SUB_WINDOW
-    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
 
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    // PC_WINDOW: IsPcOrFreeMultiWindowCapabilityEnabled returns true
-    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
-
-    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    // PAD_WINDOW: CheckCanStartMoveWindowByDevice returns true,
-    // CheckCanStartMoveWindowByWindowType returns true for SUB_WINDOW
-    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+    // CheckCanStartMoveWindowByDevice returns true, but CheckCanStartMoveWindowByWindowType returns false
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
 
     window->Destroy(true, true);
 }
 
 /**
- * @tc.name: StartMoveWindow03
- * @tc.desc: startMoving SYSTEM_SUB_WINDOW
+ * @tc.name: StartMoveWindow_MainWindow_PcWindow
+ * @tc.desc: MAIN_WINDOW with PC_WINDOW returns OK
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPCTest, StartMoveWindow03, TestSize.Level1)
+HWTEST_F(WindowPCTest, StartMoveWindow_MainWindow_PcWindow, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("Window7_3");
-    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    option->SetWindowName("StartMoveWindow_MainWindow_PcWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
@@ -438,21 +413,262 @@ HWTEST_F(WindowPCTest, StartMoveWindow03, TestSize.Level1)
     window->hostSession_ = session;
     window->property_->SetPersistentId(10073);
     window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    // IsPcOrFreeMultiWindowCapabilityEnabled returns true
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: StartMoveWindow_MainWindow_PadWindow
+ * @tc.desc: MAIN_WINDOW with PAD_WINDOW returns INVALID_CALLING
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_MainWindow_PadWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_MainWindow_PadWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10074);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+
+    // CheckCanStartMoveWindowByDevice returns true, but CheckCanStartMoveWindowByWindowType returns false
+    ASSERT_EQ(WmErrorCode::WM_ERROR_INVALID_CALLING, window->StartMoveWindow());
+
+    window->Destroy(true, true);
+}
+
+// ==================== StartMoveWindow SUB_WINDOW tests ====================
+
+/**
+ * @tc.name: StartMoveWindow_SubWindow_DeviceNotSupport
+ * @tc.desc: SUB_WINDOW with unset windowUIType returns DEVICE_NOT_SUPPORT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SubWindow_DeviceNotSupport, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SubWindow_DeviceNotSupport");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10075);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
 
     // windowUIType_ is not set, CheckCanStartMoveWindowByDevice returns false
     ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
 
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: StartMoveWindow_SubWindow_PhoneWindow
+ * @tc.desc: SUB_WINDOW with PHONE_WINDOW returns OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SubWindow_PhoneWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SubWindow_PhoneWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10076);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    // PHONE_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+
+    // CheckCanStartMoveWindowByWindowType returns true for SUB_WINDOW
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: StartMoveWindow_SubWindow_PcWindow
+ * @tc.desc: SUB_WINDOW with PC_WINDOW returns OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SubWindow_PcWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SubWindow_PcWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10077);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    // IsPcOrFreeMultiWindowCapabilityEnabled returns true
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: StartMoveWindow_SubWindow_PadWindow
+ * @tc.desc: SUB_WINDOW with PAD_WINDOW returns OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SubWindow_PadWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SubWindow_PadWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10078);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+
+    // CheckCanStartMoveWindowByWindowType returns true for SUB_WINDOW
+    ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
+
+    window->Destroy(true, true);
+}
+
+// ==================== StartMoveWindow SYSTEM_SUB_WINDOW tests ====================
+
+/**
+ * @tc.name: StartMoveWindow_SystemSubWindow_DeviceNotSupport
+ * @tc.desc: SYSTEM_SUB_WINDOW with unset windowUIType returns DEVICE_NOT_SUPPORT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SystemSubWindow_DeviceNotSupport, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SystemSubWindow_DeviceNotSupport");
+    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10079);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    // windowUIType_ is not set, CheckCanStartMoveWindowByDevice returns false
+    ASSERT_EQ(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT, window->StartMoveWindow());
+
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: StartMoveWindow_SystemSubWindow_PhoneWindow
+ * @tc.desc: SYSTEM_SUB_WINDOW with PHONE_WINDOW returns OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SystemSubWindow_PhoneWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SystemSubWindow_PhoneWindow");
+    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10080);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+
     // CheckCanStartMoveWindowByWindowType returns true for SYSTEM_SUB_WINDOW
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
 
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: StartMoveWindow_SystemSubWindow_PcWindow
+ * @tc.desc: SYSTEM_SUB_WINDOW with PC_WINDOW returns OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SystemSubWindow_PcWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SystemSubWindow_PcWindow");
+    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10081);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
-    // PC_WINDOW: IsPcOrFreeMultiWindowCapabilityEnabled returns true
+
+    // IsPcOrFreeMultiWindowCapabilityEnabled returns true
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
 
+    window->Destroy(true, true);
+}
+
+/**
+ * @tc.name: StartMoveWindow_SystemSubWindow_PadWindow
+ * @tc.desc: SYSTEM_SUB_WINDOW with PAD_WINDOW returns OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPCTest, StartMoveWindow_SystemSubWindow_PadWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("StartMoveWindow_SystemSubWindow_PadWindow");
+    option->SetWindowType(WindowType::SYSTEM_SUB_WINDOW_BASE);
+    option->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, session));
+
+    window->hostSession_ = session;
+    window->property_->SetPersistentId(10082);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    // PAD_WINDOW: CheckCanStartMoveWindowByDevice returns true,
+
     // CheckCanStartMoveWindowByWindowType returns true for SYSTEM_SUB_WINDOW
     ASSERT_EQ(WmErrorCode::WM_OK, window->StartMoveWindow());
 
