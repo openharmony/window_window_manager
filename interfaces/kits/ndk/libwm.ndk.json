@@ -196,11 +196,11 @@
         "name":"OH_WindowManager_InjectTouchEvent"
     },
     {
-        "first_instroduced":"22",
+        "first_instroduced":"26",
         "name":"OH_WindowManager_RegisterFrameMetricsMeasuredCallback"
     },
     {
-        "first_instroduced":"22",
+        "first_instroduced":"26",
         "name":"OH_WindowManager_UnregisterFrameMetricsMeasuredCallback"
     },
     {
