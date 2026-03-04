@@ -2557,12 +2557,10 @@ WMError SceneSessionManagerProxy::GetTopNavDestinationName(int32_t windowId, std
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send request failed, errCode: %{public}d", reqErrCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    const char* namePtr = nullptr;
-    auto size = reply.ReadUint32();
-    if (size != 0) {
-        namePtr = reinterpret_cast<const char*>(reply.ReadRawData(size));
+    if (!data.ReadString(topNavDestName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read topNavDestName failed");
+        return ERR_INVALID_DATA;
     }
-    topNavDestName = (namePtr != nullptr) ? std::string(namePtr, size) : "";
     int32_t errCode = 0;
     if (!reply.ReadInt32(errCode)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
