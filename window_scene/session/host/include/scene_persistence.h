@@ -49,6 +49,7 @@ public:
     bool HasSnapshot() const;
     bool HasSnapshot(SnapshotStatus key, bool freeMultiWindow = false) const;
     void ClearSnapshotPath();
+    void ClearAbilityIconPath();
     void ClearSnapshot();
     bool IsSnapshotExisted(SnapshotStatus key = defaultStatus);
     std::string GetSnapshotFilePath(SnapshotStatus& key, bool useKey = false, bool freeMultiWindow = false);
@@ -71,6 +72,7 @@ public:
     std::string GetUpdatedIconPath() const;
     void SaveAbilityIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetAbilityIconPath() const;
+    void SaveIcon(const std::shared_ptr<Media::PixelMap>& pixelMap, std::string iconPath);
     std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale,
         SnapshotStatus key = defaultStatus, bool freeMultiWindow = false);
     DisplayOrientation rotate_[SCREEN_COUNT] = {};

@@ -161,6 +161,7 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
 ScenePersistence::~ScenePersistence()
 {
     ClearSnapshotPath();
+    ClearAbilityIconPath();
 }
 
 void ScenePersistence::ClearSnapshotPath()
@@ -170,6 +171,12 @@ void ScenePersistence::ClearSnapshotPath()
         remove(snapshotPath.c_str());
     }
     remove(snapshotFreeMultiWindowPath_.c_str());
+}
+
+void ScenePersistence::ClearAbilityIconPath()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "clear icon, persistentId: %{public}d", persistentId_);
+    remove(abilityIconPath_.c_str());
 }
 
 std::shared_ptr<WSFFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
@@ -352,37 +359,7 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
     if (pixelMap == nullptr || updatedIconPath_.find('/') == std::string::npos) {
         return;
     }
-
-    OHOS::Media::ImagePacker imagePacker;
-    OHOS::Media::PackOption option;
-    option.format = IMAGE_FORMAT;
-    option.quality = IMAGE_QUALITY;
-    option.numberHint = 1;
-    if (pixelMap->GetWidth() > ICON_IMAGE_WIDTH_HEIGHT_SIZE || pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE) {
-        // large image need scale
-        double xScale = pixelMap->GetWidth() > ICON_IMAGE_WIDTH_HEIGHT_SIZE ?
-            ICON_IMAGE_WIDTH_HEIGHT_SIZE / ((double) pixelMap->GetWidth()) : ICON_IMAGE_MAX_SCALE;
-        double yScale = pixelMap->GetHeight() > ICON_IMAGE_WIDTH_HEIGHT_SIZE ?
-            ICON_IMAGE_WIDTH_HEIGHT_SIZE / ((double) pixelMap->GetHeight()) : ICON_IMAGE_MAX_SCALE;
-        pixelMap->scale(xScale, yScale, Media::AntiAliasingOption::MEDIUM);
-    }
-    if (remove(updatedIconPath_.c_str())) {
-        TLOGD(WmsLogTag::DEFAULT, "Failed to delete old file");
-    }
-    if (imagePacker.StartPacking(GetUpdatedIconPath(), option)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, starting packing error");
-        return;
-    }
-    if (imagePacker.AddImage(*pixelMap)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, adding image error");
-        return;
-    }
-    int64_t packedSize = 0;
-    if (imagePacker.FinalizePacking(packedSize)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, finalizing packing error");
-        return;
-    }
-    TLOGD(WmsLogTag::DEFAULT, "SaveUpdatedIcon finished");
+    SaveIcon(pixelMap, updatedIconPath_);
 }
 
 std::string ScenePersistence::GetUpdatedIconPath() const
@@ -395,7 +372,16 @@ void ScenePersistence::SaveAbilityIcon(const std::shared_ptr<Media::PixelMap>& p
     if (pixelMap == nullptr || abilityIconPath_.find('/') == std::string::npos) {
         return;
     }
+    SaveIcon(pixelMap, abilityIconPath_);
+}
 
+std::string ScenePersistence::GetAbilityIconPath() const
+{
+    return abilityIconPath_;
+}
+
+void ScenePersistence::SaveIcon(const std::shared_ptr<Media::PixelMap>& pixelMap, std::string iconPath)
+{
     OHOS::Media::ImagePacker imagePacker;
     OHOS::Media::PackOption option;
     option.format = IMAGE_FORMAT;
@@ -409,28 +395,23 @@ void ScenePersistence::SaveAbilityIcon(const std::shared_ptr<Media::PixelMap>& p
             ICON_IMAGE_WIDTH_HEIGHT_SIZE / ((double) pixelMap->GetHeight()) : ICON_IMAGE_MAX_SCALE;
         pixelMap->scale(xScale, yScale, Media::AntiAliasingOption::MEDIUM);
     }
-    if (remove(abilityIconPath_.c_str())) {
+    if (remove(iconPath.c_str())) {
         TLOGD(WmsLogTag::DEFAULT, "Failed to delete old file");
     }
-    if (imagePacker.StartPacking(GetAbilityIconPath(), option)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save ability icon failed, starting packing error");
+    if (imagePacker.StartPacking(iconPath, option)) {
+        TLOGE(WmsLogTag::DEFAULT, "Save icon failed, starting packing error");
         return;
     }
     if (imagePacker.AddImage(*pixelMap)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save ability icon failed, adding image error");
+        TLOGE(WmsLogTag::DEFAULT, "Save icon failed, adding image error");
         return;
     }
     int64_t packedSize = 0;
     if (imagePacker.FinalizePacking(packedSize)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save ability icon failed, finalizing packing error");
+        TLOGE(WmsLogTag::DEFAULT, "Save icon failed, finalizing packing error");
         return;
     }
-    TLOGD(WmsLogTag::DEFAULT, "SaveAbilityIcon finished");
-}
-
-std::string ScenePersistence::GetAbilityIconPath() const
-{
-    return abilityIconPath_;
+    TLOGD(WmsLogTag::DEFAULT, "SaveIcon finished");
 }
 
 void ScenePersistence::SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow, std::pair<uint32_t, uint32_t> size)
