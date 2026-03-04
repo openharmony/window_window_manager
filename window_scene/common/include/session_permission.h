@@ -30,6 +30,7 @@ constexpr const char* PERMISSION_SET_ABILITY_INSTANCE_INFO = "ohos.permission.SE
 constexpr const char* PERMISSION_VISIBLE_WINDOW_INFO = "ohos.permission.VISIBLE_WINDOW_INFO";
 constexpr const char* PERMISSION_WINDOW_TRANSPARENT = "ohos.permission.SET_WINDOW_TRANSPARENT";
 constexpr const char* PERMISSION_FLOATING_BALL = "ohos.permission.USE_FLOAT_BALL";
+constexpr const char* PERMISSION_FLOATING_BALL_AUTO_RESTORE = "ohos.permission.AUTO_RESTORE_MAIN_WINDOW";
 }
 class SessionPermission {
 public:
