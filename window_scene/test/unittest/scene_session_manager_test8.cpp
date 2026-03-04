@@ -747,7 +747,6 @@ HWTEST_F(SceneSessionManagerTest8, GetHostWindowRect01, TestSize.Level1)
     sceneSession->TransformGlobalRectToRelativeRect(hostRect);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_EQ(rect.posY_, hostRect.posY_);
-
 }
 
 /**
