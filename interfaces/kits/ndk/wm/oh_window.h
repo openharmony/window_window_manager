@@ -345,15 +345,15 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList);
 
 /**
- * @brief Callback interface for frame metrics changed.
+ * @brief Callback interface for frame metrics measured.
  *
  * @param metrics Frame metrics info.
  * @since 22
  */
-typedef void (*OH_WindowManager_FrameMetricsChangedCallback)(WindowManager_FrameMetrics metrics);
+typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(WindowManager_FrameMetrics metrics);
 
 /**
- * @brief Register frame metrics changed listener for the target window.
+ * @brief Register frame metrics measured callback for the target window.
  *
  * @param windowId WindowId when window is created.
  * @param callback Callback object.
@@ -364,11 +364,11 @@ typedef void (*OH_WindowManager_FrameMetricsChangedCallback)(WindowManager_Frame
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
  * @since 22
  */
-int32_t OH_WindowManager_RegisterFrameMetricsChangedListener(
-    int32_t windowId, OH_WindowManager_FrameMetricsChangedCallback callback);
+int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
+    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback);
 
 /**
- * @brief Unregister frame metrics changed listener for the target window.
+ * @brief Unregister frame metrics measured callback for the target window.
  *
  * @param windowId WindowId when window is created.
  * @param callback Callback object.
@@ -379,8 +379,8 @@ int32_t OH_WindowManager_RegisterFrameMetricsChangedListener(
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
  * @since 22
  */
-int32_t OH_WindowManager_UnregisterFrameMetricsChangedListener(
-    int32_t windowId, OH_WindowManager_FrameMetricsChangedCallback callback);
+int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
+    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback);
 
 /**
  * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor follows
