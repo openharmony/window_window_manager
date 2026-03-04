@@ -80,7 +80,7 @@ void OHWindowTest::TearDown()
 }
 
 namespace {
-void FrameMetricsChangedCallback(WindowManager_FrameMetrics metrics)
+void FrameMetricsMeasuredCallback(WindowManager_FrameMetrics metrics)
 {
     (void)metrics;
 }
@@ -226,59 +226,59 @@ HWTEST_F(OHWindowTest, OH_WindowManager_GetMainWindowSnapshot, TestSize.Level0)
 }
 
 /**
- * @tc.name: RegisterFrameMetricsChangedListener_NullCallback
- * @tc.desc: register frame metrics changed listener with null callback
+ * @tc.name: RegisterFrameMetricsMeasuredCallback_NullCallback
+ * @tc.desc: register frame metrics measured callback with null callback
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, RegisterFrameMetricsChangedListener_NullCallback, TestSize.Level0)
+HWTEST_F(OHWindowTest, RegisterFrameMetricsMeasuredCallback_NullCallback, TestSize.Level0)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
-    auto ret = OH_WindowManager_RegisterFrameMetricsChangedListener(windowId, nullptr);
+    auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, nullptr);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
 }
 
 /**
- * @tc.name: UnregisterFrameMetricsChangedListener_NullCallback
- * @tc.desc: unregister frame metrics changed listener with null callback
+ * @tc.name: UnregisterFrameMetricsMeasuredCallback_NullCallback
+ * @tc.desc: unregister frame metrics measured callback with null callback
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, UnregisterFrameMetricsChangedListener_NullCallback, TestSize.Level0)
+HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_NullCallback, TestSize.Level0)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
-    auto ret = OH_WindowManager_UnregisterFrameMetricsChangedListener(windowId, nullptr);
+    auto ret = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, nullptr);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
 }
 
 /**
- * @tc.name: RegisterFrameMetricsChangedListener_InvalidWindow
- * @tc.desc: register frame metrics changed listener with invalid window id
+ * @tc.name: RegisterFrameMetricsMeasuredCallback_InvalidWindow
+ * @tc.desc: register frame metrics measured callback with invalid window id
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, RegisterFrameMetricsChangedListener_InvalidWindow, TestSize.Level0)
+HWTEST_F(OHWindowTest, RegisterFrameMetricsMeasuredCallback_InvalidWindow, TestSize.Level0)
 {
-    auto ret = OH_WindowManager_RegisterFrameMetricsChangedListener(-1, FrameMetricsChangedCallback);
+    auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(-1, FrameMetricsMeasuredCallback);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
 }
 
 /**
- * @tc.name: RegisterUnregisterFrameMetricsChangedListener_Normal
- * @tc.desc: register/unregister frame metrics changed listener
+ * @tc.name: RegisterUnregisterFrameMetricsMeasuredCallback_Normal
+ * @tc.desc: register/unregister frame metrics measured callback
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsChangedListener_Normal, TestSize.Level0)
+HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsMeasuredCallback_Normal, TestSize.Level0)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
-    auto ret = OH_WindowManager_RegisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+    auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     if (ret == static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
-        auto ret2 = OH_WindowManager_RegisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+        auto ret2 = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
         EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret2);
-        auto ret3 = OH_WindowManager_UnregisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+        auto ret3 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
         EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret3);
         return;
     }
@@ -286,16 +286,16 @@ HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsChangedListener_Normal, Tes
 }
 
 /**
- * @tc.name: UnregisterFrameMetricsChangedListener_NotRegistered
- * @tc.desc: unregister frame metrics changed listener which is not registered
+ * @tc.name: UnregisterFrameMetricsMeasuredCallback_NotRegistered
+ * @tc.desc: unregister frame metrics measured callback which is not registered
  * @tc.type: FUNC
  */
-HWTEST_F(OHWindowTest, UnregisterFrameMetricsChangedListener_NotRegistered, TestSize.Level0)
+HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_NotRegistered, TestSize.Level0)
 {
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
-    auto ret = OH_WindowManager_UnregisterFrameMetricsChangedListener(windowId, FrameMetricsChangedCallback);
+    auto ret = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
 }
 }
