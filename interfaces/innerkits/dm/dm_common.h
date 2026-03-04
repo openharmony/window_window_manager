@@ -61,6 +61,8 @@ constexpr int32_t DEFAULT_CUSTOM_LOGIC_DIRECTION = 0;
 }
 constexpr uint32_t DISPLAY_A_WIDTH = 2472;
 constexpr float DEFAULT_SNAPSHOT_SCALE = 1.0f;
+constexpr uint64_t PC_WATCH_DOG_TIME_INTERVAL = 10 * 1000;
+constexpr uint64_t NON_PC_WATCH_DOG_TIME_INTERVAL = 5 * 1000;
 
 /**
  * @brief Power state change reason.
