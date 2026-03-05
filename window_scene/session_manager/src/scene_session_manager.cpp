@@ -126,6 +126,7 @@ constexpr const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_
 constexpr const char* ATOMIC_SERVICE_SESSION_ID = "com.ohos.param.sessionId";
 constexpr uint32_t MAX_BRIGHTNESS = 255;
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
+constexpr float INVALID_SCALE = 0;
 constexpr int32_t SCALE_DIMENSION = 2;
 constexpr int32_t TRANSLATE_DIMENSION = 2;
 constexpr int32_t ROTAION_DIMENSION = 4;
