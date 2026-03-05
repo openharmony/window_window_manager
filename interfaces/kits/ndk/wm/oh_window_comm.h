@@ -239,16 +239,7 @@ typedef struct {
  *
  * @since 26.0.0
  */
-typedef struct OH_WindowManager_FrameMetrics {
-    /** Whether this frame is first draw frame. */
-    bool firstDrawFrame;
-    /** Input handling duration in ns. */
-    uint64_t inputHandlingDuration;
-    /** Layout and measure duration in ns. */
-    uint64_t layoutMeasureDuration;
-    /** Vsync timestamp in ns. */
-    uint64_t vsyncTimestamp;
-} OH_WindowManager_FrameMetrics;
+typedef struct OH_WindowManager_FrameMetrics OH_WindowManager_FrameMetrics;
 
 /**
  * @brief Frame metrics callback type.

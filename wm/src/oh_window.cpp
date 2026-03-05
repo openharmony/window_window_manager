@@ -35,6 +35,13 @@
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 
+struct OH_WindowManager_FrameMetrics {
+    bool firstDrawFrame;
+    uint64_t inputHandlingDuration;
+    uint64_t layoutMeasureDuration;
+    uint64_t vsyncTimestamp;
+};
+
 using namespace OHOS::Rosen;
 
 namespace OHOS {
@@ -127,6 +134,46 @@ int32_t OH_WindowManager_ShowWindow(int32_t windowId)
 int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
 {
     return static_cast<int32_t>(OHOS::Rosen::IsWindowShownInner(windowId, isShow));
+}
+
+int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(
+    OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame)
+{
+    if (metrics == nullptr || isFirstDrawFrame == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *isFirstDrawFrame = metrics->firstDrawFrame;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(
+    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+{
+    if (metrics == nullptr || duration == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *duration = metrics->inputHandlingDuration;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(
+    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+{
+    if (metrics == nullptr || duration == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *duration = metrics->layoutMeasureDuration;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
+    OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp)
+{
+    if (metrics == nullptr || timestamp == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *timestamp = metrics->vsyncTimestamp;
+    return WindowManager_ErrorCode::OK;
 }
 
 namespace {
