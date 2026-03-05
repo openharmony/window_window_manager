@@ -235,18 +235,18 @@ HWTEST(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, TestSize
     sptr<IRemoteObject> sessionManagerService = nullptr;
     ErrCode ret;
 
-    // branch 1
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(-1));
+    // branch 1: clientUserId <= INVALID_USER_ID
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).WillOnce(Return(-1));
     ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    // branch 2
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(200));
+    // branch 2: clientUserId != SYSTEM_USERID
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).WillOnce(Return(200));
     ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_WOULD_BLOCK);
 
     // branch 3: SYSTEM_USERID
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(2).WillOnce(Return(0));
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).WillRepeatedly(Return(0));
     ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
