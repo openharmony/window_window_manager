@@ -83,7 +83,17 @@ namespace {
 void FrameMetricsMeasuredCallback(int32_t windowId, OH_WindowManager_FrameMetrics* metrics)
 {
     (void)windowId;
-    (void)metrics;
+    if (metrics == nullptr) {
+        return;
+    }
+    bool isFirstDrawFrame = false;
+    uint64_t inputHandlingDuration = 0;
+    uint64_t layoutMeasureDuration = 0;
+    uint64_t vsyncTimestamp = 0;
+    (void)OH_WindowManager_FrameMetrics_IsFirstDrawFrame(metrics, &isFirstDrawFrame);
+    (void)OH_WindowManager_FrameMetrics_GetInputHandlingDuration(metrics, &inputHandlingDuration);
+    (void)OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(metrics, &layoutMeasureDuration);
+    (void)OH_WindowManager_FrameMetrics_GetVsyncTimestamp(metrics, &vsyncTimestamp);
 }
 
 /**
@@ -298,6 +308,66 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_NotRegistered, Tes
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
     auto ret = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+}
+
+/**
+ * @tc.name: FrameMetricsIsFirstDrawFrame_InvalidParam
+ * @tc.desc: OH_WindowManager_FrameMetrics_IsFirstDrawFrame invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, FrameMetricsIsFirstDrawFrame_InvalidParam, TestSize.Level0)
+{
+    bool isFirstDrawFrame = false;
+    auto ret = OH_WindowManager_FrameMetrics_IsFirstDrawFrame(nullptr, &isFirstDrawFrame);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+
+    ret = OH_WindowManager_FrameMetrics_IsFirstDrawFrame(nullptr, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+}
+
+/**
+ * @tc.name: FrameMetricsGetInputHandlingDuration_InvalidParam
+ * @tc.desc: OH_WindowManager_FrameMetrics_GetInputHandlingDuration invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, FrameMetricsGetInputHandlingDuration_InvalidParam, TestSize.Level0)
+{
+    uint64_t duration = 0;
+    auto ret = OH_WindowManager_FrameMetrics_GetInputHandlingDuration(nullptr, &duration);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+
+    ret = OH_WindowManager_FrameMetrics_GetInputHandlingDuration(nullptr, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+}
+
+/**
+ * @tc.name: FrameMetricsGetLayoutMeasureDuration_InvalidParam
+ * @tc.desc: OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, FrameMetricsGetLayoutMeasureDuration_InvalidParam, TestSize.Level0)
+{
+    uint64_t duration = 0;
+    auto ret = OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(nullptr, &duration);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+
+    ret = OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(nullptr, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+}
+
+/**
+ * @tc.name: FrameMetricsGetVsyncTimestamp_InvalidParam
+ * @tc.desc: OH_WindowManager_FrameMetrics_GetVsyncTimestamp invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, FrameMetricsGetVsyncTimestamp_InvalidParam, TestSize.Level0)
+{
+    uint64_t timestamp = 0;
+    auto ret = OH_WindowManager_FrameMetrics_GetVsyncTimestamp(nullptr, &timestamp);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+
+    ret = OH_WindowManager_FrameMetrics_GetVsyncTimestamp(nullptr, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
 }
 }
 } // namespace Rosen
