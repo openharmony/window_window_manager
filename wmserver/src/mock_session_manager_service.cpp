@@ -292,20 +292,19 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
 }
 
 ErrCode MockSessionManagerService::GetSessionManagerServiceByUserId(int32_t userId,
-                                                                    sptr<IRemoteObject>& sessionManagerService)
+    sptr<IRemoteObject>& sessionManagerService)
 {
     int32_t clientUserId = GetUserIdByCallingUid();
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "userId=%{public}d, clientUserId=%{public}d", userId, clientUserId);
     if (clientUserId <= INVALID_USER_ID) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "clientUserId is illegal, clientUserId=%{public}d", clientUserId);
         return ERR_INVALID_VALUE;
     }
-    if (clientUserId == SYSTEM_USERID) {
-        std::lock_guard<std::mutex> lock(defaultWMSUserIdMutex_);
-        clientUserId = defaultWMSUserId_;
-        TLOGI(WmsLogTag::WMS_MULTI_USER,
-            "System user, use current default session mgr service, userId=%{public}d", clientUserId);
+    if (clientUserId != SYSTEM_USERID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "clientUserId is not system, clientUserId=%{public}d", clientUserId);
+        return ERR_WOULD_BLOCK;
     }
-    sessionManagerService = GetSessionManagerServiceInner(clientUserId);
+    sessionManagerService = GetSessionManagerServiceInner(userId);
     if (!sessionManagerService) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "sessionManagerService is null");
         return ERR_INVALID_VALUE;
