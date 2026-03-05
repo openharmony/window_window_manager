@@ -4526,31 +4526,17 @@ bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
     return false;
 }
 
-bool WindowSceneSessionImpl::CheckCanStartMoveWindowByDevice()
-{
-    return windowSystemConfig_.IsPhoneWindow() || windowSystemConfig_.IsPcWindow() ||
-        windowSystemConfig_.IsPadWindow();
-}
-
 bool WindowSceneSessionImpl::CheckCanStartMoveWindowByWindowType()
 {
     if (IsPcOrFreeMultiWindowCapabilityEnabled()) {
         return true;
     }
     WindowType windowType = GetType();
-    if (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType)) {
-        return true;
-    }
-    return false;
+    return WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType);
 }
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!CheckCanStartMoveWindowByDevice()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
-    
     if (!CheckCanStartMoveWindowByWindowType()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
