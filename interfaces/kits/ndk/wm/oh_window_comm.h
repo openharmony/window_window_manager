@@ -30,6 +30,20 @@ extern "C" {
 struct OH_PixelmapNative;
 
 /**
+ * @brief Frame metrics data object.
+ *
+ * @since 26.0.0
+ */
+typedef struct OH_WindowManager_FrameMetrics OH_WindowManager_FrameMetrics;
+
+/**
+ * @brief Frame metrics callback type.
+ *
+ * @since 26.0.0
+ */
+typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(int32_t windowId, OH_WindowManager_FrameMetrics* metrics);
+
+/**
  * @brief Enumerates the result types of the wm interface
  *
  * @since 12
@@ -233,23 +247,6 @@ typedef struct {
     /** Use cached windows' snapshot. */
     bool useCache;
 } WindowManager_WindowSnapshotConfig;
-
-/**
- * @brief Frame metrics data object.
- *
- * @since 26.0.0
- */
-typedef struct OH_WindowManager_FrameMetrics OH_WindowManager_FrameMetrics;
-
-/**
- * @brief Frame metrics callback type.
- *
- * @param windowId WindowId when window is created.
- * @param metrics Frame metrics info.
- * @since 26.0.0
- */
-typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(
-    int32_t windowId, OH_WindowManager_FrameMetrics* metrics);
 
 #ifdef __cplusplus
 }
