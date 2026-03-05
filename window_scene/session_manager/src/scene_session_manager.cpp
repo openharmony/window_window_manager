@@ -13428,6 +13428,10 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
             continue;
         }
+        if (sceneSession->GetRsScaleX() == INVALID_SCALE || sceneSession->GetRsScaleY() == INVALID_SCALE) {
+            TLOGE(WmsLogTag::WMS_IMMS, "id: %{public}d invalid scale", sceneSession->GetPersistentId());
+            continue;
+        }
         AvoidArea avoidArea = sceneSession->GetAvoidAreaByType(avoidType);
         sceneSession->UpdateAvoidArea(new AvoidArea(avoidArea), avoidType);
     }

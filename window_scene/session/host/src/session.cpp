@@ -5056,6 +5056,11 @@ void Session::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
     layoutController_->SetScale(scaleX, scaleY, pivotX, pivotY);
 }
 
+void Session::SetRsScale(float rsScaleX, float rsScaleY)
+{
+    layoutController_->SetRsScale(rsScaleX, rsScaleY);
+}
+
 void Session::SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
 {
     layoutController_->SetClientScale(scaleX, scaleY, pivotX, pivotY);
@@ -5069,6 +5074,16 @@ float Session::GetScaleX() const
 float Session::GetScaleY() const
 {
     return layoutController_->GetScaleY();
+}
+
+float Session::GetRsScaleX() const
+{
+    return layoutController_->GetRsScaleX();
+}
+
+float Session::GetRsScaleY() const
+{
+    return layoutController_->GetRsScaleY();
 }
 
 float Session::GetPivotX() const
