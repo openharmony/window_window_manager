@@ -48,7 +48,7 @@ public:
     void SetAspectRatio(float ratio) { aspectRatio_ = ratio; }
     float GetScaleX() const { return scaleX_; }
     float GetScaleY() const { return scaleY_; }
-    bool UpdateScaleInner(float scaleX, float scaleY, float rsScaleX, float rsScaleY, float pivotX, float pivotY);
+    bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
     float GetRsScaleX() const { return rsScaleX_; }
     float GetRsScaleY() const { return rsScaleY_; }
     float GetPivotX() const { return pivotX_; }
