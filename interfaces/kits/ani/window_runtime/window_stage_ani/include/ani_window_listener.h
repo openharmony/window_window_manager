@@ -118,6 +118,7 @@ public:
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnWindowHighlightChange(bool isHighlight) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void OnWindowWillClose(sptr<Window> window) override;
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) override;
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
