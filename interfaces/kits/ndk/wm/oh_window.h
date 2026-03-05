@@ -345,92 +345,6 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList);
 
 /**
- * @brief Check whether the current frame is the first frame.
- *
- * @param metrics Frame metrics data object.
- * @param isFirstDrawFrame This parameter is the return value of the function,
- *     indicating whether the current frame is the first frame.
- * @return Returns the status code of the execution.
- *         {@link OK} the function call is successful.
- *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
- * @since 26.0.0
- */
-int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(
-    OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame);
-
-/**
- * @brief Get the time taken to process external input events in one frame.
- *
- * @param metrics Frame metrics data object.
- * @param duration This parameter is the return value of the function,
- *     indicating the time taken to process external input events in one frame.
- * @return Returns the status code of the execution.
- *         {@link OK} the function call is successful.
- *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
- * @since 26.0.0
- */
-int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(
-    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration);
-
-/**
- * @brief Get the time taken for layout measurement in one frame.
- *
- * @param metrics Frame metrics data object.
- * @param duration This parameter is the return value of the function,
- *     indicating the time taken for layout measurement in one frame.
- * @return Returns the status code of the execution.
- *         {@link OK} the function call is successful.
- *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
- * @since 26.0.0
- */
-int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(
-    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration);
-
-/**
- * @brief Get the start timestamp of the current frame.
- *
- * @param metrics Frame metrics data object.
- * @param timestamp This parameter is the return value of the function,
- *     indicating the start timestamp of the current frame.
- * @return Returns the status code of the execution.
- *         {@link OK} the function call is successful.
- *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
- * @since 26.0.0
- */
-int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
-    OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp);
-
-/**
- * @brief Register frame metrics measured callback for the target window.
- *
- * @param windowId WindowId when window is created.
- * @param callback Callback object.
- * @return Returns the status code of the execution.
- *         {@link OK} the function call is successful.
- *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
- *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
- *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
- * @since 26.0.0
- */
-int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
-    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback);
-
-/**
- * @brief Unregister frame metrics measured callback for the target window.
- *
- * @param windowId WindowId when window is created.
- * @param callback Callback object.
- * @return Returns the status code of the execution.
- *         {@link OK} the function call is successful.
- *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
- *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
- *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormally.
- * @since 26.0.0
- */
-int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
-    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback);
-
-/**
  * @brief Lock the mouse cursor restricting it to a specified window area, and also control whether the cursor follows
  *        movement. Only supported by the focus window; the lock is automatically released when the window loses focus.
  *
@@ -463,6 +377,103 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
  * @since 22
  */
 int32_t OH_WindowManager_UnlockCursor(int32_t windowId);
+
+/**
+ * @brief Check whether the current frame is the first frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param isFirstDrawFrame This parameter is the return value of the function,
+ *     indicating whether the current frame is the first frame.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame);
+
+/**
+ * @brief Get the time taken to process external input events in one frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param duration This parameter is the return value of the function,
+ *     indicating the time taken to process external input events in one frame.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(OH_WindowManager_FrameMetrics* metrics,
+    uint64_t* duration);
+
+/**
+ * @brief Get the time taken for layout measurement in one frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param duration This parameter is the return value of the function,
+ *     indicating the time taken for layout measurement in one frame.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(OH_WindowManager_FrameMetrics* metrics,
+    uint64_t* duration);
+
+/**
+ * @brief Get the start timestamp of the current frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param timestamp This parameter is the return value of the function,
+ *     indicating the start timestamp of the current frame.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp);
+
+/**
+ * @brief Subscribe to the listening event for changes in the window frame rate metrics.
+ *     This interface must be used after loadContent() or setUICContent() has taken effect.
+ *     After the application registers the frame metrics change listener, the registered callback will only be 
+ *     triggered when the client UI content is redrawn (e.g., page switching, interaction with responsive
+ *     components, setting background color and opacity, etc.).
+ *
+ * @param windowId WindowId when window is created.
+ * @param callback Callback used to return the result of frame metrics.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal. Possible cause:
+ *             1. The window is not created or destroyed;
+ *             2. This window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(int32_t windowId, 
+    OH_WindowManager_FrameMetricsMeasuredCallback callback);
+
+/**
+ * @brief Unsubscribe from the listening event for changes in the window frame rate metrics. 
+ *     This interface must be used after loadContent() or setUIContent() has taken effect.
+ *
+ * @param windowId WindowId when window is created.
+ * @param callback Callback used to return the result of frame metrics.
+ * @return Returns the status code of the execution.
+ *         {@link WS_OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal. Possible cause:
+ *             1. The window is not created or destroyed;
+ *             2. This window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(int32_t windowId, 
+    OH_WindowManager_FrameMetricsMeasuredCallback callback);
 
 #ifdef __cplusplus
 }
