@@ -1177,9 +1177,17 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                 }
             }
             auto globalRect = session->moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
-            session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
-                session->moveDragController_->GetOriginalPointerPosY(),
-                rect.width_, rect.height_, 0, 0, 0, 0, globalRect.posX_, globalRect.posY_});
+            session->SetSessionEventParam({
+                .pointerX_ = session->moveDragController_->GetOriginalPointerPosX(),
+                .pointerY_ = session->moveDragController_->GetOriginalPointerPosY(),
+                .sessionWidth_ = rect.width_,
+                .sessionHeight_ = rect.height_,
+                .dragResizeType = 0,
+                .gravity = 0,
+                .waterfallResidentState = 0, 
+                .compatibleStyleMode = 0,
+                .windowGlobalPosX_ = globalRect.posX_,
+                .windowGlobalPosY_ = globalRect.posY_});
         }
         session->HandleSessionDragEvent(event);
         session->ApplySessionEventParam(event, param);
