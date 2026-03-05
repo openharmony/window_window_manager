@@ -1111,8 +1111,8 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
         task.Resolve(env, CreateJsWindowObject(env, lists->window));
         WLOGD("Get top window success");
     };
-    napi_value result = nullptr;	 
-    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",	 
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsWindowManager::OnGetTopWindow",
         env, CreateAsyncTaskWithLastParam(env, callback, std::move(execute), std::move(complete), &result));
     return result;
 }
