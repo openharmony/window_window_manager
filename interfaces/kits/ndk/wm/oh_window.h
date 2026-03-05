@@ -474,7 +474,6 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(int32_t windowId,
  */
 int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(int32_t windowId, 
     OH_WindowManager_FrameMetricsMeasuredCallback callback);
-    
 
 #ifdef __cplusplus
 }
