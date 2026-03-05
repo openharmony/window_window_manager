@@ -324,6 +324,7 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
     ani_status aniRet = env->GetVM(&vm);
     if (aniRet != ANI_OK || vm == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] Get vm failed, ret: %{public}u", aniRet);
+        env->GlobalReference_Delete(cbRef);
         return;
     }
     sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env, vm);
