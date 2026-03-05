@@ -430,6 +430,8 @@ ohos_shared_library("screen_session") {
     defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
   }
 
+  version_script = "libscene_session.map"
+  
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
