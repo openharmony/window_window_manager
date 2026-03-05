@@ -1093,7 +1093,7 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_PcWindowSuccess, TestSize.L
 
 /**
  * @tc.name: StartMoveWindow_InvalidDeviceFailed
- * @tc.desc: StartMoveWindow Test - Invalid window device should fail
+ * @tc.desc: StartMoveWindow Test - Invalid window device should fail with INVALID_CALLING
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_InvalidDeviceFailed, TestSize.Level1)
@@ -1108,7 +1108,8 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_InvalidDeviceFailed, TestSi
     window->hostSession_ = session;
 
     window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
-    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    // INVALID_WINDOW is not PC or free multi window, and MAIN_WINDOW is not system/sub window
+    ASSERT_EQ(window->StartMoveWindow(), WmErrorCode::WM_ERROR_INVALID_CALLING);
 }
 
 /**
