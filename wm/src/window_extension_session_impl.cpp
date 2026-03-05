@@ -2038,11 +2038,10 @@ WSError WindowExtensionSessionImpl::SetUIExtensionTransparent()
         TLOGE(WmsLogTag::WMS_UIEXT, "permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
+    transparentUIExtensionFlag_ = true;
     if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGI(WmsLogTag::WMS_UIEXT, "set background to transparent, id:%{public}d", GetPersistentId());
         SetBackgroundColor(TRANSPARENT_BACKGROUND_COLOR_HEX);
-    } else {
-        transparentUIExtensionFlag_ = true;
     }
     return WSError::WS_OK;
 }
