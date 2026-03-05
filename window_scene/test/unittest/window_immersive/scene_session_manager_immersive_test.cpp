@@ -155,6 +155,10 @@ HWTEST_F(SceneSessionManagerImmersiveTest, UpdateAvoidSessionAvoidArea, TestSize
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WindowType type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
     ssm_->UpdateAvoidSessionAvoidArea(type);
+    sceneSession->Session::SetRsScale(0, 0);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
+    sceneSession->Session::SetRsScale(1, 0);
+    ssm_->UpdateAvoidSessionAvoidArea(type);
 
     ASSERT_NE(sceneSession->property_, nullptr);
     sceneSession->property_->type_ = WindowType::APP_MAIN_WINDOW_END;
@@ -454,7 +458,7 @@ HWTEST_F(SceneSessionManagerImmersiveTest, GetScaleInLSState, TestSize.Level0)
     float scaleY = 1;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->layoutController_ = sptr<LayoutController>::MakeSptr(property);
-    sceneSession->Session::SetScale(-1, -1, -1, -1);
+    sceneSession->Session::SetRsScale(0, 0);
     sceneSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
     sceneSession->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
@@ -466,11 +470,11 @@ HWTEST_F(SceneSessionManagerImmersiveTest, GetScaleInLSState, TestSize.Level0)
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
     sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
-    sceneSession->Session::SetScale(1, -1, -1, -1);
+    sceneSession->Session::SetRsScale(0, 0);
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
     WSRect winRect = { 0, 0, 0, 0 };
     sceneSession->CalculateAvoidAreaByScale(winRect);
-    sceneSession->Session::SetScale(1, 1, -1, -1);
+    sceneSession->Session::SetRsScale(0, 0);
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_OK);
     AvoidArea area;
     sceneSession->CalculateAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, winRect, winRect, area);
@@ -598,6 +602,25 @@ HWTEST_F(SceneSessionManagerImmersiveTest, PostProcessProperty, TestSize.Level1)
     ssm_->PostProcessProperty(64);
     ssm_->sceneSessionMap_.clear();
     ssm_->PostProcessProperty(64);
+}
+
+/**
+ * @tc.name: GetAllAvoidAreas
+ * @tc.desc: GetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerImmersiveTest, GetAllAvoidAreas, TestSize.Level1)
+{
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    SessionInfo info;
+    info.abilityName_ = "GetAllAvoidAreas";
+    info.bundleName_ = "GetAllAvoidAreas";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_OK);
+    sceneSession->Session::SetRsScale(0, 0);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
+    sceneSession->Session::SetRsScale(1, 0);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
 }
 }
 }

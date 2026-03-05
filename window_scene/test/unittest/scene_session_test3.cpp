@@ -756,23 +756,6 @@ HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllAvoidAreas
- * @tc.desc: GetAllAvoidAreas
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, TestSize.Level1)
-{
-    std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    SessionInfo info;
-    info.abilityName_ = "GetAllAvoidAreas";
-    info.bundleName_ = "GetAllAvoidAreas";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    auto res = sceneSession->GetAllAvoidAreas(avoidAreas);
-    EXPECT_EQ(res, WSError::WS_OK);
-}
-
-/**
  * @tc.name: NotifyPipWindowSizeChange
  * @tc.desc: NotifyPipWindowSizeChange
  * @tc.type: FUNC

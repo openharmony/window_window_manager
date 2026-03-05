@@ -471,6 +471,11 @@ HWTEST_F(SceneSessionImmersiveTest, HandleLayoutAvoidAreaUpdate, TestSize.Level1
         isLayoutFinished = true;
         return WSError::WS_OK;
     };
+    session->Session::SetRsScale(0, 0);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    session->Session::SetRsScale(1, 0);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    session->Session::SetRsScale(1, 1);
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM));
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
