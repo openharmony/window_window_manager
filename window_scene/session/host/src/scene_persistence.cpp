@@ -152,11 +152,15 @@ ScenePersistence::~ScenePersistence()
 
 void ScenePersistence::ClearSnapshotPath()
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "persistentId: %{public}d", persistentId_);
-    for (const auto& snapshotPath : snapshotPath_) {
-        remove(snapshotPath.c_str());
-    }
-    remove(snapshotFreeMultiWindowPath_.c_str());
+    auto task = [snapshotPath = snapshotPath_, snapshotFreeMultiWindowPath = snapshotFreeMultiWindowPath_,
+        persistentId = persistentId_, capacity = capacity_, where = __func__]() {
+        TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s persistentId: %{public}d", where, persistentId);
+        for (size_t i = 0; i < capacity; i++) {
+            remove(snapshotPath[i].c_str());
+        }
+        remove(snapshotFreeMultiWindowPath.c_str());
+    };
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "ClearSnapshotPath" + std::to_string(persistentId_));
 }
 
 std::shared_ptr<WSFFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
