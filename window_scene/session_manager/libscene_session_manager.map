@@ -34,7 +34,6 @@
             OHOS::Rosen::SceneSessionManager::AddWindowDragHotArea*;
             OHOS::Rosen::SceneSessionManager::ApplyFeatureConfig*;
             OHOS::Rosen::SceneSessionManager::ChangeUIAbilityVisibilityBySCB*;
-            OHOS::Rosen::SceneSessionManager::CheckCollaboratorType*;
             OHOS::Rosen::SceneSessionManager::CheckIfReuseSession*;
             OHOS::Rosen::SceneSessionManager::CheckSceneZOrder*;
             OHOS::Rosen::SceneSessionManager::CloneWindow*;

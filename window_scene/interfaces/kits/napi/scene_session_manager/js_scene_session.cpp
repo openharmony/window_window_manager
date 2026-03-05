@@ -5012,7 +5012,7 @@ void JsSceneSession::ReuseSession(sptr<SceneSession>& sceneSession, SessionInfo&
 {
     if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
         TLOGI(WmsLogTag::WMS_LIFE, "session need to be reusesd.");
-        if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
+        if (CheckCollaboratorType(info.collaboratorType_)) {
             sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(info.sessionAffinity);
         } else {
             SessionIdentityInfo identityInfo = { info.bundleName_, info.moduleName_, info.abilityName_,

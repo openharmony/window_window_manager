@@ -1943,6 +1943,9 @@ HWTEST_F(sceneSessionManagerProxyTest, UnregisterIAbilityManagerCollaborator, Te
 
     int32_t type = 0;
     WSError res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, res);
+    type = 1;
+    res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);
     ASSERT_EQ(WSError::WS_OK, res);
     sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);

@@ -2115,6 +2115,10 @@ WSError SceneSessionManagerProxy::UnregisterIAbilityManagerCollaborator(int32_t 
         WLOGFE("Write interface token failed.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    if (!CheckCollaboratorType(type)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "type is invalid.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     if (!data.WriteInt32(type)) {
         WLOGFE("type write failed.");
         return WSError::WS_ERROR_INVALID_PARAM;
