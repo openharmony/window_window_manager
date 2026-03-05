@@ -12650,7 +12650,12 @@ DMError ScreenSessionManager::GetDisplayCapability(std::string& capabilitInfo)
     std::transform(deviceTypeTmp.begin(), deviceTypeTmp.end(), deviceTypeTmp.begin(), ::tolower);
     bool isTvDevice = (deviceTypeTmp == "tv");
     std::vector<std::string> orientation = ORIENTATION_DEFAULT;
-    if ((g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) || isTvDevice) {
+    bool isChildWatch = false;
+    const std::string CHILD_WATCH = system::GetParameter("const.dms.rotation_correction", "");
+    if (CHILD_WATCH == "child") {
+        isChildWatch = true;
+    }
+    if ((g_isPcDevice && !FoldScreenStateInternel::IsSuperFoldDisplayDevice()) || isTvDevice || isChildWatch) {
         orientation = {"1", "0", "3", "2"};
     }
     nlohmann::ordered_json jsonDisplayCapabilityList;
