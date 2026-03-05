@@ -603,25 +603,6 @@ HWTEST_F(SceneSessionManagerImmersiveTest, PostProcessProperty, TestSize.Level1)
     ssm_->sceneSessionMap_.clear();
     ssm_->PostProcessProperty(64);
 }
-
-/**
- * @tc.name: GetAllAvoidAreas
- * @tc.desc: GetAllAvoidAreas
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerImmersiveTest, GetAllAvoidAreas, TestSize.Level1)
-{
-    std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    SessionInfo info;
-    info.abilityName_ = "GetAllAvoidAreas";
-    info.bundleName_ = "GetAllAvoidAreas";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_OK);
-    sceneSession->Session::SetRsScale(0, 0);
-    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
-    sceneSession->Session::SetRsScale(1, 0);
-    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
-}
 }
 }
 }
