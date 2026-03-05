@@ -1056,21 +1056,14 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
             }
             lists->window = Window::GetTopWindowWithId(lists->ability->GetWindow()->GetWindowId());
         } else {
-            auto contextTmp = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
-            if (contextPtr == nullptr || contextTmp == nullptr) {
+            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+            if (contextPtr == nullptr || context == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
                 lists->errMsg = "[window][getLastWindow]msg: Stage mode without context";
                 return;
             }
-            auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::Context>(contextTmp->lock());
-            if (context == nullptr) {
-                lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
-                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
-                lists->errMsg = "[window][getLastWindow]msg: Stage mode without context";
-                return;
-            }
-            lists->window = Window::GetTopWindowWithContext(context);
+            lists->window = Window::GetTopWindowWithContext(context->lock());
         }
     };
     NapiAsyncTask::CompleteCallback complete = [lists, newApi](napi_env env, NapiAsyncTask& task, int32_t status) {
