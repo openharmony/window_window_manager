@@ -345,6 +345,62 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList);
 
 /**
+ * @brief Check whether the current frame is the first frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param isFirstDrawFrame This parameter is the return value of the function,
+ *     indicating whether the current frame is the first frame.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(
+    OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame);
+
+/**
+ * @brief Get the time taken to process external input events in one frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param duration This parameter is the return value of the function,
+ *     indicating the time taken to process external input events in one frame.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(
+    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration);
+
+/**
+ * @brief Get the time taken for layout measurement in one frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param duration This parameter is the return value of the function,
+ *     indicating the time taken for layout measurement in one frame.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(
+    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration);
+
+/**
+ * @brief Get the start timestamp of the current frame.
+ *
+ * @param metrics Frame metrics data object.
+ * @param timestamp This parameter is the return value of the function,
+ *     indicating the start timestamp of the current frame.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} parameter error.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
+    OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp);
+
+/**
  * @brief Register frame metrics measured callback for the target window.
  *
  * @param windowId WindowId when window is created.
