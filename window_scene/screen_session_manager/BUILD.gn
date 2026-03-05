@@ -284,6 +284,8 @@ ohos_shared_library("screen_session_manager") {
     print("window manager screen multi usr ability is disabled.")
   }
 
+  version_script = "libscreen_session_manager.map"
+  
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
