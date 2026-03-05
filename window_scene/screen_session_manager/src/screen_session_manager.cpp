@@ -3502,7 +3502,7 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     }
 #ifdef FOLD_ABILITY_ENABLE
     // deal device special config
-    if (foldScreenController_ != nullptr && screenId == SCREEN_ID_FULL) {
+    if (foldScreenController_ != nullptr) {
         float specialVpr = foldScreenController_->GetSpecialVirtualPixelRatio();
         if (fabs(specialVpr - (-1.0f)) > 1e-6) {
             TLOGNFI(WmsLogTag::DMS, "current device need set special vpr: %{public}f", specialVpr);
