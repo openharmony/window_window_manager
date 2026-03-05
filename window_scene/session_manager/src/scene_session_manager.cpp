@@ -14350,16 +14350,6 @@ void SceneSessionManager::ClearCollaboratorSessionsByType(int32_t type)
     }
 }
 
-bool SceneSessionManager::CheckCollaboratorType(int32_t type)
-{
-    if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE &&
-        type != CollaboratorType::REDIRECT_TYPE) {
-        TLOGD(WmsLogTag::WMS_MAIN, "type is invalid");
-        return false;
-    }
-    return true;
-}
-
 bool SceneSessionManager::CheckBrokeNotAliveAndRefresh(SessionInfo& sessionInfo) {
     sptr<AAFwk::SessionInfo> info = sptr<AAFwk::SessionInfo>::MakeSptr();
     std::shared_ptr<AAFwk::Want> notifyWant = std::make_shared<AAFwk::Want>(sessionInfo.GetWantSafely());

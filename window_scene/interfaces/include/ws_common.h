@@ -130,6 +130,8 @@ enum class WSErrorCode : int32_t {
 
 extern const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP;
 
+bool CheckCollaboratorType(int32_t type);
+
 enum class SessionState : uint32_t {
     STATE_DISCONNECT = 0,
     STATE_CONNECT,
