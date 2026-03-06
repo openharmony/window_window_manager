@@ -13429,8 +13429,9 @@ void SceneSessionManager::UpdateAvoidSessionAvoidArea(WindowType type)
         if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
             continue;
         }
-        if (sceneSession->GetScaleInLSState(
-            sceneSession->GetRsScaleX(), sceneSession->GetRsScaleY()) == WSError::WS_ERROR_INVALID_PARAM) {
+        float scaleX = INVALID_SCALE;
+        float scaleY = INVALID_SCALE;
+        if (sceneSession->GetScaleInLSState(scaleX, scaleY) == WSError::WS_ERROR_INVALID_PARAM) {
             TLOGE(WmsLogTag::WMS_IMMS, "id: %{public}d invalid scale", sceneSession->GetPersistentId());
             continue;
         }
