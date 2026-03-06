@@ -552,9 +552,9 @@ HWTEST_F(SceneSessionImmersiveTest, GetAllAvoidAreas, TestSize.Level1)
     info.bundleName_ = "GetAllAvoidAreas";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_OK);
-    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    session->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    session->specificCallback_->onGetLSState_ = []() { return true; };
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
     sceneSession->Session::SetRsScale(0, 0);
     EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
     sceneSession->Session::SetRsScale(1, 0);
