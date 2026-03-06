@@ -453,8 +453,10 @@ WSError MainSession::SetSessionLabelAndIconInner(const std::string& label,
             return WSError::WS_ERROR_NULLPTR;
         }
         session->label_ = label;
+        session->scenePersistence_->SaveAbilityIcon(icon);
+        const std::string updatedIconPath = session->scenePersistence_->GetAbilityIconPath();
         if (session->updateSessionLabelAndIconFunc_) {
-            session->updateSessionLabelAndIconFunc_(label, icon);
+            session->updateSessionLabelAndIconFunc_(label, icon, updatedIconPath);
         }
         return WSError::WS_OK;
     }, __func__);
