@@ -152,6 +152,12 @@ HWTEST_F(SceneSessionManagerImmersiveTest, UpdateAvoidSessionAvoidArea, TestSize
     info.abilityName_ = "SetBrightness";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->isVisible_ = true;
+    sceneSession->state_ = SessionState::STATE_FOREGROUND;
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
     WindowType type = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
     ssm_->UpdateAvoidSessionAvoidArea(type);
