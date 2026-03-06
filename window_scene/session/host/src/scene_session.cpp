@@ -2074,6 +2074,7 @@ void SceneSession::SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostCha
             return;
         }
         session->mainWindowTopmostChangeFunc_ = std::move(func);
+        session->mainWindowTopmostChangeFunc_(session->IsMainWindowTopmost());
     }, __func__);
 }
 
