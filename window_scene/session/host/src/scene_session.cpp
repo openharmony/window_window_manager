@@ -2834,7 +2834,7 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, win %{public}d", GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (GetRsScaleX() == INVALID_SCALE || GetRsScaleY() == INVALID_SCALE) {
+    if (GetScaleInLSState(GetRsScaleX(), GetRsScaleY()) == WSError::WS_ERROR_INVALID_PARAM) {
  	    TLOGE(WmsLogTag::WMS_IMMS, "id: %{public}d invalid scale", GetPersistentId());
  	    return WSError::WS_ERROR_INVALID_PARAM;
  	}
@@ -3614,7 +3614,8 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
-        if (session->GetRsScaleX() == INVALID_SCALE || session->GetRsScaleY() == INVALID_SCALE) {
+        if (session->GetScaleInLSState(
+            session->GetRsScaleX(), session->GetRsScaleY()) == WSError::WS_ERROR_INVALID_PARAM) {
  	        TLOGE(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d invalid scale", where, session->GetPersistentId());
  	        return WSError::WS_ERROR_INVALID_PARAM;
  	    }
