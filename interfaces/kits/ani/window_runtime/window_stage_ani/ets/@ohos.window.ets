@@ -946,6 +946,8 @@ export class WindowLayoutInfoInternal implements WindowLayoutInfo {
 export interface WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
+  globalRect?: Rect;
+  displayId?: int;
   bundleName: string;
   abilityName: string;
   windowId: int;
@@ -956,6 +958,8 @@ export interface WindowInfo {
 export class WindowInfoInternal implements WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
+  globalRect?: Rect;
+  displayId?: int;
   bundleName: string;
   abilityName: string;
   windowId: int;

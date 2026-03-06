@@ -1629,6 +1629,44 @@ HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfo, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetVisibilityWindowInfoDisplayAndGlobalRect
+ * @tc.desc: test displayId and global rect fields in visibility info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfoDisplayAndGlobalRect, Function | SmallTest | Level2)
+{
+    auto oldVisibleData = ssm_->lastVisibleData_;
+    auto oldSessionMap = ssm_->sceneSessionMap_;
+    SessionInfo info; info.bundleName_ = "bundle"; info.abilityName_ = "ability";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->persistentId_ = 2001;
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->GetSessionProperty()->SetDisplayId(66);
+    Rect expectedGlobalDisplayRect = { 1, 2, 30, 40 };
+    sceneSession->GetSessionProperty()->SetGlobalDisplayRect(expectedGlobalDisplayRect);
+    sceneSession->SetSessionGlobalRect({ 10, 20, 100, 200 });
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    ssm_->sceneSessionMap_ = { { sceneSession->GetPersistentId(), sceneSession } };
+    ssm_->lastVisibleData_ = { { surfaceNode->GetId(), WindowVisibilityState::START } };
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    auto result = ssm_->GetVisibilityWindowInfo(infos);
+    EXPECT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(infos.size(), 1);
+    ASSERT_NE(infos[0], nullptr);
+    EXPECT_EQ(infos[0]->GetDisplayId(), 66);
+    EXPECT_EQ(infos[0]->GetGlobalDisplayRect().width_, expectedGlobalDisplayRect.width_);
+    EXPECT_EQ(infos[0]->GetGlobalDisplayRect().height_, expectedGlobalDisplayRect.height_);
+    EXPECT_EQ(infos[0]->GetGlobalRect().width_, 100);
+    EXPECT_EQ(infos[0]->GetGlobalRect().height_, 200);
+    ssm_->lastVisibleData_ = oldVisibleData;
+    ssm_->sceneSessionMap_ = oldSessionMap;
+}
+
+/**
  * @tc.name: SendPointerEventForHover
  * @tc.desc: SendPointerEventForHover
  * @tc.type: FUNC

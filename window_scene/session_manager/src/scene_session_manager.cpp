@@ -15744,6 +15744,14 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             windowVisibilityInfo->SetZOrder(session->GetZOrder());
             Rect globalDisplayRect = session->GetSessionProperty()->GetGlobalDisplayRect();
             windowVisibilityInfo->SetGlobalDisplayRect(globalDisplayRect);
+            Rect globalRect;
+            session->GetGlobalScaledRect(globalRect);
+            windowVisibilityInfo->SetGlobalRect(globalRect);
+            DisplayId displayId = session->GetSessionProperty()->GetDisplayId();
+            if (session->IsPcFoldDevice() && PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
+                displayId = session->GetClientDisplayId();
+            }
+            windowVisibilityInfo->SetDisplayId(displayId);
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: wid=%{public}d, globalDisplayRect=%{public}s",
                 where, static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
             HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
