@@ -150,10 +150,10 @@ screen_session_manager_public_external_deps = [
     }
 
     public_configs = [ ":session_manager_public_config" ]
-    public_external_deps = screen_session_manager_public_external_deps
     sources = screen_session_manager_sources
     deps = screen_session_manager_deps
     external_deps = screen_session_manager_external_deps
+    external_deps += screen_session_manager_public_external_deps
 
     part_name = "window_manager"
     subsystem_name = "window"
