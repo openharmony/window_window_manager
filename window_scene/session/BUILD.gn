@@ -379,6 +379,71 @@ ohos_shared_library("scene_session") {
   }
 }
 
+screen_session_sources = [
+  "screen/src/screen_property.cpp",
+  "screen/src/screen_session.cpp",
+]
+
+screen_session_deps = [
+  "${window_base_path}/utils:libwmutil",
+  "${window_base_path}/utils:libwmutil_base",
+]
+
+screen_session_external_deps = [
+  "c_utils:utils",
+  "graphic_2d:librender_service_base",
+  "graphic_2d:librender_service_client",
+  "hicollie:libhicollie",
+  "hilog:libhilog",
+  "hisysevent:libhisysevent",
+  "hitrace:hitrace_meter",
+  "init:libbegetutil",
+  "ipc:ipc_single",
+]
+
+screen_session_public_external_deps = [
+  "ability_base:base",
+  "ability_base:want",
+  "accessibility:accessibility_common",
+  "input:libmmi-napi",
+]
+
+## Build libscreen_session_manager_static.a
+ohos_static_library("screen_session_static") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = screen_session_sources
+
+  public_configs = [ ":session_public_config" ]
+
+  deps = screen_session_deps
+
+  external_deps = screen_session_external_deps
+  public_external_deps = screen_session_public_external_deps
+
+  defines = []
+  if (window_manager_feature_screen_color_gamut) {
+    defines += [ "WM_SCREEN_COLOR_GAMUT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_hdr_format) {
+    defines += [ "WM_SCREEN_HDR_FORMAT_ENABLE" ]
+  }
+
+  if (window_manager_feature_screen_color_space) {
+    defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
+  }
+
+  part_name = "window_manager"
+  subsystem_name = "window"
+}
+
+## Build libscreen_session_manager.z.so
 ohos_shared_library("screen_session") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -387,35 +452,14 @@ ohos_shared_library("screen_session") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  sources = [
-    "screen/src/screen_property.cpp",
-    "screen/src/screen_session.cpp",
-  ]
+  sources = screen_session_sources
 
   public_configs = [ ":session_public_config" ]
 
-  deps = [
-    "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/utils:libwmutil_base",
-  ]
+  deps = screen_session_deps
 
-  external_deps = [
-    "c_utils:utils",
-    "graphic_2d:librender_service_base",
-    "graphic_2d:librender_service_client",
-    "hicollie:libhicollie",
-    "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "hitrace:hitrace_meter",
-    "init:libbegetutil",
-    "ipc:ipc_single",
-  ]
-  public_external_deps = [
-    "ability_base:base",
-    "ability_base:want",
-    "accessibility:accessibility_common",
-    "input:libmmi-napi",
-  ]
+  external_deps = screen_session_external_deps
+  public_external_deps = screen_session_public_external_deps
 
   defines = []
   if (window_manager_feature_screen_color_gamut) {
@@ -431,7 +475,7 @@ ohos_shared_library("screen_session") {
   }
 
   version_script = "libscene_session.map"
-  
+
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
   subsystem_name = "window"
