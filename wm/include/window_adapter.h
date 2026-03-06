@@ -135,6 +135,7 @@ public:
     virtual WMError DestroyAndDisconnectSpecificSession(const int32_t persistentId);
     virtual WMError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
         const sptr<IRemoteObject>& callback);
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config);
     WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     WMError UnregisterWMSConnectionChangedListener();
