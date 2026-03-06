@@ -471,6 +471,10 @@ HWTEST_F(SceneSessionImmersiveTest, HandleLayoutAvoidAreaUpdate, TestSize.Level1
         isLayoutFinished = true;
         return WSError::WS_OK;
     };
+
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    session->specificCallback_->onGetLSState_ = []() { return true; };
     session->Session::SetRsScale(0, 0);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
     session->Session::SetRsScale(1, 0);
@@ -548,10 +552,15 @@ HWTEST_F(SceneSessionImmersiveTest, GetAllAvoidAreas, TestSize.Level1)
     info.bundleName_ = "GetAllAvoidAreas";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_OK);
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    session->specificCallback_->onGetLSState_ = []() { return true; };
     sceneSession->Session::SetRsScale(0, 0);
     EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
     sceneSession->Session::SetRsScale(1, 0);
     EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
+    sceneSession->Session::SetRsScale(1, 1);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_OK);
 }
 }
 }
