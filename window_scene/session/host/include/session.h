@@ -285,6 +285,7 @@ public:
     void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
     bool IsStatusBarVisible() const;
     virtual bool IsInLSState() const { return false; }
+    virtual WSError GetScaleInLSState(float& scaleX, float& scaleY) const { return WSError::WS_DO_NOTHING; }
 
     /*
      * Cross Display Move Drag
