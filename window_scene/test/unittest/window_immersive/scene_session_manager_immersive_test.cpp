@@ -470,11 +470,11 @@ HWTEST_F(SceneSessionManagerImmersiveTest, GetScaleInLSState, TestSize.Level0)
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_DO_NOTHING);
     sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
-    sceneSession->Session::SetRsScale(0, 0);
+    sceneSession->Session::SetRsScale(1, 0);
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_ERROR_INVALID_PARAM);
     WSRect winRect = { 0, 0, 0, 0 };
     sceneSession->CalculateAvoidAreaByScale(winRect);
-    sceneSession->Session::SetRsScale(0, 0);
+    sceneSession->Session::SetRsScale(1, 1);
     EXPECT_EQ(sceneSession->GetScaleInLSState(scaleX, scaleY), WSError::WS_OK);
     AvoidArea area;
     sceneSession->CalculateAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, winRect, winRect, area);
