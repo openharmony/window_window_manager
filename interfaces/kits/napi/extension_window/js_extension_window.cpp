@@ -22,6 +22,8 @@
 #include "js_window.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
 #include "extension_window.h"
 #include "ui_content.h"
 #include "permission.h"
@@ -74,16 +76,27 @@ bool IsInvalidListener(const std::string& type)
 }
 } // namespace
 
+const std::string& JsExtensionWindow::GetWindowName() const
+{
+    return windowName_;
+}
+
 JsExtensionWindow::JsExtensionWindow(
     const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
     int32_t hostWindowId)
-    : extensionWindow_(extensionWindow), hostWindowId_(hostWindowId),
+    : extensionWindow_(extensionWindow),
+    windowToken_(extensionWindow != nullptr ? extensionWindow->GetWindow() : nullptr),
+    windowName_(windowToken_ != nullptr ? windowToken_->GetWindowName() : ""),
+    hostWindowId_(hostWindowId),
     extensionRegisterManager_(std::make_unique<JsExtensionWindowRegisterManager>()) {
 }
 
 JsExtensionWindow::JsExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow,
     sptr<AAFwk::SessionInfo> sessionInfo)
-    : extensionWindow_(extensionWindow), hostWindowId_(-1), sessionInfo_(sessionInfo),
+    : extensionWindow_(extensionWindow),
+    windowToken_(extensionWindow != nullptr ? extensionWindow->GetWindow() : nullptr),
+    windowName_(windowToken_ != nullptr ? windowToken_->GetWindowName() : ""),
+    hostWindowId_(-1), sessionInfo_(sessionInfo),
     extensionRegisterManager_(std::make_unique<JsExtensionWindowRegisterManager>()) {
 }
 
@@ -187,6 +200,9 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
         JsExtensionWindow::GetWindowSystemBarProperties);
     BindNativeFunction(env, objValue, "getWindowStateSnapshot", moduleName, JsExtensionWindow::GetWindowStateSnapshot);
     BindNativeFunction(env, objValue, "setStatusBarColor", moduleName, JsExtensionWindow::SetStatusBarColor);
+    BindNativeFunction(env, objValue, "snapshot", moduleName, JsExtensionWindow::Snapshot);
+    BindNativeFunction(env, objValue, "snapshotSync", moduleName, JsExtensionWindow::SnapshotSync);
+    BindNativeFunction(env, objValue, "snapshotIgnorePrivacy", moduleName, JsExtensionWindow::SnapshotIgnorePrivacy);
 
     RegisterUnsupportFuncs(env, objValue, moduleName);
 
@@ -206,8 +222,6 @@ void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue
     BindNativeFunction(env, objValue, "setWindowFocusable", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setExclusivelyHighlighted", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setWindowTouchable", moduleName, JsExtensionWindow::EmptyAsyncCall);
-    BindNativeFunction(env, objValue, "snapshot", moduleName, JsExtensionWindow::EmptyAsyncCall);
-    BindNativeFunction(env, objValue, "snapshotIgnorePrivacy", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setAspectRatio", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "resetAspectRatio", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "minimize", moduleName, JsExtensionWindow::EmptyAsyncCall);
@@ -575,6 +589,27 @@ napi_value JsExtensionWindow::GetWindowSystemBarProperties(napi_env env, napi_ca
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
     }
     return objValue;
+}
+
+napi_value JsExtensionWindow::Snapshot(napi_env env, napi_callback_info info)
+{
+    WLOGI("Snapshot");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnSnapshot(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::SnapshotSync(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnSnapshotSync(env, info) : nullptr;
+}
+
+napi_value JsExtensionWindow::SnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "SnapshotIgnorePrivacy");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnSnapshotIgnorePrivacy(env, info) : nullptr;
 }
 
 napi_valuetype GetType(napi_env env, napi_value value)
@@ -2055,6 +2090,129 @@ napi_value JsExtensionWindow::OnInvalidAsyncCall(napi_env env, napi_callback_inf
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnInvalidAsyncCall") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
+    }
+    return result;
+}
+
+napi_value JsExtensionWindow::OnSnapshot(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            WLOGFE("window is nullptr");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: The window is not created or destroyed"));
+            return;
+        }
+
+        std::shared_ptr<Media::PixelMap> pixelMap = weakWindow->Snapshot();
+        if (pixelMap == nullptr) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: Get pixelMap failed"));
+            WLOGFE("window snapshot get pixelmap is null");
+            return;
+        }
+
+        auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+        if (nativePixelMap == nullptr) {
+            WLOGFE("window snapshot get nativePixelMap is null");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: Create pixelMap failed"));
+            return;
+        }
+        task->Resolve(env, nativePixelMap);
+        WLOGI("Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+            pixelMap->GetWidth(), pixelMap->GetHeight());
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSnapshot") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: Internal task error"));
+    }
+    return result;
+}
+
+napi_value JsExtensionWindow::OnSnapshotSync(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken is null");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][snapshotSync]msg: The window is not created or destroyed");
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->Snapshot(pixelMap));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u snapshot end, result: %{public}d",
+        windowToken_->GetWindowId(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, ret, "[window][snapshotSync]");
+    }
+    auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+    if (nativePixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u get nativePixelMap is null",
+            windowToken_->GetWindowId());
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][snapshotSync]msg: Create pixelMap failed");
+    }
+    return nativePixelMap;
+}
+
+napi_value JsExtensionWindow::OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask] {
+        auto weakWindow = weakToken.promote();
+            if (weakWindow == nullptr) {
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][snapshotIgnorePrivacy]msg: The window is not created or destroyed"));
+                return;
+            }
+
+            std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+            WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(weakWindow->SnapshotIgnorePrivacy(pixelMap));
+            if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
+                task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                    "[window][snapshotIgnorePrivacy]"));
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "device not support");
+                return;
+            } else if (ret != WmErrorCode::WM_OK) {
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][snapshotIgnorePrivacy]msg: Create pixelMap failed"));
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get pixelmap failed, code:%{public}d", ret);
+                return;
+            }
+
+            auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+            if (nativePixelMap == nullptr) {
+                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                    "[window][snapshotIgnorePrivacy]msg: Create pixelMap failed"));
+                TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "get nativePixelMap is null");
+                return;
+            }
+            task->Resolve(env, nativePixelMap);
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, WxH=%{public}dx%{public}d",
+                weakWindow->GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSnapshotIgnorePrivacy") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "napi_send_event failed");
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshotIgnorePrivacy]msg: Internal task error"));
     }
     return result;
 }
