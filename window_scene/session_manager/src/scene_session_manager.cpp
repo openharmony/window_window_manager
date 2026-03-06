@@ -11399,7 +11399,7 @@ WMError SceneSessionManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is null: %{public}d", persistentId);
-            return WMError::WM_ERROR_INVALID_WINDOW;
+            return WMError::WM_ERROR_INVALID_SESSION;
         }
         auto surfaceNode = sceneSession->GetSurfaceNode();
         if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
@@ -11416,7 +11416,7 @@ WMError SceneSessionManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "TakeSurfaceCapture failed: %{public}d", persistentId);
             return WMError::WM_ERROR_INVALID_OPERATION;
         }
-        pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+        pixelMap = callback->GetResult(SNAPSHOT_INNER_TIMEOUT_MS);
         return pixelMap ? WMError::WM_OK : WMError::WM_ERROR_TIMEOUT;
     }, __func__);
 }
