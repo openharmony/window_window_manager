@@ -5733,7 +5733,7 @@ void AniWindow::OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled)
 }
 
 void AniWindow::SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
-    ani_boolean enabled, ani_object anchor, ani_object offsetX, ani_object offsetY)
+    ani_boolean enabled, ani_object anchor, ani_int offsetX, ani_int offsetY)
 {
     TLOGD(WmsLogTag::WMS_SUB, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
@@ -5746,7 +5746,7 @@ void AniWindow::SetRelativePositionToParentWindowEnabled(ani_env* env, ani_objec
 }
 
 void AniWindow::OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boolean enabled,
-    ani_object anchor, ani_object offsetX, ani_object offsetY)
+    ani_object anchor, ani_int offsetX, ani_int offsetY)
 {
     TLOGI(WmsLogTag::WMS_SUB, "[ANI]");
     if (windowToken_ == nullptr) {
@@ -5784,23 +5784,8 @@ void AniWindow::OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boo
         }
         anchorValue = static_cast<WindowAnchor>(aniAnchorValue);
     }
-    int32_t offsetXValue = 0;
-    aniRet = AniWindowUtils::GetIntInObject(env, offsetX, offsetXValue);
-    if (aniRet != ANI_OK && aniRet != ANI_INVALID_ARGS) {
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setRelativePositionToParentWindowEnabled",
-            WmErrorCode::WM_ERROR_INVALID_PARAM);
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-        return;
-    }
-    int32_t offsetYValue = 0;
-    aniRet = AniWindowUtils::GetIntInObject(env, offsetY, offsetYValue);
-    if (aniRet != ANI_OK && aniRet != ANI_INVALID_ARGS) {
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setRelativePositionToParentWindowEnabled",
-            WmErrorCode::WM_ERROR_INVALID_PARAM);
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-        return;
-    }
-    WindowAnchorInfo windowAnchorInfo = { static_cast<bool>(enabled), anchorValue, offsetXValue, offsetYValue };
+    WindowAnchorInfo windowAnchorInfo = {
+        static_cast<bool>(enabled), anchorValue, static_cast<int32_t>(offsetX), static_cast<int32_t>(offsetY) };
     WmErrorCode errorCode = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowAnchorInfo(windowAnchorInfo));
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "[ANI] failed");
@@ -7510,7 +7495,7 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"setWindowDelayRaiseOnDrag", "lz:",
             reinterpret_cast<void *>(AniWindow::SetWindowDelayRaiseOnDrag)},
         ani_native_function {"setRelativePositionToParentWindowEnabled",
-            "lzC{@ohos.window.window.WindowAnchor}C{std.core.Int}C{std.core.Int}:",
+            "lzC{@ohos.window.window.WindowAnchor}ii:",
             reinterpret_cast<void *>(AniWindow::SetRelativePositionToParentWindowEnabled)},
         ani_native_function {"attachLayoutToParentWindow",
             "lC{@ohos.window.window.WindowAnchorInfo}C{@ohos.window.window.SubWindowAttachOptions}:",
