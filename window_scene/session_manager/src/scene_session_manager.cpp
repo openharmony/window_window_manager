@@ -9366,16 +9366,19 @@ std::string SceneSessionManager::GetHighlightIdsStr()
     return oss.str();
 }
 
-int32_t SceneSessionManager::NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
+void SceneSessionManager::NotifyRssThawApp(const int32_t uid, const std::string& bundleName,
     const std::string& reason)
 {
-    uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_THAW_ONE_APP;
-    nlohmann::json payload;
-    payload.emplace("uid", uid);
-    payload.emplace("bundleName", bundleName);
-    payload.emplace("reason", reason);
-    nlohmann::json reply;
-    return ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+    FfrtSerialQueueHelper::GetInstance().SubmitTask([uid, bundleName, reason]() {
+        uint32_t resType = ResourceSchedule::ResType::SYNC_RES_TYPE_THAW_ONE_APP;
+        nlohmann::json payload;
+        payload.emplace("uid", uid);
+        payload.emplace("bundleName", bundleName);
+        payload.emplace("reason", reason);
+        nlohmann::json reply;
+        ResourceSchedule::ResSchedClient::GetInstance().ReportSyncEvent(resType, 0, payload, reply);
+        TLOGNI(WmsLogTag::WMS_FOCUS, "NotifyRssThawApp, uid: %{public}d", uid);
+    });
 }
 
 void SceneSessionManager::NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession,
