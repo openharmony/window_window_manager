@@ -23,6 +23,7 @@
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 #include "session_info.h"
+#include <string>
 
 namespace OHOS {
 namespace Rosen {
@@ -88,8 +89,12 @@ public:
     static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarColor(napi_env env, napi_callback_info info);
     static napi_value GetWindowStateSnapshot(napi_env env, napi_callback_info info);
+    static napi_value Snapshot(napi_env env, napi_callback_info info);
+    static napi_value SnapshotSync(napi_env env, napi_callback_info info);
+    static napi_value SnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
 
 private:
+    const std::string& GetWindowName() const;
     napi_value OnGetWindowAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnRegisterRectChangeCallback(napi_env env, size_t argc, napi_value* argv,
         const sptr<Window>& windowImpl);
@@ -131,10 +136,15 @@ private:
     napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStateSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarColor(napi_env env, napi_callback_info info);
+    napi_value OnSnapshot(napi_env env, napi_callback_info info);
+    napi_value OnSnapshotSync(napi_env env, napi_callback_info info);
+    napi_value OnSnapshotIgnorePrivacy(napi_env env, napi_callback_info info);
 
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 
     std::shared_ptr<Rosen::ExtensionWindow> extensionWindow_;
+    sptr<Window> windowToken_ = nullptr;
+    std::string windowName_;
     int32_t hostWindowId_ = 0;
     sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
     std::unique_ptr<JsExtensionWindowRegisterManager> extensionRegisterManager_ = nullptr;

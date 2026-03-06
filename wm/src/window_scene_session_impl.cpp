@@ -159,7 +159,6 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
-constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 constexpr int32_t SIDEBAR_BLUR_ANIMATION_DURATION = 150;
 
@@ -5585,73 +5584,6 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
         property_->SetSnapshotSkip(oldSkipValue);
     }
     return resError;
-}
-
-std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
-{
-    if (IsWindowSessionInvalid()) {
-        return nullptr;
-    }
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
-    if (!isSucceeded) {
-        WLOGFE("Failed to TakeSurfaceCapture!");
-        return nullptr;
-    }
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
-    if (pixelMap != nullptr) {
-        WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
-    } else {
-        WLOGFE("Failed to get pixelmap, return nullptr!");
-    }
-    return pixelMap;
-}
-
-WMError WindowSceneSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
-{
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (state_ < WindowState::STATE_SHOWN) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d bounds not init, state: %{public}u",
-            GetPersistentId(), state_);
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
-    if (!isSucceeded) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to TakeSurfaceCapture", GetPersistentId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
-    if (pixelMap == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to get pixelmap", GetPersistentId());
-        return WMError::WM_ERROR_TIMEOUT;
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d snapshot end, WxH=%{public}dx%{public}d",
-        GetPersistentId(), pixelMap->GetWidth(), pixelMap->GetHeight());
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
-{
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
-    if (!isSucceeded) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
-    if (pixelMap == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, windowId:%{public}u", GetWindowId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "succeed, windowId:%{public}u, WxH=%{public}dx%{public}d",
-        GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
-    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
