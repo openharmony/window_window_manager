@@ -870,6 +870,33 @@ struct WindowSnapshotConfiguration : public Parcelable {
 };
 
 /**
+ * @struct SnapshotConfig
+ *
+ * @brief Snapshot configuration for sa inner interface.
+ */
+struct SnapshotConfig : public Parcelable {
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    bool inCludeSubTree = false;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY) && parcel.WriteBool(inCludeSubTree);
+    }
+
+    static SnapshotConfig* Unmarshalling(Parcel& parcel)
+    {
+        auto snapshotConfig = std::make_unique<SnapshotConfig>();
+        if (!parcel.ReadFloat(snapshotConfig->scaleX) ||
+            !parcel.ReadFloat(snapshotConfig->scaleY) ||
+            !parcel.ReadBool(snapshotConfig->inCludeSubTree)) {
+            return nullptr;
+        }
+        return snapshotConfig.release();
+    }
+};
+
+/**
  * @struct MainWindowState.
  *
  * @brief Main window state info.

@@ -171,6 +171,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetAllMainWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_MAIN_WINDOW_SNAPSHOT):
             return HandleGetMainWindowSnapshot(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SNAPSHOT_BY_WINDOW_ID):
+            return HandleSnapshotByWindowId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_WINDOW_SNAPSHOT_SKIP):
             return HandleSetWindowSnapshotSkip(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_GLOBAL_WINDOW_MODE):
@@ -1601,6 +1603,31 @@ int SceneSessionManagerStub::HandleGetMainWindowSnapshot(MessageParcel& data, Me
         return ERR_INVALID_DATA;
     }
     WMError errCode = GetMainWindowSnapshot(windowIds, config, callback);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleSnapshotByWindowId(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read persistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    std::unique_ptr<SnapshotConfig> config(data.ReadParcelable<SnapshotConfig>());
+    if (config == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read snapshot config failed");
+        return ERR_INVALID_DATA;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError errCode = Snapshot(pixelMap, persistentId, *config);
+    if (!reply.WriteParcelable(pixelMap.get())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write pixelMap failed");
+        return ERR_INVALID_DATA;
+    }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode fail");
         return ERR_INVALID_DATA;

@@ -2339,6 +2339,15 @@ WMError WindowManager::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<M
     return WindowAdapter::GetInstance(userId_).GetSnapshotByWindowId(windowId, pixelMap);
 }
 
+WMError WindowManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, SnapshotConfig config)
+{
+    WMError ret = WindowAdapter::GetInstance(userId_).Snapshot(pixelMap, windowId, config);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "snapshot failed");
+    }
+    return ret;
+}
+
 WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
 {
     if (listener == nullptr) {

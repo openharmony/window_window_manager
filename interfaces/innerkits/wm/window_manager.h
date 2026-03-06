@@ -1187,6 +1187,18 @@ public:
         const std::string& moduleName, const std::string& abilityName, uint32_t color);
 
     /**
+     * @brief Snapshot by window id.
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param pixelMap Snapshot output pixel map.
+     * @param windowId Window id which want to snapshot.
+     * @param config Snapshot configuration.
+     * @return WM_OK means snapshot success, others means failed.
+     */
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, SnapshotConfig config);
+
+    /**
      * @brief Get snapshot by window id.
      *
      * @param windowId Window id which want to snapshot.

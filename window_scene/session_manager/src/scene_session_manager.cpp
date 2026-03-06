@@ -83,6 +83,7 @@
 #include "session_helper.h"
 #include "session_manager_agent_controller.h"
 #include "singleton_container.h"
+#include "surface_capture_future.h"
 #ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DSOFTBUS
 #include "softbus_bus_center.h"
 #endif
@@ -11379,6 +11380,44 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
             return WMError::WM_OK;
         }
         return WMError::WM_ERROR_NULLPTR;
+    }, __func__);
+}
+
+WMError SceneSessionManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+    int32_t persistentId, const SnapshotConfig& config)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (persistentId <= INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid persistentId: %{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return taskScheduler_->PostSyncTask([this, &pixelMap, persistentId, &config] {
+        pixelMap = nullptr;
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is null: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        auto surfaceNode = sceneSession->GetSurfaceNode();
+        if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode invalid: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+        auto callback = std::make_shared<SurfaceCaptureFuture>();
+        RSSurfaceCaptureConfig rsConfig = {
+            .scaleX = config.scaleX,
+            .scaleY = config.scaleY,
+            .useCurWindow = config.inCludeSubTree,
+        };
+        if (!RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, rsConfig)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "TakeSurfaceCapture failed: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+        pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
+        return pixelMap ? WMError::WM_OK : WMError::WM_ERROR_TIMEOUT;
     }, __func__);
 }
 
