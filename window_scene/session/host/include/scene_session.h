@@ -514,6 +514,7 @@ public:
      * Window Immersive
      */
     bool IsInLSState() const override;
+    WSError GetScaleInLSState(float& scaleX, float& scaleY)  const;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
@@ -1254,7 +1255,6 @@ private:
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
     template<typename T>
     Rect CalculateAvoidAreaByScale(WSRectT<T>& avoidAreaRect) const;
-    WSError GetScaleInLSState(float& scaleX, float& scaleY)  const;
 
     /*
      * Window Lifecycle
