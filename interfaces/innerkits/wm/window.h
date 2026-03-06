@@ -3072,7 +3072,7 @@ public:
      *
      * @return Errorcode of window.
      */
-    virtual WMError NotifyPrepareClosePiPWindow() { return WMError::WM_OK; }
+    virtual WMError NotifyPrepareClosePiPWindow(const bool isWeb = false) { return WMError::WM_OK; }
 
     /**
      * @brief update the pip window instance (w,h,r).

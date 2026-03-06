@@ -292,6 +292,8 @@ static napi_value CreatePipTemplateInfo(napi_env env, const PiPTemplateInfo& pip
         CreateJsValue(env, pipTemplateInfo.defaultWindowSizeType));
     napi_set_named_property(env, pipTemplateInfoValue, "cornerAdsorptionEnabled",
         CreateJsValue(env, pipTemplateInfo.cornerAdsorptionEnabled));
+    napi_set_named_property(env, pipTemplateInfoValue, "isWeb",
+        CreateJsValue(env, pipTemplateInfo.isWeb));
     napi_value controlArrayValue = nullptr;
     std::vector<std::uint32_t> controlGroups = pipTemplateInfo.controlGroup;
     napi_create_array_with_length(env, controlGroups.size(), &controlArrayValue);

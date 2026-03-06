@@ -37,7 +37,7 @@ public:
     ~MockWindow() {};
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD1(Destroy, WMError(uint32_t reason));
-    MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
+    MOCK_METHOD1(NotifyPrepareClosePiPWindow, WMError(const bool isWeb));
     MOCK_METHOD4(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
@@ -420,9 +420,9 @@ HWTEST_F(PictureInPictureControllerTest, StopPictureInPictureFromClient, TestSiz
     pipControl->curState_ = PiPWindowState::STATE_RESTORING;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StopPictureInPictureFromClient());
     pipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
-    EXPECT_CALL(*(mw1), NotifyPrepareClosePiPWindow()).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_CALL(*(mw1), NotifyPrepareClosePiPWindow(false)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
     EXPECT_EQ(WMError::WM_ERROR_PIP_DESTROY_FAILED, pipControl->StopPictureInPictureFromClient());
-    EXPECT_CALL(*(mw1), NotifyPrepareClosePiPWindow()).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_CALL(*(mw1), NotifyPrepareClosePiPWindow(false)).Times(1).WillOnce(Return(WMError::WM_OK));
     EXPECT_EQ(WMError::WM_OK, pipControl->StopPictureInPictureFromClient());
 }
 
