@@ -52,15 +52,7 @@ config("session_manager_public_config") {
   ]
 }
 
-ohos_shared_library("screen_session_manager") {
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    cfi_vcall_icall_only = true
-    debug = false
-  }
-  sources = [
+screen_session_manager_sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",
     "../screen_session_manager_client/src/zidl/screen_session_manager_client_proxy.cpp",
     "src/connection/screen_cast_connection.cpp",
@@ -148,6 +140,26 @@ ohos_shared_library("screen_session_manager") {
     "ability_runtime:wantagent_innerkits",
   ]
 
+  ## Build libscreen_session_manager_static.a
+  ohos_static_library("screen_session_manager_static") {
+    branch_protector_ret = "pac_ret"
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      cfi_vcall_icall_only = true
+      debug = false
+    }
+
+    public_configs = [ ":session_manager_public_config" ]
+    sources = screen_session_manager_sources
+    deps = screen_session_manager_deps
+    external_deps = screen_session_manager_external_deps
+
+    configs = [
+      
+    ]
+  }
+  
   defines = []
   if (window_manager_feature_subscribe_motion) {
     if (defined(global_parts_info) && defined(global_parts_info.msdp_motion)) {
