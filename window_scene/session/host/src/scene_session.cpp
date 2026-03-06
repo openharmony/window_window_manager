@@ -2836,7 +2836,7 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
     }
     float scaleX = INVALID_SCALE;
     float scaleY = INVALID_SCALE;
-    if (sceneSession->GetScaleInLSState(scaleX, scaleY) == WSError::WS_ERROR_INVALID_PARAM) {
+    if (GetScaleInLSState(scaleX, scaleY) == WSError::WS_ERROR_INVALID_PARAM) {
  	    TLOGE(WmsLogTag::WMS_IMMS, "id: %{public}d invalid scale", GetPersistentId());
  	    return WSError::WS_ERROR_INVALID_PARAM;
  	}
