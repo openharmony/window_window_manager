@@ -196,14 +196,6 @@
         "name":"OH_WindowManager_InjectTouchEvent"
     },
     {
-        "first_instroduced":"26",
-        "name":"OH_WindowManager_RegisterFrameMetricsMeasuredCallback"
-    },
-    {
-        "first_instroduced":"26",
-        "name":"OH_WindowManager_UnregisterFrameMetricsMeasuredCallback"
-    },
-    {
         "first_instroduced":"22",
         "name":"OH_WindowManager_LockCursor"
     },
@@ -214,5 +206,29 @@
     {
         "first_instroduced":"22",
         "name":"OH_PictureInPicture_SetParentWindowId"
+    },
+    {
+        "first_instroduced":"26",
+        "name":"OH_WindowManager_FrameMetrics_IsFirstDrawFrame"
+    },
+    {
+        "first_instroduced":"26",
+        "name":"OH_WindowManager_FrameMetrics_GetInputHandlingDuration"
+    },
+    {
+        "first_instroduced":"26",
+        "name":"OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration"
+    },
+    {
+        "first_instroduced":"26",
+        "name":"OH_WindowManager_FrameMetrics_GetVsyncTimestamp"
+    },
+    {
+        "first_instroduced":"26",
+        "name":"OH_WindowManager_RegisterFrameMetricsMeasuredCallback"
+    },
+    {
+        "first_instroduced":"26",
+        "name":"OH_WindowManager_UnregisterFrameMetricsMeasuredCallback"
     }
 ]
