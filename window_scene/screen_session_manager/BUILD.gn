@@ -85,14 +85,7 @@ screen_session_manager_sources = [
 
   cflags_cc = [ "-std=c++17" ]
 
-  public_configs = [ ":session_manager_public_config" ]
-  public_external_deps = [
-    "ability_runtime:session_handler",
-    "accessibility:accessibility_common",
-    "input:libmmi-client",
-    "input:libmmi-napi",
-  ]
-  deps = [
+  screen_session_manager_deps = [
     "${window_base_path}/etc:wms_etc",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
@@ -102,7 +95,7 @@ screen_session_manager_sources = [
     "${window_base_path}/wmserver:sms",
   ]
 
-  external_deps = [
+  screen_session_manager_external_deps = [
     "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
@@ -151,6 +144,12 @@ screen_session_manager_sources = [
     }
 
     public_configs = [ ":session_manager_public_config" ]
+    public_external_deps = [
+      "ability_runtime:session_handler",
+      "accessibility:accessibility_common",
+      "input:libmmi-client",
+      "input:libmmi-napi",
+    ]
     sources = screen_session_manager_sources
     deps = screen_session_manager_deps
     external_deps = screen_session_manager_external_deps
@@ -306,6 +305,12 @@ screen_session_manager_sources = [
     }
 
     public_configs = [ ":session_manager_public_config" ]
+    public_external_deps = [
+      "ability_runtime:session_handler",
+      "accessibility:accessibility_common",
+      "input:libmmi-client",
+      "input:libmmi-napi",
+    ]
     sources = screen_session_manager_sources
     deps = screen_session_manager_deps
     external_deps = screen_session_manager_external_deps
