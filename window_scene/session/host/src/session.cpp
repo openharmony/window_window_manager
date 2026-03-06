@@ -3051,7 +3051,11 @@ bool Session::CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surface
     if (IsPersistentImageFit()) {
         return false;
     }
-    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "surfaceNode null id: %{public}d", persistentId_);
+        return false;
+    }
+    if (!surfaceNode->IsBufferAvailable()) {
         DeleteHasSnapshot();
         scenePersistence_->ClearSnapshot();
         return false;
