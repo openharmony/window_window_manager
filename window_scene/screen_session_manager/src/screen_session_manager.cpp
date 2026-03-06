@@ -9815,10 +9815,21 @@ DMError ScreenSessionManager::SetFoldDisplayModeInner(const FoldDisplayMode disp
     if (reason.compare("backSelfie") == 0) {
         UpdateCameraBackSelfie(true);
     }
+    if (reason.compare("exitCoordinationMode")) {
+        ExitCoordinationAndRecoverDisplayMode();
+        return DMError::DM_OK;
+    }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 #endif
     return DMError::DM_OK;
+}
+
+void ScreenSessionManager::ExitCoordinationAndRecoverDisplayMode()
+{
+    TLOGNFI(WmsLogTag::DMS, "exitCoordinationMode");
+    ExitCoordination("exitCoordinationFromInner");
+    foldScreenController_->RecoverDisplayMode();
 }
 
 DMError ScreenSessionManager::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason)

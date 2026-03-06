@@ -1178,6 +1178,8 @@ private:
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);
     void MakeMirrorAfterSwitchUser();
 
+    void ExitCoordinationAndRecoverDisplayMode();
+
     // mirror screen
     bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);
     void RegisterSettingResolutionEffectObserver();
