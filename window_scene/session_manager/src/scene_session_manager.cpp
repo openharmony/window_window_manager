@@ -15771,7 +15771,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
 void SceneSessionManager::SortVisibilityWindowInfos(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     std::stable_sort(infos.begin(), infos.end(), [](const sptr<WindowVisibilityInfo>& lhs,
-        const sptr<WindowVisibilityInfo>& rhs) {
+                                                    const sptr<WindowVisibilityInfo>& rhs) {
         return lhs != nullptr && rhs != nullptr ? lhs->GetZOrder() > rhs->GetZOrder() : lhs != nullptr;
     });
 }
