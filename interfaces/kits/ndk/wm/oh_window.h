@@ -441,7 +441,7 @@ int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
 /**
  * @brief Subscribe to the listening event for changes in the window frame rate metrics.
  *     This interface must be used after loadContent() or setUICContent() has taken effect.
- *     After the application registers the frame metrics change listener, the registered callback will only be 
+ *     After the application registers the frame metrics change listener, the registered callback will only be
  *     triggered when the client UI content is redrawn (e.g., page switching, interaction with responsive
  *     components, setting background color and opacity, etc.).
  *
@@ -456,11 +456,11 @@ int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
  *             1. Invalid parameter range.
  * @since 26.0.0
  */
-int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(int32_t windowId, 
+int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(int32_t windowId,
     OH_WindowManager_FrameMetricsMeasuredCallback callback);
 
 /**
- * @brief Unsubscribe from the listening event for changes in the window frame rate metrics. 
+ * @brief Unsubscribe from the listening event for changes in the window frame rate metrics.
  *     This interface must be used after loadContent() or setUIContent() has taken effect.
  *
  * @param windowId WindowId when window is created.
@@ -474,7 +474,7 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(int32_t windowId,
  *             1. Invalid parameter range.
  * @since 26.0.0
  */
-int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(int32_t windowId, 
+int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(int32_t windowId,
     OH_WindowManager_FrameMetricsMeasuredCallback callback);
 
 #ifdef __cplusplus
