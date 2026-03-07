@@ -137,7 +137,7 @@ int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
 }
 
 int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(
-    OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame)
+    const OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame)
 {
     if (metrics == nullptr || isFirstDrawFrame == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
@@ -147,7 +147,7 @@ int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(
 }
 
 int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(
-    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
 {
     if (metrics == nullptr || duration == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
@@ -157,7 +157,7 @@ int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(
 }
 
 int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(
-    OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
 {
     if (metrics == nullptr || duration == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
@@ -167,7 +167,7 @@ int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(
 }
 
 int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
-    OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp)
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp)
 {
     if (metrics == nullptr || timestamp == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
