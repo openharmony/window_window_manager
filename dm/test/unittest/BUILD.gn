@@ -138,7 +138,7 @@ ohos_unittest("dm_screen_test") {
 
   deps = [
     ":dm_unittest_common",
-    "../../../window_scene/screen_session_manager:screen_session_manager",
+    "../../../window_scene/screen_session_manager:screen_session_manager_static",
   ]
 
   external_deps = [
