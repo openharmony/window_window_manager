@@ -183,7 +183,7 @@ private:
     DisplayId primaryDisplayId_ = DISPLAY_ID_INVALID;
     static thread_local std::map<DisplayId, sptr<Display>> displayMap_;
     std::map<DisplayId, uint64_t> globalDisplayTagMap_;
- 	static thread_local std::map<DisplayId, uint64_t> currentDisplayTagMap_;
+    static thread_local std::map<DisplayId, uint64_t> currentDisplayTagMap_;
     DisplayStateCallback displayStateCallback_;
     std::recursive_mutex& mutex_;
     std::set<sptr<IDisplayListener>> displayListeners_;
