@@ -237,7 +237,14 @@ std::mutex g_frameMetricsMeasuredCbMutex;
 std::unordered_map<int32_t,
     std::unordered_map<uintptr_t, OHOS::sptr<OHWindowFrameMetricsMeasuredListener>>> g_frameMetricsMeasuredCbMap;
 
-inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError);
+inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
+{
+    auto iter = OH_WINDOW_TO_ERROR_CODE_MAP.find(wmError);
+    if (iter == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    return iter->second;
+}
 
 bool FindFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId,
     OHOS::sptr<OHWindowFrameMetricsMeasuredListener>& listener)
@@ -292,15 +299,6 @@ WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
 
     EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
     return WindowManager_ErrorCode::OK;
-}
-
-inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
-{
-    auto iter = OH_WINDOW_TO_ERROR_CODE_MAP.find(wmError);
-    if (iter == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
-    }
-    return iter->second;
 }
 
 void TransformedToWindowManagerRect(const Rect& rect, WindowManager_Rect& wmRect)
