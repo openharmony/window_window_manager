@@ -236,15 +236,6 @@ const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WIND
     { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
 };
 
-inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
-{
-    auto iter = OH_WINDOW_TO_ERROR_CODE_MAP.find(wmError);
-    if (iter == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
-    }
-    return iter->second;
-}
-
 bool FindFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId,
     OHOS::sptr<OHWindowFrameMetricsMeasuredListener>& listener)
 {
@@ -291,7 +282,7 @@ WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
     if (ret != WMError::WM_OK) {
         TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s unregister failed, windowId:%{public}d, ret:%{public}d",
             where, windowId, static_cast<int32_t>(ret));
-        return GetWindowManagerErrorCode(ret);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     }
 
     EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
@@ -896,7 +887,8 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
             return;
         }
         auto ret = window->RegisterFrameMetricsChangeListener(listener);
-        errCode = GetWindowManagerErrorCode(ret);
+        errCode = ret == WMError::WM_OK ? WindowManager_ErrorCode::OK :
+            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
         if (ret != WMError::WM_OK) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s register failed, windowId:%{public}d, ret:%{public}d",
                 where, windowId, static_cast<int32_t>(ret));
