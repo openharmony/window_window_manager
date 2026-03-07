@@ -14,7 +14,6 @@
 {
     global:
         extern "C++" {
-            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::RegisterClientDeathListener*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::AddVirtualScreenBlockList*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::AddVirtualScreenWhiteList*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::ConvertScreenIdToRsScreenId*;
@@ -61,6 +60,7 @@
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetPixelFormat*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetPrimaryDisplayId*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetPrimaryDisplayInfo*;
+            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetRotationAndOrientationMap*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetRoundedCorner*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetScreenAreaOfDisplayArea*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetScreenBrightness*;
@@ -119,7 +119,9 @@
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::OnSensorRotationChange*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::OnSuperFoldStatusChange*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::ProxyForFreeze*;
+            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::QueryMutiScreenCapture*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::RecordEventFromScb*;
+            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::RegisterClientDeathListener*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::RegisterClientDeathListener*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::RegisterDisplayAttributeAgent*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::RegisterDisplayManagerAgent*;
@@ -203,10 +205,9 @@
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::UpdateSuperFoldExpandAvailableArea*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::WakeUpBegin*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::WakeUpEnd*;
-            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetRotationAndOrientationMap*;
-            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::QueryMutiScreenCapture*;
             
             OHOS::Rosen::GetEdid*;
+            OHOS::Rosen::ScreenSceneConfig::GetExternalScreenDefaultMode*;
             OHOS::Rosen::ScreenSessionManager::AdaptSuperHorizonalBoot*;
             OHOS::Rosen::ScreenSessionManager::AddVirtualScreenBlockList*;
             OHOS::Rosen::ScreenSessionManager::AddVirtualScreenWhiteList*;
@@ -257,12 +258,14 @@
             OHOS::Rosen::ScreenSessionManager::GetLiveCreaseRegion*;
             OHOS::Rosen::ScreenSessionManager::GetOrCreatePhysicalScreenSession*;
             OHOS::Rosen::ScreenSessionManager::GetOrCreateScreenSession*;
+            OHOS::Rosen::ScreenSessionManager::GetPcStatus*;
             OHOS::Rosen::ScreenSessionManager::GetPhyScreenProperty*;
             OHOS::Rosen::ScreenSessionManager::GetPhysicalScreenIds*;
             OHOS::Rosen::ScreenSessionManager::GetPhysicalScreenSession*;
             OHOS::Rosen::ScreenSessionManager::GetPixelFormat*;
             OHOS::Rosen::ScreenSessionManager::GetPrimaryDisplayId*;
             OHOS::Rosen::ScreenSessionManager::GetPrimaryDisplayInfo*;
+            OHOS::Rosen::ScreenSessionManager::GetRotationAndOrientationMap*;
             OHOS::Rosen::ScreenSessionManager::GetRoundedCorner*;
             OHOS::Rosen::ScreenSessionManager::GetScreenAreaOfDisplayArea*;
             OHOS::Rosen::ScreenSessionManager::GetScreenBrightness*;
@@ -335,6 +338,7 @@
             OHOS::Rosen::ScreenSessionManager::OnStart*;
             OHOS::Rosen::ScreenSessionManager::OnSuperFoldStatusChange*;
             OHOS::Rosen::ScreenSessionManager::ProxyForFreeze*;
+            OHOS::Rosen::ScreenSessionManager::QueryMutiScreenCapture*;
             OHOS::Rosen::ScreenSessionManager::RecordEventFromScb*;
             OHOS::Rosen::ScreenSessionManager::RecoverRestoredMultiScreenMode*;
             OHOS::Rosen::ScreenSessionManager::RegisterClientDeathListener*;
@@ -427,9 +431,6 @@
             OHOS::Rosen::ScreenSessionManager::WakeUpEnd*;
             OHOS::Rosen::ScreenSessionManagerStub::OnRemoteRequest*;
             OHOS::Rosen::ScreenSessionManagerStub::OnRemoteRequestInner*;
-            OHOS::Rosen::ScreenSessionManager::GetPcStatus*;
-            OHOS::Rosen::ScreenSessionManager::GetRotationAndOrientationMap*;
-            OHOS::Rosen::ScreenSessionManager::QueryMutiScreenCapture*;
  
             vtable?for?OHOS::Rosen::ScreenSessionManager*;
             VTT?for?OHOS::Rosen::ScreenSessionManager*;
