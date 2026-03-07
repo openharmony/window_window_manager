@@ -152,6 +152,7 @@ screen_session_manager_public_external_deps = [
     deps = screen_session_manager_deps
     external_deps = screen_session_manager_external_deps
     external_deps += screen_session_manager_public_external_deps
+    external_deps += [ "ipc:ipc_single" ]
     cflags_cc = [ "-std=c++17" ]
 
     part_name = "window_manager"

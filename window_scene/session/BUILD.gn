@@ -390,6 +390,7 @@ screen_session_deps = [
 ]
 
 screen_session_external_deps = [
+  "bundle_framework:appexecfwk_core",
   "c_utils:utils",
   "graphic_2d:librender_service_base",
   "graphic_2d:librender_service_client",
@@ -474,7 +475,7 @@ ohos_shared_library("screen_session") {
     defines += [ "WM_SCREEN_COLOR_SPACE_ENABLE" ]
   }
 
-  version_script = "libscene_session.map"
+  version_script = "libscreen_session.map"
 
   innerapi_tags = [ "platformsdk" ]
   part_name = "window_manager"
