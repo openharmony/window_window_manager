@@ -237,6 +237,63 @@ std::mutex g_frameMetricsMeasuredCbMutex;
 std::unordered_map<int32_t,
     std::unordered_map<uintptr_t, OHOS::sptr<OHWindowFrameMetricsMeasuredListener>>> g_frameMetricsMeasuredCbMap;
 
+inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError);
+
+bool FindFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId,
+    OHOS::sptr<OHWindowFrameMetricsMeasuredListener>& listener)
+{
+    std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
+    auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+    if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
+        return false;
+    }
+    auto callbackIter = windowIter->second.find(measuredCallbackId);
+    if (callbackIter == windowIter->second.end()) {
+        return false;
+    }
+    listener = callbackIter->second;
+    return true;
+}
+
+void EraseFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId)
+{
+    std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
+    auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+    if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
+        return;
+    }
+    windowIter->second.erase(measuredCallbackId);
+    if (windowIter->second.empty()) {
+        g_frameMetricsMeasuredCbMap.erase(windowIter);
+    }
+}
+
+WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
+    int32_t windowId, uintptr_t measuredCallbackId, const char* where)
+{
+    OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
+    if (!FindFrameMetricsMeasuredListener(windowId, measuredCallbackId, listener)) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+
+    auto window = Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+        EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+
+    auto ret = window->UnregisterFrameMetricsChangeListener(listener);
+    if (ret != WMError::WM_OK) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s unregister failed, windowId:%{public}d, ret:%{public}d",
+            where, windowId, static_cast<int32_t>(ret));
+        return GetWindowManagerErrorCode(ret);
+    }
+
+    EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+    return WindowManager_ErrorCode::OK;
+}
+
 inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
 {
     auto iter = OH_WINDOW_TO_ERROR_CODE_MAP.find(wmError);
@@ -872,53 +929,9 @@ int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
-    eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
-        OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
-        auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
-        {
-            std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
-            auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
-            if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
-                errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
-                return;
-            }
-            auto callbackIter = windowIter->second.find(measuredCallbackId);
-            if (callbackIter == windowIter->second.end()) {
-                errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
-                return;
-            }
-            listener = callbackIter->second;
-        }
-        auto window = Window::GetWindowWithId(windowId);
-        if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
-            auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
-            if (windowIter != g_frameMetricsMeasuredCbMap.end()) {
-                windowIter->second.erase(measuredCallbackId);
-                if (windowIter->second.empty()) {
-                    g_frameMetricsMeasuredCbMap.erase(windowIter);
-                }
-            }
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
-            return;
-        }
-        auto ret = window->UnregisterFrameMetricsChangeListener(listener);
-        errCode = GetWindowManagerErrorCode(ret);
-        if (ret != WMError::WM_OK) {
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s unregister failed, windowId:%{public}d, ret:%{public}d",
-                where, windowId, static_cast<int32_t>(ret));
-            return;
-        }
-        std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
-        auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
-        if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
-            return;
-        }
-        windowIter->second.erase(measuredCallbackId);
-        if (windowIter->second.empty()) {
-            g_frameMetricsMeasuredCbMap.erase(windowIter);
-        }
+    auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
+    eventHandler->PostSyncTask([windowId, measuredCallbackId, &errCode, where = __func__] {
+        errCode = UnregisterFrameMetricsMeasuredCallbackInner(windowId, measuredCallbackId, where);
     }, __func__);
     return errCode;
 }
