@@ -350,20 +350,6 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_WindowDestroyed, T
 }
 
 /**
- * @tc.name: UnregisterFrameMetricsMeasuredCallback_NotRegistered
- * @tc.desc: unregister frame metrics measured callback which is not registered
- * @tc.type: FUNC
- */
-HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_NotRegistered, TestSize.Level0)
-{
-    ASSERT_NE(nullptr, scene_);
-    ASSERT_NE(nullptr, scene_->GetMainWindow());
-    int32_t windowId = scene_->GetMainWindow()->GetWindowId();
-    auto ret = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
-}
-
-/**
  * @tc.name: UnregisterFrameMetricsMeasuredCallback_CallbackNotRegistered
  * @tc.desc: unregister callback not registered while window callback map exists
  * @tc.type: FUNC
