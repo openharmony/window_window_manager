@@ -96,6 +96,11 @@ void FrameMetricsMeasuredCallback(int32_t windowId, OH_WindowManager_FrameMetric
     (void)OH_WindowManager_FrameMetrics_GetVsyncTimestamp(metrics, &vsyncTimestamp);
 }
 
+void FrameMetricsMeasuredCallback2(int32_t windowId, OH_WindowManager_FrameMetrics* metrics)
+{
+    FrameMetricsMeasuredCallback(windowId, metrics);
+}
+
 /**
  * @tc.name: ShowWindow01
  * @tc.desc: return OK when show window
@@ -297,6 +302,54 @@ HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsMeasuredCallback_Normal, Te
 }
 
 /**
+ * @tc.name: RegisterUnregisterFrameMetricsMeasuredCallback_MultiCallbacks
+ * @tc.desc: register/unregister two frame metrics measured callbacks for map erase branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsMeasuredCallback_MultiCallbacks, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    ASSERT_NE(nullptr, scene_->GetMainWindow());
+    int32_t windowId = scene_->GetMainWindow()->GetWindowId();
+    auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
+    if (ret != static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED), ret);
+        return;
+    }
+
+    auto ret2 = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback2);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret2);
+    auto ret3 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret3);
+    auto ret4 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback2);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret4);
+    auto ret5 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret5);
+}
+
+/**
+ * @tc.name: UnregisterFrameMetricsMeasuredCallback_WindowDestroyed
+ * @tc.desc: unregister frame metrics measured callback after window destroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_WindowDestroyed, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    auto mainWindow = scene_->GetMainWindow();
+    ASSERT_NE(nullptr, mainWindow);
+    int32_t windowId = mainWindow->GetWindowId();
+    auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
+    if (ret != static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED), ret);
+        return;
+    }
+
+    EXPECT_EQ(WMError::WM_OK, mainWindow->Destroy());
+    auto ret2 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret2);
+}
+
+/**
  * @tc.name: UnregisterFrameMetricsMeasuredCallback_NotRegistered
  * @tc.desc: unregister frame metrics measured callback which is not registered
  * @tc.type: FUNC
@@ -368,6 +421,45 @@ HWTEST_F(OHWindowTest, FrameMetricsGetVsyncTimestamp_InvalidParam, TestSize.Leve
 
     ret = OH_WindowManager_FrameMetrics_GetVsyncTimestamp(nullptr, nullptr);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+}
+
+/**
+ * @tc.name: FrameMetricsGetters_ValidParam
+ * @tc.desc: frame metrics getters valid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, FrameMetricsGetters_ValidParam, TestSize.Level0)
+{
+    struct alignas(8) FrameMetricsLayoutForTest {
+        bool firstDrawFrame;
+        uint64_t inputHandlingDuration;
+        uint64_t layoutMeasureDuration;
+        uint64_t vsyncTimestamp;
+    };
+    FrameMetricsLayoutForTest metricsLayout {
+        true,
+        101,
+        202,
+        303,
+    };
+    auto metrics = reinterpret_cast<const OH_WindowManager_FrameMetrics*>(&metricsLayout);
+    bool isFirstDrawFrame = false;
+    uint64_t inputHandlingDuration = 0;
+    uint64_t layoutMeasureDuration = 0;
+    uint64_t vsyncTimestamp = 0;
+
+    auto ret = OH_WindowManager_FrameMetrics_IsFirstDrawFrame(metrics, &isFirstDrawFrame);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    EXPECT_TRUE(isFirstDrawFrame);
+    ret = OH_WindowManager_FrameMetrics_GetInputHandlingDuration(metrics, &inputHandlingDuration);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    EXPECT_EQ(metricsLayout.inputHandlingDuration, inputHandlingDuration);
+    ret = OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(metrics, &layoutMeasureDuration);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    EXPECT_EQ(metricsLayout.layoutMeasureDuration, layoutMeasureDuration);
+    ret = OH_WindowManager_FrameMetrics_GetVsyncTimestamp(metrics, &vsyncTimestamp);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
+    EXPECT_EQ(metricsLayout.vsyncTimestamp, vsyncTimestamp);
 }
 }
 } // namespace Rosen
