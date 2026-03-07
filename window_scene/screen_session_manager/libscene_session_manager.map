@@ -203,6 +203,8 @@
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::UpdateSuperFoldExpandAvailableArea*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::WakeUpBegin*;
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::WakeUpEnd*;
+            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::GetRotationAndOrientationMap*;
+            non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::QueryMutiScreenCapture*;
             
             OHOS::Rosen::GetEdid*;
             OHOS::Rosen::ScreenSessionManager::AdaptSuperHorizonalBoot*;
@@ -426,6 +428,8 @@
             OHOS::Rosen::ScreenSessionManagerStub::OnRemoteRequest*;
             OHOS::Rosen::ScreenSessionManagerStub::OnRemoteRequestInner*;
             OHOS::Rosen::ScreenSessionManager::GetPcStatus*;
+            OHOS::Rosen::ScreenSessionManager::GetRotationAndOrientationMap*;
+            OHOS::Rosen::ScreenSessionManager::QueryMutiScreenCapture*;
  
             vtable?for?OHOS::Rosen::ScreenSessionManager*;
             VTT?for?OHOS::Rosen::ScreenSessionManager*;
