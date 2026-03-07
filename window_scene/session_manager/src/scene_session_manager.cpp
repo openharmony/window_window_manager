@@ -2908,6 +2908,10 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
                 return this->GetAppForceLandscapeConfigEnable(bundleName);
             });
+            sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
+                const std::string& action, const std::string& message) {
+                return this->pageEnableFunc_(bundleName, windowId, action, message);
+            });
         }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
@@ -8127,6 +8131,11 @@ void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId disp
 void SceneSessionManager::SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func)
 {
     findScenePanelRsNodeByZOrderFunc_ = std::move(func);
+}
+
+void SceneSessionManager::RegisterPageEnableFunc(PageEnableFunc&& func)
+{
+    pageEnableFunc_ = std::move(func);
 }
 
 bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)

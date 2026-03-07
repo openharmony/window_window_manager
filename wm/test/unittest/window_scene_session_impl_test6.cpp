@@ -991,6 +991,104 @@ HWTEST_F(WindowSceneSessionImplTest6, UpdatePropertyWhenTriggerMode, TestSize.Le
     ret = window->UpdatePropertyWhenTriggerMode(property);
     EXPECT_EQ(ret, WSError::WS_OK);
 }
+
+/**
+ * @tc.name: NotifyPageEnable
+ * @tc.desc: NotifyPageEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPageEnable");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    auto ret = window->NotifyPageEnable("enter", "HomePage");
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    EXPECT_CALL(*session, NotifyPageEnable(_,_))
+        .Times(1)
+        .WillOnce(Return(WSError::WS_OK));
+
+    ret = window->NotifyPageEnable("enter", "HomePage");
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyPageEnable1
+ * @tc.desc: NotifyPageEnable1
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable1, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPageEnable1");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(1);
+    window->hostSession_ = nullptr;
+
+    auto ret = window->NotifyPageEnable("enter", "HomePage");
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyPageEnable2
+ * @tc.desc: NotifyPageEnable2
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable2, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPageEnable2");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    EXPECT_CALL(*session, NotifyPageEnable(_,_))
+        .Times(1)
+        .WillOnce(Return(WSError::WS_ERROR_INVALID_PARAM));
+
+    auto ret = window->NotifyPageEnable("enter", "HomePage");
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NotifyPageEnable3
+ * @tc.desc: NotifyPageEnable3
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable3, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPageEnable3");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+
+    EXPECT_CALL(*session, NotifyPageEnable(_,_))
+        .Times(3)
+        .WillRepeatedly(Return(WSError::WS_OK));
+
+    EXPECT_EQ(window->NotifyPageEnable("enter", "HomePage"), WSError::WS_OK);
+    EXPECT_EQ(window->NotifyPageEnable("exit", "HomePage"), WSError::WS_OK);
+    EXPECT_EQ(window->NotifyPageEnable("enter", "DetailPage"), WSError::WS_OK);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

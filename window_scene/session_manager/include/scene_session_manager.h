@@ -927,6 +927,11 @@ public:
 
     void NotifyRotationBegin(bool isStopDrag);
 
+    /*
+     * Compatible Mode
+     */
+    void RegisterPageEnableFunc(PageEnableFunc&& func);
+
 protected:
     SceneSessionManager();
     virtual ~SceneSessionManager();
@@ -1991,6 +1996,7 @@ private:
      */
     void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
     std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
+    PageEnableFunc pageEnableFunc_;
 };
 } // namespace OHOS::Rosen
 

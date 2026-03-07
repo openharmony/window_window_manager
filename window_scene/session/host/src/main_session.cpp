@@ -671,6 +671,30 @@ bool MainSession::IsFullScreenInForceSplit()
     return isFullScreenInForceSplit_.load();
 }
 
+void MainSession::RegisterPageEnableCallback(PageEnableCallback&& callback)
+{
+    pageEnableCallback_ = std::move(callback);
+}
+
+WSError MainSession::NotifyPageEnable(const std::string& action, const std::string& message)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "action=%{public}s, message=%{public}s", action.c_str(), message.c_str());
+    if (action.empty() || action.length() > 64) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid action length: %{public}zu", action.length());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (message.empty() || message.length() > 64) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid message length: %{public}zu", message.length());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    std::string bundleName = sessionInfo_.bundleName_;
+    int32_t windowId = GetPersistentId();
+    if (pageEnableCallback_) {
+        pageEnableCallback_(bundleName, windowId, action, message);
+    }
+    return WSError::WS_OK;
+}
+
 void MainSession::RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback)
 {
     compatibleModeChangeCallback_ = std::move(callback);
