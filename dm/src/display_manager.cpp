@@ -176,6 +176,8 @@ private:
     void NotifyAvailableAreaChanged(DMRect rect, DisplayId displayId);
     void Clear();
     std::string GetDisplayInfoSrting(sptr<DisplayInfo> displayInfo);
+    bool CheckNeedUpdateDisplayByTag(DisplayId displayId);
+    uint64_t GetCurrentTimeTagNs();
     std::atomic<bool> needUpdateDisplayFromDMS_ = false;
     DisplayId defaultDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId primaryDisplayId_ = DISPLAY_ID_INVALID;
@@ -788,6 +790,32 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     }
     needUpdateDisplayFromDMS_ = false;
     return displayMap_[displayId];
+}
+
+bool DisplayManager::Impl::CheckNeedUpdateDisplayByTag(DisplayId displayId)
+{
+    uint64_t globalTag = GetCurrentTimeTagNs();
+    auto iter = globalDisplayTagMap_.find(displayId);
+    if (iter != globalDisplayTagMap_.end()) {
+        globalTag = iter->second;
+    } else {
+        globalDisplayTagMap_[displayId] = globalTag;
+        return true;
+    }
+    auto iterCur = currentDisplayTagMap_.find(displayId);
+    if (iterCur != currentDisplayTagMap_.end()) {
+        return iterCur->second != globalTag;
+    }
+    return true;
+}
+
+uint64_t DisplayManager::Impl::GetCurrentTimeTagNs()
+{
+    auto now = std::chrono::system_clock::now();
+    auto duration_since_epoch = now.time_since_epoch();
+    uint64_t nanoseconds = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(duration_since_epoch).count());
+    return nanoseconds;
 }
 
 sptr<DisplayInfo> DisplayManager::Impl::GetVisibleAreaDisplayInfoById(DisplayId displayId)
