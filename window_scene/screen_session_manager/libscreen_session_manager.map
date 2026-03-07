@@ -207,7 +207,6 @@
             non-virtual?thunk?to?OHOS::Rosen::ScreenSessionManager::WakeUpEnd*;
             
             OHOS::Rosen::GetEdid*;
-            OHOS::Rosen::ScreenSceneConfig::GetExternalScreenDefaultMode*;
             OHOS::Rosen::ScreenSessionManager::AdaptSuperHorizonalBoot*;
             OHOS::Rosen::ScreenSessionManager::AddVirtualScreenBlockList*;
             OHOS::Rosen::ScreenSessionManager::AddVirtualScreenWhiteList*;
