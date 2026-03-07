@@ -317,6 +317,9 @@
             OHOS::Rosen::ScreenSession::SetPhyWidthAndHeight*;
             OHOS::Rosen::ScreenProperty::UpdateDeviceRotation*;
             OHOS::Rosen::ScreenProperty::UpdateScreenRotation*;
+            OHOS::Rosen::ScreenSession::SetBootingConnect*;
+            OHOS::Rosen::ScreenSession::IsBootingConnect*;
+            OHOS::Rosen::ScreenSession::GetBoundsWithRotation*;
         };
     local:
     *;
