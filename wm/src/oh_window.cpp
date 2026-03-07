@@ -37,9 +37,9 @@
 
 struct OH_WindowManager_FrameMetrics {
     bool firstDrawFrame;
-    uint64_t inputHandlingDuration;
-    uint64_t layoutMeasureDuration;
-    uint64_t vsyncTimestamp;
+    uint64_t inputHandlingDuration = 0;
+    uint64_t layoutMeasureDuration = 0;
+    uint64_t vsyncTimestamp = 0;
 };
 
 using namespace OHOS::Rosen;
@@ -185,30 +185,6 @@ namespace {
         } \
     } while (0)
 
-/*
- * Used to map from WMError to WindowManager_ErrorCode.
- */
-const std::unordered_map<WMError, WindowManager_ErrorCode> OH_WINDOW_TO_ERROR_CODE_MAP {
-    { WMError::WM_OK,                          WindowManager_ErrorCode::OK                                            },
-    { WMError::WM_ERROR_INVALID_PARAM,         WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM        },
-    { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,    WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED },
-    { WMError::WM_ERROR_INVALID_WINDOW,        WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL       },
-    { WMError::WM_ERROR_INVALID_CALLING,       WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
-    { WMError::WM_ERROR_NULLPTR,               WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
-    { WMError::WM_ERROR_SYSTEM_ABNORMALLY,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
-    { WMError::WM_ERROR_INVALID_PERMISSION,    WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_NO_PERMISSION        },
-};
-
-/*
- * Used to map from WindowType to WindowManager_WindowType.
- */
-const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WINDOW_TYPE_MAP {
-    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_APP    },
-    { WindowType::WINDOW_TYPE_DIALOG,              WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_DIALOG },
-    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
-    { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
-};
-
 class OHWindowFrameMetricsMeasuredListener : public IFrameMetricsChangedListener {
 public:
     OHWindowFrameMetricsMeasuredListener(int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
@@ -235,6 +211,30 @@ private:
 
 std::unordered_map<int32_t,
     std::unordered_map<uintptr_t, OHOS::sptr<OHWindowFrameMetricsMeasuredListener>>> g_frameMetricsMeasuredCbMap;
+
+/*
+ * Used to map from WMError to WindowManager_ErrorCode.
+ */
+const std::unordered_map<WMError, WindowManager_ErrorCode> OH_WINDOW_TO_ERROR_CODE_MAP {
+    { WMError::WM_OK,                          WindowManager_ErrorCode::OK                                            },
+    { WMError::WM_ERROR_INVALID_PARAM,         WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM        },
+    { WMError::WM_ERROR_DEVICE_NOT_SUPPORT,    WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED },
+    { WMError::WM_ERROR_INVALID_WINDOW,        WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL       },
+    { WMError::WM_ERROR_INVALID_CALLING,       WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
+    { WMError::WM_ERROR_NULLPTR,               WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
+    { WMError::WM_ERROR_SYSTEM_ABNORMALLY,     WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL      },
+    { WMError::WM_ERROR_INVALID_PERMISSION,    WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_NO_PERMISSION        },
+};
+
+/*
+ * Used to map from WindowType to WindowManager_WindowType.
+ */
+const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WINDOW_TYPE_MAP {
+    { WindowType::WINDOW_TYPE_APP_SUB_WINDOW,      WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_APP    },
+    { WindowType::WINDOW_TYPE_DIALOG,              WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_DIALOG },
+    { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
+    { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
+};
 
 inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
 {
