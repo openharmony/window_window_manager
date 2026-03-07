@@ -243,6 +243,7 @@ public:
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false) override;
     void SendLogicalDeviceConfigToArkUI();
+    WSError NotifyPageEnable(const std::string& action, const std::string& message);
 
     /*
      * Free Multi Window
