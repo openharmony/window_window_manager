@@ -6484,7 +6484,7 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
     }, __func__);
 }
 
-WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
+WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow(const bool isWeb)
 {
     TLOGI(WmsLogTag::WMS_PIP, "type: %{public}u", GetType());
     if (!WindowHelper::IsPipWindow(GetType())) {
@@ -6492,6 +6492,10 @@ WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    if (isWeb && surfaceNode_ != nullptr) {
+        surfaceNode_->SetAlpha(0);
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
+    }
     hostSession->NotifyPiPWindowPrepareClose();
     return WMError::WM_OK;
 }

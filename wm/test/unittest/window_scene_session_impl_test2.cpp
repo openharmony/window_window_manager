@@ -1721,6 +1721,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifyPrepareClosePiPWindow01, TestSize.Le
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->NotifyPrepareClosePiPWindow());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->NotifyPrepareClosePiPWindow(true));
 }
 
 /**

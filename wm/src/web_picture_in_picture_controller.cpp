@@ -63,6 +63,7 @@ WMError WebPictureInPictureController::CreatePictureInPictureWindow(StartPipType
     WMError errCode = WMError::WM_OK;
     PiPTemplateInfo pipTemplateInfo;
     pipOption_->GetPiPTemplateInfo(pipTemplateInfo);
+    pipTemplateInfo.isWeb = true;
     auto context = mainWindow_->GetContext();
     SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(context->GetApplicationInfo()->name);
     sptr<Window> window = Window::CreatePiP(windowOption, pipTemplateInfo, context, errCode);

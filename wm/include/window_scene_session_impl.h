@@ -157,7 +157,7 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
-    WMError NotifyPrepareClosePiPWindow() override;
+    WMError NotifyPrepareClosePiPWindow(const bool isWeb = false) override;
     void UpdateSubWindowState(const WindowType& type);
     WMError SetStatusBarColorForNavigation(const std::optional<uint32_t> color) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
