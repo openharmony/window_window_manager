@@ -458,6 +458,7 @@ int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
  */
 int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(int32_t windowId, 
     OH_WindowManager_FrameMetricsMeasuredCallback callback);
+    
 
 /**
  * @brief Unsubscribe from the listening event for changes in the window frame rate metrics. 
