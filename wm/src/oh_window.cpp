@@ -820,9 +820,9 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     }
-    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
@@ -843,7 +843,7 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
         auto listener = OHOS::sptr<OHWindowFrameMetricsMeasuredListener>::MakeSptr(windowId, callback);
         if (listener == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s create listener failed, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
         auto ret = window->RegisterFrameMetricsChangeListener(listener);
@@ -869,9 +869,9 @@ int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     }
-    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
         OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
         auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
