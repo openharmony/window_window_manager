@@ -233,7 +233,6 @@ private:
     OH_WindowManager_FrameMetricsMeasuredCallback measuredCallback_ = nullptr;
 };
 
-std::mutex g_frameMetricsMeasuredCbMutex;
 std::unordered_map<int32_t,
     std::unordered_map<uintptr_t, OHOS::sptr<OHWindowFrameMetricsMeasuredListener>>> g_frameMetricsMeasuredCbMap;
 
@@ -249,7 +248,6 @@ inline WindowManager_ErrorCode GetWindowManagerErrorCode(WMError wmError)
 bool FindFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId,
     OHOS::sptr<OHWindowFrameMetricsMeasuredListener>& listener)
 {
-    std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
     auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
     if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
         return false;
@@ -264,7 +262,6 @@ bool FindFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallba
 
 void EraseFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId)
 {
-    std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
     auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
     if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
         return;
@@ -886,14 +883,11 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
             return;
         }
         auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
-        {
-            std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
-            auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
-            if (windowIter != g_frameMetricsMeasuredCbMap.end() &&
-                windowIter->second.find(measuredCallbackId) != windowIter->second.end()) {
-                errCode = WindowManager_ErrorCode::OK;
-                return;
-            }
+        auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+        if (windowIter != g_frameMetricsMeasuredCbMap.end() &&
+            windowIter->second.find(measuredCallbackId) != windowIter->second.end()) {
+            errCode = WindowManager_ErrorCode::OK;
+            return;
         }
         auto listener = OHOS::sptr<OHWindowFrameMetricsMeasuredListener>::MakeSptr(windowId, callback);
         if (listener == nullptr) {
@@ -908,7 +902,6 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
                 where, windowId, static_cast<int32_t>(ret));
             return;
         }
-        std::lock_guard<std::mutex> lock(g_frameMetricsMeasuredCbMutex);
         g_frameMetricsMeasuredCbMap[windowId][measuredCallbackId] = listener;
     }, __func__);
     return errCode;
