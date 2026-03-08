@@ -836,10 +836,9 @@ void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenP
         return;
     }
     auto screenBounds = eventPara.GetBounds();
-    screenProperty.SetRotation(eventPara.GetRotation());
+    TLOGI(WmsLogTag::DMS, "bounds after change: %{public}f, %{public}f",
+        screenBounds.rect_.width_, screenBounds.rect_.height_);
     screenProperty.SetBounds(screenBounds);
-    TLOGI(WmsLogTag::DMS, "bounds after change: %{public}f, %{public}f, rotation:%{public}f",
-        screenBounds.rect_.width_, screenBounds.rect_.height_, eventPara.GetRotation());
 }
 
 void ScreenSession::UpdatePropertyByFakeBounds(uint32_t width, uint32_t height)
