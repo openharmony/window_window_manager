@@ -16,6 +16,7 @@
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
+import image from '@ohos.multimedia.image';
 import { Callback } from '@ohos.base';
 
 /**
@@ -101,6 +102,9 @@ namespace uiExtension {
     public native createSubWindowWithOptions(nativeObj: long, name: string,
         subWindowOptions: window.SubWindowOptions, followCreatorLifecycle: boolean): window.Window;
     public native occupyEvents(nativeObj: long, eventFlags: int): void;
+    public native snapshot(nativeObj: long): image.PixelMap;
+    public native snapshotSync(nativeObj: long): image.PixelMap;
+    public native snapshotIgnorePrivacy(nativeObj: long): image.PixelMap;
     public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): int;
     public native onSync(nativeObj: long, type: string, callback: object): void;
     public native offSync(nativeObj: long, type: string, callback?: object): void;
@@ -227,6 +231,36 @@ namespace uiExtension {
         });
       });
     }
+
+    public snapshot(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
+          reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): image.PixelMap => {
+          return this.snapshot(this.nativeObj);
+        }).then((ret: Any) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public snapshotSync(): image.PixelMap {
+      return this.snapshotSync(this.nativeObj);
+    }
+
+    public snapshotIgnorePrivacy(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
+          reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): image.PixelMap => {
+          return this.snapshotIgnorePrivacy(this.nativeObj);
+        }).then((ret: Any) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
   }
 
   /**
@@ -346,6 +380,9 @@ namespace uiExtension {
     getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     hideNonSecureWindows(shouldHide: boolean): Promise<void>;
+    snapshot(): Promise<image.PixelMap>;
+    snapshotSync(): image.PixelMap;
+    snapshotIgnorePrivacy(): Promise<image.PixelMap>;
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
     createSubWindowWithOptions(name: string, subWindowConfig: window.SubWindowOptions,
       followCreatorLifecycle: boolean): Promise<window.Window>;
