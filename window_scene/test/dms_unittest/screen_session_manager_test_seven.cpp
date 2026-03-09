@@ -1364,7 +1364,7 @@ HWTEST_F(ScreenSessionManagerTest, SetLockDisplayModeWhenShutDown, TestSize.Leve
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
         ssm_->screenPowerTaskScheduler_, ssm_->taskScheduler_);
     ssm_->foldScreenController_ = foldController;
-    ssm_->SetLockDisplayModeWhenShutDown(PowerStateChangeReason::STATE_CHANGE_REASON_AOD_SET_DOZE, true);
+    ssm_->SetLockDisplayModeWhenShutDown(PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY, true);
     EXPECT_FALSE(g_logMsg.find("lock display mode when shut down") != std::string::npos);
 
     ssm_->SetLockDisplayModeWhenShutDown(PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN, true);
