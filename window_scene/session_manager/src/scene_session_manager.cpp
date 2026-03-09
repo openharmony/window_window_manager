@@ -15,6 +15,7 @@
 
 #include "session_manager/include/scene_session_manager.h"
 
+#include <algorithm>
 #include <regex>
 #include <string>
 #include <sys/stat.h>
@@ -15800,9 +15801,18 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
             }
             infos.emplace_back(windowVisibilityInfo);
         }
+        SortVisibilityWindowInfos(infos);
         return WMError::WM_OK;
     };
     return taskScheduler_->PostSyncTask(task, "GetVisibilityWindowInfo");
+}
+
+void SceneSessionManager::SortVisibilityWindowInfos(std::vector<sptr<WindowVisibilityInfo>>& infos) const
+{
+    std::stable_sort(infos.begin(), infos.end(), [](const sptr<WindowVisibilityInfo>& lhs,
+                                                    const sptr<WindowVisibilityInfo>& rhs) {
+        return lhs != nullptr && rhs != nullptr ? lhs->GetZOrder() > rhs->GetZOrder() : lhs != nullptr;
+    });
 }
 
 void SceneSessionManager::GetAllWindowVisibilityInfos(std::vector<std::pair<int32_t, uint32_t>>& windowVisibilityInfos)
