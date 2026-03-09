@@ -6869,9 +6869,7 @@ WMError WindowSceneSessionImpl::ClearWindowMask()
     if (!(hasCornerRadius && hasShadowRadius)) {
         hostSession->RecoverWindowEffect(!hasCornerRadius, !hasShadowRadius);
     }
-    if (MathHelper::GreatNotEqual(rsCornerRadius_, 0.0)) {
-        surfaceNode_->SetCornerRadius(rsCornerRadius_);
-    }
+    surfaceNode_->SetCornerRadius(rsCornerRadius_);
     surfaceNode_->SetMask(nullptr);
     RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
     property_->SetIsShaped(false);

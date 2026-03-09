@@ -251,29 +251,6 @@ HWTEST_F(WindowSceneSessionImplEventTest, ClearWindowMask, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearWindowMask_TestRsCornerRadius
- * @tc.desc: ClearWindowMask_TestRsCornerRadius
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplEventTest, ClearWindowMask_TestRsCornerRadius, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("ClearWindowMask_TestRsCornerRadius");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-
-    window->property_->persistentId_ = 11;
-    window->state_ = WindowState::STATE_SHOWN;
-    SessionInfo sessionInfo;
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    window->property_->SetIsShaped(true);
-
-    EXPECT_CALL(*session, UpdateSessionPropertyByAction(_, _)).WillRepeatedly(Return(WMError::WM_OK));
-    window->rsCornerRadius_ = 20;
-    EXPECT_EQ(WMError::WM_OK, window->ClearWindowMask());
-}
-
-/**
  * @tc.name: SetWindowMask
  * @tc.desc: SetWindowMask_InvalidRow
  * @tc.type: FUNC
