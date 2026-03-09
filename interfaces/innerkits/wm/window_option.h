@@ -728,6 +728,7 @@ private:
     bool isConstrainedModal_ = false;
     int64_t startModalExtensionTimeStamp_ = -1;
     bool followCreatorLifecycle_ = false;
+    bool isBlockSubwindow_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
