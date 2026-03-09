@@ -137,33 +137,6 @@ screen_session_manager_external_deps = [
   "time_service:time_client",
 ]
 
-screen_session_manager_fold_ability_sources = [
-  "infra/src/common/product_config.cpp",
-  "infra/src/fold_screen/fold_crease_region_controller.cpp",
-  "infra/src/fold_screen/fold_screen_base_controller.cpp",
-  "infra/src/fold_screen/fold_screen_base_policy.cpp",
-  "infra/src/fold_screen/screen_sensor_mgr.cpp",
-  "infra/src/fold_screen/sensor_fold_state_mgr.cpp",
-  "src/fold_screen_controller/dual_display_fold_policy.cpp",
-  "src/fold_screen_controller/fold_screen_controller.cpp",
-  "src/fold_screen_controller/fold_screen_policy.cpp",
-  "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
-  "src/fold_screen_controller/fold_screen_state_machine.cpp",
-  "src/fold_screen_controller/secondary_display_fold_policy.cpp",
-  "src/fold_screen_controller/secondary_fold_sensor_manager.cpp",
-  "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
-  "src/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.cpp",
-  "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
-  "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
-  "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
-  "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_super_fold_state_manager.cpp",
-  "src/fold_screen_controller/single_display_fold_policy.cpp",
-  "src/fold_screen_controller/single_display_pocket_fold_policy.cpp",
-  "src/fold_screen_controller/single_display_super_fold_policy.cpp",
-  "src/fold_screen_controller/super_fold_policy.cpp",
-  "src/fold_screen_controller/super_fold_sensor_manager.cpp",
-  "src/fold_screen_controller/super_fold_state_manager.cpp",
-]
 ## Build libscreen_session_manager_static.a
 ohos_static_library("screen_session_manager_static") {
   branch_protector_ret = "pac_ret"
@@ -232,7 +205,33 @@ ohos_static_library("screen_session_manager_static") {
 
   if (window_manager_fold_ability) {
     defines += [ "FOLD_ABILITY_ENABLE" ]
-    sources += screen_session_manager_fold_ability_sources
+    sources += [
+      "infra/src/common/product_config.cpp",
+      "infra/src/fold_screen/fold_crease_region_controller.cpp",
+      "infra/src/fold_screen/fold_screen_base_controller.cpp",
+      "infra/src/fold_screen/fold_screen_base_policy.cpp",
+      "infra/src/fold_screen/screen_sensor_mgr.cpp",
+      "infra/src/fold_screen/sensor_fold_state_mgr.cpp",
+      "src/fold_screen_controller/dual_display_fold_policy.cpp",
+      "src/fold_screen_controller/fold_screen_controller.cpp",
+      "src/fold_screen_controller/fold_screen_policy.cpp",
+      "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
+      "src/fold_screen_controller/fold_screen_state_machine.cpp",
+      "src/fold_screen_controller/secondary_display_fold_policy.cpp",
+      "src/fold_screen_controller/secondary_fold_sensor_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_super_fold_state_manager.cpp",
+      "src/fold_screen_controller/single_display_fold_policy.cpp",
+      "src/fold_screen_controller/single_display_pocket_fold_policy.cpp",
+      "src/fold_screen_controller/single_display_super_fold_policy.cpp",
+      "src/fold_screen_controller/super_fold_policy.cpp",
+      "src/fold_screen_controller/super_fold_sensor_manager.cpp",
+      "src/fold_screen_controller/super_fold_state_manager.cpp",
+    ]
     print("window manager fold ability is enabled.")
   } else {
     print("window manager fold ability is disabled.")
@@ -360,7 +359,33 @@ ohos_shared_library("screen_session_manager") {
 
   if (window_manager_fold_ability) {
     defines += [ "FOLD_ABILITY_ENABLE" ]
-    sources += screen_session_manager_fold_ability_sources
+    sources += [
+      "infra/src/common/product_config.cpp",
+      "infra/src/fold_screen/fold_crease_region_controller.cpp",
+      "infra/src/fold_screen/fold_screen_base_controller.cpp",
+      "infra/src/fold_screen/fold_screen_base_policy.cpp",
+      "infra/src/fold_screen/screen_sensor_mgr.cpp",
+      "infra/src/fold_screen/sensor_fold_state_mgr.cpp",
+      "src/fold_screen_controller/dual_display_fold_policy.cpp",
+      "src/fold_screen_controller/fold_screen_controller.cpp",
+      "src/fold_screen_controller/fold_screen_policy.cpp",
+      "src/fold_screen_controller/fold_screen_sensor_manager.cpp",
+      "src/fold_screen_controller/fold_screen_state_machine.cpp",
+      "src/fold_screen_controller/secondary_display_fold_policy.cpp",
+      "src/fold_screen_controller/secondary_fold_sensor_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
+      "src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_super_fold_state_manager.cpp",
+      "src/fold_screen_controller/single_display_fold_policy.cpp",
+      "src/fold_screen_controller/single_display_pocket_fold_policy.cpp",
+      "src/fold_screen_controller/single_display_super_fold_policy.cpp",
+      "src/fold_screen_controller/super_fold_policy.cpp",
+      "src/fold_screen_controller/super_fold_sensor_manager.cpp",
+      "src/fold_screen_controller/super_fold_state_manager.cpp",
+    ]
     print("window manager fold ability is enabled.")
   } else {
     print("window manager fold ability is disabled.")
