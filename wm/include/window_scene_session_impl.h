@@ -555,7 +555,7 @@ private:
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
-    float rsCornerRadius_;
+    float rsCornerRadius_ = WINDOW_CORNER_RADIUS_INVALID;
     WMError SetPcAppInpadSpecificSystemBarInvisible();
     WMError SetPcAppInpadOrientationLandscape();
 
