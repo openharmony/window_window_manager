@@ -16,6 +16,8 @@
 #ifndef OHOS_JS_EXTENSION_WINDOW_H
 #define OHOS_JS_EXTENSION_WINDOW_H
 
+#include <string>
+
 #include "extension_window.h"
 #include "extension_window_impl.h"
 #include "js_extension_window_register_manager.h"
@@ -23,7 +25,6 @@
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 #include "session_info.h"
-#include <string>
 
 namespace OHOS {
 namespace Rosen {

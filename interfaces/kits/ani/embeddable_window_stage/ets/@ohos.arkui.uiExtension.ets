@@ -234,7 +234,7 @@ namespace uiExtension {
 
     public snapshot(): Promise<image.PixelMap> {
       return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
-        reject: (error: BusinessError) => void): void => {
+          reject: (error: BusinessError) => void): void => {
         taskpool.execute((): image.PixelMap => {
           return this.snapshot(this.nativeObj);
         }).then((ret: Any) => {
@@ -251,7 +251,7 @@ namespace uiExtension {
 
     public snapshotIgnorePrivacy(): Promise<image.PixelMap> {
       return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
-        reject: (error: BusinessError) => void): void => {
+          reject: (error: BusinessError) => void): void => {
         taskpool.execute((): image.PixelMap => {
           return this.snapshotIgnorePrivacy(this.nativeObj);
         }).then((ret: Any) => {

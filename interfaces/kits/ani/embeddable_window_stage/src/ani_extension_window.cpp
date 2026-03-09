@@ -15,17 +15,17 @@
 
 #include "ani_extension_window.h"
 
-#include "ani.h"
 #include <ani_signature_builder.h>
+#include "ani.h"
 #include "ani_extension_window_register_manager.h"
-#include "ani_window_utils.h"
-#include "ani_window_listener.h"
-#include "extension_window_impl.h"
-#include "window_manager_hilog.h"
-#include "permission.h"
 #include "ani_window.h"
+#include "ani_window_listener.h"
+#include "ani_window_utils.h"
+#include "extension_window_impl.h"
+#include "permission.h"
 #include "pixel_map.h"
 #include "pixel_map_taihe_ani.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {

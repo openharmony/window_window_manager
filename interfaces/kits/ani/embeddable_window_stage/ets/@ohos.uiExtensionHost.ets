@@ -224,7 +224,7 @@ namespace uiExtensionHost {
         taskpool.execute((): window.Window => {
           return this.createSubWindowWithOptions(this.nativeObj, name, subWindowConfig, followCreatorLifecycle);
         }).then((ret: Any) => {
-            resolve(ret as window.Window);
+          resolve(ret as window.Window);
         }).catch((err: Any) => {
           reject(err as BusinessError);
         });
@@ -233,7 +233,7 @@ namespace uiExtensionHost {
 
     public snapshot(): Promise<image.PixelMap> {
       return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
-        reject: (error: BusinessError) => void): void => {
+          reject: (error: BusinessError) => void): void => {
         taskpool.execute((): image.PixelMap => {
           return this.snapshot(this.nativeObj);
         }).then((ret: Any) => {
@@ -250,7 +250,7 @@ namespace uiExtensionHost {
 
     public snapshotIgnorePrivacy(): Promise<image.PixelMap> {
       return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
-        reject: (error: BusinessError) => void): void => {
+          reject: (error: BusinessError) => void): void => {
         taskpool.execute((): image.PixelMap => {
           return this.snapshotIgnorePrivacy(this.nativeObj);
         }).then((ret: Any) => {
