@@ -254,6 +254,12 @@ void LayoutController::SetScale(float scaleX, float scaleY, float pivotX, float 
     pivotY_ = pivotY;
 }
 
+void LayoutController::SetRsScale(float rsScaleX, float rsScaleY)
+{
+    rsScaleX_ = rsScaleX;
+    rsScaleY_ = rsScaleY;
+}
+
 void LayoutController::SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, preScaleX:%{public}f, preScaleY:%{public}f, "
