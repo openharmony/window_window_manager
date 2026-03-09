@@ -1178,6 +1178,9 @@ private:
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);
     void MakeMirrorAfterSwitchUser();
 
+    void ExitCoordinationAndRecoverDisplayMode();
+    FoldDisplayMode GetCurrentDisplayMode();
+
     void SetLockDisplayModeWhenShutDown(PowerStateChangeReason reason, bool isLock);
 
     // mirror screen
