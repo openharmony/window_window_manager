@@ -188,6 +188,10 @@ __attribute__((no_sanitize("cfi"))) sptr<ISceneSessionManager> SessionManager::G
     InitSessionManagerServiceProxy();
     InitSceneSessionManagerProxy();
     std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
+    if (sceneSessionManagerProxy_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_SCB, "sceneSessionManagerProxy_ is nullptr, try again");
+        InitSceneSessionManagerProxy();
+    }
     return sceneSessionManagerProxy_;
 }
 
@@ -543,5 +547,6 @@ void SSMDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& wptrDeath)
     TLOGI(WmsLogTag::WMS_RECOVER, "ssm proxy died, userId_: %{public}d", userId_);
     SessionManager::GetInstance(userId_).RemoveSSMDeathRecipient();
     SessionManager::GetInstance(userId_).ClearSessionManagerProxy();
+    TLOGI(WmsLogTag::WMS_RECOVER, "ssm proxy died, clear end");
 }
 } // namespace OHOS::Rosen
