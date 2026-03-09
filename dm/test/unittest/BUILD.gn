@@ -18,11 +18,11 @@
  module_out_path = "window_manager/OH-DMS/dm"	 
  
  
- group("unittest") {	 
+ group("unittest") {
    testonly = true	 
  
  
-   deps = [	 
+   deps = [
      ":dm_display_change_unit_test",	 
      ":dm_display_manager_agent_stub_test",	 
      ":dm_display_power_unit_test",	 
@@ -32,10 +32,10 @@
      ":dm_screen_test",	 
      ":dm_screenshot_test",	 
    ]	 
-   if (!window_manager_use_sceneboard) {	 
+   if (!window_manager_use_sceneboard) {
      deps += [ ":dm_screen_manager_ut_test"]	 
-   } else {	 
-     deps += [	 
+   } else {
+     deps += [
        ":dm_screen_manager_test",	 
        ":dm_display_manager_adapter_test",	 
        ":dm_display_manager_agent_proxy_test",	 
@@ -45,7 +45,7 @@
  }	 
  
  
- ohos_unittest("dm_display_test") {	 
+ ohos_unittest("dm_display_test") {
    module_out_path = module_out_path	 
  
  
@@ -58,7 +58,7 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
      "napi:ace_napi",	 
@@ -68,7 +68,7 @@
  }	 
  
  
- ohos_unittest("dm_display_change_unit_test") {	 
+ ohos_unittest("dm_display_change_unit_test") {
    module_out_path = module_out_path	 
  
  
@@ -78,14 +78,14 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
    ]	 
  }	 
  
  
- ohos_unittest("dm_display_power_unit_test") {	 
+ ohos_unittest("dm_display_power_unit_test") {
    module_out_path = module_out_path	 
  
  
@@ -95,14 +95,14 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
    ]	 
  }	 
  
  
- ohos_unittest("dm_screenshot_test") {	 
+ ohos_unittest("dm_screenshot_test") {
    module_out_path = module_out_path	 
  
  
@@ -112,7 +112,7 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "cJSON:cjson_static",	 
      "c_utils:utils",	 
      "hilog:libhilog",	 
@@ -121,7 +121,7 @@
  }	 
  
  
- ohos_unittest("dm_screen_manager_test") {	 
+ ohos_unittest("dm_screen_manager_test") {
    module_out_path = module_out_path	 
  
  
@@ -134,14 +134,14 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
    ]	 
  }	 
  
  
- ohos_unittest("dm_screen_manager_ut_test") {	 
+ ohos_unittest("dm_screen_manager_ut_test") {
    module_out_path = module_out_path	 
  
  
@@ -154,7 +154,7 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "graphic_2d:librender_service_base",	 
      "hilog:libhilog",	 
@@ -162,20 +162,20 @@
  }	 
  
  
- ohos_unittest("dm_screen_test") {	 
+ ohos_unittest("dm_screen_test") {
    module_out_path = module_out_path	 
  
  
    sources = [ "screen_test.cpp" ]	 
  
  
-   deps = [	 
+   deps = [
      ":dm_unittest_common",	 
      "../../../window_scene/screen_session_manager:screen_session_manager",	 
    ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
      "libxml2:libxml2",	 
@@ -183,7 +183,7 @@
  }	 
  
  
- ohos_unittest("dm_screen_group_test") {	 
+ ohos_unittest("dm_screen_group_test") {
    module_out_path = module_out_path	 
  
  
@@ -193,14 +193,14 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
    ]	 
  }	 
  
  
- ohos_unittest("dm_display_manager_adapter_test") {	 
+ ohos_unittest("dm_display_manager_adapter_test") {
    module_out_path = module_out_path	 
  
  
@@ -210,14 +210,14 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
    ]	 
  }	 
  
  
- ohos_unittest("dm_display_manager_test") {	 
+ ohos_unittest("dm_display_manager_test") {
    module_out_path = module_out_path	 
  
  
@@ -230,7 +230,7 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "graphic_2d:librender_service_base",	 
      "hilog:libhilog",	 
@@ -238,7 +238,7 @@
  }	 
  
  
- ohos_unittest("dm_display_manager_agent_stub_test") {	 
+ ohos_unittest("dm_display_manager_agent_stub_test") {
    module_out_path = module_out_path	 
  
  
@@ -248,14 +248,14 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
    ]	 
  }	 
  
  
- ohos_unittest("dm_display_manager_agent_proxy_test") {	 
+ ohos_unittest("dm_display_manager_agent_proxy_test") {
    module_out_path = module_out_path	 
  
  
@@ -268,7 +268,7 @@
    deps = [ ":dm_unittest_common" ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
      "samgr:samgr_proxy",	 
@@ -276,7 +276,7 @@
  }	 
  
  
- ohos_unittest("dm_oh_display_manager_test") {	 
+ ohos_unittest("dm_oh_display_manager_test") {
    module_out_path = module_out_path	 
  
  
@@ -286,14 +286,14 @@
    sources = [ "oh_display_manager_test.cpp" ]	 
  
  
-   deps = [	 
+   deps = [
      ":dm_unittest_common",	 
      "${window_base_path}/dm:libdm_ndk",	 
      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils"	 
    ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "c_utils:utils",	 
      "hilog:libhilog",	 
      "image_framework:pixelmap",	 
@@ -301,9 +301,9 @@
  }	 
  
  
- ## Build dm_unittest_common.a {{{	 
- config("dm_unittest_common_public_config") {	 
-   include_dirs = [	 
+ ## Build dm_unittest_common.a {{{
+ config("dm_unittest_common_public_config") {
+   include_dirs = [
      "../../include",	 
      "../../include/zidl",	 
      "../../../dmserver/include",	 
@@ -320,19 +320,19 @@
  }	 
  
  
- ohos_static_library("dm_unittest_common") {	 
+ ohos_static_library("dm_unittest_common") {
    visibility = [ ":*" ]	 
    testonly = true	 
  
  
-   public_configs = [	 
+   public_configs = [
      ":dm_unittest_common_public_config",	 
      "../../../resources/config/build:coverage_flags",	 
      "../../../resources/config/build:testcase_flags",	 
    ]	 
  
  
-   public_deps = [	 
+   public_deps = [
      "${window_base_path}/dm:libdm",	 
      "${window_base_path}/utils:libwmutil",	 
      "${window_base_path}/utils:libwmutil_base",	 
@@ -344,7 +344,7 @@
    ]	 
  
  
-   public_external_deps = [	 
+   public_external_deps = [
      "ability_base:want",	 
      "c_utils:utils",	 
      "googletest:gmock",	 
@@ -356,7 +356,7 @@
    ]	 
  
  
-   external_deps = [	 
+   external_deps = [
      "access_token:libaccesstoken_sdk",	 
      "access_token:libnativetoken",	 
      "access_token:libtoken_setproc",	 
