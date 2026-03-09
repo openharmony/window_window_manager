@@ -409,7 +409,7 @@ screen_session_public_external_deps = [
   "input:libmmi-napi",
 ]
 
-## Build libscreen_session_manager_static.a
+## Build libscreen_session_static.a
 ohos_static_library("screen_session_static") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -418,12 +418,10 @@ ohos_static_library("screen_session_static") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  sources = screen_session_sources
 
   public_configs = [ ":session_public_config" ]
-
+  sources = screen_session_sources
   deps = screen_session_deps
-
   external_deps = screen_session_external_deps
   external_deps += screen_session_public_external_deps
 
@@ -444,7 +442,7 @@ ohos_static_library("screen_session_static") {
   subsystem_name = "window"
 }
 
-## Build libscreen_session_manager.z.so
+## Build libscreen_session.z.so
 ohos_shared_library("screen_session") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -453,12 +451,10 @@ ohos_shared_library("screen_session") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  sources = screen_session_sources
 
   public_configs = [ ":session_public_config" ]
-
+  sources = screen_session_sources
   deps = screen_session_deps
-
   external_deps = screen_session_external_deps
   public_external_deps = screen_session_public_external_deps
 
