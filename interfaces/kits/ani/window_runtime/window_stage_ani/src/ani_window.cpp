@@ -2966,6 +2966,42 @@ void AniWindow::OnDestroyWindow(ani_env* env)
     windowToken_ = nullptr;
 }
 
+void AniWindow::CloseDirectly(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnCloseDirectly(env);
+    } else {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI] aniWindow is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
+void AniWindow::OnCloseDirectly(ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]");
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!WindowHelper::IsMainWindow(window->GetType()) && !WindowHelper::IsSubWindow(window->GetType())) {
+        TLOGW(WmsLogTag::WMS_PC, "window Type %{public}u is not supported, [%{public}u, %{public}s]",
+            static_cast<uint32_t>(window->GetType()), window->GetWindowId(), window->GetWindowName().c_str());
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->CloseDirectly());
+    TLOGI(WmsLogTag::WMS_PC, "window [%{public}u, %{public}s] ret=%{public}d",
+        window->GetWindowId(), window->GetWindowName().c_str(), ret);
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "Window close directly failed");
+        return;
+    }
+    windowToken_ = nullptr;
+}
+
 ani_boolean AniWindow::IsWindowShowing(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -6587,6 +6623,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(Restore)},
         ani_native_function {"destroyWindowSync", nullptr,
             reinterpret_cast<void *>(AniWindow::DestroyWindow)},
+        ani_native_function {"closeDirectlySync", nullptr,
+            reinterpret_cast<void *>(AniWindow::CloseDirectly)},
         ani_native_function {"isWindowShowingSync", nullptr,
             reinterpret_cast<void *>(AniWindow::IsWindowShowing)},
         ani_native_function {"hideWithAnimationSync", nullptr,

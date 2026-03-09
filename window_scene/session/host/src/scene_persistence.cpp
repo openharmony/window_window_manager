@@ -43,6 +43,7 @@ constexpr uint8_t SUCCESS = 0;
 
 std::string ScenePersistence::snapshotDirectory_;
 std::string ScenePersistence::updatedIconDirectory_;
+std::string ScenePersistence::abilityIconDirectory_;
 std::string ScenePersistence::startWindowDirectory_;
 std::shared_ptr<WSFFRTHelper> ScenePersistence::snapshotFfrtHelper_;
 bool ScenePersistence::isAstcEnabled_ = false;
@@ -61,6 +62,16 @@ bool ScenePersistence::CreateUpdatedIconDir(const std::string& directory)
 {
     updatedIconDirectory_ = directory + "/UpdatedIcon/";
     if (mkdir(updatedIconDirectory_.c_str(), S_IRWXU)) {
+        TLOGD(WmsLogTag::DEFAULT, "mkdir failed or the directory already exists");
+        return false;
+    }
+    return true;
+}
+
+bool ScenePersistence::CreateAbilityIconDir(const std::string& directory)
+{
+    abilityIconDirectory_ = directory + "/AbilityIcon/";
+    if (mkdir(abilityIconDirectory_.c_str(), S_IRWXU)) {
         TLOGD(WmsLogTag::DEFAULT, "mkdir failed or the directory already exists");
         return false;
     }
@@ -138,6 +149,8 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
     snapshotFreeMultiWindowPath_ = snapshotDirectory_ + bundleName + UNDERLINE_SEPARATOR +
         std::to_string(persistentId) + suffix;
     updatedIconPath_ = updatedIconDirectory_ + bundleName + IMAGE_SUFFIX;
+    abilityIconPath_ = abilityIconDirectory_ + bundleName + UNDERLINE_SEPARATOR +
+        std::to_string(persistentId) + IMAGE_SUFFIX;
     if (snapshotFfrtHelper_ == nullptr) {
         snapshotFfrtHelper_ = std::make_shared<WSFFRTHelper>();
     }
@@ -148,15 +161,26 @@ ScenePersistence::ScenePersistence(const std::string& bundleName, int32_t persis
 ScenePersistence::~ScenePersistence()
 {
     ClearSnapshotPath();
+    ClearAbilityIconPath();
 }
 
 void ScenePersistence::ClearSnapshotPath()
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "persistentId: %{public}d", persistentId_);
-    for (const auto& snapshotPath : snapshotPath_) {
-        remove(snapshotPath.c_str());
-    }
-    remove(snapshotFreeMultiWindowPath_.c_str());
+    auto task = [snapshotPath = snapshotPath_, snapshotFreeMultiWindowPath = snapshotFreeMultiWindowPath_,
+        persistentId = persistentId_, capacity = capacity_, where = __func__]() {
+        TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s persistentId: %{public}d", where, persistentId);
+        for (size_t i = 0; i < capacity; i++) {
+            remove(snapshotPath[i].c_str());
+        }
+        remove(snapshotFreeMultiWindowPath.c_str());
+    };
+    snapshotFfrtHelper_->SubmitTask(std::move(task), "ClearSnapshotPath" + std::to_string(persistentId_));
+}
+
+void ScenePersistence::ClearAbilityIconPath()
+{
+    TLOGI(WmsLogTag::WMS_PATTERN, "clear icon, persistentId: %{public}d", persistentId_);
+    remove(abilityIconPath_.c_str());
 }
 
 std::shared_ptr<WSFFRTHelper> ScenePersistence::GetSnapshotFfrtHelper() const
@@ -339,7 +363,29 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
     if (pixelMap == nullptr || updatedIconPath_.find('/') == std::string::npos) {
         return;
     }
+    SaveIcon(pixelMap, updatedIconPath_);
+}
 
+std::string ScenePersistence::GetUpdatedIconPath() const
+{
+    return updatedIconPath_;
+}
+
+void ScenePersistence::SaveAbilityIcon(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (pixelMap == nullptr || abilityIconPath_.find('/') == std::string::npos) {
+        return;
+    }
+    SaveIcon(pixelMap, abilityIconPath_);
+}
+
+std::string ScenePersistence::GetAbilityIconPath() const
+{
+    return abilityIconPath_;
+}
+
+void ScenePersistence::SaveIcon(const std::shared_ptr<Media::PixelMap>& pixelMap, std::string iconPath)
+{
     OHOS::Media::ImagePacker imagePacker;
     OHOS::Media::PackOption option;
     option.format = IMAGE_FORMAT;
@@ -353,28 +399,23 @@ void ScenePersistence::SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& p
             ICON_IMAGE_WIDTH_HEIGHT_SIZE / ((double) pixelMap->GetHeight()) : ICON_IMAGE_MAX_SCALE;
         pixelMap->scale(xScale, yScale, Media::AntiAliasingOption::MEDIUM);
     }
-    if (remove(updatedIconPath_.c_str())) {
+    if (remove(iconPath.c_str())) {
         TLOGD(WmsLogTag::DEFAULT, "Failed to delete old file");
     }
-    if (imagePacker.StartPacking(GetUpdatedIconPath(), option)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, starting packing error");
+    if (imagePacker.StartPacking(iconPath, option)) {
+        TLOGE(WmsLogTag::DEFAULT, "Save icon failed, starting packing error");
         return;
     }
     if (imagePacker.AddImage(*pixelMap)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, adding image error");
+        TLOGE(WmsLogTag::DEFAULT, "Save icon failed, adding image error");
         return;
     }
     int64_t packedSize = 0;
     if (imagePacker.FinalizePacking(packedSize)) {
-        TLOGE(WmsLogTag::DEFAULT, "Save updated icon failed, finalizing packing error");
+        TLOGE(WmsLogTag::DEFAULT, "Save icon failed, finalizing packing error");
         return;
     }
-    TLOGD(WmsLogTag::DEFAULT, "SaveUpdatedIcon finished");
-}
-
-std::string ScenePersistence::GetUpdatedIconPath() const
-{
-    return updatedIconPath_;
+    TLOGD(WmsLogTag::DEFAULT, "SaveIcon finished");
 }
 
 void ScenePersistence::SetSnapshotSize(SnapshotStatus key, bool freeMultiWindow, std::pair<uint32_t, uint32_t> size)

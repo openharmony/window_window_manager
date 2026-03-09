@@ -1659,12 +1659,7 @@ int SceneSessionManagerStub::HandleGetTopNavDestinationName(MessageParcel& data,
     if (errCode != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "get top page name failed");
     }
-    uint32_t size = static_cast<uint32_t>(topNavDestName.length());
-    if (!reply.WriteUint32(size)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write the size of top page name failed");
-        return ERR_INVALID_DATA;
-    }
-    if (size > 0 && !reply.WriteRawData(topNavDestName.c_str(), size)) {
+    if (!reply.WriteString(topNavDestName)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write top page name failed");
         return ERR_INVALID_DATA;
     }

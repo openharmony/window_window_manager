@@ -240,6 +240,7 @@ private:
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlank(napi_env env, napi_callback_info info);
     static napi_value RemoveBlank(napi_env env, napi_callback_info info);
+    static napi_value LayerPartRender(napi_env env, napi_callback_info info);
     static napi_value AddSnapshot(napi_env env, napi_callback_info info);
     static napi_value RemoveSnapshot(napi_env env, napi_callback_info info);
     static napi_value SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
@@ -339,6 +340,7 @@ private:
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlank(napi_env env, napi_callback_info info);
     napi_value OnRemoveBlank(napi_env env, napi_callback_info info);
+    napi_value OnLayerPartRender(napi_env env, napi_callback_info info);
     napi_value OnAddSnapshot(napi_env env, napi_callback_info info);
     napi_value OnRemoveSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
@@ -541,7 +543,8 @@ private:
     void OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
-    void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+    void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon,
+        const std::string& updatedIconPath);
     void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
         const uint32_t callingSessionId, const DisplayId targetDisplayId);
     void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);

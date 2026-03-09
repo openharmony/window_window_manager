@@ -41,6 +41,7 @@ sptr<SettingObserver> ScreenSettingHelper::correctionWhiteListObserver_;
 sptr<SettingObserver> ScreenSettingHelper::borderingAreaPercentObserver_;
 sptr<SettingObserver> ScreenSettingHelper::coordinationReadyObserver_;
 sptr<SettingObserver> ScreenSettingHelper::wiredScreenGamutObserver_;
+sptr<SettingObserver> ScreenSettingHelper::osSwitchStatusObserver_;
 constexpr int32_t PARAM_NUM_TEN = 10;
 constexpr uint32_t EXPECT_ACTIVE_MODE_SIZE = 4;
 constexpr uint32_t EXPECT_SCREEN_MODE_SIZE = 2;
@@ -1335,6 +1336,52 @@ FoldDisplayMode ScreenSettingHelper::ConvertStringToFoldDisplayModeSafely(const 
     }
     TLOGW(WmsLogTag::DEFAULT, "[DMS] Unknown str: %{public}s", str.c_str());
     return FoldDisplayMode::UNKNOWN;
+}
+
+void ScreenSettingHelper::RegisterSettingOsSwitchStatusObserver(SettingObserver::UpdateFunc func)
+{
+    if (osSwitchStatusObserver_) {
+        TLOGE(WmsLogTag::DMS, "setting observer is registered");
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    osSwitchStatusObserver_ = provider.CreateObserver(SETTING_OS_SWITCH_STATUS, func);
+    if (osSwitchStatusObserver_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "create observer failed");
+        return;
+    }
+    ErrCode ret = provider.RegisterObserver(osSwitchStatusObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        osSwitchStatusObserver_ = nullptr;
+    }
+}
+
+void ScreenSettingHelper::UnregisterSettingOsSwitchStatusObserver()
+{
+    if (osSwitchStatusObserver_ == nullptr) {
+        TLOGD(WmsLogTag::DMS, "setting observer is nullptr");
+        return;
+    }
+    SettingProvider& provider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = provider.UnregisterObserver(osSwitchStatusObserver_);
+    if (ret != ERR_OK) {
+        TLOGW(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+    }
+    osSwitchStatusObserver_ = nullptr;
+}
+
+bool ScreenSettingHelper::GetOsSwitchStatus(std::string& status, const std::string& key)
+{
+    std::string value = "";
+    SettingProvider& settingProvider = SettingProvider::GetInstance(DISPLAY_MANAGER_SERVICE_SA_ID);
+    ErrCode ret = settingProvider.GetStringValue(key, value);
+    if (ret != ERR_OK) {
+        TLOGE(WmsLogTag::DMS, "failed, ret=%{public}d", ret);
+        return false;
+    }
+    status = value;
+    return true;
 }
 // LCOV_EXCL_STOP
 } // namespace Rosen

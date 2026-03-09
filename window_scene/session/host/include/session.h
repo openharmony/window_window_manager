@@ -111,8 +111,8 @@ using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfi
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType type, TransitionAnimation animation)>;
-using NofitySessionLabelAndIconUpdatedFunc =
-    std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NofitySessionLabelAndIconUpdatedFunc = std::function<void(const std::string& label,
+    const std::shared_ptr<Media::PixelMap>& icon, const std::string& updatedIconPath)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption,
     const uint32_t callingSessionId, const DisplayId targetDisplayId)>;
@@ -285,6 +285,7 @@ public:
     void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
     bool IsStatusBarVisible() const;
     virtual bool IsInLSState() const { return false; }
+    virtual WSError GetScaleInLSState(float& scaleX, float& scaleY) const { return WSError::WS_DO_NOTHING; }
 
     /*
      * Cross Display Move Drag
@@ -423,6 +424,8 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
+    void SetLayerPartRender(bool isLayerPartRender);
+    bool GetLayerPartRender() const;
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
@@ -593,6 +596,8 @@ public:
     void SetIsMidScene(bool isMidScene);
     bool GetIsMidScene() const;
     WSError GetIsMidScene(bool& isMidScene) override;
+    void SetIsNeedRemoveSnapShot(bool isNeedRemoveSnapShot);
+    bool GetIsNeedRemoveSnapShot() const;
 
     /*
      * Keyboard Window
@@ -638,8 +643,11 @@ public:
     virtual void SetFloatingScale(float floatingScale);
     float GetFloatingScale() const;
     virtual void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetRsScale(float rsScaleX, float rsScaleY);
     float GetScaleX() const;
     float GetScaleY() const;
+    float GetRsScaleX() const;
+    float GetRsScaleY() const;
     float GetPivotX() const;
     float GetPivotY() const;
     void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
@@ -1214,6 +1222,7 @@ private:
      * Multi Window
      */
     bool isMidScene_ = false;
+    std::atomic<bool> isNeedRemoveSnapShot_ { true };
 
     WSRect preRect_;
     int32_t callingPid_ = -1;
@@ -1316,7 +1325,7 @@ private:
     bool isOutlineEnabled_ = false;
     OutlineStyleParams outlineStyleParams_;
     OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
+    bool isLayerPartRender_ = false;
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H

@@ -675,7 +675,8 @@ HWTEST_F(MainSessionTest, SetSessionLabelAndIconInner, TestSize.Level1)
     ASSERT_EQ(WSError::WS_OK, mainSession_->SetSessionLabelAndIconInner(label, icon));
 
     mainSession_->SetUpdateSessionLabelAndIconListener(
-        [](const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) {
+        [](const std::string& label, const std::shared_ptr<Media::PixelMap>& icon,
+        const std::string& updatedIconPath) {
     });
     ASSERT_EQ(WSError::WS_OK, mainSession_->SetSessionLabelAndIconInner(label, icon));
 }
@@ -690,7 +691,8 @@ HWTEST_F(MainSessionTest, SetUpdateSessionLabelAndIconListener, TestSize.Level1)
     std::string label = "test";
     std::shared_ptr<Media::PixelMap> icon;
     mainSession_->SetUpdateSessionLabelAndIconListener(
-        [](const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) {
+        [](const std::string& label, const std::shared_ptr<Media::PixelMap>& icon,
+        const std::string& updatedIconPath) {
     });
     ASSERT_NE(nullptr, mainSession_->updateSessionLabelAndIconFunc_);
 }
@@ -1183,7 +1185,7 @@ HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated01, TestSize
     ASSERT_NE(session, nullptr);
     session->sessionStage_ = nullptr;
     
-    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated();
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1202,7 +1204,7 @@ HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated02, TestSize
     ASSERT_NE(session, nullptr);
     session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     
-    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated();
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false);
     EXPECT_EQ(res, WSError::WS_OK);
 }
 

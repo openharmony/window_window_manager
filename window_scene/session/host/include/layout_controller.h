@@ -48,11 +48,14 @@ public:
     void SetAspectRatio(float ratio) { aspectRatio_ = ratio; }
     float GetScaleX() const { return scaleX_; }
     float GetScaleY() const { return scaleY_; }
+    float GetRsScaleX() const { return rsScaleX_; }
+    float GetRsScaleY() const { return rsScaleY_; }
     float GetPivotX() const { return pivotX_; }
     float GetPivotY() const { return pivotY_; }
     void UpdateSizeChangeReason(SizeChangeReason reason) { reason_ = reason; }
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetRsScale(float rsScaleX, float rsScaleY);
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     bool IsTransformNeedUpdate(float scaleX, float scaleY, float pivotX, float pivotY);
     void SetSystemConfigFunc(GetSystemConfigFunc&& func);
@@ -60,6 +63,8 @@ public:
 private:
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
+    float rsScaleX_ = 1.0f;
+    float rsScaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
     float clientScaleX_ = 1.0f;

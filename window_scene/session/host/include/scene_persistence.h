@@ -36,6 +36,7 @@ public:
 
     static bool CreateSnapshotDir(const std::string& directory);
     static bool CreateUpdatedIconDir(const std::string& directory);
+    static bool CreateAbilityIconDir(const std::string& directory);
     static bool CreateStartWindowDir(const std::string& directory);
     void SaveStartWindow(const std::shared_ptr<Media::PixelMap>& pixelMap, const std::string& saveStartWindowkey,
         const std::function<void(std::string, std::string)>& saveStartWindowCallback);
@@ -48,6 +49,7 @@ public:
     bool HasSnapshot() const;
     bool HasSnapshot(SnapshotStatus key, bool freeMultiWindow = false) const;
     void ClearSnapshotPath();
+    void ClearAbilityIconPath();
     void ClearSnapshot();
     bool IsSnapshotExisted(SnapshotStatus key = defaultStatus);
     std::string GetSnapshotFilePath(SnapshotStatus& key, bool useKey = false, bool freeMultiWindow = false);
@@ -68,6 +70,9 @@ public:
 
     void SaveUpdatedIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
     std::string GetUpdatedIconPath() const;
+    void SaveAbilityIcon(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    std::string GetAbilityIconPath() const;
+    void SaveIcon(const std::shared_ptr<Media::PixelMap>& pixelMap, std::string iconPath);
     std::shared_ptr<Media::PixelMap> GetLocalSnapshotPixelMap(const float oriScale, const float newScale,
         SnapshotStatus key = defaultStatus, bool freeMultiWindow = false);
     DisplayOrientation rotate_[SCREEN_COUNT] = {};
@@ -87,6 +92,9 @@ private:
     static std::string updatedIconDirectory_;
     std::string updatedIconPath_;
     static bool isAstcEnabled_;
+
+    static std::string abilityIconDirectory_;
+    std::string abilityIconPath_;
 
     static std::string startWindowDirectory_;
 

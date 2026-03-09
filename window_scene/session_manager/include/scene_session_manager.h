@@ -479,7 +479,6 @@ public:
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
-    bool CheckCollaboratorType(int32_t type);
     sptr<SceneSession> FindSessionByAffinity(const std::string& affinity);
     void AddWindowDragHotArea(DisplayId displayId, uint32_t type, WSRect& area);
     void PreloadInLakeApp(const std::string& bundleName);
@@ -702,7 +701,8 @@ public:
     void UpdateSecSurfaceInfo(std::shared_ptr<RSUIExtensionData> secExtensionData, uint64_t userId);
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, AppForceLandscapeConfig& config);
-    WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape);
+    WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape,
+        bool needUpdateViewport = false);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
     bool GetAppForceLandscapeConfigEnable(const std::string& bundleName);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
@@ -926,6 +926,7 @@ public:
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
 
     void NotifyRotationBegin(bool isStopDrag);
+    void SortVisibilityWindowInfos(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
 
 protected:
     SceneSessionManager();
@@ -960,9 +961,69 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+
+    /**
+     * @brief Configure window layout related settings.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <!-- window layout related configs -->
+     *   </windowLayout>
+     *
+     * @param windowLayoutConfig The window layout configuration item.
+     * @return Returns true if the config is valid and processed; returns false otherwise.
+     */
     bool ConfigWindowLayout(const WindowSceneConfig::ConfigItem& windowLayoutConfig);
+
+    /**
+     * @brief Configure move-drag related settings.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <moveDrag>
+     *       <!-- move drag related configs -->
+     *     </moveDrag>
+     *   </windowLayout>
+     *
+     * @param moveDragConfig The move-drag configuration item.
+     * @return Returns true if the config is valid and processed; returns false otherwise.
+     */
     bool ConfigMoveDrag(const WindowSceneConfig::ConfigItem& moveDragConfig);
+
+    /**
+     * @brief Configure move resampling behavior during drag.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <moveDrag>
+     *       <moveResample enable="true">
+     *         <resampleFpsRange>29 91</resampleFpsRange>
+     *       </moveResample>
+     *     </moveDrag>
+     *   </windowLayout>
+     *
+     * @param moveResampleConfig The move-resample configuration item.
+     * @return Returns true if the config is valid and processed; returns false otherwise.
+     */
     bool ConfigMoveResample(const WindowSceneConfig::ConfigItem& moveResampleConfig);
+
+    /**
+     * @brief Configure moving event throttling behavior.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <moveDrag>
+     *       <movingEvent>
+     *         <throttleInterval>1500</throttleInterval>
+     *       </movingEvent>
+     *     </moveDrag>
+     *   </windowLayout>
+     *
+     * @param movingEventConfig The moving-event configuration item.
+     * @return Returns true if the config is valid and applied; returns false otherwise.
+     */
+    bool ConfigMovingEvent(const WindowSceneConfig::ConfigItem& movingEventConfig);
+
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);
@@ -1100,7 +1161,7 @@ private:
     void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused, const sptr<FocusGroup>& focusGroup,
         const sptr<FocusNotifyInfo>& focusNotifyInfo);
     sptr<FocusNotifyInfo> GetFocusNotifyInfo(DisplayId displayId, const sptr<SceneSession>& nextSession);
-    int32_t NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
+    void NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
     void NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     void NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession);
     void NotifyFocusedByMission(const sptr<SceneSession>& sceneSession);

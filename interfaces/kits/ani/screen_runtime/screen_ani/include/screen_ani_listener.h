@@ -27,8 +27,8 @@ namespace OHOS {
 namespace Rosen {
 class ScreenAniListener : public ScreenManager::IScreenListener {
 public:
-    explicit ScreenAniListener(ani_env* env)
-        : env_(env), weakRef_(wptr<ScreenAniListener> (this)) {}
+    explicit ScreenAniListener(ani_env* env, ani_vm* vm)
+        : env_(env), vm_(vm), weakRef_(wptr<ScreenAniListener> (this)) {}
     ~ScreenAniListener() override;
     void AddCallback(const std::string& type, ani_ref callback);
     void RemoveAllCallback();
@@ -42,6 +42,7 @@ public:
 
 private:
     ani_env* env_;
+    ani_vm* vm_;
     std::mutex mtx_;
     std::map<std::string, std::vector<ani_ref>> aniCallback_;
     wptr<ScreenAniListener> weakRef_;

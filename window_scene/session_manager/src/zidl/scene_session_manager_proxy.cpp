@@ -2115,6 +2115,10 @@ WSError SceneSessionManagerProxy::UnregisterIAbilityManagerCollaborator(int32_t 
         WLOGFE("Write interface token failed.");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    if (!CheckCollaboratorType(type)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "type is invalid.");
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
     if (!data.WriteInt32(type)) {
         WLOGFE("type write failed.");
         return WSError::WS_ERROR_INVALID_PARAM;
@@ -2557,12 +2561,10 @@ WMError SceneSessionManagerProxy::GetTopNavDestinationName(int32_t windowId, std
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send request failed, errCode: %{public}d", reqErrCode);
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    const char* namePtr = nullptr;
-    auto size = reply.ReadUint32();
-    if (size != 0) {
-        namePtr = reinterpret_cast<const char*>(reply.ReadRawData(size));
+    if (!reply.ReadString(topNavDestName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read topNavDestName failed");
+        return WMError::WM_ERROR_IPC_FAILED;
     }
-    topNavDestName = (namePtr != nullptr) ? std::string(namePtr, size) : "";
     int32_t errCode = 0;
     if (!reply.ReadInt32(errCode)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
