@@ -2519,7 +2519,7 @@ void ScreenSessionManager::HandleRotationCorrectionExemption(sptr<DisplayInfo>& 
     if (!CORRECTION_ENABLE || SessionPermission::IsSACalling()) {
         return;
     }
-    FoldDisplayMode foldDisplayMode = GetFoldDisplayMode();
+    FoldDisplayMode foldDisplayMode = GetCurrentDisplayMode();
     {
         std::shared_lock<std::shared_mutex> lock(ssmRotationCorrectionMutex_);
         auto it = rotationCorrectionMap_.find(foldDisplayMode);
@@ -2552,6 +2552,15 @@ void ScreenSessionManager::HandleRotationCorrectionExemption(sptr<DisplayInfo>& 
             "%{public}s", displayInfo->GetRotation(), rotation, bundleName.c_str());
         displayInfo->SetRotation(rotation);
     }
+}
+
+FoldDisplayMode ScreenSessionManager::GetCurrentDisplayMode()
+{
+    FoldDisplayMode foldDisplayMode = GetFoldDisplayMode();
+    if (foldScreenController_ != nullptr) {
+        foldDisplayMode = foldScreenController_->GetCurrentDisplayMode();
+    }
+    return foldDisplayMode;
 }
  
 void ScreenSessionManager::GetRotationCorrectionExemptionListFromDatabase(bool isForce)
@@ -9823,10 +9832,21 @@ DMError ScreenSessionManager::SetFoldDisplayModeInner(const FoldDisplayMode disp
     if (reason.compare("backSelfie") == 0) {
         UpdateCameraBackSelfie(true);
     }
+    if (reason.compare("exitCoordinationMode")) {
+        ExitCoordinationAndRecoverDisplayMode();
+        return DMError::DM_OK;
+    }
     foldScreenController_->SetDisplayMode(displayMode);
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 #endif
     return DMError::DM_OK;
+}
+
+void ScreenSessionManager::ExitCoordinationAndRecoverDisplayMode()
+{
+    TLOGNFI(WmsLogTag::DMS, "exitCoordinationMode");
+    ExitCoordination("exitCoordinationFromInner");
+    foldScreenController_->RecoverDisplayMode();
 }
 
 DMError ScreenSessionManager::SetFoldDisplayModeFromJs(const FoldDisplayMode displayMode, std::string reason)

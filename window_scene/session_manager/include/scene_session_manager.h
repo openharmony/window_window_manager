@@ -926,6 +926,7 @@ public:
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
 
     void NotifyRotationBegin(bool isStopDrag);
+    void SortVisibilityWindowInfos(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
 
 protected:
     SceneSessionManager();
