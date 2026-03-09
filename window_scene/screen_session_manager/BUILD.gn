@@ -75,7 +75,7 @@ screen_session_manager_sources = [
   "src/screen_sensor_plugin.cpp",
   "src/screen_session_dumper.cpp",
   "src/screen_session_manager.cpp",
-  "src/screen_session_manager_adapter.cpp"
+  "src/screen_session_manager_adapter.cpp",
   "src/screen_setting_helper.cpp",
   "src/screen_tent_property.cpp",
   "src/setting_observer.cpp",
