@@ -15,18 +15,18 @@
 
 #include "js_extension_window.h"
 
+#include "extension_window.h"
 #include "js_err_utils.h"
 #include "js_extension_window_utils.h"
+#include "js_window.h"
 #include "js_runtime_utils.h"
 #include "js_window_utils.h"
-#include "js_window.h"
-#include "window_manager_hilog.h"
-#include "wm_common.h"
+#include "permission.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
-#include "extension_window.h"
 #include "ui_content.h"
-#include "permission.h"
+#include "window_manager_hilog.h"
+#include "wm_common.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -96,7 +96,7 @@ JsExtensionWindow::JsExtensionWindow(const std::shared_ptr<Rosen::ExtensionWindo
     : extensionWindow_(extensionWindow),
     windowToken_(extensionWindow != nullptr ? extensionWindow->GetWindow() : nullptr),
     windowName_(windowToken_ != nullptr ? windowToken_->GetWindowName() : ""),
-    hostWindowId_(-1), sessionInfo_(sessionInfo),
+    sessionInfo_(sessionInfo),
     extensionRegisterManager_(std::make_unique<JsExtensionWindowRegisterManager>()) {
 }
 
@@ -593,7 +593,7 @@ napi_value JsExtensionWindow::GetWindowSystemBarProperties(napi_env env, napi_ca
 
 napi_value JsExtensionWindow::Snapshot(napi_env env, napi_callback_info info)
 {
-    WLOGI("Snapshot");
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "Snapshot");
     JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSnapshot(env, info) : nullptr;
 }
@@ -2106,7 +2106,7 @@ napi_value JsExtensionWindow::OnSnapshot(napi_env env, napi_callback_info info)
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask] {
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
-            WLOGFE("window is nullptr");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][snapshot]msg: The window is not created or destroyed"));
             return;
@@ -2116,19 +2116,19 @@ napi_value JsExtensionWindow::OnSnapshot(napi_env env, napi_callback_info info)
         if (pixelMap == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][snapshot]msg: Get pixelMap failed"));
-            WLOGFE("window snapshot get pixelmap is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window snapshot get pixelmap is null");
             return;
         }
 
         auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
         if (nativePixelMap == nullptr) {
-            WLOGFE("window snapshot get nativePixelMap is null");
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window snapshot get nativePixelMap is null");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][snapshot]msg: Create pixelMap failed"));
             return;
         }
         task->Resolve(env, nativePixelMap);
-        WLOGI("Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
             weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
             pixelMap->GetWidth(), pixelMap->GetHeight());
     };
