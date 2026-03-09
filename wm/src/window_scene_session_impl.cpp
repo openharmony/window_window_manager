@@ -718,7 +718,8 @@ void WindowSceneSessionImpl::UpdateWindowState()
 }
 
 WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isModuleAbilityHookEnd)
+    const sptr<Rosen::ISession>& iSession, const std::string& identityToken, bool isModuleAbilityHookEnd,
+    bool isBlockSubwindow)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create name:%{public}s, state:%{public}u, mode:%{public}u",
         property_->GetWindowName().c_str(), state_, GetWindowMode());

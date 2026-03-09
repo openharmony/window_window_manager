@@ -484,4 +484,3 @@ bool WindowOption::IsCrossProcessWindow() const
 }
 } // namespace Rosen
 } // namespace OHOS
-

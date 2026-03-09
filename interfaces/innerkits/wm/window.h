@@ -1802,6 +1802,13 @@ public:
     virtual bool IsTransparent() const { return false; }
 
     /**
+     * @brief Get whether the session is blocking sub window.
+     *
+     * @return True means the session is blocking sub window, false means the opposite.
+     */
+    virtual bool GetIsBlockSubwindow() const { return false; }
+
+    /**
      * @brief Set brightness value of window.
      *
      * @param brightness Brightness of window.
