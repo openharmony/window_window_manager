@@ -1629,6 +1629,49 @@ HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfo, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetVisibilityWindowInfoSortByZOrder
+ * @tc.desc: test visibility infos are sorted by zOrder in descending order
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfoSortByZOrder, Function | SmallTest | Level2)
+{
+    auto oldVisibleData = ssm_->lastVisibleData_;
+    auto oldSessionMap = ssm_->sceneSessionMap_;
+    SessionInfo lowInfo;
+    SessionInfo highInfo;
+    sptr<SceneSession> lowSession = sptr<SceneSession>::MakeSptr(lowInfo, nullptr);
+    sptr<SceneSession> highSession = sptr<SceneSession>::MakeSptr(highInfo, nullptr);
+    ASSERT_NE(lowSession, nullptr);
+    ASSERT_NE(highSession, nullptr);
+    lowSession->persistentId_ = 3001;
+    highSession->persistentId_ = 3002;
+    lowSession->SetZOrder(100);
+    highSession->SetZOrder(200);
+    struct RSSurfaceNodeConfig lowConfig;
+    struct RSSurfaceNodeConfig highConfig;
+    std::shared_ptr<RSSurfaceNode> lowSurface = RSSurfaceNode::Create(lowConfig, RSSurfaceNodeType::DEFAULT);
+    std::shared_ptr<RSSurfaceNode> highSurface = RSSurfaceNode::Create(highConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_NE(lowSurface, nullptr);
+    ASSERT_NE(highSurface, nullptr);
+    lowSession->SetSurfaceNode(lowSurface);
+    highSession->SetSurfaceNode(highSurface);
+    ssm_->sceneSessionMap_ = { { lowSession->GetPersistentId(), lowSession },
+        { highSession->GetPersistentId(), highSession } };
+    ssm_->lastVisibleData_ = { { lowSurface->GetId(), WindowVisibilityState::START },
+        { highSurface->GetId(), WindowVisibilityState::START } };
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    auto result = ssm_->GetVisibilityWindowInfo(infos);
+    EXPECT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(infos.size(), 2);
+    ASSERT_NE(infos[0], nullptr);
+    ASSERT_NE(infos[1], nullptr);
+    EXPECT_EQ(infos[0]->GetZOrder(), 200);
+    EXPECT_EQ(infos[1]->GetZOrder(), 100);
+    ssm_->lastVisibleData_ = oldVisibleData;
+    ssm_->sceneSessionMap_ = oldSessionMap;
+}
+
+/**
  * @tc.name: SendPointerEventForHover
  * @tc.desc: SendPointerEventForHover
  * @tc.type: FUNC
