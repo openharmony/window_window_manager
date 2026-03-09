@@ -285,6 +285,7 @@ public:
     void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
     bool IsStatusBarVisible() const;
     virtual bool IsInLSState() const { return false; }
+    virtual WSError GetScaleInLSState(float& scaleX, float& scaleY) const { return WSError::WS_DO_NOTHING; }
 
     /*
      * Cross Display Move Drag
@@ -642,8 +643,11 @@ public:
     virtual void SetFloatingScale(float floatingScale);
     float GetFloatingScale() const;
     virtual void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetRsScale(float rsScaleX, float rsScaleY);
     float GetScaleX() const;
     float GetScaleY() const;
+    float GetRsScaleX() const;
+    float GetRsScaleY() const;
     float GetPivotX() const;
     float GetPivotY() const;
     void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
