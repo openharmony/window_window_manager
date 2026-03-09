@@ -11596,7 +11596,9 @@ void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
         TLOGE(WmsLogTag::DMS, "Internal Session null");
         return;
     }
-    internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+        internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
+    }
 }
 
 void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScbPid, bool coldBoot)
