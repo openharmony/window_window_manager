@@ -509,6 +509,7 @@ public:
      * Window Immersive
      */
     bool IsInLSState() const override;
+    WSError GetScaleInLSState(float& scaleX, float& scaleY) const override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
@@ -1061,7 +1062,7 @@ protected:
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
-    bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
+    bool UpdateScaleInner(float scaleX, float scaleY, float rsScaleX, float rsScaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
 
     /*
@@ -1248,7 +1249,6 @@ private:
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
     template<typename T>
     Rect CalculateAvoidAreaByScale(WSRectT<T>& avoidAreaRect) const;
-    WSError GetScaleInLSState(float& scaleX, float& scaleY)  const;
 
     /*
      * Window Lifecycle
