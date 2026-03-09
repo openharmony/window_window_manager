@@ -5489,12 +5489,20 @@ bool ScreenSessionManager::SetSpecifiedScreenPower(ScreenId screenId, ScreenPowe
         DisplayPowerEvent::DISPLAY_OFF, EventStatus::END, reason);
 }
 
+void ScreenSessionManager::SetLockDisplayModeWhenShutDown(PowerStateChangeReason reason, bool isLock)
+{
+    if (foldScreenController_ != nullptr && reason == PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN) {
+        TLOGNFI(WmsLogTag::DMS, "lock display mode when shut down");
+        foldScreenController_->SetIsClearingBootAnimation(isLock);
+    }
+}
+
 bool ScreenSessionManager::DoSetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason)
 {
     TLOGNFI(WmsLogTag::DMS, "[UL_POWER]state: %{public}u, reason: %{public}u",
         static_cast<uint32_t>(state), static_cast<uint32_t>(reason));  
     ScreenPowerStatus status;
-
+    SetLockDisplayModeWhenShutDown(reason, true);
     if (!GetPowerStatus(state, reason, status)) {
         return false;
     }
@@ -5666,7 +5674,7 @@ bool ScreenSessionManager::SetScreenPower(ScreenPowerStatus status, PowerStateCh
         gotScreenlockFingerprint_ == true) {
         gotScreenlockFingerprint_ = false;
     }
-
+    SetLockDisplayModeWhenShutDown(reason, false);
     return NotifyDisplayPowerEvent(notifyEvent, EventStatus::END, reason);
 }
 
