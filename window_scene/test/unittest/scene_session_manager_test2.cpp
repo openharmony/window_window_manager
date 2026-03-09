@@ -312,7 +312,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigMoveResampleFpsRangeFallback, TestSize.
 
         EXPECT_TRUE(ssm_->ConfigMoveResample(moveResample));
 
-        auto [enable, minFps, maxFps] = MoveDragController::GetMoveResampleSystemConfig();
+        auto [enable, minFps, maxFps] = MoveDragController::LoadMoveResampleSystemConfig();
         EXPECT_TRUE(enable);
         EXPECT_FALSE(minFps.has_value());
         EXPECT_FALSE(maxFps.has_value());
@@ -329,7 +329,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigMoveResampleFpsRangeFallback, TestSize.
 
         EXPECT_TRUE(ssm_->ConfigMoveResample(moveResample));
 
-        auto [enable, minFps, maxFps] = MoveDragController::GetMoveResampleSystemConfig();
+        auto [enable, minFps, maxFps] = MoveDragController::LoadMoveResampleSystemConfig();
         EXPECT_TRUE(enable);
         EXPECT_FALSE(minFps.has_value());
         EXPECT_FALSE(maxFps.has_value());
@@ -356,12 +356,103 @@ HWTEST_F(SceneSessionManagerTest2, ConfigMoveResampleFpsRangeValid, TestSize.Lev
 
     EXPECT_TRUE(ssm_->ConfigMoveResample(moveResample));
 
-    auto [enable, minFps, maxFps] = MoveDragController::GetMoveResampleSystemConfig();
+    auto [enable, minFps, maxFps] = MoveDragController::LoadMoveResampleSystemConfig();
     EXPECT_TRUE(enable);
     ASSERT_TRUE(minFps.has_value());
     ASSERT_TRUE(maxFps.has_value());
     EXPECT_EQ(*minFps, 60);
     EXPECT_EQ(*maxFps, 120);
+}
+
+/**
+ * @tc.name: ConfigMovingEventInvalidType
+ * @tc.desc: Verify ConfigMovingEvent returns false when config is not a map
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventInvalidType, TestSize.Level1)
+{
+    ConfigItem movingEvent;
+    movingEvent.SetValue(123); // not a map
+
+    EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+}
+
+/**
+ * @tc.name: ConfigMovingEventInvalidThrottleIntervalType
+ * @tc.desc: Verify ConfigMovingEvent returns false when throttleInterval is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventInvalidThrottleIntervalType, TestSize.Level1)
+{
+    // Case 1: throttleInterval missing
+    {
+        ConfigItem movingEvent;
+        movingEvent.SetValue(std::map<std::string, ConfigItem>{});
+
+        EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+    }
+
+    // Case 2: throttleInterval not int array
+    {
+        ConfigItem throttle;
+        throttle.SetValue(std::string("not int"));
+
+        ConfigItem movingEvent;
+        movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+        EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+    }
+}
+
+/**
+ * @tc.name: ConfigMovingEventInvalidThrottleIntervalSize
+ * @tc.desc: Verify ConfigMovingEvent returns false when throttleInterval size is not 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventInvalidThrottleIntervalSize, TestSize.Level1)
+{
+    ConfigItem throttle;
+    throttle.SetValue(std::vector<int>{10, 20}); // size != 1
+
+    ConfigItem movingEvent;
+    movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+    EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+}
+
+/**
+ * @tc.name: ConfigMovingEventNegativeThrottleInterval
+ * @tc.desc: Verify ConfigMovingEvent returns false when throttleInterval < 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventNegativeThrottleInterval, TestSize.Level1)
+{
+    ConfigItem throttle;
+    throttle.SetValue(std::vector<int>{-1});
+
+    ConfigItem movingEvent;
+    movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+    EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+}
+
+/**
+ * @tc.name: ConfigMovingEventValid
+ * @tc.desc: Verify valid throttleInterval is applied correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventValid, TestSize.Level1)
+{
+    ConfigItem throttle;
+    throttle.SetValue(std::vector<int>{16});
+
+    ConfigItem movingEvent;
+    movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+    EXPECT_TRUE(ssm_->ConfigMovingEvent(movingEvent));
+
+    uint32_t interval = MoveDragController::LoadMovingEventThrottleSystemConfig();
+    EXPECT_EQ(interval, 16u);
 }
 
 /**

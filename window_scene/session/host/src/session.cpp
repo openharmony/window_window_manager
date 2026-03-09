@@ -194,6 +194,9 @@ void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     surfaceNode_ = surfaceNode;
+    if (surfaceNode_) {
+        surfaceNode_->MarkLayerPartRender(isLayerPartRender_);
+    }
     shadowSurfaceNode_ = RSAdapterUtil::IsClientMultiInstanceEnabled() && surfaceNode_ ?
         surfaceNode_->CreateShadowSurfaceNode() : nullptr;
 }
@@ -1778,7 +1781,7 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken)
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background state invalid! state: %{public}u",
             GetPersistentId(), state);
-        if (state == SessionState::STATE_DISCONNECT) {
+        if (state == SessionState::STATE_DISCONNECT && systemConfig_.IsPcWindow()) {
             SetNeedBackgroundAfterConnect(true);
         }
         return WSError::WS_ERROR_INVALID_SESSION;
@@ -3048,7 +3051,11 @@ bool Session::CheckSurfaceNodeForSnapshot(std::shared_ptr<RSSurfaceNode> surface
     if (IsPersistentImageFit()) {
         return false;
     }
-    if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+    if (!surfaceNode) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "surfaceNode null id: %{public}d", persistentId_);
+        return false;
+    }
+    if (!surfaceNode->IsBufferAvailable()) {
         DeleteHasSnapshot();
         scenePersistence_->ClearSnapshot();
         return false;
@@ -4460,6 +4467,25 @@ WSRect Session::GetSessionRequestRect() const
     return rect;
 }
 
+void Session::SetLayerPartRender(bool isLayerPartRender)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SetLayerPartRender id[%d] flag[%d]",
+        persistentId_, isLayerPartRender);
+    isLayerPartRender_ = isLayerPartRender;
+    TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, flag: %{public}d", persistentId_, isLayerPartRender);
+    auto surfaceNode = GetSurfaceNode();
+    if (surfaceNode != nullptr) {
+        surfaceNode->MarkLayerPartRender(isLayerPartRender_);
+    } else {
+        TLOGE(WmsLogTag::WMS_PATTERN, "id: %{public}d, surfaceNode nullptr", persistentId_);
+    }
+}
+
+bool Session::GetLayerPartRender() const
+{
+    return isLayerPartRender_;
+}
+
 /** @note @window.layout */
 void Session::SetClientRect(const WSRect& rect)
 {
@@ -5034,6 +5060,11 @@ void Session::SetScale(float scaleX, float scaleY, float pivotX, float pivotY)
     layoutController_->SetScale(scaleX, scaleY, pivotX, pivotY);
 }
 
+void Session::SetRsScale(float rsScaleX, float rsScaleY)
+{
+    layoutController_->SetRsScale(rsScaleX, rsScaleY);
+}
+
 void Session::SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY)
 {
     layoutController_->SetClientScale(scaleX, scaleY, pivotX, pivotY);
@@ -5047,6 +5078,16 @@ float Session::GetScaleX() const
 float Session::GetScaleY() const
 {
     return layoutController_->GetScaleY();
+}
+
+float Session::GetRsScaleX() const
+{
+    return layoutController_->GetRsScaleX();
+}
+
+float Session::GetRsScaleY() const
+{
+    return layoutController_->GetRsScaleY();
 }
 
 float Session::GetPivotX() const
@@ -5318,9 +5359,28 @@ void Session::SetIsMidScene(bool isMidScene)
             TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "persistentId:%{public}d, isMidScene:%{public}d",
                 session->GetPersistentId(), isMidScene);
             session->isMidScene_ = isMidScene;
+            if (!session->isMidScene_) {
+                session->SetIsNeedRemoveSnapShot(true);
+            }
             session->NotifySessionPropertyChange(WindowInfoKey::MID_SCENE);
         }
     }, "SetIsMidScene");
+}
+
+void Session::SetIsNeedRemoveSnapShot(bool isNeedRemoveSnapShot)
+{
+    PostTask([weakThis = wptr(this), isNeedRemoveSnapShot] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGW(WmsLogTag::WMS_MULTI_WINDOW, "session is null");
+            return;
+        }
+        if (session->isNeedRemoveSnapShot_.load() != isNeedRemoveSnapShot) {
+            TLOGW(WmsLogTag::WMS_MULTI_WINDOW, "persistentId:%{public}d, isNeedRemoveSnapShot:%{public}d",
+                session->GetPersistentId(), isNeedRemoveSnapShot);
+            session->isNeedRemoveSnapShot_.store(isNeedRemoveSnapShot);
+        }
+    }, __func__);
 }
 
 bool Session::GetIsMidScene() const
@@ -5332,6 +5392,11 @@ bool Session::GetIsMidScene() const
         return false;
     }
     return GetParentSession()->GetIsMidScene();
+}
+
+bool Session::GetIsNeedRemoveSnapShot() const
+{
+    return isNeedRemoveSnapShot_.load();
 }
 
 void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)

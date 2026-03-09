@@ -1036,7 +1036,7 @@ private:
     std::mutex screenPowerMutex_;
     std::mutex screenMaskMutex_;
     std::condition_variable screenMaskCV_;
-    std::mutex screenModeChangeMutex_;
+    std::recursive_mutex screenModeChangeMutex_;
     std::condition_variable displayAddCV_;
     mutable std::mutex setPcStatusMutex_;
 
@@ -1115,6 +1115,7 @@ private:
     void SetWiredScreenGamut();
     void SetBorderingAreaPercent();
     bool HandleSwitchPcMode();
+    void ChangeWatchDogTimeInterval(const std::string& name, uint64_t interval);
     void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
     void SetScreenNameWhenSwitchMode(const sptr<ScreenSession>& screenSession, bool isSwitchToPcMode);
     void SwitchModeOffScreenRenderingResetScreenProperty(const sptr<ScreenSession>& externalScreenSession,
@@ -1177,10 +1178,15 @@ private:
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);
     void MakeMirrorAfterSwitchUser();
 
+    void ExitCoordinationAndRecoverDisplayMode();
+    FoldDisplayMode GetCurrentDisplayMode();
+
     // mirror screen
     bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);
     void RegisterSettingResolutionEffectObserver();
     void SetResolutionEffectFromSettingData();
+    void RegisterSettingOsSwitchStatusObserver();
+    void HandleOsSwitchStatusChange();
     void HandleResolutionEffectAfterSwitchUser();
     void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& toRect);
     void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& toRect);

@@ -248,6 +248,44 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateSessionOcclusionStateListener
 }
 
 /**
+ * @tc.name: HandleGetTopNavDestinationName
+ * @tc.desc: test HandleGetTopNavDestinationName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleGetTopNavDestinationName, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(1);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_TOP_NAV_DEST_NAME);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_NE(res, ERR_NULL_OBJECT);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = stub_->HandleGetTopNavDestinationName(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInt32(2);
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    res = stub_->HandleGetTopNavDestinationName(data2, reply2);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+
+    MessageParcel data4;
+    MessageParcel reply4;
+    data4.WriteInt32(4);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleGetTopNavDestinationName(data4, reply4);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+}
+
+/**
  * @tc.name: HandleSetWindowSnapshotSkip
  * @tc.desc: test HandleSetWindowSnapshotSkip
  * @tc.type: FUNC

@@ -3520,11 +3520,13 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
             SystemBarSettingFlag::COLOR_SETTING : SystemBarSettingFlag::DEFAULT_SETTING;
         property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
             systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
-
-        auto ret = UpdateSystemBarPropertyForPage(systemBarType, property, systemBarPropertyFlag);
-        if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::WMS_IMMS, "set failed");
-            return ret;
+        if (systemBarPropertyFlag.enableFlag || systemBarPropertyFlag.backgroundColorFlag ||
+            systemBarPropertyFlag.contentColorFlag || systemBarPropertyFlag.enableAnimationFlag) {
+            auto ret = UpdateSystemBarPropertyForPage(systemBarType, property, systemBarPropertyFlag);
+            if (ret != WMError::WM_OK) {
+                TLOGE(WmsLogTag::WMS_IMMS, "set failed");
+                return ret;
+            }
         }
     }
     SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -6482,7 +6484,7 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
     }, __func__);
 }
 
-WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
+WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow(const bool isWeb)
 {
     TLOGI(WmsLogTag::WMS_PIP, "type: %{public}u", GetType());
     if (!WindowHelper::IsPipWindow(GetType())) {
@@ -6490,6 +6492,10 @@ WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    if (isWeb && surfaceNode_ != nullptr) {
+        surfaceNode_->SetAlpha(0);
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
+    }
     hostSession->NotifyPiPWindowPrepareClose();
     return WMError::WM_OK;
 }
@@ -8054,20 +8060,20 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
     WindowType winType = GetType();
     bool enableForceSplit = false;
     if (WindowHelper::IsMainWindow(winType) &&
         GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit);
+        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
 }
 
-void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
+void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport)
 {
     WindowType winType = GetType();
     if (!WindowHelper::IsMainWindow(winType)) {
@@ -8078,9 +8084,9 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
         TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
         return;
     }
-    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u",
-        enableForceSplit);
-    uiContent->SetForceSplitEnable(enableForceSplit);
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u",
+        enableForceSplit, needUpdateViewport);
+    uiContent->SetForceSplitEnable(enableForceSplit, needUpdateViewport);
 }
 
 void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()

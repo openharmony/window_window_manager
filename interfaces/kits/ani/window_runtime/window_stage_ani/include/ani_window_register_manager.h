@@ -72,6 +72,8 @@ private:
         sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWaterMarkFlagChangeRegister(sptr<AniWindowListener> listener,
         sptr<Window> window, bool isRegister, ani_env* env);
+    WmErrorCode ProcessApplicationFocusChangeRegister(sptr<AniWindowListener> listener,
+        sptr<Window> window, bool isRegister, ani_env* env);
     WmErrorCode ProcessWindowVisibilityChangeRegister(sptr<AniWindowListener> listener, sptr<Window> window,
         bool isRegister, ani_env* env);
     WmErrorCode ProcessOcclusionStateChangeRegister(const sptr<AniWindowListener>& listener, sptr<Window> window,

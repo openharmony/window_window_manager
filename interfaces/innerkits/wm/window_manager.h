@@ -546,6 +546,21 @@ public:
 };
 
 /**
+ * @class IApplicationFocusChangedListener
+ *
+ * @brief Listener to observe application process focus changed.
+ */
+class IApplicationFocusChangedListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when application process focused.
+     *
+     * @param isFocus True means application process focused, false application process unfocused.
+     */
+    virtual void OnApplicationFocusUpdate(bool isFocused) = 0;
+};
+
+/**
  * @class IVisibleWindowNumChangedListener
  *
  * @brief Listener to observe visible main window num changed.
@@ -812,6 +827,22 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     WMError UnregisterWaterMarkFlagChangedListener(const sptr<IWaterMarkFlagChangedListener>& listener);
+
+    /**
+     * @brief Register application focus changed listener.
+     *
+     * @param listener IApplicationFocusChangedListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    WMError RegisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener);
+
+    /**
+     * @brief Unregister application focus changed listener.
+     *
+     * @param listener IApplicationFocusChangedListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    WMError UnregisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener);
 
     /**
      * @brief Register gesture navigation enabled changed listener.
@@ -1465,6 +1496,12 @@ public:
      * @param lifeCycleInfo window lifecycle info.
      */
     void NotifyWMSWindowDestroyed(const WindowLifeCycleInfo& lifeCycleInfo);
+
+    /**
+     * @brief notify application focus changed.
+     * @param isFocus application focus state.
+     */
+    void NotifyApplicationFocusChangedResult(bool isFocused) const;
 
     /**
      * @brief Add BundleNames to the list that will hide on virtual screen.

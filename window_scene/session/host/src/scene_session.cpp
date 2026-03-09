@@ -521,12 +521,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
         session->DisableUIFirstIfNeed();
-        if (session->GetNeedBackgroundAfterConnect()) {
-            TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Need background after connect, id:%{public}d",
-                where, persistentId);
-            session->SetNeedBackgroundAfterConnect(false);
-            session->NotifySessionBackground(1, true, true);
-        }
+        session->SyncUISessionState();
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
@@ -553,6 +548,16 @@ void SceneSession::DisableUIFirstIfNeed()
     }
     isUIFirstEnabled_ = false;
     TLOGI(WmsLogTag::WMS_ANIMATION, "leashWinShadowSurfaceNode disable UIFirst id:%{public}d!", GetPersistentId());
+}
+
+void SceneSession::SyncUISessionState()
+{
+    // Sync when session state and UI state are inconsistent.
+    if (GetNeedBackgroundAfterConnect() && IsPcWindow()) {
+        TLOGI(WmsLogTag::WMS_LIFE, "Need background after connect, id:%{public}d", GetPersistentId());
+        SetNeedBackgroundAfterConnect(false);
+        NotifySessionBackground(1, true, true);
+    }
 }
 
 void SceneSession::CheckAndMoveDisplayIdRecursively(uint64_t displayId)
@@ -803,6 +808,7 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot)
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Notify scene session id: %{public}d paused", where,
                 session->GetPersistentId());
             session->UpdateLifecyclePausedInner();
+            session->SetNeedBackgroundAfterConnect(false);
         }
         if (session->sessionInfo_.isPrelaunch_) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Remove prelaunch session id: %{public}d", where,
@@ -1171,9 +1177,17 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
                 }
             }
             auto globalRect = session->moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
-            session->SetSessionEventParam({session->moveDragController_->GetOriginalPointerPosX(),
-                session->moveDragController_->GetOriginalPointerPosY(),
-                rect.width_, rect.height_, 0, 0, 0, 0, globalRect.posX_, globalRect.posY_});
+            session->SetSessionEventParam({
+                .pointerX_ = session->moveDragController_->GetOriginalPointerPosX(),
+                .pointerY_ = session->moveDragController_->GetOriginalPointerPosY(),
+                .sessionWidth_ = rect.width_,
+                .sessionHeight_ = rect.height_,
+                .dragResizeType = 0,
+                .gravity = 0,
+                .waterfallResidentState = 0, 
+                .compatibleStyleMode = 0,
+                .windowGlobalPosX_ = globalRect.posX_,
+                .windowGlobalPosY_ = globalRect.posY_});
         }
         session->HandleSessionDragEvent(event);
         session->ApplySessionEventParam(event, param);
@@ -1855,7 +1869,6 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
 {
     PostTask([weakThis = wptr(this), rect, reason, rsTransaction, updateReason, where = __func__] {
         auto session = weakThis.promote();
-        int32_t persistentId = session->GetPersistentId();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
             return;
@@ -1866,6 +1879,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             return;
         }
 
+        int32_t persistentId = session->GetPersistentId();
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSession::UpdateRect %d [%d, %d, %u, %u]",
             persistentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
         // check whether to notify the client rect update
@@ -2060,6 +2074,7 @@ void SceneSession::SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostCha
             return;
         }
         session->mainWindowTopmostChangeFunc_ = std::move(func);
+        session->mainWindowTopmostChangeFunc_(session->IsMainWindowTopmost());
     }, __func__);
 }
 
@@ -2819,6 +2834,12 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
         TLOGE(WmsLogTag::WMS_IMMS, "isLastFrameLayoutFinishedFunc is null, win %{public}d", GetPersistentId());
         return WSError::WS_ERROR_NULLPTR;
     }
+    float scaleX = INVALID_SCALE;
+    float scaleY = INVALID_SCALE;
+    if (GetScaleInLSState(scaleX, scaleY) == WSError::WS_ERROR_INVALID_PARAM) {
+ 	    TLOGE(WmsLogTag::WMS_IMMS, "id: %{public}d invalid scale", GetPersistentId());
+ 	    return WSError::WS_ERROR_INVALID_PARAM;
+ 	}
     bool isLayoutFinished = false;
     WSError ret = isLastFrameLayoutFinishedFunc_(isLayoutFinished);
     if (ret != WSError::WS_OK) {
@@ -3499,13 +3520,12 @@ WSError SceneSession::GetScaleInLSState(float& scaleX, float& scaleY) const
         TLOGD(WmsLogTag::WMS_IMMS, "win: %{public}d, not in LS state", GetPersistentId());
         return WSError::WS_DO_NOTHING;
     }
-    constexpr float invalidScale = 0;
-    if (GetScaleX() <= invalidScale || GetScaleY() <= invalidScale) {
+    if (GetRsScaleX() == INVALID_SCALE || GetRsScaleY() == INVALID_SCALE) {
         TLOGE(WmsLogTag::WMS_IMMS, "win: %{public}d, invalid scale", GetPersistentId());
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    scaleX = GetScaleX();
-    scaleY = GetScaleY();
+    scaleX = GetRsScaleX();
+    scaleY = GetRsScaleY();
     return WSError::WS_OK;
 }
 
@@ -3596,7 +3616,12 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return WSError::WS_ERROR_NULLPTR;
         }
-
+        float scaleX = INVALID_SCALE;
+        float scaleY = INVALID_SCALE;
+        if (session->GetScaleInLSState(scaleX, scaleY) == WSError::WS_ERROR_INVALID_PARAM) {
+ 	        TLOGE(WmsLogTag::WMS_IMMS, "%{public}s id: %{public}d invalid scale", where, session->GetPersistentId());
+ 	        return WSError::WS_ERROR_INVALID_PARAM;
+ 	    }
         using T = std::underlying_type_t<AvoidAreaType>;
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
@@ -8916,7 +8941,8 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
         return dirtyFlags_;
     }
     dirtyFlags_ |= UpdateVisibilityInner(true) ? static_cast<uint32_t>(SessionUIDirtyFlag::VISIBLE) : 0;
-    dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
+    dirtyFlags_ |= UpdateScaleInner(uiParam.scaleX_, uiParam.scaleY_,
+ 	    uiParam.rsScaleX_, uiParam.rsScaleY_, uiParam.pivotX_, uiParam.pivotY_) ?
         static_cast<uint32_t>(SessionUIDirtyFlag::SCALE) : 0;
     bool isUpdateRectDirty = UpdateRectInner(uiParam, GetSizeChangeReason());
     if (isUpdateRectDirty) {
@@ -9117,11 +9143,13 @@ void SceneSession::NotifyClientToUpdateAvoidArea()
     }
 }
 
-bool SceneSession::UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY)
+bool SceneSession::UpdateScaleInner(
+    float scaleX, float scaleY, float rsScaleX, float rsScaleY, float pivotX, float pivotY)
 {
     if (!layoutController_->IsTransformNeedUpdate(scaleX, scaleY, pivotX, pivotY)) {
         return false;
     }
+    Session::SetRsScale(rsScaleX, rsScaleY);
     Session::SetScale(scaleX, scaleY, pivotX, pivotY);
     if (!IsSessionForeground()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());

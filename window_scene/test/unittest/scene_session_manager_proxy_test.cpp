@@ -1270,6 +1270,52 @@ HWTEST_F(sceneSessionManagerProxyTest, UpdateSessionOcclusionStateListener01, Te
 }
 
 /**
+ * @tc.name: GetTopNavDestinationName01
+ * @tc.desc: get top nav destination name
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, GetTopNavDestinationName01, TestSize.Level1)
+{
+    std::string topNavDestName;
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->GetTopNavDestinationName(1, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->GetTopNavDestinationName(1, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = proxy->GetTopNavDestinationName(1, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->GetTopNavDestinationName(1, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    MockMessageParcel::SetReadStringErrorFlag(true);
+    ret = proxy->GetTopNavDestinationName(1, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadStringErrorFlag(false);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = proxy->GetTopNavDestinationName(1, topNavDestName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    ret = proxy->GetTopNavDestinationName(1, topNavDestName);
+    EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
  * @tc.name: SetWindowSnapshotSkip01
  * @tc.desc: update session screenshot listener
  * @tc.type: FUNC
@@ -1897,6 +1943,9 @@ HWTEST_F(sceneSessionManagerProxyTest, UnregisterIAbilityManagerCollaborator, Te
 
     int32_t type = 0;
     WSError res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);
+    ASSERT_EQ(WSError::WS_ERROR_INVALID_PARAM, res);
+    type = 1;
+    res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);
     ASSERT_EQ(WSError::WS_OK, res);
     sceneSessionManagerProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
     res = sceneSessionManagerProxy->UnregisterIAbilityManagerCollaborator(type);

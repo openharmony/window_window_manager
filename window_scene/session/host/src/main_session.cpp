@@ -453,8 +453,10 @@ WSError MainSession::SetSessionLabelAndIconInner(const std::string& label,
             return WSError::WS_ERROR_NULLPTR;
         }
         session->label_ = label;
+        session->scenePersistence_->SaveAbilityIcon(icon);
+        const std::string updatedIconPath = session->scenePersistence_->GetAbilityIconPath();
         if (session->updateSessionLabelAndIconFunc_) {
-            session->updateSessionLabelAndIconFunc_(label, icon);
+            session->updateSessionLabelAndIconFunc_(label, icon, updatedIconPath);
         }
         return WSError::WS_OK;
     }, __func__);
@@ -705,13 +707,13 @@ WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
     return WMError::WM_OK;
 }
 
-WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
+    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
 }
 
 bool MainSession::GetSessionBoundedSystemTray(

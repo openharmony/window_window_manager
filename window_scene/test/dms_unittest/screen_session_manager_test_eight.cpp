@@ -336,6 +336,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyIsFullScreenInForceSplitMode, Function | SmallTest | Level2)
 {
+    ssm_->displayHookMap_.clear();
     int32_t uid = 0;
     MockAccesstokenKit::MockIsSystemApp(false);
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);

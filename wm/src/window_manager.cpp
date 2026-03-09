@@ -46,6 +46,7 @@ public:
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+    void NotifyApplicationFocusChangedResult(bool isFocused);
     void NotifyWindowModeChange(WindowModeType type);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
@@ -96,6 +97,7 @@ public:
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangedListeners_;
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners_;
+    std::vector<sptr<IApplicationFocusChangedListener>> applicationFocusChangeListeners_;
     sptr<WindowManagerAgent> waterMarkFlagChangeAgent_;
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
@@ -356,6 +358,19 @@ void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
     }
     for (auto& listener : waterMarkFlagChangeListeners) {
         listener->OnWaterMarkFlagUpdate(showWaterMark);
+    }
+}
+
+void WindowManager::Impl::NotifyApplicationFocusChangedResult(bool isFocused)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}d", isFocused);
+    std::vector<sptr<IApplicationFocusChangedListener>> applicationFocusChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        applicationFocusChangeListeners = applicationFocusChangeListeners_;
+    }
+    for (auto& listener : applicationFocusChangeListeners) {
+        listener->OnApplicationFocusUpdate(isFocused);
     }
 }
 
@@ -1622,6 +1637,44 @@ WMError WindowManager::UnregisterWaterMarkFlagChangedListener(const sptr<IWaterM
     return ret;
 }
 
+WMError WindowManager::RegisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
+        pImpl_->applicationFocusChangeListeners_.end(), listener);
+    if (iter != pImpl_->applicationFocusChangeListeners_.end()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Listener is already registered.");
+        return WMError::WM_OK;
+    }
+    pImpl_->applicationFocusChangeListeners_.push_back(listener);
+    TLOGD(WmsLogTag::WMS_FOCUS, "Try to registerApplicationFocusChangedListener end");
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::UnregisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
+                          pImpl_->applicationFocusChangeListeners_.end(), listener);
+    if (iter == pImpl_->applicationFocusChangeListeners_.end()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->applicationFocusChangeListeners_.erase(iter);
+    TLOGD(WmsLogTag::WMS_FOCUS, "Try to registerApplicationFocusChangedListener end");
+    return WMError::WM_OK;
+}
+
 WMError WindowManager::RegisterGestureNavigationEnabledChangedListener(
     const sptr<IGestureNavigationEnabledChangedListener>& listener)
 {
@@ -2071,6 +2124,11 @@ void WindowManager::UpdateCameraFloatWindowStatus(uint32_t accessTokenId, bool i
 void WindowManager::NotifyWaterMarkFlagChangedResult(bool showWaterMark) const
 {
     pImpl_->NotifyWaterMarkFlagChangedResult(showWaterMark);
+}
+
+void WindowManager::NotifyApplicationFocusChangedResult(bool isFocused) const
+{
+    pImpl_->NotifyApplicationFocusChangedResult(isFocused);
 }
 
 void WindowManager::NotifyGestureNavigationEnabledResult(bool enable) const

@@ -4785,10 +4785,10 @@ napi_value JsSceneSessionManager::SetAppForceLandscapeConfigEnable(napi_env env,
 
 napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = { nullptr };
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != OHOS::Rosen::ARGC_TWO) {
+    if (argc != OHOS::Rosen::ARGC_TWO && argc != OHOS::Rosen::ARGC_THREE) {
         TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -4807,11 +4807,16 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfigEnable(napi_env en
     if (GetType(env, argv[ARG_INDEX_ONE]) == napi_boolean) {
         RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_ONE], enableForceSplit, "enableForceSplit", WmsLogTag::DEFAULT);
     }
+    bool needUpdateViewport = false;
+    if (argc == OHOS::Rosen::ARGC_THREE && GetType(env, argv[ARG_INDEX_TWO]) == napi_boolean) {
+        RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_TWO], needUpdateViewport, "needUpdateViewport", WmsLogTag::DEFAULT);
+    }
 
-    TLOGI(WmsLogTag::DEFAULT, "SetAppForceLandscapeConfigEnable bundleName: %{public}s, enable: %{public}d",
-        bundleName.c_str(), enableForceSplit);
+    TLOGI(WmsLogTag::DEFAULT, "SetAppForceLandscapeConfigEnable bundleName: %{public}s, enable: %{public}d, "
+        "needUpdateViewport: %{public}d", bundleName.c_str(), enableForceSplit, needUpdateViewport);
 
-    SceneSessionManager::GetInstance().SetAppForceLandscapeConfigEnable(bundleName, enableForceSplit);
+    SceneSessionManager::GetInstance().SetAppForceLandscapeConfigEnable(bundleName, enableForceSplit,
+        needUpdateViewport);
     return NapiGetUndefined(env);
 }
 napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback_info info)
