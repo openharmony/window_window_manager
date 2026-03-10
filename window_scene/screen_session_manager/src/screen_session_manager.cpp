@@ -343,7 +343,9 @@ void ScreenSessionManager::LoadDmsExtension()
 }
 bool ScreenSessionManager::GetScreenSessionMngSystemAbility()
 {
-    ScreenSessionManager::LoadDmsExtension();
+    if (DEVICE_TYPE != "phone") {
+        ScreenSessionManager::LoadDmsExtension();
+    }
     return SystemAbility::MakeAndRegisterAbility(&ScreenSessionManager::GetInstance());
 }
 const bool REGISTER_RESULT = !SceneBoardJudgement::IsSceneBoardEnabled() ? false : ScreenSessionManager::GetScreenSessionMngSystemAbility();

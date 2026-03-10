@@ -64,8 +64,6 @@ test_external_deps = [
   "hitrace:hitrace_meter",
   "ipc:ipc_core",
   "samgr:samgr_proxy",
-  "time_service:time_client",
-  "ability_runtime:wantagent_innerkits",
   "init:libbegetutil",
 ]
 
@@ -109,10 +107,8 @@ test_source_common = [
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.cpp",
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.cpp",
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.cpp",
-  "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/sensor_fold_state_manager/single_display_sensor_super_fold_state_manager.cpp",
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/single_display_fold_policy.cpp",
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/single_display_pocket_fold_policy.cpp",
-  "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/single_display_super_fold_policy.cpp",
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/super_fold_policy.cpp",
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/super_fold_sensor_manager.cpp",
   "${window_base_path}/window_scene/screen_session_manager/src/fold_screen_controller/super_fold_state_manager.cpp",
