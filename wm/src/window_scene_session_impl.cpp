@@ -3746,7 +3746,7 @@ SystemBarProperty WindowSceneSessionImpl::GetCurrentActiveSystemBarProperty(Wind
 {
     // fallback to system default property
     auto prop = GetSystemBarPropertyByType(type);
-    prop.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
+    prop.settingFlag_ = SystemBarSettingFlag::FOLLOW_SETTING;
     {
         std::lock_guard<std::mutex> lock(ownSystemBarPropertyMapMutex_);
         if (ownSystemBarPropertyMap_.find(type) == ownSystemBarPropertyMap_.end()) {
