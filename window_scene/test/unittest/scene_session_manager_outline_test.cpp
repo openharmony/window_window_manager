@@ -62,14 +62,16 @@ public:
     void TearDown() override;
 
     // Helper methods
-    sptr<SceneSession> CreateMockSceneSession(int32_t persistentId, SessionState state = SessionState::STATE_FOREGROUND);
+    sptr<SceneSession> CreateMockSceneSession(int32_t persistentId,
+        SessionState state = SessionState::STATE_FOREGROUND);
     OutlineStyleParams CreateMockOutlineStyleParams(uint32_t color = 0xFF000000, uint32_t width = 2);
     OutlineParams CreateMockOutlineParams(const std::vector<int32_t>& persistentIds = {});
     void SetSystemConfigForFreeMultiWindow(bool enabled);
 
 private:
-    static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
-    static constexpr uint32_t WAIT_SYNC_FOR_TEST_END_IN_NS = 500000;
+    static constexpr uint32_t waitSyncInNs = 200000;
+    static constexpr uint32_t waitSyncForTestEndInNs = 500000;
+    static constexpr uint32_t defaultRectSize = 100;
     static sptr<SceneSessionManager> ssm_;
 };
 
@@ -98,7 +100,7 @@ void SceneSessionManagerOutlineTest::SetUp()
 void SceneSessionManagerOutlineTest::TearDown()
 {
     MockAccesstokenKit::ChangeMockStateToInit();
-    usleep(WAIT_SYNC_IN_NS);
+    usleep(waitSyncInNs);
     ssm_->sceneSessionMap_.clear();
     ssm_->outlineRemoteObject_ = nullptr;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
@@ -134,8 +136,8 @@ OutlineParams SceneSessionManagerOutlineTest::CreateMockOutlineParams(const std:
     params.displayId_ = 0;
     params.rect_.posX_ = 0;
     params.rect_.posY_ = 0;
-    params.rect_.width_ = 100;
-    params.rect_.height_ = 100;
+    params.rect_.width_ = defaultRectSize;
+    params.rect_.height_ = defaultRectSize;
     params.persistentIds_ = persistentIds;
     params.outlineStyleParams_ = CreateMockOutlineStyleParams();
     return params;
@@ -170,7 +172,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateScreenLockState_SessionNotFound, 
 {
     WMError result = ssm_->UpdateScreenLockState(99999);
     EXPECT_EQ(result, WMError::WM_OK);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
 }
 
 /**
@@ -185,7 +187,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateScreenLockState_Success, TestSize
 
     WMError result = ssm_->UpdateScreenLockState(1001);
     EXPECT_EQ(result, WMError::WM_OK);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
 }
 
 /**
@@ -197,7 +199,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateScreenLockState_ZeroId, TestSize.
 {
     WMError result = ssm_->UpdateScreenLockState(0);
     EXPECT_EQ(result, WMError::WM_OK);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
 }
 
 // ============================================================================
@@ -571,7 +573,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_NullSession, TestSiz
     ssm_->sceneSessionMap_.emplace(1002, CreateMockSceneSession(1002, SessionState::STATE_FOREGROUND));
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -589,7 +591,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_StateDisconnect, Tes
     ssm_->sceneSessionMap_.emplace(1001, session);
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -607,7 +609,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_StateEnd, TestSize.L
     ssm_->sceneSessionMap_.emplace(1001, session);
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -625,7 +627,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_ConnectInList, TestS
     ssm_->sceneSessionMap_.emplace(1001, session);
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -643,7 +645,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_ForegroundNotInList,
     ssm_->sceneSessionMap_.emplace(1001, session);
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -661,7 +663,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_ActiveInList, TestSi
     ssm_->sceneSessionMap_.emplace(1001, session);
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -679,7 +681,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_InactiveNotInList, T
     ssm_->sceneSessionMap_.emplace(1001, session);
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -697,7 +699,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_BackgroundInList, Te
     ssm_->sceneSessionMap_.emplace(1001, session);
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
@@ -716,7 +718,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutlineInner_MultipleSessions, Te
     ssm_->sceneSessionMap_.emplace(1003, CreateMockSceneSession(1003, SessionState::STATE_ACTIVE));
 
     ssm_->UpdateOutlineInner(remoteObject, params);
-    usleep(WAIT_SYNC_FOR_TEST_END_IN_NS);
+    usleep(waitSyncForTestEndInNs);
     EXPECT_TRUE(true);
 }
 
