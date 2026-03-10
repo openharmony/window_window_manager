@@ -1348,6 +1348,30 @@ HWTEST_F(ScreenSessionManagerTest, SetPowerStateForAodInvalidState, TestSize.Lev
     EXPECT_TRUE(g_logMsg.find("[UL_POWER]invalid state:") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name: SetLockDisplayModeWhenShutDown
+ * @tc.desc: SetLockDisplayModeWhenShutDown test invalid state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetLockDisplayModeWhenShutDown, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->SetLockDisplayModeWhenShutDown(PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN, true);
+    EXPECT_FALSE(g_logMsg.find("lock display mode when shut down") != std::string::npos);
+
+    auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
+        ssm_->screenPowerTaskScheduler_, ssm_->taskScheduler_);
+    ssm_->foldScreenController_ = foldController;
+    ssm_->SetLockDisplayModeWhenShutDown(PowerStateChangeReason::STATE_CHANGE_REASON_HARD_KEY, true);
+    EXPECT_FALSE(g_logMsg.find("lock display mode when shut down") != std::string::npos);
+
+    ssm_->SetLockDisplayModeWhenShutDown(PowerStateChangeReason::STATE_CHANGE_REASON_SHUT_DOWN, true);
+    EXPECT_TRUE(g_logMsg.find("lock display mode when shut down") != std::string::npos);
+    ssm_->foldScreenController_ = nullptr;
+    LOG_SetCallback(nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS

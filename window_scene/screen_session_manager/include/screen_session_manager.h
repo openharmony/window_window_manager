@@ -1181,6 +1181,8 @@ private:
     void ExitCoordinationAndRecoverDisplayMode();
     FoldDisplayMode GetCurrentDisplayMode();
 
+    void SetLockDisplayModeWhenShutDown(PowerStateChangeReason reason, bool isLock);
+
     // mirror screen
     bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);
     void RegisterSettingResolutionEffectObserver();
