@@ -172,14 +172,14 @@ void SessionManager::ClearSessionManagerProxy()
 {
     TLOGI(WmsLogTag::WMS_SCB, "begin clear proxy");
     {
-        std::lock_guard<std::recursive_mutex> lock(sessionManagerServiceMutex_);
+        std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
         if (sessionManagerServiceProxy_ != nullptr) {
             int refCount = sessionManagerServiceProxy_->GetSptrRefCount();
             TLOGI(WmsLogTag::WMS_SCB, "ref count: %{public}d", refCount);
             sessionManagerServiceProxy_ = nullptr;
         }
     }
-    std::lock_guard<std::recursive_mutex> lock(sceneSessionManagerMutex_);
+    std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
     sceneSessionManagerProxy_ = nullptr;
 }
 
@@ -187,19 +187,26 @@ __attribute__((no_sanitize("cfi"))) sptr<ISceneSessionManager> SessionManager::G
 {
     InitSessionManagerServiceProxy();
     InitSceneSessionManagerProxy();
-    std::lock_guard<std::recursive_mutex> lock(sceneSessionManagerMutex_);
-    // Fix the issue where proxy returns null because thread B clears proxy immediately after thread A initializes it
-    if (sceneSessionManagerProxy_ == nullptr) {
-        TLOGW(WmsLogTag::WMS_SCB, "sceneSessionManagerProxy_ is nullptr, try again");
-        InitSceneSessionManagerProxy();
+    TLOGI(WmsLogTag::WMS_SCB, "init first time.");
+    {
+        std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
+        if (sceneSessionManagerProxy_ != nullptr) {
+            return sceneSessionManagerProxy_;
+        }
     }
+    // Fix the issue where proxy returns null because thread B clears proxy immediately after thread A initializes it
+    TLOGW(WmsLogTag::WMS_SCB, "sceneSessionManagerProxy_ is nullptr, try again");
+    InitSessionManagerServiceProxy();
+    InitSceneSessionManagerProxy();
+    TLOGW(WmsLogTag::WMS_SCB, "sceneSessionManagerProxy_ is nullptr, try again end");
+    std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
     return sceneSessionManagerProxy_;
 }
 
 void SessionManager::InitSessionManagerServiceProxy()
 {
     {
-        std::lock_guard<std::recursive_mutex> lock(sessionManagerServiceMutex_);
+        std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
         if (sessionManagerServiceProxy_) {
             return;
         }
@@ -212,7 +219,7 @@ void SessionManager::InitSessionManagerServiceProxy()
     RegisterSMSRecoverListener();
 
     auto proxy = SessionManagerLite::GetInstance(userId_).GetSessionManagerServiceProxy();
-    std::lock_guard<std::recursive_mutex> lock(sessionManagerServiceMutex_);
+    std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
     sessionManagerServiceProxy_ = proxy;
     if (!sessionManagerServiceProxy_) {
         TLOGE(WmsLogTag::WMS_SCB, "failed to get sms proxy");
@@ -273,14 +280,14 @@ __attribute__((no_sanitize("cfi"))) void SessionManager::InitSceneSessionManager
 {
     TLOGI(WmsLogTag::WMS_SCB, "enter");
     {
-        std::lock_guard<std::recursive_mutex> lock(sceneSessionManagerMutex_);
+        std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
         if (sceneSessionManagerProxy_) {
             return;
         }
     }
     sptr<IRemoteObject> remoteObject = nullptr;
     {
-        std::lock_guard<std::recursive_mutex> lock(sessionManagerServiceMutex_);
+        std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
         if (sessionManagerServiceProxy_ == nullptr) {
             TLOGE(WmsLogTag::WMS_SCB, "sms proxy is null");
             return;
@@ -295,7 +302,7 @@ __attribute__((no_sanitize("cfi"))) void SessionManager::InitSceneSessionManager
         sceneSessionManagerDeath_ = sptr<SSMDeathRecipient>::MakeSptr(userId_);
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(sceneSessionManagerMutex_);
+        std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
         sceneSessionManagerProxy_ = iface_cast<ISceneSessionManager>(remoteObject);
         if (sceneSessionManagerProxy_ == nullptr) {
             TLOGE(WmsLogTag::WMS_SCB, "Get scene session manager proxy failed");
@@ -365,7 +372,7 @@ void SessionManager::RegisterWindowManagerRecoverCallbackFunc(const WindowManage
 void SessionManager::RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService)
 {
     {
-        std::lock_guard<std::recursive_mutex> lock(sessionManagerServiceMutex_);
+        std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
         sessionManagerServiceProxy_ = sessionManagerService;
     }
     WindowManagerRecoverCallbackFunc callbackFunc = nullptr;
@@ -387,12 +394,12 @@ void SessionManager::OnUserSwitch(const sptr<ISessionManagerService>& sessionMan
     RemoveSSMDeathRecipient();
     ClearSessionManagerProxy();
     {
-        std::lock_guard<std::recursive_mutex> lock(sessionManagerServiceMutex_);
+        std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
         sessionManagerServiceProxy_ = sessionManagerService;
     }
     InitSceneSessionManagerProxy();
     {
-        std::lock_guard<std::recursive_mutex> lock(sceneSessionManagerMutex_);
+        std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
         if (sceneSessionManagerProxy_ == nullptr) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "init ssm proxy failed");
             return;
@@ -416,7 +423,7 @@ void SessionManager::RemoveSSMDeathRecipient()
 {
     sptr<IRemoteObject> remoteObject = nullptr;
     {
-        std::lock_guard<std::recursive_mutex> lock(sceneSessionManagerMutex_);
+        std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
         if (sceneSessionManagerProxy_) {
             remoteObject = sceneSessionManagerProxy_->AsObject();
         }
@@ -506,11 +513,11 @@ void SessionManager::OnFoundationDied()
         isRecoverListenerRegistered_ = false;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(sessionManagerServiceMutex_);
+        std::lock_guard<std::mutex> lock(sessionManagerServiceMutex_);
         sessionManagerServiceProxy_ = nullptr;
     }
     {
-        std::lock_guard<std::recursive_mutex> lock(sceneSessionManagerMutex_);
+        std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
         sceneSessionManagerProxy_ = nullptr;
     }
     {
