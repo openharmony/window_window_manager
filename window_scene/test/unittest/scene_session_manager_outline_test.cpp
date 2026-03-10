@@ -109,7 +109,7 @@ sptr<SceneSession> SceneSessionManagerOutlineTest::CreateMockSceneSession(int32_
     SessionInfo info;
     info.bundleName_ = "test.bundle_" + std::to_string(persistentId);
     info.abilityName_ = "test.ability_" + std::to_string(persistentId);
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession = new SceneSession(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
     sceneSession->persistentId_ = persistentId;
     sceneSession->state_ = state;
