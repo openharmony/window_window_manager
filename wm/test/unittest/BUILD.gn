@@ -882,15 +882,13 @@ ohos_static_library("wm_unittest_common") {
     "${window_base_path}/wmserver:libwms",
   ]
 
-  public_external_deps = [
+  external_deps = [
     "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ace_engine:ace_uicontent",
     "googletest:gmock",
     "googletest:gtest_main",
     "napi:ace_napi",
-  ]
-  external_deps = [
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
