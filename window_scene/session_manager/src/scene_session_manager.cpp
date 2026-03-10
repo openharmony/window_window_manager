@@ -547,7 +547,7 @@ void SceneSessionManager::InitStartingWindow()
 
 void SceneSessionManager::InitDmaReclaimParam()
 {
-    enableDmaReclaim_ = system::GetBoolParameter("resourceschedule.memmgr.dma.reclaimable", false);
+    enableDmaReclaim_ = system::GetBoolParameter("persist.resourceschedule.memmgr.superreclaim.dma.turbo", false);
     TLOGI(WmsLogTag::WMS_PATTERN, "Dma reclaim enabled: %{public}d", enableDmaReclaim_);
 }
 
