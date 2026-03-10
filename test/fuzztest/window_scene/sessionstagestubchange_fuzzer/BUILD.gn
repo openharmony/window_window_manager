@@ -48,6 +48,9 @@ ohos_fuzztest("SessionStageStubChangeFuzzTest") {
   ]
 
   external_deps = [
+    "accessibility:accessibility_common",
+    "accessibility:accessibility_interface",
+    "input:libmmi-napi",
     "ability_base:base",
     "ability_base:session_info",
     "ability_base:want",
@@ -67,11 +70,6 @@ ohos_fuzztest("SessionStageStubChangeFuzzTest") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "preferences:native_preferences",
-  ]
-  public_external_deps = [
-    "accessibility:accessibility_common",
-    "accessibility:accessibility_interface",
-    "input:libmmi-napi",
   ]
 }
 
