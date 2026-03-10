@@ -13,12 +13,18 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
-#include <regex>
+#include "application_info.h"
 #include <bundle_mgr_interface.h>
 #include <bundlemgr/launcher_service.h>
+#include "context.h"
+#include <gtest/gtest.h>
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
+#include "../mock/mock_accesstoken_kit.h"
+#include "../mock/mock_session_stage.h"
+#include "../mock/mock_window_event_channel.h"
+#include <regex>
+#include "session_manager.h"
 #include "screen_fold_data.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -26,16 +32,10 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "session/screen/include/screen_session.h"
+#include "wm_common.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
-#include "session_manager.h"
-#include "wm_common.h"
 #include "zidl/window_manager_agent_interface.h"
-#include "../mock/mock_accesstoken_kit.h"
-#include "../mock/mock_session_stage.h"
-#include "../mock/mock_window_event_channel.h"
-#include "application_info.h"
-#include "context.h"
 
 using namespace testing;
 using namespace testing::ext;
