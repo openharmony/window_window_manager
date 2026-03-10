@@ -68,7 +68,7 @@ ohos_fuzztest("SessionStageStubActiveFuzzTest") {
     "ipc:ipc_single",
     "preferences:native_preferences",
   ]
-  public_external_deps = [
+  external_deps = [
     "accessibility:accessibility_common",
     "accessibility:accessibility_interface",
     "input:libmmi-napi",
