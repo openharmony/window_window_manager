@@ -1217,14 +1217,6 @@ enum class TerminateType : uint32_t {
 };
 
 /**
- * @brief window expand flag.
- */
-enum class ExpandInputFlag : uint32_t {
-    EXPAND_INPUT_FLAG_DEFAULT = 0,
-    WINDOW_DISABLE_USER_ACTION = 1 << 2,
-};
-
-/**
  * @brief System animaged scene type.
  */
 enum class SystemAnimatedSceneType : uint32_t {
