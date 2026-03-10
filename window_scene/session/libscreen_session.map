@@ -52,6 +52,8 @@
             OHOS::Rosen::ScreenProperty::GetScreenType*;
             OHOS::Rosen::ScreenProperty::GetStartX*;
             OHOS::Rosen::ScreenProperty::GetStartY*;
+            OHOS::Rosen::ScreenProperty::GetTranslateX*;
+            OHOS::Rosen::ScreenProperty::GetTranslateY*;
             OHOS::Rosen::ScreenProperty::GetValidHeight*;
             OHOS::Rosen::ScreenProperty::GetValidWidth*;
             OHOS::Rosen::ScreenProperty::GetVirtualPixelRatio*;
