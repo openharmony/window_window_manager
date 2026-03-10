@@ -88,10 +88,7 @@ export native function makeMirrorInternal(mainScreen: long, mirrorScreen: Array<
 
 export function getAllScreens(callback: AsyncCallback<Array<Screen>>): void {
     taskpool.execute((): Array<Screen> => {
-        let screens: Array<Screen> = new Array<Screen>(SCREEN_ARRAY_LENGTH);
-        for (let i = 0; i < 10; i++) {
-            screens[i] = new ScreenImpl();
-        }
+        let screens: Array<Screen> = new Array<Screen>(SCREEN_ARRAY_LENGTH, () => { return new ScreenImpl() });
         getAllScreensInternal(screens);
         minusScreens(screens);
         return screens;
@@ -106,10 +103,7 @@ export function getAllScreens(): Promise<Array<Screen>> {
     return new Promise<Array<Screen>>((resolve: (value: Array<Screen>) => void,
         reject: (error: BusinessError) => void ) => {
             taskpool.execute((): Array<Screen> => {
-                let screens: Array<Screen> = new Array<Screen>(SCREEN_ARRAY_LENGTH);
-                for (let i = 0; i < 10; i++) {
-                    screens[i] = new ScreenImpl();
-                }
+                let screens: Array<Screen> = new Array<Screen>(SCREEN_ARRAY_LENGTH, () => { return new ScreenImpl() });
                 getAllScreensInternal(screens);
                 minusScreens(screens);
                 return screens;
@@ -454,10 +448,7 @@ class ScreenImpl implements Screen {
 
     constructor() {
         this.id = -1;
-        this.supportedModeInfo = new Array<ScreenModeInfo>(SCREEN_MODE_INFO);
-        for (let i = 0; i < this.supportedModeInfo.length;i++) {
-            this.supportedModeInfo[i] = new ScreenModeInfoImpl();
-        }
+        this.supportedModeInfo = new Array<ScreenModeInfo>(SCREEN_MODE_INFO, () => { return new ScreenModeInfoImpl() });
     }
 
     readonly id: long;
