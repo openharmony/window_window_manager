@@ -114,10 +114,10 @@ private:
 
     sptr<SSMDeathRecipient> sceneSessionManagerDeath_ = nullptr;
     sptr<ISceneSessionManager> sceneSessionManagerProxy_ = nullptr;
-    std::mutex sceneSessionManagerMutex_;
+    std::recursive_mutex sceneSessionManagerMutex_;
 
     sptr<ISessionManagerService> sessionManagerServiceProxy_ = nullptr;
-    std::mutex sessionManagerServiceMutex_;
+    std::recursive_mutex sessionManagerServiceMutex_;
 
     sptr<IRemoteObject> smsRecoverListener_ = nullptr;
     bool isRecoverListenerRegistered_ = false;
