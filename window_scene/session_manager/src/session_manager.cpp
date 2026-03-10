@@ -188,6 +188,7 @@ __attribute__((no_sanitize("cfi"))) sptr<ISceneSessionManager> SessionManager::G
     InitSessionManagerServiceProxy();
     InitSceneSessionManagerProxy();
     std::lock_guard<std::mutex> lock(sceneSessionManagerMutex_);
+    // Fix the issue where proxy returns null because thread B clears proxy immediately after thread A initializes it
     if (sceneSessionManagerProxy_ == nullptr) {
         TLOGW(WmsLogTag::WMS_SCB, "sceneSessionManagerProxy_ is nullptr, try again");
         InitSceneSessionManagerProxy();
