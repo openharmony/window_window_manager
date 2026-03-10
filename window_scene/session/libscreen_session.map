@@ -67,6 +67,8 @@
             OHOS::Rosen::ScreenProperty::SetDisplayOrientation*;
             OHOS::Rosen::ScreenProperty::SetDpiPhyBounds*;
             OHOS::Rosen::ScreenProperty::SetInputOffset*;
+            OHOS::Rosen::ScreenProperty::SetMirrorHeight*;
+            OHOS::Rosen::ScreenProperty::SetMirrorWidth*;
             OHOS::Rosen::ScreenProperty::SetPhyBounds*;
             OHOS::Rosen::ScreenProperty::SetPhyHeight*;
             OHOS::Rosen::ScreenProperty::SetPhysicalTouchBounds*;
@@ -254,6 +256,7 @@
             OHOS::Rosen::ScreenSession::SetRotationCorrectionMap*;
             OHOS::Rosen::ScreenSession::SetRSScreenId*;
             OHOS::Rosen::ScreenSession::SetScreenAreaHeight*;
+            OHOS::Rosen::ScreenSession::SetScreenAreaOffsetY*;
             OHOS::Rosen::ScreenSession::SetScreenAreaWidth*;
             OHOS::Rosen::ScreenSession::SetScreenAvailableStatus*;
             OHOS::Rosen::ScreenSession::SetScreenColorGamut*;
