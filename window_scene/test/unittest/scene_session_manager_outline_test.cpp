@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +31,9 @@
 #include "session_manager.h"
 #include "wm_common.h"
 #include "zidl/window_manager_agent_interface.h"
-#include "mock/mock_accesstoken_kit.h"
-#include "mock/mock_session_stage.h"
-#include "mock/mock_window_event_channel.h"
+#include "../mock/mock_accesstoken_kit.h"
+#include "../mock/mock_session_stage.h"
+#include "../mock/mock_window_event_channel.h"
 #include "application_info.h"
 #include "context.h"
 
@@ -110,7 +110,7 @@ sptr<SceneSession> SceneSessionManagerOutlineTest::CreateMockSceneSession(int32_
     info.bundleName_ = "test.bundle_" + std::to_string(persistentId);
     info.abilityName_ = "test.ability_" + std::to_string(persistentId);
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
+    EXPECT_NE(nullptr, sceneSession);
     sceneSession->persistentId_ = persistentId;
     sceneSession->state_ = state;
     sceneSession->GetSessionProperty()->SetWindowFlags(
@@ -266,7 +266,6 @@ HWTEST_F(SceneSessionManagerOutlineTest, NotifySessionScreenLockedChange_NoShowW
     SetSystemConfigForFreeMultiWindow(true);
     sptr<SceneSession> sceneSession = CreateMockSceneSession(1001, SessionState::STATE_FOREGROUND);
     sceneSession->GetSessionProperty()->SetWindowFlags(0); // No WINDOW_FLAG_SHOW_WHEN_LOCKED
-    sceneSession->foreground_ = true;
     ssm_->sceneSessionMap_.emplace(1001, sceneSession);
 
     ssm_->NotifySessionScreenLockedChange(true);
@@ -282,7 +281,6 @@ HWTEST_F(SceneSessionManagerOutlineTest, NotifySessionScreenLockedChange_LockedA
 {
     SetSystemConfigForFreeMultiWindow(true);
     sptr<SceneSession> sceneSession = CreateMockSceneSession(1001, SessionState::STATE_BACKGROUND);
-    sceneSession->foreground_ = false;
     ssm_->sceneSessionMap_.emplace(1001, sceneSession);
 
     ssm_->NotifySessionScreenLockedChange(true);
@@ -298,7 +296,6 @@ HWTEST_F(SceneSessionManagerOutlineTest, NotifySessionScreenLockedChange_Unlocke
 {
     SetSystemConfigForFreeMultiWindow(true);
     sptr<SceneSession> sceneSession = CreateMockSceneSession(1001, SessionState::STATE_FOREGROUND);
-    sceneSession->foreground_ = true;
     ssm_->sceneSessionMap_.emplace(1001, sceneSession);
 
     ssm_->NotifySessionScreenLockedChange(false);
@@ -314,7 +311,6 @@ HWTEST_F(SceneSessionManagerOutlineTest, NotifySessionScreenLockedChange_Foregro
 {
     SetSystemConfigForFreeMultiWindow(true);
     sptr<SceneSession> sceneSession = CreateMockSceneSession(1001, SessionState::STATE_FOREGROUND);
-    sceneSession->foreground_ = true;
     ssm_->sceneSessionMap_.emplace(1001, sceneSession);
 
     ssm_->NotifySessionScreenLockedChange(true);
@@ -474,7 +470,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutline_NoSAPermission, TestSize.
     OutlineParams params = CreateMockOutlineParams({1001});
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
 
-    MockAccesstokenKit::MockSetTokenType(ATokenTypeEnum::TOKEN_HAP);
+    MockAccesstokenKit::MockIsSACalling(false);
     WMError result = ssm_->UpdateOutline(remoteObject, params);
     EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
     MockAccesstokenKit::ChangeMockStateToInit();
@@ -490,8 +486,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutline_NotSupportedNotRecovering
     OutlineParams params = CreateMockOutlineParams({1001});
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
 
-    MockAccesstokenKit::MockSetTokenType(ATokenTypeEnum::TOKEN_NATIVE);
-    MockAccesstokenKit::MockSetIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
 
     // Simulate not PC and not FreeMultiWindow mode
     ssm_->recoverState_ = RecoverState::RECOVER_ENABLE_INPUT;
@@ -513,8 +508,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutline_NullRemoteObject, TestSiz
 {
     OutlineParams params = CreateMockOutlineParams({1001});
 
-    MockAccesstokenKit::MockSetTokenType(ATokenTypeEnum::TOKEN_NATIVE);
-    MockAccesstokenKit::MockSetIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
 
     WMError result = ssm_->UpdateOutline(nullptr, params);
     // Should still work as AddOutlineRemoteDeathRecipient handles null
@@ -533,8 +527,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutline_EmptyPersistentIdList, Te
     OutlineParams params = CreateMockOutlineParams({});
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
 
-    MockAccesstokenKit::MockSetTokenType(ATokenTypeEnum::TOKEN_NATIVE);
-    MockAccesstokenKit::MockSetIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
 
     WMError result = ssm_->UpdateOutline(remoteObject, params);
     EXPECT_TRUE(result == WMError::WM_OK || result == WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
@@ -552,8 +545,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, UpdateOutline_ValidParams, TestSize.Lev
     OutlineParams params = CreateMockOutlineParams({1001});
     sptr<IRemoteObject> remoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
 
-    MockAccesstokenKit::MockSetTokenType(ATokenTypeEnum::TOKEN_NATIVE);
-    MockAccesstokenKit::MockSetIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(true);
 
     WMError result = ssm_->UpdateOutline(remoteObject, params);
     EXPECT_TRUE(result == WMError::WM_OK || result == WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
@@ -939,7 +931,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, GetJsonProfile_NullBundleMgr, TestSize.
     std::string profileInfo;
 
     WMError result = ssm_->GetJsonProfile(
-        AppExecFwk::ProfileType::ABILITY_CONFIG,
+        AppExecFwk::ProfileType::UNSPECIFIED_PROFILE,
         "test.bundle",
         "test.module",
         100,
@@ -961,7 +953,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, GetJsonProfile_ValidParams, TestSize.Le
     std::string profileInfo;
 
     WMError result = ssm_->GetJsonProfile(
-        AppExecFwk::ProfileType::ABILITY_CONFIG,
+        AppExecFwk::ProfileType::UNSPECIFIED_PROFILE,
         "test.bundle",
         "test.module",
         100,
@@ -983,7 +975,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, GetJsonProfile_EmptyBundleName, TestSiz
     std::string profileInfo;
 
     WMError result = ssm_->GetJsonProfile(
-        AppExecFwk::ProfileType::ABILITY_CONFIG,
+        AppExecFwk::ProfileType::UNSPECIFIED_PROFILE,
         "",
         "test.module",
         100,
@@ -1009,7 +1001,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, GetAllJsonProfile_NullBundleMgr, TestSi
     std::vector<AppExecFwk::JsonProfileInfo> jsonProfileInfos;
 
     WMError result = ssm_->GetAllJsonProfile(
-        AppExecFwk::ProfileType::ABILITY_CONFIG,
+        AppExecFwk::ProfileType::UNSPECIFIED_PROFILE,
         100,
         jsonProfileInfos
     );
@@ -1027,7 +1019,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, GetAllJsonProfile_ValidParams, TestSize
     std::vector<AppExecFwk::JsonProfileInfo> jsonProfileInfos;
 
     WMError result = ssm_->GetAllJsonProfile(
-        AppExecFwk::ProfileType::ABILITY_CONFIG,
+        AppExecFwk::ProfileType::UNSPECIFIED_PROFILE,
         100,
         jsonProfileInfos
     );
@@ -1047,7 +1039,7 @@ HWTEST_F(SceneSessionManagerOutlineTest, GetAllJsonProfile_DifferentProfileType,
     std::vector<AppExecFwk::JsonProfileInfo> jsonProfileInfos;
 
     WMError result = ssm_->GetAllJsonProfile(
-        AppExecFwk::ProfileType::APPCONFIG_JSON,
+        AppExecFwk::ProfileType::UNSPECIFIED_PROFILE,
         100,
         jsonProfileInfos
     );
