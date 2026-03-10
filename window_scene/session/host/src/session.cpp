@@ -1321,6 +1321,17 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
         PcFoldScreenManager::GetInstance().GetDisplayRects();
     int32_t lowerScreenPosY = defaultDisplayRect.height_ + foldCreaseRect.height_;
     TLOGI(WmsLogTag::WMS_LAYOUT, "lowerScreenPosY: %{public}d", lowerScreenPosY);
+    // Compatible mode sub-window display id follows the parent window
+    if (IsCompatibilityModeSubWin()) {
+        auto parentSession = GetParentSession();
+        if (parentSession) {
+            DisplayId parentClientDisplayId = parentSession->GetClientDisplayId();
+            if (parentClientDisplayId == VIRTUAL_DISPLAY_ID) {
+                rect.posY_ -= lowerScreenPosY;
+            }
+            return parentClientDisplayId;
+        }
+    }
     auto screenHeight = defaultDisplayRect.height_ + foldCreaseRect.height_ + virtualDisplayRect.height_;
     if (rect.posY_ > screenHeight) {
         rect.posY_ -= lowerScreenPosY;
@@ -1332,6 +1343,21 @@ DisplayId Session::TransformGlobalRectToRelativeRect(WSRect& rect) const
         rect.posY_ -= lowerScreenPosY;
     }
     return updatedDisplayId;
+}
+
+bool Session::IsCompatibilityModeSubWin() const
+{
+    if (!WindowHelper::IsSubWindow(GetWindowType())) {
+        return false;
+    }
+    auto parentSession = GetParentSession();
+    if (parentSession &&
+        parentSession->GetSessionProperty() &&
+        parentSession->GetSessionProperty()->IsAdaptToDragScale() &&
+        GetCallingPid() == parentSession->GetCallingPid()) {
+        return true;
+    }
+    return false;
 }
 
 void Session::TransformRelativeRectToGlobalRect(WSRect& rect) const

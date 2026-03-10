@@ -3076,6 +3076,172 @@ HWTEST_F(SceneSessionTest5, SetSkipEventOnCastPlus, TestSize.Level1)
     EXPECT_EQ(persistentId, sceneSession->GetMissionId());
     EXPECT_EQ(isSkip, true);
 }
+
+/**
+ * @tc.name: UpdateCrossAxisOfLayout_CompatibilityMode01
+ * @tc.desc: UpdateCrossAxisOfLayout Test - compatibility mode sub window inherits parent's cross axis state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateCrossAxisOfLayout_CompatibilityMode01, TestSize.Level1)
+{
+    // Create parent session with cross axis state true
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->SetCallingPid(1234);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    parentSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    // Set parent cross axis state to true
+    parentSession->isCrossAxisOfLayout_ = true;
+
+    // Create child session (sub window) in compatibility mode
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSessionMocker> childSession = sptr<SceneSessionMocker>::MakeSptr(childInfo, nullptr);
+    childSession->SetCallingPid(1234); // Same pid as parent
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+
+    // UpdateCrossAxisOfLayout should inherit parent's cross axis state
+    WSRect rect{ 100, 100, 200, 200 };
+    EXPECT_CALL(*childSession, UpdateCrossAxis()).Times(1);
+    childSession->SceneSession::UpdateCrossAxisOfLayout(rect);
+    // Child should inherit parent's cross axis state
+    EXPECT_EQ(childSession->IsCrossAxisOfLayout(), true);
+}
+
+/**
+ * @tc.name: UpdateCrossAxisOfLayout_CompatibilityMode02
+ * @tc.desc: UpdateCrossAxisOfLayout Test - compatibility mode sub window with parent cross axis false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateCrossAxisOfLayout_CompatibilityMode02, TestSize.Level1)
+{
+    // Create parent session with cross axis state false
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->SetCallingPid(1234);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    parentSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    // Set parent cross axis state to false
+    parentSession->isCrossAxisOfLayout_ = false;
+
+    // Create child session (sub window) in compatibility mode
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSessionMocker> childSession = sptr<SceneSessionMocker>::MakeSptr(childInfo, nullptr);
+    childSession->SetCallingPid(1234);
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+
+    // UpdateCrossAxisOfLayout should inherit parent's cross axis state
+    WSRect rect{ 100, 100, 200, 200 };
+    EXPECT_CALL(*childSession, UpdateCrossAxis()).Times(1);
+    childSession->SceneSession::UpdateCrossAxisOfLayout(rect);
+    // Child should inherit parent's cross axis state (false)
+    EXPECT_EQ(childSession->IsCrossAxisOfLayout(), false);
+}
+
+/**
+ * @tc.name: UpdateCrossAxisOfLayout_CompatibilityMode03
+ * @tc.desc: UpdateCrossAxisOfLayout Test - non-compatibility mode uses rect overlap check
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateCrossAxisOfLayout_CompatibilityMode03, TestSize.Level1)
+{
+    // Setup fold screen status with fold crease
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+
+    // Create main window session (not a sub window)
+    SessionInfo info;
+    info.abilityName_ = "UpdateCrossAxisOfLayout_CompatibilityMode03";
+    info.bundleName_ = "UpdateCrossAxisOfLayout_CompatibilityMode03";
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    // Rect that overlaps with fold crease (posY_ 1624-3272)
+    WSRect overlapRect{ 100, 1700, 200, 200 };
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    sceneSession->SceneSession::UpdateCrossAxisOfLayout(overlapRect);
+    // Should detect cross axis because rect overlaps with fold crease
+    EXPECT_EQ(sceneSession->IsCrossAxisOfLayout(), true);
+
+    // Rect that does not overlap with fold crease
+    WSRect nonOverlapRect{ 100, 100, 200, 200 };
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    sceneSession->SceneSession::UpdateCrossAxisOfLayout(nonOverlapRect);
+    // Should not detect cross axis
+    EXPECT_EQ(sceneSession->IsCrossAxisOfLayout(), false);
+}
+
+/**
+ * @tc.name: UpdateCrossAxisOfLayout_CompatibilityMode04
+ * @tc.desc: UpdateCrossAxisOfLayout Test - sub window without parent uses rect overlap check
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, UpdateCrossAxisOfLayout_CompatibilityMode04, TestSize.Level1)
+{
+    // Setup fold screen status
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
+
+    // Create sub window without parent session
+    SessionInfo info;
+    info.abilityName_ = "UpdateCrossAxisOfLayout_CompatibilityMode04";
+    info.bundleName_ = "UpdateCrossAxisOfLayout_CompatibilityMode04";
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    // No parent session set
+
+    // Rect that overlaps with fold crease
+    WSRect overlapRect{ 100, 1700, 200, 200 };
+    EXPECT_CALL(*sceneSession, UpdateCrossAxis()).Times(1);
+    sceneSession->SceneSession::UpdateCrossAxisOfLayout(overlapRect);
+    // Should use rect overlap check since no parent
+    EXPECT_EQ(sceneSession->IsCrossAxisOfLayout(), true);
+}
+
+/**
+ * @tc.name: IsCrossAxisOfLayout_Polymorphism
+ * @tc.desc: IsCrossAxisOfLayout Test - verify polymorphism through base class pointer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, IsCrossAxisOfLayout_Polymorphism, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCrossAxisOfLayout_Polymorphism";
+    info.bundleName_ = "IsCrossAxisOfLayout_Polymorphism";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    // Test through base class pointer
+    sptr<Session> baseSession = sceneSession;
+    ASSERT_NE(baseSession, nullptr);
+
+    // Default value is false
+    EXPECT_EQ(baseSession->IsCrossAxisOfLayout(), false);
+
+    // Set cross axis state through derived class
+    sceneSession->isCrossAxisOfLayout_ = true;
+
+    // Should return true through base class pointer (polymorphism)
+    EXPECT_EQ(baseSession->IsCrossAxisOfLayout(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
