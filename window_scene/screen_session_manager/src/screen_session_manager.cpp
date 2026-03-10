@@ -11662,6 +11662,7 @@ void ScreenSessionManager::SwitchScbNodeHandle(int32_t newUserId, int32_t newScb
             std::lock_guard<std::mutex> lock(multiClientProxyMapMutex_);
             multiClientProxyMap_[newUserId] = clientProxy;
         }
+        UpdateScbDisplayModeMap();
     } else {
         isNeedSwitchWait = (GetFoldDisplayMode() != FindPidInDisplayModeMap(newScbPid));
         HotSwitch(newUserId, newScbPid);
