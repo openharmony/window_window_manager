@@ -82,10 +82,7 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH);
-        for (let i = 0; i < this.boundingRects.length; i++) {
-            this.boundingRects[i] = new RectImpl();
-        }
+        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH, () => { return new RectImpl() });
         this.waterfallDisplayAreaRects = new WaterfallDisplayAreaRectsImpl();
     }
 
@@ -122,10 +119,7 @@ export interface FoldCreaseRegion {
 
 export class FoldCreaseRegionImpl implements FoldCreaseRegion {
     constructor() {
-        this.creaseRects = new Array<Rect>(CREASE_RECTS_LENGTH);
-        for (let i = 0; i < this.creaseRects.length; i++) {
-            this.creaseRects[i] = new RectImpl();
-        }
+        this.creaseRects = new Array<Rect>(CREASE_RECTS_LENGTH, () => { return new RectImpl() });
     }
 
     readonly displayId: long;
@@ -456,10 +450,7 @@ export class DisplayImpl implements Display {
     }
 
     getRoundedCorner(): Array<RoundedCorner> {
-        let res: Array<RoundedCorner> = new Array<RoundedCorner>(ROUNDED_CORNER_LENGTH);
-        for (let i = 0; i < res.length; i++) {
-            res[i] = new RoundedCornerImpl();
-        }
+        let res: Array<RoundedCorner> = new Array<RoundedCorner>(ROUNDED_CORNER_LENGTH, () => { return new RoundedCornerImpl() });
         this.getRoundedCornerInternal(res);
         minusRoundedCornerArray(res);
         return res;
@@ -655,10 +646,7 @@ export native function getDefaultDisplaySyncNative(obj: object): void;
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
 export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
-    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
-    for (let i = 0; i < res.length; i++) {
-        res[i] = new DisplayImpl();
-    }
+    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH, () => { return new DisplayImpl() });
     try {
         getAllDisplaysSyncNative(res);
         minusDisplayArray(res);
@@ -669,10 +657,11 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
     }
     return;
 }
+
 export function getAllDisplays(): Promise<Array<Display>> {
     return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
-            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
+            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH,  () => { return new DisplayImpl() });
             for (let i = 0; i < res.length; i++) {
                 res[i] = new DisplayImpl();
             }
@@ -824,10 +813,7 @@ export function getAllDisplayPhysicalResolution(): Promise<Array<DisplayPhysical
         reject: (error: BusinessError) => void ) => {
             taskpool.execute((): Array<DisplayPhysicalResolution> => {
                 let res: Array<DisplayPhysicalResolution> =
-                    new Array<DisplayPhysicalResolution>(DISPLAY_PHYSICAL_RESOLUTION_LENGTH);
-                for (let i = 0; i < res.length; i++) {
-                    res[i] = new DisplayPhysicalResolutionImpl();
-                }
+                    new Array<DisplayPhysicalResolution>(DISPLAY_PHYSICAL_RESOLUTION_LENGTH, () => { return new DisplayPhysicalResolutionImpl() });
                 getAllDisplayPhysicalResolutionNative(res, displayMgrRef);
                 minusResolutionArray(res);
                 return res;
