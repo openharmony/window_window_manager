@@ -48,6 +48,7 @@
             OHOS::Rosen::ScreenProperty::GetScaleY*;
             OHOS::Rosen::ScreenProperty::GetScreenComponentRotation*;
             OHOS::Rosen::ScreenProperty::GetScreenRequestedOrientation*;
+            OHOS::Rosen::ScreenProperty::GetScreenRotation*;
             OHOS::Rosen::ScreenProperty::GetScreenType*;
             OHOS::Rosen::ScreenProperty::GetStartX*;
             OHOS::Rosen::ScreenProperty::GetStartY*;
@@ -62,6 +63,8 @@
             OHOS::Rosen::ScreenProperty::SetDefaultDensity*;
             OHOS::Rosen::ScreenProperty::SetDefaultDeviceRotationOffset*;
             OHOS::Rosen::ScreenProperty::SetDensityInCurResolution*;
+            OHOS::Rosen::ScreenProperty::SetDeviceOrientation*;
+            OHOS::Rosen::ScreenProperty::SetDisplayOrientation*;
             OHOS::Rosen::ScreenProperty::SetDpiPhyBounds*;
             OHOS::Rosen::ScreenProperty::SetInputOffset*;
             OHOS::Rosen::ScreenProperty::SetPhyBounds*;
@@ -83,6 +86,7 @@
             OHOS::Rosen::ScreenSession::BeforeScreenPropertyChange*;
             OHOS::Rosen::ScreenSession::CalcBoundsByRotation*;
             OHOS::Rosen::ScreenSession::CalcBoundsInRotationZero*;
+            OHOS::Rosen::ScreenSession::CalcDeviceOrientation*;
             OHOS::Rosen::ScreenSession::CalcDeviceOrientationWithBounds*;
             OHOS::Rosen::ScreenSession::CalcDisplayOrientation*;
             OHOS::Rosen::ScreenSession::CalcRotationByDeviceOrientation*;
