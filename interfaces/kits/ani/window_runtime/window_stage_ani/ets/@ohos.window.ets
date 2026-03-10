@@ -2669,6 +2669,7 @@ export class WindowStageInternal implements WindowStage {
         }).then((ret: Any) => {
             callback(new BusinessError(), ret as Window);
         }).catch((err: Any) => {
+            callback(err as BusinessError, new WindowInternal());
         });
     }
 
@@ -2692,6 +2693,7 @@ export class WindowStageInternal implements WindowStage {
         }).then((ret: Any) => {
             callback(new BusinessError(), ret as Window);
         }).catch((err: Any) => {
+            callback(err as BusinessError, new WindowInternal());
         });
     }
 

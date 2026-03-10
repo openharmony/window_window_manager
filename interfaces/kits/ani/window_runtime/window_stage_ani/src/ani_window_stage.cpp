@@ -291,18 +291,20 @@ ani_ref AniWindowStage::GetMainWindow(ani_env* env)
     std::shared_ptr<WindowScene> weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] WindowScene_ is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
         return AniWindowUtils::CreateAniUndefined(env);
     }
 
-    sptr<Window> windowScene = weakScene->GetMainWindow();
-    if (windowScene == nullptr) {
+    sptr<Window> window = weakScene->GetMainWindow();
+    if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Get main window failed");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::CreateAniUndefined(env);
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI] Get main window [%{public}u, %{public}s]",
-        windowScene->GetWindowId(), windowScene->GetWindowName().c_str());
+        window->GetWindowId(), window->GetWindowName().c_str());
 
-    return CreateAniWindowObject(env, windowScene);
+    return CreateAniWindowObject(env, window);
 }
 
 void DropWindowStageByAni(ani_object aniObj)
@@ -886,13 +888,15 @@ ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
     ani_status ret = AniWindowUtils::GetStdString(env, name, windowName);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] invalid param of name");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return AniWindowUtils::CreateAniUndefined(env);
     }
 
     auto weakScene = windowScene_.lock();
     if (weakScene == nullptr) {
         TLOGI(WmsLogTag::DEFAULT, "[ANI] Window scene is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     sptr<Rosen::WindowOption> windowOption = new Rosen::WindowOption();
     windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -900,7 +904,8 @@ ani_ref AniWindowStage::OnCreateSubWindow(ani_env* env, ani_string name)
     auto window = weakScene->CreateWindow(windowName, windowOption);
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Create window failed");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     return CreateAniWindowObject(env, window);
 }
