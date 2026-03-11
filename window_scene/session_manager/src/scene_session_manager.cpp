@@ -825,6 +825,7 @@ void SceneSessionManager::ConfigWindowSceneXml()
     ConfigWindowSizeLimits();
     ConfigAppsWithDeduplicatedWindowStatus();
     ConfigSnapshotScale();
+    ConfigPersistentScaledSnapshot();
     ConfigWindowSceneXml(config);
     ConfigWindowLayout(config["windowLayout"]);
 }
@@ -1818,6 +1819,16 @@ void SceneSessionManager::ConfigSnapshotScale()
             return;
         }
         snapshotScale_ = snapshotScale[0];
+    }
+}
+
+void SceneSessionManager::ConfigPersistentScaledSnapshot()
+{
+    const auto& config = WindowSceneConfig::GetConfig();
+    WindowSceneConfig::ConfigItem item = config["persistDifferentScaledSnapshot"].GetProp("enable");
+    if (item.IsBool()) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "enable");
+        enablePersistentScaledSnapshot_ = item.boolValue_;
     }
 }
 
@@ -3303,6 +3314,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     sceneSession->SetSystemConfig(systemConfig);
     sceneSession->InitSnapshotCapacity();
     sceneSession->SetSnapshotScale(snapshotScale_);
+    sceneSession->InitPersistentScaledSnapshotParam(enablePersistentScaledSnapshot_);
     sceneSession->SetBlurRadius(blurRadius_);
     sceneSession->SetBlurBackgroundColor(blurBackgroundColor_);
     UpdateParentSessionForDialog(sceneSession, property);

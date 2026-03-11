@@ -1925,12 +1925,14 @@ private:
     std::atomic<bool> delayRemoveSnapshot_ = false;
     bool syncLoadStartingWindow_ = false;
     bool enableDmaReclaim_ = false;
+    bool enablePersistentScaledSnapshot_ = false;
     std::unordered_map<DisplayId, bool> appUseControlDisplayMap_;
     std::mutex startWindowPersistencePathMutex_;
     std::unordered_map<std::string, std::unordered_map<std::string, std::string>> startWindowPersistencePathMap_;
     void InitWindowPattern();
     void InitStartingWindow();
     void InitDmaReclaimParam();
+    void ConfigPersistentScaledSnapshot();
     void InitStartingWindowRdb(const std::string& rdbPath);
     bool GetStartingWindowInfoFromCache(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool isDark);
