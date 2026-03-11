@@ -109,6 +109,7 @@ scene_session_manager_external_deps = [
   "ability_runtime:app_context",
   "ability_runtime:app_manager",
   "ability_runtime:mission_info",
+  "ability_runtime:runtime",
   "ability_runtime:session_handler",
   "ace_engine:ace_uicontent",
   "bundle_framework:appexecfwk_base",
