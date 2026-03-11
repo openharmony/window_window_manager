@@ -28,6 +28,8 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MainSession" };
 constexpr int32_t MAX_LABEL_SIZE = 1024;
+const int32_t MAX_ACTION_LIMIT_SIZE = 64;
+const int32_t MAX_MESSAGE_LIMIT_SIZE = 512;
 const uint64_t PRELAUNCH_DONE_TIME_MS = system::GetIntParameter<int>("window.prelaunchDoneTime", 6000);
 } // namespace
 
@@ -679,11 +681,11 @@ void MainSession::RegisterPageEnableCallback(PageEnableCallback&& callback)
 WSError MainSession::NotifyPageEnable(const std::string& action, const std::string& message)
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "action=%{public}s, message=%{public}s", action.c_str(), message.c_str());
-    if (action.empty() || action.length() > 64) {
+    if (action.empty() || action.length() > MAX_ACTION_LIMIT_SIZE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Invalid action length: %{public}zu", action.length());
         return WSError::WS_ERROR_INVALID_PARAM;
     }
-    if (message.empty() || message.length() > 64) {
+    if (message.empty() || message.length() > MAX_MESSAGE_LIMIT_SIZE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Invalid message length: %{public}zu", message.length());
         return WSError::WS_ERROR_INVALID_PARAM;
     }
