@@ -1482,6 +1482,27 @@ private:
     bool ShouldSkipUpdateRect(const WSRect& rect);
     bool ShouldSkipUpdateRectNotify(const WSRect& rect);
 
+    /**
+     * @brief Set surface bounds via the original surface node.
+     *
+     * This method is used for normal transaction commit together with ArkUI relayout.
+     *
+     * @param rect     Window bounds to be applied.
+     * @param isGlobal Indicates whether global positioning is enabled.
+     */
+    void SetSurfaceBoundsWithOriginalNode(const WSRect& rect, bool isGlobal);
+
+    /**
+     * @brief Set surface bounds via the shadow surface node.
+     *
+     * This method is used for immediate RS commit to avoid flushing other pending
+     * SurfaceNode updates in the current transaction.
+     *
+     * @param rect     Window bounds to be applied.
+     * @param isGlobal Indicates whether global positioning is enabled.
+     */
+    void SetSurfaceBoundsWithShadowNode(const WSRect& rect, bool isGlobal);
+
     /*
      * Window Decor
      */
