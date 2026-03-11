@@ -1168,8 +1168,8 @@ int SceneSessionManagerStub::HandleBindDialogTarget(MessageParcel& data, Message
 int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "Enter");
-    uint32_t vectorSize;
-    if (!data.ReadUint32(vectorSize)) {
+    uint64_t vectorSize;
+    if (!data.ReadUint64(vectorSize)) {
         TLOGE(WmsLogTag::DEFAULT, "Failed to read vectorSize");
         return ERR_INVALID_DATA;
     }
@@ -1178,8 +1178,8 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
         return ERR_INVALID_DATA;
     }
     std::vector<std::string> info;
-    for (uint32_t i = 0; i < vectorSize; i++) {
-        uint32_t curSize = data.ReadUint32();
+    for (uint64_t i = 0; i < vectorSize; i++) {
+        uint64_t curSize = data.ReadUint64();
         std::string curInfo = "";
         if (curSize != 0) {
             const char* infoPtr = nullptr;
@@ -1187,7 +1187,7 @@ int SceneSessionManagerStub::HandleNotifyDumpInfoResult(MessageParcel& data, Mes
             curInfo = (infoPtr) ? std::string(infoPtr, curSize) : "";
         }
         info.emplace_back(curInfo);
-        TLOGD(WmsLogTag::DEFAULT, "InfoResult count: %{public}u, infoSize: %{public}u", i, curSize);
+        TLOGD(WmsLogTag::DEFAULT, "InfoResult count: %{public}" PRIu64 ", infoSize: %{public}" PRIu64, i, curSize);
     }
     NotifyDumpInfoResult(info);
     return ERR_NONE;
