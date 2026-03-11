@@ -1806,6 +1806,247 @@ HWTEST_F(WindowSessionTest, IsStatusBarVisible, TestSize.Level1)
     session_->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     EXPECT_EQ(false, session_->IsStatusBarVisible());
 }
+
+/**
+ * @tc.name: IsCrossAxisOfLayout01
+ * @tc.desc: IsCrossAxisOfLayout Test - default return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsCrossAxisOfLayout01, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    // Session base class default returns false
+    EXPECT_EQ(session_->IsCrossAxisOfLayout(), false);
+}
+
+/**
+ * @tc.name: IsCrossAxisOfLayout02
+ * @tc.desc: IsCrossAxisOfLayout Test - SceneSession override returns actual value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsCrossAxisOfLayout02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCrossAxisOfLayout02";
+    info.bundleName_ = "IsCrossAxisOfLayout02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    // Default value is false
+    EXPECT_EQ(sceneSession->IsCrossAxisOfLayout(), false);
+    // Set cross axis state
+    sceneSession->isCrossAxisOfLayout_ = true;
+    EXPECT_EQ(sceneSession->IsCrossAxisOfLayout(), true);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeSubWin01
+ * @tc.desc: IsCompatibilityModeSubWin Test - not a sub window
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsCompatibilityModeSubWin01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCompatibilityModeSubWin01";
+    info.bundleName_ = "IsCompatibilityModeSubWin01";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    // Main window type, should return false
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_EQ(sceneSession->IsCompatibilityModeSubWin(), false);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeSubWin02
+ * @tc.desc: IsCompatibilityModeSubWin Test - sub window without parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsCompatibilityModeSubWin02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsCompatibilityModeSubWin02";
+    info.bundleName_ = "IsCompatibilityModeSubWin02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    // Sub window type but no parent session
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    EXPECT_EQ(sceneSession->IsCompatibilityModeSubWin(), false);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeSubWin03
+ * @tc.desc: IsCompatibilityModeSubWin Test - sub window with parent not in compatibility mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsCompatibilityModeSubWin03, TestSize.Level1)
+{
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->SetCallingPid(1234);
+    // Parent not in compatibility mode (IsAdaptToDragScale is false by default)
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(false);
+    parentSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    childSession->SetCallingPid(1234); // Same pid as parent
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+    // Parent is not in compatibility mode
+    EXPECT_EQ(childSession->IsCompatibilityModeSubWin(), false);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeSubWin04
+ * @tc.desc: IsCompatibilityModeSubWin Test - sub window with parent in compatibility mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsCompatibilityModeSubWin04, TestSize.Level1)
+{
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->SetCallingPid(1234);
+    // Parent in compatibility mode
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    parentSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    childSession->SetCallingPid(1234); // Same pid as parent
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+    // Parent is in compatibility mode and same pid
+    EXPECT_EQ(childSession->IsCompatibilityModeSubWin(), true);
+}
+
+/**
+ * @tc.name: IsCompatibilityModeSubWin05
+ * @tc.desc: IsCompatibilityModeSubWin Test - sub window with different pid from parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsCompatibilityModeSubWin05, TestSize.Level1)
+{
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->SetCallingPid(1234);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    parentSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    childSession->SetCallingPid(5678); // Different pid from parent
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+    // Different pid, should return false
+    EXPECT_EQ(childSession->IsCompatibilityModeSubWin(), false);
+}
+
+/**
+ * @tc.name: TransformGlobalRectToRelativeRect_CompatibilityMode01
+ * @tc.desc: TransformGlobalRectToRelativeRect Test - compatibility mode sub window with virtual display parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransformGlobalRectToRelativeRect_CompatibilityMode01, TestSize.Level1)
+{
+    // Setup fold screen status
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 24 });
+
+    // Create parent session on virtual display
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->SetCallingPid(1234);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    parentSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    // Set parent client display id to virtual display
+    parentSession->clientDisplayId_ = 999; // VIRTUAL_DISPLAY_ID
+
+    // Create child session (sub window)
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    childSession->SetCallingPid(1234);
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+
+    // Test TransformGlobalRectToRelativeRect
+    WSRect rect{ 100, 3500, 200, 200 }; // Position in virtual display area
+    DisplayId displayId = childSession->TransformGlobalRectToRelativeRect(rect);
+    // Should return parent's client display id
+    EXPECT_EQ(displayId, static_cast<DisplayId>(999));
+}
+
+/**
+ * @tc.name: TransformGlobalRectToRelativeRect_CompatibilityMode02
+ * @tc.desc: TransformGlobalRectToRelativeRect Test - compatibility mode sub window with default display parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, TransformGlobalRectToRelativeRect_CompatibilityMode02, TestSize.Level1)
+{
+    // Setup fold screen status
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 24 });
+
+    // Create parent session on default display
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->SetCallingPid(1234);
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    compatibleModeProperty->SetIsAdaptToDragScale(true);
+    parentSession->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    // Set parent client display id to default display
+    parentSession->clientDisplayId_ = 0; // DEFAULT_DISPLAY_ID
+
+    // Create child session (sub window)
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    childSession->SetCallingPid(1234);
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+
+    // Test TransformGlobalRectToRelativeRect
+    WSRect rect{ 100, 500, 200, 200 }; // Position in default display area
+    DisplayId displayId = childSession->TransformGlobalRectToRelativeRect(rect);
+    // Should return parent's client display id (default display)
+    EXPECT_EQ(displayId, static_cast<DisplayId>(0));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
