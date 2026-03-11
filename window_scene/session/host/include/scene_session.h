@@ -856,6 +856,7 @@ public:
     bool IsDirtyDragWindow();
     void ResetDirtyDragFlags();
     void ResetSizeChangeReasonIfDirty();
+    bool IsCrossAxisOfLayout() const override { return isCrossAxisOfLayout_; }
 
     /**
      * @brief Set the VsyncStation used by the session.

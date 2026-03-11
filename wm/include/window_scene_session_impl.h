@@ -552,7 +552,7 @@ private:
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
-    float rsCornerRadius_;
+    float rsCornerRadius_ = 0.0f;
     WMError SetPcAppInpadSpecificSystemBarInvisible();
     WMError SetPcAppInpadOrientationLandscape();
 
@@ -584,9 +584,8 @@ private:
     /*
      * Move Drag
      */
-    bool CalcWindowShouldMove();
     bool CheckCanMoveWindowType();
-    bool CheckCanMoveWindowTypeByDevice();
+    bool CheckCanStartMoveWindowByWindowType();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
     AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);

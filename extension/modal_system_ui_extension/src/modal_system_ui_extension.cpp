@@ -44,6 +44,11 @@ ModalSystemUiExtension::~ModalSystemUiExtension()
 
 bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
 {
+    return CreateModalUIExtension(want, INVALID_USERID);
+}
+
+bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want, const int32_t userId)
+{
     auto abilityManagerClient = AbilityManagerClient::GetInstance();
     if (abilityManagerClient == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "AbilityManagerClient is nullptr");
@@ -53,7 +58,7 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want)
     AAFwk::Want systemUIWant;
     systemUIWant.SetElementName("com.ohos.sceneboard", "com.ohos.sceneboard.systemdialog");
     dialogConnectionCallback_ = sptr<DialogAbilityConnection>::MakeSptr(want);
-    auto result = abilityManagerClient->ConnectAbility(systemUIWant, dialogConnectionCallback_, INVALID_USERID);
+    auto result = abilityManagerClient->ConnectAbility(systemUIWant, dialogConnectionCallback_, userId);
     if (result != ERR_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "ConnectAbility failed, result=%{public}d", result);
         return false;

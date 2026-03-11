@@ -51,6 +51,30 @@ void sceneSessionManagerProxyTest::TearDown() {}
 
 namespace {
 /**
+ * @tc.name: NotifyDumpInfoResult
+ * @tc.desc: NotifyDumpInfoResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, NotifyDumpInfoResult, TestSize.Level1)
+{
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(iRemoteObjectMocker, nullptr);
+    sptr<SceneSessionManagerProxy> sceneSessionManagerProxy =
+        sptr<SceneSessionManagerProxy>::MakeSptr(iRemoteObjectMocker);
+
+    std::vector<std::string> info;
+    info.push_back("test1");
+    info.push_back("test2");
+
+    MockMessageParcel::ClearAllErrorFlag();
+    sceneSessionManagerProxy->NotifyDumpInfoResult(info);
+    // WriteUint64 failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteUint64ErrorFlag(true);
+    sceneSessionManagerProxy->NotifyDumpInfoResult(info);
+}
+
+/**
  * @tc.name: CreateAndConnectSpecificSession
  * @tc.desc: normal function
  * @tc.type: FUNC

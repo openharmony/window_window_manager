@@ -1861,15 +1861,15 @@ void SceneSessionManagerProxy::NotifyDumpInfoResult(const std::vector<std::strin
         WLOGFE("WriteInterfaceToken pfailed");
         return;
     }
-    uint32_t vectorSize = static_cast<uint32_t>(info.size());
-    if (!data.WriteUint32(vectorSize)) {
+    uint64_t vectorSize = static_cast<uint64_t>(info.size());
+    if (!data.WriteUint64(vectorSize)) {
         WLOGFE("Write vector size failed");
         return;
     }
     for (const auto& elem : info) {
-        uint32_t curSize = static_cast<uint32_t>(elem.length());
-        WLOGFD("NotifyDumpInfoResult infoSize: %{public}u", curSize);
-        if (!data.WriteUint32(curSize)) {
+        uint64_t curSize = static_cast<uint64_t>(elem.length());
+        WLOGFD("NotifyDumpInfoResult infoSize: %{public}" PRIu64, curSize);
+        if (!data.WriteUint64(curSize)) {
             WLOGFE("Write info size failed");
             return;
         }

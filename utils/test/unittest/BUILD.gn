@@ -70,7 +70,6 @@ test_external_deps = [
   "init:libbegetutil",
   "input:libmmi-client",
   "preferences:native_preferences",
-  "time_service:time_client",
 ]
 
 ohos_unittest("utils_task_sequence_process_test") {

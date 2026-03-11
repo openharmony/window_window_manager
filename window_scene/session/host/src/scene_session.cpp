@@ -2453,8 +2453,13 @@ void SceneSession::UpdatePrivateStateOfLayout(const WSRect &rect)
 void SceneSession::UpdateCrossAxisOfLayout(const WSRect& rect)
 {
     const int FOLD_CREASE_TYPE = 2;
-    isCrossAxisOfLayout_ = rect.IsOverlap(std::get<FOLD_CREASE_TYPE>(
-        PcFoldScreenManager::GetInstance().GetDisplayRects()));
+    auto parentSession = GetParentSession();
+    if (parentSession && Session::IsCompatibilityModeSubWin()) {
+        isCrossAxisOfLayout_ = parentSession->IsCrossAxisOfLayout();
+    } else {
+        isCrossAxisOfLayout_ = rect.IsOverlap(std::get<FOLD_CREASE_TYPE>(
+            PcFoldScreenManager::GetInstance().GetDisplayRects()));
+    }
     UpdateCrossAxis();
 }
 
