@@ -152,6 +152,7 @@ ohos_static_library("scene_session_manager_static") {
   external_deps = scene_session_manager_external_deps
   external_deps += [
     "accessibility:accessibility_common",
+    "c_utils:utils",
     "graphic_2d:window_animation",
     "input:libmmi-napi",
   ]
