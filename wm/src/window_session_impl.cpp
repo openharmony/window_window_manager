@@ -9392,8 +9392,8 @@ void WindowSessionImpl::RecordWindowLifecycleChange(const std::string& windowEve
         << ", name: " << GetWindowName()
         << ", id: " << GetWindowId()
         << ", displayId: " << GetDisplayId();
-    // WritePageSwitchStr return 0: Success, -1: Failure; disabled by default
-    constexpr int WRITE_PAGE_SWITCH_FAIL = -1;
+    // WritePageSwitchStr return 0: Success, -1: Disable, -2: Failure; disabled by default
+    constexpr int WRITE_PAGE_SWITCH_FAIL = -2;
     int ret = HiviewDFX::WritePageSwitchStr(oss.str());
     if (ret == WRITE_PAGE_SWITCH_FAIL) {
         TLOGE(WmsLogTag::WMS_MAIN, "failed, ret: %{public}d, event: %{public}s",
