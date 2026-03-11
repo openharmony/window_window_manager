@@ -166,11 +166,11 @@ ScenePersistence::~ScenePersistence()
 
 void ScenePersistence::ClearSnapshotPath()
 {
-    auto task = [snapshotPath = snapshotPath_, snapshotFreeMultiWindowPath = snapshotFreeMultiWindowPath_,
-        persistentId = persistentId_, capacity = capacity_, where = __func__]() {
+    auto task = [snapshotPaths = std::vector<std::string>(snapshotPath_, snapshotPath_ + SCREEN_COUNT),
+        snapshotFreeMultiWindowPath = snapshotFreeMultiWindowPath_, persistentId = persistentId_, where = __func__]() {
         TLOGI(WmsLogTag::WMS_PATTERN, "%{public}s persistentId: %{public}d", where, persistentId);
-        for (size_t i = 0; i < capacity; i++) {
-            remove(snapshotPath[i].c_str());
+        for (const auto& snapshotPath: snapshotPaths) {
+            remove(snapshotPath.c_str());
         }
         remove(snapshotFreeMultiWindowPath.c_str());
     };
