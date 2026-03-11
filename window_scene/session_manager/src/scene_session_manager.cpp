@@ -112,10 +112,6 @@
 #endif // IMF_ENABLE
 #include "dms_global_mutex.h"
 
-#ifdef DEVICE_STATUS_ENABLE
-#include "interaction_manager.h"
-#endif // DEVICE_STATUS_ENABLE
-
 namespace OHOS::Rosen {
 namespace {
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
@@ -20171,16 +20167,10 @@ void SceneSessionManager::RegisterMinimizeAllCallback(MinimizeAllFunc&& func){
     minimizeAllFunc_ = std::move(func);
 }
 
-void SceneSessionManager::NotifyRotationBegin(bool isStopDrag)
+void SceneSessionManager::NotifyRotationBegin()
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "NotifyRotationBegin isStopDrag: %{public}d", isStopDrag);
+    TLOGI(WmsLogTag::WMS_ROTATION, "in");
     SceneInputManager::GetInstance().SetIsRotationBegin(true);
-    if (isStopDrag) {
-        #ifdef DEVICE_STATUS_ENABLE
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(
-            { Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false, -1 });
-        #endif // DEVICE_STATUS_ENABLE
-    }
 }
 
 } // namespace OHOS::Rosen
