@@ -1806,7 +1806,7 @@ public:
      *
      * @return True means the session is blocking sub window, false means the opposite.
      */
-    virtual bool GetIsBlockSubwindow() const { return false; }
+    virtual bool IsBlockSubwindow() const { return false; }
 
     /**
      * @brief Set brightness value of window.
