@@ -5148,6 +5148,18 @@ public:
      * @brief Flush vsync for prelaunch.
      */
     virtual void FlushVsync() {}
+
+    /**
+     * @brief Notify pageEnable.
+     *
+     * @param action action.
+     * @param message message.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WSError NotifyPageEnable(const std::string& action, const std::string& message)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
