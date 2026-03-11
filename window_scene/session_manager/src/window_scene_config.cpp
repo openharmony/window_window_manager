@@ -80,6 +80,7 @@ const std::map<std::string, WindowSceneConfig::ValueType> WindowSceneConfig::con
     { "offsetY",                                      WindowSceneConfig::ValueType::FLOATS },
     { "radius",                                       WindowSceneConfig::ValueType::FLOATS },
     { "snapshotScale",                                WindowSceneConfig::ValueType::FLOATS },
+    { "persistDifferentScaledSnapshot",               WindowSceneConfig::ValueType::STRING },
     { "fullScreen",                                   WindowSceneConfig::ValueType::STRING },
     { "split",                                        WindowSceneConfig::ValueType::STRING },
     { "float",                                        WindowSceneConfig::ValueType::STRING },
