@@ -84,8 +84,8 @@ public:
         return WMError::WM_OK;
     }
 
-    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
-        int32_t windowId, const SnapshotConfig& config) override
+    WMError Snapshot(
+        std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config) override
     {
         pixelMap = nullptr;
         return WMError::WM_OK;
