@@ -553,7 +553,8 @@ WMError WindowAdapter::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<M
     return wmsProxy->GetSnapshotByWindowId(windowId, pixelMap);
 }
 
-WMError WindowAdapter::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config)
+WMError WindowAdapter::Snapshot(
+    std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_IPC_FAILED);
     auto wmsProxy = GetWindowManagerServiceProxy();
