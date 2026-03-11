@@ -372,7 +372,7 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
 
 void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
 {
-    auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
+    auto movedSurfaceNode = GetMoveDragTargetSurfaceNode();
     if (movedSurfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
@@ -440,7 +440,7 @@ std::set<uint64_t> SubSession::GetNewDisplayIdsDuringMoveTo(WSRect& newRect)
 
 void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId)
 {
-    auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
+    auto currSurfacedNode = GetMoveDragTargetSurfaceNode();
     if (currSurfacedNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
@@ -482,7 +482,7 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
 
 void SubSession::RemoveSurfaceNodeFromScreen()
 {
-    auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
+    auto currSurfacedNode = GetMoveDragTargetSurfaceNode();
     if (currSurfacedNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
@@ -514,7 +514,7 @@ void SubSession::RemoveSurfaceNodeFromScreen()
 
 void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId)
 {
-    auto surfaceNode = GetSurfaceNodeForMoveDrag();
+    auto surfaceNode = GetMoveDragTargetSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, SurfaceNode is null", GetPersistentId());
         return;

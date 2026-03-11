@@ -4298,7 +4298,7 @@ bool SceneSession::SaveAspectRatio(float ratio)
 /** @note @window.drag */
 void SceneSession::InitializeCrossMoveDrag()
 {
-    auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
+    auto movedSurfaceNode = GetMoveDragTargetSurfaceNode();
     if (!movedSurfaceNode) {
         return;
     }
@@ -5083,11 +5083,12 @@ std::shared_ptr<Rosen::RSNode> SceneSession::GetWindowDragMoveMountedNode(Displa
 /** @note @window.drag */
 void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
 {
-    auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
-    if (movedSurfaceNode == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
-        return;
-    }
+    auto targetSurfaceNode = GetMoveDragTargetSurfaceNode();
+    RETURN_IF_NULL(targetSurfaceNode);
+
+    auto targetShadowSurfaceNode = GetMoveDragTargetShadowSurfaceNode();
+    RETURN_IF_NULL(targetShadowSurfaceNode);
+
     const auto startDisplayId = moveDragController_->GetMoveDragStartDisplayId();
     auto startScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(startDisplayId);
     if (startScreenSession == nullptr) {
@@ -5119,23 +5120,29 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 continue;
             }
             {
-                AutoRSTransaction trans(movedSurfaceNode->GetRSUIContext());
+                AutoRSTransaction trans(targetShadowSurfaceNode);
                 // In cross-display drag scenarios, SetIsCrossNode(true) creates a clone node.
                 // The clone node uses global position, so GlobalPosition must be enabled, and
                 // Bounds / Frame must be updated synchronously. Otherwise, if deferred to a
                 // vsync callback, the clone node will be rendered at an incorrect position in
                 // its first frame.
-                movedSurfaceNode->SetGlobalPositionEnabled(true);
-                movedSurfaceNode->SetBounds(globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_);
-                movedSurfaceNode->SetFrame(globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_);
-                movedSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
-                movedSurfaceNode->SetIsCrossNode(true);
+                targetShadowSurfaceNode->SetGlobalPositionEnabled(true);
+                targetShadowSurfaceNode->SetBounds(
+                    globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_);
+                targetShadowSurfaceNode->SetFrame(
+                    globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_);
             }
-
             {
-                AutoRSTransaction trans(dragMoveMountedNode->GetRSUIContext());
+                AutoRSTransaction trans(targetSurfaceNode);
+                // PositionZ depends on RSTransformModifier. Shadow node adaptation is not
+                // supported yet, so the value is set on the original surface node.
+                targetSurfaceNode->SetPositionZ(MOVE_DRAG_POSITION_Z);
+                targetSurfaceNode->SetIsCrossNode(true);
+            }
+            {
+                AutoRSTransaction trans(dragMoveMountedNode);
                 // input parameter -1 means inserting to the end of childList
-                dragMoveMountedNode->AddCrossScreenChild(movedSurfaceNode, -1, true);
+                dragMoveMountedNode->AddCrossScreenChild(targetSurfaceNode, -1, true);
             }
             HandleSubSessionSurfaceNodeByWindowAnchor(reason, displayId);
             TLOGI(WmsLogTag::WMS_LAYOUT, "Add window to display: %{public}" PRIu64 "persistentId: %{public}d",
@@ -5151,15 +5158,15 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
                 TLOGE(WmsLogTag::WMS_LAYOUT, "dragMoveMountedNode is null");
                 continue;
             }
-            movedSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
-            movedSurfaceNode->SetIsCrossNode(false);
-            dragMoveMountedNode->RemoveCrossScreenChild(movedSurfaceNode);
+            targetSurfaceNode->SetPositionZ(moveDragController_->GetOriginalPositionZ());
+            targetSurfaceNode->SetIsCrossNode(false);
+            dragMoveMountedNode->RemoveCrossScreenChild(targetSurfaceNode);
             // When the drag-to-move or drag-to-scale operation ends, if the window's current screen
             // is the same as the starting screen, the cloned node is removed immediately. Otherwise,
             // the removal of the cloned node is submitted along with the vsync refresh.
             if (!moveDragController_->IsWindowCrossScreenOnDragEnd()) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "Cloned node removed immediately");
-                RSTransactionAdapter::FlushImplicitTransaction({ movedSurfaceNode, dragMoveMountedNode });
+                RSTransactionAdapter::FlushImplicitTransaction({ targetSurfaceNode, dragMoveMountedNode });
             }
             HandleSubSessionSurfaceNodeByWindowAnchor(reason, displayId);
             TLOGI(WmsLogTag::WMS_LAYOUT, "Remove window from display: %{public}" PRIu64 "persistentId: %{public}d",
@@ -5279,11 +5286,6 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         "id: %{public}d, type: %{public}u, rect: %{public}s, isGlobal: %{public}d, needFlush: %{public}d",
         windowId, windowType, rect.ToString().c_str(), isGlobal, needFlush);
 
-    if (getRsCmdBlockingCountFunc_ != nullptr && getRsCmdBlockingCountFunc_() > 0) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "creating node, stop commit");
-        return;
-    }
-
     auto surfaceNode = GetSurfaceNode();
     RETURN_IF_NULL(surfaceNode);
 
@@ -5300,31 +5302,61 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
         TLOGD(WmsLogTag::WMS_KEYBOARD, "On drag end, needFlush: %{public}d", needFlush);
     }
 
-    auto leashWinSurfaceNode = GetLeashWinSurfaceNode();
-    if (leashWinSurfaceNode) {
-        AutoRSTransaction trans(surfaceNode, needFlush);
+    // If the bounds update needs to be flushed to RS immediately, operate on a
+    // shadow node instead of the original one.
+    // SurfaceNode updates are recorded as RS commands and committed through the
+    // current RSTransaction. Flushing the original node may also commit other
+    // pending modifications on the same node prematurely.
+    // Using the shadow node isolates this update, ensuring that only the bounds
+    // change is flushed to RS without affecting other SurfaceNode updates.
+    if (needFlush) {
+        SetSurfaceBoundsWithShadowNode(rect, isGlobal);
+    } else {
+        // Otherwise, commit together with the next ArkUI relayout in the normal transaction.
+        SetSurfaceBoundsWithOriginalNode(rect, isGlobal);
+    }
+}
+
+void SceneSession::SetSurfaceBoundsWithOriginalNode(const WSRect& rect, bool isGlobal)
+{
+    auto surfaceNode = GetSurfaceNode();
+    RETURN_IF_NULL(surfaceNode);
+
+    if (auto leashWinSurfaceNode = GetLeashWinSurfaceNode()) {
+        surfaceNode->SetBounds(0.0f, 0.0f, rect.width_, rect.height_);
+        surfaceNode->SetFrame(0.0f, 0.0f, rect.width_, rect.height_);
         leashWinSurfaceNode->SetGlobalPositionEnabled(isGlobal);
         leashWinSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         leashWinSurfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        surfaceNode->SetBounds(0, 0, rect.width_, rect.height_);
-        surfaceNode->SetFrame(0, 0, rect.width_, rect.height_);
-        return;
-    }
-
-    // NOTE: This judgment might be redundant and can be removed later.
-    const bool isDraggableSpecialWindow = WindowHelper::IsPipWindow(windowType) ||
-                                          WindowHelper::IsSubWindow(windowType) ||
-                                          WindowHelper::IsDialogWindow(windowType) ||
-                                          WindowHelper::IsSystemWindow(windowType);
-    if (isDraggableSpecialWindow) {
-        AutoRSTransaction trans(surfaceNode, needFlush);
+    } else {
         surfaceNode->SetGlobalPositionEnabled(isGlobal);
         surfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
         surfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+}
+
+void SceneSession::SetSurfaceBoundsWithShadowNode(const WSRect& rect, bool isGlobal)
+{
+    auto shadowSurfaceNode = EnsureMoveDragShadowSurfaceNode();
+    RETURN_IF_NULL(shadowSurfaceNode);
+
+    if (auto leashWinShadowSurfaceNode = EnsureMoveDragLeashWinShadowSurfaceNode()) {
+        {
+            AutoRSTransaction trans(shadowSurfaceNode);
+            shadowSurfaceNode->SetBounds(0.0f, 0.0f, rect.width_, rect.height_);
+            shadowSurfaceNode->SetFrame(0.0f, 0.0f, rect.width_, rect.height_);
+        }
+        {
+            AutoRSTransaction trans(leashWinShadowSurfaceNode);
+            leashWinShadowSurfaceNode->SetGlobalPositionEnabled(isGlobal);
+            leashWinShadowSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+            leashWinShadowSurfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        }
     } else {
-        TLOGE(WmsLogTag::WMS_LAYOUT,
-              "id: %{public}d, type: %{public}u, unsupported to set bounds",
-              windowId, windowType);
+        AutoRSTransaction trans(shadowSurfaceNode);
+        shadowSurfaceNode->SetGlobalPositionEnabled(isGlobal);
+        shadowSurfaceNode->SetBounds(rect.posX_, rect.posY_, rect.width_, rect.height_);
+        shadowSurfaceNode->SetFrame(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
 }
 
