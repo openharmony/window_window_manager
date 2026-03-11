@@ -1254,7 +1254,7 @@ HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_RepeatOperationFailed, Test
 /**
  * @tc.name: StartMoveWindow_PcAppInPadFullscreenFailed
  * @tc.desc: StartMoveWindow Test - PC app in Pad fullscreen mode should fail
- * @tc.type: FUNC
+ * @tc.type: FUNC1
  */
 HWTEST_F(WindowSceneSessionImplTest, StartMoveWindow_PcAppInPadFullscreenFailed, TestSize.Level1)
 {
