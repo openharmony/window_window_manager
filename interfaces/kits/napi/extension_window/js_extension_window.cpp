@@ -1422,7 +1422,7 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     auto extWindow = extensionWindow_->GetWindow();
-    if (extWindow != nullptr && extWindow->GetIsBlockSubwindow()) {
+    if (extWindow != nullptr && extWindow->IsBlockSubwindow()) {
         TLOGE(WmsLogTag::WMS_SUB, "The session is blocking sub window");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][createSubWindowWithOptions]msg: The session is blocking sub window"));

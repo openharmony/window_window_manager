@@ -1813,7 +1813,7 @@ WMError WindowExtensionSessionImpl::SetStatusBarColorForExtensionInner(uint32_t 
     return WMError::WM_OK;
 }
 
-bool WindowExtensionSessionImpl::GetIsBlockSubwindow() const
+bool WindowExtensionSessionImpl::IsBlockSubwindow() const
 {
     return isBlockSubwindow_;
 }

@@ -482,5 +482,15 @@ bool WindowOption::IsCrossProcessWindow() const
 {
     return isCrossProcessWindow_;
 }
+
+void WindowOption::SetIsBlockSubwindow(bool isBlockSubwindow)
+{
+    isBlockSubwindow_ = isBlockSubwindow;
+}
+
+bool WindowOption::IsBlockSubwindow() const
+{
+    return isBlockSubwindow_;
+}
 } // namespace Rosen
 } // namespace OHOS
