@@ -1573,7 +1573,7 @@ HWTEST_F(ScreenSessionManagerTest, TestCalcRectsWithRotation003, TestSize.Level1
     ASSERT_NE(screenSession, nullptr);
     FoldDisplayMode displayMode = ssm_->GetFoldDisplayMode();
     ScreenProperty screenProperty = screenSession->GetScreenProperty();
-    int boundaryOffset = 0;
+    int32_t boundaryOffset = 0;
     Rotation rotation = ssm_->CalcPhysicalRotation(screenProperty.GetDeviceRotation(), displayMode);
     int32_t screenWidth = screenProperty.GetBounds().rect_.GetWidth();
     int32_t screenHeigth = screenProperty.GetBounds().rect_.GetHeight();
@@ -1592,24 +1592,22 @@ HWTEST_F(ScreenSessionManagerTest, TestCalcRectsWithRotation003, TestSize.Level1
     switch (rotation)
     {
         case Rotation::ROTATION_0:
-            res = DMRect{ rect.posX_, rect.posY_ + boundaryOffset, rect.width_, rect.height_ };
+            res = DMRect{rect.posX_, rect.posY_ + boundaryOffset, rect.width_, rect.height_};
             break;
         case Rotation::ROTATION_90:
             res = DMRect{
-                rect.posY_, screenWidth - rect.posX_ - rect.width_ + boundaryOffset, rect.height_, rect.width_
-            };
+                rect.posY_, screenWidth - rect.posX_ - rect.width_ + boundaryOffset, rect.height_, rect.width_};
             break;
         case Rotation::ROTATION_180:
-            res = DMRect{ screenWidth - rect.posX_ - rect.width_,
-                              screenHeigth - rect.posY_ - rect.height_ + boundaryOffset,
-                              rect.width_, rect.height_ };
+            res = DMRect{screenWidth - rect.posX_ - rect.width_,
+                screenHeigth - rect.posY_ - rect.height_ + boundaryOffset, rect.width_, rect.height_};
             break;
         case Rotation::ROTATION_270:
             res = DMRect{
                 screenHeigth - rect.posY_ - rect.height_, rect.posX_ + boundaryOffset, rect.height_, rect.width_};
             break;
         default:
-            EXPECT_EQ(calcRect, rect);
+            EXPECT_EQ(res, rect);
             break;
     }
     EXPECT_EQ(calcRect, res);
