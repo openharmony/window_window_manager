@@ -63,8 +63,6 @@ ohos_source_set("ui_effect_controller_client") {
    "ability_runtime:ability_connect_callback_stub",
    "ability_runtime:ability_manager",
    "ace_engine:ace_uicontent",
-   "googletest:gmock",
-   "googletest:gtest_main",
    "napi:ace_napi",
    ]
   public_configs = [ ":ui_effect_public_config" ]
@@ -92,8 +90,6 @@ ohos_source_set("ui_effect_controller") {
    "ability_runtime:ability_connect_callback_stub",
    "ability_runtime:ability_manager",
    "ace_engine:ace_uicontent",
-   "googletest:gmock",
-   "googletest:gtest_main",
    "napi:ace_napi",
    ]
   deps = [ "${window_base_path}/window_scene/common:window_scene_common" ]
