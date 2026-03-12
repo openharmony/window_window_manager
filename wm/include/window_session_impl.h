@@ -657,7 +657,7 @@ public:
     /*
      * Window Lifecycle and mode Record
      */
-    void RecordWindowLifecycleChange(const std::string& widnowEvent);
+    void RecordWindowLifecycleChange(const std::string& windowEvent);
     static std::string WindowStatusToString(WindowStatus status);
 
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
