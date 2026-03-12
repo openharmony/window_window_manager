@@ -59,6 +59,13 @@ ohos_source_set("ui_effect_controller_client") {
     "host/src/ui_effect_controller_client_stub.cpp",
     "host/src/ui_effect_controller_proxy.cpp",
   ]
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "napi:ace_napi",
+    ]
   public_configs = [ ":ui_effect_public_config" ]
   public_deps = [ "${window_base_path}/utils:ui_effect_controller_common" ]
   part_name = "window_manager"
@@ -80,7 +87,13 @@ ohos_source_set("ui_effect_controller") {
   ]
   public_configs = [ ":ui_effect_public_config" ]
   public_deps = [ "${window_base_path}/utils:ui_effect_controller_common" ]
-
+  external_deps = [
+    "ability_runtime:runtime",
+    "c_utils:utils",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "napi:ace_napi",
+    ]
   deps = [ "${window_base_path}/window_scene/common:window_scene_common" ]
   part_name = "window_manager"
   subsystem_name = "window"
