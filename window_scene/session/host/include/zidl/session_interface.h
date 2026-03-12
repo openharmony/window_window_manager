@@ -703,7 +703,7 @@ public:
 
     virtual WSError NotifyPageEnable(const std::string& action, const std::string& message)
     {
-        return WMError::WM_OK;
+        return WSError::WS_OK;
     }
 
     /*

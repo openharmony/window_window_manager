@@ -2486,12 +2486,12 @@ HWTEST_F(SessionStubTest, HandleNotifyPageEnable, TestSize.Level1)
     data.WriteString("enter");
     data.WriteString("HomePage");
 
-    auto result = session->HandleNotifyPageEnable(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 
     int32_t errCode;
     reply.ReadInt32(errCode);
-    EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
+    EXPECT_EQ(errCode, static_cast<int32_t>(WSError::WS_OK));
 }
 
 /**
@@ -2503,13 +2503,13 @@ HWTEST_F(SessionStubTest, HandleNotifyPageEnable01, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
-    MockMessageParcel::ClearALllErrorFlag();
+    MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetReadStringErrorFlag(true);
 
-    auto result = session->HandleNotifyPageEnable(data, reply);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 
-    MockMessageParcel::ClearALllErrorFlag();
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -2525,10 +2525,10 @@ HWTEST_F(SessionStubTest, HandleNotifyPageEnable02, TestSize.Level1)
     data.WriteString("enter");
     MockMessageParcel::SetReadStringErrorFlag(true);
 
-    auto result = session->HandleNotifyPageEnable(data, reply);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 
-    MockMessageParcel::ClearALllErrorFlag();
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -2546,10 +2546,10 @@ HWTEST_F(SessionStubTest, HandleNotifyPageEnable03, TestSize.Level1)
 
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
 
-    auto result = session->HandleNotifyPageEnable(data, reply);
-    EXPECT_EQ(ret, ERR_INVALID_DATA);
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 
-    MockMessageParcel::ClearALllErrorFlag();
+    MockMessageParcel::ClearAllErrorFlag();
 }
 
 /**
@@ -2570,11 +2570,11 @@ HWTEST_F(SessionStubTest, HandleNotifyPageEnable04, TestSize.Level1)
         .WillOnce(Return(WSError::WS_ERROR_INVALID_PARAM));
 
     auto result = mockSession->HandleNotifyPageEnable(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(result, ERR_NONE);
 
     int32_t errCode;
     reply.ReadInt32(errCode);
-    EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_ERROR_INVALID_PARAM));
+    EXPECT_EQ(errCode, static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
 }
 
 /**
@@ -2589,12 +2589,12 @@ HWTEST_F(SessionStubTest, HandleNotifyPageEnable05, TestSize.Level1)
     data.WriteString("");
     data.WriteString("");
 
-    auto result = session->HandleNotifyPageEnable(data, reply);
-    EXPECT_EQ(ret, ERR_NONE);
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 
     int32_t errCode;
     reply.ReadInt32(errCode);
-    EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_ERROR_INVALID_PARAM));
+    EXPECT_EQ(errCode, static_cast<int32_t>(WSError::WS_ERROR_INVALID_PARAM));
 }
 } // namespace
 } // namespace Rosen

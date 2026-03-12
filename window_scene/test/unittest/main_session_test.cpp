@@ -1288,7 +1288,7 @@ HWTEST_F(MainSessionTest, RemovePrelaunchStartingWindow, TestSize.Level1)
 
 /**
  * @tc.name: NotifyPageEnable
- * @tc.desc: NotifyPageEnable test
+ * @tc.desc: Test NotifyPageEnable with various parameters
  * @tc.type: FUNC
  */
 HWTEST_F(MainSessionTest, NotifyPageEnable, TestSize.Level1)
@@ -1324,7 +1324,7 @@ HWTEST_F(MainSessionTest, NotifyPageEnable, TestSize.Level1)
     EXPECT_EQ(receivedMessage, "HomePage");
 
     session->pageEnableCallback_ = nullptr;
-    ret = session->NotifyPageEnable("exit", "HomePage");
+    ret = session->NotifyPageEnable("exit", "DetailPage");
     EXPECT_EQ(ret, WSError::WS_OK);
 
     ret = session->NotifyPageEnable("", "HomePage");
@@ -1351,14 +1351,14 @@ HWTEST_F(MainSessionTest, NotifyPageEnable, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyPageEnable1
- * @tc.desc: NotifyPageEnable1 test
+ * @tc.name: NotifyPageEnable01
+ * @tc.desc: Verify callback is triggered with correct parameters
  * @tc.type: FUNC
  */
-HWTEST_F(MainSessionTest, NotifyPageEnable1, TestSize.Level1)
+HWTEST_F(MainSessionTest, NotifyPageEnable01, TestSize.Level1)
 {
     SessionInfo info;
-    info.bundleName_ = "NotifyPageEnable1";
+    info.bundleName_ = "NotifyPageEnable01";
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
     std::vector<std::tuple<std::string, int32_t, std::string, std::string>> callbackCalls;
@@ -1375,7 +1375,7 @@ HWTEST_F(MainSessionTest, NotifyPageEnable1, TestSize.Level1)
 
     EXPECT_EQ(callbackCalls.size(), 3);
 
-    EXPECT_EQ(std::get<0>(callbackCalls[0]), "NotifyPageEnable1");
+    EXPECT_EQ(std::get<0>(callbackCalls[0]), "NotifyPageEnable01");
     EXPECT_EQ(std::get<1>(callbackCalls[0]), session->GetPersistentId());
     EXPECT_EQ(std::get<2>(callbackCalls[0]), "enter");
     EXPECT_EQ(std::get<3>(callbackCalls[0]), "Page1");

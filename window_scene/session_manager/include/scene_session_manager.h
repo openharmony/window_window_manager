@@ -180,6 +180,8 @@ using NotifyVirtualPixelChangeFunc = std::function<void(float density, DisplayId
 using NotifySetSpecificWindowZIndexFunc = std::function<void(WindowType windowType, int32_t zIndex,
     SetSpecificZIndexReason reason)>;
 using MinimizeAllFunc = std::function<void(DisplayId displayId, int32_t excludeWindlowId)>;
+using PageEnableFunc = std::function<void(const std::string& bundleName, int32_t windowId,
+    const std::string& action, const std::string& message)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;

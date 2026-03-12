@@ -352,7 +352,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE):
             return HandleNotifyCompatibleModeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PAGE_ENABLE):
-            return HandleNotifyCompatibleModeChange(data, reply);
+            return HandleNotifyPageEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
             return HandleRestartApp(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT):
@@ -2702,6 +2702,7 @@ int SessionStub::HandleNotifyPageEnable(MessageParcel& data, MessageParcel& repl
 {
     std::string action;
     std::string message;
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
     if (!data.ReadString(action)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Read action failed.");
         return ERR_INVALID_DATA;

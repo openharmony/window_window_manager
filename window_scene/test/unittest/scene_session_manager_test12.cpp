@@ -3480,7 +3480,7 @@ HWTEST_F(SceneSessionManagerTest12, FillWindowProfileInfoTest, TestSize.Level1)
 
 /**
  * @tc.name: RegisterPageEnableFunc
- * @tc.desc: RegisterPageEnableFunc
+ * @tc.desc: Test RegisterPageEnableFunc with valid func
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc, TestSize.Level1)
@@ -3506,22 +3506,20 @@ HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc, TestSize.Level1)
     ssm_->RegisterPageEnableFunc(std::move(func));
     EXPECT_NE(ssm_->pageEnableFunc_, nullptr);
 
-    if (ssm_->pageEnableFunc_) {
-        ssm_->pageEnableFunc_("com.test.app", 1 , "enter", "HomePage");
-        EXPECT_TRUE(funcTriggered);
-        EXPECT_EQ(receivedBundleName, "com.test.app");
-        EXPECT_EQ(receivedWindowId, 1);
-        EXPECT_EQ(receivedAction, "enter");
-        EXPECT_EQ(receivedMessage, "HomePage");
-    }
+    ssm_->pageEnableFunc_("com.test.app", 1 , "enter", "HomePage");
+    EXPECT_TRUE(funcTriggered);
+    EXPECT_EQ(receivedBundleName, "com.test.app");
+    EXPECT_EQ(receivedWindowId, 1);
+    EXPECT_EQ(receivedAction, "enter");
+    EXPECT_EQ(receivedMessage, "HomePage");
 }
 
 /**
- * @tc.name: RegisterPageEnableFunc1
- * @tc.desc: RegisterPageEnableFunc1
+ * @tc.name: RegisterPageEnableFunc01
+ * @tc.desc: Test multiple func registrations overwrite previous ones
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc1, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
 
@@ -3551,11 +3549,11 @@ HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc1, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterPageEnableFunc2
- * @tc.desc: RegisterPageEnableFunc2
+ * @tc.name: RegisterPageEnableFunc02
+ * @tc.desc: Test RegisterPageEnableFunc with null func
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc2, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc02, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
 

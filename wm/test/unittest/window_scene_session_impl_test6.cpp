@@ -994,7 +994,7 @@ HWTEST_F(WindowSceneSessionImplTest6, UpdatePropertyWhenTriggerMode, TestSize.Le
 
 /**
  * @tc.name: NotifyPageEnable
- * @tc.desc: NotifyPageEnable
+ * @tc.desc: Test NotifyPageEnable with valid session
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable, TestSize.Level1)
@@ -1005,7 +1005,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable, TestSize.Level1)
     ASSERT_NE(nullptr, window);
 
     auto ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -1017,18 +1017,18 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable, TestSize.Level1)
         .WillOnce(Return(WSError::WS_OK));
 
     ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WMError::WM_OK);
 }
 
 /**
- * @tc.name: NotifyPageEnable1
- * @tc.desc: NotifyPageEnable1
+ * @tc.name: NotifyPageEnable01
+ * @tc.desc: Test NotifyPageEnable with null host session
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable1, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyPageEnable1");
+    option->SetWindowName("NotifyPageEnable01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
@@ -1036,18 +1036,18 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable1, TestSize.Level1)
     window->hostSession_ = nullptr;
 
     auto ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
- * @tc.name: NotifyPageEnable2
- * @tc.desc: NotifyPageEnable2
+ * @tc.name: NotifyPageEnable02
+ * @tc.desc: Test NotifyPageEnable when host session returns error
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable2, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyPageEnable2");
+    option->SetWindowName("NotifyPageEnable02");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
@@ -1061,18 +1061,18 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable2, TestSize.Level1)
         .WillOnce(Return(WSError::WS_ERROR_INVALID_PARAM));
 
     auto ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
 }
 
 /**
- * @tc.name: NotifyPageEnable3
- * @tc.desc: NotifyPageEnable3
+ * @tc.name: NotifyPageEnable03
+ * @tc.desc: Test NotifyPageEnable with multiple calls
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable3, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyPageEnable3");
+    option->SetWindowName("NotifyPageEnable03");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
 
@@ -1085,9 +1085,9 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable3, TestSize.Level1)
         .Times(3)
         .WillRepeatedly(Return(WSError::WS_OK));
 
-    EXPECT_EQ(window->NotifyPageEnable("enter", "HomePage"), WSError::WS_OK);
-    EXPECT_EQ(window->NotifyPageEnable("exit", "HomePage"), WSError::WS_OK);
-    EXPECT_EQ(window->NotifyPageEnable("enter", "DetailPage"), WSError::WS_OK);
+    EXPECT_EQ(window->NotifyPageEnable("enter", "HomePage"), WMError::WM_OK);
+    EXPECT_EQ(window->NotifyPageEnable("exit", "HomePage"), WMError::WM_OK);
+    EXPECT_EQ(window->NotifyPageEnable("enter", "DetailPage"), WMError::WM_OK);
 }
 }
 } // namespace Rosen
