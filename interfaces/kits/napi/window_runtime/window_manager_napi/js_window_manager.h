@@ -47,6 +47,8 @@ public:
     static napi_value ToggleShownStateForAllAppWindows(napi_env env, napi_callback_info info);
     static napi_value RegisterWindowManagerCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterWindowMangerCallback(napi_env env, napi_callback_info info);
+    static napi_value RegisterApplicationFocusStageChangeCallback(napi_env env, napi_callback_info info);
+    static napi_value UnregisterApplicationFocusStageChangeCallback(napi_env env, napi_callback_info info);
     static napi_value GetTopWindow(napi_env env, napi_callback_info info);
     static napi_value GetSnapshot(napi_env env, napi_callback_info info);
     static napi_value GetLastWindow(napi_env env, napi_callback_info info);
@@ -79,6 +81,8 @@ private:
     static napi_value OnToggleShownStateForAllAppWindows(napi_env env, napi_callback_info info);
     napi_value OnRegisterWindowManagerCallback(napi_env env, napi_callback_info info);
     napi_value OnUnregisterWindowManagerCallback(napi_env env, napi_callback_info info);
+    napi_value OnRegisterApplicationFocusStageChangeCallback(napi_env env, napi_callback_info info);
+    napi_value OnUnregisterApplicationFocusStageChangeCallback(napi_env env, napi_callback_info info);
     static napi_value OnGetTopWindow(napi_env env, napi_callback_info info);
     static napi_value OnGetLastWindow(napi_env env, napi_callback_info info);
     static napi_value OnGetSnapshot(napi_env env, napi_callback_info info);
