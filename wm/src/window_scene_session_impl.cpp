@@ -422,26 +422,42 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             AddSubWindowMapForExtensionWindow();
         }
     } else if (WindowHelper::IsSubWindow(type)) {
-        sptr<WindowSessionImpl> parentSession = nullptr;
-        auto ret = WindowSceneSessionImpl::GetParentSessionAndVerify(hasToastFlag, parentSession);
-        if (ret != WMError::WM_OK) {
-            return ret;
+        if (property_->GetIsCrossProcessWindow()) {
+            CrossProcessWindowInfo crossProcessWindowInfo;
+            crossProcessWindowInfo.persistentId = property_->GetParentId();
+            WMError wmError = SingletonContainer::Get<WindowAdapter>()
+                .GetCrossProcessWindowInfo(crossProcessWindowInfo);
+            if (wmError != WMError::WM_OK) {
+                return wmError;
+            }
+            property_->SetParentPersistentId(crossProcessWindowInfo.persistentId);
+            property_->SetDisplayId(crossProcessWindowInfo.displayId);
+            property_->SetIsPcAppInPad(crossProcessWindowInfo.isPcAppInPad);
+            property_->SetPcAppInpadCompatibleMode(crossProcessWindowInfo.isPcAppInpadCompatibleMode);
+            SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+                surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+        } else {
+            sptr<WindowSessionImpl> parentSession = nullptr;
+            auto ret = WindowSceneSessionImpl::GetParentSessionAndVerify(hasToastFlag, parentSession);
+            if (ret != WMError::WM_OK) {
+                return ret;
+            }
+            property_->SetDisplayId(parentSession->GetDisplayId());
+            // set parent persistentId
+            auto parentWindowId = parentSession->GetPersistentId();
+            property_->SetParentPersistentId(parentWindowId);
+            property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
+            property_->SetPcAppInpadCompatibleMode(parentSession->GetProperty()->GetPcAppInpadCompatibleMode());
+            // creat sub session by parent session
+            SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+                surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+            {
+                std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+                // update subWindowSessionMap_
+                subWindowSessionMap_[parentWindowId].push_back(this);
+            }
+            SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
         }
-        property_->SetDisplayId(parentSession->GetDisplayId());
-        // set parent persistentId
-        auto parentWindowId = parentSession->GetPersistentId();
-        property_->SetParentPersistentId(parentWindowId);
-        property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
-        property_->SetPcAppInpadCompatibleMode(parentSession->GetProperty()->GetPcAppInpadCompatibleMode());
-        // creat sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        {
-            std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-            // update subWindowSessionMap_
-            subWindowSessionMap_[parentWindowId].push_back(this);
-        }
-        SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
@@ -2233,7 +2249,8 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (WindowHelper::IsSubWindow(GetType()) && !property_->GetIsUIExtFirstSubWindow()) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
-            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            if ((parentSession == nullptr || parentSession->GetHostSession() == nullptr) &&
+                !property_->GetIsCrossProcessWindow()) {
                 return WMError::WM_ERROR_NULLPTR;
             }
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());

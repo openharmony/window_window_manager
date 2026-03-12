@@ -719,6 +719,8 @@ public:
     void CalculateStartWindowType(SessionInfo& sessionInfo, bool hideStartWindow);
     void NotifyPendingSessionActivation(SessionInfo& info);
     bool isRemoving_ = false;
+    void NotifyParentLifecycleEvent(ParentLifeCycleEvent event);
+    void NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent event) override;
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);

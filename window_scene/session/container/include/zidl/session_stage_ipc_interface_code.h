@@ -115,6 +115,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_SET_SIDEBAR_BLUR_STYLE,
     TRANS_ID_NOTIFY_WINDOW_UI_TYPE,
     TRANS_ID_UPDATE_PROPERTY_WHEN_TRIGGER_MODE,
+    TRANS_ID_NOTIFY_PARENT_LIFECYCLE_EVENT,
 };
 }   // namespace Rosen
 }   // namespace OHOS

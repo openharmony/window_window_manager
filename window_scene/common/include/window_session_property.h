@@ -396,6 +396,9 @@ public:
     void SetAppBufferReady(bool isAppBufferReady);
     bool IsAppBufferReady() const;
 
+    void SetIsCrossProcessWindow(bool isCrossProcess);
+    bool GetIsCrossProcessWindow() const;
+
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
     bool MarshallingTouchHotAreasInner(const std::vector<Rect>& touchHotAreas, Parcel& parcel) const;
@@ -674,6 +677,7 @@ private:
     bool isPrelaunch_ = false;
     int32_t frameNum_ = 0;
     bool isAppBufferReady_ = false;
+    bool isCrossProcessWindow_ = false;
 };
 
 class CompatibleModeProperty : public Parcelable {

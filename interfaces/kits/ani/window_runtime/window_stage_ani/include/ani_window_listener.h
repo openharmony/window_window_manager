@@ -63,6 +63,7 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowStatusDidChangeListener,
                         public IWindowRotationChangeListener,
                         public IFreeWindowModeChangeListener,
+                        public IParentLifecycleEventListener,
                         public IAcrossDisplaysChangeListener,
                         public IScreenshotAppEventListener,
                         public IApplicationFocusChangedListener,
@@ -132,6 +133,12 @@ public:
     void AfterLifecycleBackground() override;
     void AfterLifecycleResumed() override;
     void AfterLifecyclePaused() override;
+
+    void OnParentForeground(int32_t windowId) override;
+    void OnParentActive(int32_t windowId) override;
+    void OnParentInactive(int32_t windowId) override;
+    void OnParentBackground(int32_t windowId) override;
+    void OnParentDestroyed(int32_t windowId) override;
 private:
     void OnLastStrongRef(const void *) override;
 

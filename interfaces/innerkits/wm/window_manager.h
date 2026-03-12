@@ -984,6 +984,14 @@ public:
     WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
 
     /**
+     * @brief Obtain cross-process window information
+     *
+     * @param crossProcessWindowInfo Cross-process window information
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo);
+
+    /**
      * @brief Get accessibility window info.
      *
      * @param infos WindowInfos used for Accessibility.

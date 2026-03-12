@@ -4594,4 +4594,55 @@ WMError SceneSessionManagerProxy::NotifySupportRotationRegistered()
     }
     return WMError::WM_OK;
 }
+
+WMError SceneSessionManagerProxy::GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(crossProcessWindowInfo.persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write persistentId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto retErrorCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO),
+        data, reply, option);
+    if (retErrorCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Send request failed");
+        return static_cast<WMError>(retErrorCode);
+    }
+    uint64_t displayId = 0;
+    if (!reply.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read displayId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    crossProcessWindowInfo.displayId = displayId;
+    bool isPcAppInPad = false;
+    if (!reply.ReadBool(isPcAppInPad)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isPcAppInPad failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    crossProcessWindowInfo.isPcAppInPad = isPcAppInPad;
+    bool isPcAppInpadCompatibleMode = false;
+    if (!reply.ReadBool(isPcAppInpadCompatibleMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read isPcAppInpadCompatibleMode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    crossProcessWindowInfo.isPcAppInpadCompatibleMode = isPcAppInpadCompatibleMode;
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read reply failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
 } // namespace OHOS::Rosen

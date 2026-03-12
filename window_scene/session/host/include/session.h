@@ -242,6 +242,7 @@ public:
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     std::string GetSessionLabel() const;
     void SetRestartAppListener(NotifyRestartAppFunc&& func);
+    virtual void NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent event) {}
 
     /*
      * App Use Control

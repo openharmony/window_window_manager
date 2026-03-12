@@ -118,6 +118,7 @@ private:
     int HandleSetSidebarBlurStyleWithType(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowUIType(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyWhenTriggerMode(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyParentLifecycleEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H
