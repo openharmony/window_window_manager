@@ -6452,7 +6452,7 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModePropertyChange(const sptr<Co
 
 WMError WindowSceneSessionImpl::NotifyPageEnable(const std::string& action, const std::string& message)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "action=%{public}s, message=%{public}s", action.c_str(), message.c_str());
+    TLOGI(WmsLogTag::WMS_COMPAT, "action:%{public}s, message:%{public}s", action.length(), message.length());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_COMPAT, "window session invalid!");
         return WMError::WM_ERROR_INVALID_WINDOW;

@@ -2910,7 +2910,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             });
             sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
                 const std::string& action, const std::string& message) {
-                return this->pageEnableFunc_(bundleName, windowId, action, message);
+                if (pageEnableFunc_) {
+                    return this->pageEnableFunc_(bundleName, windowId, action, message);
+                }
             });
         }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;

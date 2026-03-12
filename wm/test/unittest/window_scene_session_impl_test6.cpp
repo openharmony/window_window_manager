@@ -1012,7 +1012,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
-    EXPECT_CALL(*session, NotifyPageEnable(_,_))
+    EXPECT_CALL(*session, NotifyPageEnable(_, _))
         .Times(1)
         .WillOnce(Return(WSError::WS_OK));
 
@@ -1056,7 +1056,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable02, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
-    EXPECT_CALL(*session, NotifyPageEnable(_,_))
+    EXPECT_CALL(*session, NotifyPageEnable(_, _))
         .Times(1)
         .WillOnce(Return(WSError::WS_ERROR_INVALID_PARAM));
 
@@ -1081,7 +1081,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable03, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
-    EXPECT_CALL(*session, NotifyPageEnable(_,_))
+    EXPECT_CALL(*session, NotifyPageEnable(_, _))
         .Times(3)
         .WillRepeatedly(Return(WSError::WS_OK));
 

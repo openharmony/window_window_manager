@@ -3542,7 +3542,7 @@ HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc01, TestSize.Level1)
     EXPECT_NE(ssm_->pageEnableFunc_, nullptr);
 
     if (ssm_->pageEnableFunc_) {
-        ssm_->pageEnableFunc_("com.test.app", 1 , "enter", "HomePage");
+        ssm_->pageEnableFunc_("com.test.app", 1, "enter", "HomePage");
         EXPECT_FALSE(firstFuncTriggered);
         EXPECT_TRUE(secondFuncTriggered);
     }

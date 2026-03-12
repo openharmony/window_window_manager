@@ -91,7 +91,6 @@ public:
     MOCK_METHOD1(UpdateIsShowDecorInFreeMultiWindow, WSError(bool& isShow));
     MOCK_METHOD(WSError, SetContentAspectRatio, (float ratio, bool isPersistent, bool needUpdateRect), (override));
     MOCK_METHOD(WSError, SetDecorVisible, (bool isVisible), (override));
-    MOCK_METHOD2(NotifyPageEnable, WSError(const std::string& action, const std::string& message));
 };
 } // namespace Rosen
 } // namespace OHOS
