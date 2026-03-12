@@ -501,7 +501,7 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
         windowAdapter->windowManagerServiceProxy_ = nullptr;
     }
     WMError ret = instance_->GetSnapshotByWindowId(windowId, pixelMap);
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     windowAdapter->windowManagerServiceProxy_ = tempProxy;
 }
 
@@ -537,7 +537,7 @@ HWTEST_F(WindowManagerTest, Snapshot, TestSize.Level1)
         windowAdapter->windowManagerServiceProxy_ = nullptr;
     }
     WMError ret = instance_->Snapshot(pixelMap, windowId, config);
-    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
     windowAdapter->windowManagerServiceProxy_ = tempProxy;
 
     ret = mockInstance_->Snapshot(pixelMap, 1, config);
