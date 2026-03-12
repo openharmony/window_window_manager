@@ -6450,17 +6450,17 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModePropertyChange(const sptr<Co
     return WSError::WS_OK;
 }
 
-WSError WindowSceneSessionImpl::NotifyPageEnable(const std::string& action, const std::string& message)
+WMError WindowSceneSessionImpl::NotifyPageEnable(const std::string& action, const std::string& message)
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "action=%{public}s, message=%{public}s", action.c_str(), message.c_str());
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_COMPAT, "window session invalid!");
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    WSError ret = hostSession->NotifyPageEnable(action, message);
-    if (ret != WSError::WS_OK) {
+    WMError ret = hostSession->NotifyPageEnable(action, message);
+    if (ret != WMError::WS_OK) {
         TLOGE(WmsLogTag::WMS_COMPAT, "NotifyPageEnable failed, ret: %{public}d", static_cast<int32_t>(ret));
         return static_cast<WMError>(ret);
     }

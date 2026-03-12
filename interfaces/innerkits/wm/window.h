@@ -5154,9 +5154,9 @@ public:
      *
      * @param action action.
      * @param message message.
-     * @return WM_OK means unregister success, others means unregister failed.
+     * @return WM_OK means on success, others means failed.
      */
-    virtual WSError NotifyPageEnable(const std::string& action, const std::string& message)
+    virtual WMError NotifyPageEnable(const std::string& action, const std::string& message)
     {
         return WMError::WM_OK;
     }
