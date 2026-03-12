@@ -3506,7 +3506,7 @@ HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc, TestSize.Level1)
     ssm_->RegisterPageEnableFunc(std::move(func));
     EXPECT_NE(ssm_->pageEnableFunc_, nullptr);
 
-    ssm_->pageEnableFunc_("com.test.app", 1 , "enter", "HomePage");
+    ssm_->pageEnableFunc_("com.test.app", 1, "enter", "HomePage");
     EXPECT_TRUE(funcTriggered);
     EXPECT_EQ(receivedBundleName, "com.test.app");
     EXPECT_EQ(receivedWindowId, 1);
