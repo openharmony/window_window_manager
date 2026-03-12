@@ -680,7 +680,7 @@ void MainSession::RegisterPageEnableCallback(PageEnableCallback&& callback)
 
 WSError MainSession::NotifyPageEnable(const std::string& action, const std::string& message)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "action:%{public}s, message:%{public}s", action.length(), message.length());
+    TLOGI(WmsLogTag::WMS_COMPAT, "action:%{public}zu, message:%{public}zu", action.length(), message.length());
     if (action.empty() || action.length() > MAX_ACTION_LIMIT_SIZE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Invalid action length: %{public}zu", action.length());
         return WSError::WS_ERROR_INVALID_PARAM;
