@@ -168,6 +168,7 @@ private:
     int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleGetCrossProcessWindowInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

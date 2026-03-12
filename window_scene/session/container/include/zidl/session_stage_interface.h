@@ -369,6 +369,19 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+    * @brief Notify parent lifecycle event to subwindow.
+    *
+    * Notify subwindow about parent window lifecycle changes (foreground, background, destroy).
+    *
+    * @param eventType Indicates the lifecycle event (foreground/background/destroy).
+    * @return Returns WSError::WS_OK if called success, otherwise failed.
+    */
+    virtual WSError NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType)
+    {
+        return WSError::WS_OK;
+    }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

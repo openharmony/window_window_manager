@@ -662,6 +662,20 @@ public:
      */
     bool IsFollowCreatorLifecycle() const;
 
+    /**
+    * @brief Set whether this window is a cross-process window.
+    *
+    * @param isCrossProcessWindow true means the window is a cross-process window.
+    */
+    void SetIsCrossProcessWindow(bool isCrossProcessWindow);
+ 	 
+    /**
+    * @brief Check whether this window is a cross-process window.
+    *
+    * @return true - this window is a cross-process window, false - this window is not a cross-process window.
+    */
+    bool IsCrossProcessWindow() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -699,6 +713,7 @@ private:
     int32_t zIndex_ = SPECIFIC_ZINDEX_INVALID;
     bool isSystemKeyboard_ = false;
     bool defaultDensityEnabled_ = false;
+    bool isCrossProcessWindow_ = false;
 
     /*
      * UIExtension

@@ -66,6 +66,7 @@ enum class RegisterListenerType : uint32_t {
     WINDOW_ROTATION_CHANGE_CB,
     FREE_WINDOW_MODE_CHANGE_CB,
     APPLICATION_FOCUS_STATE_CHANGE_CB,
+    PARENT_LIFECYCLE_EVENT_CB,
 };
 
 class JsWindowRegisterManager {
@@ -154,6 +155,8 @@ private:
     WmErrorCode ProcessWindowRotationChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessFreeWindowModeChangeRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
+        bool isRegister, napi_env env, napi_value parameter = nullptr);
+    WmErrorCode ProcessParentLifecycleEventRegister(const sptr<JsWindowListener>& listener, const sptr<Window>& window,
         bool isRegister, napi_env env, napi_value parameter = nullptr);
     WmErrorCode ProcessListener(RegisterListenerType registerListenerType, CaseType caseType,
         const sptr<JsWindowListener>& windowManagerListener, const sptr<Window>& window, bool isRegister,

@@ -521,6 +521,7 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
         session->DisableUIFirstIfNeed();
+        session->NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
         session->SyncUISessionState();
         return WSError::WS_OK;
     }, __func__);
@@ -658,6 +659,7 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
             session->specificCallback_->onHandleSecureSessionShouldHide_(session);
             session->UpdateGestureBackEnabled();
         }
+        session->NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::BACKGROUND);
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
@@ -6384,6 +6386,33 @@ void SceneSession::CalculateStartWindowType(SessionInfo& info, bool hideStartWin
 void SceneSession::RegisterGetStartWindowConfigFunc(GetStartWindowTypeFunc&& func)
 {
     getStartWindowConfigFunc_ = std::move(func);
+}
+
+void SceneSession::NotifyParentLifecycleEvent(ParentLifeCycleEvent event)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "sessionStage is nullptr");
+        return;
+    }
+    sessionStage_->NotifyParentLifecycleEvent(event);
+}
+
+void SceneSession::NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent event)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "parentId: %{public}d, event: %{public}u",
+        GetPersistentId(), static_cast<uint32_t>(event));
+    int32_t parentPid = GetCallingPid();
+    const auto& subSessions = GetSubSession();
+    for (const auto& subSession : subSessions) {
+        if (subSession == nullptr) {
+            continue;
+        }
+        if (parentPid != subSession->GetCallingPid()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "Cross-process subWindow found, subId: %{public}d, event: %{public}u",
+                subSession->GetPersistentId(), static_cast<uint32_t>(event));
+            subSession->NotifyParentLifecycleEvent(event);
+        }
+    }
 }
 
 void SceneSession::NotifyPendingSessionActivation(SessionInfo& info)
