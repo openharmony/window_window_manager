@@ -38,6 +38,15 @@ struct DisplayConfig {
     bool hasFlag = false;
 };
 
+struct RogResolution {
+    bool isSupportRog = false;
+    bool isNewBoot = true;
+    int rogMode = 0;
+    float dpi = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+};
+
 class ScreenSceneConfig : public RefBase, public XmlConfigBase {
 public:
     ScreenSceneConfig() = delete;
@@ -71,6 +80,9 @@ public:
     static uint32_t GetNumberConfigValue(const std::string& name, const uint32_t& default_value);
     static bool IsConcurrentUser();
     static void UpdateCutoutBoundRect(uint64_t displayId, float rogRatio);
+    static int32_t GetRogDpi();
+    static RogResolution GetRogResolution(uint32_t width, uint32_t height);
+    static uint64_t GetUptimeSeconds();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
@@ -91,6 +103,10 @@ private:
     static bool isSupportOffScreenRendering_;
     static bool isConcurrentUser_;
     static uint32_t offScreenPPIThreshold_;
+    static bool enableRog_;
+    static int32_t rogDpi_;
+    static uint64_t bootTimeThreshold_;
+    static RogResolution rogResolution_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
@@ -108,6 +124,8 @@ private:
     static uint64_t ParseStrToUll(const std::string& contentStr);
     static void ParseDisplaysConfig(const xmlNodePtr& currPtr);
     static bool ParseFlagsConfig(const xmlNodePtr& flagsNode, DisplayFlag& outFlags);
+    static void ReadRogResolutionConfigInfo(const xmlNodePtr& currNode);
+    static void SetRogResolution(const RogResolution rogResolution);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_SCREEN_SCENE_CONFIG_H
