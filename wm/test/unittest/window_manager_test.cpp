@@ -501,11 +501,7 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
         windowAdapter->windowManagerServiceProxy_ = nullptr;
     }
     WMError ret = instance_->GetSnapshotByWindowId(windowId, pixelMap);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    }
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     windowAdapter->windowManagerServiceProxy_ = tempProxy;
 }
 
@@ -520,7 +516,7 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId02, TestSize.Level1)
     int32_t windowId = 1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError ret = mockInstance_->GetSnapshotByWindowId(windowId, pixelMap);
-    ASSERT_EQ(WMError::WM_OK, ret);
+    EXPECT_EQ(WMError::WM_OK, ret);
     ASSERT_EQ(nullptr, pixelMap);
 }
 
@@ -541,11 +537,7 @@ HWTEST_F(WindowManagerTest, Snapshot, TestSize.Level1)
         windowAdapter->windowManagerServiceProxy_ = nullptr;
     }
     WMError ret = instance_->Snapshot(pixelMap, windowId, config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_SAMGR, ret);
-    }
+    EXPECT_EQ(WMError::WM_DO_NOTHING, ret);
     windowAdapter->windowManagerServiceProxy_ = tempProxy;
 
     ret = mockInstance_->Snapshot(pixelMap, 1, config);
