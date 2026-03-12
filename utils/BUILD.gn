@@ -53,7 +53,7 @@ ohos_source_set("ui_effect_controller_common") {
     ":libwmutil_public_config",
   ]
 
-  public_deps = [
+  deps = [
     ":libwmutil_base",
   ]
 
