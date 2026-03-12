@@ -213,7 +213,9 @@ ohos_shared_library("sms") {
     ":libidl_config",
   ]
 
-  version_script = "libsms.map"
+  if (window_manager_use_sceneboard) {
+    version_script = "libsms.map"
+  }
 
   deps = sms_deps
 
