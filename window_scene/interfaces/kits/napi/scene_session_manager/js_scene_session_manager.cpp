@@ -6255,7 +6255,7 @@ void JsSceneSessionManager::OnMinimizeAll(DisplayId displayId, int32_t excludeWi
 void JsSceneSessionManager::RegisterPageEnableCallback()
 {
     TLOGND(WmsLogTag::WMS_COMPAT, "RegisterPageEnableCallback called");
-    SceneSessionManager::GetInstance().RegisterPageEnableCallback(
+    SceneSessionManager::GetInstance().RegisterPageEnableFunc(
         [this](const std::string& bundleName, int32_t windowId, const std::string& action,
         const std::string& message) {
         this->OnNotifyPageEnableRegistered(bundleName, windowId, action, message);
@@ -6265,7 +6265,7 @@ void JsSceneSessionManager::RegisterPageEnableCallback()
 void JsSceneSessionManager::OnNotifyPageEnableRegistered(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)
 {
-    TLOGNI(WmsLogTag::WMS_COMPAT, "in");
+    TLOGI(WmsLogTag::WMS_COMPAT, "in");
     const char* const where = __func__;
     taskScheduler_->PostMainThreadTask([this, where, bundleName, windowId, action, message,
         jsCallBack = GetJSCallback(NOTIFY_PAGE_ENABLE_REGISTERED_CB), env = env_] {

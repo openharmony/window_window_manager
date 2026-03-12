@@ -5158,7 +5158,7 @@ public:
      */
     virtual WMError NotifyPageEnable(const std::string& action, const std::string& message)
     {
-        return WMError::WM_OK;
+        return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
 };
 }
