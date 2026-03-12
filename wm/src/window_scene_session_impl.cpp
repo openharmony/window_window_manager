@@ -6459,8 +6459,8 @@ WMError WindowSceneSessionImpl::NotifyPageEnable(const std::string& action, cons
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    WMError ret = hostSession->NotifyPageEnable(action, message);
-    if (ret != WMError::WS_OK) {
+    WSError ret = hostSession->NotifyPageEnable(action, message);
+    if (ret != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_COMPAT, "NotifyPageEnable failed, ret: %{public}d", static_cast<int32_t>(ret));
         return static_cast<WMError>(ret);
     }
