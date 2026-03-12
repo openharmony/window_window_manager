@@ -318,12 +318,10 @@ ohos_shared_library("scene_session_manager") {
 }
 
 session_manager_sources = [
-    ":session_manager_lite",
-    "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/utils:libwmutil_base",
-    "${window_base_path}/window_scene/common:window_scene_common",
-    "${window_base_path}/window_scene/session:ui_effect_controller_client",
-    "${window_base_path}/wmserver:mock_session_manager_service_proxy",
+    "../session_manager_service/src/session_manager_service_proxy.cpp", 
+    "src/session_manager.cpp", 
+    "src/zidl/scene_session_manager_proxy.cpp", 
+    "src/zidl/session_lifecycle_listener_proxy.cpp",
 ]
 
 session_manager_deps = [
