@@ -936,8 +936,8 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, TestSize.Leve
     EXPECT_EQ(res, ERR_INVALID_DATA);
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    uint32_t vectorSize = 90;
-    data.WriteUint32(vectorSize);
+    uint64_t vectorSize = 90;
+    data.WriteUint64(vectorSize);
     res = stub_->HandleNotifyDumpInfoResult(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
@@ -1918,18 +1918,18 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, TestSize.Level
     MessageParcel data;
     MessageParcel reply;
 
-    uint32_t vectorSize = 128;
-    data.WriteUint32(vectorSize);
+    uint64_t vectorSize = 128;
+    data.WriteUint64(vectorSize);
     stub_->HandleNotifyDumpInfoResult(data, reply);
 
     std::vector<std::string> info = { "-a", "-b123", "-c3456789", "" };
-    vectorSize = static_cast<uint32_t>(info.size());
-    data.WriteUint32(vectorSize);
-    uint32_t curSize;
+    vectorSize = static_cast<uint64_t>(info.size());
+    data.WriteUint64(vectorSize);
+    uint64_t curSize;
     for (const auto& elem : info) {
         const char* curInfo = elem.c_str();
-        curSize = static_cast<uint32_t>(strlen(curInfo));
-        data.WriteUint32(curSize);
+        curSize = static_cast<uint64_t>(strlen(curInfo));
+        data.WriteUint64(curSize);
         if (curSize != 0) {
             data.WriteRawData(curInfo, curSize);
         }
