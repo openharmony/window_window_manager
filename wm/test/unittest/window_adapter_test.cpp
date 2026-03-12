@@ -322,11 +322,7 @@ HWTEST_F(WindowAdapterTest, GetSnapshotByWindowId, TestSize.Level1)
     int32_t persistentId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     auto err = windowAdapter.GetSnapshotByWindowId(persistentId, pixelMap);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, err);
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_SAMGR, err);
-    }
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
 }
@@ -343,11 +339,7 @@ HWTEST_F(WindowAdapterTest, Snapshot, TestSize.Level1)
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     SnapshotConfig config;
     auto err = windowAdapter.Snapshot(pixelMap, persistentId, config);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, err);
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_SAMGR, err);
-    }
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
     ASSERT_EQ(nullptr, pixelMap);
 }
 
