@@ -211,10 +211,21 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     OHOS::Rosen::DisplayFuzzTest(data, size);
     OHOS::Rosen::GetScreenshotFuzzTest(data, size);
+    return 0;
+}
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
+    /* Run your code on data */
     OHOS::Rosen::DisplayPowerFuzzTest(data, size);
     OHOS::Rosen::ScreenBrightnessFuzzTest(data, size);
+    return 0;
+}
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
+    /* Run your code on data */
     OHOS::Rosen::FreezeFuzzTest(data, size);
     OHOS::Rosen::NotifyDisplayEventFuzzTest(data, size);
     return 0;
 }
-
