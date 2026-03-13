@@ -717,7 +717,7 @@ private:
         RSScreenCapability& screenCapability, ScreenProperty& property);
     RRect GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
     RRect GetPhyScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
-    void ValidateRogProperty(RRect screenPhyBounds, ScreenProperty& property);
+    void ValidateRogProperty(const RRect& screenPhyBounds, ScreenProperty& property);
     void SetRogParameter(uint32_t width, uint32_t height, float dpi, bool isSupportRog);
     void InitSecondaryDisplayPhysicalParams();
     void UpdateCoordinationRefreshRate(uint32_t refreshRate);
