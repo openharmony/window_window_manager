@@ -23,6 +23,7 @@
 #include "display_manager_interface_code.h"
 #include "idisplay_manager.h"
 #include "window_manager_hilog.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS ::Rosen {
 namespace {
@@ -168,7 +169,7 @@ bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
     if (messageData.size() > MAX_MESSAGE_SIZE) {
         messageData.resize(MAX_MESSAGE_SIZE);
     }
-    sendData.WriteBuffer(data + startPos, dataSize);
+    sendData.WriteBuffer(messageData.data(), messageData.size());
     IPCSpecificInterfaceFuzzTest1(proxy.second, sendData, reply, option);
     IPCSpecificInterfaceFuzzTest2(proxy.second, sendData, reply, option, proxy.first);
     return true;
