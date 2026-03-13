@@ -877,11 +877,11 @@ struct WindowSnapshotConfiguration : public Parcelable {
 struct SnapshotConfig : public Parcelable {
     float scaleX = 1.0f;
     float scaleY = 1.0f;
-    bool inCludeSubTree = false;
+    bool includeSubTree = false;
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY) && parcel.WriteBool(inCludeSubTree);
+        return parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY) && parcel.WriteBool(includeSubTree);
     }
 
     static SnapshotConfig* Unmarshalling(Parcel& parcel)
@@ -889,7 +889,7 @@ struct SnapshotConfig : public Parcelable {
         auto snapshotConfig = std::make_unique<SnapshotConfig>();
         if (!parcel.ReadFloat(snapshotConfig->scaleX) ||
             !parcel.ReadFloat(snapshotConfig->scaleY) ||
-            !parcel.ReadBool(snapshotConfig->inCludeSubTree)) {
+            !parcel.ReadBool(snapshotConfig->includeSubTree)) {
             return nullptr;
         }
         return snapshotConfig.release();
