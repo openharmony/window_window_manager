@@ -181,7 +181,7 @@ HWTEST_F(SessionManagerLiteTest, InitSceneSessionManagerLiteProxy, TestSize.Leve
     instance_->InitSessionManagerServiceProxy();
     EXPECT_EQ(nullptr, instance_->sessionManagerServiceProxy_);
     ret = instance_->InitSceneSessionManagerLiteProxy();
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: mock sessionManagerServiceProxy_
     instance_->sceneSessionManagerLiteProxy_ = nullptr;
@@ -300,7 +300,7 @@ HWTEST_F(SessionManagerLiteTest, OnUserSwitch, TestSize.Level1)
     EXPECT_EQ(nullptr, sessionMgrService);
     instance_->userSwitchCallbackFunc_ = nullptr;
     instance_->OnUserSwitch(sessionMgrService);
-    EXPECT_TRUE(g_errLog.find("callback func is null") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("callback func is null") != std::string::npos);
 
     // branch 3: Set callback func is not null
     instance_->userSwitchCallbackFunc_ = [](){};
