@@ -2463,6 +2463,43 @@ WMError SceneSessionManagerProxy::GetMainWindowSnapshot(const std::vector<int32_
     return static_cast<WMError>(errCode);
 }
 
+WMError SceneSessionManagerProxy::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+    int32_t persistentId, const SnapshotConfig& config)
+{
+    pixelMap = nullptr;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write persistentId failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(&config)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write snapshot config failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+            SceneSessionManagerMessage::TRANS_ID_SNAPSHOT_BY_WINDOW_ID), data, reply, option) != ERR_NONE) {
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    pixelMap.reset(reply.ReadParcelable<Media::PixelMap>());
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
 WMError SceneSessionManagerProxy::SetWindowSnapshotSkip(int32_t windowId, bool isSkip)
 {
     MessageParcel data;

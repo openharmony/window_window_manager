@@ -78,6 +78,19 @@ public:
         return WMError::WM_OK;
     }
 
+    WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap) override
+    {
+        pixelMap = nullptr;
+        return WMError::WM_OK;
+    }
+
+    WMError Snapshot(
+        std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config) override
+    {
+        pixelMap = nullptr;
+        return WMError::WM_OK;
+    }
+
     static std::string lastModuleName_;
     static std::string lastAbilityName_;
     static uint32_t lastColor_;
@@ -488,12 +501,48 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
         windowAdapter->windowManagerServiceProxy_ = nullptr;
     }
     WMError ret = instance_->GetSnapshotByWindowId(windowId, pixelMap);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    }
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     windowAdapter->windowManagerServiceProxy_ = tempProxy;
+}
+
+/**
+ * @tc.name: GetSnapshotByWindowId02
+ * @tc.desc: Check GetSnapshotByWindowId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetSnapshotByWindowId02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, mockInstance_);
+    int32_t windowId = 1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError ret = mockInstance_->GetSnapshotByWindowId(windowId, pixelMap);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(nullptr, pixelMap);
+}
+
+/**
+ * @tc.name: Snapshot
+ * @tc.desc: Check Snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, Snapshot, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    int32_t windowId = -1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+    windowAdapter->isProxyValid_ = true;
+    auto tempProxy = windowAdapter->windowManagerServiceProxy_;
+    if (windowAdapter->windowManagerServiceProxy_ != nullptr) {
+        windowAdapter->windowManagerServiceProxy_ = nullptr;
+    }
+    WMError ret = instance_->Snapshot(pixelMap, windowId, config);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    windowAdapter->windowManagerServiceProxy_ = tempProxy;
+
+    ret = mockInstance_->Snapshot(pixelMap, 1, config);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(nullptr, pixelMap);
 }
 
 /**

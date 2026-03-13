@@ -3011,6 +3011,69 @@ HWTEST_F(SceneSessionManagerTest12, PendingSessionToBackground03, Function | Sma
 }
 
 /**
+ * @tc.name: Snapshot01
+ * @tc.desc: test function : Snapshot permission and invalid id
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, Snapshot01, Function | SmallTest | Level2)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto ret = ssm_->Snapshot(pixelMap, 1, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ret = ssm_->Snapshot(pixelMap, INVALID_SESSION_ID, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+}
+
+/**
+ * @tc.name: Snapshot02
+ * @tc.desc: test function : Snapshot invalid session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, Snapshot02, Function | SmallTest | Level2)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ssm_->sceneSessionMap_.clear();
+
+    auto ret = ssm_->Snapshot(pixelMap, 100, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+}
+
+/**
+ * @tc.name: Snapshot03
+ * @tc.desc: test function : Snapshot invalid surface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, Snapshot03, Function | SmallTest | Level2)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+    SessionInfo info;
+    info.abilityName_ = "Snapshot03";
+    info.bundleName_ = "Snapshot03";
+    info.persistentId_ = 101;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({ info.persistentId_, sceneSession });
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto ret = ssm_->Snapshot(pixelMap, info.persistentId_, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+}
+
+/**
  * @tc.name: SetPiPSettingSwitchStatus
  * @tc.desc: test function : SetPiPSettingSwitchStatus
  * @tc.type: FUNC

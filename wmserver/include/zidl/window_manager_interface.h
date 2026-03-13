@@ -281,6 +281,11 @@ public:
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+        int32_t persistentId, const SnapshotConfig& config)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetSnapshotByWindowId(int32_t persistentId, std::shared_ptr<Media::PixelMap>& pixelMap)
     {
         return WMError::WM_OK;
