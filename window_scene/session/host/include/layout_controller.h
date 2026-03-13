@@ -33,11 +33,13 @@ public:
     ~LayoutController() = default;
 
     void SetSessionRect(const WSRect& rect) { winRect_ = rect; }
+    void SetLastClientParentSize(const WSRect& rect) { lastClientParentSize_ = rect; }
     bool SetSessionGlobalRect(const WSRect& rect);
     void SetClientRect(const WSRect& rect);
     WSRect GetSessionRect() const { return winRect_; }
     WSRect GetSessionGlobalRect() const;
     WSRect GetClientRect() const;
+    WSRect GetLastClientParentSize() const { return lastClientParentSize_; };
     void GetGlobalScaledRect(Rect& globalScaledRect);
     WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const;
     WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const;
@@ -71,6 +73,7 @@ private:
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
+    WSRect lastClientParentSize_; // save the last sessionRect.
     WSRect winRect_;
     WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
     mutable std::mutex globalRectMutex_;

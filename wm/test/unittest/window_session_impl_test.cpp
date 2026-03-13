@@ -1081,6 +1081,19 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, TestSize.Level1)
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowCrossAxisListener(listener6);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IParentWindowSizeChangeListener> listener7 = nullptr;
+    res = window->RegisterParentWindowSizeChangeListener(listener7);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterParentWindowSizeChangeListener(listener7);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
+    sptr<IParentWindowStatusChangeListener> listener8 = nullptr;
+    res = window->RegisterParentWindowStatusChangeListener(listener8);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterParentWindowStatusChangeListener(listener8);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
 }
