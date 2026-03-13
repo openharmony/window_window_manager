@@ -2910,9 +2910,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             });
             sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
                 const std::string& action, const std::string& message) {
-                if (pageEnableFunc_) {
-                    return this->pageEnableFunc_(bundleName, windowId, action, message);
-                }
+                return this->NotifyPageEnableFunc(bundleName, windowId, action, message);
             });
         }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
@@ -8138,6 +8136,17 @@ void SceneSessionManager::SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNo
 void SceneSessionManager::RegisterPageEnableFunc(PageEnableFunc&& func)
 {
     pageEnableFunc_ = std::move(func);
+}
+
+WSError SceneSessionManager::NotifyPageEnableFunc(const std::string& bundleName, int32_t windowId,
+    const std::string& action, const std::string& message)
+{
+    if (!pageEnableFunc_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "pageEnableCallback_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    pageEnableFunc_(bundleName, windowId, action, message);
+    return WSError::WS_OK;
 }
 
 bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)
