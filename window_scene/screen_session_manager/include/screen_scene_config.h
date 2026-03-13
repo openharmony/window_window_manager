@@ -40,8 +40,8 @@ struct DisplayConfig {
 
 struct RogResolution {
     bool isSupportRog = false;
-    bool isNewBoot = true;
-    int rogMode = 0;
+    bool notInit = true;
+    int32_t rogMode = 0;
     float dpi = 0;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -83,6 +83,7 @@ public:
     static int32_t GetRogDpi();
     static RogResolution GetRogResolution(uint32_t width, uint32_t height);
     static uint64_t GetUptimeSeconds();
+    static uint64_t GetBootTimeThreshold();
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
@@ -105,8 +106,8 @@ private:
     static uint32_t offScreenPPIThreshold_;
     static bool enableRog_;
     static int32_t rogDpi_;
-    static uint64_t bootTimeThreshold_;
     static RogResolution rogResolution_;
+    static uint64_t bootTimeThreshold_;
 
     static bool IsValidNode(const xmlNode& currNode);
     static void ReadEnableConfigInfo(const xmlNodePtr& currNode);
