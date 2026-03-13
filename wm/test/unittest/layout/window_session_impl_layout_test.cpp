@@ -393,6 +393,42 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyWindowStatusDidChange_Test_Undefined
 }
 
 /**
+ * @tc.name: NotifyParentWindowSizeChange
+ * @tc.desc: NotifyParentWindowSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyParentWindowSizeChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowSizeChange start";
+    auto window = GetTestWindowImpl("NotifyParentWindowSizeChange");
+    auto listeners = GetListenerList<IParentWindowStatusChangeListener, MockParentWindowSizeChangeListener>();
+    EXPECT_NE(listeners.size(), 0);
+    listeners.insert(listeners.begin(), nullptr);
+    window->parentWindowSizeChangeListeners_.insert({ window->GetPersistentId(), listeners });
+    window->NotifyParentWindowSizeChange(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowStatusChange end";
+}
+
+/**
+ * @tc.name: NotifyParentWindowStatusChange
+ * @tc.desc: NotifyParentWindowStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyParentWindowStatusChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowStatusChange start";
+    auto window = GetTestWindowImpl("NotifyParentWindowStatusChange");
+    auto listeners = GetListenerList<IParentWindowStatusChangeListener, MockParentWindowStatusChangeListener>();
+    EXPECT_NE(listeners.size(), 0);
+    listeners.insert(listeners.begin(), nullptr);
+    window->parentWindowStatusChangeListeners_.insert({ window->GetPersistentId(), listeners });
+    window->NotifyParentWindowStatusChange(WindowMode::WINDOW_MODE_FLOATING);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowStatusChange end";
+}
+
+/**
  * @tc.name: NotifyAfterUIContentReady
  * @tc.desc: NotifyAfterUIContentReady
  * @tc.type: FUNC

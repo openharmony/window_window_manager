@@ -220,6 +220,8 @@ std::recursive_mutex WindowSessionImpl::windowVisibilityChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowNoInteractionListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStatusDidChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::parentWindowSizeChangeListenerMutex_;
+std::recursive_mutex WindowSessionImpl::parentWindowStatusChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowTitleButtonRectChangeListenerMutex_;
 std::mutex WindowSessionImpl::displayMoveListenerMutex_;
 std::mutex WindowSessionImpl::windowRectChangeListenerMutex_;
@@ -249,6 +251,10 @@ std::recursive_mutex WindowSessionImpl::subWindowSessionMutex_;
 std::map<int32_t, std::vector<sptr<WindowSessionImpl>>> WindowSessionImpl::subWindowSessionMap_;
 std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> WindowSessionImpl::windowStatusChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> WindowSessionImpl::windowStatusDidChangeListeners_;
+std::map<int32_t, std::vector<sptr<IParentWindowSizeChangeListener>>>
+    WindowSessionImpl::parentWindowSizeChangeListeners_;
+std::map<int32_t, std::vector<sptr<IParentWindowStatusChangeListener>>>
+    WindowSessionImpl::parentWindowStatusChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
 
 #define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
@@ -3856,6 +3862,37 @@ WMError WindowSessionImpl::UnregisterWindowStatusDidChangeListener(const sptr<IW
     return UnregisterListener(windowStatusDidChangeListeners_[GetPersistentId()], listener);
 }
 
+WMError WindowSessionImpl::RegisterParentWindowSizeChangeListener(const sptr<IParentWindowSizeChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(parentWindowSizeChangeListenerMutex_);
+    return RegisterListener(parentWindowSizeChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterParentWindowSizeChangeListener(const
+    sptr<IParentWindowSizeChangeListener>&listener)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(parentWindowSizeChangeListenerMutex_);
+    return UnregisterListener(parentWindowSizeChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::RegisterParentWindowStatusChangeListener(const
+    sptr<IParentWindowStatusChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(parentWindowStatusChangeListenerMutex_);
+    return RegisterListener(parentWindowStatusChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterParentWindowStatusChangeListener(const
+    sptr<IParentWindowStatusChangeListener>& listener)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    std::lock_guard<std::recursive_mutex> lockListener(parentWindowStatusChangeListenerMutex_);
+    return UnregisterListener(parentWindowStatusChangeListeners_[GetPersistentId()], listener);
+}
+
 std::shared_ptr<Media::PixelMap> WindowSessionImpl::Snapshot()
 {
     if (IsWindowSessionInvalid()) {
@@ -5042,6 +5079,28 @@ EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDi
         windowStatusDidChangeListeners.push_back(listener);
     }
     return windowStatusDidChangeListeners;
+}
+
+template<typename T>
+EnableIfSame<T, IParentWindowSizeChangeListener, std::vector<sptr<IParentWindowSizeChangeListener>>>
+    WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IParentWindowSizeChangeListener>> parentWindowSizeChangeListeners;
+    for (auto& listener : parentWindowSizeChangeListeners_[GetPersistentId()]) {
+        parentWindowSizeChangeListeners.push_back(listener);
+    }
+    return parentWindowSizeChangeListeners;
+}
+
+template<typename T>
+EnableIfSame<T, IParentWindowStatusChangeListener, std::vector<sptr<IParentWindowStatusChangeListener>>>
+    WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IParentWindowStatusChangeListener>> parentWindowStatusChangeListeners;
+    for (auto& listener : parentWindowStatusChangeListeners_[GetPersistentId()]) {
+        parentWindowStatusChangeListeners.push_back(listener);
+    }
+    return parentWindowStatusChangeListeners;
 }
 
 void WindowSessionImpl::ClearListenersById(int32_t persistentId)
@@ -8225,6 +8284,54 @@ void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
     std::ostringstream oss;
     oss << "status: " << WindowStatusToString(windowStatus);
     RecordWindowLifecycleChange(oss.str());
+}
+
+/** @note @window.layout */
+void WindowSessionImpl::NotifyParentWindowSizeChange(Rect rect)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyParentWindowSizeChange begin, id:%{public}d, rect:[%{public}d,%{public}d,
+        %{public}u,%{public}u]", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    std::vector<sptr<IParentWindowSizeChangeListener>> parentWindowSizeChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(parentWindowSizeChangeListenerMutex_);
+        parentWindowSizeChangeListeners = GetListeners<IParentWindowSizeChangeListener>();
+    }
+
+    TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyParentWindowSizeChange listener count:%{public}zu",
+        parentWindowSizeChangeListeners.size());
+    for (auto& listener : parentWindowSizeChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnParentWindowSizeChange(rect);
+        }
+    }
+}
+
+/** @note @window.layout */
+void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode)
+{
+    auto windowStatus = GetWindowStatusInner(mode);
+    TLOGD(WmsLogTag::WMS_LAYOUT, " id:%{public}d, windowStatus:%{public}u, windowMode:%{public}u",
+            GetPersistentId(), windowStatus,  mode);
+    auto lastStatus = lastStatusWhenNotifyParentStatusChange_.load();
+    if (lastStatus == windowStatus) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Duplicate windowStatus:%{public}u, id:%{public}d, windowMode:%{public}u",
+            windowStatus, GetPersistentId(), mode);
+        return;
+    }
+    lastStatusWhenNotifyParentStatusChange_.store(windowStatus);
+    std::vector<sptr<IParentWindowStatusChangeListener>> parentWindowStatusChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(parentWindowStatusChangeListenerMutex_);
+        parentWindowStatusChangeListeners = GetListeners<IParentWindowStatusChangeListener>();
+    }
+    TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyParentWindowStatusChange listener count:%{public}zu", 
+        parentWindowStatusChangeListeners.size());
+
+    for (auto& listener : parentWindowStatusChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnParentWindowStatusChange(windowStatus);
+        }
+    }
 }
 
 void WindowSessionImpl::NotifyFirstValidLayoutUpdate(const Rect& preRect, const Rect& newRect)

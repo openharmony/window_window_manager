@@ -6002,6 +6002,18 @@ WSError WindowSceneSessionImpl::NotifyLayoutFinishAfterWindowModeChange(WindowMo
     return WSError::WS_OK;
 }
 
+WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowSizeChange(Rect rect)
+{
+    NotifyParentWindowSizeChange(rect);
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowStatusChange(WindowMode mode)
+{
+    NotifyParentWindowStatusChange(mode);
+    return WSError::WS_OK;
+}
+
 bool WindowSceneSessionImpl::ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode)
 {
     bool isFreeMultiWindowMode = IsFreeMultiWindowMode();
@@ -7598,6 +7610,10 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     const auto& property = GetProperty();
+    if (!windowAnchorInfo.isAnchoredByAttach_ && !property->GetWindowAnchorInfo().isAnchoredByAttach_) {
+        TLOGE(WmsLogTag::WMS_SUB, "Repeated invoking");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
     if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
         return WMError::WM_ERROR_INVALID_CALLING;

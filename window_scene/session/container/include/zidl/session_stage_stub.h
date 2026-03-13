@@ -56,6 +56,8 @@ private:
     int HandleUpdateWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyLayoutFinishAfterWindowModeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySubWindowAfterParentWindowSizeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySubWindowAfterParentWindowStatusChange(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateWindowModeForUITest(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyForegroundInteractiveStatus(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyPausedStatus();

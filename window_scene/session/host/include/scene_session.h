@@ -344,7 +344,8 @@ public:
     WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
     std::shared_ptr<Rosen::RSNode> GetWindowDragMoveMountedNode(DisplayId displayId, uint32_t targetZOrder);
     virtual void RegisterGetIsRecentStateFunc(GetIsRecentStateFunc&& callback) {};
-
+    void NotifySubSessionParentSizeChange(Rect rect) override;
+    void NotifySubSessionParentStatusChange(WindowMode mode) override;
     /*
      * PiP Window
      */

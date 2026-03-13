@@ -75,6 +75,8 @@ public:
     WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
+    WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override;
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override;
     WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
