@@ -15716,7 +15716,10 @@ bool SceneSessionManager::IsSessionForegroundForGlobalWindowMode(const sptr<Scen
     if (!WindowHelper::IsSubWindow(windowType) && !WindowHelper::IsDialogWindow(windowType)) {
         return session->IsSessionForeground();
     }
-    auto mainSession = GetMainParentSceneSession(session->GetParentPersistentId(), sceneSessionMap_);
+    if (!session->IsSessionForeground()) {
+        return false;
+    }
+    auto mainSession = session->GetMainSession();
     return mainSession != nullptr && mainSession->IsSessionForeground();
 }
 

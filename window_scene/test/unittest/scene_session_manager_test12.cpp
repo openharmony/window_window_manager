@@ -1642,7 +1642,12 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
     GlobalWindowMode globalWinMode2 = GlobalWindowMode::UNKNOWN;
     ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode2);
-    EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 6);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 2);
+
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    GlobalWindowMode globalWinMode3 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode3);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode3), 6);
 
     SessionInfo sessionInfo3;
     sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
@@ -1654,16 +1659,16 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     sceneSession3->SetSessionGlobalRect(rect3);
     sceneSession3->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
-    GlobalWindowMode globalWinMode3 = GlobalWindowMode::UNKNOWN;
-    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode3);
-    EXPECT_EQ(static_cast<uint32_t>(globalWinMode3), 14);
+    GlobalWindowMode globalWinMode4 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode4);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode4), 14);
 
     ssm_->sceneSessionMap_.clear();
 }
 
 /**
  * @tc.name: GetGlobalWindowMode03
- * @tc.desc: test dialog window mode depends on main window foreground state
+ * @tc.desc: test dialog window mode depends on dialog and main window foreground state
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode03, TestSize.Level0)
@@ -1688,7 +1693,12 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode03, TestSize.Level0)
 
     GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
     ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode);
-    EXPECT_EQ(static_cast<uint32_t>(globalWinMode), 5);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode), 1);
+
+    dialogSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    GlobalWindowMode globalWinMode2 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode2);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 5);
 
     ssm_->sceneSessionMap_.clear();
 }
