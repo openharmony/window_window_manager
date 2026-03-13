@@ -8143,7 +8143,7 @@ WSError SceneSessionManager::NotifyPageEnableFunc(const std::string& bundleName,
 {
     if (!pageEnableFunc_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "pageEnableCallback_ is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
+        return WSError::WS_ERROR_NULLPTR;
     }
     pageEnableFunc_(bundleName, windowId, action, message);
     return WSError::WS_OK;
