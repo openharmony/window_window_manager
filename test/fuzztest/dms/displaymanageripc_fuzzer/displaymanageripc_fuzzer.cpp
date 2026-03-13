@@ -61,24 +61,26 @@ std::pair<sptr<IDisplayManager>, sptr<IRemoteObject>> GetProxy()
 
 bool IPCFuzzTest(const uint8_t* data, size_t size)
 {
-    uint32_t code;
-    int flags, waitTime;
-    if (data == nullptr || size < sizeof(code) + sizeof(flags) + sizeof(waitTime)) {
+    if (data == nullptr || size < 4) {
         return false;
     }
+    FuzzedDataProvider provider(data, size);
     auto proxy = GetProxy();
     if (proxy.first == nullptr || proxy.second == nullptr) {
         return false;
     }
-    size_t startPos = 0;
-    startPos += GetObject<uint32_t>(code, data + startPos, size - startPos);
-    startPos += GetObject<int>(flags, data + startPos, size - startPos);
-    startPos += GetObject<int>(waitTime, data + startPos, size - startPos);
+    uint32_t code = provider.ConsumeUint32();
+    int flags = provider.ConsumeInt32();
+    int waitTime = provider.ConsumeInt32();
+    std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes();
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
-    uint32_t dataSize = (size - startPos) > 1024 * 1024 ? 1024 * 1024 : (size - startPos);
-    sendData.WriteBuffer(data + startPos, dataSize);
+    if (messageData.size() > 1024 * 1024) {
+        messageData.resize(1024 * 1024);
+    }
+
+    sendData.WriteBuffer(messageData.data(), messageData.size());
     proxy.second->SendRequest(code, sendData, reply, option);
     return true;
 }
@@ -144,22 +146,25 @@ void IPCSpecificInterfaceFuzzTest2(const sptr<IRemoteObject>& proxy, MessageParc
 
 bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
 {
-    int flags, waitTime;
-    if (data == nullptr || size < sizeof(flags) + sizeof(waitTime)) {
+    if (data == nullptr || size < 4) {
         return false;
     }
+    FuzzedDataProvider provider(data, size);
     auto proxy = GetProxy();
     if (proxy.first == nullptr || proxy.second == nullptr) {
         return false;
     }
-    size_t startPos = 0;
-    startPos += GetObject<int>(flags, data + startPos, size - startPos);
-    startPos += GetObject<int>(waitTime, data + startPos, size - startPos);
+
+    int flags = provider.ConsumeInt32();
+    int waitTime = provider.ConsumeInt32();
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
     sendData.WriteInterfaceToken(IDisplayManager::GetDescriptor());
-    uint32_t dataSize = (size - startPos) > 1024 * 1024 ? 1024 * 1024 : (size - startPos);
+    std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes();
+    if (messageData.size() > 1024 * 1024) {
+        messageData.resize(1024 * 1024);
+    }
     sendData.WriteBuffer(data + startPos, dataSize);
     IPCSpecificInterfaceFuzzTest1(proxy.second, sendData, reply, option);
     IPCSpecificInterfaceFuzzTest2(proxy.second, sendData, reply, option, proxy.first);
