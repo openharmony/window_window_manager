@@ -5148,6 +5148,18 @@ public:
      * @brief Flush vsync for prelaunch.
      */
     virtual void FlushVsync() {}
+
+    /**
+     * @brief Notify pageEnable.
+     *
+     * @param action action.
+     * @param message message.
+     * @return WM_OK means on success, others means failed.
+     */
+    virtual WMError NotifyPageEnable(const std::string& action, const std::string& message)
+    {
+        return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
+    }
 };
 }
 }
