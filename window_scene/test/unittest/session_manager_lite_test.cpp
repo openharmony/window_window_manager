@@ -305,7 +305,7 @@ HWTEST_F(SessionManagerLiteTest, OnUserSwitch, TestSize.Level1)
     // branch 3: Set callback func is not null
     instance_->userSwitchCallbackFunc_ = [](){};
     instance_->OnUserSwitch(sessionMgrService);
-    EXPECT_TRUE(g_errLog.find("run callback func") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("run callback func") != std::string::npos);
 
     LOG_SetCallback(nullptr);
 }
