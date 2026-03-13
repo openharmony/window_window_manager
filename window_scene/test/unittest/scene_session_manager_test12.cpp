@@ -3613,7 +3613,7 @@ HWTEST_F(SceneSessionManagerTest12, NotifyPageEnableFunc01, TestSize.Level1)
     ssm_->pageEnableFunc_ = nullptr;
     auto result = ssm_->NotifyPageEnableFunc("com.test.app", 1, "enter", "HomePage");
 
-    EXPECT_EQ(result, WSError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 } // namespace
 } // namespace Rosen
