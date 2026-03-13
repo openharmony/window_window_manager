@@ -1999,6 +1999,8 @@ private:
     void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
     std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
     PageEnableFunc pageEnableFunc_;
+    WSError NotifyPageEnableFunc(const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message);
 };
 } // namespace OHOS::Rosen
 

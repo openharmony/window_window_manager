@@ -690,9 +690,11 @@ WSError MainSession::NotifyPageEnable(const std::string& action, const std::stri
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     const auto& windowId = GetPersistentId();
-    if (pageEnableCallback_) {
-        pageEnableCallback_(sessionInfo_.bundleName_, windowId, action, message);
+    if (!pageEnableCallback_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "pageEnableCallback_ is nullptr");
+        return WMError::WM_ERROR_NULLPTR;
     }
+    pageEnableCallback_(sessionInfo_.bundleName_, windowId, action, message);
     return WSError::WS_OK;
 }
 

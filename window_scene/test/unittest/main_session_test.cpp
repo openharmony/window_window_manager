@@ -1325,7 +1325,7 @@ HWTEST_F(MainSessionTest, NotifyPageEnable, TestSize.Level1)
 
     session->pageEnableCallback_ = nullptr;
     ret = session->NotifyPageEnable("exit", "DetailPage");
-    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(ret, WSError::WM_ERROR_NULLPTR);
 
     ret = session->NotifyPageEnable("", "HomePage");
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
