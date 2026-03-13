@@ -1632,10 +1632,12 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     sceneSession2->SetRSVisible(true);
-    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
     WSRect rect2 = { 100, 0, 100, 100 };
     sceneSession2->SetSessionRect(rect2);
     sceneSession2->SetSessionGlobalRect(rect2);
+    sceneSession2->SetParentPersistentId(sceneSession1->GetPersistentId());
+    sceneSession2->SetParentSession(sceneSession1);
     sceneSession2->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
     GlobalWindowMode globalWinMode2 = GlobalWindowMode::UNKNOWN;
@@ -1655,6 +1657,38 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     GlobalWindowMode globalWinMode3 = GlobalWindowMode::UNKNOWN;
     ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode3);
     EXPECT_EQ(static_cast<uint32_t>(globalWinMode3), 14);
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetGlobalWindowMode03
+ * @tc.desc: test dialog window mode depends on main window foreground state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode03, TestSize.Level0)
+{
+    SessionInfo mainInfo;
+    mainInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> mainSession = sptr<SceneSession>::MakeSptr(mainInfo, nullptr);
+    mainSession->SetRSVisible(true);
+    mainSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    mainSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ssm_->sceneSessionMap_.insert({ mainSession->GetPersistentId(), mainSession });
+
+    SessionInfo dialogInfo;
+    dialogInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> dialogSession = sptr<SceneSession>::MakeSptr(dialogInfo, nullptr);
+    dialogSession->SetRSVisible(true);
+    dialogSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    dialogSession->SetParentPersistentId(mainSession->GetPersistentId());
+    dialogSession->SetParentSession(mainSession);
+    dialogSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ssm_->sceneSessionMap_.insert({ dialogSession->GetPersistentId(), dialogSession });
+
+    GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode), 5);
 
     ssm_->sceneSessionMap_.clear();
 }
