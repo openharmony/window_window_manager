@@ -610,7 +610,7 @@ HWTEST(MockSessionManagerServiceTest, NotifyWMSConnectionStatus, TestSize.Level1
     mockMockSms.sessionManagerServiceMap_[userId] = sptr<IRemoteObjectMocker>::MakeSptr();
     mockMockSms.userId2ScreenIdMap_[userId] = 0;
     errCode = mockMockSms.NotifyWMSConnectionStatus(userId, smsListener);
-    EXPECT_EQ(errCode, ERR_DEAD_OBJECT);
+    EXPECT_EQ(errCode, ERR_OK);
 }
 
 /**
