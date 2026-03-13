@@ -432,7 +432,7 @@ void ScreenProperty::UpdateXDpi()
     if (dpiPhyWidth_ != UINT32_MAX) {
         int32_t width = phyBounds_.rect_.width_;
         if (rogWidth_ != 0) {
-            width = rogWidth_;
+            width = static_cast<int32_t>(rogWidth_);
         }
         xDpi_ = width * INCH_2_MM / dpiPhyWidth_;
         xDpi_ = std::floor(xDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
@@ -444,7 +444,7 @@ void ScreenProperty::UpdateYDpi()
     if (dpiPhyHeight_ != UINT32_MAX) {
         int32_t height_ = phyBounds_.rect_.height_;
         if (rogHeight_ != 0) {
-            height_ = rogHeight_;
+            height_ = static_cast<int32_t>(rogHeight_);
         }
         yDpi_ = height_ * INCH_2_MM / dpiPhyHeight_;
         yDpi_ = std::floor(yDpi_ * TRUNCATE_THREE_DECIMALS) / TRUNCATE_THREE_DECIMALS;
