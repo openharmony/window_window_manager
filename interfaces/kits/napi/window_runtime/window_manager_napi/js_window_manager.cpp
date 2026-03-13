@@ -135,6 +135,18 @@ napi_value JsWindowManager::UnregisterWindowMangerCallback(napi_env env, napi_ca
     return (me != nullptr) ? me->OnUnregisterWindowManagerCallback(env, info) : nullptr;
 }
 
+napi_value JsWindowManager::RegisterApplicationFocusStateChangeCallback(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnRegisterApplicationFocusStateChangeCallback(env, info) : nullptr;
+}
+
+napi_value JsWindowManager::UnregisterApplicationFocusStateChangeCallback(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnUnregisterApplicationFocusStateChangeCallback(env, info) : nullptr;
+}
+
 napi_value JsWindowManager::GetTopWindow(napi_env env, napi_callback_info info)
 {
     JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
@@ -1032,6 +1044,71 @@ napi_value JsWindowManager::OnUnregisterWindowManagerCallback(napi_env env, napi
     }
     if (ret != WmErrorCode::WM_OK) {
         napi_throw(env, JsErrUtils::CreateJsError(env, ret, "[window][off]msg: unregister " + cbType + " failed"));
+        return NapiGetUndefined(env);
+    }
+    TLOGD(WmsLogTag::DEFAULT, "Unregister end, type=%{public}s", cbType.c_str());
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindowManager::OnRegisterApplicationFocusStateChangeCallback(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) { // 1: params num
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][onApplicationFocusStateChange]msg: Argc is invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string cbType = APPLICATION_FOCUS_STATE_CHANGE_CB;
+    napi_value value = argv[0];
+    if (!NapiIsCallable(env, value)) {
+        TLOGE(WmsLogTag::DEFAULT, "Callback(argv[0]) is not callable");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][onApplicationFocusStateChange]msg: Callback(argv[0]) is not callable"));
+        return NapiGetUndefined(env);
+    }
+
+    WmErrorCode ret = registerManager_->RegisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, env, value);
+    if (ret != WmErrorCode::WM_OK) {
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret,
+            "[window][onApplicationFocusStateChange]msg: register " + cbType + " failed"));
+        return NapiGetUndefined(env);
+    }
+    TLOGD(WmsLogTag::DEFAULT, "Register end, type=%{public}s", cbType.c_str());
+    return NapiGetUndefined(env);
+}
+
+napi_value JsWindowManager::OnUnregisterApplicationFocusStateChangeCallback(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 0) {
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][offApplicationFocusStateChange]msg: Argc is invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string cbType = APPLICATION_FOCUS_STATE_CHANGE_CB;
+    napi_value value = nullptr;
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (argc == 0) {
+        ret = registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, env, value);
+    } else {
+        value = argv[0];
+        if ((value == nullptr) || (!NapiIsCallable(env, value))) {
+            ret = registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, env, nullptr);
+        } else {
+            ret = registerManager_->UnregisterListener(nullptr, cbType, CaseType::CASE_WINDOW_MANAGER, env, value);
+        }
+    }
+    if (ret != WmErrorCode::WM_OK) {
+        napi_throw(env, JsErrUtils::CreateJsError(env, ret,
+            "[window][offApplicationFocusStateChange]msg: unregister " + cbType + " failed"));
         return NapiGetUndefined(env);
     }
     TLOGD(WmsLogTag::DEFAULT, "Unregister end, type=%{public}s", cbType.c_str());
@@ -2114,6 +2191,10 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "findWindow", moduleName, JsWindowManager::FindWindowSync);
     BindNativeFunction(env, exportObj, "on", moduleName, JsWindowManager::RegisterWindowManagerCallback);
     BindNativeFunction(env, exportObj, "off", moduleName, JsWindowManager::UnregisterWindowMangerCallback);
+    BindNativeFunction(env, exportObj, "onApplicationFocusStateChange", moduleName,
+        JsWindowManager::RegisterApplicationFocusStateChangeCallback);
+    BindNativeFunction(env, exportObj, "offApplicationFocusStateChange", moduleName,
+        JsWindowManager::UnregisterApplicationFocusStateChangeCallback);
     BindNativeFunction(env, exportObj, "getTopWindow", moduleName, JsWindowManager::GetTopWindow);
     BindNativeFunction(env, exportObj, "getLastWindow", moduleName, JsWindowManager::GetLastWindow);
     BindNativeFunction(env, exportObj, "getSnapshot", moduleName, JsWindowManager::GetSnapshot);
