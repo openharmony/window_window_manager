@@ -6356,6 +6356,23 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModePropertyChange(const sptr<Co
     return WSError::WS_OK;
 }
 
+WMError WindowSceneSessionImpl::NotifyPageEnable(const std::string& action, const std::string& message)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "action:%{public}zu, message:%{public}zu", action.length(), message.length());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "window session invalid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WSError ret = hostSession->NotifyPageEnable(action, message);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "NotifyPageEnable failed, ret: %{public}d", static_cast<int32_t>(ret));
+        return static_cast<WMError>(ret);
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");

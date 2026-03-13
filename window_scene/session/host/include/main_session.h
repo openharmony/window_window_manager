@@ -89,6 +89,8 @@ public:
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
     void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) override;
+    void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
+    WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
 
     /*
      * Window Pattern
@@ -137,6 +139,7 @@ private:
     std::atomic_bool isFullScreenInForceSplit_ { false };
     CompatibleModeChangeCallback compatibleModeChangeCallback_;
     NotifyForceSplitEnableFunc forceSplitEnableFunc_;
+    PageEnableCallback pageEnableCallback_;
 
     /*
      * Prelaunch check
