@@ -46,7 +46,7 @@ static ani_ref WindowGetMainWindow(ani_env* env, ani_object obj, ani_long native
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+    if (windowStage == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowStage is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
         return AniWindowUtils::CreateAniUndefined(env);
@@ -58,7 +58,7 @@ static ani_ref CreateSubWindow(ani_env* env, ani_object obj, ani_long nativeObj,
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     AniWindowStage* windowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (windowStage == nullptr || windowStage->GetWindowScene().lock() == nullptr) {
+    if (windowStage == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] windowStage is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
         return AniWindowUtils::CreateAniUndefined(env);

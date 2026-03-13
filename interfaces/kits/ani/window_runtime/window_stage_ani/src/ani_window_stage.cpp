@@ -201,8 +201,9 @@ ani_object AniWindowStage::GetSubWindow(ani_env* env, ani_object obj, ani_long n
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[ANI]");
     AniWindowStage* aniWindowStage = reinterpret_cast<AniWindowStage*>(nativeObj);
-    if (aniWindowStage == nullptr || aniWindowStage->GetMainWindow(env) == nullptr) {
+    if (aniWindowStage == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowStage is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
         return AniWindowUtils::CreateAniUndefined(env);
     }
     return aniWindowStage->OnGetSubWindow(env);
@@ -214,7 +215,8 @@ ani_object AniWindowStage::OnGetSubWindow(ani_env* env)
     auto windowScene = GetWindowScene().lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] Window scene is nullptr");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     std::vector<sptr<Window>> subWindowVec = windowScene->GetSubWindow();
     TLOGI(WmsLogTag::WMS_LIFE, "Get sub windows, size = %{public}zu", subWindowVec.size());
@@ -235,6 +237,7 @@ ani_object AniWindowStage::CreateSubWindowWithOptions(ani_env* env, ani_object o
         return aniWindowStage->OnCreateSubWindowWithOptions(env, name, options);
     } else {
         TLOGE(WmsLogTag::WMS_SUB, "[ANI] aniWindowStage is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
         return AniWindowUtils::CreateAniUndefined(env);
     }
 }
