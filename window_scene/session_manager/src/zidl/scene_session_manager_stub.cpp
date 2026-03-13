@@ -1614,22 +1614,22 @@ int SceneSessionManagerStub::HandleSnapshotByWindowId(MessageParcel& data, Messa
 {
     int32_t persistentId = 0;
     if (!data.ReadInt32(persistentId)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "read persistentId failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read persistentId failed");
         return ERR_INVALID_DATA;
     }
     std::unique_ptr<SnapshotConfig> config(data.ReadParcelable<SnapshotConfig>());
     if (config == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "read snapshot config failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read snapshot config failed");
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     WMError errCode = Snapshot(pixelMap, persistentId, *config);
     if (!reply.WriteParcelable(pixelMap.get())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write pixelMap failed");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write pixelMap failed");
         return ERR_INVALID_DATA;
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write errCode fail");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
