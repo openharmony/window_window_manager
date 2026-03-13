@@ -11410,7 +11410,7 @@ WMError SceneSessionManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap
         RSSurfaceCaptureConfig rsConfig = {
             .scaleX = config.scaleX,
             .scaleY = config.scaleY,
-            .useCurWindow = !config.includeSubTree,
+            .useCurWindow = config.useCurWindow,
         };
         if (!RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, rsConfig)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "TakeSurfaceCapture failed: %{public}d", persistentId);
