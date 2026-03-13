@@ -27,6 +27,8 @@
 namespace OHOS ::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerIPC_Fuzzer"};
+constexpr size_t DATA_MIN_SIZE = 4;
+const size_t MAX_MESSAGE_SIZE = 1024 * 1024;
 }
 template<class T>
 size_t GetObject(T &object, const uint8_t *data, size_t size)
@@ -61,7 +63,7 @@ std::pair<sptr<IDisplayManager>, sptr<IRemoteObject>> GetProxy()
 
 bool IPCFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr || size < 4) {
+    if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
     FuzzedDataProvider provider(data, size);
@@ -72,12 +74,13 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
     uint32_t code = provider.ConsumeUint32();
     int flags = provider.ConsumeInt32();
     int waitTime = provider.ConsumeInt32();
+    size_t MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
     std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes();
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
-    if (messageData.size() > 1024 * 1024) {
-        messageData.resize(1024 * 1024);
+    if (messageData.size() > MAX_MESSAGE_SIZE) {
+        messageData.resize(MAX_MESSAGE_SIZE);
     }
 
     sendData.WriteBuffer(messageData.data(), messageData.size());
@@ -146,7 +149,7 @@ void IPCSpecificInterfaceFuzzTest2(const sptr<IRemoteObject>& proxy, MessageParc
 
 bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr || size < 4) {
+    if (data == nullptr || size < DATA_MIN_SIZE) {
         return false;
     }
     FuzzedDataProvider provider(data, size);
@@ -162,8 +165,8 @@ bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
     MessageOption option(flags, waitTime);
     sendData.WriteInterfaceToken(IDisplayManager::GetDescriptor());
     std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes();
-    if (messageData.size() > 1024 * 1024) {
-        messageData.resize(1024 * 1024);
+    if (messageData.size() > MAX_MESSAGE_SIZE) {
+        messageData.resize(MAX_MESSAGE_SIZE);
     }
     sendData.WriteBuffer(data + startPos, dataSize);
     IPCSpecificInterfaceFuzzTest1(proxy.second, sendData, reply, option);
