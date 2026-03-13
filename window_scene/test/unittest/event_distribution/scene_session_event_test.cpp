@@ -275,6 +275,27 @@ HWTEST_F(SceneSessionEventTest, RecoverWindowEffect, TestSize.Level1)
     EXPECT_EQ(WSError::WS_OK, session->RecoverWindowEffect(true, true));
     usleep(WAIT_SYNC_IN_NS);
 }
+
+/**
+ * @tc.name: SetWindowCornerRadiusCallback_TestShapedWindow
+ * @tc.desc: SetWindowCornerRadiusCallback_TestShapedWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionEventTest, SetWindowCornerRadiusCallback_TestShapedWindow, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestShapedWindow";
+    info.bundleName_ = "TestShapedWindow";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("SceneSessionTest");
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sceneSession->SetEventHandler(handler, handler);
+    sceneSession->property_->SetIsShaped(true);
+    NotifySetWindowCornerRadiusFunc func;
+    sceneSession->SetWindowCornerRadiusCallback(std::move(func));
+    usleep(WAIT_SYNC_IN_NS);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
