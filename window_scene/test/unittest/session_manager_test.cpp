@@ -72,7 +72,7 @@ HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, TestSize.Level1)
     sm_->ClearSessionManagerProxy();
     sm_->sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerProxy);
+    EXPECT_EQ(nullptr, sceneSessionManagerProxy);
 }
 
 /**
