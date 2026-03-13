@@ -63,7 +63,6 @@ bool FreezeController::UnfreezeDisplay(DisplayId displayId)
         }
         window = iter->second;
     }
-    sptr<Window> window = iter->second;
     if (window == nullptr) {
         WLOGW("unfreeze fail, window is null. display %{public}" PRIu64"", displayId);
         return false;
