@@ -292,7 +292,7 @@ HWTEST_F(SceneSessionEventTest, SetWindowCornerRadiusCallback_TestShapedWindow, 
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
     sceneSession->SetEventHandler(handler, handler);
     sceneSession->property_->SetIsShaped(true);
-    NotifySetWindowCornerRadiusFunc func;
+    NotifySetWindowCornerRadiusFunc func = [](float cornerRadius) {};
     sceneSession->SetWindowCornerRadiusCallback(std::move(func));
     usleep(WAIT_SYNC_IN_NS);
 }
