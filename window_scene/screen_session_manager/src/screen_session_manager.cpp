@@ -4312,9 +4312,9 @@ void ScreenSessionManager::SetRogParameter(uint32_t width, uint32_t height, floa
     system::SetParameter("persist.window.screen.isSupportRog", std::to_string(isSupportRog));
 }
 
-void ScreenSessionManager::ValidateRogProperty(RRect screenPhyBounds, ScreenProperty& property)
+void ScreenSessionManager::ValidateRogProperty(const RRect& screenPhyBounds, ScreenProperty& property)
 {
-    bool isBoot = (ScreenSceneConfig::GetUptimeSeconds() <= ScreenSceneConfig::bootTimeThreshold_);
+    bool isBoot = (ScreenSceneConfig::GetUptimeSeconds() <= ScreenSceneConfig::GetBootTimeThreshold());
     RogResolution rogSize =
         ScreenSceneConfig::GetRogResolution(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_);
     TLOGNFI(WmsLogTag::DMS, "ValidateRogProperty width = %{public}d, height = %{public}d, dpi = %{public}f",
@@ -4385,7 +4385,7 @@ RRect ScreenSessionManager::GetScreenBounds(ScreenId screenId, RSScreenModeInfo&
     RogResolution rogSize =
         ScreenSceneConfig::GetRogResolution(screenMode.GetScreenWidth(), screenMode.GetScreenHeight());
     if (rogSize.isSupportRog) {
-        float rogDpi = rogsize.dpi;
+        float rogDpi = rogSize.dpi;
         defaultDpi = static_cast<uint32_t>(rogDpi);
         cachedSettingDpi_ = static_cast<uint32_t>(rogDpi);
         rogDpi_ = rogDpi / BASELINE_DENSITY;
@@ -4708,7 +4708,9 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     if (rogSize.isSupportRog) {
         if (rsInterface_.SetRogScreenResolution(screenId, rogSize.width, rogSize.height) != 0) {
             TLOGNFE(WmsLogTag::DMS, "Failed to SetRogScreenResolution, retry setRog");
-            rsInterface_.SetRogScreenResolution(screenId, rogSize.width, rogSize.height);
+            if (rsInterface_.SetRogScreenResolution(screenId, rogSize.width, rogSize.height) != 0) {
+                TLOGNFE(WmsLogTag::DMS, "retry setRog failed");
+            }
         }
         float rogScaleRatio = rogDpi_ / densityDpi_;
         TLOGNFI(WmsLogTag::DMS, "rogDpi_: %{public}f, densityDpi_: %{public}f, rogScaleRatio: %{public}f", rogDpi_, densityDpi_, rogScaleRatio);

@@ -102,7 +102,7 @@ bool ScreenSceneConfig::enableRog_ = false;
 uint32_t ScreenSceneConfig::curvedAreaInLandscape_ = 0;
 uint32_t ScreenSceneConfig::offScreenPPIThreshold_ = 0;
 uint64_t ScreenSceneConfig::bootTimeThreshold_ =
-    system::GetIntParameter("persist.window.boot.threshold", 60); // default 60s
+    system::GetIntParameter<int32_t>("persist.window.boot.threshold", 60); // default 60s
 int32_t ScreenSceneConfig::rogDpi_ = 0;
 RogResolution ScreenSceneConfig::rogResolution_ = { false, true, 0, 0, 0, 0 };
 std::map<int32_t, std::string> ScreenSceneConfig::xmlNodeMap_ = {
@@ -563,16 +563,16 @@ void ScreenSceneConfig::SetRogResolution(const RogResolution rogResolution)
 
 RogResolution ScreenSceneConfig::GetRogResolution(uint32_t width, uint32_t height)
 {
-    bool isBoot = (GetUptimeSeconds() <= bootTimeThreshold_);
-    if (rogResolution_.isNewBoot) {
+    if (rogResolution_.notInit) {
+        bool isBoot = (GetUptimeSeconds() <= bootTimeThreshold_);
         if (isBoot) {
             bool apsUserset = (system::GetIntParameter<int32_t>("persist.aps.rog.userset", 0) > 0);
             bool apsSupport = (system::GetIntParameter<int32_t>("persist.aps.rog.support", 0) > 0);
-            uint32_t apsWidth = system::GetIntParameter<uint32_t>("persist.aps.rog.width", 0);
-            uint32_t apsHeight = system::GetIntParameter<uint32_t>("persist.aps.rog.height", 0);
+            uint32_t apsWidth = system::GetIntParameter<int32_t>("persist.aps.rog.width", 0);
+            uint32_t apsHeight = system::GetIntParameter<int32_t>("persist.aps.rog.height", 0);
             float apsDpi = static_cast<float>(system::GetIntParameter<int32_t>("persist.aps.rog.density", 0));
-            if (apsUserset && apsSupport && apsHidth > 0 && apsHeight > 0 && apsDpi > 0) {
-                SetRogResolution(RogResolution{ true, false, 0, apsdpi, apswidth, apsheight });
+            if (apsUserset && apsSupport && apsWidth > 0 && apsHeight > 0 && apsDpi > 0) {
+                SetRogResolution(RogResolution{ true, false, 0, apsDpi, apsWidth, apsHeight });
             } else if (!apsUserset && enableRog_ && rogResolution_.width > 0 && rogResolution_.height > 0 &&
                        GetRogDpi() > 0) {
                 SetRogResolution(RogResolution{ true, false, 0, rogDpi_, rogResolution_.width, rogResolution_.height });
@@ -583,15 +583,15 @@ RogResolution ScreenSceneConfig::GetRogResolution(uint32_t width, uint32_t heigh
             TLOGNFI(WmsLogTag::DMS, "rogResolution Init");
         } else {
             bool dmsSupport = (system::GetIntParameter<int32_t>("persist.window.screen.isSupportRog", 0) > 0);
-            uint32_t dmsWidth = system::GetIntParameter<uint32_t>("persist.window.screen.width", width);
-            uint32_t dmsHeight = system::GetIntParameter<uint32_t>("persist.window.screen.height", height);
+            uint32_t dmsWidth = system::GetIntParameter<int32_t>("persist.window.screen.width", width);
+            uint32_t dmsHeight = system::GetIntParameter<int32_t>("persist.window.screen.height", height);
             float dmsDpi = static_cast<float>(
                 system::GetIntParameter<int32_t>("persist.window.screen.dpi", intNumbersConfig_[xmlNodeMap_[DPI]][0]));
             SetRogResolution(RogResolution{ dmsSupport, false, 0, dmsDpi, dmsWidth, dmsHeight });
             TLOGNFI(WmsLogTag::DMS, "rogResolution Recover");
         }
     }
-    TLOGNFI(WmsLogTag::DMS, "rogResolution - [%{public}u, %{public}u, %{public}u, %{public}f, %{public}u]",
+    TLOGNFI(WmsLogTag::DMS, "rogResolution - [%{public}u, %{public}u, %{public}u, %{public}f, %{public}d]",
             rogResolution_.width, rogResolution_.height, rogResolution_.isSupportRog,
             rogResolution_.dpi, rogResolution_.rogMode);
     return rogResolution_;
@@ -812,6 +812,11 @@ bool ScreenSceneConfig::IsWaterfallDisplay()
 bool ScreenSceneConfig::IsSupportCapture()
 {
     return isSupportCapture_;
+}
+
+uint64_t ScreenSceneConfig::GetBootTimeThreshold()
+{
+    return bootTimeThreshold_;
 }
 
 int32_t ScreenSceneConfig::GetRogDpi()
