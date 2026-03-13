@@ -2339,7 +2339,8 @@ WMError WindowManager::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<M
     return WindowAdapter::GetInstance(userId_).GetSnapshotByWindowId(windowId, pixelMap);
 }
 
-WMError WindowManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, SnapshotConfig config)
+WMError WindowManager::Snapshot(
+    std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config)
 {
     WMError ret = WindowAdapter::GetInstance(userId_).Snapshot(pixelMap, windowId, config);
     if (ret != WMError::WM_OK) {

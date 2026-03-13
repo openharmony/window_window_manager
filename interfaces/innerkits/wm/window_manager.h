@@ -1196,7 +1196,7 @@ public:
      * @param config Snapshot configuration.
      * @return WM_OK means snapshot success, others means failed.
      */
-    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, SnapshotConfig config);
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config);
 
     /**
      * @brief Get snapshot by window id.
