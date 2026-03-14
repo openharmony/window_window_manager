@@ -2134,7 +2134,7 @@ public:
      * @param listener ParentLifeCycleListener listener.
      * @return WM_OK means register success, others means register failed.
      */
-    virtual WMError RegisterParentLifecycleEventListener(const sptr<IParentLifeCycleEventListener>& listener)
+    virtual WMError RegisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
     {
         return WMError::WM_OK;
     }
@@ -2145,7 +2145,7 @@ public:
      * @param listener WindowLifeCycle listener.
      * @return WM_OK means unregister success, others means unregister failed.
      */
-    virtual WMError UnregisterParentLifecycleEventListener(const sptr<IParentLifeCycleEventListener>& listener)
+    virtual WMError UnregisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
     {
         return WMError::WM_OK;
     }
