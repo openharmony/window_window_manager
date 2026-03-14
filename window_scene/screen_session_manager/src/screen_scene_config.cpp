@@ -618,6 +618,8 @@ void ScreenSceneConfig::ReadEnableConfigInfo(const xmlNodePtr& currNode)
             isSupportOffScreenRendering_ = true;
         } else if (xmlNodeMap_[IS_CONCURRENT_USER] == nodeName) {
             isConcurrentUser_ = true;
+            TLOGE(WmsLogTag::DMS, "set ConcurrentUser true");
+            system::SetParameter("persist.dms.concurrentuser", "true");
         } else if (xmlNodeMap_[ENABLE_ROG] == nodeName) {
             enableRog_ = true;
         }
