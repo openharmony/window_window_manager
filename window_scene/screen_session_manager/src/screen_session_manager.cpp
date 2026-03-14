@@ -12911,6 +12911,7 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
 #ifdef WM_MULTI_SCREEN_ENABLE
     TLOGNFW(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",Mode:%{public}u",
         mainScreenId, secondaryScreenId, screenMode);
+    std::lock_guard<std::recursive_mutex> lock(screenModeChangeMutex_);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGNFE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -15553,14 +15554,18 @@ void ScreenSessionManager::ProcessVirtualScreenDestroy(ScreenId screenId, Screen
         RemoveScreenCastInfo(screenId);
         NotifyDisplayDestroy(screenId);
         NotifyScreenDisconnected(screenId);
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screen->GetIsExtendVirtual()) {
-            SetIsExtendModelocked(false);
-            SetExpandAndHorizontalLocked(false);
+        if (screen->GetIsExtendVirtual()) {
+            if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+                SetIsExtendModelocked(false);
+                SetExpandAndHorizontalLocked(false);
+            }
+            MultiScreenPositionOptions defaultOptions = { GetDefaultScreenId(), 0, 0 };
+            SetRelativePositionForDisconnect(defaultOptions);
         }
         if (auto clientProxy = GetClientProxy()) {
             clientProxy->OnVirtualScreenDisconnected(rsScreenId);
         }
-        TLOGNFW(WmsLogTag::DMS, "destroy success, id: %{public}" PRIu64 ", rsId: %{public}" PRIu64, screenId, rsScreenId);
+        TLOGNFW(WmsLogTag::DMS, "destroy success, sid: %{public}" PRIu64 ", rsId: %{public}" PRIu64, screenId, rsScreenId);
     }
 }
 // LCOV_EXCL_STOP
