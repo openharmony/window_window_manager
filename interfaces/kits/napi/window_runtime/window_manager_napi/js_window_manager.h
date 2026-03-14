@@ -105,7 +105,7 @@ private:
     static napi_value OnNotifyScreenshotEvent(napi_env env, napi_callback_info info);
     static napi_value OnCreateUIEffectController(napi_env env, napi_callback_info info);
     static napi_value OnSetSpecificSystemWindowZIndex(napi_env env, napi_callback_info info);
-    static napi_value OnCreateSubWindowAndBindParent(napi_env env, napi_callback_info info);
+    napi_value OnCreateSubWindowAndBindParent(napi_env env, napi_callback_info info);
     static bool ParseRequiredConfigOption(
         napi_env env, napi_value jsObject, WindowOption& option);
     static bool ParseConfigOption(

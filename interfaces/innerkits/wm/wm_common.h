@@ -2357,7 +2357,7 @@ struct WindowInfoOption : public Parcelable {
 };
 
 struct CrossProcessWindowInfo : public Parcelable {
-    int32_t persistentId = INVALID_SESSION_ID;
+    int32_t persistentId = 0;
     uint64_t displayId = 0;
     bool isPcAppInPad = false;
     bool isPcAppInpadCompatibleMode = false;
