@@ -2635,6 +2635,16 @@ void ScreenSession::SetHdrFormats(std::vector<uint32_t>&& hdrFormats)
     hdrFormats_ = std::move(hdrFormats);
 }
 
+void ScreenSession::AddHdrFormats(const std::vector<uint32_t>& hdrFormats)
+{
+    std::unique_lock<std::shared_mutex> lock(hdrFormatsMutex_);
+    for (uint32_t format : hdrFormats) {
+        if (std::find(hdrFormats_.begin(), hdrFormats_.end(), format) == hdrFormats_.end()) {
+            hdrFormats_.push_back(format);
+        }
+    }
+}
+
 void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
 {
     std::unique_lock<std::shared_mutex> lock(colorSpacesMutex_);

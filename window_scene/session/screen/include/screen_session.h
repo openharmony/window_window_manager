@@ -232,6 +232,7 @@ public:
     void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
+    void AddHdrFormats(const std::vector<uint32_t>& hdrFormats);
     std::vector<uint32_t> GetHdrFormats();
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
     std::vector<uint32_t> GetColorSpaces();
