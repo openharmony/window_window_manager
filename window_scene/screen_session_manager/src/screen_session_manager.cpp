@@ -4659,11 +4659,32 @@ bool ScreenSessionManager::HandleFoldScreenSessionCreate(ScreenId screenId)
     return true;
 }
 
+void ScreenSessionManager::OnGetHdrFormats(ScreenId screenId, const std::vector<ScreenHDRFormat>& rsHdrFormats)
+{
+    auto session = GetScreenSession(screenId);
+    if (session == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "session is nullptr!");
+        return;
+    }
+    if (rsHdrFormats.empty()) {
+        return;
+    }
+    std::vector<uint32_t> hdrFormats(rsHdrFormats.size());
+    std::transform(rsHdrFormats.begin(), rsHdrFormats.end(), hdrFormats.begin(), [](ScreenHDRFormat val) {
+        return static_cast<uint32_t>(val);
+    });
+    session->AddHdrFormats(hdrFormats);
+}
+
 void ScreenSessionManager::SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session)
 {
     TLOGNFI(WmsLogTag::DMS, "SetHdrFormats %{public}" PRIu64, screenId);
     std::vector<ScreenHDRFormat> rsHdrFormat;
-    auto status = rsInterface_.GetScreenSupportedHDRFormats(screenId, rsHdrFormat);
+    auto hdrFormatsCallback = DmUtils::wrap_callback([this](ScreenId screenId,
+        const std::vector<ScreenHDRFormat>& rsHdrFormats) {
+            OnGetHdrFormats(screenId, rsHdrFormats);
+        });
+    auto status = rsInterface_.GetScreenSupportedHDRFormats(screenId, rsHdrFormat, hdrFormatsCallback);
     if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
         TLOGNFE(WmsLogTag::DMS, "get hdr format failed! status code: %{public}d", status);
     } else {
