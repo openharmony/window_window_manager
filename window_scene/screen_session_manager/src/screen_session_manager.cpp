@@ -3788,7 +3788,7 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
 
 bool ScreenSessionManager::RecoveryResolutionEffect()
 {
-    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE || (!g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER)) {
         TLOGNFW(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -11565,7 +11565,7 @@ void ScreenSessionManager::SwitchUserResetDisplayNodeScreenId()
 }
 
 void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
-    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE || (!g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER)) {
         return;
     }
     if (!IS_SUPPORT_PC_MODE) {
