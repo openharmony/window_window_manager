@@ -932,13 +932,16 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, TestSize.Leve
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    auto res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    uint64_t vectorSize = 90;
+    uint64_t vectorSize = 1;
     data.WriteUint64(vectorSize);
-    res = stub_->HandleNotifyDumpInfoResult(data, reply);
+    std::string info = "test";
+    uint64_t curSize = static_cast<uint64_t>(info.size());
+    data.WriteUint64(curSize);
+    data.WriteRawData(info.c_str(), curSize);
+
+    uint32_t code =
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
 
