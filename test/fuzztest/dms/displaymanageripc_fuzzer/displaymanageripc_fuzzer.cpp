@@ -72,11 +72,11 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
     if (proxy.first == nullptr || proxy.second == nullptr) {
         return false;
     }
-    uint32_t code = provider.ConsumeUint32();
-    int flags = provider.ConsumeInt32();
-    int waitTime = provider.ConsumeInt32();
+    uint32_t code = provider.ConsumeIntegral<uint32_t>();
+    int flags = provider.ConsumeIntegral<uint32_t>();
+    int waitTime = provider.ConsumeIntegral<uint32_t>();
     size_t MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
-    std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes();
+    std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes<uint8_t>();
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
@@ -159,13 +159,13 @@ bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
 
-    int flags = provider.ConsumeInt32();
-    int waitTime = provider.ConsumeInt32();
+    int flags = provider.ConsumeIntegral<uint32_t>();
+    int waitTime = provider.ConsumeIntegral<uint32_t>();
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
     sendData.WriteInterfaceToken(IDisplayManager::GetDescriptor());
-    std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes();
+    std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes<uint8_t>();
     if (messageData.size() > MAX_MESSAGE_SIZE) {
         messageData.resize(MAX_MESSAGE_SIZE);
     }
