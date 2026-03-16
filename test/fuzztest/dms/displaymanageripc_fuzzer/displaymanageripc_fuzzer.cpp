@@ -75,7 +75,6 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
     uint32_t code = provider.ConsumeIntegral<uint32_t>();
     int flags = provider.ConsumeIntegral<uint32_t>();
     int waitTime = provider.ConsumeIntegral<uint32_t>();
-    size_t MAX_MESSAGE_SIZE = MAX_MESSAGE_SIZE;
     std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes<uint8_t>();
     MessageParcel sendData;
     MessageParcel reply;
