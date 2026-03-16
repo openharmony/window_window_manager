@@ -300,6 +300,14 @@ WMError WindowAdapter::ConvertToRelativeCoordinateExtended(const Rect& rect, Rec
     return wmsProxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
 }
 
+WMError WindowAdapter::GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetCrossProcessWindowInfo(crossProcessWindowInfo);
+}
+
 WMError WindowAdapter::GetUnreliableWindowInfo(int32_t windowId,
     std::vector<sptr<UnreliableWindowInfo>>& infos)
 {
@@ -551,6 +559,15 @@ WMError WindowAdapter::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<M
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_IPC_FAILED);
     return wmsProxy->GetSnapshotByWindowId(windowId, pixelMap);
+}
+
+WMError WindowAdapter::Snapshot(
+    std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_IPC_FAILED);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_IPC_FAILED);
+    return wmsProxy->Snapshot(pixelMap, windowId, config);
 }
 
 void WindowAdapter::UnregisterSessionRecoverCallbackFunc(int32_t persistentId)

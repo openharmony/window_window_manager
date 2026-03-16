@@ -672,6 +672,7 @@ class WindowManager : public RefBase {
 public:
     static WindowManager& GetInstance(const int32_t userId);
     static WMError RemoveInstanceByUserId(const int32_t userId);
+    static bool IsMultiInstanceEnabled();
 
     /**
      * @brief Register WMS connection status changed listener.
@@ -984,6 +985,14 @@ public:
     WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
 
     /**
+     * @brief Obtain cross-process window information
+     *
+     * @param crossProcessWindowInfo Cross-process window information
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo);
+
+    /**
      * @brief Get accessibility window info.
      *
      * @param infos WindowInfos used for Accessibility.
@@ -1185,6 +1194,18 @@ public:
      */
     WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color);
+
+    /**
+     * @brief Snapshot by window id.
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param pixelMap Snapshot output pixel map.
+     * @param windowId Window id which want to snapshot.
+     * @param config Snapshot configuration.
+     * @return WM_OK means snapshot success, others means failed.
+     */
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config);
 
     /**
      * @brief Get snapshot by window id.

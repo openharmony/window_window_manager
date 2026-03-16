@@ -1024,5 +1024,130 @@ void AniWindowListener::OnFreeWindowModeChange(bool isInFreeWindowMode)
     }
     eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
+
+void AniWindowListener::OnParentForeground(int32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] window id: %{public}d", windowId);
+    auto task = [self = weakRef_, vm = vm_, windowId, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]this listener, vm or callback is nullptr", where);
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]get env failed, ret: %{public}u", where, ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runParentLifecycleEventCallback", nullptr,
+            thisListener->aniCallback_, ani_int(windowId), static_cast<ani_int>(ParentLifeCycleEventType::FOREGROUND));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniWindowListener::OnParentActive(int32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] window id: %{public}d", windowId);
+    auto task = [self = weakRef_, vm = vm_, windowId, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]this listener, vm or callback is nullptr", where);
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]get env failed, ret: %{public}u", where, ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runParentLifecycleEventCallback", nullptr,
+            thisListener->aniCallback_, ani_int(windowId), static_cast<ani_int>(ParentLifeCycleEventType::ACTIVE));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniWindowListener::OnParentInactive(int32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] window id: %{public}d", windowId);
+    auto task = [self = weakRef_, vm = vm_, windowId, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]this listener, vm or callback is nullptr", where);
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]get env failed, ret: %{public}u", where, ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runParentLifecycleEventCallback", nullptr,
+            thisListener->aniCallback_, ani_int(windowId), static_cast<ani_int>(ParentLifeCycleEventType::INACTIVE));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniWindowListener::OnParentBackground(int32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] window id: %{public}d", windowId);
+    auto task = [self = weakRef_, vm = vm_, windowId, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]this listener, vm or callback is nullptr", where);
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]get env failed, ret: %{public}u", where, ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runParentLifecycleEventCallback", nullptr,
+            thisListener->aniCallback_, ani_int(windowId), static_cast<ani_int>(ParentLifeCycleEventType::BACKGROUND));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void AniWindowListener::OnParentDestroyed(int32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI] window id: %{public}d", windowId);
+    auto task = [self = weakRef_, vm = vm_, windowId, where = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || vm == nullptr || thisListener->aniCallback_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]this listener, vm or callback is nullptr", where);
+            return;
+        }
+        ani_env* env = nullptr;
+        ani_status ret = vm->GetEnv(ANI_VERSION_1, &env);
+        if (ret != ANI_OK || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: [ANI]get env failed, ret: %{public}u", where, ret);
+            return;
+        }
+        AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window", "runParentLifecycleEventCallback", nullptr,
+            thisListener->aniCallback_, ani_int(windowId), static_cast<ani_int>(ParentLifeCycleEventType::DESTROYED));
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(task, __func__, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
 } // namespace Rosen
 } // namespace OHOS

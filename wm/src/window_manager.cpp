@@ -27,6 +27,7 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "ws_common.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -624,6 +625,11 @@ WindowManager& WindowManager::GetInstance(const int32_t userId)
         return GetInstance();
     }
 
+    if (!WindowManager::IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "get default instance, userId: %{public}d", userId);
+        return GetInstance();
+    }
+
     /**
      * multi-instance mode
      * At present, the map does not have memory leak issues. In actual business scenarios,
@@ -646,6 +652,16 @@ WMError WindowManager::RemoveInstanceByUserId(const int32_t userId)
     std::lock_guard<std::mutex> lock(windowManagerMapMutex_);
     windowManagerMap_.erase(userId);
     return WMError::WM_OK;
+}
+
+bool WindowManager::IsMultiInstanceEnabled()
+{
+    static bool enabled = [] {
+        bool isConcurrentUser = system::GetBoolParameter("persist.dms.concurrentuser", false);
+        TLOGNI(WmsLogTag::WMS_SCB, "isConcurrentUser: %{public}d", isConcurrentUser);
+        return isConcurrentUser;
+    }();
+    return enabled;
 }
 
 void WindowManager::ActiveFaultAgentReregister(const WindowManagerAgentType type,
@@ -2337,6 +2353,16 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
 WMError WindowManager::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     return WindowAdapter::GetInstance(userId_).GetSnapshotByWindowId(windowId, pixelMap);
+}
+
+WMError WindowManager::Snapshot(
+    std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config)
+{
+    WMError ret = WindowAdapter::GetInstance(userId_).Snapshot(pixelMap, windowId, config);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "snapshot failed");
+    }
+    return ret;
 }
 
 WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)

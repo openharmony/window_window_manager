@@ -180,6 +180,8 @@ using NotifyVirtualPixelChangeFunc = std::function<void(float density, DisplayId
 using NotifySetSpecificWindowZIndexFunc = std::function<void(WindowType windowType, int32_t zIndex,
     SetSpecificZIndexReason reason)>;
 using MinimizeAllFunc = std::function<void(DisplayId displayId, int32_t excludeWindlowId)>;
+using PageEnableFunc = std::function<void(const std::string& bundleName, int32_t windowId,
+    const std::string& action, const std::string& message)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
@@ -245,6 +247,7 @@ public:
     WSError DestroyAndDisconnectSpecificSession(const int32_t persistentId) override;
     WSError DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
         const sptr<IRemoteObject>& callback) override;
+    WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo) override;
     void SetCreateSystemSessionListener(const NotifyCreateSystemSessionFunc& func);
     void SetCreateKeyboardSessionListener(const NotifyCreateKeyboardSessionFunc& func);
     void SetStatusBarEnabledChangeListener(const ProcessStatusBarEnabledChangeFunc& func);
@@ -827,6 +830,8 @@ public:
     WMError GetMainWindowInfoByToken(const sptr<IRemoteObject>& abilityToken, MainWindowInfo& windowInfo) const;
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override;
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+        int32_t persistentId, const SnapshotConfig& config) override;
     WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
     void NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId);
     WMError GetAllMainWindowInfos(std::vector<MainWindowInfo>& infos) const;
@@ -925,8 +930,13 @@ public:
 
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
 
-    void NotifyRotationBegin(bool isStopDrag);
+    void NotifyRotationBegin();
     void SortVisibilityWindowInfos(std::vector<sptr<WindowVisibilityInfo>>& infos) const;
+
+    /*
+     * Compatible Mode
+     */
+    void RegisterPageEnableFunc(PageEnableFunc&& func);
 
 protected:
     SceneSessionManager();
@@ -1992,6 +2002,9 @@ private:
      */
     void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
     std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
+    PageEnableFunc pageEnableFunc_;
+    WSError NotifyPageEnableFunc(const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message);
 };
 } // namespace OHOS::Rosen
 

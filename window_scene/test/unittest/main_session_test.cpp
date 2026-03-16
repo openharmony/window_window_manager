@@ -1285,6 +1285,107 @@ HWTEST_F(MainSessionTest, RemovePrelaunchStartingWindow, TestSize.Level1)
     session->RemovePrelaunchStartingWindow();
     EXPECT_TRUE(lifecycleListener->isCalled);
 }
+
+/**
+ * @tc.name: NotifyPageEnable
+ * @tc.desc: Test NotifyPageEnable with various parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyPageEnable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyPageEnable";
+    info.abilityName_ = "NotifyPageEnable";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+
+    bool callbackTriggered = false;
+    std::string receivedBundleName;
+    int32_t receivedWindowId = 0;
+    std::string receivedAction;
+    std::string receivedMessage;
+
+    session->RegisterPageEnableCallback([&](
+        const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message) {
+        callbackTriggered = true;
+        receivedBundleName = bundleName;
+        receivedWindowId = windowId;
+        receivedAction = action;
+        receivedMessage = message;
+    });
+
+    auto ret = session->NotifyPageEnable("enter", "HomePage");
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_TRUE(callbackTriggered);
+    EXPECT_EQ(receivedBundleName, "NotifyPageEnable");
+    EXPECT_EQ(receivedWindowId, session->GetPersistentId());
+    EXPECT_EQ(receivedAction, "enter");
+    EXPECT_EQ(receivedMessage, "HomePage");
+
+    session->pageEnableCallback_ = nullptr;
+    ret = session->NotifyPageEnable("exit", "DetailPage");
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    ret = session->NotifyPageEnable("", "HomePage");
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+
+    std::string longAction(65, 'a');
+    ret = session->NotifyPageEnable(longAction, "HomePage");
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+
+    ret = session->NotifyPageEnable("enter", "");
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+
+    std::string longMessage(513, 'm');
+    ret = session->NotifyPageEnable("enter", longMessage);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
+
+    std::string validAction(64, 'a');
+    ret = session->NotifyPageEnable(validAction, "HomePage");
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    std::string validMessage(512, 'm');
+    ret = session->NotifyPageEnable("enter", validMessage);
+    EXPECT_EQ(ret, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyPageEnable01
+ * @tc.desc: Verify callback is triggered with correct parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, NotifyPageEnable01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "NotifyPageEnable01";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    std::vector<std::tuple<std::string, int32_t, std::string, std::string>> callbackCalls;
+
+    session->RegisterPageEnableCallback([&](
+        const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message) {
+        callbackCalls.emplace_back(bundleName, windowId, action, message);
+    });
+
+    session->NotifyPageEnable("enter", "Page1");
+    session->NotifyPageEnable("exit", "Page1");
+    session->NotifyPageEnable("enter", "Page2");
+
+    EXPECT_EQ(callbackCalls.size(), 3);
+
+    EXPECT_EQ(std::get<0>(callbackCalls[0]), "NotifyPageEnable01");
+    EXPECT_EQ(std::get<1>(callbackCalls[0]), session->GetPersistentId());
+    EXPECT_EQ(std::get<2>(callbackCalls[0]), "enter");
+    EXPECT_EQ(std::get<3>(callbackCalls[0]), "Page1");
+
+    EXPECT_EQ(std::get<2>(callbackCalls[1]), "exit");
+    EXPECT_EQ(std::get<3>(callbackCalls[1]), "Page1");
+
+    EXPECT_EQ(std::get<2>(callbackCalls[2]), "enter");
+    EXPECT_EQ(std::get<3>(callbackCalls[2]), "Page2");
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

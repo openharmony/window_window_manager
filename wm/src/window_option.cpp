@@ -472,6 +472,16 @@ bool WindowOption::IsFollowCreatorLifecycle() const
 {
     return followCreatorLifecycle_;
 }
+
+void WindowOption::SetIsCrossProcessWindow(bool isCrossProcessWindow)
+{
+    isCrossProcessWindow_ = isCrossProcessWindow;
+}
+ 	 
+bool WindowOption::IsCrossProcessWindow() const
+{
+    return isCrossProcessWindow_;
+}
 } // namespace Rosen
 } // namespace OHOS
 

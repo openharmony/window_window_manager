@@ -1348,6 +1348,16 @@ enum class LifeCycleChangeReason {
     REASON_END,
 };
 
+enum class ParentLifeCycleEvent : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+    DESTROYED,
+};
+
 enum class AsyncTraceTaskId: int32_t {
     THROW_SLIP_ANIMATION = 0,
 };

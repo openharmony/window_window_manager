@@ -836,6 +836,10 @@ void ScreenSessionManager::ConfigureScreenScene()
         bool isWaterfallDisplay = static_cast<bool>(enableConfig["isWaterfallDisplay"]);
         TLOGD(WmsLogTag::DMS, "isWaterfallDisplay = %{public}d", isWaterfallDisplay);
     }
+    if (enableConfig.count("enableRog") != 0) {
+        bool enableRog = static_cast<bool>(enableConfig["enableRog"]);
+        TLOGD(WmsLogTag::DMS, "enableRog = %{public}d", enableRog);
+    }
     if (numbersConfig.count("curvedScreenBoundary") != 0) {
         std::vector<int> vtBoundary = static_cast<std::vector<int>>(numbersConfig["curvedScreenBoundary"]);
         TLOGD(WmsLogTag::DMS, "vtBoundary.size=%{public}u", static_cast<uint32_t>(vtBoundary.size()));
@@ -3613,6 +3617,11 @@ DMError ScreenSessionManager::SetDefaultDensityDpi(ScreenId screenId, float virt
 
 DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, uint32_t height, float virtualPixelRatio)
 {
+    RogResolution rogSize = ScreenSceneConfig::GetRogResolution(0, 0);
+    if (rogSize.width == width && rogSize.height == height) {
+        TLOGNFE(WmsLogTag::DMS, "skip apsROG by same param");
+        return DMError::DM_OK;
+    }
     TLOGNFI(WmsLogTag::DMS,
         "ScreenId: %{public}" PRIu64 ", w: %{public}u, h: %{public}u, virtualPixelRatio: %{public}f",
         screenId, width, height, virtualPixelRatio);
@@ -3645,6 +3654,7 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     screenSession->SetVirtualPixelRatio(virtualPixelRatio * vprScale);
     float rogScaleRatio = virtualPixelRatio / densityDpi_;
     screenSession->SetVprScaleRatio(rogScaleRatio);
+    screenSession->SetRogScreenResolution(width, height);
     ScreenSceneConfig::UpdateCutoutBoundRect(static_cast<uint64_t>(screenId), rogScaleRatio);
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetResolution(%" PRIu64", %u, %u, %f)",
@@ -4209,8 +4219,18 @@ void ScreenSessionManager::SetupScreenDensityProperties(ScreenId screenId, Scree
             TLOGNFI(WmsLogTag::DMS, "subDensityDpi_ = %{public}f", subDensityDpi_);
             property.SetScreenDensityProperties(subDensityDpi_);
         } else {
-            TLOGNFI(WmsLogTag::DMS, "densityDpi_ = %{public}f", densityDpi_);
-            property.SetScreenDensityProperties(densityDpi_);
+            TLOGNFI(WmsLogTag::DMS, "densityDpi_ = %{public}f, rogDpi_ = %{public}f", densityDpi_, rogDpi_);
+            RogResolution rogSize = ScreenSceneConfig::GetRogResolution(property.GetPhyBounds().rect_.GetWidth(),
+                                                                        property.GetPhyBounds().rect_.GetHeight());
+            if (rogSize.isSupportRog) {
+                float rogDpi = rogSize.dpi;
+                defaultDpi = static_cast<uint32_t>(rogDpi);
+                cachedSettingDpi_ = static_cast<uint32_t>(rogDpi);
+                rogDpi_ = rogDpi / BASELINE_DENSITY;
+                property.SetScreenDensityProperties(rogDpi_);
+            } else {
+                property.SetScreenDensityProperties(densityDpi_);
+            }
         }
     } else {
         property.UpdateVirtualPixelRatio(bounds);
@@ -4286,23 +4306,64 @@ const std::string ScreenSessionManager::GetScreenName(ScreenId screenId)
     return screenName;
 }
 
+void ScreenSessionManager::SetRogParameter(uint32_t width, uint32_t height, float dpi, bool isSupportRog)
+{
+    system::SetParameter("persist.window.screen.width", std::to_string(width));
+    system::SetParameter("persist.window.screen.height", std::to_string(height));
+    system::SetParameter("persist.window.screen.dpi", std::to_string(static_cast<uint32_t>(dpi)));
+    system::SetParameter("persist.window.screen.isSupportRog", std::to_string(isSupportRog));
+}
+
+void ScreenSessionManager::ValidateRogProperty(const RRect& screenPhyBounds, ScreenProperty& property)
+{
+    bool isBoot = (ScreenSceneConfig::GetUptimeSeconds() <= ScreenSceneConfig::GetBootTimeThreshold());
+    RogResolution rogSize =
+        ScreenSceneConfig::GetRogResolution(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_);
+    TLOGNFI(WmsLogTag::DMS, "ValidateRogProperty width = %{public}d, height = %{public}d, dpi = %{public}f",
+            rogSize.width, rogSize.height, rogSize.dpi);
+    if (isBoot) {
+        if (rogSize.isSupportRog) {
+            if (rogSize.width > 0 && rogSize.height > 0 && rogSize.dpi > 0) {
+                SetRogParameter(rogSize.width, rogSize.height, rogSize.dpi, rogSize.isSupportRog);
+                property.SetRogScreenResolution(rogSize.width, rogSize.height);
+                TLOGI(WmsLogTag::DMS, "success, save rog");
+            } else {
+                SetRogParameter(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_, defaultDpi, 0);
+                TLOGE(WmsLogTag::DMS, "fail, not support rog");
+            }
+        } else {
+            SetRogParameter(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_, defaultDpi, 0);
+            TLOGE(WmsLogTag::DMS, "close by aps, not support rog");
+        }
+    }
+}
+
 void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
     RSScreenCapability& screenCapability, ScreenProperty& property)
 {
     auto screenBounds = GetScreenBounds(screenId, screenMode);
+    auto screenPhyBounds = GetPhyScreenBounds(screenId, screenMode);
+    ValidateRogProperty(screenPhyBounds, property);
     property.SetRotation(0.0f);
     property.SetPhyWidth(screenCapability.GetPhyWidth());
     property.SetPhyHeight(screenCapability.GetPhyHeight());
     property.SetValidWidth(screenBounds.rect_.width_);
     property.SetValidHeight(screenBounds.rect_.height_);
     property.SetDpiPhyBounds(screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
-    property.SetPhyBounds(screenBounds);
+    property.SetPhyBounds(screenPhyBounds);
     property.SetBounds(screenBounds);
     property.SetAvailableArea({0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight()});
     property.SetPhysicalTouchBounds(GetCurrentConfigCorrection());
     property.SetCurrentOffScreenRendering(false);
-    property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
-    property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
+    RogResolution rogSize =
+        ScreenSceneConfig::GetRogResolution(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_);
+    if (rogSize.isSupportRog) {
+        property.SetScreenRealWidth(property.GetPhyBounds().rect_.GetWidth());
+        property.SetScreenRealHeight(property.GetPhyBounds().rect_.GetHeight());
+    } else {
+        property.SetScreenRealWidth(property.GetBounds().rect_.GetWidth());
+        property.SetScreenRealHeight(property.GetBounds().rect_.GetHeight());
+    }
     property.SetMirrorWidth(property.GetBounds().rect_.GetWidth());
     property.SetMirrorHeight(property.GetBounds().rect_.GetHeight());
     property.SetScreenRealPPI();
@@ -4317,6 +4378,29 @@ RRect ScreenSessionManager::GetScreenBounds(ScreenId screenId, RSScreenModeInfo&
 {
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() &&
         GetCoordinationFlag() && screenId == SCREEN_ID_MAIN) {
+        if (screenParams_.size() < STATUS_PARAM_VALID_INDEX) {
+            TLOGNFE(WmsLogTag::DMS, "invalid param num, use default");
+            return RRect({ 0, 0, MAIN_STATUS_DEFAULT_WIDTH, SCREEN_DEFAULT_HEIGHT }, 0.0f, 0.0f);
+        }
+        return RRect({ 0, 0, screenParams_[MAIN_STATUS_WIDTH], screenParams_[MAIN_STATUS_HEIGHT] }, 0.0f, 0.0f);
+    }
+    RogResolution rogSize =
+        ScreenSceneConfig::GetRogResolution(screenMode.GetScreenWidth(), screenMode.GetScreenHeight());
+    if (rogSize.isSupportRog) {
+        float rogDpi = rogSize.dpi;
+        defaultDpi = static_cast<uint32_t>(rogDpi);
+        cachedSettingDpi_ = static_cast<uint32_t>(rogDpi);
+        rogDpi_ = rogDpi / BASELINE_DENSITY;
+        TLOGNFI(WmsLogTag::DMS, "Set ROG ScreenBounds");
+        return RRect({ 0, 0, rogSize.width, rogSize.height }, 0.0f, 0.0f);
+    }
+    return RRect({ 0, 0, screenMode.GetScreenWidth(), screenMode.GetScreenHeight() }, 0.0f, 0.0f);
+}
+
+RRect ScreenSessionManager::GetPhyScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode)
+{
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() && GetCoordinationFlag() &&
+        screenId == SCREEN_ID_MAIN) {
         if (screenParams_.size() < STATUS_PARAM_VALID_INDEX) {
             TLOGNFE(WmsLogTag::DMS, "invalid param num, use default");
             return RRect({ 0, 0, MAIN_STATUS_DEFAULT_WIDTH, SCREEN_DEFAULT_HEIGHT }, 0.0f, 0.0f);
@@ -4621,6 +4705,20 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         SetMultiScreenFrameControl();
     }
     screenEventTracker_.RecordEvent("create screen session success.");
+    RogResolution rogSize = ScreenSceneConfig::GetRogResolution(property.GetPhyBounds().rect_.GetWidth(),
+                                                                property.GetPhyBounds().rect_.GetHeight());
+    if (rogSize.isSupportRog) {
+        if (rsInterface_.SetRogScreenResolution(screenId, rogSize.width, rogSize.height) != 0) {
+            TLOGNFE(WmsLogTag::DMS, "Failed to SetRogScreenResolution, retry setRog");
+            if (rsInterface_.SetRogScreenResolution(screenId, rogSize.width, rogSize.height) != 0) {
+                TLOGNFE(WmsLogTag::DMS, "retry setRog failed");
+            }
+        }
+        float rogScaleRatio = rogDpi_ / densityDpi_;
+        TLOGNFI(WmsLogTag::DMS, "rogDpi_: %{public}f, densityDpi_: %{public}f, rogScaleRatio: %{public}f", rogDpi_, densityDpi_, rogScaleRatio);
+        session->SetVprScaleRatio(rogScaleRatio);
+        ScreenSceneConfig::UpdateCutoutBoundRect(static_cast<uint64_t>(screenId), rogScaleRatio);
+    }
     SetHdrFormats(GetPhyScreenId(screenId), session);
     SetColorSpaces(GetPhyScreenId(screenId), session);
     SetSupportedRefreshRate(session);
@@ -5992,7 +6090,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         if (that.defaultDpi) {
             uint32_t initDefaultDpi;
             auto ret = ScreenSettingHelper::GetSettingValue(initDefaultDpi, SET_SETTING_DPI_KEY);
-            if (ret && initDefaultDpi > 0) {
+            if (ret && initDefaultDpi == that.defaultDpi) {
                 TLOGE(WmsLogTag::DMS, "set setting defaultDpi completed, value:%{public}d", initDefaultDpi);
                 return;
             }
@@ -12911,6 +13009,7 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
 #ifdef WM_MULTI_SCREEN_ENABLE
     TLOGNFW(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",Mode:%{public}u",
         mainScreenId, secondaryScreenId, screenMode);
+    std::lock_guard<std::recursive_mutex> lock(screenModeChangeMutex_);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGNFE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -15415,8 +15514,7 @@ DMError ScreenSessionManager::CheckSetResolutionIsValid(ScreenId screenId, uint3
         TLOGNFE(WmsLogTag::DMS, "SetResolution: Get active screenMode failed");
         return DMError::DM_ERROR_NULLPTR;
     }
-    if (width <= 0 || width > screenSessionModes->width_ ||
-        height <= 0 || height > screenSessionModes->height_ ||
+    if (width <= 0 || height <= 0 ||
         virtualPixelRatio < (static_cast<float>(DOT_PER_INCH_MINIMUM_VALUE) / DOT_PER_INCH) ||
         virtualPixelRatio > (static_cast<float>(DOT_PER_INCH_MAXIMUM_VALUE) / DOT_PER_INCH)) {
         TLOGNFE(WmsLogTag::DMS, "invalid param! w:%{public}u h:%{public}u min:%{public}f max:%{public}f",
@@ -15553,14 +15651,18 @@ void ScreenSessionManager::ProcessVirtualScreenDestroy(ScreenId screenId, Screen
         RemoveScreenCastInfo(screenId);
         NotifyDisplayDestroy(screenId);
         NotifyScreenDisconnected(screenId);
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screen->GetIsExtendVirtual()) {
-            SetIsExtendModelocked(false);
-            SetExpandAndHorizontalLocked(false);
+        if (screen->GetIsExtendVirtual()) {
+            if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+                SetIsExtendModelocked(false);
+                SetExpandAndHorizontalLocked(false);
+            }
+            MultiScreenPositionOptions defaultOptions = { GetDefaultScreenId(), 0, 0 };
+            SetRelativePositionForDisconnect(defaultOptions);
         }
         if (auto clientProxy = GetClientProxy()) {
             clientProxy->OnVirtualScreenDisconnected(rsScreenId);
         }
-        TLOGNFW(WmsLogTag::DMS, "destroy success, id: %{public}" PRIu64 ", rsId: %{public}" PRIu64, screenId, rsScreenId);
+        TLOGNFW(WmsLogTag::DMS, "destroy success, sid: %{public}" PRIu64 ", rsId: %{public}" PRIu64, screenId, rsScreenId);
     }
 }
 // LCOV_EXCL_STOP

@@ -327,6 +327,8 @@ public:
     WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
     WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
     WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
+    WMError RegisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener) override;
+    WMError UnregisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     void UnregisterWindowDestroyedListener() override { notifyNativeFunc_ = nullptr; }
     WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
@@ -401,6 +403,7 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
+    WSError NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType) override;
 
     /*
      * PiP Window
@@ -1048,6 +1051,8 @@ private:
     EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> GetListeners();
+    template<typename T>
+ 	EnableIfSame<T, IParentLifecycleEventListener, std::vector<sptr<IParentLifecycleEventListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -1160,6 +1165,7 @@ private:
     static std::mutex windowOrientationChangeListenerMutex_;
     static std::mutex highlightChangeListenerMutex_;
     static std::mutex freeWindowModeChangeListenerMutex_;
+    static std::mutex parentLifecycleEventListenerMutex_;
     static std::mutex windowRotationChangeListenerMutex_;
     static std::mutex occlusionStateChangeListenerMutex_;
     static std::unordered_map<int32_t,
@@ -1207,6 +1213,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> windowRotationChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> freeWindowModeChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IParentLifecycleEventListener>>> parentLifecycleEventListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;
