@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    "screen_session_manager_test:unittest",
     ":ws_screen_cutout_controller_test",
     ":ws_screen_edid_test",
     ":ws_screen_edid_parse_test",

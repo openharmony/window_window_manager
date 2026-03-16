@@ -19,7 +19,6 @@
 #include "dm_common.h"
 #include <ipc_skeleton.h>
 #include "transaction/rs_marshalling_helper.h"
-#include "session_manager/include/scene_session_manager.h"
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
