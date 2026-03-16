@@ -2010,11 +2010,13 @@ WSError Session::SetActive(bool active)
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
         isActive_ = active;
+        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::ACTIVE);
     }
     if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
         sessionStage_->SetActive(false);
         UpdateSessionState(SessionState::STATE_INACTIVE);
         isActive_ = active;
+        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::INACTIVE);
     }
     return WSError::WS_OK;
 }

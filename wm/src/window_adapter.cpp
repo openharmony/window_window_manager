@@ -300,6 +300,14 @@ WMError WindowAdapter::ConvertToRelativeCoordinateExtended(const Rect& rect, Rec
     return wmsProxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
 }
 
+WMError WindowAdapter::GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetCrossProcessWindowInfo(crossProcessWindowInfo);
+}
+
 WMError WindowAdapter::GetUnreliableWindowInfo(int32_t windowId,
     std::vector<sptr<UnreliableWindowInfo>>& infos)
 {
