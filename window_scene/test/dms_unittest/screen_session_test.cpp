@@ -1217,6 +1217,29 @@ HWTEST_F(ScreenSessionTest, SetHdrFormats, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddHdrFormats
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, AddHdrFormats, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AddHdrFormats start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+    std::vector<uint32_t> hdrFormats = { 0, 0, 0, 0 };
+    screenSession->AddHdrFormats(hdrFormats);
+    EXPECT_TRUE(std::find(screenSession->hdrFormats_.begin(), screenSession->hdrFormats_.end(), 0) !=
+        screenSession->hdrFormats_.end());
+    GTEST_LOG_(INFO) << "AddHdrFormats end";
+}
+
+/**
  * @tc.name: SetColorSpaces
  * @tc.desc: normal function
  * @tc.type: FUNC
