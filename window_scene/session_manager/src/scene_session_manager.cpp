@@ -4184,11 +4184,17 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
         TLOGW(WmsLogTag::WMS_SUB, "sceneSession is nullptr");
         return;
     }
+    int32_t parentPid = sceneSession->GetCallingPid();
     for (const auto& subSession : sceneSession->GetSubSession()) {
-        if (subSession != nullptr) {
+        if (subSession == nullptr) {
+            continue;
+        }
+        if (parentPid == subSession->GetCallingPid()) {
             const auto persistentId = subSession->GetPersistentId();
             TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", persistentId);
             DestroyAndDisconnectSpecificSessionInner(persistentId);
+        } else {
+            subSession->NotifyParentLifecycleEvent(ParentLifeCycleEvent::DESTROYED);
         }
     }
 }
@@ -5739,6 +5745,19 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallba
     };
 
     return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
+}
+
+WMError SceneSessionManager::GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo)
+{
+    auto sceneSession = GetSceneSession(crossProcessWindowInfo.persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Scene session is nullptr, id:%{public}d", crossProcessWindowInfo.persistentId);
+ 	    return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    crossProcessWindowInfo.displayId = static_cast<uint64_t>(sceneSession->GetDisplayId());
+    crossProcessWindowInfo.isPcAppInPad = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
+    crossProcessWindowInfo.isPcAppInpadCompatibleMode = sceneSession->GetSessionProperty()->GetPcAppInpadCompatibleMode();
+    return WMError::WM_OK;
 }
 
 void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession)

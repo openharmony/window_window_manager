@@ -2356,6 +2356,51 @@ struct WindowInfoOption : public Parcelable {
     }
 };
 
+struct CrossProcessWindowInfo : public Parcelable {
+    int32_t persistentId = 0;
+    uint64_t displayId = 0;
+    bool isPcAppInPad = false;
+    bool isPcAppInpadCompatibleMode = false;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteInt32(persistentId)) {
+            return false;
+        }
+        if (!parcel.WriteUint64(displayId)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isPcAppInPad)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isPcAppInpadCompatibleMode)) {
+            return false;
+        }
+        return true;
+    }
+
+    static CrossProcessWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new CrossProcessWindowInfo();
+        if (!parcel.ReadInt32(info->persistentId) || !parcel.ReadUint64(info->displayId) ||
+            !parcel.ReadBool(info->isPcAppInPad) || !parcel.ReadBool(info->isPcAppInpadCompatibleMode)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+};
+
+enum class ParentLifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+    DESTROYED,
+};
+
 /**
  * Config of keyboard animation
  */

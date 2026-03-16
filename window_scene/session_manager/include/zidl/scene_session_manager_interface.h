@@ -175,6 +175,7 @@ public:
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
         TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN,
         TRANS_ID_SNAPSHOT_BY_WINDOW_ID,
+        TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -308,6 +309,10 @@ public:
     }
     WMError ConvertToRelativeCoordinateExtended(
         const Rect& rect, Rect& newRect, DisplayId& newDisplayId) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo) override
     {
         return WMError::WM_OK;
     }

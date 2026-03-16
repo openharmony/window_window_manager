@@ -271,6 +271,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo)
+    {
+        return WMError::WM_OK;
+    }
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT)
     {
