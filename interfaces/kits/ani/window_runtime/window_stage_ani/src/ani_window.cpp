@@ -5343,8 +5343,7 @@ static void ParseAttachOptions(sptr<Window> windowToken, ani_env* env, ani_objec
             ani_boolean isUndefined;
             if (env->Reference_IsUndefined(outRef, &isUndefined) != ANI_OK || isUndefined) {
                 TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] check %s is undefined fail.", propName);
-                AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                    std::string("Failed check ") + propName + "fail.");
+                AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
                 return false;
             }
             return true;
@@ -5354,13 +5353,13 @@ static void ParseAttachOptions(sptr<Window> windowToken, ani_env* env, ani_objec
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get currentLayoutMode.");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to get currentLayoutMode.");
-            return;
+        return false;
     }
     ani_boolean isUndefinedCurrentLayoutMode;
     if (env->Reference_IsUndefined(nameValueRet, &isUndefinedCurrentLayoutMode) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Check enum_object isUndefined fail");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
-        return;
+        return false;
     }
     if (!isUndefinedCurrentLayoutMode) {
         ani_string str = static_cast<ani_string>(nameValueRet);
@@ -5368,27 +5367,21 @@ static void ParseAttachOptions(sptr<Window> windowToken, ani_env* env, ani_objec
         options.currentLayoutMode_ = currentLayoutMode;
     }
 
-    ani_ref parentWindowSizeChangeCallBack = nullptr;
+    ani_ref parentWindowSizeChangeCallBack;
     if(!GetPropertyAndCheckUndefined(attachOptions, "parentWindowSizeChangeCallBack",
         parentWindowSizeChangeCallBack, "parentWindowSizeChangeCallBack")) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get parentWindowSizeChangeCallBack.");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "Failed to get parentWindowSizeChangeCallBack.");
         return;
     }
     if (parentWindowSizeChangeCallBack && registerManager_->RegisterListener(windowToken_, "parentWindowSizeChange",
             CaseType::CASE_WINDOW, env, parentWindowSizeChangeCallBack, 0) != WmErrorCode::WM_OK) {
-            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "Failed to get parentWindowSizeChangeCallBack.");
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
             return;
     }
 
-    ani_ref parentWindowStatusChangeCallBack = nullptr;
+    ani_ref parentWindowStatusChangeCallBack;
     if(!GetPropertyAndCheckUndefined(attachOptions, "parentWindowStatusChangeCallBack",
         parentWindowStatusChangeCallBack, "parentWindowStatusChangeCallBack")) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get parentWindowStatusChangeCallBack.");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "Failed to get parentWindowStatusChangeCallBack.");
         return;
     }
     if (parentWindowStatusChangeCallBack && registerManager_->RegisterListener(windowToken_, "parentWindowStatusChange",

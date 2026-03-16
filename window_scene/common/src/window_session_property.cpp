@@ -2903,5 +2903,15 @@ bool WindowSessionProperty::IsAppBufferReady() const
 {
     return isAppBufferReady_;
 }
+
+void WindowSessionProperty::SetIsCrossProcessWindow(bool isCrossProcess)
+{
+    isCrossProcessWindow_ = isCrossProcess;
+}
+
+bool WindowSessionProperty::GetIsCrossProcessWindow() const
+{
+    return isCrossProcessWindow_;
+}
 } // namespace Rosen
 } // namespace OHOS

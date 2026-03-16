@@ -107,6 +107,7 @@ private:
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllMainWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWindowSnapshot(MessageParcel& data, MessageParcel& reply);
+    int HandleSnapshotByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowSnapshotSkip(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
@@ -167,6 +168,7 @@ private:
     int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleGetCrossProcessWindowInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

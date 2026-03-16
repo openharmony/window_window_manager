@@ -201,6 +201,7 @@ std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessi
 std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::windowRotationChangeListeners_;
 std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> WindowSessionImpl::freeWindowModeChangeListeners_;
+std::map<int32_t, std::vector<sptr<IParentLifecycleEventListener>>> WindowSessionImpl::parentLifecycleEventListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStageLifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
@@ -241,6 +242,7 @@ std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
     WindowSessionImpl::waterfallModeChangeListeners_;
 std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::mutex WindowSessionImpl::freeWindowModeChangeListenerMutex_;
+std::mutex WindowSessionImpl::parentLifecycleEventListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> g_windowExtensionSessionSet_;
@@ -361,6 +363,7 @@ void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
     property_->SetIsSystemKeyboard(option->IsSystemKeyboard());
     property_->SetConstrainedModal(option->IsConstrainedModal());
     property_->SetSubWindowOutlineEnabled(option->IsSubWindowOutlineEnabled());
+    property_->SetIsCrossProcessWindow(option->IsCrossProcessWindow());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
     getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
@@ -9428,6 +9431,67 @@ void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
             listener->OnFreeWindowModeChange(isInFreeWindowMode);
         }
     }
+}
+
+template<typename T>
+EnableIfSame<T, IParentLifecycleEventListener,
+    std::vector<sptr<IParentLifecycleEventListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IParentLifecycleEventListener>> parentLifecycleEventListeners;
+    for (const auto& listener : parentLifecycleEventListeners_[GetPersistentId()]) {
+        parentLifecycleEventListeners.push_back(listener);
+    }
+    return parentLifecycleEventListeners;
+}
+
+WMError WindowSessionImpl::RegisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "Start register, id: %{public}d", GetPersistentId());
+    if (listener) {
+        std::lock_guard<std::mutex> lockListener(parentLifecycleEventListenerMutex_);
+        return RegisterListener(parentLifecycleEventListeners_[GetPersistentId()], listener);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "id: %{public}d, listener is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+}
+ 	  
+WMError WindowSessionImpl::UnregisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "Start unregister, id: %{public}d", GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(parentLifecycleEventListenerMutex_);
+    return UnregisterListener(parentLifecycleEventListeners_[GetPersistentId()], listener);
+}
+
+WSError WindowSessionImpl::NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType)
+{
+    std::lock_guard<std::mutex> lockListener(parentLifecycleEventListenerMutex_);
+    auto parentLifecycleEventListeners = GetListeners<IParentLifecycleEventListener>();
+    for (auto& listener : parentLifecycleEventListeners) {
+        if (listener != nullptr) {
+            switch (eventType) {
+                case ParentLifeCycleEvent::FOREGROUND:
+                    listener->OnParentForeground(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::ACTIVE:
+                    listener->OnParentActive(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::INACTIVE:
+                    listener->OnParentInactive(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::BACKGROUND:
+                    listener->OnParentBackground(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::DESTROYED:
+                    listener->OnParentDestroyed(property_->GetParentPersistentId());
+                    break;
+                default:
+                    TLOGE(WmsLogTag::WMS_LIFE, "Unknown event type: %{public}u", static_cast<uint32_t>(eventType));
+                    break;
+            }
+        }
+    }
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::RegisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)

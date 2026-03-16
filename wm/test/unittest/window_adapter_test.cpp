@@ -321,9 +321,26 @@ HWTEST_F(WindowAdapterTest, GetSnapshotByWindowId, TestSize.Level1)
     WindowAdapter windowAdapter;
     int32_t persistentId = -1;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-    windowAdapter.GetSnapshotByWindowId(persistentId, pixelMap);
+    auto err = windowAdapter.GetSnapshotByWindowId(persistentId, pixelMap);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, err);
     auto ret = windowAdapter.InitWMSProxy();
     ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: Snapshot
+ * @tc.desc: WindowAdapter/Snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowAdapterTest, Snapshot, TestSize.Level1)
+{
+    WindowAdapter windowAdapter;
+    int32_t persistentId = -1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+    auto err = windowAdapter.Snapshot(pixelMap, persistentId, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, err);
+    ASSERT_EQ(nullptr, pixelMap);
 }
 
 /**

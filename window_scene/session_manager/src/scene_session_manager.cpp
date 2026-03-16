@@ -84,6 +84,7 @@
 #include "session_helper.h"
 #include "session_manager_agent_controller.h"
 #include "singleton_container.h"
+#include "surface_capture_future.h"
 #ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DSOFTBUS
 #include "softbus_bus_center.h"
 #endif
@@ -111,10 +112,6 @@
 #include <input_method_controller.h>
 #endif // IMF_ENABLE
 #include "dms_global_mutex.h"
-
-#ifdef DEVICE_STATUS_ENABLE
-#include "interaction_manager.h"
-#endif // DEVICE_STATUS_ENABLE
 
 namespace OHOS::Rosen {
 namespace {
@@ -2909,6 +2906,10 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
                 return this->GetAppForceLandscapeConfigEnable(bundleName);
             });
+            sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
+                const std::string& action, const std::string& message) {
+                return this->NotifyPageEnableFunc(bundleName, windowId, action, message);
+            });
         }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
         GetAppDragResizeType(sessionInfo.bundleName_, dragResizeType);
@@ -4183,11 +4184,17 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
         TLOGW(WmsLogTag::WMS_SUB, "sceneSession is nullptr");
         return;
     }
+    int32_t parentPid = sceneSession->GetCallingPid();
     for (const auto& subSession : sceneSession->GetSubSession()) {
-        if (subSession != nullptr) {
+        if (subSession == nullptr) {
+            continue;
+        }
+        if (parentPid == subSession->GetCallingPid()) {
             const auto persistentId = subSession->GetPersistentId();
             TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", persistentId);
             DestroyAndDisconnectSpecificSessionInner(persistentId);
+        } else {
+            subSession->NotifyParentLifecycleEvent(ParentLifeCycleEvent::DESTROYED);
         }
     }
 }
@@ -5738,6 +5745,19 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallba
     };
 
     return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
+}
+
+WMError SceneSessionManager::GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo)
+{
+    auto sceneSession = GetSceneSession(crossProcessWindowInfo.persistentId);
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Scene session is nullptr, id:%{public}d", crossProcessWindowInfo.persistentId);
+ 	    return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    crossProcessWindowInfo.displayId = static_cast<uint64_t>(sceneSession->GetDisplayId());
+    crossProcessWindowInfo.isPcAppInPad = sceneSession->GetSessionProperty()->GetIsPcAppInPad();
+    crossProcessWindowInfo.isPcAppInpadCompatibleMode = sceneSession->GetSessionProperty()->GetPcAppInpadCompatibleMode();
+    return WMError::WM_OK;
 }
 
 void SceneSessionManager::DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession)
@@ -8128,6 +8148,22 @@ void SceneSessionManager::SetStatusBarDefaultVisibilityPerDisplay(DisplayId disp
 void SceneSessionManager::SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func)
 {
     findScenePanelRsNodeByZOrderFunc_ = std::move(func);
+}
+
+void SceneSessionManager::RegisterPageEnableFunc(PageEnableFunc&& func)
+{
+    pageEnableFunc_ = std::move(func);
+}
+
+WSError SceneSessionManager::NotifyPageEnableFunc(const std::string& bundleName, int32_t windowId,
+    const std::string& action, const std::string& message)
+{
+    if (!pageEnableFunc_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "pageEnableCallback_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    pageEnableFunc_(bundleName, windowId, action, message);
+    return WSError::WS_OK;
 }
 
 bool SceneSessionManager::GetStatusBarDefaultVisibilityByDisplayId(DisplayId displayId)
@@ -11386,6 +11422,44 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
             return WMError::WM_OK;
         }
         return WMError::WM_ERROR_NULLPTR;
+    }, __func__);
+}
+
+WMError SceneSessionManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+    int32_t persistentId, const SnapshotConfig& config)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (persistentId <= INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid persistentId: %{public}d", persistentId);
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    return taskScheduler_->PostSyncTask([this, &pixelMap, persistentId, &config] {
+        pixelMap = nullptr;
+        auto sceneSession = GetSceneSession(persistentId);
+        if (sceneSession == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is null: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        auto surfaceNode = sceneSession->GetSurfaceNode();
+        if (!surfaceNode || !surfaceNode->IsBufferAvailable()) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode invalid: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+        auto callback = std::make_shared<SurfaceCaptureFuture>();
+        RSSurfaceCaptureConfig rsConfig = {
+            .scaleX = config.scaleX,
+            .scaleY = config.scaleY,
+            .useCurWindow = config.useCurWindow,
+        };
+        if (!RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, rsConfig)) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "TakeSurfaceCapture failed: %{public}d", persistentId);
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+        pixelMap = callback->GetResult(SNAPSHOT_INNER_TIMEOUT_MS);
+        return pixelMap ? WMError::WM_OK : WMError::WM_ERROR_TIMEOUT;
     }, __func__);
 }
 
@@ -20179,16 +20253,10 @@ void SceneSessionManager::RegisterMinimizeAllCallback(MinimizeAllFunc&& func){
     minimizeAllFunc_ = std::move(func);
 }
 
-void SceneSessionManager::NotifyRotationBegin(bool isStopDrag)
+void SceneSessionManager::NotifyRotationBegin()
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "NotifyRotationBegin isStopDrag: %{public}d", isStopDrag);
+    TLOGI(WmsLogTag::WMS_ROTATION, "in");
     SceneInputManager::GetInstance().SetIsRotationBegin(true);
-    if (isStopDrag) {
-        #ifdef DEVICE_STATUS_ENABLE
-        Msdp::DeviceStatus::InteractionManager::GetInstance()->StopDrag(
-            { Msdp::DeviceStatus::DragResult::DRAG_CANCEL, false, -1 });
-        #endif // DEVICE_STATUS_ENABLE
-    }
 }
 
 } // namespace OHOS::Rosen
