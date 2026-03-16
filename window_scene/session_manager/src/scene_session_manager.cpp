@@ -34,6 +34,7 @@
 #include "publish/scb_dump_subscriber.h"
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "uea_list_config.h"
+#include "process_options.h"
 #include "wm_common.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
@@ -3557,7 +3558,18 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr, id: %{public}d", persistentId);
+        return;
+    }
+    auto processOptions = sceneSession->GetSessionInfo().processOptions;
+    if (processOptions && processOptions->processMode != AAFwk::ProcessMode::UNSPECIFIED &&
+        processOptions->startupVisibility == AAFwk::StartupVisibility::STARTUP_HIDE) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "ability start up in hide");
+        return;
+    }
+    auto keyboardSession = GetKeyboardSession(sceneSession->GetSessionProperty()->GetDisplayId(), false);
+    if (keyboardSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, id: %{public}d", persistentId);
         return;
     }
     // Hide keyboard when app is cold started, if keyboard is showing and screen is unlocked.
