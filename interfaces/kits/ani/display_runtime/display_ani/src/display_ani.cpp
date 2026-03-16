@@ -15,6 +15,8 @@
 
 #include "display_ani.h"
 
+#include <cinttypes>
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
