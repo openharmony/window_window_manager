@@ -550,9 +550,14 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
         reply.WriteString(property->GetLogicalDeviceConfig());
         auto combinedCompatibleConfig = property->GetCombinedCompatibleConfig();
-        reply.WriteUint32(static_cast<uint32_t>(combinedCompatibleConfig.size()));
-        for (decltype(combinedCompatibleConfig.size()) i = 0; i < combinedCompatibleConfig.size(); i++) {
-            reply.WriteString(combinedCompatibleConfig[i]);
+        auto combinedSize = combinedCompatibleConfig.size();
+        if (combinedSize > 0 && combinedSize <= COMBINED_COMPATIBLE_CONFIG_MAX_SIZE) {
+            reply.WriteUint32(static_cast<uint32_t>(combinedSize));
+            for (decltype(combinedSize) i = 0; i < combinedSize; i++) {
+                reply.WriteString(combinedCompatibleConfig[i]);
+            }
+        } else {
+            reply.WriteUint32(0);
         }
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);

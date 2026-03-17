@@ -2532,7 +2532,7 @@ void WindowSessionProperty::SetCombinedCompatibleConfig(const std::vector<std::s
     combinedCompatibleConfig_ = combinedCompatibleConfig;
 }
 
-const std::vector<std::string>& WindowSessionProperty::GetCombinedCompatibleConfig() const
+std::vector<std::string> WindowSessionProperty::GetCombinedCompatibleConfig() const
 {
     std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
     return combinedCompatibleConfig_;
