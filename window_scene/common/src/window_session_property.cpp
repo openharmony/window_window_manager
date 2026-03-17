@@ -2526,6 +2526,16 @@ std::string WindowSessionProperty::GetLogicalDeviceConfig() const
     return logicalDeviceConfig_;
 }
 
+void WindowSessionProperty::SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig)
+{
+    combinedCompatibleConfig_ = combinedCompatibleConfig;
+}
+
+const std::vector<std::string>& WindowSessionProperty::GetCombinedCompatibleConfig() const
+{
+    return combinedCompatibleConfig_;
+}
+
 void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
 {
     isPcAppInpadCompatibleMode_ = enabled;

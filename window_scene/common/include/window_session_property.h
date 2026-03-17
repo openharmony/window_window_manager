@@ -358,6 +358,8 @@ public:
     CompatibleStyleMode GetPageCompatibleMode() const;
     void SetLogicalDeviceConfig(const std::string& logicalDeviceConfig);
     std::string GetLogicalDeviceConfig() const;
+    void SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig);
+    const std::vector<std::string>& GetCombinedCompatibleConfig() const;
 
     /*
      * Keyboard
@@ -565,6 +567,7 @@ private:
     bool isFullScreenInForceSplitMode_ = false;
     CompatibleStyleMode pageCompatibleMode_ = CompatibleStyleMode::INVALID_VALUE;
     std::string logicalDeviceConfig_ = "";
+    std::vector<std::string> combinedCompatibleConfig_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;

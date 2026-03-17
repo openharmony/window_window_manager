@@ -112,6 +112,7 @@ constexpr float MAX_GRAY_SCALE = 1.0f;
 constexpr int32_t DISPLAY_ID_C = 999;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
+constexpr int32_t MIN_COMBINED_CONFIG_SIZE = 2;
 const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
 const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
 const std::string COMPATIBLE_MAX_WINDOW_EVENT = "win_compatible_max_event";
@@ -224,6 +225,7 @@ std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
 std::atomic<bool> WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = false;
+std::atomic<bool> WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option,
     const std::shared_ptr<RSUIContext>& rsUIContext) : WindowSessionImpl(option, rsUIContext)
@@ -759,6 +761,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
         ret = Connect();
         SendLogicalDeviceConfigToArkUI();
+        SendCombinedCompatibleConfigToArkUI();
         TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
         TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", GetType());
@@ -8046,6 +8049,36 @@ void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()
     } else {
         TLOGI(WmsLogTag::WMS_COMPAT, "Send logical device config to arkui successfully!");
     }
+}
+
+void WindowSceneSessionImpl::SendCombinedCompatibleConfigToArkUI()
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName: %{public}s, combinedCompatibleConfig size: %{public}zu",
+        property_->GetSessionInfo().bundleName_.c_str(), property_->GetCombinedCompatibleConfig().size());
+    if (WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "Combined compatible config has already sent");
+        return;
+    }
+    const std::vector<std::string>& combinedCompatibleConfig = property_->GetCombinedCompatibleConfig();
+    if (combinedCompatibleConfig.size() < MIN_COMBINED_CONFIG_SIZE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Combined compatible config size is less than %{public}d, expected at least %{public}d",
+            combinedCompatibleConfig.size(), MIN_COMBINED_CONFIG_SIZE);
+        return;
+    }
+    for (size_t i = 0; i < combinedCompatibleConfig.size(); i++) {
+        const std::string& config = combinedCompatibleConfig[i];
+        if (i == 0) {
+            TLOGI(WmsLogTag::WMS_COMPAT, "Sending logicalDeviceConfig to arkui: %{public}s", config.c_str());
+            Ace::UIContent::SetXComponentCompensationAngle(config);
+        } else if (i == 1) {
+            TLOGI(WmsLogTag::WMS_COMPAT, "Sending arkUIAndWebConfig to arkui: %{public}s", config.c_str());
+            Ace::UIContent::SetUICorrectionConfig(config);
+        } else {
+            TLOGW(WmsLogTag::WMS_COMPAT, "Unknown config at index %{public}zu: %{public}s", i, config.c_str());
+        }
+    }
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = true;
+    TLOGI(WmsLogTag::WMS_COMPAT, "Send combined compatible config to arkui successfully!");
 }
 
 WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
