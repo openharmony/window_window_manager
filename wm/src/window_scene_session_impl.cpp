@@ -8057,8 +8057,8 @@ void WindowSceneSessionImpl::SendCombinedCompatibleConfigToArkUI()
     TLOGI(WmsLogTag::WMS_COMPAT, "bundleName: %{public}s, combinedCompatibleConfig size: %{public}zu",
         property_->GetSessionInfo().bundleName_.c_str(), combinedCompatibleConfig.size());
     if (combinedCompatibleConfig.size() < COMBINED_COMPATIBLE_CONFIG_SIZE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Combined compatible config size is less than %{public}d!",
-            combinedCompatibleConfig.size(), COMBINED_COMPATIBLE_CONFIG_SIZE);
+        TLOGE(WmsLogTag::WMS_COMPAT, "Combined compatible config size is less than %{public}u!",
+            COMBINED_COMPATIBLE_CONFIG_SIZE);
         return;
     }
     if (WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_) {

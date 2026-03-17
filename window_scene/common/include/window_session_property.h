@@ -359,7 +359,7 @@ public:
     void SetLogicalDeviceConfig(const std::string& logicalDeviceConfig);
     std::string GetLogicalDeviceConfig() const;
     void SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig);
-    const std::vector<std::string>& GetCombinedCompatibleConfig() const;
+    std::vector<std::string> GetCombinedCompatibleConfig() const;
 
     /*
      * Keyboard
