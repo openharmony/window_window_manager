@@ -11747,7 +11747,7 @@ void ScreenSessionManager::SwitchUserResetDisplayNodeScreenId()
 }
 
 void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
-    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE || (!g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER)) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         return;
     }
     RecoveryResolutionEffect();
