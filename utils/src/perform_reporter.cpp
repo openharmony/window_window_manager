@@ -479,7 +479,7 @@ void WindowInfoReporter::ReportWindowIOPerDay()
     }
 }
 
-void WindowInfoReporter::ReportWindowFrozen(int32_t detectionType, const std::string& windowInfo)
+void WindowInfoReporter::ReportWindowFrozen(WindowDFXHelperType detectionType, const std::string& windowInfo)
 {
     std::string eventName = "WINDOW_FROZEN_DETECTION";
     std::string detectionName = WM_CHECK_TYPE_TO_CHECK_NAME_MAP.find(detectionType) !=
@@ -487,7 +487,7 @@ void WindowInfoReporter::ReportWindowFrozen(int32_t detectionType, const std::st
     int32_t ret = HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        "DETECTION_TYPE", detectionType,
+        "DETECTION_TYPE", static_cast<int32_t>(detectionType),
         "DETECTION_NAME", detectionName,
         "MSG", windowInfo);
     if (ret != 0) {
