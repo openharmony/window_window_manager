@@ -202,6 +202,7 @@
             OHOS::Rosen::WindowManager::GetAllMainWindowInfo*;
             OHOS::Rosen::WindowManager::GetAllWindowLayoutInfo*;
             OHOS::Rosen::WindowManager::GetAppDragResizeType*;
+            OHOS::Rosen::WindowManager::GetCrossProcessWindowInfo*;
             OHOS::Rosen::WindowManager::GetDisplayIdByWindowId*;
             OHOS::Rosen::WindowManager::GetFocusWindowInfo*;
             OHOS::Rosen::WindowManager::GetFocusWindowInfoByAbilityToken*;
@@ -219,10 +220,12 @@
             OHOS::Rosen::WindowManager::GetWindowModeType*;
             OHOS::Rosen::WindowManager::GetWindowStyleType*;
             OHOS::Rosen::WindowManager::IsModuleHookOff*;
+            OHOS::Rosen::WindowManager::IsMultiInstanceEnabled*;
             OHOS::Rosen::WindowManager::ListWindowInfo*;
             OHOS::Rosen::WindowManager::MinimizeAllAppWindows*;
             OHOS::Rosen::WindowManager::MinimizeByWindowId*;
             OHOS::Rosen::WindowManager::NotifyAccessibilityWindowInfo*;
+            OHOS::Rosen::WindowManager::NotifyApplicationFocusChangedResult*;
             OHOS::Rosen::WindowManager::NotifyDisplayInfoChange*;
             OHOS::Rosen::WindowManager::NotifyScreenshotEvent*;
             OHOS::Rosen::WindowManager::NotifySupportRotationChange*;
@@ -253,6 +256,7 @@
             OHOS::Rosen::WindowManager::RegisterWMSConnectionChangedListener*;
             OHOS::Rosen::WindowManager::RegisterApplicationFocusChangedListener*;
             OHOS::Rosen::WindowManager::RemoveSessionBlackList*;
+            OHOS::Rosen::WindowManager::RemoveInstanceByUserId*;
             OHOS::Rosen::WindowManager::RequestFocus*;
             OHOS::Rosen::WindowManager::SetAppDragResizeType*;
             OHOS::Rosen::WindowManager::SetAppKeyFramePolicy*;
@@ -268,6 +272,7 @@
             OHOS::Rosen::WindowManager::ShiftAppWindowFocus*;
             OHOS::Rosen::WindowManager::ShiftAppWindowPointerEvent*;
             OHOS::Rosen::WindowManager::SkipSnapshotForAppProcess*;
+            OHOS::Rosen::WindowManager::Snapshot*;
             OHOS::Rosen::WindowManager::ToggleShownStateForAllAppWindows*;
             OHOS::Rosen::WindowManager::UnregisterCallingWindowDisplayChangedListener*;
             OHOS::Rosen::WindowManager::UnregisterCameraFloatWindowChangedListener*;
@@ -404,6 +409,7 @@
             OHOS::Rosen::WindowScene::UpdateConfiguration*;
             OHOS::Rosen::WindowScene::UpdateConfigurationForSpecified*;
             OHOS::Rosen::WindowScene::WindowScene*;
+            OHOS::Rosen::WindowScene::~WindowScene*;
             OHOS::Rosen::WindowSceneSessionImpl::WindowSceneSessionImpl*;
             OHOS::Rosen::WindowSessionImpl::GetHostSession*;
             OHOS::Rosen::WindowSessionImpl::WindowSessionImpl*;
