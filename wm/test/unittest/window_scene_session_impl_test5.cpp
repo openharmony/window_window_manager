@@ -3061,19 +3061,27 @@ HWTEST_F(WindowSceneSessionImplTest5, SendCombinedCompatibleConfigToArkUI, TestS
     window->SendCombinedCompatibleConfigToArkUI();
     EXPECT_FALSE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
     
-    // Test with single config (should return early due to size check)
-    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
-    window->property_->SetCombinedCompatibleConfig({"{}"});
-    window->SendCombinedCompatibleConfigToArkUI();
-    EXPECT_FALSE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
-    
-    // Test with two configs (should succeed)
-    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
-    window->property_->SetCombinedCompatibleConfig({"{}", "{key: value}"});
+    // Test with config had been sent (should return early)
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = true;
+    window->property_->SetCombinedCompatibleConfig({"logicalDeviceConfig", "arkUIAndWebConfig"});
     window->SendCombinedCompatibleConfigToArkUI();
     EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
     
-    // Test duplicate call (should return early)
+    // Test with logicalDeviceConfig is ""
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"", "arkUIAndWebConfig"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with logicalDeviceConfig is "{}"
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"{}", "arkUIAndWebConfig"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+
+    // Test with logicalDeviceConfig is normal config
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"{aaa: bbb}", "arkUIAndWebConfig"});
     window->SendCombinedCompatibleConfigToArkUI();
     EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
 }
