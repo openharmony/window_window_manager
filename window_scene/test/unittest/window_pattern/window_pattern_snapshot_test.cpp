@@ -81,6 +81,7 @@ void WindowPatternSnapshotTest::SetUpTestCase()
 void WindowPatternSnapshotTest::TearDownTestCase()
 {
     ssm_ = nullptr;
+    scenePersistence = nullptr;
 }
 
 void WindowPatternSnapshotTest::SetUp()

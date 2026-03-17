@@ -47,6 +47,8 @@ private:
     SystemSessionConfig systemConfig_;
 };
 
+static sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr("MainSessionTest", 1423);
+
 void MainSessionTest::SetUpTestCase() {}
 
 void MainSessionTest::TearDownTestCase() {}
@@ -63,6 +65,7 @@ void MainSessionTest::SetUp()
 
 void MainSessionTest::TearDown()
 {
+    scenePersistence = nullptr;
     mainSession_ = nullptr;
 }
 
