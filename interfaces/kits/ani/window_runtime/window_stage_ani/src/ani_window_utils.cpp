@@ -1670,8 +1670,6 @@ ani_status AniWindowUtils::CallAniMethodVoid(ani_env *env, ani_object object, an
     }
     va_list args;
     va_start(args, signature);
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] aniMethod == nullptr:%{public}d , args == nullptr:%{public}d ",
-        aniMethod == nullptr, args == nullptr);
     ret = env->Object_CallMethod_Void_V(object, aniMethod, args);
     va_end(args);
     if (ret != ANI_OK) {
