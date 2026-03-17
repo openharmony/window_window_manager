@@ -1625,6 +1625,22 @@ HWTEST_F(WindowSessionPropertyTest, SetLogicalDeviceConfig, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCombinedCompatibleConfig
+ * @tc.desc: SetCombinedCompatibleConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetCombinedCompatibleConfig, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    std::vector<std::string> configs = {"{}", "{key: value}"};
+    property->SetCombinedCompatibleConfig(configs);
+    auto result = property->GetCombinedCompatibleConfig();
+    EXPECT_EQ(result.size(), configs.size());
+    EXPECT_EQ(result[0], configs[0]);
+    EXPECT_EQ(result[1], configs[1]);
+}
+
+/**
  * @tc.name: SetPcAppInpadCompatibleMode
  * @tc.desc: SetPcAppInpadCompatibleMode
  * @tc.type: FUNC

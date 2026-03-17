@@ -3037,6 +3037,48 @@ HWTEST_F(WindowSceneSessionImplTest5, SendLogicalDeviceConfigToArkUI, TestSize.L
 }
 
 /**
+ * @tc.name: SendCombinedCompatibleConfigToArkUI
+ * @tc.desc: Test SendCombinedCompatibleConfigToArkUI
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SendCombinedCompatibleConfigToArkUI, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendCombinedCompatibleConfigToArkUI");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+    WindowType winType = window->GetType();
+    EXPECT_TRUE(WindowHelper::IsMainWindow(winType));
+    std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
+    EXPECT_EQ(uiContent, nullptr);
+
+    EXPECT_FALSE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with empty config (should return early)
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_FALSE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with single config (should return early due to size check)
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"{}"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_FALSE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with two configs (should succeed)
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"{}", "{key: value}"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test duplicate call (should return early)
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+}
+
+/**
  * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated01
  * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated when window type is not main window
  * @tc.type: FUNC
