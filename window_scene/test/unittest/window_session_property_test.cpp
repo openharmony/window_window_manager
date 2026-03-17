@@ -1632,12 +1632,12 @@ HWTEST_F(WindowSessionPropertyTest, SetLogicalDeviceConfig, TestSize.Level1)
 HWTEST_F(WindowSessionPropertyTest, SetCombinedCompatibleConfig, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    std::vector<std::string> configs = {"{}", "{key: value}"};
-    property->SetCombinedCompatibleConfig(configs);
+    std::vector<std::string> config = {"logicalDeviceConfig", "arkUIAndWebConfig"};
+    property->SetCombinedCompatibleConfig(config);
     auto result = property->GetCombinedCompatibleConfig();
-    EXPECT_EQ(result.size(), configs.size());
-    EXPECT_EQ(result[0], configs[0]);
-    EXPECT_EQ(result[1], configs[1]);
+    EXPECT_EQ(result.size(), config.size());
+    bool isEqual = std::equal(result.begin(), result.end(), config.begin());
+    EXPECT_TRUE(isEqual);
 }
 
 /**
