@@ -171,6 +171,9 @@ public:
     // IO record
     void ReportWindowIO(const std::string& subScene, double sizeKB);
 
+    // Window frozen check
+    void ReportWindowFrozen(int32_t detectionType, const std::string& windowInfo);
+
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,
         const std::string& packageName);
