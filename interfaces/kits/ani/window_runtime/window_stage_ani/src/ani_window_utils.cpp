@@ -766,7 +766,7 @@ ani_object AniWindowUtils::CreateAniWindowSystemBarProperties(ani_env* env,
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("statusBarContentColor").c_str(),
         nullptr, statusBarContentColor);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("isStatusBarLightIcon").c_str(),
-        nullptr, status.contentColor_ == SYSTEM_COLOR_WHITE);
+        nullptr, CreateOptionalBool(env, ani_boolean(status.contentColor_ == SYSTEM_COLOR_WHITE)));
 
     if (!CreateNavBarColorProperties(env, navi, cls, systemBarProperties, status)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
@@ -784,30 +784,20 @@ bool AniWindowUtils::CreateNavBarColorProperties(ani_env* env, const SystemBarPr
     if (GetAniString(env, GetHexColor(navi.backgroundColor_), &navigationBarColor) != ANI_OK) {
         return false;
     }
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] Builder == nullptr:%{public}d",
-        Builder::BuildSetterName("navigationBarColor").c_str() == nullptr);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("navigationBarColor").c_str(),
         nullptr, navigationBarColor);
     ani_string navigationBarContentColor;
     if (GetAniString(env, GetHexColor(navi.contentColor_), &navigationBarContentColor) != ANI_OK) {
         return false;
     }
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] Builder == nullptr:%{public}d, navigationBarContentColor == nullptr:%{public}d",
-        Builder::BuildSetterName("navigationBarContentColor").c_str() == nullptr, navigationBarContentColor == nullptr);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("navigationBarContentColor").c_str(),
         nullptr, navigationBarContentColor);
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] Builder == nullptr:%{public}d",
-        Builder::BuildSetterName("isNavigationBarLightIcon").c_str() == nullptr);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("isNavigationBarLightIcon").c_str(),
-        nullptr, navi.contentColor_ == SYSTEM_COLOR_WHITE);
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] Builder == nullptr:%{public}d",
-        Builder::BuildSetterName("enableStatusBarAnimation").c_str() == nullptr);
+        nullptr, CreateOptionalBool(env, ani_boolean(navi.contentColor_ == SYSTEM_COLOR_WHITE)));
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("enableStatusBarAnimation").c_str(),
-        nullptr, status.enableAnimation_);
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] Builder == nullptr:%{public}d",
-        Builder::BuildSetterName("enableNavigationBarAnimation").c_str() == nullptr);
+        nullptr, CreateOptionalBool(env, ani_boolean(status.enableAnimation_)));
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("enableNavigationBarAnimation").c_str(),
-        nullptr, navi.enableAnimation_);
+        nullptr, CreateOptionalBool(env, ani_boolean(navi.enableAnimation_)));
     return true;
 }
 
@@ -1656,12 +1646,9 @@ ani_status AniWindowUtils::CallAniMethodVoid(ani_env *env, ani_object object, co
     return ret;
 }
 
-// tanhong
 ani_status AniWindowUtils::CallAniMethodVoid(ani_env *env, ani_object object, ani_class cls,
     const char* method, const char* signature, ...)
 {
-    TLOGE(WmsLogTag::DEFAULT, "[ANI] method == nullptr:%{public}d, object == nullptr:%{public}d "
-        " cls == nullptr:%{public}d", method == nullptr, object == nullptr, cls == nullptr);
     ani_method aniMethod;
     ani_status ret = env->Class_FindMethod(cls, method, signature, &aniMethod);
     if (ret != ANI_OK) {
