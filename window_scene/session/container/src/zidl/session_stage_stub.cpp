@@ -262,6 +262,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateWindowUIType(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_PROPERTY_WHEN_TRIGGER_MODE):
             return HandleUpdatePropertyWhenTriggerMode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PARENT_LIFECYCLE_EVENT):
+            return HandleNotifyParentLifecycleEvent(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1335,7 +1337,12 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& 
 int SessionStageStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "in");
-    NotifyAppForceLandscapeConfigEnableUpdated();
+    bool needUpdateViewport = false;
+    if (!data.ReadBool(needUpdateViewport)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
     return ERR_NONE;
 }
 int SessionStageStub::HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply)
@@ -1451,6 +1458,22 @@ int SessionStageStub::HandleUpdatePropertyWhenTriggerMode(MessageParcel& data, M
         return ERR_INVALID_DATA;
     }
     UpdatePropertyWhenTriggerMode(property);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyParentLifecycleEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "HandleNotifyParentLifecycleEvent called!");
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read evet failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = NotifyParentLifecycleEvent(static_cast<ParentLifeCycleEvent>(event));
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "NotifyParentLifecycleEvent failed, ret: %{public}d", ret);
+        return static_cast<int32_t>(ret);
+    }
     return ERR_NONE;
 }
 //

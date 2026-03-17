@@ -567,7 +567,7 @@ sptr<SceneSession> JsRootSceneSession::GenSceneSession(SessionInfo& info)
         }
 
         if (info.reuse || info.isAtomicService_ || !info.specifiedFlag_.empty()) {
-            if (SceneSessionManager::GetInstance().CheckCollaboratorType(info.collaboratorType_)) {
+            if (CheckCollaboratorType(info.collaboratorType_)) {
                 sceneSession = SceneSessionManager::GetInstance().FindSessionByAffinity(
                     info.sessionAffinity);
             } else {

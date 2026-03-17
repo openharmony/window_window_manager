@@ -27,6 +27,7 @@
 #include "window_manager_hilog.h"
 #include "wm_common.h"
 #include "ws_common.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -46,6 +47,7 @@ public:
     void NotifyUnfocused(uint32_t windowId, const sptr<IRemoteObject>& abilityToken,
         WindowType windowType, DisplayId displayId);
     void NotifyFocused(const sptr<FocusChangeInfo>& focusChangeInfo);
+    void NotifyApplicationFocusChangedResult(bool isFocused);
     void NotifyWindowModeChange(WindowModeType type);
     void NotifyUnfocused(const sptr<FocusChangeInfo>& focusChangeInfo);
     void NotifySystemBarChanged(DisplayId displayId, const SystemBarRegionTints& tints);
@@ -96,6 +98,7 @@ public:
     std::vector<sptr<ICameraFloatWindowChangedListener>> cameraFloatWindowChangedListeners_;
     sptr<WindowManagerAgent> cameraFloatWindowChangedListenerAgent_;
     std::vector<sptr<IWaterMarkFlagChangedListener>> waterMarkFlagChangeListeners_;
+    std::vector<sptr<IApplicationFocusChangedListener>> applicationFocusChangeListeners_;
     sptr<WindowManagerAgent> waterMarkFlagChangeAgent_;
     std::vector<sptr<IGestureNavigationEnabledChangedListener>> gestureNavigationEnabledListeners_;
     sptr<WindowManagerAgent> gestureNavigationEnabledAgent_;
@@ -359,6 +362,19 @@ void WindowManager::Impl::NotifyWaterMarkFlagChangedResult(bool showWaterMark)
     }
 }
 
+void WindowManager::Impl::NotifyApplicationFocusChangedResult(bool isFocused)
+{
+    TLOGI(WmsLogTag::WMS_FOCUS, "%{public}d", isFocused);
+    std::vector<sptr<IApplicationFocusChangedListener>> applicationFocusChangeListeners;
+    {
+        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        applicationFocusChangeListeners = applicationFocusChangeListeners_;
+    }
+    for (auto& listener : applicationFocusChangeListeners) {
+        listener->OnApplicationFocusUpdate(isFocused);
+    }
+}
+
 void WindowManager::Impl::NotifyGestureNavigationEnabledResult(bool enable)
 {
     WLOGFI("Notify gesture navigation enable result, enable=%{public}d", enable);
@@ -609,6 +625,11 @@ WindowManager& WindowManager::GetInstance(const int32_t userId)
         return GetInstance();
     }
 
+    if (!WindowManager::IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "get default instance, userId: %{public}d", userId);
+        return GetInstance();
+    }
+
     /**
      * multi-instance mode
      * At present, the map does not have memory leak issues. In actual business scenarios,
@@ -631,6 +652,16 @@ WMError WindowManager::RemoveInstanceByUserId(const int32_t userId)
     std::lock_guard<std::mutex> lock(windowManagerMapMutex_);
     windowManagerMap_.erase(userId);
     return WMError::WM_OK;
+}
+
+bool WindowManager::IsMultiInstanceEnabled()
+{
+    static bool enabled = [] {
+        bool isConcurrentUser = system::GetBoolParameter("persist.dms.concurrentuser", false);
+        TLOGNI(WmsLogTag::WMS_SCB, "isConcurrentUser: %{public}d", isConcurrentUser);
+        return isConcurrentUser;
+    }();
+    return enabled;
 }
 
 void WindowManager::ActiveFaultAgentReregister(const WindowManagerAgentType type,
@@ -1622,6 +1653,44 @@ WMError WindowManager::UnregisterWaterMarkFlagChangedListener(const sptr<IWaterM
     return ret;
 }
 
+WMError WindowManager::RegisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
+        pImpl_->applicationFocusChangeListeners_.end(), listener);
+    if (iter != pImpl_->applicationFocusChangeListeners_.end()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "Listener is already registered.");
+        return WMError::WM_OK;
+    }
+    pImpl_->applicationFocusChangeListeners_.push_back(listener);
+    TLOGD(WmsLogTag::WMS_FOCUS, "Try to registerApplicationFocusChangedListener end");
+    return WMError::WM_OK;
+}
+
+WMError WindowManager::UnregisterApplicationFocusChangedListener(const sptr<IApplicationFocusChangedListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "listener could not be null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+
+    std::lock_guard<std::recursive_mutex> lock(pImpl_->mutex_);
+    auto iter = std::find(pImpl_->applicationFocusChangeListeners_.begin(),
+                          pImpl_->applicationFocusChangeListeners_.end(), listener);
+    if (iter == pImpl_->applicationFocusChangeListeners_.end()) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "could not find this listener");
+        return WMError::WM_OK;
+    }
+    pImpl_->applicationFocusChangeListeners_.erase(iter);
+    TLOGD(WmsLogTag::WMS_FOCUS, "Try to registerApplicationFocusChangedListener end");
+    return WMError::WM_OK;
+}
+
 WMError WindowManager::RegisterGestureNavigationEnabledChangedListener(
     const sptr<IGestureNavigationEnabledChangedListener>& listener)
 {
@@ -2073,6 +2142,11 @@ void WindowManager::NotifyWaterMarkFlagChangedResult(bool showWaterMark) const
     pImpl_->NotifyWaterMarkFlagChangedResult(showWaterMark);
 }
 
+void WindowManager::NotifyApplicationFocusChangedResult(bool isFocused) const
+{
+    pImpl_->NotifyApplicationFocusChangedResult(isFocused);
+}
+
 void WindowManager::NotifyGestureNavigationEnabledResult(bool enable) const
 {
     pImpl_->NotifyGestureNavigationEnabledResult(enable);
@@ -2279,6 +2353,16 @@ WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisib
 WMError WindowManager::GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     return WindowAdapter::GetInstance(userId_).GetSnapshotByWindowId(windowId, pixelMap);
+}
+
+WMError WindowManager::Snapshot(
+    std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config)
+{
+    WMError ret = WindowAdapter::GetInstance(userId_).Snapshot(pixelMap, windowId, config);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "snapshot failed");
+    }
+    return ret;
 }
 
 WMError WindowManager::UnregisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)

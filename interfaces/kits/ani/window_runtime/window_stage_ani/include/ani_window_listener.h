@@ -63,8 +63,10 @@ class AniWindowListener : public IWindowChangeListener,
                         public IWindowStatusDidChangeListener,
                         public IWindowRotationChangeListener,
                         public IFreeWindowModeChangeListener,
+                        public IParentLifecycleEventListener,
                         public IAcrossDisplaysChangeListener,
                         public IScreenshotAppEventListener,
+                        public IApplicationFocusChangedListener,
                         public IWindowStageLifeCycle {
 public:
     AniWindowListener(ani_env* env, ani_vm* vm, ani_ref callback, CaseType caseType)
@@ -101,6 +103,7 @@ public:
     void OnDialogDeathRecipient() const override;
     void OnGestureNavigationEnabledUpdate(bool enable) override;
     void OnWaterMarkFlagUpdate(bool showWaterMark) override;
+    void OnApplicationFocusUpdate(bool isFocused) override;
     void SetMainEventHandler();
     void SetTimeout(int64_t timeout) override;
     int64_t GetTimeout() const override;
@@ -116,6 +119,7 @@ public:
     void OnSubWindowClose(bool& terminateCloseProcess) override;
     void OnWindowHighlightChange(bool isHighlight) override;
     void OnMainWindowClose(bool& terminateCloseProcess) override;
+    void OnWindowWillClose(sptr<Window> window) override;
     void OnRotationChange(const RotationChangeInfo& rotationChangeInfo,
         RotationChangeResult& rotationChangeResult) override;
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
@@ -129,6 +133,12 @@ public:
     void AfterLifecycleBackground() override;
     void AfterLifecycleResumed() override;
     void AfterLifecyclePaused() override;
+
+    void OnParentForeground(int32_t windowId) override;
+    void OnParentActive(int32_t windowId) override;
+    void OnParentInactive(int32_t windowId) override;
+    void OnParentBackground(int32_t windowId) override;
+    void OnParentDestroyed(int32_t windowId) override;
 private:
     void OnLastStrongRef(const void *) override;
 

@@ -111,8 +111,8 @@ using AcquireRotateAnimationConfigFunc = std::function<void(RotateAnimationConfi
 using RequestVsyncFunc = std::function<void(const std::shared_ptr<VsyncCallback>& callback)>;
 using NotifyWindowMovingFunc = std::function<void(DisplayId displayId, int32_t pointerX, int32_t pointerY)>;
 using UpdateTransitionAnimationFunc = std::function<void(WindowTransitionType type, TransitionAnimation animation)>;
-using NofitySessionLabelAndIconUpdatedFunc =
-    std::function<void(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon)>;
+using NofitySessionLabelAndIconUpdatedFunc = std::function<void(const std::string& label,
+    const std::shared_ptr<Media::PixelMap>& icon, const std::string& updatedIconPath)>;
 using NotifySessionGetTargetOrientationConfigInfoFunc = std::function<void(uint32_t targetOrientation)>;
 using NotifyKeyboardStateChangeFunc = std::function<void(SessionState state, const KeyboardEffectOption& effectOption,
     const uint32_t callingSessionId, const DisplayId targetDisplayId)>;
@@ -242,6 +242,7 @@ public:
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     std::string GetSessionLabel() const;
     void SetRestartAppListener(NotifyRestartAppFunc&& func);
+    virtual void NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent event) {}
 
     /*
      * App Use Control
@@ -285,11 +286,7 @@ public:
     void UpdateStatusBarVisible(bool isStatusBarVisible) { isStatusBarVisible_ = isStatusBarVisible; }
     bool IsStatusBarVisible() const;
     virtual bool IsInLSState() const { return false; }
-
-    /*
-     * Cross Display Move Drag
-     */
-    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
+    virtual WSError GetScaleInLSState(float& scaleX, float& scaleY) const { return WSError::WS_DO_NOTHING; }
 
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
@@ -310,8 +307,57 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode(bool isUpdateContextBeforeGet);
     std::optional<NodeId> GetSurfaceNodeId() const;
+    std::shared_ptr<RSSurfaceNode> GetShadowSurfaceNode() const;
+
+    /**
+     * @brief Ensures the shadow surface node used for window move-drag operations.
+     *
+     * If RS client multi-instance mode is disabled, the original surface node
+     * is returned directly. Otherwise a shadow node is lazily created from the
+     * original node. The shadow node copies RSBoundsModifier and RSFrameModifier
+     * required for drag updates.
+     *
+     * @return The shadow surface node, the original node if shadow creation is
+     *         skipped or fails, or nullptr if the original node does not exist.
+     */
+    std::shared_ptr<RSSurfaceNode> EnsureMoveDragShadowSurfaceNode();
+
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetLeashWinShadowSurfaceNode() const;
+
+    /**
+     * @brief Ensure the shadow surface node used for leash window move-drag operations.
+     *
+     * If RS client multi-instance mode is disabled, the original leash window
+     * surface node is returned directly. Otherwise a shadow node is lazily created
+     * from the original node. The shadow node copies RSBoundsModifier and RSFrameModifier
+     * required for drag updates.
+     *
+     * @return The shadow surface node, the original node if shadow creation is
+     *         skipped or fails, or nullptr if the original node does not exist.
+     */
+    std::shared_ptr<RSSurfaceNode> EnsureMoveDragLeashWinShadowSurfaceNode();
+
+    /**
+     * @brief Get the target surface node for window move-drag operations.
+     *
+     * If a leash window surface node exists, it will be used as the drag target.
+     * Otherwise, the original surface node is returned.
+     *
+     * @return The surface node used as the move-drag target.
+     */
+    std::shared_ptr<RSSurfaceNode> GetMoveDragTargetSurfaceNode() const;
+
+    /**
+     * @brief Get the target shadow surface node for window move-drag operations.
+     *
+     * If a leash window shadow surface node exists, it will be used as the drag target.
+     * Otherwise, the original shadow surface node is returned.
+     *
+     * @return The shadow surface node used as the move-drag target.
+     */
+    std::shared_ptr<RSSurfaceNode> GetMoveDragTargetShadowSurfaceNode();
 
     /*
      * Window Scene Snapshot
@@ -423,6 +469,8 @@ public:
     void SetSessionGlobalRect(const WSRect& rect);
     void SetSessionRequestRect(const WSRect& rect);
     WSRect GetSessionRequestRect() const;
+    void SetLayerPartRender(bool isLayerPartRender);
+    bool GetLayerPartRender() const;
     std::string GetWindowName() const;
     WSRect GetLastLayoutRect() const;
     WSRect GetLayoutRect() const;
@@ -640,8 +688,11 @@ public:
     virtual void SetFloatingScale(float floatingScale);
     float GetFloatingScale() const;
     virtual void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetRsScale(float rsScaleX, float rsScaleY);
     float GetScaleX() const;
     float GetScaleY() const;
+    float GetRsScaleX() const;
+    float GetRsScaleY() const;
     float GetPivotX() const;
     float GetPivotY() const;
     void SetSCBKeepKeyboard(bool scbKeepKeyboardFlag);
@@ -790,6 +841,8 @@ public:
     WSError UpdateClientRectInfo(const WSRect& rect, SizeChangeReason reason,
                                  const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
                                  const std::shared_ptr<RSTransaction>& rsTransaction);
+    bool IsCompatibilityModeSubWin() const;
+    virtual bool IsCrossAxisOfLayout() const { return false; }
 
     /*
      * Screen Lock
@@ -871,6 +924,8 @@ public:
     void GetPreloadStartingWindow(std::shared_ptr<Media::PixelMap>& pixelMap,
         std::pair<std::shared_ptr<uint8_t[]>, size_t>& bufferInfo);
     void ResetPreloadStartingWindow();
+    void InitPersistentScaledSnapshotParam(bool enabled);
+    bool IsPersistentScaledSnapshotEnabled() { return enablePersistentScaledSnapshot_; };
     std::atomic<bool> freeMultiWindow_ { false };
     std::atomic<bool> isPersistentImageFit_ { false };
     std::atomic<int32_t> persistentImageFit_ = 0;
@@ -946,8 +1001,6 @@ protected:
     /*
      * Window shadow surfaceNode
      */
-    std::shared_ptr<RSSurfaceNode> GetShadowSurfaceNode() const;
-    std::shared_ptr<RSSurfaceNode> GetLeashWinShadowSurfaceNode() const;
     std::shared_ptr<RSUIContext> GetRSShadowContext();
     std::shared_ptr<RSUIContext> GetRSLeashWinShadowContext();
 
@@ -956,9 +1009,21 @@ protected:
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
+
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::shared_ptr<RSSurfaceNode> shadowSurfaceNode_;
+
+    /**
+     * @brief Shadow surface node used during window move-drag.
+     *
+     * This node is lazily initialized when the window is dragged for the first time.
+     * It copies the necessary RSBoundsModifier and RSFrameModifier from the original
+     * surface node to support drag updates.
+     */
+    std::shared_ptr<RSSurfaceNode> moveDragShadowSurfaceNode_;
+    // guarded by surfaceNodeMutex_
+
     mutable std::mutex preloadSnapshotMutex_;
     std::shared_ptr<Media::PixelMap> preloadSnapshot_;
     mutable std::mutex snapshotMutex_;
@@ -1032,6 +1097,7 @@ protected:
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
+    bool enablePersistentScaledSnapshot_ = false;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
     /**
@@ -1243,9 +1309,20 @@ private:
     std::atomic<bool> isPendingToBackgroundState_ { false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
+    mutable std::mutex leashWinSurfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode_;
-    mutable std::mutex leashWinSurfaceNodeMutex_;
+
+    /**
+     * @brief Shadow surface node used during window move-drag for the leash window.
+     *
+     * This node is lazily initialized when the window is dragged for the first time.
+     * Initialization occurs only if `leashWinSurfaceNode_` exists, and copies the
+     * necessary RSBoundsModifier and RSFrameModifier from it to support drag updates.
+     */
+    std::shared_ptr<RSSurfaceNode> moveDragLeashWinShadowSurfaceNode_;
+    // guarded by leashWinSurfaceNodeMutex_
+
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
     bool needBackgroundAfterConnect_ { false };
@@ -1319,7 +1396,7 @@ private:
     bool isOutlineEnabled_ = false;
     OutlineStyleParams outlineStyleParams_;
     OutlineParamsChangeCallbackFunc outlineParamsChangeCallback_;
+    bool isLayerPartRender_ = false;
 };
 } // namespace OHOS::Rosen
-
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_H

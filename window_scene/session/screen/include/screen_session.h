@@ -232,6 +232,7 @@ public:
     void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
+    void AddHdrFormats(const std::vector<uint32_t>& hdrFormats);
     std::vector<uint32_t> GetHdrFormats();
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
     std::vector<uint32_t> GetColorSpaces();
@@ -280,6 +281,7 @@ public:
     uint32_t GetValidHeight() const;
     uint32_t GetValidWidth() const;
     float GetVirtualPixelRatio() const;
+    void SetRogScreenResolution(uint32_t width, uint32_t height) { property_.SetRogScreenResolution(width, height); }
     void SetRealHeight(uint32_t realHeight) { property_.SetScreenRealHeight(realHeight); }
     void SetRealWidth(uint32_t realWidth) { property_.SetScreenRealWidth(realWidth); }
 

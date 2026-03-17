@@ -860,6 +860,10 @@ ani_object AniWindowUtils::CreateAniWindowInfo(ani_env* env, const WindowVisibil
         CreateAniRect(env, info.GetRect()));
     CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("globalDisplayRect").c_str(), nullptr,
         CreateAniRect(env, info.GetGlobalDisplayRect()));
+    CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("globalRect").c_str(), nullptr,
+        CreateAniRect(env, info.GetGlobalRect()));
+    CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("displayId").c_str(), nullptr,
+        static_cast<ani_long>(info.GetDisplayId()));
     ani_string bundleName;
     if (GetAniString(env, info.GetBundleName(), &bundleName) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create string failed");
@@ -1493,7 +1497,7 @@ ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const Keyboard
     }
 
     ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>duration", nullptr,
-        CreateBaseTypeObject(env, curve.duration_));
+        CreateBaseTypeObject<long>(env, curve.duration_));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set duration");
         return AniWindowUtils::CreateAniUndefined(env);

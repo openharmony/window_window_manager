@@ -3011,6 +3011,69 @@ HWTEST_F(SceneSessionManagerTest12, PendingSessionToBackground03, Function | Sma
 }
 
 /**
+ * @tc.name: Snapshot01
+ * @tc.desc: test function : Snapshot permission and invalid id
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, Snapshot01, Function | SmallTest | Level2)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+
+    MockAccesstokenKit::MockIsSACalling(false);
+    auto ret = ssm_->Snapshot(pixelMap, 1, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ret = ssm_->Snapshot(pixelMap, INVALID_SESSION_ID, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+}
+
+/**
+ * @tc.name: Snapshot02
+ * @tc.desc: test function : Snapshot invalid session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, Snapshot02, Function | SmallTest | Level2)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    ssm_->sceneSessionMap_.clear();
+
+    auto ret = ssm_->Snapshot(pixelMap, 100, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_SESSION, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+}
+
+/**
+ * @tc.name: Snapshot03
+ * @tc.desc: test function : Snapshot invalid surface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, Snapshot03, Function | SmallTest | Level2)
+{
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+    SessionInfo info;
+    info.abilityName_ = "Snapshot03";
+    info.bundleName_ = "Snapshot03";
+    info.persistentId_ = 101;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({ info.persistentId_, sceneSession });
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    auto ret = ssm_->Snapshot(pixelMap, info.persistentId_, config);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, ret);
+    EXPECT_EQ(nullptr, pixelMap);
+}
+
+/**
  * @tc.name: SetPiPSettingSwitchStatus
  * @tc.desc: test function : SetPiPSettingSwitchStatus
  * @tc.type: FUNC
@@ -3476,6 +3539,144 @@ HWTEST_F(SceneSessionManagerTest12, FillWindowProfileInfoTest, TestSize.Level1)
  
     ASSERT_EQ(sceneSession->SetVisibilityState(WINDOW_VISIBILITY_STATE_NO_OCCLUSION), WSError::WS_OK);
     ssm_->FillWindowProfileInfo(sceneSession, focusWindowId);
+}
+
+/**
+ * @tc.name: RegisterPageEnableFunc
+ * @tc.desc: Test RegisterPageEnableFunc with valid func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    bool funcTriggered = false;
+    std::string receivedBundleName;
+    int32_t receivedWindowId = 0;
+    std::string receivedAction;
+    std::string receivedMessage;
+
+    PageEnableFunc func = [&](
+        const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message) {
+        funcTriggered = true;
+        receivedBundleName = bundleName;
+        receivedWindowId = windowId;
+        receivedAction = action;
+        receivedMessage = message;
+    };
+
+    ssm_->RegisterPageEnableFunc(std::move(func));
+    EXPECT_NE(ssm_->pageEnableFunc_, nullptr);
+
+    ssm_->pageEnableFunc_("com.test.app", 1, "enter", "HomePage");
+    EXPECT_TRUE(funcTriggered);
+    EXPECT_EQ(receivedBundleName, "com.test.app");
+    EXPECT_EQ(receivedWindowId, 1);
+    EXPECT_EQ(receivedAction, "enter");
+    EXPECT_EQ(receivedMessage, "HomePage");
+}
+
+/**
+ * @tc.name: RegisterPageEnableFunc01
+ * @tc.desc: Test multiple func registrations overwrite previous ones
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    bool firstFuncTriggered = false;
+    PageEnableFunc firstFunc = [&](
+        const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message) {
+        firstFuncTriggered = true;
+    };
+    ssm_->RegisterPageEnableFunc(std::move(firstFunc));
+    EXPECT_NE(ssm_->pageEnableFunc_, nullptr);
+
+    bool secondFuncTriggered = false;
+    PageEnableFunc secondFunc = [&](
+        const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message) {
+        secondFuncTriggered = true;
+    };
+    ssm_->RegisterPageEnableFunc(std::move(secondFunc));
+    EXPECT_NE(ssm_->pageEnableFunc_, nullptr);
+
+    if (ssm_->pageEnableFunc_) {
+        ssm_->pageEnableFunc_("com.test.app", 1, "enter", "HomePage");
+        EXPECT_FALSE(firstFuncTriggered);
+        EXPECT_TRUE(secondFuncTriggered);
+    }
+}
+
+/**
+ * @tc.name: RegisterPageEnableFunc02
+ * @tc.desc: Test RegisterPageEnableFunc with null func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RegisterPageEnableFunc02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    PageEnableFunc nullFunc = nullptr;
+    ssm_->RegisterPageEnableFunc(std::move(nullFunc));
+
+    EXPECT_EQ(ssm_->pageEnableFunc_, nullptr);
+}
+
+/**
+ * @tc.name: NotifyPageEnableFunc
+ * @tc.desc: Test NotifyPageEnableFunc with valid func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyPageEnableFunc, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    bool funcTriggered = false;
+    std::string receivedBundleName;
+    int32_t receivedWindowId = 0;
+    std::string receivedAction;
+    std::string receivedMessage;
+
+    PageEnableFunc func = [&](
+        const std::string& bundleName, int32_t windowId,
+        const std::string& action, const std::string& message) {
+        funcTriggered = true;
+        receivedBundleName = bundleName;
+        receivedWindowId = windowId;
+        receivedAction = action;
+        receivedMessage = message;
+    };
+
+    ssm_->RegisterPageEnableFunc(std::move(func));
+    EXPECT_NE(ssm_->pageEnableFunc_, nullptr);
+
+    auto result = ssm_->NotifyPageEnableFunc("com.test.app", 1, "enter", "HomePage");
+
+    EXPECT_EQ(result, WSError::WS_OK);
+    EXPECT_TRUE(funcTriggered);
+    EXPECT_EQ(receivedBundleName, "com.test.app");
+    EXPECT_EQ(receivedWindowId, 1);
+    EXPECT_EQ(receivedAction, "enter");
+    EXPECT_EQ(receivedMessage, "HomePage");
+}
+
+/**
+ * @tc.name: NotifyPageEnableFunc01
+ * @tc.desc: Test NotifyPageEnableFunc with null func
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, NotifyPageEnableFunc01, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    ssm_->pageEnableFunc_ = nullptr;
+    auto result = ssm_->NotifyPageEnableFunc("com.test.app", 1, "enter", "HomePage");
+
+    EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
 } // namespace
 } // namespace Rosen

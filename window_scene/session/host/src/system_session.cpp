@@ -501,8 +501,10 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
         TLOGNE(WmsLogTag::WMS_SYSTEM, "Check floating ball permission failed");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    bool canAutoRestore =
+        SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL_AUTO_RESTORE);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    return PostSyncTask([weakThis = wptr(this), &want, callingPid, where = __func__]() {
+    return PostSyncTask([weakThis = wptr(this), &want, callingPid, canAutoRestore, where = __func__]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
@@ -519,11 +521,11 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
         }
         {
             std::lock_guard<std::mutex> lock(session->fbClickMutex_);
-            if (session->fbClickCnt_ == 0) {
-                TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s not click, deny", where);
+            if (session->fbClickCnt_ == 0 && !canAutoRestore) {
+                TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s not click or cannot auto restore, deny", where);
                 return WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED;
             }
-            session->fbClickCnt_--;
+            session->fbClickCnt_ = 0;
         }
         TLOGNI(WmsLogTag::WMS_SYSTEM,
             "%{public}s restore window, bundle %{public}s, ability %{public}s, session bundle %{public}s",

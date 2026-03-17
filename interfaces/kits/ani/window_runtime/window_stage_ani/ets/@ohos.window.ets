@@ -40,6 +40,7 @@ const DOMAIN = 0x4200;
 const TAG = '[ANI]';
 const WM_ERROR_INVALID_PARAM = 401;
 declare type WindowAnimationCurveParam = Array<number>;
+declare type WindowEventListener = (windowId: int, event: window.WindowEventType) => void;
 
 namespace window {
   export interface Size {
@@ -946,6 +947,8 @@ export class WindowLayoutInfoInternal implements WindowLayoutInfo {
 export interface WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
+  globalRect?: Rect;
+  displayId?: int;
   bundleName: string;
   abilityName: string;
   windowId: int;
@@ -956,6 +959,8 @@ export interface WindowInfo {
 export class WindowInfoInternal implements WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
+  globalRect?: Rect;
+  displayId?: int;
   bundleName: string;
   abilityName: string;
   windowId: int;
@@ -2669,6 +2674,7 @@ export class WindowStageInternal implements WindowStage {
         }).then((ret: Any) => {
             callback(new BusinessError(), ret as Window);
         }).catch((err: Any) => {
+            callback(err as BusinessError, new WindowInternal());
         });
     }
 
@@ -2692,6 +2698,7 @@ export class WindowStageInternal implements WindowStage {
         }).then((ret: Any) => {
             callback(new BusinessError(), ret as Window);
         }).catch((err: Any) => {
+            callback(err as BusinessError, new WindowInternal());
         });
     }
 
@@ -3055,6 +3062,7 @@ export class WindowInternal implements Window {
     private native showWindowSync(nativeObj: long): void;
     private native showWindowWithOptions(nativeObj: long, options: ShowWindowOptions): void;
     private native destroyWindowSync(nativeObj: long): void;
+    private native closeDirectlySync(nativeObj: long): void;
     private native isWindowShowingSync(nativeObj: long): boolean;
     private native isWindowHighlightedSync(nativeObj: long): boolean;
     private native hideWithAnimationSync(nativeObj: long): void;
@@ -4634,6 +4642,10 @@ export class WindowInternal implements Window {
       });
     }
 
+    public closeDirectly(): void {
+      this.closeDirectlySync(this.nativeObj);
+    }
+
     public isWindowShowing(): boolean {
       return this.isWindowShowingSync(this.nativeObj);
     }
@@ -5516,6 +5528,32 @@ native function setStartWindowBackgroundColorSync(nativeObj: long, moduleName: s
 native function notifyScreenshotEventSync(nativeObj: long, eventType: ScreenshotEventType): void;
 native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
 native function setSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
+native function createSubWindowAndBindParentSync(nativeObj: long, name: string,
+  parentId: int, ctx: BaseContext, parentWindowEventListener: WindowEventListener): Window;
+
+export function createSubWindowAndBindParent(name: string, parentId: int, ctx: BaseContext,
+  parentWindowEventListener: WindowEventListener): Promise<Window> {
+ 	return new Promise<Window>((resolve: (value: Window) => void, reject: (error: BusinessError) => void ) => {
+ 	  taskpool.execute((): Window => {
+ 	    return createSubWindowAndBindParentSync(nativeObj, name, parentId, ctx, parentWindowEventListener);
+ 	  }).then((ret: Any) => {
+ 	    resolve(ret as Window);
+ 	  }).catch((err: Any) => {
+ 	    reject(err as BusinessError);
+ 	  });
+ 	});
+}
+
+export function createSubWindowAndBindParent(name: string, parentId: int, ctx: BaseContext,
+  parentWindowEventListener: WindowEventListener, asyncCallback: AsyncCallback<Window>): void {
+ 	taskpool.execute((): Window => {
+ 	  return createSubWindowAndBindParentSync(nativeObj, name, parentId, ctx, parentWindowEventListener);
+ 	}).then((ret: Any) => {
+ 	  asyncCallback(new BusinessError(), ret as Window);
+ 	}).catch((err: Any) => {
+ 	  asyncCallback(err as BusinessError, new WindowInternal());
+ 	});
+}
 
 export function toggleShownStateForAllAppWindows(callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
@@ -5959,6 +5997,14 @@ export function offWaterMarkFlagChange(callback?: Callback<boolean>): void {
   offSync(nativeObj, 'waterMarkFlagChange', callback);
 }
 
+export function onApplicationFocusStateChange(callback: Callback<boolean>): void {
+  onSync(nativeObj, 'applicationFocusStateChange', callback);
+} 
+
+export function offApplicationFocusStateChange(callback?: Callback<boolean>): void {
+  offSync(nativeObj, 'applicationFocusStateChange', callback);
+}
+
 function runWindowListenerVoidArgCallback(cb: object): void {
   const func = cb as () => void;
   func();
@@ -5967,6 +6013,20 @@ function runWindowListenerVoidArgCallback(cb: object): void {
 function runWindowListenerBooleanArgCallback(cb: object, cbArg: boolean): void {
   const func = cb as (cbArg: boolean) => void;
   func(cbArg);
+}
+
+function runWindowWillCloseListenerCallback(cb: object, cbArg: object): void {
+  const func = cb as () => Promise<boolean>;
+  const window = cbArg as WindowInternal;
+  func().then((result: boolean) => {
+    if (!result) {
+      window.closeDirectly();
+    }
+  }).catch((error: Error) => {
+    hilog.error(DOMAIN, TAG,
+      `runWindowWillCloseListenerCallback errorCode = ${error.code}, message = ${error.message}`);
+    window.closeDirectly();
+  });
 }
 
 function runSystemDensityChangeCallback(cb: object, density: double): void {
@@ -6097,6 +6157,11 @@ function runUiExtensionSecureLimitChangeCallback(cb: object, cbArg: boolean): vo
 function runWindowStatusDidChangeCallback(cb: object, windowStatus: int): void {
   const func = cb as (windowStatus: WindowStatusType) => void;
   func(windowStatus as WindowStatusType);
+}
+
+function runParentLifecycleEventCallback(cb: object, windowId: int, event: int): void {
+  const func = cb as (windowId: int, event: WindowEventType) => void;
+  func(windowId, event as WindowEventType);
 }
 }
 

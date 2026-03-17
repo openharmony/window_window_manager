@@ -67,12 +67,12 @@ HWTEST_F(SessionManagerTest, GetSceneSessionManagerProxy, TestSize.Level1)
     sm_->RemoveSSMDeathRecipient();
     sm_->ClearSessionManagerProxy();
     auto sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerProxy);
+    EXPECT_EQ(nullptr, sceneSessionManagerProxy);
 
     sm_->ClearSessionManagerProxy();
     sm_->sessionManagerServiceProxy_ = SessionManagerLite::GetInstance().GetSessionManagerServiceProxy();
     sceneSessionManagerProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneSessionManagerProxy);
+    EXPECT_EQ(nullptr, sceneSessionManagerProxy);
 }
 
 /**
@@ -188,7 +188,7 @@ HWTEST_F(SessionManagerTest, RemoveSSMDeathRecipient, TestSize.Level1)
 
     // branch 2
     auto sceneProxy = sm_->GetSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sceneProxy);
+    EXPECT_EQ(nullptr, sceneProxy);
     sm_->RemoveSSMDeathRecipient();
 }
 
@@ -247,7 +247,7 @@ HWTEST_F(SessionManagerTest, InitSceneSessionManagerProxy, TestSize.Level1)
     sm_->InitSessionManagerServiceProxy();
     ASSERT_NE(nullptr, sm_->sessionManagerServiceProxy_);
     sm_->InitSceneSessionManagerProxy();
-    ASSERT_NE(nullptr, sm_->sceneSessionManagerProxy_);
+    EXPECT_EQ(nullptr, sm_->sceneSessionManagerProxy_);
 }
 
 /**
