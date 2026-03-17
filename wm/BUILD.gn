@@ -276,6 +276,10 @@ ohos_shared_library("libwm") {
 
   public_configs = [ ":libwm_public_config" ]
 
+  if (window_manager_use_sceneboard) {
+    version_script = "libwm.map"
+  }
+
   deps = [
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
