@@ -3679,7 +3679,7 @@ static inline bool IsVertical(Rotation rotation)
     return rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180;
 }
 
-void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
+void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType type, int rotation)
 {
     TLOGNFI(WmsLogTag::DMS, "start");
     if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -3692,9 +3692,12 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate()
         TLOGNFE(WmsLogTag::DMS, "Internal Session null");
         return;
     }
-    if (!IsVertical(internalSession->GetRotation())) {
+    Rotation targetRotation = ConvertIntToRotation(rotation);
+    if (!IsVertical(targetRotation) && (type == ScreenPropertyChangeType::ROTATION_END)) {
         HandleResolutionEffectChange();
-    } else {
+    } else if (IsVertical(targetRotation) && (type == ScreenPropertyChangeType::ROTATION_BEGIN ||
+        type == ScreenPropertyChangeType::UNSPECIFIED)) {
+        //It's need Recovery when start rotate to vertical and in muiltuser the rotato is UNSPECIFIED.
         RecoveryResolutionEffect();
     }
 #endif
@@ -3716,6 +3719,11 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
     }
     bool effectFlag = false;
     ScreenSettingHelper::GetResolutionEffect(effectFlag, externalSession->GetSerialNumber());
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && (IsVertical(internalSession->GetRotation()) ||
+        GetSuperFoldStatus() != SuperFoldStatus::EXPANDED)){
+        TLOGNFI(WmsLogTag::DMS, "SuperFoldDisplayDevice status not support");
+        return false;
+    }
     bool osSwitchPadRecovery = IS_SUPPORT_PC_MODE && !g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER;
     if(!effectFlag || osSwitchPadRecovery ||
         externalSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
@@ -3725,11 +3733,6 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
     uint32_t targetWidth = 0;
     uint32_t targetHeight = 0;
     CalculateTargetResolution(internalSession, externalSession, effectFlag, targetWidth, targetHeight);
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && (IsVertical(internalSession->GetRotation()) ||
-        GetSuperFoldStatus() != SuperFoldStatus::EXPANDED)){
-        TLOGNFI(WmsLogTag::DMS, "SuperFoldDisplayDevice status not support");
-        return false;
-    }
     if (targetWidth != 0 && targetHeight != 0) {
         SetResolutionEffect(internalSession->GetScreenId(), targetWidth, targetHeight);
     }
@@ -3823,15 +3826,6 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGNFE(WmsLogTag::DMS, "internalSession null");
         return false;
     }
-    /*
-     * When device is in the hover state with the magnetic keyboard attached and restarted, there will be a landscape
-     * orientation and keyboard state. This state does not normally exist, and it is expected that the logic for
-     * ResolutionEffect should not be applied. Therefore, a status check for SuperFoldStatus needs to be added.
-     */
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetSuperFoldStatus() == SuperFoldStatus::KEYBOARD){
-        TLOGNFI(WmsLogTag::DMS, "SuperFoldDisplayDevice status not support");
-        return false;
-    }
     auto internalProperty = internalSession->GetScreenProperty();
     DMRect realResolutionRect = { 0, 0, internalProperty.GetScreenRealWidth(),
         internalProperty.GetScreenRealHeight()};
@@ -3850,6 +3844,17 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
     return true;
 }
 
+static inline bool IsBoundsChanged(RRect oldBounds, DMRect newRect) {
+    if (oldBounds.rect_.left_ == newRect.posX_ && oldBounds.rect_.top_ == newRect.posY_){
+        if((oldBounds.rect_.width_ == newRect.width_ && oldBounds.rect_.height_ == newRect.height_) ||
+            (oldBounds.rect_.height_ == newRect.width_ && oldBounds.rect_.width_ == newRect.height_)) {
+            return false;
+        }
+        return true;
+    }
+    return true;
+}
+
 void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& targetRect)
 {
     if (internalSession == nullptr) {
@@ -3858,14 +3863,22 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
     }
     // Setting the display area of the internal screen
     auto oldProperty = internalSession->GetScreenProperty();
-    internalSession->UpdatePropertyByResolution(targetRect);
-    auto newProperty = internalSession->GetScreenProperty();
-    newProperty.SetPropertyChangeReason(ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
+    if(!IsBoundsChanged(oldProperty.GetBounds(), targetRect)) {
+        TLOGNFI(WmsLogTag::DMS, "bounds not change");
+        return;
     }
-    internalSession->PropertyChange(newProperty, ScreenPropertyChangeReason::CHANGE_MODE);
-    internalSession->ClearPropertyChangeReasonAndEvent();
+    auto newProperty = internalSession->GetPropertyByResolution(targetRect);
+    newProperty.SetPropertyChangeReason(ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
+    newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
+    internalSession->NotifyListenerPropertyChange(newProperty, ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
+    oldProperty.SetInputOffset(newProperty.GetInputOffsetX(), newProperty.GetInputOffsetY());
+    if (GetSuperFoldStatus() != SuperFoldStatus::KEYBOARD) {
+        oldProperty.SetScreenAreaWidth(newProperty.GetScreenAreaWidth());
+        oldProperty.SetScreenAreaHeight(newProperty.GetScreenAreaHeight());
+        oldProperty.SetMirrorWidth(newProperty.GetMirrorWidth());
+        oldProperty.SetMirrorHeight(newProperty.GetMirrorHeight());
+    }
+    internalSession->SetScreenProperty(oldProperty);
     if (oldProperty.GetScreenAreaWidth() != targetRect.width_ ||
         oldProperty.GetScreenAreaHeight() != targetRect.height_) {
         NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
@@ -3884,6 +3897,10 @@ void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSe
 {
     if (externalSession == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "externalSession null");
+        return;
+    }
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && GetSuperFoldStatus() != SuperFoldStatus::EXPANDED) {
+        TLOGNFE(WmsLogTag::DMS, "no need handle");
         return;
     }
     //all zero, means full screen mirror.
@@ -6661,6 +6678,7 @@ void ScreenSessionManager::UpdateScreenRotationProperty(ScreenId screenId, const
         }
         NotifyScreenModeChange();
     }
+    HandleResolutionEffectChangeWhenRotate(screenPropertyChangeType, rotation);
     SetFoldDisplayModeAfterRotation(GetFoldDisplayMode());
     SetFirstSCBConnect(false);
     sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
@@ -6679,7 +6697,7 @@ void ScreenSessionManager::UpdateScreenRotationPropertyForRs(sptr<ScreenSession>
         // Rs is used to mark the end of the rotation animation
         TLOGNFI(WmsLogTag::DMS, "DisableCacheForRotation");
         RSInterfaces::GetInstance().DisableCacheForRotation();
-        HandleResolutionEffectChangeWhenRotate();
+        HandleResolutionEffectChangeWhenRotate(screenPropertyChangeType, rotation);
         return;
     } else if (screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY ||
         screenPropertyChangeType == ScreenPropertyChangeType::ROTATION_UPDATE_PROPERTY_ONLY_NOT_NOTIFY) {
@@ -11732,19 +11750,19 @@ void ScreenSessionManager::HandleResolutionEffectAfterSwitchUser() {
     if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE || (!g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER)) {
         return;
     }
+    RecoveryResolutionEffect();
     if (!IS_SUPPORT_PC_MODE) {
         // After switching users, the listener will become invalid and needs to be re-registered. 
         ScreenSettingHelper::UnregisterSettingResolutionEffectObserver();
         RegisterSettingResolutionEffectObserver();
     }
     //ensure updateavilibearea success after switch user
-    RecoveryResolutionEffect();
     auto internalSession = GetInternalScreenSession();
     if (internalSession == nullptr) {
         TLOGE(WmsLogTag::DMS, "Internal Session null");
         return;
     }
-    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+    if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice() && g_isPcDevice) {
         internalSession->PropertyChange(internalSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
     }
 }
