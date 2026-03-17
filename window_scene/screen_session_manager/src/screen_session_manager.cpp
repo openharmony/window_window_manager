@@ -6079,17 +6079,7 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
-        if (SUPPORT_COMPATIBLE_MODE) {
-            ScreenSettingHelper::GetSettingOffScreenRenderValue(g_offScreenRenderValue,
-                SETTING_OFF_SCREEN_RENDERING_SWITCH_KEY);
-            that.RegisterOffScreenRenderingSettingSwitchObserver();
-            that.RegisterSettingExtendScreenIndepDpiObserver();
-        }
-        if (g_offScreenRenderValue) {
-            that.SetExtendScreenDpi();
-        } else {
-            that.SetExtendScreenIndepDpi();
-        }
+        that.SetExtendScreenDpi();
         that.SetBorderingAreaPercent();
         that.UpdateDisplayState(that.GetAllScreenIds(), DisplayState::ON);
         that.RegisterSettingDpiObserver();
@@ -6142,6 +6132,12 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
                 ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
         }
 #endif
+        if (SUPPORT_COMPATIBLE_MODE) {
+            ScreenSettingHelper::GetSettingOffScreenRenderValue(g_offScreenRenderValue,
+                SETTING_OFF_SCREEN_RENDERING_SWITCH_KEY);
+            that.RegisterOffScreenRenderingSettingSwitchObserver();
+            that.RegisterSettingExtendScreenIndepDpiObserver();
+        }
     }
 }
 
@@ -14102,6 +14098,10 @@ void ScreenSessionManager::SetExtendScreenDpi()
 
 void ScreenSessionManager::SetExtendScreenIndepDpi()
 {
+    if (g_offScreenRenderValue) {
+        TLOGNFI(WmsLogTag::DMS, "current is not independent dpi mode.");
+        return;
+    }
     sptr<ScreenSession> externalSession = GetExternalSession();
     if (!externalSession) {
         TLOGNFE(WmsLogTag::DMS, "extend screen session is null.");
