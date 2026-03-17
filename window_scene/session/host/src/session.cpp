@@ -4742,6 +4742,17 @@ uint32_t Session::GetBlurBackgroundColor() const
 void Session::SetSnapshotScale(const float snapshotScale)
 {
     snapshotScale_ = snapshotScale;
+    if (scenePersistence_) {
+        scenePersistence_->SetSnapshotScale(snapshotScale);
+    }
+}
+
+void Session::InitPersistentScaledSnapshotParam(bool enabled)
+{
+    enablePersistentScaledSnapshot_ = enabled;
+    if (scenePersistence_) {
+        scenePersistence_->InitPersistentScaledSnapshotParam(enabled);
+    }
 }
 
 WSError Session::ProcessBackEvent()
