@@ -478,5 +478,21 @@ void WindowInfoReporter::ReportWindowIOPerDay()
         TLOGE(WmsLogTag::DEFAULT, "write HiSysEvent error, ret: %{public}d", ret);
     }
 }
+
+void WindowInfoReporter::ReportWindowFrozen(int32_t detectionType, const std::string& windowInfo)
+{
+    std::string eventName = "WINDOW_FROZEN_DETECTION";
+    std::string detectionName = WM_CHECK_TYPE_TO_CHECK_NAME_MAP.find(detectionType) !=
+        WM_CHECK_TYPE_TO_CHECK_NAME_MAP.end() ? WM_CHECK_TYPE_TO_CHECK_NAME_MAP.at(detectionType) : "";
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "DETECTION_TYPE", detectionType,
+        "DETECTION_NAME", detectionName,
+        "MSG", windowInfo);
+    if (ret != 0) {
+        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+    }
+}
 } // namespace Rosen
 }

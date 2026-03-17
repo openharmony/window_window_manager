@@ -8564,8 +8564,8 @@ void WindowSessionImpl::AddSetUIContentTimeoutCheck()
                 oss << ", abilityName: " << context->GetApplicationInfo()->name;
             }
         }
-        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowFrozen(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_UICONTENT_TIMEOUT_CHECK), oss.str());
 
         if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
             window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UICONTENT_TIMEOUT);
@@ -8639,8 +8639,8 @@ void WindowSessionImpl::AddSetUIExtensionDestroyTimeoutCheck()
                 oss << ", abilityName: " << context->GetApplicationInfo()->name;
             }
         }
-        SingletonContainer::Get<WindowInfoReporter>().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK), getpid(), oss.str());
+        SingletonContainer::Get<WindowInfoReporter>().ReportWindowFrozen(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK), oss.str());
 
         if (WindowHelper::IsUIExtensionWindow(window->GetType())) {
             window->NotifyExtensionTimeout(TimeoutErrorCode::SET_UIEXTENSION_DESTROY_TIMEOUT);
