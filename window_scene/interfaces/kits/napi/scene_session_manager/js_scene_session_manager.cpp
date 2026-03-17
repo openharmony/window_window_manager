@@ -2256,6 +2256,9 @@ napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callb
         if (!sessionInfo.pageConfig.empty()) {
             sceneSession->EditSessionInfo().pageConfig = sessionInfo.pageConfig;
         }
+        if (!sessionInfo.combinedCompatibleConfig.empty()) {
+            sceneSession->EditSessionInfo().combinedCompatibleConfig = sessionInfo.combinedCompatibleConfig;
+        }
         return jsSceneSessionObj;
     }
 }

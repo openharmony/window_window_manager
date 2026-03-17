@@ -549,11 +549,9 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteString(property->GetAncoRealBundleName());
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
         reply.WriteString(property->GetLogicalDeviceConfig());
-        std::vector<std::string> combinedCompatibleConfig;
-        property->GetCombinedCompatibleConfig(combinedCompatibleConfig);
-        auto size = combinedCompatibleConfig.size();
-        reply.WriteUint32(static_cast<uint32_t>(size));
-        for (decltype(size) i = 0; i < size; i++) {
+        auto combinedCompatibleConfig = property->GetCombinedCompatibleConfig();
+        reply.WriteUint32(static_cast<uint32_t>(combinedCompatibleConfig.size()));
+        for (decltype(combinedCompatibleConfig.size()) i = 0; i < combinedCompatibleConfig.size(); i++) {
             reply.WriteString(combinedCompatibleConfig[i]);
         }
         MissionInfo missionInfo = property->GetMissionInfo();

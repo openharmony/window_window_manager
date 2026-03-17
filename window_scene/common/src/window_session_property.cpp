@@ -2528,11 +2528,13 @@ std::string WindowSessionProperty::GetLogicalDeviceConfig() const
 
 void WindowSessionProperty::SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig)
 {
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
     combinedCompatibleConfig_ = combinedCompatibleConfig;
 }
 
 const std::vector<std::string>& WindowSessionProperty::GetCombinedCompatibleConfig() const
 {
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
     return combinedCompatibleConfig_;
 }
 
