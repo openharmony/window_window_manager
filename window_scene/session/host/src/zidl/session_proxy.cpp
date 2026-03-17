@@ -345,6 +345,13 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetAncoRealBundleName(reply.ReadString());
         property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
         property->SetLogicalDeviceConfig(reply.ReadString());
+        uint32_t combinedConfigSize = reply.ReadUint32();
+        std::vector<std::string> combinedCompatibleConfig;
+        combinedCompatibleConfig.reserve(combinedConfigSize);
+        for (uint32_t i = 0; i < combinedConfigSize; i++) {
+            combinedCompatibleConfig.emplace_back(reply.ReadString());
+        }
+        property->SetCombinedCompatibleConfig(combinedCompatibleConfig);
         sptr<MissionInfo> missionInfo = reply.ReadParcelable<MissionInfo>();
         if (missionInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "read missionInfo is nullptr.");

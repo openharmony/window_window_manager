@@ -196,6 +196,7 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             }
             if (WindowHelper::IsMainWindow(session->GetWindowType())) {
                 property->SetLogicalDeviceConfig(session->GetSessionInfo().logicalDeviceConfig);
+                property->SetCombinedCompatibleConfig(session->GetSessionInfo().combinedCompatibleConfig);
             }
             property->SetPrelaunch(session->GetSessionInfo().isPrelaunch_);
             property->SetFrameNum(session->GetSessionInfo().frameNum_);

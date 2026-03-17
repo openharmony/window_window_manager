@@ -811,6 +811,25 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "logicalDeviceConfig", sessionInfo.logicalDeviceConfig)) {
         return false;
     }
+    napi_value jsArray = nullptr;
+    napi_get_named_property(env, jsObject, "combinedCompatibleConfig", &jsArray);
+    napi_valuetype valueType = napi_undefined;
+    if (jsArray != nullptr) {
+        napi_typeof(env, jsArray, &valueType);
+        if (valueType != napi_undefined) {
+            bool isArray = false;
+            napi_is_array(env, jsArray, &isArray);
+            if (isArray) {
+                if (!ParseArrayStringValue(env, jsArray, sessionInfo.combinedCompatibleConfig)) {
+                    WLOGFE("Failed to parse combinedCompatibleConfig array");
+                    return false;
+                }
+            } else {
+                WLOGFE("combinedCompatibleConfig is not an array");
+                return false;
+            }
+        }
+    }
     return true;
 }
 
