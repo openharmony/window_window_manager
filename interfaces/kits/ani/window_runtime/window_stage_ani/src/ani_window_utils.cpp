@@ -776,6 +776,7 @@ ani_object AniWindowUtils::CreateAniWindowSystemBarProperties(ani_env* env,
     return systemBarProperties;
 }
 
+// tanhong
 bool AniWindowUtils::CreateNavBarColorProperties(ani_env* env, const SystemBarProperty& navi, ani_class cls,
     ani_object systemBarProperties, const SystemBarProperty& status)
 {
@@ -783,12 +784,20 @@ bool AniWindowUtils::CreateNavBarColorProperties(ani_env* env, const SystemBarPr
     if (GetAniString(env, GetHexColor(navi.backgroundColor_), &navigationBarColor) != ANI_OK) {
         return false;
     }
+    TLOGE(WmsLogTag::DEFAULT, "[ANI] method:%{public}s, systemBarProperties == nullptr:%{public}d "
+        " cls == nullptr:%{public}d, Builder:%{public}d",
+        method, systemBarProperties == nullptr, cls == nullptr,
+        Builder::BuildSetterName("navigationBarColor").c_str() == nullptr);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("navigationBarColor").c_str(),
         nullptr, navigationBarColor);
     ani_string navigationBarContentColor;
     if (GetAniString(env, GetHexColor(navi.contentColor_), &navigationBarContentColor) != ANI_OK) {
         return false;
     }
+    TLOGE(WmsLogTag::DEFAULT, "[ANI] method:%{public}s, systemBarProperties == nullptr:%{public}d "
+        "navigationBarContentColor == nullptr:%{public}d, cls == nullptr:%{public}d, Builder:%{public}d",
+        method, systemBarProperties == nullptr, navigationBarContentColor == nullptr, cls == nullptr,
+        Builder::BuildSetterName("navigationBarColor").c_str() == nullptr);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("navigationBarContentColor").c_str(),
         nullptr, navigationBarContentColor);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("isNavigationBarLightIcon").c_str(),
@@ -1645,6 +1654,7 @@ ani_status AniWindowUtils::CallAniMethodVoid(ani_env *env, ani_object object, co
     return ret;
 }
 
+// tanhong
 ani_status AniWindowUtils::CallAniMethodVoid(ani_env *env, ani_object object, ani_class cls,
     const char* method, const char* signature, ...)
 {
