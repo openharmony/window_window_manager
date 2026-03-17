@@ -176,6 +176,39 @@ public:
 };
 
 /**
+ * @class IParentLifecycleEventListener
+ *
+ * @brief IParentLifecycleEventListener is a listener used to notify caller that lifecycle of parent window.
+ */
+class IParentLifecycleEventListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller that parent window is on the foreground.
+     */
+    virtual void OnParentForeground(int32_t windowId) {}
+
+    /**
+     * @brief Notify caller that parent window is active.
+     */
+    virtual void OnParentActive(int32_t windowId) {}
+
+    /**
+     * @brief Notify caller that parent window is inactive.
+     */
+    virtual void OnParentInactive(int32_t windowId) {}
+
+    /**
+     * @brief Notify caller that parent window is on the background.
+     */
+    virtual void OnParentBackground(int32_t windowId) {}
+
+    /**
+     * @brief Notify caller that parent window is destroyed.
+     */
+    virtual void OnParentDestroyed(int32_t windowId) {}
+};
+
+/**
  * @class IWindowStageLifeCycle
  *
  * @brief IWindowStageLifeCycle is a listener used to notify caller that lifecycle of window.
@@ -2096,6 +2129,28 @@ public:
     virtual WMError UnregisterLifeCycleListener(const sptr<IWindowLifeCycle>& listener) { return WMError::WM_OK; }
 
     /**
+     * @brief Register parent window lifecycle listener.
+     *
+     * @param listener ParentLifeCycleListener listener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Unregister parent window lifecycle listener.
+     *
+     * @param listener WindowLifeCycle listener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Register window lifecycle listener.
      *
      * @param listener WindowLifeCycle listener.
@@ -3072,7 +3127,7 @@ public:
      *
      * @return Errorcode of window.
      */
-    virtual WMError NotifyPrepareClosePiPWindow() { return WMError::WM_OK; }
+    virtual WMError NotifyPrepareClosePiPWindow(const bool isWeb = false) { return WMError::WM_OK; }
 
     /**
      * @brief update the pip window instance (w,h,r).
@@ -5148,6 +5203,18 @@ public:
      * @brief Flush vsync for prelaunch.
      */
     virtual void FlushVsync() {}
+
+    /**
+     * @brief Notify pageEnable.
+     *
+     * @param action action.
+     * @param message message.
+     * @return WM_OK means on success, others means failed.
+     */
+    virtual WMError NotifyPageEnable(const std::string& action, const std::string& message)
+    {
+        return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
+    }
 };
 }
 }

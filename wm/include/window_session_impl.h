@@ -237,7 +237,7 @@ public:
     bool OnPointDown(int32_t eventId, int32_t posX, int32_t posY) override;
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
-    virtual void SetForceSplitConfigEnable(bool enableForceSplit) {};
+    virtual void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false) {};
     void SetForceSplitConfig(const AppForceLandscapeConfig& config);
 
     /*
@@ -327,6 +327,8 @@ public:
     WMError UnregisterWindowStageLifeCycleListener(const sptr<IWindowStageLifeCycle>& listener) override;
     WMError RegisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
     WMError UnregisterFreeWindowModeChangeListener(const sptr<IFreeWindowModeChangeListener>& listener) override;
+    WMError RegisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener) override;
+    WMError UnregisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener) override;
     void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) override;
     void UnregisterWindowDestroyedListener() override { notifyNativeFunc_ = nullptr; }
     WMError RegisterScreenshotListener(const sptr<IScreenshotListener>& listener) override;
@@ -401,6 +403,7 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     WSError NotifyDialogStateChange(bool isForeground) override;
     bool IsMainHandlerAvailable() const override;
+    WSError NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType) override;
 
     /*
      * PiP Window
@@ -591,6 +594,12 @@ public:
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight) override;
     void NotifyHighlightChange(bool isHighlight);
+    /*
+     * Snapshot
+     */
+    std::shared_ptr<Media::PixelMap> Snapshot() override;
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap) override;
+    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
 
     /*
      * PC Fold Screen
@@ -651,7 +660,7 @@ public:
     /*
      * Window Lifecycle and mode Record
      */
-    void RecordWindowLifecycleChange(const std::string& widnowEvent);
+    void RecordWindowLifecycleChange(const std::string& windowEvent);
     static std::string WindowStatusToString(WindowStatus status);
 
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
@@ -1028,6 +1037,8 @@ private:
     EnableIfSame<T, IWindowRotationChangeListener, std::vector<sptr<IWindowRotationChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> GetListeners();
+    template<typename T>
+ 	EnableIfSame<T, IParentLifecycleEventListener, std::vector<sptr<IParentLifecycleEventListener>>> GetListeners();
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);
@@ -1087,7 +1098,7 @@ private:
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; };
     virtual WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) { return WMError::WM_OK; };
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
@@ -1138,6 +1149,7 @@ private:
     static std::mutex windowOrientationChangeListenerMutex_;
     static std::mutex highlightChangeListenerMutex_;
     static std::mutex freeWindowModeChangeListenerMutex_;
+    static std::mutex parentLifecycleEventListenerMutex_;
     static std::mutex windowRotationChangeListenerMutex_;
     static std::mutex occlusionStateChangeListenerMutex_;
     static std::unordered_map<int32_t,
@@ -1183,6 +1195,7 @@ private:
     static std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> highlightChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> windowRotationChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> freeWindowModeChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IParentLifecycleEventListener>>> parentLifecycleEventListeners_;
 
     // FA only
     sptr<IAceAbilityHandler> aceAbilityHandler_;

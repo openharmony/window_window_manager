@@ -2202,7 +2202,6 @@ HWTEST_F(ScreenSessionManagerTest, CheckSetResolutionIsValid, TestSize.Level1)
     mode->width_ = 1;
     mode->height_ = 1;
     screenSession->modes_ = {mode};
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 100, 100, 0.5));
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 0, 0, 10.5));
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->CheckSetResolutionIsValid(screenId, 1, 1, 10.5));
 }

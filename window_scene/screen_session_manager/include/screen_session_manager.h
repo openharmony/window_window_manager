@@ -505,7 +505,7 @@ public:
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
     void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
-
+    void OnGetHdrFormats(ScreenId screenId, const std::vector<ScreenHDRFormat>& rsHdrFormats);
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     /*
      * multi user
@@ -716,6 +716,9 @@ private:
     void InitScreenProperty(ScreenId screenId, RSScreenModeInfo& screenMode,
         RSScreenCapability& screenCapability, ScreenProperty& property);
     RRect GetScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
+    RRect GetPhyScreenBounds(ScreenId screenId, RSScreenModeInfo& screenMode);
+    void ValidateRogProperty(const RRect& screenPhyBounds, ScreenProperty& property);
+    void SetRogParameter(uint32_t width, uint32_t height, float dpi, bool isSupportRog);
     void InitSecondaryDisplayPhysicalParams();
     void UpdateCoordinationRefreshRate(uint32_t refreshRate);
     void UpdateSuperFoldRefreshRate(sptr<ScreenSession> screenSession, uint32_t refreshRate);
@@ -805,6 +808,10 @@ private:
 
         sptr<ScreenSession> secondaryScreenSession);
     bool IsSpecialApp();
+    DMError CheckDestroyVirtualScreenPermission(bool isCallingByThirdParty);
+    DMError ValidateVirtualScreenId(ScreenId screenId);
+    void RemoveScreenFromAgentMap(ScreenId screenId);
+    void ProcessVirtualScreenDestroy(ScreenId screenId, ScreenId rsScreenId, sptr<ScreenSession> screen);
     void SetMultiScreenRelativePositionInner(sptr<ScreenSession>& firstScreenSession,
         sptr<ScreenSession>& secondScreenSession, MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption);
@@ -887,6 +894,7 @@ private:
         ~ScreenIdManager() = default;
         WM_DISALLOW_COPY_AND_MOVE(ScreenIdManager);
         ScreenId CreateAndGetNewScreenId(ScreenId rsScreenId);
+        void CreateScreenId(ScreenId smsScreenId, ScreenId rsScreenId);
         void UpdateScreenId(ScreenId rsScreenId, ScreenId smsScreenId);
         bool DeleteScreenId(ScreenId smsScreenId);
         bool HasRsScreenId(ScreenId smsScreenId) const;
@@ -989,6 +997,7 @@ private:
 
     bool isDensityDpiLoad_ = false;
     float densityDpi_ { 1.0f };
+    float rogDpi_{ 1.0f };
     float subDensityDpi_ { 1.0f };
     std::atomic<uint32_t> cachedSettingDpi_ {0};
     float pcModeDpi_ { 1.0f };
@@ -1036,7 +1045,7 @@ private:
     std::mutex screenPowerMutex_;
     std::mutex screenMaskMutex_;
     std::condition_variable screenMaskCV_;
-    std::mutex screenModeChangeMutex_;
+    std::recursive_mutex screenModeChangeMutex_;
     std::condition_variable displayAddCV_;
     mutable std::mutex setPcStatusMutex_;
 
@@ -1115,6 +1124,7 @@ private:
     void SetWiredScreenGamut();
     void SetBorderingAreaPercent();
     bool HandleSwitchPcMode();
+    void ChangeWatchDogTimeInterval(const std::string& name, uint64_t interval);
     void SwitchModeHandleExternalScreen(bool isSwitchToPcMode);
     void SetScreenNameWhenSwitchMode(const sptr<ScreenSession>& screenSession, bool isSwitchToPcMode);
     void SwitchModeOffScreenRenderingResetScreenProperty(const sptr<ScreenSession>& externalScreenSession,
@@ -1176,6 +1186,11 @@ private:
     void HandleNewUserDisplayNode(int32_t newUserId, bool coldBoot);
     void WaitSwitchUserAnimateFinish(int32_t newUserId, bool isColdSwitch);
     void MakeMirrorAfterSwitchUser();
+
+    void ExitCoordinationAndRecoverDisplayMode();
+    FoldDisplayMode GetCurrentDisplayMode();
+
+    void SetLockDisplayModeWhenShutDown(PowerStateChangeReason reason, bool isLock);
 
     // mirror screen
     bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);

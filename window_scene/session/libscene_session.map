@@ -40,6 +40,7 @@
             OHOS::Rosen::SceneSession::RemoveSubSession*;
             OHOS::Rosen::SceneSession::SendKeyEventToUI*;
             OHOS::Rosen::SceneSession::SetIsStartMoving*;
+            OHOS::Rosen::SceneSession::NotifyParentLifecycleEvent*;
             OHOS::Rosen::SceneSession::SetUIFirstSwitch*;
             OHOS::Rosen::SceneSession::IsSameMainSession*;
             OHOS::Rosen::SceneSession::NotifyDisplayMove*;
@@ -246,6 +247,7 @@
             OHOS::Rosen::ScenePersistence::CreateSnapshotDir*;
             OHOS::Rosen::ScenePersistence::GetSnapshotFilePath*;
             OHOS::Rosen::ScenePersistence::CreateUpdatedIconDir*;
+            OHOS::Rosen::ScenePersistence::CreateAbilityIconDir*;
             OHOS::Rosen::SessionStageStub::OnRemoteRequest*;
             OHOS::Rosen::WSSnapshotHelper::GetInstance*;
             OHOS::Rosen::WSSnapshotHelper::SetWindowScreenStatus*;

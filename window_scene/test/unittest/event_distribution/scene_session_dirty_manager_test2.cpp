@@ -233,7 +233,7 @@ HWTEST_F(SceneSessionDirtyManagerTest2, GetWindowInfoWithNotIsTouchEnable, TestS
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
     manager_->UpdateWindowFlags(screenId, sceneSessionMainWindow, windowInfo);
-    ASSERT_EQ(windowInfo.flags, MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE);
+    ASSERT_EQ(windowInfo.flags, MMI::WindowInputPolicy::FLAG_UNTOUCHABLE);
 }
 
 /**

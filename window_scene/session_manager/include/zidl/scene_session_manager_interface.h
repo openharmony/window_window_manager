@@ -174,6 +174,8 @@ public:
         TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX,
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
         TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN,
+        TRANS_ID_SNAPSHOT_BY_WINDOW_ID,
+        TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -310,6 +312,10 @@ public:
     {
         return WMError::WM_OK;
     }
+    WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
@@ -321,6 +327,11 @@ public:
     WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override { return WMError::WM_OK; }
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+        int32_t persistentId, const SnapshotConfig& config) override
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     WMError GetGlobalWindowMode(DisplayId displayId,
         GlobalWindowMode& globalWinMode) override { return WMError::WM_OK; }
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override { return WMError::WM_OK; }

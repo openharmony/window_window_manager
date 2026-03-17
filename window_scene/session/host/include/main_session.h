@@ -34,7 +34,7 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
 
     /*
      * Window Hierarchy
@@ -89,6 +89,8 @@ public:
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
     void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) override;
+    void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
+    WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
 
     /*
      * Window Pattern
@@ -137,6 +139,7 @@ private:
     std::atomic_bool isFullScreenInForceSplit_ { false };
     CompatibleModeChangeCallback compatibleModeChangeCallback_;
     NotifyForceSplitEnableFunc forceSplitEnableFunc_;
+    PageEnableCallback pageEnableCallback_;
 
     /*
      * Prelaunch check

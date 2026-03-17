@@ -870,6 +870,33 @@ struct WindowSnapshotConfiguration : public Parcelable {
 };
 
 /**
+ * @struct SnapshotConfig
+ *
+ * @brief Snapshot configuration for sa inner interface.
+ */
+struct SnapshotConfig : public Parcelable {
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    bool useCurWindow = false;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteFloat(scaleX) && parcel.WriteFloat(scaleY) && parcel.WriteBool(useCurWindow);
+    }
+
+    static SnapshotConfig* Unmarshalling(Parcel& parcel)
+    {
+        auto snapshotConfig = std::make_unique<SnapshotConfig>();
+        if (!parcel.ReadFloat(snapshotConfig->scaleX) ||
+            !parcel.ReadFloat(snapshotConfig->scaleY) ||
+            !parcel.ReadBool(snapshotConfig->useCurWindow)) {
+            return nullptr;
+        }
+        return snapshotConfig.release();
+    }
+};
+
+/**
  * @struct MainWindowState.
  *
  * @brief Main window state info.
@@ -1787,6 +1814,7 @@ struct PiPTemplateInfo : public Parcelable {
     std::vector<PiPControlEnableInfo> pipControlEnableInfoList;
     uint32_t defaultWindowSizeType{0};
     bool cornerAdsorptionEnabled{true};
+    bool isWeb{false};
 
     PiPTemplateInfo() {}
 
@@ -1821,7 +1849,7 @@ struct PiPTemplateInfo : public Parcelable {
         if (!parcel.WriteUint32(defaultWindowSizeType)) {
             return false;
         }
-        if (!parcel.WriteBool(cornerAdsorptionEnabled)) {
+        if (!parcel.WriteBool(cornerAdsorptionEnabled) || !parcel.WriteBool(isWeb)) {
             return false;
         }
         return true;
@@ -1872,7 +1900,7 @@ struct PiPTemplateInfo : public Parcelable {
             delete pipTemplateInfo;
             return nullptr;
         }
-        if (!parcel.ReadBool(pipTemplateInfo->cornerAdsorptionEnabled)) {
+        if (!parcel.ReadBool(pipTemplateInfo->cornerAdsorptionEnabled) || !parcel.ReadBool(pipTemplateInfo->isWeb)) {
             delete pipTemplateInfo;
             return nullptr;
         }
@@ -2326,6 +2354,51 @@ struct WindowInfoOption : public Parcelable {
         windowInfoOption->windowInfoTypeOption = static_cast<WindowInfoTypeOption>(windowInfoTypeOption);
         return windowInfoOption;
     }
+};
+
+struct CrossProcessWindowInfo : public Parcelable {
+    int32_t persistentId = 0;
+    uint64_t displayId = 0;
+    bool isPcAppInPad = false;
+    bool isPcAppInpadCompatibleMode = false;
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteInt32(persistentId)) {
+            return false;
+        }
+        if (!parcel.WriteUint64(displayId)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isPcAppInPad)) {
+            return false;
+        }
+        if (!parcel.WriteBool(isPcAppInpadCompatibleMode)) {
+            return false;
+        }
+        return true;
+    }
+
+    static CrossProcessWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto info = new CrossProcessWindowInfo();
+        if (!parcel.ReadInt32(info->persistentId) || !parcel.ReadUint64(info->displayId) ||
+            !parcel.ReadBool(info->isPcAppInPad) || !parcel.ReadBool(info->isPcAppInpadCompatibleMode)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+};
+
+enum class ParentLifeCycleEventType : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+    DESTROYED,
 };
 
 /**

@@ -685,7 +685,7 @@ void SceneInputManager::SetUserBackground(bool userBackground)
 
 void SceneInputManager::SetIsRotationBegin(bool isRotationBegin)
 {
-    TLOGD(WmsLogTag::WMS_MULTI_USER, "isRotationBegin=%{public}d", isRotationBegin);
+    TLOGD(WmsLogTag::WMS_EVENT, "isRotationBegin=%{public}d", isRotationBegin);
     isRotationBegin_.store(isRotationBegin);
 }
 

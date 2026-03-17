@@ -128,9 +128,6 @@ public:
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
-    virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
-    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap) override;
-    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
@@ -157,7 +154,7 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
-    WMError NotifyPrepareClosePiPWindow() override;
+    WMError NotifyPrepareClosePiPWindow(const bool isWeb = false) override;
     void UpdateSubWindowState(const WindowType& type);
     WMError SetStatusBarColorForNavigation(const std::optional<uint32_t> color) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
@@ -186,7 +183,7 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
 
     /*
      * Sub Window
@@ -241,8 +238,9 @@ public:
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
-    void SetForceSplitConfigEnable(bool enableForceSplit) override;
+    void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false) override;
     void SendLogicalDeviceConfigToArkUI();
+    WMError NotifyPageEnable(const std::string& action, const std::string& message) override;
 
     /*
      * Free Multi Window
@@ -555,7 +553,7 @@ private:
     float GetMainWindowCustomDensity();
     float customDensity_ = UNDEFINED_DENSITY;
     bool isEnableDefaultDensityWhenCreate_ = false;
-    float rsCornerRadius_;
+    float rsCornerRadius_ = 0.0f;
     WMError SetPcAppInpadSpecificSystemBarInvisible();
     WMError SetPcAppInpadOrientationLandscape();
 
@@ -587,9 +585,8 @@ private:
     /*
      * Move Drag
      */
-    bool CalcWindowShouldMove();
     bool CheckCanMoveWindowType();
-    bool CheckCanMoveWindowTypeByDevice();
+    bool CheckCanStartMoveWindowByWindowType();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
     AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);

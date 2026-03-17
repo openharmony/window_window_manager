@@ -300,7 +300,7 @@ public:
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated() = 0;
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
     virtual WSError UpdateBrightness(float brightness) = 0;
@@ -366,6 +366,19 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError UpdatePropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+    * @brief Notify parent lifecycle event to subwindow.
+    *
+    * Notify subwindow about parent window lifecycle changes (foreground, background, destroy).
+    *
+    * @param eventType Indicates the lifecycle event (foreground/background/destroy).
+    * @return Returns WSError::WS_OK if called success, otherwise failed.
+    */
+    virtual WSError NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType)
     {
         return WSError::WS_OK;
     }

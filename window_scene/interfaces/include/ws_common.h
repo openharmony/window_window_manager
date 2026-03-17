@@ -48,6 +48,7 @@ using ScreenId = uint64_t;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int64_t INVALID_TIME_STAMP = 0;
+constexpr float INVALID_SCALE = 0;
 constexpr int32_t MIN_REQUEST_ID_FROM_ABILITY = 1;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
@@ -129,6 +130,8 @@ enum class WSErrorCode : int32_t {
 };
 
 extern const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP;
+
+bool CheckCollaboratorType(int32_t type);
 
 enum class SessionState : uint32_t {
     STATE_DISCONNECT = 0,
@@ -1214,14 +1217,6 @@ enum class TerminateType : uint32_t {
 };
 
 /**
- * @brief window expand flag.
- */
-enum class ExpandInputFlag : uint32_t {
-    EXPAND_INPUT_FLAG_DEFAULT = 0,
-    WINDOW_DISABLE_USER_ACTION = 1 << 2,
-};
-
-/**
  * @brief System animaged scene type.
  */
 enum class SystemAnimatedSceneType : uint32_t {
@@ -1258,6 +1253,8 @@ struct SessionUIParam {
     WSRect rect_;
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
+    float rsScaleX_ { 1.0f };
+    float rsScaleY_ { 1.0f };
     float pivotX_ { 1.0f };
     float pivotY_ { 1.0f };
     float transX_ { 0.0f }; // global translateX
@@ -1349,6 +1346,16 @@ enum class LifeCycleChangeReason {
     SCREEN_ROTATION,
 
     REASON_END,
+};
+
+enum class ParentLifeCycleEvent : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+    DESTROYED,
 };
 
 enum class AsyncTraceTaskId: int32_t {

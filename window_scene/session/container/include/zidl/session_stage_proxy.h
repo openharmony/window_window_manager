@@ -112,7 +112,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
     WSError CloseSpecificScene() override;
     void NotifyLifecyclePausedStatus() override;
@@ -125,6 +125,7 @@ public:
     WSError SetSidebarBlurStyleWithType(SidebarBlurType type) override;
     WSError UpdateWindowUIType(WindowUIType windowUIType) override;
     WSError UpdatePropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property) override;
+    WSError NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType) override;
 
     // Window Property
     WSError UpdateBrightness(float brightness) override;

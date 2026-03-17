@@ -1817,6 +1817,40 @@ HWTEST_F(WindowSessionTest4, GetIsMidScene_SubSession, TestSize.Level1)
     EXPECT_EQ(result, WSError::WS_OK);
     EXPECT_EQ(isMidScene, true);
 }
+
+/**
+ * @tc.name: SetLayerPartRender001
+ * @tc.desc: Set and get layer part render flag when surface node exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLayerPartRender001, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    EXPECT_FALSE(session_->GetLayerPartRender());
+
+    session_->SetLayerPartRender(true);
+    EXPECT_TRUE(session_->GetLayerPartRender());
+
+    session_->SetLayerPartRender(false);
+    EXPECT_FALSE(session_->GetLayerPartRender());
+}
+
+/**
+ * @tc.name: SetLayerPartRender002
+ * @tc.desc: Set and get layer part render flag when surface node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLayerPartRender002, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->surfaceNode_ = nullptr;
+
+    session_->SetLayerPartRender(true);
+    EXPECT_TRUE(session_->GetLayerPartRender());
+
+    session_->SetLayerPartRender(false);
+    EXPECT_FALSE(session_->GetLayerPartRender());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

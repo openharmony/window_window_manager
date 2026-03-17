@@ -111,6 +111,8 @@ ohos_shared_library("extensionwindow_napi") {
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "image_framework:image",
+    "image_framework:image_native",
     "ipc:ipc_single",
     "napi:ace_napi",
   ]

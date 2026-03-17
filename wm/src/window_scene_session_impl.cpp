@@ -159,7 +159,6 @@ constexpr float INVALID_DEFAULT_DENSITY = 1.0f;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_WIDTH = 40;
 constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
-constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 constexpr int32_t SIDEBAR_BLUR_ANIMATION_DURATION = 150;
 
@@ -423,26 +422,42 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             AddSubWindowMapForExtensionWindow();
         }
     } else if (WindowHelper::IsSubWindow(type)) {
-        sptr<WindowSessionImpl> parentSession = nullptr;
-        auto ret = WindowSceneSessionImpl::GetParentSessionAndVerify(hasToastFlag, parentSession);
-        if (ret != WMError::WM_OK) {
-            return ret;
+        if (property_->GetIsCrossProcessWindow()) {
+            CrossProcessWindowInfo crossProcessWindowInfo;
+            crossProcessWindowInfo.persistentId = property_->GetParentId();
+            WMError wmError = SingletonContainer::Get<WindowAdapter>()
+                .GetCrossProcessWindowInfo(crossProcessWindowInfo);
+            if (wmError != WMError::WM_OK) {
+                return wmError;
+            }
+            property_->SetParentPersistentId(crossProcessWindowInfo.persistentId);
+            property_->SetDisplayId(crossProcessWindowInfo.displayId);
+            property_->SetIsPcAppInPad(crossProcessWindowInfo.isPcAppInPad);
+            property_->SetPcAppInpadCompatibleMode(crossProcessWindowInfo.isPcAppInpadCompatibleMode);
+            SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+                surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+        } else {
+            sptr<WindowSessionImpl> parentSession = nullptr;
+            auto ret = WindowSceneSessionImpl::GetParentSessionAndVerify(hasToastFlag, parentSession);
+            if (ret != WMError::WM_OK) {
+                return ret;
+            }
+            property_->SetDisplayId(parentSession->GetDisplayId());
+            // set parent persistentId
+            auto parentWindowId = parentSession->GetPersistentId();
+            property_->SetParentPersistentId(parentWindowId);
+            property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
+            property_->SetPcAppInpadCompatibleMode(parentSession->GetProperty()->GetPcAppInpadCompatibleMode());
+            // creat sub session by parent session
+            SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+                surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
+            {
+                std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+                // update subWindowSessionMap_
+                subWindowSessionMap_[parentWindowId].push_back(this);
+            }
+            SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
         }
-        property_->SetDisplayId(parentSession->GetDisplayId());
-        // set parent persistentId
-        auto parentWindowId = parentSession->GetPersistentId();
-        property_->SetParentPersistentId(parentWindowId);
-        property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
-        property_->SetPcAppInpadCompatibleMode(parentSession->GetProperty()->GetPcAppInpadCompatibleMode());
-        // creat sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
-            surfaceNode_, property_, persistentId, session, windowSystemConfig_, token);
-        {
-            std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
-            // update subWindowSessionMap_
-            subWindowSessionMap_[parentWindowId].push_back(this);
-        }
-        SetTargetAPIVersion(parentSession->GetTargetAPIVersion());
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
@@ -2234,7 +2249,8 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
         } else if (WindowHelper::IsSubWindow(GetType()) && !property_->GetIsUIExtFirstSubWindow()) {
             auto parentSession = FindParentSessionByParentId(GetParentId());
-            if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+            if ((parentSession == nullptr || parentSession->GetHostSession() == nullptr) &&
+                !property_->GetIsCrossProcessWindow()) {
                 return WMError::WM_ERROR_NULLPTR;
             }
             ret = SyncDestroyAndDisconnectSpecificSession(property_->GetPersistentId());
@@ -3746,7 +3762,7 @@ SystemBarProperty WindowSceneSessionImpl::GetCurrentActiveSystemBarProperty(Wind
 {
     // fallback to system default property
     auto prop = GetSystemBarPropertyByType(type);
-    prop.settingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
+    prop.settingFlag_ = SystemBarSettingFlag::FOLLOW_SETTING;
     {
         std::lock_guard<std::mutex> lock(ownSystemBarPropertyMapMutex_);
         if (ownSystemBarPropertyMap_.find(type) == ownSystemBarPropertyMap_.end()) {
@@ -4502,20 +4518,6 @@ bool WindowSceneSessionImpl::IsStartMoving()
     return isMoving;
 }
 
-bool WindowSceneSessionImpl::CalcWindowShouldMove()
-{
-    if ((windowSystemConfig_.IsPhoneWindow() ||
-        (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
-        GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            return true;
-    }
-
-    if (IsPcOrFreeMultiWindowCapabilityEnabled()) {
-        return true;
-    }
-    return false;
-}
-
 bool WindowSceneSessionImpl::CheckCanMoveWindowType()
 {
     WindowType windowType = GetType();
@@ -4525,22 +4527,6 @@ bool WindowSceneSessionImpl::CheckCanMoveWindowType()
         return false;
     }
     return true;
-}
-
-bool WindowSceneSessionImpl::CheckCanMoveWindowTypeByDevice()
-{
-    WindowType windowType = GetType();
-    bool isPcOrFreeMultiWindowCanMove = IsPcOrFreeMultiWindowCapabilityEnabled() &&
-        (WindowHelper::IsSystemWindow(windowType) ||
-         WindowHelper::IsMainWindow(windowType) ||
-         WindowHelper::IsSubWindow(windowType));
-    bool isPhoneWindowCanMove = (windowSystemConfig_.IsPhoneWindow() ||
-        (windowSystemConfig_.IsPadWindow() && !IsFreeMultiWindowMode())) &&
-        (WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType));
-    if (isPcOrFreeMultiWindowCanMove || isPhoneWindowCanMove) {
-        return true;
-    }
-    return false;
 }
 
 bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
@@ -4556,38 +4542,42 @@ bool WindowSceneSessionImpl::CheckIsPcAppInPadFullScreenOnMobileWindowMode()
     return false;
 }
 
+bool WindowSceneSessionImpl::CheckCanStartMoveWindowByWindowType()
+{
+    if (IsPcOrFreeMultiWindowCapabilityEnabled()) {
+        return true;
+    }
+    WindowType windowType = GetType();
+    return WindowHelper::IsSystemWindow(windowType) || WindowHelper::IsSubWindow(windowType);
+}
+
 WmErrorCode WindowSceneSessionImpl::StartMoveWindow()
 {
-    if (!CheckCanMoveWindowTypeByDevice()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "invalid window type:%{public}u", GetType());
+    if (!CheckCanStartMoveWindowByWindowType()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid window type:%{public}u", GetType());
         return WmErrorCode::WM_ERROR_INVALID_CALLING;
     }
-    if (!CalcWindowShouldMove()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-    }
+
     if (CheckIsPcAppInPadFullScreenOnMobileWindowMode()) {
         return WmErrorCode::WM_OK;
     }
-    if (auto hostSession = GetHostSession()) {
-        WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
-        TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errorCode:%{public}d",
-            GetPersistentId(), static_cast<int>(errorCode));
-        switch (errorCode) {
-            case WSError::WS_ERROR_REPEAT_OPERATION: {
-                return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
-            }
-            case WSError::WS_ERROR_NULLPTR: {
-                return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            }
-            default: {
-                return WmErrorCode::WM_OK;
-            }
-        }
-    } else {
+
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "hostSession is nullptr");
         return WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
     }
+
+    WSError errorCode = hostSession->SyncSessionEvent(SessionEvent::EVENT_START_MOVE);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, errorCode:%{public}d",
+        GetPersistentId(), static_cast<int>(errorCode));
+    if (errorCode == WSError::WS_ERROR_REPEAT_OPERATION) {
+        return WmErrorCode::WM_ERROR_REPEAT_OPERATION;
+    }
+    if (errorCode == WSError::WS_ERROR_NULLPTR) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    return WmErrorCode::WM_OK;
 }
 
 WmErrorCode WindowSceneSessionImpl::StartMoveWindowWithCoordinate(int32_t offsetX, int32_t offsetY)
@@ -5623,73 +5613,6 @@ WMError WindowSceneSessionImpl::SetSnapshotSkip(bool isSkip)
     return resError;
 }
 
-std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::Snapshot()
-{
-    if (IsWindowSessionInvalid()) {
-        return nullptr;
-    }
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
-    if (!isSucceeded) {
-        WLOGFE("Failed to TakeSurfaceCapture!");
-        return nullptr;
-    }
-    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
-    if (pixelMap != nullptr) {
-        WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
-    } else {
-        WLOGFE("Failed to get pixelmap, return nullptr!");
-    }
-    return pixelMap;
-}
-
-WMError WindowSceneSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
-{
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (state_ < WindowState::STATE_SHOWN) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d bounds not init, state: %{public}u",
-            GetPersistentId(), state_);
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
-    if (!isSucceeded) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to TakeSurfaceCapture", GetPersistentId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
-    if (pixelMap == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to get pixelmap", GetPersistentId());
-        return WMError::WM_ERROR_TIMEOUT;
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d snapshot end, WxH=%{public}dx%{public}d",
-        GetPersistentId(), pixelMap->GetWidth(), pixelMap->GetHeight());
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
-{
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
-    if (!isSucceeded) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
-        return WMError::WM_ERROR_INVALID_OPERATION;
-    }
-    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
-    if (pixelMap == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, windowId:%{public}u", GetWindowId());
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "succeed, windowId:%{public}u, WxH=%{public}dx%{public}d",
-        GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
-    return WMError::WM_OK;
-}
-
 WMError WindowSceneSessionImpl::NotifyMemoryLevel(int32_t level)
 {
     TLOGI(WmsLogTag::DEFAULT, "id: %{public}u, level: %{public}d", GetWindowId(), level);
@@ -6450,6 +6373,23 @@ WSError WindowSceneSessionImpl::NotifyCompatibleModePropertyChange(const sptr<Co
     return WSError::WS_OK;
 }
 
+WMError WindowSceneSessionImpl::NotifyPageEnable(const std::string& action, const std::string& message)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "action:%{public}zu, message:%{public}zu", action.length(), message.length());
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "window session invalid!");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    WSError ret = hostSession->NotifyPageEnable(action, message);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "NotifyPageEnable failed, ret: %{public}d", static_cast<int32_t>(ret));
+        return static_cast<WMError>(ret);
+    }
+    return WMError::WM_OK;
+}
+
 void WindowSceneSessionImpl::NotifySessionForeground(uint32_t reason, bool withAnimation)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
@@ -6484,7 +6424,7 @@ void WindowSceneSessionImpl::NotifySessionBackground(uint32_t reason, bool withA
     }, __func__);
 }
 
-WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
+WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow(const bool isWeb)
 {
     TLOGI(WmsLogTag::WMS_PIP, "type: %{public}u", GetType());
     if (!WindowHelper::IsPipWindow(GetType())) {
@@ -6492,6 +6432,10 @@ WMError WindowSceneSessionImpl::NotifyPrepareClosePiPWindow()
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    if (isWeb && surfaceNode_ != nullptr) {
+        surfaceNode_->SetAlpha(0);
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
+    }
     hostSession->NotifyPiPWindowPrepareClose();
     return WMError::WM_OK;
 }
@@ -8056,20 +8000,20 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
     WindowType winType = GetType();
     bool enableForceSplit = false;
     if (WindowHelper::IsMainWindow(winType) &&
         GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit);
+        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
 }
 
-void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
+void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport)
 {
     WindowType winType = GetType();
     if (!WindowHelper::IsMainWindow(winType)) {
@@ -8080,9 +8024,9 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit)
         TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
         return;
     }
-    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u",
-        enableForceSplit);
-    uiContent->SetForceSplitEnable(enableForceSplit);
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u",
+        enableForceSplit, needUpdateViewport);
+    uiContent->SetForceSplitEnable(enableForceSplit, needUpdateViewport);
 }
 
 void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()

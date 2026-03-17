@@ -967,11 +967,19 @@ HWTEST_F(SystemSessionTest, RestoreFbMainWindow, Function | SmallTest | Level2)
     want->SetBundle(bundle);
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
 
+    MockAccesstokenKit::MockIsUseTokenMap(true);
+    MockAccesstokenKit::MockTokenMap(PermissionConstants::PERMISSION_FLOATING_BALL, 0);
+    MockAccesstokenKit::MockTokenMap(PermissionConstants::PERMISSION_FLOATING_BALL_AUTO_RESTORE, -1);
     systemSession->EditSessionInfo().bundleName_ = bundle;
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED);
-    
+
+    MockAccesstokenKit::MockTokenMap(PermissionConstants::PERMISSION_FLOATING_BALL_AUTO_RESTORE, 0);
+    EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_OK);
+
+    MockAccesstokenKit::MockTokenMap(PermissionConstants::PERMISSION_FLOATING_BALL_AUTO_RESTORE, -1);
     ++systemSession->fbClickCnt_;
     EXPECT_EQ(systemSession->RestoreFbMainWindow(want), WMError::WM_OK);
+    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 /**

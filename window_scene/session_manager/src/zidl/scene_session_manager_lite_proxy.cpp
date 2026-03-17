@@ -1492,6 +1492,10 @@ WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int3
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!CheckCollaboratorType(type)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "type is invalid.");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!data.WriteInt32(type)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Write type failed");
         return WSError::WS_ERROR_IPC_FAILED;

@@ -49,6 +49,7 @@
 #include "session_helper.h"
 #include "session_permission.h"
 #include "key_event.h"
+#include "surface_capture_future.h"
 #include "session/container/include/window_event_channel.h"
 #include "session_manager/include/session_manager.h"
 #include "vsync_station.h"
@@ -85,6 +86,7 @@ constexpr int32_t WINDOW_CONNECT_TIMEOUT = 1000;
 constexpr int32_t WINDOW_LIFECYCLE_TIMEOUT = 100;
 constexpr int32_t MIN_ROTATION_VALUE = 0;
 constexpr int32_t MAX_ROTATION_VALUE = 3;
+constexpr uint32_t SNAPSHOT_TIMEOUT = 2000; // MS
 
 /*
  * DFX
@@ -199,6 +201,7 @@ std::map<int32_t, std::vector<sptr<ISwitchFreeMultiWindowListener>>> WindowSessi
 std::map<int32_t, std::vector<sptr<IWindowHighlightChangeListener>>> WindowSessionImpl::highlightChangeListeners_;
 std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessionImpl::windowRotationChangeListeners_;
 std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> WindowSessionImpl::freeWindowModeChangeListeners_;
+std::map<int32_t, std::vector<sptr<IParentLifecycleEventListener>>> WindowSessionImpl::parentLifecycleEventListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowStageLifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
@@ -237,6 +240,7 @@ std::unordered_map<int32_t, std::vector<sptr<IWaterfallModeChangeListener>>>
     WindowSessionImpl::waterfallModeChangeListeners_;
 std::mutex WindowSessionImpl::windowRotationChangeListenerMutex_;
 std::mutex WindowSessionImpl::freeWindowModeChangeListenerMutex_;
+std::mutex WindowSessionImpl::parentLifecycleEventListenerMutex_;
 std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>> WindowSessionImpl::windowSessionMap_;
 std::shared_mutex WindowSessionImpl::windowSessionMutex_;
 std::set<sptr<WindowSessionImpl>> g_windowExtensionSessionSet_;
@@ -353,6 +357,7 @@ void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
     property_->SetIsSystemKeyboard(option->IsSystemKeyboard());
     property_->SetConstrainedModal(option->IsConstrainedModal());
     property_->SetSubWindowOutlineEnabled(option->IsSubWindowOutlineEnabled());
+    property_->SetIsCrossProcessWindow(option->IsCrossProcessWindow());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();
     getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
@@ -1741,6 +1746,9 @@ WSError WindowSessionImpl::UpdateDisplayId(uint64_t displayId)
 
 WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
 {
+    if (focusNotifyInfo != nullptr && !focusNotifyInfo->isSameCallingPid_) {
+        WindowManager::GetInstance().NotifyApplicationFocusChangedResult(isFocused);
+    }
     if (focusNotifyInfo == nullptr || !focusNotifyInfo->isSyncNotify_) {
         UpdateFocusState(isFocused);
         return WSError::WS_OK;
@@ -3849,6 +3857,73 @@ WMError WindowSessionImpl::UnregisterWindowStatusDidChangeListener(const sptr<IW
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusDidChangeListenerMutex_);
     return UnregisterListener(windowStatusDidChangeListeners_[GetPersistentId()], listener);
+}
+
+std::shared_ptr<Media::PixelMap> WindowSessionImpl::Snapshot()
+{
+    if (IsWindowSessionInvalid()) {
+        return nullptr;
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    if (!isSucceeded) {
+        WLOGFE("Failed to TakeSurfaceCapture!");
+        return nullptr;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
+    if (pixelMap != nullptr) {
+        WLOGFD("Snapshot succeed, save WxH=%{public}dx%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
+    } else {
+        WLOGFE("Failed to get pixelmap, return nullptr!");
+    }
+    return pixelMap;
+}
+
+WMError WindowSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (state_ < WindowState::STATE_SHOWN) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d bounds not init, state: %{public}u",
+            GetPersistentId(), state_);
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    if (!isSucceeded) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to TakeSurfaceCapture", GetPersistentId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to get pixelmap", GetPersistentId());
+        return WMError::WM_ERROR_TIMEOUT;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d snapshot end, WxH=%{public}dx%{public}d",
+        GetPersistentId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
+    auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
+    if (!isSucceeded) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to get pixelmap, windowId:%{public}u", GetWindowId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "succeed, windowId:%{public}u, WxH=%{public}dx%{public}d",
+        GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
@@ -8410,7 +8485,7 @@ WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError WindowSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     return WSError::WS_DO_NOTHING;
 }
@@ -9251,6 +9326,67 @@ void WindowSessionImpl::NotifyFreeWindowModeChange(bool isInFreeWindowMode)
     }
 }
 
+template<typename T>
+EnableIfSame<T, IParentLifecycleEventListener,
+    std::vector<sptr<IParentLifecycleEventListener>>> WindowSessionImpl::GetListeners()
+{
+    std::vector<sptr<IParentLifecycleEventListener>> parentLifecycleEventListeners;
+    for (const auto& listener : parentLifecycleEventListeners_[GetPersistentId()]) {
+        parentLifecycleEventListeners.push_back(listener);
+    }
+    return parentLifecycleEventListeners;
+}
+
+WMError WindowSessionImpl::RegisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "Start register, id: %{public}d", GetPersistentId());
+    if (listener) {
+        std::lock_guard<std::mutex> lockListener(parentLifecycleEventListenerMutex_);
+        return RegisterListener(parentLifecycleEventListeners_[GetPersistentId()], listener);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "id: %{public}d, listener is null", GetPersistentId());
+        return WMError::WM_ERROR_NULLPTR;
+    }
+}
+ 	  
+WMError WindowSessionImpl::UnregisterParentLifecycleEventListener(const sptr<IParentLifecycleEventListener>& listener)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "Start unregister, id: %{public}d", GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(parentLifecycleEventListenerMutex_);
+    return UnregisterListener(parentLifecycleEventListeners_[GetPersistentId()], listener);
+}
+
+WSError WindowSessionImpl::NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType)
+{
+    std::lock_guard<std::mutex> lockListener(parentLifecycleEventListenerMutex_);
+    auto parentLifecycleEventListeners = GetListeners<IParentLifecycleEventListener>();
+    for (auto& listener : parentLifecycleEventListeners) {
+        if (listener != nullptr) {
+            switch (eventType) {
+                case ParentLifeCycleEvent::FOREGROUND:
+                    listener->OnParentForeground(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::ACTIVE:
+                    listener->OnParentActive(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::INACTIVE:
+                    listener->OnParentInactive(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::BACKGROUND:
+                    listener->OnParentBackground(property_->GetParentPersistentId());
+                    break;
+                case ParentLifeCycleEvent::DESTROYED:
+                    listener->OnParentDestroyed(property_->GetParentPersistentId());
+                    break;
+                default:
+                    TLOGE(WmsLogTag::WMS_LIFE, "Unknown event type: %{public}u", static_cast<uint32_t>(eventType));
+                    break;
+            }
+        }
+    }
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::RegisterUIContentCreateListener(const sptr<IUIContentCreateListener>& listener)
 {
     if (!listener) {
@@ -9320,8 +9456,8 @@ void WindowSessionImpl::RecordWindowLifecycleChange(const std::string& windowEve
         << ", name: " << GetWindowName()
         << ", id: " << GetWindowId()
         << ", displayId: " << GetDisplayId();
-    // WritePageSwitchStr return 0: Success, -1: Failure; disabled by default
-    constexpr int WRITE_PAGE_SWITCH_FAIL = -1;
+    // WritePageSwitchStr return 0: Success, -1: Disable, -2: Failure; disabled by default
+    constexpr int WRITE_PAGE_SWITCH_FAIL = -2;
     int ret = HiviewDFX::WritePageSwitchStr(oss.str());
     if (ret == WRITE_PAGE_SWITCH_FAIL) {
         TLOGE(WmsLogTag::WMS_MAIN, "failed, ret: %{public}d, event: %{public}s",

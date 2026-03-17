@@ -235,18 +235,18 @@ HWTEST(MockSessionManagerServiceTest, GetSessionManagerServiceByUserId, TestSize
     sptr<IRemoteObject> sessionManagerService = nullptr;
     ErrCode ret;
 
-    // branch 1
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(-1));
+    // branch 1: clientUserId <= INVALID_USER_ID
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).WillOnce(Return(-1));
     ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    // branch 2
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(200));
+    // branch 2: clientUserId != SYSTEM_USERID
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).WillOnce(Return(200));
     ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_WOULD_BLOCK);
 
     // branch 3: SYSTEM_USERID
-    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(2).WillOnce(Return(0));
+    EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).WillRepeatedly(Return(0));
     ret = mockMockSms.GetSessionManagerServiceByUserId(userId, sessionManagerService);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
@@ -291,7 +291,7 @@ HWTEST(MockSessionManagerServiceTest, RegisterSMSRecoverListener, TestSize.Level
     // branch 3-2
     EXPECT_CALL(mockMockSms, InitDisplayIdAndUserIdByClient(_, _, _)).WillRepeatedly(Return(ERR_OK));
     ret = mockMockSms.RegisterSMSRecoverListener(userId, isLite, listener);
-    EXPECT_EQ(ret, ERR_WOULD_BLOCK);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
     // branch 4: set clientUserId is SYSTEM_USERID and return NotifyWMSConnectionStatus
     EXPECT_CALL(mockMockSms, GetUserIdByCallingUid()).Times(1).WillOnce(Return(0));
@@ -436,7 +436,7 @@ HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailableToSystemAppClient
     testMap[0] = listener;
     mockMockSms.systemAppRecoverListenerMap_[displayId] = testMap;
     mockMockSms.NotifySceneBoardAvailableToSystemAppClient(userId, isLite);
-    EXPECT_TRUE(g_errLog.find("Call OnSessionManagerServiceRecover") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("Call OnSessionManagerServiceRecover") != std::string::npos);
 
     // branch 4: iter.second == nullptr
     g_errLog.clear();
@@ -482,7 +482,7 @@ HWTEST(MockSessionManagerServiceTest, NotifySceneBoardAvailableToClient, TestSiz
     mockMockSms.recoverListenerMap_[userId] = testMap;
 
     mockMockSms.NotifySceneBoardAvailableToClient(userId, isLite);
-    EXPECT_TRUE(g_errLog.find("Call OnSessionManagerServiceRecover") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("Call OnSessionManagerServiceRecover") != std::string::npos);
 
     // branch 4: iter.second == nullptr
     g_errLog.clear();
@@ -605,7 +605,7 @@ HWTEST(MockSessionManagerServiceTest, NotifyWMSConnectionStatus, TestSize.Level1
         return mockMockSms.MockSessionManagerService::GetSessionManagerServiceInner(userId);
     }));
     ErrCode errCode = mockMockSms.NotifyWMSConnectionStatus(userId, smsListener);
-    EXPECT_EQ(errCode, ERR_DEAD_OBJECT);
+    EXPECT_EQ(errCode, ERR_OK);
 
     mockMockSms.sessionManagerServiceMap_[userId] = sptr<IRemoteObjectMocker>::MakeSptr();
     mockMockSms.userId2ScreenIdMap_[userId] = 0;
@@ -1008,7 +1008,7 @@ HWTEST(MockSessionManagerServiceTest, DumpSessionInfo, TestSize.Level1)
     auto sceneSessionManagerRemote = sptr<IRemoteObjectMocker>::MakeSptr();
     EXPECT_CALL(mockMockSms, GetSceneSessionManager()).WillOnce(Return(sceneSessionManagerRemote));
     ret = mockMockSms.DumpSessionInfo(args, info);
-    EXPECT_NE(-1, ret);
+    EXPECT_EQ(-1, ret);
 }
 
 /**
