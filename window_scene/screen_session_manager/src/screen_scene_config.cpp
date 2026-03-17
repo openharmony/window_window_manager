@@ -577,9 +577,9 @@ RogResolution ScreenSceneConfig::GetRogResolution(uint32_t width, uint32_t heigh
                        GetRogDpi() > 0) {
                 SetRogResolution(RogResolution{ true, false, 0, rogDpi_, rogResolution_.width, rogResolution_.height });
             } else {
-                uint32_t densityDpi = 0;
+                int32_t densityDpi = 0;
                 if (intNumbersConfig_.count(xmlNodeMap_[DPI]) != 0) {
-                    densityDpi = static_cast<uint32_t>(intNumbersConfig_[xmlNodeMap_[DPI]][0]);
+                    densityDpi = intNumbersConfig_[xmlNodeMap_[DPI]][0];
                 }
                 SetRogResolution(RogResolution{ false, false, 0, static_cast<float>(densityDpi), width, height });
             }
@@ -588,9 +588,9 @@ RogResolution ScreenSceneConfig::GetRogResolution(uint32_t width, uint32_t heigh
             bool dmsSupport = (system::GetIntParameter<int32_t>("persist.window.screen.isSupportRog", 0) > 0);
             uint32_t dmsWidth = system::GetIntParameter<int32_t>("persist.window.screen.width", width);
             uint32_t dmsHeight = system::GetIntParameter<int32_t>("persist.window.screen.height", height);
-            uint32_t densityDpi = 0;
+            int32_t densityDpi = 0;
             if (intNumbersConfig_.count(xmlNodeMap_[DPI]) != 0) {
-                densityDpi = static_cast<uint32_t>(intNumbersConfig_[xmlNodeMap_[DPI]][0]);
+                densityDpi = intNumbersConfig_[xmlNodeMap_[DPI]][0];
             }
             float dmsDpi =
                 static_cast<float>(system::GetIntParameter<int32_t>("persist.window.screen.dpi", densityDpi));
