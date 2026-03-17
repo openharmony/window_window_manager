@@ -28,7 +28,7 @@
 namespace OHOS ::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "DisplayManagerIPC_Fuzzer"};
-constexpr size_t DATA_MIN_SIZE = 4;
+constexpr size_t DATA_MIN_SIZE = 12;
 const size_t MAX_MESSAGE_SIZE = 1024 * 1024;
 }
 template<class T>
@@ -73,8 +73,8 @@ bool IPCFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
     uint32_t code = provider.ConsumeIntegral<uint32_t>();
-    int flags = provider.ConsumeIntegral<uint32_t>();
-    int waitTime = provider.ConsumeIntegral<uint32_t>();
+    int flags = provider.ConsumeIntegral<int32_t>();
+    int waitTime = provider.ConsumeIntegral<int32_t>();
     std::vector<uint8_t> messageData = provider.ConsumeRemainingBytes<uint8_t>();
     MessageParcel sendData;
     MessageParcel reply;
@@ -158,8 +158,8 @@ bool IPCInterfaceFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
 
-    int flags = provider.ConsumeIntegral<uint32_t>();
-    int waitTime = provider.ConsumeIntegral<uint32_t>();
+    int flags = provider.ConsumeIntegral<int32_t>();
+    int waitTime = provider.ConsumeIntegral<int32_t>();
     MessageParcel sendData;
     MessageParcel reply;
     MessageOption option(flags, waitTime);
