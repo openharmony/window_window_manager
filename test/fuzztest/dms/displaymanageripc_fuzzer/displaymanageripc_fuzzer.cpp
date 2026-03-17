@@ -31,15 +31,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_DISPLAY, "Displa
 constexpr size_t DATA_MIN_SIZE = 12;
 const size_t MAX_MESSAGE_SIZE = 1024 * 1024;
 }
-template<class T>
-size_t GetObject(T &object, const uint8_t *data, size_t size)
-{
-    size_t objectSize = sizeof(object);
-    if (objectSize > size) {
-        return 0;
-    }
-    return memcpy_s(&object, objectSize, data, objectSize) == EOK ? objectSize : 0;
-}
 
 std::pair<sptr<IDisplayManager>, sptr<IRemoteObject>> GetProxy()
 {
