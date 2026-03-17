@@ -568,6 +568,7 @@ private:
     CompatibleStyleMode pageCompatibleMode_ = CompatibleStyleMode::INVALID_VALUE;
     std::string logicalDeviceConfig_ = "";
     std::vector<std::string> combinedCompatibleConfig_;
+    mutable std::mutex combinedCompatibleConfigMutex_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
