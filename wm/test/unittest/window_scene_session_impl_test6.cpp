@@ -1005,7 +1005,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable, TestSize.Level1)
     ASSERT_NE(nullptr, window);
 
     auto ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -1036,7 +1036,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable01, TestSize.Level1)
     window->hostSession_ = nullptr;
 
     auto ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
