@@ -12334,16 +12334,21 @@ void ScreenSessionManager::UpdateSuperFoldAvailableArea(ScreenId screenId, DMRec
         NotifyDisplayChanged(screenSession->ConvertToDisplayInfo(),
             DisplayChangeEvent::SUPER_FOLD_AVAILABLE_AREA_UPDATE);
     }
-    if (!screenSession->GetIsFakeInUse()) {
-        TLOGNFE(WmsLogTag::DMS, "fake screen session is not in use");
-        return;
-    }
     auto fakeScreenSession = screenSession->GetFakeScreenSession();
     if (fakeScreenSession == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "can not get fake screen now");
         return;
     }
-    if (fakeScreenSession->UpdateAvailableArea(cArea) && cArea.width_ > 0) {
+    bool ret = fakeScreenSession->UpdateAvailableArea(cArea);
+    if (!screenSession->GetScreenProperty().GetIsFakeInUse()) {
+        TLOGNFE(WmsLogTag::DMS, "fake screen session is not in use");
+        {
+            std::lock_guard<std::mutex> lock(lastDisplayInfoMapMutex_);
+            lastDisplayInfoMap_.erase(fakeScreenSession->GetScreenId());
+        }
+        return;
+    }
+    if (ret && cArea.width_ > 0) {
         NotifyAvailableAreaChanged(cArea, fakeScreenSession->GetScreenId());
         NotifyDisplayChanged(fakeScreenSession->ConvertToDisplayInfo(),
             DisplayChangeEvent::SUPER_FOLD_AVAILABLE_AREA_UPDATE);
