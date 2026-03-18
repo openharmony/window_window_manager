@@ -648,11 +648,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnPropertyChanged02
- * @tc.desc: OnPropertyChanged02 test
+ * @tc.name: OnPropertyChanged03
+ * @tc.desc: OnPropertyChanged03 test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged02, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
 {
     ScreenId screenId = 0;
     ScreenProperty property;
@@ -664,11 +664,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged02, TestSize.Level1)
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->currentstate_ = SuperFoldStatus::KEYBOARD;
     screenSessionManagerClient_->OnPropertyChanged(screenId, property, reason);
-    EXPECT_NE(screenSession->GetMirrorWidth(), 100);
+    EXPECT_NE(screenSession->GetScreenProperty().GetMirrorWidth(), 100);
 
     screenSessionManagerClient_->currentstate_ = SuperFoldStatus::UNKNOWN;
     screenSessionManagerClient_->OnPropertyChanged(screenId, property, reason);
-    EXPECT_EQ(screenSession->GetMirrorWidth(), 100);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetMirrorWidth(), 100);
 }
 
 /**
