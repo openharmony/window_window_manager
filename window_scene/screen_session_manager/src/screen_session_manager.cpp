@@ -10997,6 +10997,10 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     ScreenId screenId)
 {
     TLOGNFI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
+    // Update display orientation when boot animation
+    if (IsOnBootAnimation()) {
+        UpdateDisplayOrientationWhenBootAnimation(screenId);
+    }
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
         TLOGNFI(WmsLogTag::DMS, "clientProxy_ is null");
@@ -11008,6 +11012,20 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     // update scb map when change displaymode
     UpdateScbDisplayModeMap();
     clientProxy->OnPropertyChanged(screenId, newProperty, reason);
+}
+
+void ScreenSessionManager::UpdateDisplayOrientationWhenBootAnimation(ScreenId screenId)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (!screenSession) {
+        TLOGNFE(WmsLogTag::DMS, "Get screen session failed, screenId: %{public}" PRIu64, screenId);
+        return;
+    }
+    auto currProperty = screenSession->GetScreenProperty();
+    currProperty.CalcDefaultDisplayOrientation();
+    screenSession->SetScreenProperty(currProperty);
+    TLOGNFI(WmsLogTag::DMS, "DisplayOrientation is: %{public}d",
+        screenSession->GetScreenProperty().GetDisplayOrientation());
 }
 
 void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& newProperty,
