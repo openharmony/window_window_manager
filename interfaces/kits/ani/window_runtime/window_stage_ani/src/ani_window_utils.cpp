@@ -766,7 +766,7 @@ ani_object AniWindowUtils::CreateAniWindowSystemBarProperties(ani_env* env,
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("statusBarContentColor").c_str(),
         nullptr, statusBarContentColor);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("isStatusBarLightIcon").c_str(),
-        nullptr, status.contentColor_ == SYSTEM_COLOR_WHITE);
+        nullptr, CreateOptionalBool(env, ani_boolean(status.contentColor_ == SYSTEM_COLOR_WHITE)));
 
     if (!CreateNavBarColorProperties(env, navi, cls, systemBarProperties, status)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] create string failed");
@@ -792,11 +792,11 @@ bool AniWindowUtils::CreateNavBarColorProperties(ani_env* env, const SystemBarPr
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("navigationBarContentColor").c_str(),
         nullptr, navigationBarContentColor);
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("isNavigationBarLightIcon").c_str(),
-        nullptr, navi.contentColor_ == SYSTEM_COLOR_WHITE);
+        nullptr, CreateOptionalBool(env, ani_boolean(navi.contentColor_ == SYSTEM_COLOR_WHITE)));
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("enableStatusBarAnimation").c_str(),
-        nullptr, status.enableAnimation_);
+        nullptr, CreateOptionalBool(env, ani_boolean(status.enableAnimation_)));
     CallAniMethodVoid(env, systemBarProperties, cls, Builder::BuildSetterName("enableNavigationBarAnimation").c_str(),
-        nullptr, navi.enableAnimation_);
+        nullptr, CreateOptionalBool(env, ani_boolean(navi.enableAnimation_)));
     return true;
 }
 
