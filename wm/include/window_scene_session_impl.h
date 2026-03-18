@@ -390,10 +390,45 @@ protected:
     WMError NotifyWindowSessionProperty();
     WMError NotifyWindowNeedAvoid(bool status = false);
     WMError SetLayoutFullScreenByApiVersion(bool status) override;
+
+    /**
+     * @brief Updates the window size limits.
+     *
+     * Window size limits come from multiple sources, with the following
+     * priority (highest to lowest):
+     * 1. Set via the `setWindowLimits` API.
+     * 2. Set in `StartOptions` when launching the window via `startAbility`.
+     * 3. Set in the `abilities` tag of the `module.json5` file.
+     * 4. System limits (product configuration or default values).
+     *
+     * The following are the constraint rules:
+     * 1. Default rule: all application-defined window size limits (1–3) are
+     *    constrained by system limits (4), and excess values are replaced by
+     *    system limits.
+     * 2. Exception rules (highest to lowest):
+     *    - startAbility forced mode: when launched via `startAbility` and
+     *      `startOptions.windowCreateParams.isWindowLimitsForcible = true`,
+     *      limits (1–3) are not constrained by system limits (4).
+     *    - setWindowLimits limited forced mode: when using `setWindowLimits`,
+     *      if `pixelUnit` is `PX` and `isForcible` is `true`, the minimum size
+     *      may exceed system limits and is clamped to min(system limits, 40vp);
+     *      other cases remain constrained by system limits.
+     */
     void UpdateWindowSizeLimits();
+
+    /**
+     * @brief Apply forcible system size limits by relaxing default constraints.
+     *
+     * @param sysLimitsPX System config of window size limits in physical pixels.
+     * @param sysLimitsVP System config of window size limits in virtual pixels.
+     * @param vpr Virtual pixel ratio of the display.
+     */
+    void ApplyForcibleLimits(WindowLimits& sysLimitsPX, WindowLimits& sysLimitsVP, float vpr);
+
     // First windowLimits uses px(physical pixels), second uses vp(virtual pixels)
     std::pair<WindowLimits, WindowLimits> GetSystemSizeLimits(uint32_t displayWidth,
         uint32_t displayHeight, float vpr);
+
     void GetConfigurationFromAbilityInfo();
     uint32_t GetSupportedWindowModesConfiguration(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
