@@ -652,7 +652,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged, TestSize.Level1)
  * @tc.desc: OnPropertyChanged02 test
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged02, TestSize.Level1)
 {
     ScreenId screenId = 0;
     ScreenProperty property;
