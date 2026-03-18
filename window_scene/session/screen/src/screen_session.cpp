@@ -826,7 +826,7 @@ ScreenProperty ScreenSession::GetPropertyByResolution(const DMRect& rect)
     return newProperty;
 }
 
-void ScreenSession::CheckAndNotifyPropertychange()
+void ScreenSession::CheckAndNotifyPropertyChange()
 {
     std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
     if (isNeedNotify) {
@@ -836,7 +836,7 @@ void ScreenSession::CheckAndNotifyPropertychange()
     }
 }
 
-void ScreenSession::SetPropertyNeedNotified(ScreenProperty property)
+void ScreenSession::SetPropertyNeedNotified(const ScreenProperty& property)
 {
     std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
     propertyNeedNotified_ = property;

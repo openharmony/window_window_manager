@@ -452,7 +452,7 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
     }
     RegisterScreenChangeListener();
     if (callbackType == ON_PROPERTY_CHANGE_CALLBACK && screenSession_ != nullptr) {
-        screenSession_->CheckAndNotifyPropertychange();
+        screenSession_->CheckAndNotifyPropertyChange();
     }
     return NapiGetUndefined(env);
 }
