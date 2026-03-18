@@ -18,7 +18,6 @@
 
 #include <mutex>
 #include <refbase.h>
-#include <struct_multimodal.h>
 
 #include "common/include/window_session_property.h"
 #include "interfaces/include/ws_common.h"
