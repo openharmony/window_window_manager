@@ -7638,12 +7638,16 @@ float WindowSceneSessionImpl::GetCustomDensity() const
     return customDensity_;
 }
 
-WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo, bool isAttach)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     const auto& property = GetProperty();
+    if (isAttach && (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.freeMultiWindowSupport_) ||
+        property_->IsAdaptToCompatibleDevice())) {
+            return WMError::WM_OK;
+    }
     if (!windowAnchorInfo.isAnchoredByAttach_ && !property->GetWindowAnchorInfo().isAnchoredByAttach_) {
         TLOGE(WmsLogTag::WMS_SUB, "Repeated invoking");
         return WMError::WM_ERROR_INVALID_CALLING;
@@ -7660,7 +7664,7 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!windowSystemConfig_.supportFollowRelativePositionToParent_) {
+    if (!isAttach && !windowSystemConfig_.supportFollowRelativePositionToParent_) {
         TLOGI(WmsLogTag::WMS_SUB, "not support device");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

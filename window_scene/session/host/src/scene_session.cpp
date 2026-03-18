@@ -8768,12 +8768,13 @@ WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorIn
 {
     auto property = GetSessionProperty();
     if(windowAnchorInfo.isAnchoredByAttach_ && !SessionPermission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Not system app, no permission");
-        return WSError::WS_ERROR_INVALID_OPERATION;
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Not system app, no permission");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (WindowHelper::IsMainWindow(session->parentSession_ != nullptr && session->parentSession_->GetWindowType()))
+    auto parentSession = GetParentSession();
+    if (parentSession && !WindowHelper::IsMainWindow(parentSession->GetWindowType()))
     {
-        TLOGE(WmsLogTag::WMS_SUB, "parent window is valid");
+        TLOGE(WmsLogTag::WMS_SUB, "parent window is not mainWindow");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
     if (!property || property->GetSubWindowLevel() > 1) {
@@ -10271,9 +10272,9 @@ void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFu
 
 void SceneSession::NotifySubSessionParentSizeChange(Rect rect)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}lu", GetSubSession().size());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}zu", GetSubSession().size());
     for(const auto& subSession : GetSubSession()) {
-        if (subSession && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
+        if (subSession && subSession->sessionStage_ && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
             subSession->sessionStage_->NotifySubWindowAfterParentWindowSizeChange(rect);
         }
     }
@@ -10281,14 +10282,13 @@ void SceneSession::NotifySubSessionParentSizeChange(Rect rect)
 
 void SceneSession::NotifySubSessionParentStatusChange(WindowMode mode)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}lu", GetSubSession().size());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}zu", GetSubSession().size());
     for(const auto& subSession : GetSubSession()) {
-        if (subSession && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
+        if (subSession && subSession->sessionStage_ && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
             subSession->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(mode);
         }
     }
 }
-
 
 void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)
 {

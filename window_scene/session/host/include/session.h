@@ -495,8 +495,8 @@ public:
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void IsNeedNotifySubSessionParentSizeChange(const WSRect& rect);
-    virtual void NotifySubSessionParentSizeChange(Rect rect);
-    virtual void NotifySubSessionParentStatusChange(WindowMode mode);
+    virtual void NotifySubSessionParentSizeChange(Rect rect){};
+    virtual void NotifySubSessionParentStatusChange(WindowMode mode){};
     WSError UpdateDensity();
     WSError UpdateOrientation();
     virtual bool IsDragMoving() const { return false; }
@@ -929,6 +929,8 @@ public:
     void GetPreloadStartingWindow(std::shared_ptr<Media::PixelMap>& pixelMap,
         std::pair<std::shared_ptr<uint8_t[]>, size_t>& bufferInfo);
     void ResetPreloadStartingWindow();
+    void InitPersistentScaledSnapshotParam(bool enabled);
+    bool IsPersistentScaledSnapshotEnabled() { return enablePersistentScaledSnapshot_; };
     std::atomic<bool> freeMultiWindow_ { false };
     std::atomic<bool> isPersistentImageFit_ { false };
     std::atomic<int32_t> persistentImageFit_ = 0;
@@ -1100,6 +1102,7 @@ protected:
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
+    bool enablePersistentScaledSnapshot_ = false;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
     /**

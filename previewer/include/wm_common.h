@@ -1047,35 +1047,38 @@ struct WindowAnchorInfo : public Parcelable {
     int32_t offsetX_ = 0;
     int32_t offsetY_ = 0;
     struct AttachOptions : public Parcelable {
-        std::string currentLayoutMode_ = "";
-        AttachOptions() {}
-        AttachOptions(std::string currentLayoutMode) : currentLayoutMode_(currentLayoutMode) {}
-        bool operator==(const WindowAnchorInfo& other) const
+        std::string currentLayoutMode = "";
+        AttachOptions() = default;
+        AttachOptions(const std::string&& currentLayoutMode) : currentLayoutMode(currentLayoutMode) {}
+        bool operator==(const AttachOptions& other) const
         {
-            return currentLayoutMode_ == other.currentLayoutMode_;
+            return currentLayoutMode == other.currentLayoutMode;
         }
 
-        bool operator!=(const WindowAnchorInfo& other) const
+        bool operator!=(const AttachOptions& other) const
         {
             return !(*this == other);
         }
 
         bool Marshalling(Parcel& parcel) const override
         {
-            return parcel.WriteBool(currentLayoutMode_);
+            return parcel.WriteString(currentLayoutMode);
         }
 
         static AttachOptions* Unmarshalling(Parcel& parcel)
         {
             std::string layoutMode = "";
             auto attachOptions = std::make_unique<AttachOptions>();
+            if (!attachOptions) {
+                return nullptr;
+            }
             if (!parcel.ReadString(layoutMode)) {
                 return nullptr;
             }
-            attachOptions->currentLayoutMode_ = layoutMode;
+            attachOptions->currentLayoutMode = layoutMode;
             return attachOptions.release();
         }
-    }
+    };
     AttachOptions attachOptions;
 
     WindowAnchorInfo() {}
@@ -1083,9 +1086,9 @@ struct WindowAnchorInfo : public Parcelable {
     WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
-    WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
-        int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
-        offsetX_(offsetX), offsetY_(offsetY) {}
+    WindowAnchorInfo(bool isAnchorEnabled, bool isAnchoredByAttach, WindowAnchor windowAnchor, int32_t offsetX,
+        int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled), isAnchoredByAttach_(isAnchoredByAttach),
+        windowAnchor_(windowAnchor), offsetX_(offsetX), offsetY_(offsetY) {}
 
     bool operator==(const WindowAnchorInfo& other) const
     {

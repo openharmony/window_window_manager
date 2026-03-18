@@ -1591,17 +1591,6 @@ void Session::NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason r
     }
 }
 
-void Session::NotifySubSessionParentSizeChange(Rect rect)
-{
-    return;
-}
-
-void Session::NotifySubSessionParentStatusChange(WindowMode mode)
-{
-    return;
-}
-
-
 WSError Session::UpdateDensity()
 {
     WLOGFI("session update density: id: %{public}d.", GetPersistentId());
@@ -4511,12 +4500,11 @@ void Session::SetSessionRect(const WSRect& rect)
 void Session::SetLastClientParentSize(const WSRect& rect)
 {
     if (GetSessionRect() == rect) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
         return;
     }
     layoutController_->SetLastClientParentSize(rect);
     dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
-    RectCheckProcess();
 }
 
 /** @note @window.layout */
@@ -4784,6 +4772,17 @@ uint32_t Session::GetBlurBackgroundColor() const
 void Session::SetSnapshotScale(const float snapshotScale)
 {
     snapshotScale_ = snapshotScale;
+    if (scenePersistence_) {
+        scenePersistence_->SetSnapshotScale(snapshotScale);
+    }
+}
+
+void Session::InitPersistentScaledSnapshotParam(bool enabled)
+{
+    enablePersistentScaledSnapshot_ = enabled;
+    if (scenePersistence_) {
+        scenePersistence_->InitPersistentScaledSnapshotParam(enabled);
+    }
 }
 
 WSError Session::ProcessBackEvent()

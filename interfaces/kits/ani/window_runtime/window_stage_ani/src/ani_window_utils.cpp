@@ -1497,7 +1497,7 @@ ani_object AniWindowUtils::CreateAniAnimationConfig(ani_env* env, const Keyboard
     }
 
     ret = CallAniMethodVoid(env, aniConfig, aniClass, "<set>duration", nullptr,
-        CreateBaseTypeObject(env, curve.duration_));
+        CreateBaseTypeObject<long>(env, curve.duration_));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI] failed to set duration");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -2332,7 +2332,8 @@ bool AniWindowUtils::ParseWindowLimits(ani_env* env, ani_object aniWindowLimits,
     return true;
 }
 
-std::string AniWindowUtils::ANIStringToStdString(ani_env *env, ani_string ani_str) {
+std::string AniWindowUtils::ANIStringToStdString(ani_env *env, ani_string ani_str)
+{
     ani_size sz {};
     env->String_GetUTF8Size(ani_str, &sz);
 

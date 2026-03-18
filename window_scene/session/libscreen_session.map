@@ -87,6 +87,7 @@
             OHOS::Rosen::ScreenProperty::UpdateScreenRotation*;
             OHOS::Rosen::ScreenProperty::SetRogScreenResolution*;
             OHOS::Rosen::ScreenProperty::UpdateVirtualPixelRatio*;
+            OHOS::Rosen::ScreenSession::AddHdrFormats*;
             OHOS::Rosen::ScreenSession::AddRotationCorrection*;
             OHOS::Rosen::ScreenSession::BeforeScreenPropertyChange*;
             OHOS::Rosen::ScreenSession::CalcBoundsByRotation*;

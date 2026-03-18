@@ -5085,8 +5085,7 @@ EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDi
 }
 
 template<typename T>
-EnableIfSame<T, IParentWindowSizeChangeListener, std::vector<sptr<IParentWindowSizeChangeListener>>>
-    WindowSessionImpl::GetListeners()
+EnableIfSame<T, IParentWindowSizeChangeListener, std::vector<sptr<IParentWindowSizeChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IParentWindowSizeChangeListener>> parentWindowSizeChangeListeners;
     for (auto& listener : parentWindowSizeChangeListeners_[GetPersistentId()]) {
@@ -5096,8 +5095,7 @@ EnableIfSame<T, IParentWindowSizeChangeListener, std::vector<sptr<IParentWindowS
 }
 
 template<typename T>
-EnableIfSame<T, IParentWindowStatusChangeListener, std::vector<sptr<IParentWindowStatusChangeListener>>>
-    WindowSessionImpl::GetListeners()
+EnableIfSame<T, IParentWindowStatusChangeListener, std::vector<sptr<IParentWindowStatusChangeListener>>> WindowSessionImpl::GetListeners()
 {
     std::vector<sptr<IParentWindowStatusChangeListener>> parentWindowStatusChangeListeners;
     for (auto& listener : parentWindowStatusChangeListeners_[GetPersistentId()]) {
@@ -8292,8 +8290,8 @@ void WindowSessionImpl::NotifyWindowStatusDidChange(WindowMode mode)
 /** @note @window.layout */
 void WindowSessionImpl::NotifyParentWindowSizeChange(Rect rect)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyParentWindowSizeChange begin, id:%{public}d, rect:[%{public}d,%{public}d,
-        %{public}u,%{public}u]", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyParentWindowSizeChange begin, id:%{public}d, rect:[%{public}d, %{public}d,"
+        "%{public}u,%{public}u]", GetPersistentId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
     std::vector<sptr<IParentWindowSizeChangeListener>> parentWindowSizeChangeListeners;
     {
         std::lock_guard<std::recursive_mutex> lockListener(parentWindowSizeChangeListenerMutex_);
@@ -8313,8 +8311,8 @@ void WindowSessionImpl::NotifyParentWindowSizeChange(Rect rect)
 void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode)
 {
     auto windowStatus = GetWindowStatusInner(mode);
-    TLOGD(WmsLogTag::WMS_LAYOUT, " id:%{public}d, windowStatus:%{public}u, windowMode:%{public}u",
-            GetPersistentId(), windowStatus,  mode);
+    TLOGI(WmsLogTag::WMS_LAYOUT, " id:%{public}d, windowStatus:%{public}u, windowMode:%{public}u",
+        GetPersistentId(), windowStatus,  mode);
     auto lastStatus = lastStatusWhenNotifyParentStatusChange_.load();
     if (lastStatus == windowStatus) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Duplicate windowStatus:%{public}u, id:%{public}d, windowMode:%{public}u",
@@ -8327,7 +8325,7 @@ void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode)
         std::lock_guard<std::recursive_mutex> lockListener(parentWindowStatusChangeListenerMutex_);
         parentWindowStatusChangeListeners = GetListeners<IParentWindowStatusChangeListener>();
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT, "NotifyParentWindowStatusChange listener count:%{public}zu", 
+    TLOGI (WmsLogTag::WMS_LAYOUT, "NotifyParentWindowStatusChange listener count:%{public}zu",
         parentWindowStatusChangeListeners.size());
 
     for (auto& listener : parentWindowStatusChangeListeners) {
