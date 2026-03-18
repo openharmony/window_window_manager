@@ -327,6 +327,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         WindowSizeLimits windowSizeLimits = { reply.ReadUint32(), reply.ReadUint32(),
                                               reply.ReadUint32(), reply.ReadUint32() };
         property->SetWindowSizeLimits(windowSizeLimits);
+        property->SetIsWindowLimitsForcible(reply.ReadBool());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));

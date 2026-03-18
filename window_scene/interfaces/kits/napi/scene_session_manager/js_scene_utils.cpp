@@ -1880,6 +1880,10 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
         napi_set_named_property(env, objValue, "needAnimation",
             CreateJsValue(env, *(sessionInfo.windowCreateParams->needAnimation)));
     }
+    bool isWindowLimitsForcible = sessionInfo.windowCreateParams ?
+        sessionInfo.windowCreateParams->isWindowLimitsForcible : false;
+    napi_set_named_property(env, objValue, "isWindowLimitsForcible",
+        CreateJsValue(env, isWindowLimitsForcible));
     napi_set_named_property(env, objValue, "atomicServiceInfo",
         CreateJsAtomicServiceInfo(env, sessionInfo.atomicServiceInfo_));
     napi_set_named_property(env, objValue, "isTargetPlugin",

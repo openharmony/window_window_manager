@@ -1710,16 +1710,22 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         GetSessionInfo().abilityInfo->windowModes : GetSessionInfo().supportedWindowModes;
     property->SetSupportedWindowModes(supportedWindowModes);
     property->SetWindowSizeLimits(GetSessionInfo().windowSizeLimits);
+
+    auto windowCreateParams = GetSessionInfo().windowCreateParams;
+    bool isWindowLimitsForcible = windowCreateParams ? windowCreateParams->isWindowLimitsForcible : false;
+    property->SetIsWindowLimitsForcible(isWindowLimitsForcible);
+
     property->SetIsAtomicService(GetSessionInfo().isAtomicService_);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     property->SetUserRequestedOrientation(GetSessionProperty()->GetUserRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] requestedOrientation: %{public}u,"
         " defaultRequestedOrientation: %{public}u,"
-        " userRequestedOrientation: %{public}u", GetPersistentId(),
+        " userRequestedOrientation: %{public}u, isWindowLimitsForcible: %{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()),
-        static_cast<uint32_t>(GetSessionProperty()->GetUserRequestedOrientation()));
+        static_cast<uint32_t>(GetSessionProperty()->GetUserRequestedOrientation()),
+        isWindowLimitsForcible);
     property->SetCompatibleModeProperty(GetSessionProperty()->GetCompatibleModeProperty());
     if (property->GetCompatibleModeProperty()) {
         property->SetDragEnabled(!GetSessionProperty()->IsDragResizeDisabled());
