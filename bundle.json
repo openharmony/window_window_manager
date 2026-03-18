@@ -14,7 +14,7 @@
       "subsystem": "window",
       "syscap": [
         "SystemCapability.WindowManager.WindowManager.Core",
-        "SystemCapability.Window.SessionManager = false"
+        "SystemCapability.Window.SessionManager"
       ],
       "features": [
         "window_manager_use_sceneboard",
@@ -92,7 +92,10 @@
           "runtime_core",
           "zlib",
           "screenlock_mgr",
-          "os_account"
+          "os_account",
+          "ets_frontend",
+          "selinux_adapter"
+
         ],
         "third_party": [
         ]
