@@ -3143,7 +3143,7 @@ bool Session::GetNeedUseBlurSnapshot() const
     bool snapshotPrivacyMode = GetSnapshotPrivacyMode();
     ControlInfo controlInfo;
     bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
-    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool isAppUseControl = controlInfo.isNeedControl;
     bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && isAppUseControl);
     if (needUseBlurSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, snapshotPrivacyMode: %{public}d, "
@@ -3184,7 +3184,7 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
         SaveSnapshot(true, true, nullptr);
         return;
     }
-    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool isAppUseControl = controlInfo.isNeedControl;
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, isAppUseControl);
     if (isAppLockControl_.load() == isAppUseControl) {
         return;
@@ -3195,7 +3195,9 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
             NotifyAddSnapshot(false, false, false);
             return;
         }
-        NotifyAddSnapshot(true, false, false);
+        if (!controlInfo.isControlRecentOnly) {
+            NotifyAddSnapshot(true, false, false);
+        }
         SaveSnapshot(true, true, nullptr, true);
         return;
     }
