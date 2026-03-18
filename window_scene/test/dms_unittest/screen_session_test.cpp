@@ -5248,10 +5248,12 @@ HWTEST_F(ScreenSessionTest, CheckAndNotifyPropertychange, TestSize.Level1)
     session->isNeedNotify =false;
     session->CheckAndNotifyPropertychange();
     EXPECT_FALSE(g_errLog.find("It's need notify") != std::string::npos);
+    g_errLog.clear();
 
     session->isNeedNotify =true;
     session->CheckAndNotifyPropertychange();
     EXPECT_TRUE(g_errLog.find("It's need notify") != std::string::npos);
+    g_errLog.clear();
 }
 } // namespace
 } // namespace Rosen
