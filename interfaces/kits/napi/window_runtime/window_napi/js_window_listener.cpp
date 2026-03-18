@@ -782,7 +782,7 @@ void JsWindowListener::OnParentWindowStatusChange(WindowStatus status)
         thisListener->CallJsMethod(PARENT_WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_send_event(env_, jsCallback, napi_eprio_high, "parentWindowStatusChangeCallBack") !=
-        napi_status::napi_ok){
+            napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
     }
 }

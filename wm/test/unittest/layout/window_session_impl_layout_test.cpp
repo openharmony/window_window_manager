@@ -401,11 +401,12 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyParentWindowSizeChange, TestSize.Lev
 {
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowSizeChange start";
     auto window = GetTestWindowImpl("NotifyParentWindowSizeChange");
-    auto listeners = GetListenerList<IParentWindowStatusChangeListener, MockParentWindowSizeChangeListener>();
+    auto listeners = GetListenerList<IParentWindowSizeChangeListener, MockParentWindowSizeChangeListener>();
     EXPECT_NE(listeners.size(), 0);
     listeners.insert(listeners.begin(), nullptr);
     window->parentWindowSizeChangeListeners_.insert({ window->GetPersistentId(), listeners });
-    window->NotifyParentWindowSizeChange(WindowMode::WINDOW_MODE_FLOATING);
+    Rect rect = { 1, 2, 3, 4};
+    window->NotifyParentWindowSizeChange(rect);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowStatusChange end";
 }
@@ -426,6 +427,25 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyParentWindowStatusChange, TestSize.L
     window->NotifyParentWindowStatusChange(WindowMode::WINDOW_MODE_FLOATING);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowStatusChange end";
+}
+
+/**
+ * @tc.name: NotifyParentWindowStatusChange_Test_Undefined
+ * @tc.desc: NotifyParentWindowStatusChange test UNDEFINED
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplLayoutTest, NotifyParentWindowStatusChange_Test_Undefined, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyWindowStatusDidChange_Test_Undefined start";
+    auto window = GetTestWindowImpl("NotifyWindowStatusDidChange");
+    auto listeners = GetListenerList<IParentWindowStatusChangeListener, MockParentWindowStatusChangeListener>();
+    EXPECT_NE(listeners.size(), 0);
+    window->parentWindowStatusChangelisteners_.insert({ window->GetPersistentId(), listeners });
+    window->lastStatusWhenNotifyParentStatusChange_.store(WindowStatus::WINDOW_STATUS_FULLSCREEN);
+    window->NotifyParentWindowStatusChange(WindowMode::WINDOW_MODE_UNDEFINED);
+    EXPECT_EQ(window->lastStatusWhenNotifyParentStatusChange_, WindowStatus::WINDOW_STATUS_UNDEFINED);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyWindowStatusDidChange_Test_Undefined end";
 }
 
 /**

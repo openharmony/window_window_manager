@@ -430,8 +430,8 @@ HWTEST_F(WindowSessionTest, GetLastClientParentSize, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
-    session_->SetSessionRect(rect);
-    ASSERT_EQ(rect, session_->GetSessionRect());
+    session_->SetLastClientParentSize(rect);
+    ASSERT_EQ(rect, session_->GetLastClientParentSize());
 }
 
 /**
@@ -1708,7 +1708,7 @@ HWTEST_F(WindowSessionTest, SetLastClientParentSize01, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     WSRect rect = {1, 2, 3, 4};
     session_->SetSessionRect(rect);
-    WSRect rect = session_->SetLastClientParentSize(rect);
+    session_->SetLastClientParentSize(rect);
     EXPECT_TRUE(g_errLog.find("skip same rect") != std::string::npos);
     LOG_SetCallback(nullptr);
 }

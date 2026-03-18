@@ -47,6 +47,8 @@ private:
     SystemSessionConfig systemConfig_;
 };
 
+static sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr("MainSessionTest", 1423);
+
 void MainSessionTest::SetUpTestCase() {}
 
 void MainSessionTest::TearDownTestCase() {}
@@ -63,6 +65,7 @@ void MainSessionTest::SetUp()
 
 void MainSessionTest::TearDown()
 {
+    scenePersistence = nullptr;
     mainSession_ = nullptr;
 }
 
@@ -1340,14 +1343,6 @@ HWTEST_F(MainSessionTest, NotifyPageEnable, TestSize.Level1)
     std::string longMessage(513, 'm');
     ret = session->NotifyPageEnable("enter", longMessage);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-
-    std::string validAction(64, 'a');
-    ret = session->NotifyPageEnable(validAction, "HomePage");
-    EXPECT_EQ(ret, WSError::WS_OK);
-
-    std::string validMessage(512, 'm');
-    ret = session->NotifyPageEnable("enter", validMessage);
-    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**

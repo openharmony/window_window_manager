@@ -912,8 +912,6 @@ void AniWindowListener::OnParentWindowSizeChange(Rect rect)
             TLOGNE(WmsLogTag::WMS_LAYOUT, "this listener, vm or callback is nullptr");
             return;
         }
-        RETURN_IF_NULL(listener);
-        RETURN_IF_NULL(listener->aniCallback_);
 
         auto aniVm = AniVm(vm);
         auto env = aniVm.GetAniEnv();
@@ -925,7 +923,7 @@ void AniWindowListener::OnParentWindowSizeChange(Rect rect)
 
     RETURN_IF_NULL(eventHandler_);
     eventHandler_->PostTask(task, "wms:AniWindowListener::ParentWindowSizeChangeCallBack", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void AniWindowListener::OnParentWindowStatusChange(WindowStatus status)
@@ -947,7 +945,7 @@ void AniWindowListener::OnParentWindowStatusChange(WindowStatus status)
 
     RETURN_IF_NULL(eventHandler_);
     eventHandler_->PostTask(task, "wms:AniWindowListener::ParentWindowStatusChangeCallBack", 0,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 void AniWindowListener::OnAcrossDisplaysChanged(bool isAcrossDisplays)

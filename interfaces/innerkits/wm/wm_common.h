@@ -1462,12 +1462,12 @@ struct WindowAnchorInfo : public Parcelable {
     int32_t offsetY_ = 0;
 
     struct AttachOptions : public Parcelable {
-        std::string currentLayoutMode_ = "";
+        std::string currentLayoutMode = "";
         AttachOptions() = default;
-        AttachOptions(std::string currentLayoutMode) : currentLayoutMode_(currentLayoutMode) {}
+        AttachOptions(std::string currentLayoutMode) : currentLayoutMode(currentLayoutMode) {}
         bool operator==(const AttachOptions& other) const
         {
-            return currentLayoutMode_ == other.currentLayoutMode_;
+            return currentLayoutMode == other.currentLayoutMode;
         }
 
         bool operator!=(const AttachOptions& other) const
@@ -1477,17 +1477,20 @@ struct WindowAnchorInfo : public Parcelable {
 
         bool Marshalling(Parcel& parcel) const override
         {
-            return parcel.WriteString(currentLayoutMode_);
+            return parcel.WriteString(currentLayoutMode);
         }
 
         static AttachOptions* Unmarshalling(Parcel& parcel)
         {
             std::string layoutMode = "";
             auto attachOptions = std::make_unique<AttachOptions>();
+            if (!attachOptions) {
+                return nullptr;
+            }
             if (!parcel.ReadString(layoutMode)) {
                 return nullptr;
             }
-            attachOptions->currentLayoutMode_ = layoutMode;
+            attachOptions->currentLayoutMode = layoutMode;
             return attachOptions.release();
         }
     };

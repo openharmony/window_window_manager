@@ -290,6 +290,18 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo01, TestSize.Level1)
     ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
 
+    windowAnchorInfo.isAnchoredByAttach_ = true;
+
+    property->SetWindowAnchorInfo(windowAnchorInfo);
+
+    sptr<MainSession> parentSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, parentSession);
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    sceneSession->parentSession_ = parentSession;
+    ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_OPERATION);
+
     property->subWindowLevel_ = 100;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
