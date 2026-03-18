@@ -357,6 +357,13 @@ static void CreateNewSystemWindowTask(void* contextPtr, sptr<WindowOption> windo
         WLOGFE("Context is nullptr");
         return;
     }
+    auto contextConvert = Context::ConvertTo<AbilityRuntime::Context>(context->lock());
+    if (contextConvert == nullptr) {
+        task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_CONTEXT_ABNORMALLY,
+            "Convert context is nullptr"));
+        TLOGE(WmsLogTag::WMS_LIFE, "Convert context is nullptr");
+        return;
+    }
     if (windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT ||
         windowOption->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
         auto abilityContext = Context::ConvertTo<AbilityRuntime::AbilityContext>(context->lock());
@@ -387,6 +394,12 @@ static void CreateSystemWindowTask(void* contextPtr, std::string windowName, Win
     if (contextPtr == nullptr || context == nullptr) {
         task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Context is nullptr"));
         WLOGFE("Context is nullptr");
+        return;
+    }
+    auto contextConvert = Context::ConvertTo<AbilityRuntime::Context>(context->lock());
+    if (contextConvert == nullptr) {
+        task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR, "Convert context is nullptr"));
+        TLOGE(WmsLogTag::WMS_LIFE, "Convert Context is nullptr");
         return;
     }
     if (winType == WindowType::WINDOW_TYPE_FLOAT || winType == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
@@ -1056,14 +1069,21 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
             }
             lists->window = Window::GetTopWindowWithId(lists->ability->GetWindow()->GetWindowId());
         } else {
-            auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
-            if (contextPtr == nullptr || context == nullptr) {
+            auto contextTmp = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr);
+            if (contextPtr == nullptr || contextTmp == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
                 lists->errMsg = "[window][getLastWindow]msg: Stage mode without context";
                 return;
             }
-            lists->window = Window::GetTopWindowWithContext(context->lock());
+            auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::Context>(contextTmp->lock());
+            if (context == nullptr) {
+                lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
+                    static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
+                lists->errMsg = "[window][getLastWindow]msg: Stage mode without context";
+                return;
+            }
+            lists->window = Window::GetTopWindowWithContext(context);
         }
     };
     NapiAsyncTask::CompleteCallback complete = [lists, newApi](napi_env env, NapiAsyncTask& task, int32_t status) {
