@@ -656,11 +656,11 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
 {
     ScreenId screenId = 0;
     ScreenProperty property;
-    property.SetMirrorWidth(100);
+
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
     sptr<ScreenSession> screenSession = new ScreenSession(0, property, 0);
     screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
-
+    property.SetMirrorWidth(100);
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->currentstate_ = SuperFoldStatus::KEYBOARD;
     screenSessionManagerClient_->OnPropertyChanged(screenId, property, reason);

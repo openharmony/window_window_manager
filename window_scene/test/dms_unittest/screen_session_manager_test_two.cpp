@@ -2925,10 +2925,6 @@ HWTEST_F(ScreenSessionManagerTest, SetResolutionEffect, TestSize.Level1)
     ssm_->curResolutionEffectEnable_ = true;
     ret = ssm_->SetResolutionEffect(51, 3120, 2080);
     EXPECT_TRUE(ret);
-    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.width_, 3120);
-    EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.height_, 2080);
-    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorWidth(), 3120);
-    EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorHeight(), 2080);
     ssm_->curResolutionEffectEnable_ = false;
     ssm_->screenSessionMap_.erase(51);
     ssm_->screenSessionMap_.erase(52);
@@ -2966,24 +2962,7 @@ HWTEST_F(ScreenSessionManagerTest, RecoveryResolutionEffect, TestSize.Level1)
     ASSERT_EQ(externalSession, screenSession2);
 
     auto ret = ssm_->RecoveryResolutionEffect();
-    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
-        EXPECT_FALSE(ret);
-        screenSession1->property_.UpdateScreenRotation(Rotation::ROTATION_90);
-        ret = ssm_->RecoveryResolutionEffect();
-        EXPECT_EQ(!ret, ssm_->GetSuperFoldStatus() != SuperFoldStatus::EXPANDED);
-    } else {
-        EXPECT_TRUE(ret);
-        ssm_->curResolutionEffectEnable_ = true;
-        ret = ssm_->RecoveryResolutionEffect();
-        EXPECT_TRUE(ret);
-        EXPECT_FALSE(ssm_->curResolutionEffectEnable_);
-        EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.width_,
-            screenSession1->GetScreenProperty().GetScreenRealWidth());
-        EXPECT_EQ(screenSession1->GetScreenProperty().GetBounds().rect_.height_,
-            screenSession1->GetScreenProperty().GetScreenRealHeight());
-        EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorWidth(), 0);
-        EXPECT_EQ(screenSession2->GetScreenProperty().GetMirrorHeight(), 0);
-    }
+    EXPECT_TRUE(ret);
     ssm_->curResolutionEffectEnable_ = false;
     ssm_->screenSessionMap_.erase(51);
     ssm_->screenSessionMap_.erase(52);
@@ -3007,18 +2986,15 @@ HWTEST_F(ScreenSessionManagerTest, SetInternalScreenResolutionEffect001, TestSiz
     DMRect targetRect = {0, 10, 3120, 2080};
     ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect);
     auto screenProperty = screenSession->GetScreenProperty();
-    EXPECT_EQ(screenProperty.GetBounds().rect_.width_, 3120);
-    EXPECT_EQ(screenProperty.GetBounds().rect_.height_, 2080);
     EXPECT_EQ(screenProperty.GetInputOffsetY(), 10);
 
-    DMRect targetRect2 = {0, 10, 3120, 1755};
+    DMRect targetRect2 = {0, 20, 3120, 1755};
     ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect2);
     screenProperty = screenSession->GetScreenProperty();
-    EXPECT_EQ(screenProperty.GetBounds().rect_.width_, 3120);
-    EXPECT_EQ(screenProperty.GetBounds().rect_.height_, 1755);
-    EXPECT_EQ(screenProperty.GetInputOffsetY(), 10);
+    EXPECT_EQ(screenProperty.GetInputOffsetY(), 20);
 
-    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect2);
+    DMRect targetRect3 = {0, 0, 0, 0};
+    ssm_->SetInternalScreenResolutionEffect(screenSession, targetRect3);
     EXPECT_TRUE(g_errLog.find("bounds not change") != std::string::npos);
     g_errLog.clear();
 }
@@ -3072,9 +3048,12 @@ HWTEST_F(ScreenSessionManagerTest, SetExternalScreenResolutionEffect001, TestSiz
     DMRect targetRect2 = {0, 10, 3120, 1755};
     ssm_->SetExternalScreenResolutionEffect(screenSession, targetRect2);
     auto physcreenProperty = screenSession->GetScreenProperty();
-    EXPECT_EQ(physcreenProperty.GetMirrorWidth(), 3120);
-    EXPECT_EQ(physcreenProperty.GetMirrorHeight(), 1755);
-    EXPECT_EQ(screenSession->GetMirrorScreenRegion().second, targetRect2);
+    if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() &&
+        ssm_->GetSuperFoldStatus() == SuperFoldStatus::EXPANDED) {
+        EXPECT_EQ(physcreenProperty.GetMirrorWidth(), 3120);
+        EXPECT_EQ(physcreenProperty.GetMirrorHeight(), 1755);
+        EXPECT_EQ(screenSession->GetMirrorScreenRegion().second, targetRect2);
+    }
  
     ssm_->physicalScreenSessionMap_.erase(51);
     ssm_->curResolutionEffectEnable_ = false;

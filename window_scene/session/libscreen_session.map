@@ -108,7 +108,7 @@
             OHOS::Rosen::ScreenSession::ConvertToDisplayInfo*;
             OHOS::Rosen::ScreenSession::ConvertToRealDisplayInfo*;
             OHOS::Rosen::ScreenSession::ConvertToScreenInfo*;
-            OHOS::Rosen::ScreenSession::CheckAndNotifyPropertychange*;
+            OHOS::Rosen::ScreenSession::CheckAndNotifyPropertyChange*;
             OHOS::Rosen::ScreenSession::CreateDisplayNode*;
             OHOS::Rosen::ScreenSession::DestroyScreenScene*;
             OHOS::Rosen::ScreenSession::Disconnect*;

@@ -5234,24 +5234,25 @@ HWTEST_F(ScreenSessionTest, SetBootingConnect, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckAndNotifyPropertychange
- * @tc.desc: CheckAndNotifyPropertychange
+ * @tc.name: CheckAndNotifyPropertyChange
+ * @tc.desc: CheckAndNotifyPropertyChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, CheckAndNotifyPropertychange, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, CheckAndNotifyPropertyChange, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallbackWithAllLog);
     g_errLog.clear();
     ScreenId screenId = 10000;
     ScreenProperty property = ScreenProperty();
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, property, screenId);
-    session->isNeedNotify =false;
-    session->CheckAndNotifyPropertychange();
+    session->isNeedNotify = false;
+    session->CheckAndNotifyPropertyChange();
     EXPECT_FALSE(g_errLog.find("It's need notify") != std::string::npos);
     g_errLog.clear();
 
-    session->isNeedNotify =true;
-    session->CheckAndNotifyPropertychange();
+    session->isNeedNotify = true;
+    session->SetPropertyNeedNotified(property);
+    session->CheckAndNotifyPropertyChange();
     EXPECT_TRUE(g_errLog.find("It's need notify") != std::string::npos);
     g_errLog.clear();
 }
