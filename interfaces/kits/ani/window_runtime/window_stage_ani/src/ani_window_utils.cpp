@@ -776,7 +776,6 @@ ani_object AniWindowUtils::CreateAniWindowSystemBarProperties(ani_env* env,
     return systemBarProperties;
 }
 
-// tanhong
 bool AniWindowUtils::CreateNavBarColorProperties(ani_env* env, const SystemBarProperty& navi, ani_class cls,
     ani_object systemBarProperties, const SystemBarProperty& status)
 {
