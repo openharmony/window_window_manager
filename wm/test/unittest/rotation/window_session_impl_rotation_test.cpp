@@ -175,17 +175,25 @@ HWTEST_F(WindowSessionImplRotationTest, GetScreenNodeCount, Function | SmallTest
     option->SetWindowName("GetScreenNodeCount");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     
-    // Case 1: rsUIDirector_ is nullptr - should return error
+    // Case 1: rsUIDirector_ is valid by default - should return success
     uint32_t nodeCount = 0;
     auto ret = window->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_GE(nodeCount, 0);
+    
+    // Case 2: Explicitly set rsUIDirector_ to nullptr - should return error
+    window->rsUIDirector_ = nullptr;
+    nodeCount = 0;
+    ret = window->GetScreenNodeCount(nodeCount);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     EXPECT_EQ(nodeCount, 0);
     
-    // Case 2: rsUIDirector_ is valid - should return success
+    // Case 3: Restore rsUIDirector_ and verify multiple calls work correctly
     window->rsUIDirector_ = std::make_shared<RSUIDirector>();
-    ret = window->GetScreenNodeCount(nodeCount);
+    uint32_t nodeCount2 = 0;
+    ret = window->GetScreenNodeCount(nodeCount2);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_GE(nodeCount, 0);
+    EXPECT_GE(nodeCount2, 0);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetScreenNodeCount end";
 }
