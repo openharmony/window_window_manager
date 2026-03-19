@@ -1188,15 +1188,15 @@ int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParce
 
 int SessionStageStub::HandleGetScreenNodeCount(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "in");
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
     uint32_t nodeCount = 0;
     WSError ret = GetScreenNodeCount(nodeCount);
     if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "GetScreenNodeCount failed");
+        TLOGE(WmsLogTag::WMS_ROTATION, "GetScreenNodeCount failed");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteUint32(nodeCount)) {
-        TLOGE(WmsLogTag::DEFAULT, "Write nodeCount failed");
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write nodeCount failed");
         return ERR_INVALID_VALUE;
     }
     return ERR_NONE;

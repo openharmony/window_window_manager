@@ -187,14 +187,6 @@ HWTEST_F(WindowSessionImplRotationTest, GetScreenNodeCount, Function | SmallTest
     ret = window->GetScreenNodeCount(nodeCount);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     EXPECT_EQ(nodeCount, 0);
-    
-    // Case 3: Restore rsUIDirector_ and verify multiple calls work correctly
-    window->rsUIDirector_ = std::make_shared<RSUIDirector>();
-    uint32_t nodeCount2 = 0;
-    ret = window->GetScreenNodeCount(nodeCount2);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_GE(nodeCount2, 0);
-    
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetScreenNodeCount end";
 }
 

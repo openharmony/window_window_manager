@@ -51,6 +51,7 @@ ohos_unittest("ws_scene_session_rotation_test") {
 
   sources = [
     "${window_base_path}/window_scene/test/mock/mock_parameters.cpp",
+    "${window_base_path}/window_scene/test/mock/mock_message_parcel.cpp",
     "scene_session_rotation_test.cpp",
   ]
 

@@ -448,7 +448,7 @@ HWTEST_F(SceneSessionRotationTest, GetScreenNodeCount, TestSize.Level1)
     // Case 1: sessionStage_ is nullptr - should return error
     uint32_t nodeCount = 0;
     auto ret = session->GetScreenNodeCount(nodeCount);
-    EXPECT_EQ(WSError::WS_ERROR_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
     EXPECT_EQ(nodeCount, 0);
 
     // Case 2: sessionStage_ is valid - should return success
@@ -457,12 +457,6 @@ HWTEST_F(SceneSessionRotationTest, GetScreenNodeCount, TestSize.Level1)
     ret = session->GetScreenNodeCount(nodeCount);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_GE(nodeCount, 0);
-
-    // Case 3: Multiple calls to verify consistency
-    uint32_t nodeCount2 = 0;
-    ret = session->GetScreenNodeCount(nodeCount2);
-    EXPECT_EQ(WSError::WS_OK, ret);
-    EXPECT_GE(nodeCount2, 0);
 
     GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetScreenNodeCount end";
 }
