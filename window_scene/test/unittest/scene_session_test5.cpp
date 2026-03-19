@@ -165,9 +165,9 @@ HWTEST_F(SceneSessionTest5, HookAvoidAreaInCompatibleMode, TestSize.Level1)
     // hook Func only support compatibleMode
     sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
     compatibleModeProperty->SetIsAdaptToImmersive(false);
-    session->property_->SetCompatibleModeProperty(compatibleModeProperty);	 
-    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);	 
-    session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea); 
+    session->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    session->property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING); 
+    session->HookAvoidAreaInCompatibleMode(rect, AvoidAreaType::TYPE_SYSTEM, avoidArea);
     EXPECT_TRUE(avoidArea.topRect_ == invalidRect);
 
     // test top system avoidArea in floating
