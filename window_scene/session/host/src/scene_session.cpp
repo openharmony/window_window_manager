@@ -1140,6 +1140,7 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
         session->NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(event);
+        session->NotifySubSessionParentStatusChange(session->GetWindowMode());
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
         bool proportionalScale = property->IsAdaptToProportionalScale();
@@ -8766,6 +8767,16 @@ void SceneSession::SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFun
 WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
 {
     auto property = GetSessionProperty();
+    if(windowAnchorInfo.isAnchoredByAttach_ && !SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Not system app, no permission");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto parentSession = GetParentSession();
+    if (parentSession && !WindowHelper::IsMainWindow(parentSession->GetWindowType()))
+    {
+        TLOGE(WmsLogTag::WMS_SUB, "parent window is not mainWindow");
+        return WSError::WS_ERROR_INVALID_OPERATION;
+    }
     if (!property || property->GetSubWindowLevel() > 1) {
         TLOGE(WmsLogTag::WMS_SUB, "property is null or not surppot more than 1 level window");
         return WSError::WS_ERROR_INVALID_OPERATION;
@@ -10257,6 +10268,26 @@ void SceneSession::HookSceneSessionActivation(NotifyHookSceneSessionActivationFu
         }
         session->hookSceneSessionActivationFunc_ = std::move(func);
     }, where);
+}
+
+void SceneSession::NotifySubSessionParentSizeChange(Rect rect)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}zu", GetSubSession().size());
+    for(const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->sessionStage_ && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
+            subSession->sessionStage_->NotifySubWindowAfterParentWindowSizeChange(rect);
+        }
+    }
+}
+
+void SceneSession::NotifySubSessionParentStatusChange(WindowMode mode)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}zu", GetSubSession().size());
+    for(const auto& subSession : GetSubSession()) {
+        if (subSession && subSession->sessionStage_ && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
+            subSession->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(mode);
+        }
+    }
 }
 
 void SceneSession::NotifyWindowAttachStateListenerRegistered(bool registered)

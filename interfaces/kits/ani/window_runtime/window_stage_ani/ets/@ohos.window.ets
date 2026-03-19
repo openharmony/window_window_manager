@@ -558,6 +558,18 @@ namespace window {
     BOTTOM_END = 8,
   }
 
+  export interface WindowAnchorInfo {
+    anchorType ?: WindowAnchor;
+    offsetX?: int;
+    offsetY?: int;
+  }
+
+  export interface SubWindowAttachOptions {
+    currentLayoutMode?: string;
+    parentWindowSizeChangeCallBack?:Callback<Size>;
+    parentWindowStatusChangeCallBack?:Callback<WindowStatusType>;
+  }
+
   export interface Rect {
     /**
      * The left of the Rect.
@@ -3073,6 +3085,9 @@ export class WindowInternal implements Window {
     private native setParentWindow(nativeObj: long, windowId: int): void;
     private native setContentAspectRatio(
       nativeObj: long, ratio: double, isPersistent: boolean, needUpdateRect: boolean): void;
+    private native attachLayoutToParentWindow(
+      nativeObj: long, anchorInfo: WindowAnchorInfo, attachOptions: SubWindowAttachOptions): void;
+    private native detachLayoutToParentWindow(nativeObj: long): void;
     private native onSync(nativeObj: long, type: string, callback: object): void;
     private native onNoInteractionDetected(nativeObj: long, type: string, timeout: long, callback: Object): void;
     private native offSync(nativeObj: long, type: string, callback?: object): void;
@@ -4354,6 +4369,32 @@ export class WindowInternal implements Window {
       });
     }
 
+    public attachLayoutToParentWindow(anchorInfo: WindowAnchorInfo, attachOptions: SubWindowAttachOptions): Promise<void> {
+      return new Promise<void>(
+        (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+          taskpool.execute((): void => {
+              this.attachLayoutToParentWindow(this.nativeObj, anchorInfo, attachOptions);
+          }).then((ret: Any) => {
+              resolve(undefined);
+          }).catch((err: Any) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
+    public detachLayoutToParentWindow(): Promise<void> {
+      return new Promise<void>(
+        (resolve: (value: undefined) => void, reject: (error: BusinessError) => void ): void => {
+          taskpool.execute((): void => {
+              this.detachLayoutToParentWindow(this.nativeObj);
+          }).then((ret: Any) => {
+              resolve(undefined);
+          }).catch((err: Any) => {
+              reject(err as BusinessError);
+          });
+      });
+    }
+
     public setCornerRadius(cornerRadius: double): void {
       this.setCornerRadiusSync(this.nativeObj, cornerRadius);
     }
@@ -5378,6 +5419,8 @@ export interface Window {
     bindDialogTarget(requestInfo: dialogRequest.RequestInfo, deathCallback: Callback<void>,
       callback: AsyncCallback<void>): void;
     setContentAspectRatio(ratio: double, isPersistent?: boolean, needUpdateRect?: boolean): Promise<void>;
+    attachLayoutToParentWindow(anchorInfo: WindowAnchorInfo, attachOptions: SubWindowAttachOptions): Promise<void>;
+    detachLayoutToParentWindow(): Promise<void>;
     opacity(opacity: double): void;
     scale(scaleOptions: ScaleOptions): void;
     translate(translateOptions: TranslateOptions): void;
@@ -6157,6 +6200,16 @@ function runUiExtensionSecureLimitChangeCallback(cb: object, cbArg: boolean): vo
 }
 
 function runWindowStatusDidChangeCallback(cb: object, windowStatus: int): void {
+  const func = cb as (windowStatus: WindowStatusType) => void;
+  func(windowStatus as WindowStatusType);
+}
+
+function runParentWindowSizeChangeCallback(cb: object, cbArg: object): void {
+  const func = cb as (cbArg: Size) => void;
+  func(cbArg as Size);
+}
+
+function runParentWindowStatusChangeCallback(cb: object, windowStatus: int): void {
   const func = cb as (windowStatus: WindowStatusType) => void;
   func(windowStatus as WindowStatusType);
 }

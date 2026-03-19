@@ -61,6 +61,8 @@ class AniWindowListener : public IWindowChangeListener,
                         public IRectChangeInGlobalDisplayListener,
                         public IExtensionSecureLimitChangeListener,
                         public IWindowStatusDidChangeListener,
+                        public IParentWindowSizeChangeListener,
+                        public IParentWindowStatusChangeListener,
                         public IWindowRotationChangeListener,
                         public IFreeWindowModeChangeListener,
                         public IParentLifecycleEventListener,
@@ -125,6 +127,8 @@ public:
     void OnRectChangeInGlobalDisplay(const Rect& rect, WindowSizeChangeReason reason) override;
     void OnSecureLimitChange(bool isLimit) override;
     void OnWindowStatusDidChange(WindowStatus status) override;
+    void OnParentWindowSizeChange(Rect rect) override;
+    void OnParentWindowStatusChange(WindowStatus status) override;
     void OnFreeWindowModeChange(bool IsInFreeWindowMode) override;
     void OnAcrossDisplaysChanged(bool isAcrossDisplays) override;
     void OnScreenshotAppEvent(ScreenshotEventType type) override;
