@@ -16,6 +16,7 @@
 #include "anomaly_detection.h"
 #include <hitrace_meter.h>
 
+#include "parameters.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_helper.h"
 #include "perform_reporter.h"
@@ -108,7 +109,8 @@ void AnomalyDetection::CheckWallpaper(const sptr<SceneSession>& session)
     if (!(session->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER)) {
         return;
     }
-    constexpr uint32_t defaultWallpaperZOrder = 1;
+    bool realTimeEnabled = (OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0") == "1");
+    uint32_t defaultWallpaperZOrder = realTimeEnabled ? 1 : 2;
     if (!SceneSessionManager::GetInstance().IsScreenLocked() && session->GetZOrder() != defaultWallpaperZOrder) {
         TLOGD(WmsLogTag::WMS_HIERARCHY,
               "ZOrderCheck err %{public}d, persitentId:%{public}d, wallpaper zOrder abnormal pre",
@@ -117,11 +119,14 @@ void AnomalyDetection::CheckWallpaper(const sptr<SceneSession>& session)
             if (session == nullptr) {
                 return;
             }
-            if (session->IsVisibleForeground() && session->GetZOrder() != defaultWallpaperZOrder) {
+            if (session->IsVisibleForeground() && session->GetZOrder() > defaultWallpaperZOrder) {
                 TLOGE(WmsLogTag::WMS_HIERARCHY,
                       "ZOrderCheck err %{public}d, persitentId:%{public}d, wallpaper zOrder abnormal",
                       session->GetZOrder(), session->GetPersistentId());
-                ReportZOrderException("check wallpaperWhenLocked", session);
+                std::string msg("windowId: " + session->GetPersistentId() + ", windowType: " +
+                    static_cast<uint32_t>(session->GetWindowType()) + ", ZOrder: " + session->GetZOrder());
+                WindowInfoReporter::GetInstance().ReportWindowFrozen(
+                    WindowDFXHelperType::WINDOW_WALLPAPER_ZORDER_CHECK, msg);
             }
         };
         auto handler = SceneSessionManager::GetInstance().GetTaskScheduler();

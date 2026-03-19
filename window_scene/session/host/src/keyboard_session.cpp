@@ -16,6 +16,7 @@
 #include "session/host/include/keyboard_session.h"
 
 #include <hitrace_meter.h>
+#include "parameters.h"
 #include "perform_reporter.h"
 #include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -1136,7 +1137,8 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
 {
     // anim_sync_exception
-    int32_t const THRESHOLD = 1000;
+    bool realTimeEnabled = (OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0") == "1");
+    int32_t THRESHOLD = realTimeEnabled ? 0 : 5000;
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1147,11 +1149,9 @@ void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
             TLOGND(WmsLogTag::WMS_KEYBOARD, "closed anim_sync in time");
             return;
         }
-        std::string msg("close anim_sync timeout");
-        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(
-            session->GetPersistentId(),
-            KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION,
-            msg);
+        std::string msg("windowId: " + session->GetPersistentId() + ", close anim_sync timeout");
+        WindowInfoReporter::GetInstance().ReportWindowFrozen(
+            WindowDFXHelperType::WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK, msg);
     };
     auto handler = GetEventHandler();
     if (!handler) {
