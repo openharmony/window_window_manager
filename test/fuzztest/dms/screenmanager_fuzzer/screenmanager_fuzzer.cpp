@@ -352,6 +352,7 @@ extern "C" int LLVMFuzzerTestFourInput(const uint8_t* data, size_t size)
     /* Run your code on data */
     OHOS::Rosen::SetVirtualScreenSurfaceFuzzTest(data, size);
     OHOS::Rosen::RemoveVirtualScreenFromGroupFuzzTest(data, size);
+    return 0;
 }
 
 extern "C" int LLVMFuzzerTestFiveInput(const uint8_t* data, size_t size)
