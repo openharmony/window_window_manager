@@ -79,6 +79,7 @@ DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager(
     const std::shared_ptr<TaskScheduler>& screenPowerTaskScheduler)
     :screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
+    ffrtQueue_ = std::make_shared<DMS::FfrtQueue>("DualDisplaySensorFoldStateManager");
     auto stringListConfig = ScreenSceneConfig::GetStringListConfig();
     if (stringListConfig.count("hallSwitchApp") != 0) {
         packageNames_ = stringListConfig["hallSwitchApp"];
@@ -147,7 +148,7 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
 
         TLOGI(WmsLogTag::DMS, "taskDualChangeFoldStatus was notified and not change foldStatus by hall.");
     };
-    screenPowerTaskScheduler_->PostAsyncTask(taskDualChangeFoldStatus, __func__);
+    ffrtQueue_->Submit(taskDualChangeFoldStatus);
 }
 
 void DualDisplaySensorFoldStateManager::SensorReportTimeOutPro(float angle, int hall,
