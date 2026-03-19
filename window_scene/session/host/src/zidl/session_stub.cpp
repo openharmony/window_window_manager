@@ -548,7 +548,6 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetUseControlState());
         reply.WriteString(property->GetAncoRealBundleName());
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
-        reply.WriteString(property->GetLogicalDeviceConfig());
         auto combinedCompatibleConfig = property->GetCombinedCompatibleConfig();
         auto combinedSize = combinedCompatibleConfig.size();
         if (combinedSize > 0 && combinedSize <= COMBINED_COMPATIBLE_CONFIG_MAX_SIZE) {

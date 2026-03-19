@@ -531,7 +531,6 @@ struct SessionInfo {
      * Compatible Mode
      */
     std::string pageConfig = "";
-    std::string logicalDeviceConfig = "";
     std::vector<std::string> combinedCompatibleConfig;
 
     AAFwk::Want GetWantSafely() const

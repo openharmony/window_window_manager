@@ -344,7 +344,6 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetUseControlState(reply.ReadBool());
         property->SetAncoRealBundleName(reply.ReadString());
         property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
-        property->SetLogicalDeviceConfig(reply.ReadString());
         uint32_t combinedConfigSize = reply.ReadUint32();
         if (combinedConfigSize > 0 && combinedConfigSize <= COMBINED_COMPATIBLE_CONFIG_MAX_SIZE) {
             std::vector<std::string> combinedCompatibleConfig;

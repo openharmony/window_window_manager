@@ -239,7 +239,6 @@ public:
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false) override;
-    void SendLogicalDeviceConfigToArkUI();
     void SendCombinedCompatibleConfigToArkUI();
     WMError NotifyPageEnable(const std::string& action, const std::string& message) override;
 
@@ -617,7 +616,6 @@ private:
     /*
      * Window Compatible Mode
      */
-    static std::atomic<bool> hasSentLogicalDeviceConfig_;
     static std::atomic<bool> hasSentCombinedCompatibleConfig_;
 
     /*
