@@ -15580,6 +15580,10 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             }
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
                 windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
+                auto display = DisplayManager::GetInstance().GetDisplayById(windowInfo->windowDisplayInfo.displayId);
+                if (display != nullptr) {
+                    windowInfo->windowDisplayInfo.displayName = display->GetName();
+                }
             }
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
