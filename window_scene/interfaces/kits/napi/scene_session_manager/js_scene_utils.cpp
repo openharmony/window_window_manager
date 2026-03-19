@@ -808,9 +808,6 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "pageConfig", sessionInfo.pageConfig)) {
         return false;
     }
-    if (!ConvertFromJsValueProperty(env, jsObject, "logicalDeviceConfig", sessionInfo.logicalDeviceConfig)) {
-        return false;
-    }
     std::vector<std::string> combinedCompatibleConfig;
     napi_value jsCombinedCompatibleConfig = nullptr;
     napi_get_named_property(env, jsObject, "combinedCompatibleConfig", &jsCombinedCompatibleConfig);
@@ -1986,8 +1983,6 @@ napi_value CreateJsSessionRecoverInfo(
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
     napi_set_named_property(env, objValue,
         "pageCompatibleMode", CreateJsValue(env, property->GetPageCompatibleMode()));
-    napi_set_named_property(env, objValue,
-        "logicalDeviceConfig", CreateJsValue(env, property->GetLogicalDeviceConfig()));
     napi_set_named_property(env, objValue,
         "combinedCompatibleConfig", CreateJsValueFromStringArray(env, property->GetCombinedCompatibleConfig()));
 

@@ -224,7 +224,6 @@ void UpdateLimitIfInRange(uint32_t& currentLimit, uint32_t newLimit, uint32_t mi
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
-std::atomic<bool> WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = false;
 std::atomic<bool> WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option,
@@ -760,7 +759,6 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetDefaultDisplayIdIfNeed();
         SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
         ret = Connect();
-        SendLogicalDeviceConfigToArkUI();
         SendCombinedCompatibleConfigToArkUI();
         TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
@@ -8030,25 +8028,6 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bo
     TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u",
         enableForceSplit, needUpdateViewport);
     uiContent->SetForceSplitEnable(enableForceSplit, needUpdateViewport);
-}
-
-void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()
-{
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName: %{public}s, logicalDeviceConfig: %{public}s",
-        property_->GetSessionInfo().bundleName_.c_str(), property_->GetLogicalDeviceConfig().c_str());
-    if (WindowSceneSessionImpl::hasSentLogicalDeviceConfig_) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "Logical device config has already sent");
-        return;
-    }
-    Ace::UIContent::SetXComponentCompensationAngle(property_->GetLogicalDeviceConfig());
-    WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = true;
-    if (property_->GetLogicalDeviceConfig() == "") {
-        TLOGI(WmsLogTag::WMS_COMPAT, "Send default logical device config to arkui");
-    } else if (property_->GetLogicalDeviceConfig() == "{}") {
-        TLOGI(WmsLogTag::WMS_COMPAT, "Send null logical device config to arkui");
-    } else {
-        TLOGI(WmsLogTag::WMS_COMPAT, "Send logical device config to arkui successfully!");
-    }
 }
 
 void WindowSceneSessionImpl::SendCombinedCompatibleConfigToArkUI()

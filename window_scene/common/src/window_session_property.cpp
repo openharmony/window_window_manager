@@ -2516,16 +2516,6 @@ CompatibleStyleMode WindowSessionProperty::GetPageCompatibleMode() const
     return pageCompatibleMode_;
 }
 
-void WindowSessionProperty::SetLogicalDeviceConfig(const std::string& logicalDeviceConfig)
-{
-    logicalDeviceConfig_ = logicalDeviceConfig;
-}
-
-std::string WindowSessionProperty::GetLogicalDeviceConfig() const
-{
-    return logicalDeviceConfig_;
-}
-
 void WindowSessionProperty::SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig)
 {
     std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
