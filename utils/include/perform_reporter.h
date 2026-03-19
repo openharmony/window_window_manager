@@ -41,8 +41,8 @@ constexpr const char* WINDOW_CREATE_SUB_WINDOW_FAILED_NAME = "Window create sub 
 constexpr const char* WINDOW_UNEXPECTED_EVENT_CHECK_NAME = "Window unexpected event check";
 constexpr const char* WINDOW_UICONTENT_TIMEOUT_CHECK_NAME = "Window UIContent timeout check";
 constexpr const char* WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK_NAME = "Window UIExt destroy timeout check";
-constexpr const char* WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK_NAME = "Window keyboard anim timeout check"
-constexpr const char* WINDOW_WALLPAPER_ZORDER_CHECK_NAME = "Window wallpaper z-order check"
+constexpr const char* WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK_NAME = "Window keyboard anim timeout check";
+constexpr const char* WINDOW_WALLPAPER_ZORDER_CHECK_NAME = "Window wallpaper z-order check";
 
 enum class WindowDFXHelperType : uint32_t {
     WINDOW_RECT_CHECK = 1,

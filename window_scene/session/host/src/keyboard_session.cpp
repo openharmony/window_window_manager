@@ -1149,7 +1149,7 @@ void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
             TLOGND(WmsLogTag::WMS_KEYBOARD, "closed anim_sync in time");
             return;
         }
-        std::string msg("windowId: " + session->GetPersistentId() + ", close anim_sync timeout");
+        std::string msg("windowId: " + std::to_string(session->GetPersistentId()) + ", close anim_sync timeout");
         WindowInfoReporter::GetInstance().ReportWindowFrozen(
             WindowDFXHelperType::WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK, msg);
     };
