@@ -91,6 +91,7 @@ public:
     void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) override;
     void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
     WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
+    WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
 
     /*
      * Window Pattern

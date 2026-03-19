@@ -78,6 +78,7 @@ public:
     WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
+    WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
 
     /*
      * Window Hierarchy

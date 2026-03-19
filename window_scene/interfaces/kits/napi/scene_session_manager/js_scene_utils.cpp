@@ -1157,6 +1157,9 @@ bool ConvertHookWindowInfoFromJs(napi_env env, napi_value jsObject, HookWindowIn
         return false;
     }
     hookWindowInfo.widthHookRatio = static_cast<float>(widthHookRatio);
+    if (!ConvertFromJsValueProperty(env, jsObject, "notifyWindowChange", hookWindowInfo.notifyWindowChange)) {
+        return false;
+    }
     return true;
 }
 
