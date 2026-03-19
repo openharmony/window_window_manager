@@ -41,6 +41,8 @@ constexpr const char* WINDOW_CREATE_SUB_WINDOW_FAILED_NAME = "Window create sub 
 constexpr const char* WINDOW_UNEXPECTED_EVENT_CHECK_NAME = "Window unexpected event check";
 constexpr const char* WINDOW_UICONTENT_TIMEOUT_CHECK_NAME = "Window UIContent timeout check";
 constexpr const char* WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK_NAME = "Window UIExt destroy timeout check";
+constexpr const char* WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK_NAME = "Window keyboard anim timeout check"
+constexpr const char* WINDOW_WALLPAPER_ZORDER_CHECK_NAME = "Window wallpaper z-order check"
 
 enum class WindowDFXHelperType : uint32_t {
     WINDOW_RECT_CHECK = 1,
@@ -56,6 +58,8 @@ enum class WindowDFXHelperType : uint32_t {
     WINDOW_UNEXPECTED_EVENT_CHECK,
     WINDOW_UICONTENT_TIMEOUT_CHECK,
     WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK,
+    WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK,
+    WINDOW_WALLPAPER_ZORDER_CHECK,
 };
 
 static std::map<WindowDFXHelperType, const char*> WM_CHECK_TYPE_TO_CHECK_NAME_MAP {
@@ -73,6 +77,8 @@ static std::map<WindowDFXHelperType, const char*> WM_CHECK_TYPE_TO_CHECK_NAME_MA
     {WindowDFXHelperType::WINDOW_UNEXPECTED_EVENT_CHECK,             WINDOW_UNEXPECTED_EVENT_CHECK_NAME            },
     {WindowDFXHelperType::WINDOW_UICONTENT_TIMEOUT_CHECK,            WINDOW_UICONTENT_TIMEOUT_CHECK_NAME           },
     {WindowDFXHelperType::WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK,        WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK_NAME       },
+    {WindowDFXHelperType::WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK,        WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK_NAME       },
+    {WindowDFXHelperType::WINDOW_WALLPAPER_ZORDER_CHECK,             WINDOW_WALLPAPER_ZORDER_CHECK_NAME            },
 };
 
 struct WindowProfileInfo {
