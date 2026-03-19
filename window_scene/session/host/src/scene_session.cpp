@@ -3246,7 +3246,7 @@ void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaTy
     AvoidArea& avoidArea) const
 {
     WindowMode mode = GetWindowMode();
-    if (!GetSessionProperty()->IsAdaptToImmersive() || mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (!GetSessionProperty()->IsAdaptToImmersive()) {
         return;
     }
     float vpr = 1.9f; // 3.5f: default pixel ratio
