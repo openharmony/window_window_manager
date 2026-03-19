@@ -123,8 +123,9 @@ void AnomalyDetection::CheckWallpaper(const sptr<SceneSession>& session)
                 TLOGE(WmsLogTag::WMS_HIERARCHY,
                       "ZOrderCheck err %{public}d, persitentId:%{public}d, wallpaper zOrder abnormal",
                       session->GetZOrder(), session->GetPersistentId());
-                std::string msg("windowId: " + session->GetPersistentId() + ", windowType: " +
-                    static_cast<uint32_t>(session->GetWindowType()) + ", ZOrder: " + session->GetZOrder());
+                std::string msg("windowId: " + std::to_string(session->GetPersistentId()) + ", windowType: " +
+                    std::to_string(static_cast<uint32_t>(session->GetWindowType())) + ", ZOrder: " +
+                    std::to_string(session->GetZOrder()));
                 WindowInfoReporter::GetInstance().ReportWindowFrozen(
                     WindowDFXHelperType::WINDOW_WALLPAPER_ZORDER_CHECK, msg);
             }
