@@ -242,6 +242,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleCloseSpecificScene(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
             return HandleGetRouterStackInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT):
+            return HandleGetScreenNodeCount(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
             return HandleUpdateWindowModeForUITest(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
@@ -1181,6 +1183,22 @@ int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParce
         return ERR_INVALID_VALUE;
     }
     SetCurrentRotation(currentRotation);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetScreenNodeCount(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::DEFAULT, "in");
+    uint32_t nodeCount = 0;
+    WSError ret = GetScreenNodeCount(nodeCount);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "GetScreenNodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteUint32(nodeCount)) {
+        TLOGE(WmsLogTag::DEFAULT, "Write nodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
     return ERR_NONE;
 }
 

@@ -1015,6 +1015,51 @@ HWTEST_F(SessionStageProxyTest, SetCurrentRotation, Function | SmallTest | Level
 }
 
 /**
+ * @tc.name: GetScreenNodeCount
+ * @tc.desc: test function : GetScreenNodeCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, GetScreenNodeCount, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyTest: GetScreenNodeCount start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    uint32_t nodeCount = 0;
+    WSError errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 3: Failed to send request
+    remoteMocker->SetRequestResult(ERR_TRANSACTION_FAILED);
+    errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Case 4: Failed to read nodeCount
+    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadUint32ErrorFlag(false);
+
+    // Case 5: Success
+    errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+    EXPECT_GE(nodeCount, 0);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyTest: GetScreenNodeCount end";
+}
+
+/**
  * @tc.name: ReadLittleStringVectorFromParcel
  * @tc.desc: test function : ReadLittleStringVectorFromParcel
  * @tc.type: FUNC

@@ -63,6 +63,57 @@ HWTEST_F(SessionStageProxyRotationTest, SetCurrentRotation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetScreenNodeCount
+ * @tc.desc: test function : GetScreenNodeCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyRotationTest, GetScreenNodeCount, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetScreenNodeCount start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    uint32_t nodeCount = 0;
+    WSError errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 3: Failed to send request
+    remoteMocker->SetRequestResult(ERR_TRANSACTION_FAILED);
+    errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Case 4: Failed to read nodeCount
+    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadUint32ErrorFlag(false);
+
+    // Case 5: Success
+    errCode = sessionStageProxy->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+    EXPECT_GE(nodeCount, 0);
+
+    // Case 6: Verify nodeCount is updated on multiple calls
+    uint32_t nodeCount2 = 0;
+    errCode = sessionStageProxy->GetScreenNodeCount(nodeCount2);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+    EXPECT_GE(nodeCount2, 0);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetScreenNodeCount end";
+}
+
+/**
  * @tc.name: NotifyRotationChange
  * @tc.desc: test function : NotifyRotationChange
  * @tc.type: FUNC

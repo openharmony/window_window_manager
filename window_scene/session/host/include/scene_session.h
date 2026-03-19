@@ -648,6 +648,7 @@ public:
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     WSError SetCurrentRotation(int32_t currentRotation);
+    WSError GetScreenNodeCount(uint32_t& nodeCount);
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     WSError NotifyPageRotationIsIgnored();
     WSError ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation);

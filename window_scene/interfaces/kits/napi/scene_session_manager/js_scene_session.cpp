@@ -608,6 +608,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::UpdateSceneAnimationConfig);
     BindNativeFunction(env, objValue, "setMobileAppInPadLayoutFullScreen",
         moduleName, JsSceneSession::SetMobileAppInPadLayoutFullScreen);
+    BindNativeFunction(env, objValue, "queryScreenNodeCount", moduleName,
+        JsSceneSession::QueryScreenNodeCount);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -9109,5 +9111,41 @@ void JsSceneSession::OnCompatibleModeChange(CompatibleStyleMode mode)
         napi_value argv[] = { CreateJsValue(env, mode) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
+}
+
+napi_value JsSceneSession::QueryScreenNodeCount(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnQueryScreenNodeCount(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::OnQueryScreenNodeCount(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::DEFAULT, "[NAPI]OnQueryScreenNodeCount");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc > 0) {
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "session is nullptr, id:%{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+
+    uint32_t nodeCount = 0;
+    if (session->GetScreenNodeCount(nodeCount) != WSError::WS_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "GetScreenNodeCount failed, id:%{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY)));
+        return NapiGetUndefined(env);
+    }
+
+    TLOGI(WmsLogTag::DEFAULT, "queryScreenNodeCount success, count: %{public}u", nodeCount);
+    return CreateJsValue(env, nodeCount);
 }
 } // namespace OHOS::Rosen

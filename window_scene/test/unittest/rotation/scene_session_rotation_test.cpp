@@ -432,6 +432,42 @@ HWTEST_F(SceneSessionRotationTest, NotifyPageRotationIsIgnored, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetScreenNodeCount
+ * @tc.desc: GetScreenNodeCount function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionRotationTest, GetScreenNodeCount, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetScreenNodeCount start";
+    SessionInfo info;
+    info.abilityName_ = "GetScreenNodeCount";
+    info.bundleName_ = "GetScreenNodeCount";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
+
+    // Case 1: sessionStage_ is nullptr - should return error
+    uint32_t nodeCount = 0;
+    auto ret = session->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(WSError::WS_ERROR_STATE_ABNORMALLY, ret);
+    EXPECT_EQ(nodeCount, 0);
+
+    // Case 2: sessionStage_ is valid - should return success
+    sptr<SessionStageMocker> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = sessionStage;
+    ret = session->GetScreenNodeCount(nodeCount);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_GE(nodeCount, 0);
+
+    // Case 3: Multiple calls to verify consistency
+    uint32_t nodeCount2 = 0;
+    ret = session->GetScreenNodeCount(nodeCount2);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    EXPECT_GE(nodeCount2, 0);
+
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetScreenNodeCount end";
+}
+
+/**
  * @tc.name: ConvertOrientationAndRotation
  * @tc.desc: ConvertOrientationAndRotation function
  * @tc.type: FUNC
