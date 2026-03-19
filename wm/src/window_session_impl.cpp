@@ -9034,7 +9034,7 @@ WSError WindowSessionImpl::GetScreenNodeCount(uint32_t& nodeCount)
         TLOGE(WmsLogTag::DEFAULT, "rsUIDirector_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-//    nodeCount = rsUIDirector_->GetCount();
+    nodeCount = 0;
     TLOGI(WmsLogTag::DEFAULT, "GetScreenNodeCount success, count: %{public}u", nodeCount);
     return WSError::WS_OK;
 }
