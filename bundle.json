@@ -92,10 +92,7 @@
           "runtime_core",
           "zlib",
           "screenlock_mgr",
-          "os_account",
-          "ets_frontend",
-          "selinux_adapter"
-
+          "os_account"
         ],
         "third_party": [
         ]
