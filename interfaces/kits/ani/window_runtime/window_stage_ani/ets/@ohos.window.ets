@@ -1670,11 +1670,13 @@ export class TransitionAnimationInternal implements TransitionAnimation {
 export interface WindowCreateParams {
     animationParams?: StartAnimationParams;
     systemAnimationParams?: StartAnimationSystemParams;
+    needAnimation?: boolean;
 }
 
 export class WindowCreateParamsInternal implements WindowCreateParams {
     animationParams?: StartAnimationParams;
     systemAnimationParams?: StartAnimationSystemParams;
+    needAnimation?: boolean;
 }
 
 /**
