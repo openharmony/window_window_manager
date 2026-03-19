@@ -396,6 +396,19 @@ HWTEST_F(WindowSessionTest, SetSessionRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetLastClientParentSize
+ * @tc.desc: check func SetLastClientParentSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetLastClientParentSize, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetLastClientParentSize(rect);
+    ASSERT_EQ(rect, session_->GetSessionRect());
+}
+
+/**
  * @tc.name: GetSessionRect
  * @tc.desc: check func GetSessionRect
  * @tc.type: FUNC
@@ -406,6 +419,19 @@ HWTEST_F(WindowSessionTest, GetSessionRect, TestSize.Level1)
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->GetSessionRect());
+}
+
+/**
+ * @tc.name: GetLastClientParentSize
+ * @tc.desc: check func GetLastClientParentSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetLastClientParentSize, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetLastClientParentSize(rect);
+    ASSERT_EQ(rect, session_->GetLastClientParentSize());
 }
 
 /**
@@ -1667,6 +1693,22 @@ HWTEST_F(WindowSessionTest, SetSessionRect01, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     WSRect rect = session_->GetSessionRect();
     session_->SetSessionRect(rect);
+    EXPECT_TRUE(g_errLog.find("skip same rect") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetLastClientParentSize01
+ * @tc.desc: SetSessionRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetLastClientParentSize01, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    WSRect rect = {1, 2, 3, 4};
+    session_->SetSessionRect(rect);
+    session_->SetLastClientParentSize(rect);
     EXPECT_TRUE(g_errLog.find("skip same rect") != std::string::npos);
     LOG_SetCallback(nullptr);
 }

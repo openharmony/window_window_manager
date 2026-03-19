@@ -634,6 +634,56 @@ HWTEST_F(SessionStageStubTest, HandleNotifyLayoutFinishAfterWindowModeChange, Te
 }
 
 /**
+ * @tc.name: HandleHandleNotifySubWindowAfterParentWindowSizeChange
+ * @tc.desc: test function : HandleHandleNotifySubWindowAfterParentWindowSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleHandleNotifySubWindowAfterParentWindowSizeChange, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sessionStageStub_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    Rect rect = { 10, 20, 100, 200 };
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUB_WINDOW_AFTER_PARENT_WINDOW_SIZE_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteInt32(rect.posX_);
+    data.WriteInt32(rect.posY_);
+    data.WriteInt32(rect.width_);
+    data.WriteInt32(rect.height_);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    int32_t ret = reply.ReadInt32();
+    EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
+}
+
+/**
+ * @tc.name: HandleHandleNotifySubWindowAfterParentWindowStatusChange
+ * @tc.desc: test function : HandleHandleNotifySubWindowAfterParentWindowStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleHandleNotifySubWindowAfterParentWindowStatusChange, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sessionStageStub_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUB_WINDOW_AFTER_PARENT_WINDOW_STATUS_CHANGE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(1);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    int32_t ret = reply.ReadInt32();
+    EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
+}
+
+/**
  * @tc.name: HandleNotifyForegroundInteractiveStatus
  * @tc.desc: test function : HandleNotifyForegroundInteractiveStatus
  * @tc.type: FUNC

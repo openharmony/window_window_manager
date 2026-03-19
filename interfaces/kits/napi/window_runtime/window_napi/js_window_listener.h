@@ -58,6 +58,8 @@ extern const std::string SYSTEM_DENSITY_CHANGE_CB;
 extern const std::string ACROSS_DISPLAYS_CHANGE_CB;
 extern const std::string WINDOW_STATUS_CHANGE_CB;
 extern const std::string WINDOW_STATUS_DID_CHANGE_CB;
+extern const std::string PARENT_WINDOW_SIZE_CHANGE_CB;
+extern const std::string PARENT_WINDOW_STATUS_CHANGE_CB;
 extern const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB;
 extern const std::string WINDOW_NO_INTERACTION_DETECT_CB;
 extern const std::string WINDOW_RECT_CHANGE_CB;
@@ -95,6 +97,8 @@ class JsWindowListener : public IWindowChangeListener,
                          public IWindowTitleButtonRectChangedListener,
                          public IWindowStatusChangeListener,
                          public IWindowStatusDidChangeListener,
+                         public IParentWindowSizeChangeListener,
+                         public IParentWindowStatusChangeListener,
                          public IWindowNoInteractionListener,
                          public IWindowRectChangeListener,
                          public IRectChangeInGlobalDisplayListener,
@@ -158,6 +162,8 @@ public:
 
     void OnWindowStatusChange(WindowStatus status) override;
     void OnWindowStatusDidChange(WindowStatus status) override;
+    void OnParentWindowSizeChange(Rect rect) override;
+    void OnParentWindowStatusChange(WindowStatus status) override;
     void OnWindowNoInteractionCallback() override;
     void OnWindowTitleButtonRectChanged(const TitleButtonRect& titleButtonRect) override;
     void SetTimeout(int64_t timeout) override;

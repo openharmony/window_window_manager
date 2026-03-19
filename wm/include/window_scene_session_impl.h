@@ -72,9 +72,11 @@ public:
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
     WMError Resize(uint32_t width, uint32_t height) override;
     WMError ResizeAsync(uint32_t width, uint32_t height) override;
-    WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
+    WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo, bool isAttach = false) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
+    WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override;
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override;
     WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
