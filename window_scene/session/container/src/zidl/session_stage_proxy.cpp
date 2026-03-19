@@ -2169,7 +2169,7 @@ WSError SessionStageProxy::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::GetScreenNodeCount(uint32_t& nodeCount)
+WSError SessionStageProxy::GetSceneNodeCount(uint32_t& nodeCount)
 {
     MessageParcel data;
     MessageParcel reply;

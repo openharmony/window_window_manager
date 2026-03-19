@@ -10136,13 +10136,13 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::GetScreenNodeCount(uint32_t& nodeCount)
+WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
 {
     if (!sessionStage_) {
         TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->GetScreenNodeCount(nodeCount);
+    return sessionStage_->GetSceneNodeCount(nodeCount);
 }
 
 WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister)

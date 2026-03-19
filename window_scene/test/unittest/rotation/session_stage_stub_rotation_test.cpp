@@ -75,13 +75,13 @@ HWTEST_F(SessionStageStubRotationTest, HandleSetCurrentRotation, TestSize.Level1
 }
 
 /**
- * @tc.name: HandleGetScreenNodeCount
- * @tc.desc: test function : HandleGetScreenNodeCount
+ * @tc.name: HandleGetSceneNodeCount
+ * @tc.desc: test function : HandleGetSceneNodeCount
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStageStubRotationTest, HandleGetScreenNodeCount, TestSize.Level1)
+HWTEST_F(SessionStageStubRotationTest, HandleGetSceneNodeCount, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetScreenNodeCount start";
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCount start";
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -89,17 +89,17 @@ HWTEST_F(SessionStageStubRotationTest, HandleGetScreenNodeCount, TestSize.Level1
     ASSERT_TRUE(sessionStageStub_ != nullptr);
 
     // Case 1: Failed to read interface token
-    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleGetScreenNodeCount(data, reply));
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleGetSceneNodeCount(data, reply));
 
     // Case 2: Success case with valid interface token
-    data.WriteInterfaceToken(SessionStageStub->GetDescriptor());
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
-    // Case 3: Direct call to HandleGetScreenNodeCount with valid data
+    // Case 3: Direct call to HandleGetSceneNodeCount with valid data
     MessageParcel data2;
     MessageParcel reply2;
-    data2.WriteInterfaceToken(SessionStageStub->GetDescriptor());
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleGetScreenNodeCount(data2, reply2));
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleGetSceneNodeCount(data2, reply2));
 
     // Case 4: Verify reply contains valid nodeCount
     uint32_t nodeCount = 0;
@@ -107,7 +107,7 @@ HWTEST_F(SessionStageStubRotationTest, HandleGetScreenNodeCount, TestSize.Level1
         EXPECT_GE(nodeCount, 0);
     }
 
-    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetScreenNodeCount end";
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCount end";
 }
 
 /**

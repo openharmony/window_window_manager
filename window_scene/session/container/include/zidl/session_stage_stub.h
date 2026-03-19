@@ -110,7 +110,7 @@ private:
     int HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
-    int HandleGetScreenNodeCount(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSceneNodeCount(MessageParcel& data, MessageParcel& reply);
     int HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply);
     int HandleSendFbActionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateIsShowDecorInFreeMultiWindow(MessageParcel& data, MessageParcel& reply);

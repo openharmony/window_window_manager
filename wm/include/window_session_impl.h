@@ -612,7 +612,7 @@ public:
      * Window Rotation
      */
     WSError SetCurrentRotation(int32_t currentRotation) override;
-    WSError GetScreenNodeCount(uint32_t& nodeCount) override;
+    WSError GetSceneNodeCount(uint32_t& nodeCount) override;
     WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
     WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
