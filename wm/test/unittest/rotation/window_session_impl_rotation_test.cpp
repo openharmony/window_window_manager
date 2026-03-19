@@ -164,30 +164,30 @@ HWTEST_F(WindowSessionImplRotationTest, SetCurrentRotation, Function | SmallTest
 }
 
 /**
- * @tc.name: GetScreenNodeCount
- * @tc.desc: GetScreenNodeCount
+ * @tc.name: GetSceneNodeCount
+ * @tc.desc: GetSceneNodeCount
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplRotationTest, GetScreenNodeCount, Function | SmallTest | Level1)
+HWTEST_F(WindowSessionImplRotationTest, GetSceneNodeCount, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetScreenNodeCount start";
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetSceneNodeCount start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetScreenNodeCount");
+    option->SetWindowName("GetSceneNodeCount");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     
     // Case 1: rsUIDirector_ is valid by default - should return success
     uint32_t nodeCount = 0;
-    auto ret = window->GetScreenNodeCount(nodeCount);
+    auto ret = window->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_GE(nodeCount, 0);
     
     // Case 2: Explicitly set rsUIDirector_ to nullptr - should return error
     window->rsUIDirector_ = nullptr;
     nodeCount = 0;
-    ret = window->GetScreenNodeCount(nodeCount);
+    ret = window->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
     EXPECT_EQ(nodeCount, 0);
-    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetScreenNodeCount end";
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetSceneNodeCount end";
 }
 
 /**

@@ -432,33 +432,33 @@ HWTEST_F(SceneSessionRotationTest, NotifyPageRotationIsIgnored, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetScreenNodeCount
- * @tc.desc: GetScreenNodeCount function
+ * @tc.name: GetSceneNodeCount
+ * @tc.desc: GetSceneNodeCount function
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionRotationTest, GetScreenNodeCount, TestSize.Level1)
+HWTEST_F(SceneSessionRotationTest, GetSceneNodeCount, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetScreenNodeCount start";
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetSceneNodeCount start";
     SessionInfo info;
-    info.abilityName_ = "GetScreenNodeCount";
-    info.bundleName_ = "GetScreenNodeCount";
+    info.abilityName_ = "GetSceneNodeCount";
+    info.bundleName_ = "GetSceneNodeCount";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, session);
 
     // Case 1: sessionStage_ is nullptr - should return error
     uint32_t nodeCount = 0;
-    auto ret = session->GetScreenNodeCount(nodeCount);
+    auto ret = session->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
     EXPECT_EQ(nodeCount, 0);
 
     // Case 2: sessionStage_ is valid - should return success
     sptr<SessionStageMocker> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     session->sessionStage_ = sessionStage;
-    ret = session->GetScreenNodeCount(nodeCount);
+    ret = session->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(WSError::WS_OK, ret);
     EXPECT_GE(nodeCount, 0);
 
-    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetScreenNodeCount end";
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetSceneNodeCount end";
 }
 
 /**
