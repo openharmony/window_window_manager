@@ -226,6 +226,51 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifyAppHookWindowInfoUpdated, TestSize.L
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifyAppHookWindowInfoUpdated end";
 }
+
+/**
+ * @tc.name: UpdateAppHookWindowInfo
+ * @tc.desc: test function : UpdateAppHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, UpdateAppHookWindowInfo, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: UpdateAppHookWindowInfo start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    HookWindowInfo hookWindowInfo;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 3: Failed to write hook info
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    // Case 4: Failed to send request
+    remoteMocker->SetRequestResult(ERR_TRANSACTION_FAILED);
+    errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Case 5: Success
+    errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: UpdateAppHookWindowInfo end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

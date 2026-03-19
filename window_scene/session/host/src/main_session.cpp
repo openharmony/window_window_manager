@@ -711,6 +711,14 @@ WSError MainSession::NotifyCompatibleModeChange(CompatibleStyleMode mode)
     return WSError::WS_OK;
 }
 
+WSError MainSession::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->UpdateAppHookWindowInfo(hookWindowInfo);
+}
+
 bool MainSession::RestoreAspectRatio(float ratio)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, ratio: %{public}f", GetPersistentId(), ratio);

@@ -17445,15 +17445,15 @@ WMError SceneSessionManager::UpdateAppHookWindowInfo(const std::string& bundleNa
                                                      const HookWindowInfo& hookWindowInfo)
 {
     if (bundleName.empty()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Bundle name is empty");
+        TLOGE(WmsLogTag::WMS_COMPAT, "Bundle name is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
     if (hookWindowInfo.widthHookRatio < 0.0f) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid hook window parameters: widthHookRatio:%{public}f, "
+        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid hook window parameters: widthHookRatio:%{public}f, "
             "bundleName:%{public}s", hookWindowInfo.widthHookRatio, bundleName.c_str());
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "bundleName:%{public}s, hookWindowInfo:[%{public}s]", bundleName.c_str(),
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, hookWindowInfo:[%{public}s]", bundleName.c_str(),
         hookWindowInfo.ToString().c_str());
 
     HookWindowInfo preInfo;
@@ -17464,7 +17464,11 @@ WMError SceneSessionManager::UpdateAppHookWindowInfo(const std::string& bundleNa
         } else {
             preInfo = {};
         }
-        appHookWindowInfoMap_[bundleName] = hookWindowInfo;
+        HookWindowInfo newInfo = {};
+        newInfo.enableHookWindow = hookWindowInfo.enableHookWindow;
+        newInfo.widthHookRatio = hookWindowInfo.widthHookRatio;
+        newInfo.notifyWindowChange = false;
+        appHookWindowInfoMap_[bundleName] = newInfo;
     }
 
     if (preInfo.enableHookWindow != hookWindowInfo.enableHookWindow ||
@@ -17473,7 +17477,7 @@ WMError SceneSessionManager::UpdateAppHookWindowInfo(const std::string& bundleNa
         std::shared_lock lock(sceneSessionMapMutex_);
         for (const auto& [_, session] : sceneSessionMap_) {
             if (session && session->GetSessionInfo().bundleName_ == bundleName) {
-                session->NotifyAppHookWindowInfoUpdated();
+                session->UpdateAppHookWindowInfo(hookWindowInfo);
             }
         }
     }

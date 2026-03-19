@@ -1518,6 +1518,40 @@ HWTEST_F(SessionStageStubTest, HandleNotifyAppHookWindowInfoUpdated, TestSize.Le
 }
 
 /**
+ * @tc.name: HandleUpdateAppHookWindowInfo
+ * @tc.desc: test function : HandleUpdateAppHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateAppHookWindowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    HookWindowInfo hookWindowInfo;
+    data.WriteParcelable(&hookWindowInfo);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleUpdateAppHookWindowInfoWithNull
+ * @tc.desc: test function : HandleUpdateAppHookWindowInfoWithNull
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleUpdateAppHookWindowInfoWithNull, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleUpdateIsShowDecorInFreeMultiWindow
  * @tc.desc: test function : HandleUpdateIsShowDecorInFreeMultiWindow
  * @tc.type: FUNC
