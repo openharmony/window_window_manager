@@ -111,6 +111,7 @@ public:
     void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    WSError GetScreenNodeCount(uint32_t& nodeCount) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
     WSError NotifyAppHookWindowInfoUpdated() override;

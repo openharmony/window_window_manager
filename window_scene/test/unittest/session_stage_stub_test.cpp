@@ -1319,6 +1319,36 @@ HWTEST_F(SessionStageStubTest, HandleNotifyPageRotationIsIgnored, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleGetScreenNodeCount
+ * @tc.desc: test function : HandleGetScreenNodeCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleGetScreenNodeCount, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubTest: HandleGetScreenNodeCount start";
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+
+    // Case 1: Failed to read interface token
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleGetScreenNodeCount(data, reply));
+
+    // Case 2: Success case with valid interface token
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    // Case 3: Direct call to HandleGetScreenNodeCount with valid data
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleGetScreenNodeCount(data2, reply2));
+
+    GTEST_LOG_(INFO) << "SessionStageStubTest: HandleGetScreenNodeCount end";
+}
+
+/**
  * @tc.name: HandleNotifyAppForceLandscapeConfigUpdated
  * @tc.desc: test function : HandleNotifyAppForceLandscapeConfigUpdated
  * @tc.type: FUNC

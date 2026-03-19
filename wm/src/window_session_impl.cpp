@@ -9028,6 +9028,17 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::GetScreenNodeCount(uint32_t& nodeCount)
+{
+    if (rsUIDirector_ == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "rsUIDirector_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    nodeCount = rsUIDirector_->GetCount();
+    TLOGI(WmsLogTag::DEFAULT, "GetScreenNodeCount success, count: %{public}u", nodeCount);
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::CheckMultiWindowRect(uint32_t& width, uint32_t& height)
 {
     const auto& requestRect = GetRequestRect();
