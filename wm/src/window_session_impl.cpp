@@ -9031,11 +9031,11 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
 WSError WindowSessionImpl::GetScreenNodeCount(uint32_t& nodeCount)
 {
     if (rsUIDirector_ == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "rsUIDirector_ is nullptr");
+        TLOGE(WmsLogTag::WMS_ROTATION, "rsUIDirector_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
     nodeCount = 0;
-    TLOGI(WmsLogTag::DEFAULT, "GetScreenNodeCount success, count: %{public}u", nodeCount);
+    TLOGI(WmsLogTag::WMS_ROTATION, "GetScreenNodeCount success, count: %{public}u", nodeCount);
     return WSError::WS_OK;
 }
 

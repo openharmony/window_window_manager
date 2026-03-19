@@ -10140,7 +10140,7 @@ WSError SceneSession::GetScreenNodeCount(uint32_t& nodeCount)
 {
     if (!sessionStage_) {
         TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
-        return WSError::WS_ERROR_STATE_ABNORMALLY;
+        return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->GetScreenNodeCount(nodeCount);
 }
