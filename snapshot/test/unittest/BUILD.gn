@@ -39,7 +39,7 @@ ohos_unittest("snapshot_utils_test") {
     "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
-    "image_framework:image_native"
+    "image_framework:image_native",
     "selinux_adapter:librestorecon",
   ]
 }
@@ -55,7 +55,7 @@ ohos_unittest("snapshot_display_test") {
     "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
-    "image_framework:image_native"
+    "image_framework:image_native",
     "selinux_adapter:librestorecon",
   ]
 }
