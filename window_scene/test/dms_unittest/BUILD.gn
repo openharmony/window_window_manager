@@ -1587,6 +1587,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/window_scene/screen_session_manager_client/include",
     "${window_base_path}/window_scene/screen_session_manager/infra/include/fold_screen",
     "${window_base_path}/window_scene/screen_session_manager/infra/include/common",
+    "${window_base_path}/window_scene/screen_session_manager/infra/include/ffrt",
     "${window_base_path}/window_scene/screen_session_manager/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
