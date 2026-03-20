@@ -506,7 +506,8 @@ public:
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
     void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
-    void OnGetHdrFormats(ScreenId screenId, const std::vector<ScreenHDRFormat>& rsHdrFormats);
+    void OnGetHdrFormats(ScreenId screenId, const sptr<ScreenSession>& session,
+        const std::vector<ScreenHDRFormat>& rsHdrFormats);
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     /*
      * multi user
