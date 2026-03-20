@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
+#include "parameters.h"
 #include "scene_board_judgement.h"
 #include "window_manager.cpp"
 #include "window_manager.h"
@@ -305,6 +306,7 @@ void WindowManagerTest::TearDownTestCase() {}
 
 void WindowManagerTest::SetUp()
 {
+    OHOS::system::SetParameter("persist.dms.concurrentuser", "true");
     instance_ = &WindowManager::GetInstance(userId_);
     windowAdapter = &WindowAdapter::GetInstance(userId_);
 
@@ -322,6 +324,7 @@ void WindowManagerTest::TearDown()
     WindowManager::RemoveInstanceByUserId(mockUserId_);
 
     WindowAdapter::windowAdapterMap_.clear();
+    OHOS::system::SetParameter("persist.dms.concurrentuser", "false");
 }
 
 namespace {
