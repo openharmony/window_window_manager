@@ -9034,7 +9034,7 @@ WSError WindowSessionImpl::GetSceneNodeCount(uint32_t& nodeCount)
         TLOGE(WmsLogTag::WMS_ROTATION, "rsUIDirector_ is nullptr");
         return WSError::WS_ERROR_NULLPTR;
     }
-    nodeCount = 0;
+    nodeCount = static_cast<uint32_t>(rsUIDirector_->GetUIDescendantCount());
     TLOGI(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount success, count: %{public}u", nodeCount);
     return WSError::WS_OK;
 }
