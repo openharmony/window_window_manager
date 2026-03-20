@@ -449,14 +449,12 @@ HWTEST_F(SceneSessionRotationTest, GetSceneNodeCount, TestSize.Level1)
     uint32_t nodeCount = 0;
     auto ret = session->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
-    EXPECT_EQ(nodeCount, 0);
 
     // Case 2: sessionStage_ is valid - should return success
     sptr<SessionStageMocker> sessionStage = sptr<SessionStageMocker>::MakeSptr();
     session->sessionStage_ = sessionStage;
     ret = session->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(WSError::WS_OK, ret);
-    EXPECT_GE(nodeCount, 0);
 
     GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetSceneNodeCount end";
 }

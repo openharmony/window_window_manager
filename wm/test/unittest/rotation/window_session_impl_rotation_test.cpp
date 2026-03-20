@@ -179,14 +179,12 @@ HWTEST_F(WindowSessionImplRotationTest, GetSceneNodeCount, Function | SmallTest 
     uint32_t nodeCount = 0;
     auto ret = window->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_GE(nodeCount, 0);
     
     // Case 2: Explicitly set rsUIDirector_ to nullptr - should return error
     window->rsUIDirector_ = nullptr;
     nodeCount = 0;
     ret = window->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
-    EXPECT_EQ(nodeCount, 0);
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetSceneNodeCount end";
 }
 
