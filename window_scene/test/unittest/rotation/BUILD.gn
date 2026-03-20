@@ -77,6 +77,11 @@ ohos_unittest("ws_session_stage_proxy_rotation_test") {
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
+  defines = [
+    "ENABLE_MOCK_READ_UINT32",
+    "ENABLE_MOCK_READ_INT32",
+  ]
+
   deps = [ ws_unittest_common ]
 
   external_deps = [
