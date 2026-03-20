@@ -239,6 +239,20 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
+    if (reason == ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE) {
+        screenSession->NotifyListenerPropertyChange(property, reason);
+        screenSession->SetPropertyNeedNotified(property);
+        auto oldProperty = screenSession->GetScreenProperty();
+        oldProperty.SetInputOffset(property.GetInputOffsetX(), property.GetInputOffsetY());
+        if (currentstate_ != SuperFoldStatus::KEYBOARD) {
+            oldProperty.SetScreenAreaWidth(property.GetScreenAreaWidth());
+            oldProperty.SetScreenAreaHeight(property.GetScreenAreaHeight());
+            oldProperty.SetMirrorWidth(property.GetMirrorWidth());
+            oldProperty.SetMirrorHeight(property.GetMirrorHeight());
+            screenSession->SetScreenProperty(oldProperty);
+        }
+        return;
+    }
     screenSession->PropertyChange(property, reason);
 }
 

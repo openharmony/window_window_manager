@@ -804,28 +804,43 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
     property_.SetBounds(screenBounds);
 }
 
-void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
+ScreenProperty ScreenSession::GetPropertyByResolution(const DMRect& rect)
 {
-    auto logicalRect = rect;
-    if (!IsVertical(property_.GetScreenRotation())) {
-        std::swap(logicalRect.width_, logicalRect.height_);
-    }
-    auto screenBounds = property_.GetBounds();
-    screenBounds.rect_.left_ = logicalRect.posX_;
-    screenBounds.rect_.top_ = logicalRect.posY_;
-    screenBounds.rect_.width_ = logicalRect.width_;
-    screenBounds.rect_.height_ = logicalRect.height_;
-    property_.SetBounds(screenBounds);
+    auto newProperty = property_;
+    auto screenBounds = newProperty.GetBounds();
+    screenBounds.rect_.left_ = rect.posX_;
+    screenBounds.rect_.top_ = rect.posY_;
+    screenBounds.rect_.width_ = rect.width_;
+    screenBounds.rect_.height_ = rect.height_;
+    newProperty.SetBounds(screenBounds);
     // Determine whether the touch is in a valid area.
-    property_.SetValidWidth(logicalRect.width_);
-    property_.SetValidHeight(logicalRect.height_);
-    property_.SetInputOffset(rect.posX_, rect.posY_);
+    newProperty.SetValidWidth(rect.width_);
+    newProperty.SetValidHeight(rect.height_);
+    newProperty.SetInputOffset(rect.posX_, rect.posY_);
     // It is used to calculate the original screen size
-    property_.SetScreenAreaWidth(rect.width_);
-    property_.SetScreenAreaHeight(rect.height_);
+    newProperty.SetScreenAreaWidth(rect.width_);
+    newProperty.SetScreenAreaHeight(rect.height_);
     // It is used to calculate the effective area of the inner screen for cursor
-    property_.SetMirrorWidth(rect.width_);
-    property_.SetMirrorHeight(rect.height_);
+    newProperty.SetMirrorWidth(rect.width_);
+    newProperty.SetMirrorHeight(rect.height_);
+    return newProperty;
+}
+
+void ScreenSession::CheckAndNotifyPropertyChange()
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    if (isNeedNotify) {
+        TLOGI(WmsLogTag::DMS, "It's need notify RESOLUTION_EFFECT_CHANGE");
+        NotifyListenerPropertyChange(propertyNeedNotified_, ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
+        isNeedNotify = false;
+    }
+}
+
+void ScreenSession::SetPropertyNeedNotified(const ScreenProperty& property)
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    propertyNeedNotified_ = property;
+    isNeedNotify = true;
 }
 
 void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty,
