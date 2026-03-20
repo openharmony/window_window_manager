@@ -1133,16 +1133,17 @@ HWTEST_F(SceneSessionLayoutTest, NotifySubSessionParentSizeChange, TestSize.Leve
     sptr<SessionStageMocker> mockSubSessionStage = sptr<SessionStageMocker>::MakeSptr();
     subSceneSession->sessionStage_ = mockSubSessionStage;
     WindowAnchorInfo anchorInfo = {false, false, WindowAnchor::TOP_START, 0, 0};
-    subSceneSession->SetWindowAnchorInfo(anchorInfo);
+    subSceneSession->windowAnchorInfo_ = anchorInfo;
     sceneSession->subSession_.push_back(subSceneSession);
     sceneSession->NotifySubSessionParentSizeChange(rect);
-    EXPECT_CALL(*mockSessionStage, NotifySubWindowAfterParentWindowSizeChange(rect)).Times(0);
+    EXPECT_CALL(*mockSubSessionStage, NotifySubWindowAfterParentWindowSizeChange(rect)).Times(0);
 
+    // subSession->GetWindowAnchorInfo().isAnchoredByAttach is true
     anchorInfo = {true, true, WindowAnchor::TOP_START, 0, 0};
-    subSceneSession->SetWindowAnchorInfo(anchorInfo);
+    subSceneSession->windowAnchorInfo_ = anchorInfo;
     sceneSession->subSession_.push_back(subSceneSession);
     sceneSession->NotifySubSessionParentSizeChange(rect);
-    EXPECT_CALL(*mockSessionStage, NotifySubWindowAfterParentWindowSizeChange(rect)).Times(1);
+    EXPECT_CALL(*mockSubSessionStage, NotifySubWindowAfterParentWindowSizeChange(rect)).Times(1);
 }
 
 /**
@@ -1157,34 +1158,40 @@ HWTEST_F(SceneSessionLayoutTest, NotifySubSessionParentStatusChange, TestSize.Le
     info.bundleName_ = "NotifySubSessionParentStatusChange";
     auto specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
-    // sceneSession->subSession_
 
     WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
     // subSession is null
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     sceneSession->sessionStage_ = mockSessionStage;
     sceneSession->handler_ = nullptr;
-    sceneSession->NotifySubSessionParentStatusChange(mode);
     EXPECT_CALL(*mockSessionStage, NotifySubWindowAfterParentWindowStatusChange(mode)).Times(0);
+    sceneSession->NotifySubSessionParentStatusChange(mode);
 
     // sessionStage_ is null
     sptr<SceneSession> subSceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
-    sceneSession->sessionStage_ = nullptr;
     sceneSession->subSession_.push_back(subSceneSession);
-    sceneSession->NotifySubSessionParentStatusChange(mode);
+    sceneSession->sessionStage_ = nullptr;
     EXPECT_CALL(*mockSessionStage, NotifySubWindowAfterParentWindowStatusChange(mode)).Times(0);
+    sceneSession->NotifySubSessionParentStatusChange(mode);
 
+    // subSession->GetWindowAnchorInfo().isAnchoredByAttach is false
     sptr<SessionStageMocker> mockSubSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    subSceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
     subSceneSession->sessionStage_ = mockSubSessionStage;
     WindowAnchorInfo anchorInfo = {false, false, WindowAnchor::TOP_START, 0, 0};
-    subSceneSession->SetWindowAnchorInfo(anchorInfo);
-    sceneSession->NotifySubSessionParentStatusChange(mode);
+    subSceneSession->windowAnchorInfo_ = anchorInfo;
+    sceneSession->subSession_.push_back(subSceneSession);
     EXPECT_CALL(*mockSessionStage, NotifySubWindowAfterParentWindowStatusChange(mode)).Times(0);
-
-    anchorInfo = {true, true, WindowAnchor::TOP_START, 0, 0};
-    subSceneSession->SetWindowAnchorInfo(anchorInfo);
     sceneSession->NotifySubSessionParentStatusChange(mode);
+
+    subSceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback_);
+    mockSubSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    subSceneSession->sessionStage_ = mockSubSessionStage;
+    anchorInfo = {true, true, WindowAnchor::TOP_START, 0, 0};
+    subSceneSession->windowAnchorInfo_ = anchorInfo;
+    sceneSession->subSession_.push_back(subSceneSession);
     EXPECT_CALL(*mockSessionStage, NotifySubWindowAfterParentWindowStatusChange(mode)).Times(1);
+    sceneSession->NotifySubSessionParentStatusChange(mode);
 }
 
 /**

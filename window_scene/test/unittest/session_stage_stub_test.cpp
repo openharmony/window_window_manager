@@ -611,6 +611,44 @@ HWTEST_F(SessionStageStubTest, HandleUpdateWindowMode, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleNotifySubWindowAfterParentWindowSizeChange
+ * @tc.desc: test function : HandleNotifySubWindowAfterParentWindowSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyLayoutFinishAfterWindowModeChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubTest: HandleNotifySubWindowAfterParentWindowSizeChange start";
+    ASSERT_NE(nullptr, sessionStageStub_);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    Rect rect = { 10, 20, 100, 200 };
+    uint32_t code =
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUB_WINDOW_AFTER_PARENT_WINDOW_SIZE_CHANGE);
+
+    // case 1:Read failed
+    {
+        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+        data.WriteInt32(rect.posX_);
+        data.WriteInt32(rect.posY_);
+        int32_t ret = sessionStageStub->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ERR_INVALID_VALUE, ret);
+    }
+    // case 2: Success
+    {
+        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+        data.WriteInt32(rect.posX_);
+        data.WriteInt32(rect.posY_);
+        data.WriteInt32(rect.width_);
+        data.WriteInt32(rect.height_);
+        EXPECT_EQ(ERR_NONE, sessionStageStub->OnRemoteRequest(code, data, reply, option));
+        int32_t ret = reply.ReadInt32();
+        EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
+    }
+    GTEST_LOG_(INFO) << "SessionStageStubTest: HandleNotifySubWindowAfterParentWindowSizeChange end";
+}
+
+/**
  * @tc.name: HandleNotifyLayoutFinishAfterWindowModeChange
  * @tc.desc: test function : HandleNotifyLayoutFinishAfterWindowModeChange
  * @tc.type: FUNC
@@ -634,53 +672,41 @@ HWTEST_F(SessionStageStubTest, HandleNotifyLayoutFinishAfterWindowModeChange, Te
 }
 
 /**
- * @tc.name: HandleHandleNotifySubWindowAfterParentWindowSizeChange
- * @tc.desc: test function : HandleHandleNotifySubWindowAfterParentWindowSizeChange
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleHandleNotifySubWindowAfterParentWindowSizeChange, TestSize.Level1)
-{
-    ASSERT_NE(nullptr, sessionStageStub_);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    Rect rect = { 10, 20, 100, 200 };
-    uint32_t code =
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUB_WINDOW_AFTER_PARENT_WINDOW_SIZE_CHANGE);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    data.WriteInt32(rect.posX_);
-    data.WriteInt32(rect.posY_);
-    data.WriteInt32(rect.width_);
-    data.WriteInt32(rect.height_);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-    int32_t ret = reply.ReadInt32();
-    EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
-}
-
-/**
  * @tc.name: HandleHandleNotifySubWindowAfterParentWindowStatusChange
  * @tc.desc: test function : HandleHandleNotifySubWindowAfterParentWindowStatusChange
  * @tc.type: FUNC
  */
 HWTEST_F(SessionStageStubTest, HandleHandleNotifySubWindowAfterParentWindowStatusChange, TestSize.Level1)
 {
+    GTEST_LOG_(INFO) << "SessionStageStubTest: HandleHandleNotifySubWindowAfterParentWindowStatusChange start";
     ASSERT_NE(nullptr, sessionStageStub_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     uint32_t code =
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUB_WINDOW_AFTER_PARENT_WINDOW_STATUS_CHANGE);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    data.WriteUint32(1);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-    int32_t ret = reply.ReadInt32();
-    EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
+    // Case1: Invalid data
+    {
+        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+        EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    }
+
+    // Case2: Failed to read mode
+    {
+        int32_t ret = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ERR_INVALID_DATA, ret);
+    }
+
+    // Case3: Success with calid windowMode
+    {
+        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+        data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
+        EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+        int32_t ret = reply.ReadInt32();
+        EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
+    }
+    GTEST_LOG_(INFO) << "SessionStageStubTest: HandleHandleNotifySubWindowAfterParentWindowStatusChange end";
 }
 
 /**

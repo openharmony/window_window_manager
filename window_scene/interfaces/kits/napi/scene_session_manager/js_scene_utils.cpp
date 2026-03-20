@@ -2938,6 +2938,9 @@ napi_value CreateSupportType(napi_env env)
 
 napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offsetY:%{public}d"
+        "currentLayoutMode:%{public}s", windowAnchorInfo.windowAnchor_, windowAnchorInfo.offsetX_,
+        windowAnchorInfo.offsetY_, windowAnchorInfo.attachOptions.currentLayoutMode.c_str());
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -2946,12 +2949,24 @@ napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& window
     }
     napi_set_named_property(env, objValue, "isAnchorEnabled",
         CreateJsValue(env, windowAnchorInfo.isAnchorEnabled_));
+    napi_set_named_property(env, objValue, "isAnchoredByAttach",
+        CreateJsValue(env, windowAnchorInfo.isAnchoredByAttach_));
     napi_set_named_property(env, objValue, "windowAnchor",
         CreateJsValue(env, static_cast<uint32_t>(windowAnchorInfo.windowAnchor_)));
     napi_set_named_property(env, objValue, "offsetX",
         CreateJsValue(env, windowAnchorInfo.offsetX_));
     napi_set_named_property(env, objValue, "offsetY",
         CreateJsValue(env, windowAnchorInfo.offsetY_));
+
+    napi_value attachOptionsValue = nullptr;
+    napi_create_object(env, &attachOptionsValue);
+    if (attachOptionsValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get attachOptionsValue");
+        return nullptr;
+    }
+    napi_set_named_property(env, attachOptionsValue, "currentLayoutMode",
+        CreateJsValue(env, windowAnchorInfo.attachOptions.currentLayoutMode));
+    napi_set_named_property(env, objValue, "attachOptions", attachOptionsValue);
     return objValue;
 }
 

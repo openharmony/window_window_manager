@@ -1002,7 +1002,11 @@ napi_value JsWindow::AttachLayoutToParentWindow(napi_env env, napi_callback_info
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnAttachToParentWindow(env, info) : nullptr;
+    if (me != nullptr) {
+        return me->OnAttachToParentWindow(env, info);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        "[window][attachLayoutToParentWindow]msg: Window is nullptr.");
 }
 
 /** @note @window.layout */
@@ -1010,7 +1014,11 @@ napi_value JsWindow::DetachLayoutToParentWindow(napi_env env, napi_callback_info
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
-    return (me != nullptr) ? me->OnDetachLayoutToParentWindow(env, info) : nullptr;
+    if (me != nullptr) {
+        return me->OnDetachLayoutToParentWindow(env, info);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        "[window][detachLayoutToParentWindow]msg: Window is nullptr.");
 }
 
 /** @note @window.layout */
@@ -7596,7 +7604,8 @@ bool JsWindow::ParseWindowAnchorInfo(napi_env env, napi_value jsObject, WindowAn
         return false;
     }
     windowAnchorInfo.windowAnchor_ = windowAnchor;
-    auto parseField = [&](const char* fieldName, auto& field, auto& defValue) -> bool {
+    auto parseField = [](napi_env& env, const char* fieldName, int32_t& data, auto& field, auto& defValue,
+        napi_value& jsObject) -> bool {
         if (!ParseJsValueOrGetDefault(jsObject, env, fieldName, data, defValue)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to %{public}s", fieldName);
             return false;
@@ -7605,10 +7614,10 @@ bool JsWindow::ParseWindowAnchorInfo(napi_env env, napi_value jsObject, WindowAn
         return true;
     };
 
-    if (!parseField("offsetX", windowAnchorInfo.offsetX_, defaultValue)) {
+    if (!parseField(env, "offsetX", data, windowAnchorInfo.offsetX_, defaultValue, jsObject)) {
         return false;
     }
-    if (!parseField("offsetY", windowAnchorInfo.offsetY_, defaultValue)) {
+    if (!parseField(env, "offsetY", data, windowAnchorInfo.offsetY_, defaultValue, jsObject)) {
         return false;
     }
     return true;
@@ -7622,7 +7631,8 @@ bool JsWindow::ParseWindowAttachOptions(napi_env env, napi_value jsObject,
     if (GetType(env, jsObject) != napi_object) {
         return false;
     }
-    auto parseField = [&](const char* fieldName, auto& field, auto& defValue) -> bool {
+    auto parseField = [](napi_env& env, const char* fieldName, std::string& data, auto& field, auto& defValue,
+            napi_value& jsObject) -> bool {
         if (!ParseJsValueOrGetDefault(jsObject, env, fieldName, data, defValue)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to %{public}s", fieldName);
             return false;
@@ -7631,7 +7641,7 @@ bool JsWindow::ParseWindowAttachOptions(napi_env env, napi_value jsObject,
         return true;
     };
 
-    if (!parseField("currentLayoutMode", subWindowAttachOptions.currentLayoutMode, defaultValue)) {
+    if (!parseField(env, "currentLayoutMode", data, subWindowAttachOptions.currentLayoutMode, defaultValue, jsObject)) {
         return false;
     }
     return true;
@@ -7859,7 +7869,8 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP, "not system application");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "[window][attachToParentWindow]msg: not system application");
     }
     WindowAnchorInfo acceptAnchorInfo = {true, true, WindowAnchor::TOP_START, 0, 0};
     if(argc > INDEX_ZERO && !ParseWindowAnchorInfo(env, argv[INDEX_ZERO], acceptAnchorInfo)) {
@@ -7875,7 +7886,7 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
     }
 
     napi_value sizeChangeCallback = nullptr;
-    napi_status sizeStatus = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowSizeChangeCallBack",
+    napi_status sizeStatus = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowSizeChangeCallback",
         &sizeChangeCallback);
     if (sizeStatus == napi_ok && sizeChangeCallback != nullptr) {
         WmErrorCode registerWindowSizeChangeRet = registerManager_->RegisterListener(windowToken_,
@@ -7891,7 +7902,7 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
     }
 
     napi_value statusChangeCallback = nullptr;
-    napi_status statusChange = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowStatusChangeCallBack",
+    napi_status statusChange = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowStatusChangeCallback",
         &statusChangeCallback);
     if (statusChange == napi_ok && statusChangeCallback != nullptr) {
         WmErrorCode registerWindowStatusChangeRet = registerManager_->RegisterListener(windowToken_,
@@ -7909,12 +7920,11 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offset:%{public}d currentLayoutMode:"
-        "%{public}s", acceptAnchorInfo.windowAnchor_, acceptAnchorInfo.offsetX_, acceptAnchorInfo.offsetY_,
-        acceptAnchorInfo.attachOptions.currentLayoutMode.c_str());
-    WindowAnchorInfo windowAnchorInfo = { true, true, acceptAnchorInfo.windowAnchor_,
-        acceptAnchorInfo.offsetX_, acceptAnchorInfo.offsetY_};
-    windowAnchorInfo.attachOptions.currentLayoutMode = acceptAnchorInfo.attachOptions.currentLayoutMode;
+    acceptAnchorInfo.attachOptions.currentLayoutMode = windowAttachOptions.currentLayoutMode;
+    acceptAnchorInfo.isFromAttachOrDetach_ = true;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offsetY:%{public}d"
+        "currentLayoutMode:%{public}s", acceptAnchorInfo.windowAnchor_, acceptAnchorInfo.offsetX_,
+        acceptAnchorInfo.offsetY_, acceptAnchorInfo.attachOptions.currentLayoutMode.c_str());
     auto asyncTask = [weakToken = wptr(windowToken_), task = napiAsyncTask, env, acceptAnchorInfo, where] {
         auto window = weakToken.promote();
         if (window == nullptr) {
@@ -7929,7 +7939,7 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
                 "[window][attachLayoutToParentWindow]msg: Only sub window is valid."));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(acceptAnchorInfo, true));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(acceptAnchorInfo));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -7952,6 +7962,7 @@ napi_value JsWindow::OnDetachLayoutToParentWindow(napi_env env, napi_callback_in
 {
     WindowAnchorInfo acceptAnchorInfo = {false, false, WindowAnchor::TOP_START, 0, 0};
     acceptAnchorInfo.attachOptions.currentLayoutMode = "";
+    acceptAnchorInfo.isFromAttachOrDetach_ = true;
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
@@ -7964,7 +7975,7 @@ napi_value JsWindow::OnDetachLayoutToParentWindow(napi_env env, napi_callback_in
         if (window == nullptr) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][detachLayoutToParentWindow]msg: Window is nullptr."));
+                "[window][detachLayoutToParentWindow]msg: The window is not created or destroyed."));
             return;
         }
         if (!WindowHelper::IsSubWindow(window->GetType())) {
@@ -7973,7 +7984,7 @@ napi_value JsWindow::OnDetachLayoutToParentWindow(napi_env env, napi_callback_in
                 "[window][detachLayoutToParentWindow]msg: Only sub window is valid."));
             return;
         }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(acceptAnchorInfo, true));
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(acceptAnchorInfo));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
