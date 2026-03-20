@@ -15561,7 +15561,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
 WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     std::vector<sptr<WindowInfo>>& infos)
 {
-    if (!(SessionPermission::IsSACalling())) {
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
