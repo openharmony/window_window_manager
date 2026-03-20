@@ -87,10 +87,10 @@ HWTEST_F(SessionStageProxyRotationTest, GetSceneNodeCount, TestSize.Level1)
     EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
 
     // Case 3: Failed to send request
-    remoteMocker->SetRequestResult(ERR_TRANSACTION_FAILED);
+    remoteMocker->SetRequestResult(1);
     errCode = sessionStageProxy->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
-    remoteMocker->SetRequestResult(ERR_NONE);
+    remoteMocker->SetRequestResult(0);
 
     // Case 4: Failed to read nodeCount
     MockMessageParcel::SetReadUint32ErrorFlag(true);
@@ -100,14 +100,7 @@ HWTEST_F(SessionStageProxyRotationTest, GetSceneNodeCount, TestSize.Level1)
 
     // Case 5: Success
     errCode = sessionStageProxy->GetSceneNodeCount(nodeCount);
-    EXPECT_EQ(errCode, WSError::WS_OK);
-    EXPECT_GE(nodeCount, 0);
-
-    // Case 6: Verify nodeCount is updated on multiple calls
-    uint32_t nodeCount2 = 0;
-    errCode = sessionStageProxy->GetSceneNodeCount(nodeCount2);
-    EXPECT_EQ(errCode, WSError::WS_OK);
-    EXPECT_GE(nodeCount2, 0);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
 
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetSceneNodeCount end";

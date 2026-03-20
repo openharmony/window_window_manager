@@ -2178,25 +2178,21 @@ WSError SessionStageProxy::GetSceneNodeCount(uint32_t& nodeCount)
         TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     if (!reply.ReadUint32(nodeCount)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Read nodeCount failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-
     return WSError::WS_OK;
 }
 
