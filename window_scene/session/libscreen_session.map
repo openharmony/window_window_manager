@@ -123,6 +123,7 @@
             OHOS::Rosen::ScreenSession::GetDisplayNode*;
             OHOS::Rosen::ScreenSession::GetExpandAvailableArea*;
             OHOS::Rosen::ScreenSession::GetFakeScreenSession*;
+            OHOS::Rosen::ScreenSession::GetHdrFormats*;
             OHOS::Rosen::ScreenSession::GetInnerName*;
             OHOS::Rosen::ScreenSession::GetIsCurrentInUse*;
             OHOS::Rosen::ScreenSession::GetIsDestroyDisplay*;
