@@ -1586,6 +1586,10 @@ void SceneSessionManager::ConfigSingleHandBackgroundText(const WindowSceneConfig
         if (item.IsInts() && item.intsValue_->size() == 1) {
             textConfig.maxLines = (*item.intsValue_)[0];
         }
+        item = configItem["textAlign"];
+        if (item.IsInts() && item.intsValue_->size() == 1) {
+            textConfig.textAlign = (*item.intsValue_)[0];
+        }
         item = configItem["maxFontScale"];
         if (item.IsString()) {
             textConfig.maxFontScale = item.stringValue_;
@@ -1618,6 +1622,14 @@ void SceneSessionManager::ConfigSingleHandBackgroundLayout(const WindowSceneConf
         if (itemHeight.IsInts() && itemHeight.intsValue_->size() == 1) {
             config.settingButtonRect.height_ = (*itemHeight.intsValue_)[0];
         }
+    }
+    item = configItem["isSettingButtonMirror"].GetProp("enable");
+    if (item.IsBool()) {
+        config.isSettingButtonMirror = item.boolValue_;
+    }
+    item = configItem["textContainerWidth"];
+    if (item.IsInts() && item.intsValue_->size() == 1) {
+        config.textContainerWidth = (*item.intsValue_)[0];
     }
     ConfigSingleHandBackgroundText(configItem["singleHandBackgroundTitle"], config.title);
     ConfigSingleHandBackgroundText(configItem["singleHandBackgroundContent"], config.content);
