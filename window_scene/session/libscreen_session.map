@@ -83,6 +83,10 @@
             OHOS::Rosen::ScreenProperty::SetValidHeight*;
             OHOS::Rosen::ScreenProperty::SetValidWidth*;
             OHOS::Rosen::ScreenProperty::SetVirtualPixelRatio*;
+            OHOS::Rosen::ScreenProperty::SetMirrorWidth*;
+            OHOS::Rosen::ScreenProperty::GetMirrorWidth*;
+            OHOS::Rosen::ScreenProperty::SetMirrorHeight*;
+            OHOS::Rosen::ScreenProperty::GetMirrorHeight*;
             OHOS::Rosen::ScreenProperty::UpdateDeviceRotation*;
             OHOS::Rosen::ScreenProperty::UpdateScreenRotation*;
             OHOS::Rosen::ScreenProperty::SetRogScreenResolution*;
@@ -104,6 +108,7 @@
             OHOS::Rosen::ScreenSession::ConvertToDisplayInfo*;
             OHOS::Rosen::ScreenSession::ConvertToRealDisplayInfo*;
             OHOS::Rosen::ScreenSession::ConvertToScreenInfo*;
+            OHOS::Rosen::ScreenSession::CheckAndNotifyPropertyChange*;
             OHOS::Rosen::ScreenSession::CreateDisplayNode*;
             OHOS::Rosen::ScreenSession::DestroyScreenScene*;
             OHOS::Rosen::ScreenSession::Disconnect*;
@@ -140,6 +145,7 @@
             OHOS::Rosen::ScreenSession::GetPixelFormat*;
             OHOS::Rosen::ScreenSession::GetPointerActiveHeight*;
             OHOS::Rosen::ScreenSession::GetPointerActiveWidth*;
+            OHOS::Rosen::ScreenSession::GetPropertyByResolution*;
             OHOS::Rosen::ScreenSession::GetRefreshRate*;
             OHOS::Rosen::ScreenSession::GetRotation*;
             OHOS::Rosen::ScreenSession::GetRotationCorrection*;
@@ -299,6 +305,7 @@
             OHOS::Rosen::ScreenSession::SetVirtualScreenType*;
             OHOS::Rosen::ScreenSession::SetVprScaleRatio*;
             OHOS::Rosen::ScreenSession::SetXYPosition*;
+            OHOS::Rosen::ScreenSession::SetPropertyNeedNotified*;
             OHOS::Rosen::ScreenSession::SuperFoldStatusChange*;
             OHOS::Rosen::ScreenSession::UnregisterScreenChangeListener*;
             OHOS::Rosen::ScreenSession::UpdateAvailableArea*;
@@ -313,7 +320,6 @@
             OHOS::Rosen::ScreenSession::UpdatePropertyByFakeBounds*;
             OHOS::Rosen::ScreenSession::UpdatePropertyByFakeInUse*;
             OHOS::Rosen::ScreenSession::UpdatePropertyByFoldControl*;
-            OHOS::Rosen::ScreenSession::UpdatePropertyByResolution*;
             OHOS::Rosen::ScreenSession::UpdatePropertyByResolution*;
             OHOS::Rosen::ScreenSession::UpdatePropertyByScreenMode*;
             OHOS::Rosen::ScreenSession::UpdatePropertyOnly*;
