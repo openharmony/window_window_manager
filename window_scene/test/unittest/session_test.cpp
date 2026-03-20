@@ -405,7 +405,7 @@ HWTEST_F(WindowSessionTest, SetLastClientParentSize, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     session_->SetLastClientParentSize(rect);
-    ASSERT_EQ(rect, session_->GetSessionRect());
+    ASSERT_EQ(rect, session_->GetLastClientParentSize());
 }
 
 /**
