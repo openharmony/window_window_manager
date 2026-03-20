@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+#include "parameters.h"
 #include "iremote_object_mocker.h"
 #include "scene_board_judgement.h"
 #include "singleton_mocker.h"
@@ -44,6 +45,7 @@ void WindowManagerAttributeTest::TearDownTestCase() {}
 
 void WindowManagerAttributeTest::SetUp()
 {
+    OHOS::system::SetParameter("persist.dms.concurrentuser", "true");
     instance_ = &WindowManager::GetInstance(userId_);
     windowAdapter_ = &WindowAdapter::GetInstance(userId_);
 }
@@ -51,6 +53,7 @@ void WindowManagerAttributeTest::SetUp()
 void WindowManagerAttributeTest::TearDown()
 {
     WindowManager::RemoveInstanceByUserId(userId_);
+    OHOS::system::SetParameter("persist.dms.concurrentuser", "false");
 }
 
 namespace {
