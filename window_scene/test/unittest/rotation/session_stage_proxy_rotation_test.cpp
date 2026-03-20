@@ -100,7 +100,7 @@ HWTEST_F(SessionStageProxyRotationTest, GetSceneNodeCount, TestSize.Level1)
 
     // Case 5: Success
     errCode = sessionStageProxy->GetSceneNodeCount(nodeCount);
-    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    EXPECT_EQ(errCode, WSError::WS_OK);
 
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetSceneNodeCount end";
