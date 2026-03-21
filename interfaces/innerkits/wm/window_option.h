@@ -676,6 +676,20 @@ public:
     */
     bool IsCrossProcessWindow() const;
 
+    /**
+     * @brief Set whether this window is a block subwindow.
+     *
+     * @param isBlockSubwindow true - is a block subwindow, false - is not a block subwindow.
+     */
+    void SetIsBlockSubwindow(bool isBlockSubwindow);
+
+    /**
+     * @brief Get whether this window is a block subwindow.
+     *
+     * @return true - is a block subwindow, false - is not a block subwindow.
+     */
+    bool IsBlockSubwindow() const;
+
 private:
     Rect windowRect_ { 0, 0, 0, 0 };
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW };
@@ -728,6 +742,7 @@ private:
     bool isConstrainedModal_ = false;
     int64_t startModalExtensionTimeStamp_ = -1;
     bool followCreatorLifecycle_ = false;
+    bool isBlockSubwindow_ = false;
 };
 } // namespace Rosen
 } // namespace OHOS
