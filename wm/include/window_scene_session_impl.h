@@ -36,7 +36,7 @@ public:
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
-        bool isModuleAbilityHookEnd = false) override;
+        bool isModuleAbilityHookEnd = false, bool isBlockSubwindow = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
     WMError ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption) override;
