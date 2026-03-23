@@ -107,6 +107,8 @@ public:
         const std::vector<int32_t>& persistentIdList) override;
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList) override;
+    WMError RegisterSessionLifecycleListenerByBundle(const sptr<ISessionLifecycleListener>& listener,
+        const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) override;
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
     WMError SetGlobalDragResizeType(DragResizeType dragResizeType) override;
     WMError GetGlobalDragResizeType(DragResizeType& dragResizeType) override;

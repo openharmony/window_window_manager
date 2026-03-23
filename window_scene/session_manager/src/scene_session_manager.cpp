@@ -2062,6 +2062,20 @@ void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
     }
 }
 
+void SceneSessionManager::GetMainSessionByBundleNameAndAppIndexAndInstanceKey(const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& mainSessionVec)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, sceneSession] : sceneSessionMap_) {
+        if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
+            sceneSession->GetSessionInfo().appIndex_ == appIndex &&
+            sceneSession->GetSessionInfo().appInstanceKey_ == appInstanceKey &&
+            SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
+            mainSessionVec.push_back(sceneSession);
+        }
+    }
+}
+
 void SceneSessionManager::GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
     std::vector<sptr<SceneSession>>& mainSessions) const
 {
