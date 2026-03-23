@@ -16,7 +16,7 @@
 #include "display_manager.h"
 #include "session/host/include/keyboard_session.h"
 #include <gtest/gtest.h>
-#include <parameter.h>
+#include <parameters.h>
 #include <ui/rs_surface_node.h>
 
 #include "interfaces/include/ws_common.h"
