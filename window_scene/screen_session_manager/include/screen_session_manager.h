@@ -111,6 +111,7 @@ public:
     bool SetScreenPowerById(ScreenId screenId, ScreenPowerState state, PowerStateChangeReason reason) override;
     bool SetScreenPowerByIdForPC(ScreenId screenId, ScreenPowerState state);
     bool SetScreenPowerByIdDefault(ScreenId screenId, ScreenPowerState state);
+    bool DealMultiScreenOff(ScreenId screenId, ScreenPowerStatus status);
     DisplayState GetDisplayState(DisplayId displayId) override;
     bool SetScreenBrightness(uint64_t screenId, uint32_t level) override;
     uint32_t GetScreenBrightness(uint64_t screenId) override;
