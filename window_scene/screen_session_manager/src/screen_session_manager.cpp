@@ -6079,7 +6079,6 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
-        that.SetExtendScreenDpi();
         that.SetBorderingAreaPercent();
         that.UpdateDisplayState(that.GetAllScreenIds(), DisplayState::ON);
         that.RegisterSettingDpiObserver();
@@ -14083,6 +14082,10 @@ void ScreenSessionManager::RegisterSettingExtendScreenIndepDpiObserver()
 
 void ScreenSessionManager::SetExtendScreenDpi()
 {
+    if (SUPPORT_COMPATIBLE_MODE && !g_offScreenRenderValue) {
+        TLOGNFI(WmsLogTag::DMS, "current is independent dpi mode.");
+        return;
+    }
     float extendScreenDpiCoef = EXTEND_SCREEN_DPI_DEFAULT_PARAMETER;
     bool ret = ScreenSettingHelper::GetSettingExtendScreenDpi(extendScreenDpiCoef);
     if (!ret) {
@@ -14093,12 +14096,13 @@ void ScreenSessionManager::SetExtendScreenDpi()
     }
     float dpi = static_cast<float>(cachedSettingDpi_) / BASELINE_DENSITY;
     SetExtendPixelRatio(dpi * g_extendScreenDpiCoef);
-    TLOGNFI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f", g_extendScreenDpiCoef);
+    TLOGNFI(WmsLogTag::DMS, "get setting extend screen dpi is : %{public}f, "
+        "g_extendScreenDpiCoef is : %{public}f", dpi, g_extendScreenDpiCoef);
 }
 
 void ScreenSessionManager::SetExtendScreenIndepDpi()
 {
-    if (g_offScreenRenderValue) {
+    if (SUPPORT_COMPATIBLE_MODE && g_offScreenRenderValue) {
         TLOGNFI(WmsLogTag::DMS, "current is not independent dpi mode.");
         return;
     }
