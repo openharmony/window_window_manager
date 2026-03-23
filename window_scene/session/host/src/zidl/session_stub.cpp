@@ -551,12 +551,22 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         auto combinedCompatibleConfig = property->GetCombinedCompatibleConfig();
         auto combinedSize = combinedCompatibleConfig.size();
         if (combinedSize > 0 && combinedSize <= COMBINED_COMPATIBLE_CONFIG_MAX_SIZE) {
-            reply.WriteUint32(static_cast<uint32_t>(combinedSize));
+            if (!reply.WriteUint32(static_cast<uint32_t>(combinedSize))) {
+                TLOGE(WmsLogTag::WMS_COMPAT, "Write combinedSize failed!");
+                return ERR_INVALID_DATA;
+            }
             for (decltype(combinedSize) i = 0; i < combinedSize; i++) {
-                reply.WriteString(combinedCompatibleConfig[i]);
+                if (!reply.WriteString(combinedCompatibleConfig[i])) {
+                    TLOGE(WmsLogTag::WMS_COMPAT, "Write config failed!");
+                    return ERR_INVALID_DATA;
+                }
             }
         } else {
-            reply.WriteUint32(0);
+            if (!reply.WriteUint32(0)) {
+                TLOGE(WmsLogTag::WMS_COMPAT, "Write combinedSize failed!");
+                return ERR_INVALID_DATA;
+            }
+            TLOGE(WmsLogTag::WMS_COMPAT, "combinedSize: %{public}zu fail to meet the conditions", combinedSize);
         }
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);

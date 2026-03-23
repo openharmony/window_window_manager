@@ -8046,10 +8046,11 @@ void WindowSceneSessionImpl::SendCombinedCompatibleConfigToArkUI()
     }
     const auto& logicalDeviceConfig = combinedCompatibleConfig[0];
     const auto& arkUIAndWebConfig = combinedCompatibleConfig[1];
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, logicalDeviceConfig:%{public}s, arkUIAndWebConfig:%{public}s",
-        property_->GetSessionInfo().bundleName_.c_str(), logicalDeviceConfig.c_str(), arkUIAndWebConfig.c_str());
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, logicalDeviceConfig size:%{public}zu, arkUIAndWebConfig size:"
+        "%{public}zu", property_->GetSessionInfo().bundleName_.c_str(), logicalDeviceConfig.size(),
+        arkUIAndWebConfig.size());
     Ace::UIContent::SetXComponentCompensationAngle(logicalDeviceConfig);
-    // Ace::UIContent::SetUICorrectionConfig(arkUIAndWebConfig);
+    Ace::UIContent::SetUICorrectionConfig(arkUIAndWebConfig);
     WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = true;
     if (logicalDeviceConfig == "") {
         TLOGI(WmsLogTag::WMS_COMPAT, "Send default logical device config to arkui");
