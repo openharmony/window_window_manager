@@ -37,6 +37,7 @@ private:
     int32_t userId_ = 100;
     sptr<WindowManager> instance_ = nullptr;
     sptr<WindowAdapter> windowAdapter_ = nullptr;
+    std::string isConcurrentuser_;
 };
 
 void WindowManagerAttributeTest::SetUpTestCase() {}
@@ -45,6 +46,7 @@ void WindowManagerAttributeTest::TearDownTestCase() {}
 
 void WindowManagerAttributeTest::SetUp()
 {
+    isConcurrentuser_ = OHOS::system::GetParameter("persist.dms.concurrentuser", "");
     OHOS::system::SetParameter("persist.dms.concurrentuser", "true");
     instance_ = &WindowManager::GetInstance(userId_);
     windowAdapter_ = &WindowAdapter::GetInstance(userId_);
@@ -53,7 +55,7 @@ void WindowManagerAttributeTest::SetUp()
 void WindowManagerAttributeTest::TearDown()
 {
     WindowManager::RemoveInstanceByUserId(userId_);
-    OHOS::system::SetParameter("persist.dms.concurrentuser", "false");
+    OHOS::system::SetParameter("persist.dms.concurrentuser", isConcurrentuser_);
 }
 
 namespace {
@@ -64,9 +66,9 @@ namespace {
  */
 HWTEST_F(WindowManagerAttributeTest, SetProcessWatermark, TestSize.Level1)
 {
-    ASSERT_NE(windowAdapter_, nullptr);
-    windowAdapter_->isProxyValid_ = true;
-    windowAdapter_->windowManagerServiceProxy_ = nullptr;
+    ASSERT_NE(windowAdapter, nullptr);
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
     int32_t pid = 1000;
     const std::string watermarkName = "SetProcessWatermarkName";
     bool isEnabled = true;
