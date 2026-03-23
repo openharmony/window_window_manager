@@ -344,8 +344,6 @@ ohos_shared_library("scene_session") {
   }
   public_external_deps = [
     "ability_base:session_info",
-    "accessibility:accessibility_common",
-    "accessibility:accessibility_interface",
     "input:libmmi-napi",
   ]
   defines = []
