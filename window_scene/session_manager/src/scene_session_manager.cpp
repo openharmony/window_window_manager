@@ -351,6 +351,15 @@ bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea
     return isVisible && diff <= 1;
 }
 
+void FillWindowDisplayName(WindowDisplayInfo& windowDisplayInfo)
+{
+    auto display = DisplayManager::GetInstance().GetDisplayById(windowDisplayInfo.displayId);
+    if (display == nullptr) {
+        return;
+    }
+    windowDisplayInfo.displayName = display->GetName();
+}
+
 enum class UpdateStartingWindowColorCacheResult : uint32_t {
     SUCCESS = 0,
     COLOR_MAP_BUNDLE_NOT_FOUND,
@@ -15576,7 +15585,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
 WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     std::vector<sptr<WindowInfo>>& infos)
 {
-    if (!(SessionPermission::IsSACalling())) {
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -15604,6 +15613,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             }
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
                 windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
+                FillWindowDisplayName(windowInfo->windowDisplayInfo);
             }
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();
