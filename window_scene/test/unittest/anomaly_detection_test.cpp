@@ -361,9 +361,6 @@ HWTEST_F(AnomalyDetectionTest, CheckWallpaper_ScreenLocked, TestSize.Level1)
  */
 HWTEST_F(AnomalyDetectionTest, CheckWallpaper_ZOrderMatch, TestSize.Level1)
 {
-    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
-    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
-
     auto sceneSession = GetSceneSession("CheckWallpaper_ZOrderMatch");
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
@@ -386,9 +383,6 @@ HWTEST_F(AnomalyDetectionTest, CheckWallpaper_ZOrderMatch, TestSize.Level1)
  */
 HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalWithHandler, TestSize.Level1)
 {
-    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
-    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
-
     auto sceneSession = GetSceneSession("CheckWallpaper_NormalWithHandler");
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
@@ -411,9 +405,6 @@ HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalWithHandler, TestSize.Level1
  */
 HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalNoHandler, TestSize.Level1)
 {
-    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
-    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
-
     auto sceneSession = GetSceneSession("CheckWallpaper_NormalNoHandler");
     ASSERT_NE(sceneSession, nullptr);
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);

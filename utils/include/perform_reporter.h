@@ -27,23 +27,6 @@
 
 namespace OHOS {
 namespace Rosen {
-constexpr const char* WINDOW_RECT_CHECK_NAME = "Window rect check";
-constexpr const char* WINDOW_ZORDER_CHECK_NAME = "Window z-order check";
-constexpr const char* WINDOW_FOCUS_CHECK_NAME = "Window focus check";
-constexpr const char* WINDOW_TRANSPARENT_CHECK_NAME = "Window transparent check";
-constexpr const char* WINDOW_MODAL_UIEXTENSION_UICONTENT_CHECK_NAME = "Window modal uiextension uicontent check";
-constexpr const char* WINDOW_MODAL_UIEXTENSION_SUBWINDOW_CHECK_NAME = "Window modal uiextension subwindow check";
-constexpr const char* WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL_NAME = "Window uiextension transfer data fail";
-constexpr const char* WINDOW_UIEXTENSION_START_ABILITY_FAIL_NAME = "Window uiextension start ability fail";
-constexpr const char* WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION_NAME =
-    "Window flush empty display info to mmi exception";
-constexpr const char* WINDOW_CREATE_SUB_WINDOW_FAILED_NAME = "Window create sub window failed";
-constexpr const char* WINDOW_UNEXPECTED_EVENT_CHECK_NAME = "Window unexpected event check";
-constexpr const char* WINDOW_UICONTENT_TIMEOUT_CHECK_NAME = "Window UIContent timeout check";
-constexpr const char* WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK_NAME = "Window UIExt destroy timeout check";
-constexpr const char* WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK_NAME = "Window keyboard anim timeout check";
-constexpr const char* WINDOW_WALLPAPER_ZORDER_CHECK_NAME = "Window wallpaper z-order check";
-
 enum class WindowDFXHelperType : uint32_t {
     WINDOW_RECT_CHECK = 1,
     WINDOW_ZORDER_CHECK,
@@ -60,25 +43,6 @@ enum class WindowDFXHelperType : uint32_t {
     WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK,
     WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK,
     WINDOW_WALLPAPER_ZORDER_CHECK,
-};
-
-static std::map<WindowDFXHelperType, const char*> WM_CHECK_TYPE_TO_CHECK_NAME_MAP {
-    {WindowDFXHelperType::WINDOW_RECT_CHECK,                         WINDOW_RECT_CHECK_NAME             },
-    {WindowDFXHelperType::WINDOW_ZORDER_CHECK,                       WINDOW_ZORDER_CHECK_NAME           },
-    {WindowDFXHelperType::WINDOW_FOCUS_CHECK,                        WINDOW_FOCUS_CHECK_NAME            },
-    {WindowDFXHelperType::WINDOW_TRANSPARENT_CHECK,                  WINDOW_TRANSPARENT_CHECK_NAME      },
-    {WindowDFXHelperType::WINDOW_MODAL_UIEXTENSION_UICONTENT_CHECK,  WINDOW_MODAL_UIEXTENSION_UICONTENT_CHECK_NAME  },
-    {WindowDFXHelperType::WINDOW_MODAL_UIEXTENSION_SUBWINDOW_CHECK,  WINDOW_MODAL_UIEXTENSION_SUBWINDOW_CHECK_NAME  },
-    {WindowDFXHelperType::WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL,     WINDOW_UIEXTENSION_TRANSFER_DATA_FAIL_NAME     },
-    {WindowDFXHelperType::WINDOW_UIEXTENSION_START_ABILITY_FAIL,     WINDOW_UIEXTENSION_START_ABILITY_FAIL_NAME     },
-    {WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION,
-        WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION_NAME },
-    {WindowDFXHelperType::WINDOW_CREATE_SUB_WINDOW_FAILED,           WINDOW_CREATE_SUB_WINDOW_FAILED_NAME          },
-    {WindowDFXHelperType::WINDOW_UNEXPECTED_EVENT_CHECK,             WINDOW_UNEXPECTED_EVENT_CHECK_NAME            },
-    {WindowDFXHelperType::WINDOW_UICONTENT_TIMEOUT_CHECK,            WINDOW_UICONTENT_TIMEOUT_CHECK_NAME           },
-    {WindowDFXHelperType::WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK,        WINDOW_UIEXT_DESTROY_TIMEOUT_CHECK_NAME       },
-    {WindowDFXHelperType::WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK,        WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK_NAME       },
-    {WindowDFXHelperType::WINDOW_WALLPAPER_ZORDER_CHECK,             WINDOW_WALLPAPER_ZORDER_CHECK_NAME            },
 };
 
 struct WindowProfileInfo {

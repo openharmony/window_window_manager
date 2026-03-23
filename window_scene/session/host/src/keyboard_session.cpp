@@ -38,6 +38,7 @@ namespace {
     constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
     constexpr int32_t INSERT_TO_THE_END = -1;
     const std::string KEYBOARD_ANIM_SYNC_EVENT_NAME { "KeyboardAnimationSyncException" };
+    static const std::string REAL_TIME_ENABLED = OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0");
 }
 KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
     const sptr<KeyboardSessionCallback>& keyboardCallback)
@@ -1137,7 +1138,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
 {
     // anim_sync_exception
-    bool realTimeEnabled = (OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0") == "1");
+    bool realTimeEnabled = (REAL_TIME_ENABLED == "1");
     int32_t THRESHOLD = realTimeEnabled ? 0 : 5000;
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
