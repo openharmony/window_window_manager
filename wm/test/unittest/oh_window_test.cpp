@@ -363,6 +363,28 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_WindowDestroyed, T
 }
 
 /**
+ * @tc.name: UnregisterFrameMetricsMeasuredCallback_WindowDestroyedCallbackNotRegistered
+ * @tc.desc: unregister unregistered callback after window destroy
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_WindowDestroyedCallbackNotRegistered, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    auto mainWindow = scene_->GetMainWindow();
+    ASSERT_NE(nullptr, mainWindow);
+    int32_t windowId = mainWindow->GetWindowId();
+    auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
+    if (ret != static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
+        return;
+    }
+
+    EXPECT_EQ(WMError::WM_OK, mainWindow->Destroy());
+    auto ret2 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback2);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret2);
+}
+
+/**
  * @tc.name: UnregisterFrameMetricsMeasuredCallback_CallbackNotRegistered
  * @tc.desc: unregister callback not registered while window callback map exists
  * @tc.type: FUNC

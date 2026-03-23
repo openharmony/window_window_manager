@@ -266,16 +266,16 @@ void EraseFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallb
 WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
     int32_t windowId, uintptr_t measuredCallbackId, const char* where)
 {
-    OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
-    if (!FindFrameMetricsMeasuredListener(windowId, measuredCallbackId, listener)) {
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
-    }
-
     auto window = Window::GetWindowWithId(windowId);
     if (window == nullptr) {
         TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
         EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+
+    OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
+    if (!FindFrameMetricsMeasuredListener(windowId, measuredCallbackId, listener)) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
 
     auto ret = window->UnregisterFrameMetricsChangeListener(listener);
