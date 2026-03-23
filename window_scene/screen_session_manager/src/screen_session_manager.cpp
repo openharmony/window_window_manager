@@ -5294,8 +5294,50 @@ bool ScreenSessionManager::SetScreenPowerByIdDefault(ScreenId screenId, ScreenPo
             return false;
         }
     }
+
+    if(DealMultiScreenOff(screenId, status)) {
+        return true;
+    }
+
     CallRsSetScreenPowerStatusSync(screenId, status);
     return true;
+}
+
+// when there are multiple physical screens and one screen is turned off individually, the state machine should be switched to Screen_On.
+bool ScreenSessionManager::DealMultiScreenOff(ScreenId screenId, ScreenPowerStatus status)
+{
+    if (!g_isPcDevice || status != ScreenPowerStatus::POWER_STATUS_OFF) {
+        return false;
+    }
+    bool hasOtherScreenPowerOn = false;
+    auto screenIds = GetAllScreenIds();
+    for (auto sid : screenIds) {
+        if (sid == screenId) {
+            continue;
+        }
+        auto session = GetScreenSession(sid);
+        if (session && session->GetScreenProperty().GetScreenType() == ScreenType::REAL) {
+            std::lock_guard<std::mutex> lock(screenPowerStatusMapMutex_);
+            auto it = screenPowerStatusMap_.find(sid);
+            if (it != screenPowerStatusMap_.end()) {
+                auto powerStatus = it->second;
+                TLOGNFI(WmsLogTag::DMS, "[UL_POWER]screenId: %{public}" PRIu64 " powerStatus:%{public}u",
+                    sid, powerStatus);
+                if (it->second == ScreenPowerStatus::POWER_STATUS_ON) {
+                    hasOtherScreenPowerOn = true;
+                    break;
+                }
+            } else {
+                TLOGNFI(WmsLogTag::DMS, "[UL_POWER]cannot find screenPowerStatusMap_ id: %{public}" PRIu64, sid);
+            }
+        }
+    }
+    if (hasOtherScreenPowerOn) {
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_FOR_ONE_SCREEN_OFF;
+        CallRsSetScreenPowerStatusSync(screenId, status, reason);
+        return true;
+    }
+    return false;
 }
 
 void ScreenSessionManager::SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession)
@@ -5965,6 +6007,10 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
             }
         }
         auto transState = ConvertPowerStatus2ScreenState(status);
+        if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_FOR_ONE_SCREEN_OFF) {
+            TLOGNFI(WmsLogTag::DMS, "[UL_POWER]set transitionstate SCREEN_ON when off one screen");
+            transState = ScreenTransitionState::SCREEN_ON;
+        }
         SetRSScreenPowerStatusExt(screenId, status);
         if (ScreenStateMachine::GetInstance().GetTransitionState() != ScreenTransitionState::SCREEN_INIT) {
             ScreenStateMachine::GetInstance().ToTransition(transState, false);
@@ -15625,10 +15671,8 @@ void ScreenSessionManager::DoSetScreenPowerStatus(ScreenId rsScreenId, ScreenPow
         TLOGNFW(WmsLogTag::DMS,
         "set the power status to OFF_ADVANCED first, screenId: %{public}" PRIu64 ", status: %{public}d.", rsScreenId,
         status);
-        rsInterface_.SetScreenPowerStatus(rsScreenId, ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED);
-        return;
+        status = ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED;
     }
-
     rsInterface_.SetScreenPowerStatus(rsScreenId, status);
     {
         std::lock_guard<std::mutex> lock(screenPowerStatusMapMutex_);
