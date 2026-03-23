@@ -6079,6 +6079,12 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
         auto &that = *reinterpret_cast<ScreenSessionManager *>(context);
         that.SetRotateLockedFromSettingData();
         that.SetDpiFromSettingData();
+        if (SUPPORT_COMPATIBLE_MODE) {
+            ScreenSettingHelper::GetSettingOffScreenRenderValue(g_offScreenRenderValue,
+                SETTING_OFF_SCREEN_RENDERING_SWITCH_KEY);
+            that.RegisterOffScreenRenderingSettingSwitchObserver();
+            that.RegisterSettingExtendScreenIndepDpiObserver();
+        }
         that.SetBorderingAreaPercent();
         that.UpdateDisplayState(that.GetAllScreenIds(), DisplayState::ON);
         that.RegisterSettingDpiObserver();
@@ -6131,12 +6137,6 @@ void ScreenSessionManager::BootFinishedCallback(const char *key, const char *val
                 ScreenPropertyChangeReason::SUPER_FOLD_STATUS_CHANGE);
         }
 #endif
-        if (SUPPORT_COMPATIBLE_MODE) {
-            ScreenSettingHelper::GetSettingOffScreenRenderValue(g_offScreenRenderValue,
-                SETTING_OFF_SCREEN_RENDERING_SWITCH_KEY);
-            that.RegisterOffScreenRenderingSettingSwitchObserver();
-            that.RegisterSettingExtendScreenIndepDpiObserver();
-        }
     }
 }
 
