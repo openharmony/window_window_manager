@@ -208,6 +208,11 @@ ohos_unittest("ws_anomaly_detection_test") {
 
   sources = [ "anomaly_detection_test.cpp" ]
 
+  cflags_cc = [
+    "-Dprivate = public",
+    "-Dprotected = public",
+  ]
+
   deps = [ ":ws_unittest_common" ]
 
   external_deps = test_external_deps
