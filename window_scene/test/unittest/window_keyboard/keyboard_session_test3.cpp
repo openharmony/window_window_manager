@@ -966,6 +966,61 @@ HWTEST_F(KeyboardSessionTest3, ForceNotifyKeyboardOccupiedArea, Function | Small
     EXPECT_TRUE(result);
 }
 
+/**
+ * @tc.name: PostKeyboardAnimationSyncTimeoutTask_HandlerNull
+ * @tc.desc: test PostKeyboardAnimationSyncTimeoutTask with handler is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_HandlerNull, Function | SmallTest | Level0)
+{
+    auto keyboardSession = GetKeyboardSession(
+        "PostKeyboardAnimationSyncTimeoutTask_HandlerNull", "PostKeyboardAnimationSyncTimeoutTask_HandlerNull");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    keyboardSession->eventHandler_ = nullptr;
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
+    EXPECT_TRUE(g_logMsg.find("handler is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: PostKeyboardAnimationSyncTimeoutTask_RealTimeEnabled
+ * @tc.desc: test PostKeyboardAnimationSyncTimeoutTask with realTimeEnabled="1"
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_RealTimeEnabled, Function | SmallTest | Level0)
+{
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "1");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "1");
+
+    auto keyboardSession = GetKeyboardSession(
+        "PostKeyboardAnimationSyncTimeoutTask_RealTimeEnabled", "PostKeyboardAnimationSyncTimeoutTask_RealTimeEnabled");
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
+
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
+}
+
+/**
+ * @tc.name: PostKeyboardAnimationSyncTimeoutTask_RealTimeDisabled
+ * @tc.desc: test PostKeyboardAnimationSyncTimeoutTask with realTimeEnabled="0"
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_RealTimeDisabled, Function | SmallTest | Level0)
+{
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
+
+    auto keyboardSession = GetKeyboardSession(
+        "PostKeyboardAnimationSyncTimeoutTask_RealTimeDisabled", "PostKeyboardAnimationSyncTimeoutTask_RealTimeDisabled");
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
