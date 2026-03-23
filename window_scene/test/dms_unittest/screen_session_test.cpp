@@ -5234,25 +5234,27 @@ HWTEST_F(ScreenSessionTest, SetBootingConnect, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdatePropertyByResolution by rect
- * @tc.desc: normal function
+ * @tc.name: CheckAndNotifyPropertyChange
+ * @tc.desc: CheckAndNotifyPropertyChange
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionTest, UpdatePropertyByResolution2, TestSize.Level1)
+HWTEST_F(ScreenSessionTest, CheckAndNotifyPropertyChange, TestSize.Level1)
 {
+    LOG_SetCallback(MyLogCallbackWithAllLog);
+    g_errLog.clear();
     ScreenId screenId = 10000;
-    ScreenProperty screenProperty;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
-    EXPECT_NE(nullptr, screenSession);
-    DMRect rect = {0, 0, 3120, 2080};
-    screenSession->SetRotation(Rotation::ROTATION_0);
-    screenSession->UpdatePropertyByResolution(rect);
-    auto bounds = screenSession->GetScreenProperty().GetBounds();
-    EXPECT_EQ(bounds.rect_.width_, 3120);
-    screenSession->SetRotation(Rotation::ROTATION_90);
-    screenSession->UpdatePropertyByResolution(rect);
-    bounds = screenSession->GetScreenProperty().GetBounds();
-    EXPECT_EQ(bounds.rect_.width_, 2080);
+    ScreenProperty property = ScreenProperty();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, property, screenId);
+    session->isNeedNotify = false;
+    session->CheckAndNotifyPropertyChange();
+    EXPECT_FALSE(g_errLog.find("It's need notify") != std::string::npos);
+    g_errLog.clear();
+
+    session->isNeedNotify = true;
+    session->SetPropertyNeedNotified(property);
+    session->CheckAndNotifyPropertyChange();
+    EXPECT_TRUE(g_errLog.find("It's need notify") != std::string::npos);
+    g_errLog.clear();
 }
 } // namespace
 } // namespace Rosen
