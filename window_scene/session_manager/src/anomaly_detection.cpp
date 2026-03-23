@@ -25,6 +25,7 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr OHOS::HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "AnomalyDetection" };
+static const std::string REAL_TIME_ENABLED = OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0");
 }
 
 void AnomalyDetection::SceneZOrderCheckProcess()
@@ -109,7 +110,7 @@ void AnomalyDetection::CheckWallpaper(const sptr<SceneSession>& session)
     if (!(session->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER)) {
         return;
     }
-    bool realTimeEnabled = (OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0") == "1");
+    bool realTimeEnabled = (REAL_TIME_ENABLED == "1");
     uint32_t defaultWallpaperZOrder = realTimeEnabled ? 1 : 2;
     if (!SceneSessionManager::GetInstance().IsScreenLocked() && session->GetZOrder() != defaultWallpaperZOrder) {
         TLOGD(WmsLogTag::WMS_HIERARCHY,
