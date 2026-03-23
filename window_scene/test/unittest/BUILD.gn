@@ -1392,7 +1392,7 @@ ohos_unittest("ws_session_stub_lifecycle_test") {
 
   external_deps = test_external_deps
 
-  public_external_deps = [ "accessibility:accessibility_interface" ]
+  external_deps += [ "accessibility:accessibility_interface" ]
 }
 
 ohos_unittest("ws_session_stub_mock_test") {
