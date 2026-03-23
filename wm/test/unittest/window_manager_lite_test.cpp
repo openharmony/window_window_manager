@@ -248,6 +248,7 @@ private:
     int32_t mockUserId_ = 200;
     sptr<WindowManagerLite> mockInstance_ = nullptr;
     sptr<MockWindowAdapterLite> mockAdapter_ = nullptr;
+    std::string isConcurrentuser_;
 };
 
 void WindowManagerLiteTest::SetUpTestCase() {}
@@ -256,6 +257,7 @@ void WindowManagerLiteTest::TearDownTestCase() {}
 
 void WindowManagerLiteTest::SetUp()
 {
+    isConcurrentuser_ = OHOS::system::GetParameter("persist.dms.concurrentuser", "");
     OHOS::system::SetParameter("persist.dms.concurrentuser", "true");
     instance_ = &WindowManagerLite::GetInstance(userId_);
     adapter_ = sptr<WindowAdapterLite>::MakeSptr(userId_);
@@ -281,7 +283,7 @@ void WindowManagerLiteTest::TearDown()
     mockInstance_ = nullptr;
     adapter_ = nullptr;
     mockAdapter_ = nullptr;
-    OHOS::system::SetParameter("persist.dms.concurrentuser", "false");
+    OHOS::system::SetParameter("persist.dms.concurrentuser", isConcurrentuser_);
 }
 
 bool WindowManagerLiteTest::CheckCallingWindowInfo(

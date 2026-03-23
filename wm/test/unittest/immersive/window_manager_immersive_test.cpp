@@ -103,6 +103,7 @@ private:
     int32_t mockUserId_ = 200;
     sptr<WindowManager> mockInstance_ = nullptr;
     sptr<MockWindowAdapter> mockAdapter_ = nullptr;
+    std::string isConcurrentuser_;
 };
 
 void WindowManagerImmersiveTest::SetUpTestCase() {}
@@ -111,6 +112,7 @@ void WindowManagerImmersiveTest::TearDownTestCase() {}
 
 void WindowManagerImmersiveTest::SetUp()
 {
+    isConcurrentuser_ = OHOS::system::GetParameter("persist.dms.concurrentuser", "");
     OHOS::system::SetParameter("persist.dms.concurrentuser", "true");
     instance_ = &WindowManager::GetInstance(userId_);
     windowAdapter = &WindowAdapter::GetInstance(userId_);
@@ -129,7 +131,7 @@ void WindowManagerImmersiveTest::TearDown()
     WindowManager::RemoveInstanceByUserId(mockUserId_);
 
     WindowAdapter::windowAdapterMap_.clear();
-    OHOS::system::SetParameter("persist.dms.concurrentuser", "false");
+    OHOS::system::SetParameter("persist.dms.concurrentuser", isConcurrentuser_);
 }
 
 namespace {
