@@ -66,9 +66,9 @@ namespace {
  */
 HWTEST_F(WindowManagerAttributeTest, SetProcessWatermark, TestSize.Level1)
 {
-    ASSERT_NE(windowAdapter, nullptr);
-    windowAdapter->isProxyValid_ = true;
-    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    ASSERT_NE(windowAdapter_, nullptr);
+    windowAdapter_->isProxyValid_ = true;
+    windowAdapter_->windowManagerServiceProxy_ = nullptr;
     int32_t pid = 1000;
     const std::string watermarkName = "SetProcessWatermarkName";
     bool isEnabled = true;
