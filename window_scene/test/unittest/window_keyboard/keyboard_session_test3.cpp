@@ -16,6 +16,7 @@
 #include "display_manager.h"
 #include "session/host/include/keyboard_session.h"
 #include <gtest/gtest.h>
+#include <parameter.h>
 #include <ui/rs_surface_node.h>
 
 #include "interfaces/include/ws_common.h"
@@ -977,7 +978,7 @@ HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_HandlerNull,
         "PostKeyboardAnimationSyncTimeoutTask_HandlerNull", "PostKeyboardAnimationSyncTimeoutTask_HandlerNull");
     ASSERT_NE(keyboardSession, nullptr);
 
-    keyboardSession->eventHandler_ = nullptr;
+    keyboardSession->SetEventHandler(nullptr, nullptr);
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
