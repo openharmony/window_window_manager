@@ -15,6 +15,7 @@
 
 #include "anomaly_detection.h"
 #include <gtest/gtest.h>
+#include <parameters.h>
 #include "session_manager/include/scene_session_manager.h"
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/session.h"
@@ -346,16 +347,41 @@ HWTEST_F(AnomalyDetectionTest, CheckWallpaper_ScreenLocked, TestSize.Level1)
     sceneSession->persistentId_ = 1;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
-    ssm_->screenLocked_ = true;
+    ssm_->isScreenLocked_ = true;
     AnomalyDetection::CheckWallpaper(sceneSession);
-    ssm_->screenLocked_ = false;
+    ssm_->isScreenLocked_ = false;
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: CheckWallpaper_ZOrderMatch
+ * @tc.desc: CheckWallpaper when zOrder equals defaultWallpaperZOrder
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnomalyDetectionTest, CheckWallpaper_ZOrderMatch, TestSize.Level1)
+{
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
+
+    auto sceneSession = GetSceneSession("CheckWallpaper_ZOrderMatch");
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    sceneSession->isVisible_ = true;
+    sceneSession->zOrder_ = 2;
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    ssm_->isScreenLocked_ = false;
+
+    AnomalyDetection::CheckWallpaper(sceneSession);
 
     ssm_->sceneSessionMap_.clear();
 }
 
 /**
  * @tc.name: CheckWallpaper_NormalWithHandler
- * @tc.desc: CheckWallpaper normal case with handler exists
+ * @tc.desc: CheckWallpaper normal case - screen not locked, zOrder mismatch, handler exists
  * @tc.type: FUNC
  */
 HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalWithHandler, TestSize.Level1)
@@ -371,8 +397,7 @@ HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalWithHandler, TestSize.Level1
     sceneSession->persistentId_ = 1;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
-    ssm_->screenLocked_ = false;
-    ssm_->taskScheduler_ = nullptr;
+    ssm_->isScreenLocked_ = false;
 
     AnomalyDetection::CheckWallpaper(sceneSession);
 
@@ -381,7 +406,7 @@ HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalWithHandler, TestSize.Level1
 
 /**
  * @tc.name: CheckWallpaper_NormalNoHandler
- * @tc.desc: CheckWallpaper normal case with handler is null
+ * @tc.desc: CheckWallpaper normal case - screen not locked, zOrder mismatch, handler is null
  * @tc.type: FUNC
  */
 HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalNoHandler, TestSize.Level1)
@@ -397,7 +422,7 @@ HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalNoHandler, TestSize.Level1)
     sceneSession->persistentId_ = 1;
     ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
 
-    ssm_->screenLocked_ = false;
+    ssm_->isScreenLocked_ = false;
     ssm_->taskScheduler_ = nullptr;
 
     AnomalyDetection::CheckWallpaper(sceneSession);
