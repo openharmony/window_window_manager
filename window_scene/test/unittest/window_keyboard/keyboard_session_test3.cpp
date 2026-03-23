@@ -1014,7 +1014,7 @@ HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_RealTimeDisa
     OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
     EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
 
-    auto keyboardSession = GetKeyboardSession( "PostKeyboardAnimationSyncTimeoutTask_RealTimeDisabled",
+    auto keyboardSession = GetKeyboardSession("PostKeyboardAnimationSyncTimeoutTask_RealTimeDisabled",
         "PostKeyboardAnimationSyncTimeoutTask_RealTimeDisabled");
     ASSERT_NE(keyboardSession, nullptr);
     keyboardSession->isKeyboardSyncTransactionOpen_ = true;
