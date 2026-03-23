@@ -17,6 +17,7 @@
 #define OHOS_SESSION_MANAGER_SESSION_LISTENER_CONTROLLER_H
 
 #include <mutex>
+#include <tuple>
 #include <vector>
 #include <list>
 
@@ -58,6 +59,9 @@ public:
         
     WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList);
+
+    WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+        const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey);
 
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
 
@@ -113,6 +117,18 @@ private:
     };
 
 private:
+    struct BundleInstanceFilterKey {
+        std::string bundleName_;
+        int32_t appIndex_ = 0;
+        std::string appInstanceKey_;
+
+        bool operator<(const BundleInstanceFilterKey& other) const
+        {
+            return std::tie(bundleName_, appIndex_, appInstanceKey_) <
+                std::tie(other.bundleName_, other.appIndex_, other.appInstanceKey_);
+        }
+    };
+
     std::mutex listenerLock_;
     std::vector<sptr<ISessionListener>> sessionListeners_;
     sptr<IRemoteObject::DeathRecipient> listenerDeathRecipient_;
@@ -134,6 +150,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
     std::map<int32_t, std::vector<sptr<ISessionLifecycleListener>>> listenerMapById_;
     std::map<std::string, std::vector<sptr<ISessionLifecycleListener>>> listenerMapByBundle_;
+    std::map<BundleInstanceFilterKey, std::vector<sptr<ISessionLifecycleListener>>> listenerMapByBundleInstance_;
     std::vector<sptr<ISessionLifecycleListener>> listenersOfAllBundles_;
 };
 }  // namespace Rosen

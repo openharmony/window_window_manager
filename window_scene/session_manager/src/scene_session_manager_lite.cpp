@@ -15,6 +15,7 @@
 
 #include "session_manager/include/scene_session_manager.h"
 #include "session_manager/include/scene_session_manager_lite.h"
+#include "scene_session_manager_lite.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -394,6 +395,12 @@ WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
     const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
 {
     return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleNameList);
+}
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundle(const sptr<ISessionLifecycleListener>& listener,
+    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) 
+{
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
 }
 
 WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
