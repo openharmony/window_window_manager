@@ -337,6 +337,8 @@
             OHOS::Rosen::JsWindowListener::OnWindowNoInteractionCallback*;
             OHOS::Rosen::JsWindowListener::OnWindowStatusChange*;
             OHOS::Rosen::JsWindowListener::OnWindowStatusDidChange*;
+            OHOS::Rosen::JsWindowListener::OnParentWindowSizeChange*;
+            OHOS::Rosen::JsWindowListener::OnParentWindowStatusChange*;
             OHOS::Rosen::JsWindowListener::OnWindowTitleButtonRectChanged*;
             OHOS::Rosen::JsWindowListener::OnWindowVisibilityChangedCallback*;
             OHOS::Rosen::JsWindowListener::OnWindowWillClose*;
@@ -437,6 +439,8 @@
             OHOS::Rosen::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB;
             OHOS::Rosen::WINDOW_VISIBILITY_CHANGE_CB;
             OHOS::Rosen::WINDOW_WILL_CLOSE_CB;
+            OHOS::Rosen::PARENT_WINDOW_SIZE_CHANGE_CB;
+            OHOS::Rosen::PARENT_WINDOW_STATUS_CHANGE_CB;
         };
     local:
     *;

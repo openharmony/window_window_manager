@@ -1076,13 +1076,16 @@ struct SingleHandBackgroundTextConfig {
     int32_t height = -1;
     int32_t fontSize = 0;
     int32_t minFontSize = 0;
-    int32_t maxLines = 0;
+    int32_t maxLines = -1;
+    int32_t textAlign = 1;
     std::string maxFontScale = "";
 };
 
 struct SingleHandBackgroundLayoutConfig {
     bool isCustomLayout = false;
     WSRect settingButtonRect = {0, 0, 0, 0};
+    bool isSettingButtonMirror = false;
+    int32_t textContainerWidth = 0;
     SingleHandBackgroundTextConfig title;
     SingleHandBackgroundTextConfig content;
     SingleHandBackgroundTextConfig issueText;

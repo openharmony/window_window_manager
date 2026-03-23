@@ -100,7 +100,8 @@ public:
 
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession,
-        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false) { return WMError::WM_OK; }
+        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false,
+        bool isBlockSubwindow = false) { return WMError::WM_OK; }
 
     /*
      * inherits from window
@@ -526,7 +527,14 @@ public:
     WMError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError RegisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
     WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener) override;
+    WMError RegisterParentWindowSizeChangeListener(const sptr<IParentWindowSizeChangeListener>& listener) override;
+    WMError UnregisterParentWindowSizeChangeListener(const sptr<IParentWindowSizeChangeListener>& listener) override;
+    WMError RegisterParentWindowStatusChangeListener(const sptr<IParentWindowStatusChangeListener>& listener) override;
+    WMError UnregisterParentWindowStatusChangeListener(const sptr<IParentWindowStatusChangeListener>& listener)
+        override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
+    WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override { return WSError::WS_OK; }
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
@@ -612,6 +620,7 @@ public:
      * Window Rotation
      */
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    WSError GetSceneNodeCount(uint32_t& nodeCount) override;
     WMError RegisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
     WMError UnregisterWindowRotationChangeListener(const sptr<IWindowRotationChangeListener>& listener) override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
@@ -707,6 +716,8 @@ protected:
     void NotifyUIExtHostRectChangeInGlobalDisplayListeners(const Rect& rect, const WindowSizeChangeReason reason);
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
+    void NotifyParentWindowSizeChange(Rect rect);
+    void NotifyParentWindowStatusChange(WindowMode mode);
     void NotifyTransformChange(const Transform& transForm) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
@@ -1014,6 +1025,11 @@ private:
     template<typename T>
     EnableIfSame<T, IWindowStatusDidChangeListener, std::vector<sptr<IWindowStatusDidChangeListener>>> GetListeners();
     template<typename T>
+    EnableIfSame<T, IParentWindowSizeChangeListener, std::vector<sptr<IParentWindowSizeChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IParentWindowStatusChangeListener, std::vector<sptr<IParentWindowStatusChangeListener>>>
+        GetListeners();
+    template<typename T>
     EnableIfSame<T, IWindowRectChangeListener, std::vector<sptr<IWindowRectChangeListener>>> GetListeners();
     template<typename T>
     EnableIfSame<T, IWindowTitleChangeListener, std::vector<sptr<IWindowTitleChangeListener>>> GetListeners();
@@ -1138,6 +1154,8 @@ private:
     static std::recursive_mutex windowNoInteractionListenerMutex_;
     static std::recursive_mutex windowStatusChangeListenerMutex_;
     static std::recursive_mutex windowStatusDidChangeListenerMutex_;
+    static std::recursive_mutex parentWindowSizeChangeListenerMutex_;
+    static std::recursive_mutex parentWindowStatusChangeListenerMutex_;
     static std::mutex displayMoveListenerMutex_;
     static std::mutex windowRectChangeListenerMutex_;
     static std::mutex windowTitleChangeListenerMutex_;
@@ -1184,6 +1202,8 @@ private:
     static std::map<int32_t, std::vector<IWindowNoInteractionListenerSptr>> windowNoInteractionListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusChangeListener>>> windowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowStatusDidChangeListener>>> windowStatusDidChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IParentWindowSizeChangeListener>>> parentWindowSizeChangeListeners_;
+    static std::map<int32_t, std::vector<sptr<IParentWindowStatusChangeListener>>> parentWindowStatusChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowRectChangeListener>>> windowRectChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleChangeListener>>> windowTitleChangeListeners_;
     static std::map<int32_t, std::vector<sptr<IWindowTitleOrHotAreasListener>>> windowTitleOrHotAreasListeners_;
@@ -1229,6 +1249,7 @@ private:
     KeyFramePolicy keyFramePolicy_;
     std::atomic<WindowStatus> lastWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    std::atomic<WindowStatus> lastStatusWhenNotifyParentStatusChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
     std::shared_mutex hookWindowInfoMutex_;
     HookWindowInfo hookWindowInfo_;

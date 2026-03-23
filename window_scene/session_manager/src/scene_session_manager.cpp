@@ -34,6 +34,7 @@
 #include "publish/scb_dump_subscriber.h"
 #include "session/host/include/pc_fold_screen_manager.h"
 #include "uea_list_config.h"
+#include "process_options.h"
 #include "wm_common.h"
 
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
@@ -348,6 +349,15 @@ bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea
     auto diff =
         std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
     return isVisible && diff <= 1;
+}
+
+void FillWindowDisplayName(WindowDisplayInfo& windowDisplayInfo)
+{
+    auto display = DisplayManager::GetInstance().GetDisplayById(windowDisplayInfo.displayId);
+    if (display == nullptr) {
+        return;
+    }
+    windowDisplayInfo.displayName = display->GetName();
 }
 
 enum class UpdateStartingWindowColorCacheResult : uint32_t {
@@ -1585,6 +1595,10 @@ void SceneSessionManager::ConfigSingleHandBackgroundText(const WindowSceneConfig
         if (item.IsInts() && item.intsValue_->size() == 1) {
             textConfig.maxLines = (*item.intsValue_)[0];
         }
+        item = configItem["textAlign"];
+        if (item.IsInts() && item.intsValue_->size() == 1) {
+            textConfig.textAlign = (*item.intsValue_)[0];
+        }
         item = configItem["maxFontScale"];
         if (item.IsString()) {
             textConfig.maxFontScale = item.stringValue_;
@@ -1617,6 +1631,14 @@ void SceneSessionManager::ConfigSingleHandBackgroundLayout(const WindowSceneConf
         if (itemHeight.IsInts() && itemHeight.intsValue_->size() == 1) {
             config.settingButtonRect.height_ = (*itemHeight.intsValue_)[0];
         }
+    }
+    item = configItem["isSettingButtonMirror"].GetProp("enable");
+    if (item.IsBool()) {
+        config.isSettingButtonMirror = item.boolValue_;
+    }
+    item = configItem["textContainerWidth"];
+    if (item.IsInts() && item.intsValue_->size() == 1) {
+        config.textContainerWidth = (*item.intsValue_)[0];
     }
     ConfigSingleHandBackgroundText(configItem["singleHandBackgroundTitle"], config.title);
     ConfigSingleHandBackgroundText(configItem["singleHandBackgroundContent"], config.content);
@@ -3569,7 +3591,18 @@ void SceneSessionManager::RequestInputMethodCloseKeyboard(const int32_t persiste
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_KEYBOARD, "session is nullptr");
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "sceneSession is nullptr, id: %{public}d", persistentId);
+        return;
+    }
+    auto processOptions = sceneSession->GetSessionInfo().processOptions;
+    if (processOptions && processOptions->processMode != AAFwk::ProcessMode::UNSPECIFIED &&
+        processOptions->startupVisibility == AAFwk::StartupVisibility::STARTUP_HIDE) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "ability start up in hide");
+        return;
+    }
+    auto keyboardSession = GetKeyboardSession(sceneSession->GetSessionProperty()->GetDisplayId(), false);
+    if (keyboardSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_KEYBOARD, "keyboardSession is nullptr, id: %{public}d", persistentId);
         return;
     }
     // Hide keyboard when app is cold started, if keyboard is showing and screen is unlocked.
@@ -15552,7 +15585,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
 WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     std::vector<sptr<WindowInfo>>& infos)
 {
-    if (!(SessionPermission::IsSACalling())) {
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
@@ -15580,6 +15613,7 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             }
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
                 windowInfo->windowDisplayInfo = sceneSession->GetWindowDisplayInfoForWindowInfo();
+                FillWindowDisplayName(windowInfo->windowDisplayInfo);
             }
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
                 windowInfo->windowLayoutInfo = sceneSession->GetWindowLayoutInfoForWindowInfo();

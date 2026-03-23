@@ -605,10 +605,21 @@ bool ConvertWindowCreateParamsFromAniValue(ani_env* env, ani_object aniObject,
     } else {
         TLOGW(WmsLogTag::WMS_ANIMATION, "[ANI] There is no systemAnimationParams.");
     }
-    ani_boolean isNeeded = false;
-    ani_status status = env->Object_GetPropertyByName_Boolean(aniObject, "needAnimation", &isNeeded);
+    ani_ref aniNeedAnimation = nullptr;
+    ani_status status = env->Object_GetPropertyByName_Ref(aniObject, "needAnimation", &aniNeedAnimation);
     if (status == ANI_OK) {
-        windowCreateParams.needAnimation = std::make_shared<bool>(isNeeded);
+        ani_boolean isUndefined = true;
+        if (env->Reference_IsUndefined(aniNeedAnimation, &isUndefined) == ANI_OK && !isUndefined) {
+            ani_boolean isNeeded = false;
+            ani_status boolStatus = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniNeedAnimation),
+                "toBoolean", ":z", &isNeeded);
+            if (boolStatus != ANI_OK) {
+                boolStatus = env->Object_GetPropertyByName_Boolean(aniObject, "needAnimation", &isNeeded);
+            }
+            if (boolStatus == ANI_OK) {
+                windowCreateParams.needAnimation = std::make_shared<bool>(static_cast<bool>(isNeeded));
+            }
+        }
     }
     return true;
 }

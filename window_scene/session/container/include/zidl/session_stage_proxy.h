@@ -60,6 +60,8 @@ public:
     WSError UpdateWindowMode(WindowMode mode) override;
     WSError GetTopNavDestinationName(std::string& topNavDestName) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
+    WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override;
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
@@ -111,6 +113,7 @@ public:
     void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
+    WSError GetSceneNodeCount(uint32_t& nodeCount) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
     WSError NotifyAppHookWindowInfoUpdated() override;

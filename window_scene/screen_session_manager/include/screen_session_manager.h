@@ -506,7 +506,8 @@ public:
     DMError SetVirtualScreenMaxRefreshRate(ScreenId id, uint32_t refreshRate,
         uint32_t& actualRefreshRate) override;
     void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
-    void OnGetHdrFormats(ScreenId screenId, const std::vector<ScreenHDRFormat>& rsHdrFormats);
+    void OnGetHdrFormats(ScreenId screenId, const sptr<ScreenSession>& session,
+        const std::vector<ScreenHDRFormat>& rsHdrFormats);
     void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
     /*
      * multi user
@@ -1203,7 +1204,7 @@ private:
     void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& toRect);
     void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& toRect);
     void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
-    void HandleResolutionEffectChangeWhenRotate();
+    void HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType type, int rotation);
     void CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
         const sptr<ScreenSession>& externalSession, const bool& effectFlag,
         uint32_t& targetWidth, uint32_t& targetHeight);

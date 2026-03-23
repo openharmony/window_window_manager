@@ -1533,6 +1533,16 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return UpdateRectWithLayoutInfo(rect, reason, updateReason, rsTransaction, {});
 }
 
+void Session::IsNeedNotifySubSessionParentSizeChange(const WSRect& rect)
+{
+    WSRect lastParentRect = GetLayoutController()->GetLastClientParentSize();
+    if (lastParentRect.width_ != rect.width_ || lastParentRect.height_ != rect.height_) {
+        Rect parentRect = { rect.posX_, rect.posY_, static_cast<uint32_t>(rect.width_),
+            static_cast<uint32_t>(rect.height_)};
+        NotifySubSessionParentSizeChange(parentRect);
+    }
+}
+
 WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
@@ -1540,7 +1550,9 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     const auto persistentId = GetPersistentId();
     TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
         "reason:%{public}u %{public}s", persistentId, rect.ToString().c_str(), reason, updateReason.c_str());
+    IsNeedNotifySubSessionParentSizeChange(rect);
     GetLayoutController()->SetSessionRect(rect);
+    GetLayoutController()->SetLastClientParentSize(rect);
     if (!IsSessionValid()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             persistentId, GetSessionState());
@@ -1876,6 +1888,7 @@ void Session::HandleDialogForeground()
 WSError Session::Background(bool isFromClient, const std::string& identityToken)
 {
     HandleDialogBackground();
+    NotifySubSessionParentStatusChange(GetWindowMode());
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background session, state: %{public}" PRIu32, GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -3143,7 +3156,7 @@ bool Session::GetNeedUseBlurSnapshot() const
     bool snapshotPrivacyMode = GetSnapshotPrivacyMode();
     ControlInfo controlInfo;
     bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
-    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool isAppUseControl = controlInfo.isNeedControl;
     bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && isAppUseControl);
     if (needUseBlurSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, snapshotPrivacyMode: %{public}d, "
@@ -3184,7 +3197,7 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
         SaveSnapshot(true, true, nullptr);
         return;
     }
-    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool isAppUseControl = controlInfo.isNeedControl;
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, isAppUseControl);
     if (isAppLockControl_.load() == isAppUseControl) {
         return;
@@ -3195,7 +3208,9 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
             NotifyAddSnapshot(false, false, false);
             return;
         }
-        NotifyAddSnapshot(true, false, false);
+        if (!controlInfo.isControlRecentOnly) {
+            NotifyAddSnapshot(true, false, false);
+        }
         SaveSnapshot(true, true, nullptr, true);
         return;
     }
@@ -4484,9 +4499,26 @@ void Session::SetSessionRect(const WSRect& rect)
 }
 
 /** @note @window.layout */
+void Session::SetLastClientParentSize(const WSRect& rect)
+{
+    if (GetSessionRect() == rect) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
+        return;
+    }
+    layoutController_->SetLastClientParentSize(rect);
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+}
+
+/** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
     return layoutController_->GetSessionRect();
+}
+
+/** @note @window.layout */
+WSRect Session::GetLastClientParentSize() const
+{
+    return layoutController_->GetLastClientParentSize();
 }
 
 /** @note @window.layout */

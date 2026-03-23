@@ -602,7 +602,7 @@ ohos_static_library("wms_systemtest_common") {
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/wm:libwm",
+    "${window_base_path}/wm:libwm_static",
   ]
   external_deps = test_external_deps
 

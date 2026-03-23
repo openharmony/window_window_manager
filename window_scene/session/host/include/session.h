@@ -461,8 +461,10 @@ public:
     WSError SetSessionPropertyForReconnect(const sptr<WindowSessionProperty>& property);
     const sptr<WindowSessionProperty>& GetSessionProperty() const { return property_; }
     void SetSessionRect(const WSRect& rect);
+    void SetLastClientParentSize(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WSRect GetLastClientParentSize() const;
     WSRect GetSessionScreenRelativeRect() const;
     WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
@@ -492,6 +494,9 @@ public:
     virtual WSError UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
+    void IsNeedNotifySubSessionParentSizeChange(const WSRect& rect);
+    virtual void NotifySubSessionParentSizeChange(Rect rect){};
+    virtual void NotifySubSessionParentStatusChange(WindowMode mode){};
     WSError UpdateDensity();
     WSError UpdateOrientation();
     virtual bool IsDragMoving() const { return false; }

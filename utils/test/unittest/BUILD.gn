@@ -404,6 +404,9 @@ ohos_static_library("utils_unittest_common") {
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
+  ]
+
+  deps = [
     "${window_base_path}/wm:libwm",
   ]
 
