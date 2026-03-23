@@ -15795,7 +15795,7 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
                     where, session->GetWindowId(), session->GetWindowName().c_str());
                 continue;
             }
-            if (!session->IsSessionForeground()) {
+            if (!IsSessionForegroundForGlobalWindowMode(session)) {
                 TLOGND(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: skip win=[%{public}d, %{public}s], stat: %{public}u",
                     where, session->GetWindowId(), session->GetWindowName().c_str(),
                     static_cast<uint32_t>(session->GetSessionState()));
@@ -15825,6 +15825,22 @@ WMError SceneSessionManager::GetGlobalWindowMode(DisplayId displayId, GlobalWind
         }
         return WMError::WM_OK;
     }, __func__);
+}
+
+bool SceneSessionManager::IsSessionForegroundForGlobalWindowMode(const sptr<SceneSession>& session)
+{
+    if (session == nullptr) {
+        return false;
+    }
+    const auto windowType = session->GetWindowType();
+    if (!WindowHelper::IsSubWindow(windowType) && !WindowHelper::IsDialogWindow(windowType)) {
+        return session->IsSessionForeground();
+    }
+    if (!session->IsSessionForeground()) {
+        return false;
+    }
+    auto mainSession = session->GetMainSession();
+    return mainSession != nullptr && mainSession->IsSessionForeground();
 }
 
 WMError SceneSessionManager::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName)

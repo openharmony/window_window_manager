@@ -1156,6 +1156,7 @@ private:
     bool CheckClickFocusIsDownThroughFullScreen(const sptr<SceneSession>& focusedSession,
         const sptr<SceneSession>& sceneSession, FocusChangeReason reason);
     bool IsBlockingFocusWindowType(const sptr<SceneSession>& sceneSession) const;
+    bool IsSessionForegroundForGlobalWindowMode(const sptr<SceneSession>& session);
     bool IsParentSessionVisible(const sptr<SceneSession>& session);
     sptr<SceneSession> GetNextFocusableSession(DisplayId displayId, int32_t persistentId);
     sptr<SceneSession> GetTopFloatingSession(DisplayId displayGroupId, int32_t persistentId);
