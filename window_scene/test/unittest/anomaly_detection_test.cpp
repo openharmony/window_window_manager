@@ -311,6 +311,99 @@ HWTEST_F(AnomalyDetectionTest, SceneZOrderCheckProcess, TestSize.Level1)
     LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "AnomalyDetectionTest: SceneZOrderCheckProcess end";
 }
+
+/**
+ * @tc.name: CheckWallpaper_NotWallpaper
+ * @tc.desc: CheckWallpaper when windowType is not WALLPAPER
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NotWallpaper, TestSize.Level1)
+{
+    auto sceneSession = GetSceneSession("CheckWallpaper_NotWallpaper");
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->isVisible_ = true;
+    sceneSession->zOrder_ = 1;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    AnomalyDetection::CheckWallpaper(sceneSession);
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: CheckWallpaper_ScreenLocked
+ * @tc.desc: CheckWallpaper when screen is locked
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnomalyDetectionTest, CheckWallpaper_ScreenLocked, TestSize.Level1)
+{
+    auto sceneSession = GetSceneSession("CheckWallpaper_ScreenLocked");
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    sceneSession->isVisible_ = true;
+    sceneSession->zOrder_ = 10;
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    ssm_->screenLocked_ = true;
+    AnomalyDetection::CheckWallpaper(sceneSession);
+    ssm_->screenLocked_ = false;
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: CheckWallpaper_NormalWithHandler
+ * @tc.desc: CheckWallpaper normal case with handler exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalWithHandler, TestSize.Level1)
+{
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
+
+    auto sceneSession = GetSceneSession("CheckWallpaper_NormalWithHandler");
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    sceneSession->isVisible_ = true;
+    sceneSession->zOrder_ = 10;
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    ssm_->screenLocked_ = false;
+    ssm_->taskScheduler_ = nullptr;
+
+    AnomalyDetection::CheckWallpaper(sceneSession);
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: CheckWallpaper_NormalNoHandler
+ * @tc.desc: CheckWallpaper normal case with handler is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnomalyDetectionTest, CheckWallpaper_NormalNoHandler, TestSize.Level1)
+{
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
+
+    auto sceneSession = GetSceneSession("CheckWallpaper_NormalNoHandler");
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_WALLPAPER);
+    sceneSession->isVisible_ = true;
+    sceneSession->zOrder_ = 10;
+    sceneSession->persistentId_ = 1;
+    ssm_->sceneSessionMap_.insert({sceneSession->GetPersistentId(), sceneSession});
+
+    ssm_->screenLocked_ = false;
+    ssm_->taskScheduler_ = nullptr;
+
+    AnomalyDetection::CheckWallpaper(sceneSession);
+
+    ssm_->sceneSessionMap_.clear();
+}
 }
 }
 }
