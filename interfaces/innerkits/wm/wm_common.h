@@ -3634,7 +3634,7 @@ struct StateChangeOption {
 enum class TitleButtonEventType : uint32_t {
     EVENT_TYPE_UNDEFINED = 0,
     EVENT_TYPE_MAXIMIZE = 1,
-    EVENT_TYPE_END = 100,
+    EVENT_TYPE_END = 10,
 };
 }
 }
