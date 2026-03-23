@@ -526,19 +526,16 @@ HWTEST_F(ScreenSessionManagerTest, OnGetHdrFormats, TestSize.Level1)
     ASSERT_EQ(ssm_->clientProxy_, nullptr);
 
     ScreenId screenId = 123;
-    ssm_->screenSessionMap_.erase(screenId);
-    EXPECT_EQ(ssm_->GetScreenSession(screenId), nullptr);
     std::vector<ScreenHDRFormat> rsHdrFormats{ScreenHDRFormat::VIDEO_AIHDR};
     std::vector<ScreenHDRFormat> rsHdrFormatsEmpty{};
-    ssm_->OnGetHdrFormats(screenId, rsHdrFormats);
+    ssm_->OnGetHdrFormats(screenId, nullptr, rsHdrFormatsEmpty);
+    ssm_->OnGetHdrFormats(screenId, nullptr, rsHdrFormats);
 
     sptr<ScreenSession> session = new ScreenSession();
-    ssm_->screenSessionMap_[screenId] = session;
-    ssm_->OnGetHdrFormats(screenId, rsHdrFormatsEmpty);
-    ssm_->OnGetHdrFormats(screenId, rsHdrFormats);
-    auto hdrFormats = ssm_->GetScreenSession(screenId)->hdrFormats_;
+    ssm_->OnGetHdrFormats(screenId, session, rsHdrFormatsEmpty);
+    ssm_->OnGetHdrFormats(screenId, session, rsHdrFormats);
+    auto hdrFormats = session->hdrFormats_;
     EXPECT_TRUE(std::find(hdrFormats.begin(), hdrFormats.end(), ScreenHDRFormat::VIDEO_AIHDR) != hdrFormats.end());
-    ssm_->screenSessionMap_.erase(screenId);
 }
 
 /**
