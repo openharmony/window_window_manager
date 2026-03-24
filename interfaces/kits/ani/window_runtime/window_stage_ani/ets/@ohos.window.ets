@@ -1215,7 +1215,7 @@ export class WindowPropertiesInternal implements WindowProperties {
     this.isPrivacyMode = isPrivacyMode;
     this.isRoundCorner = isRoundCorner;
     this.isTransparent = isTransparent;
-    this.type = typeInternal as WindowType;
+    this.type = WindowType.fromValue(typeInternal);
     this.id = id;
     this.displayId = displayId;
     this.name = name;
@@ -2831,7 +2831,7 @@ export class WindowStageInternal implements WindowStage {
     public setImageForRecent(imageResource: long | image.PixelMap, value: ImageFit): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.setImageForRecentSync(this.nativeObj, imageResource, value as int);
+          this.setImageForRecentSync(this.nativeObj, imageResource, value);
         }).then((ret: Any): void => {
           resolve(undefined);
         }).catch((err: Any): void => {
@@ -3685,7 +3685,7 @@ export class WindowInternal implements Window {
     public setWindowColorSpace(colorSpace: ColorSpace): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.setWindowColorSpaceSync(this.nativeObj, colorSpace as int);
+          this.setWindowColorSpaceSync(this.nativeObj, colorSpace);
         }).then((ret: Any) => {
           resolve(undefined);
         }).catch((err: Any) => {
@@ -3696,7 +3696,7 @@ export class WindowInternal implements Window {
 
     public setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
-        this.setWindowColorSpaceSync(this.nativeObj, colorSpace as int);
+        this.setWindowColorSpaceSync(this.nativeObj, colorSpace);
       }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
       }).catch((err: Any) => {
@@ -3707,7 +3707,7 @@ export class WindowInternal implements Window {
     public setPreferredOrientation(orientation: Orientation): Promise<void> {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
-          this.setPreferredOrientationSync(this.nativeObj, orientation as int);
+          this.setPreferredOrientationSync(this.nativeObj, orientation);
         }).then((ret: Any) => {
           resolve(undefined);
         }).catch((err: Any) => {
@@ -3718,7 +3718,7 @@ export class WindowInternal implements Window {
 
     public setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void {
       taskpool.execute((): void => {
-        this.setPreferredOrientationSync(this.nativeObj, orientation as int);
+        this.setPreferredOrientationSync(this.nativeObj, orientation);
       }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
       }).catch((err: Any) => {
@@ -3727,11 +3727,11 @@ export class WindowInternal implements Window {
     }
 
     public getPreferredOrientation(): Orientation {
-      return this.getPreferredOrientation(this.nativeObj) as Orientation;
+      return Orientation.fromValue(this.getPreferredOrientation(this.nativeObj));
     }
 
     public convertOrientationAndRotation(from: RotationInfoType, to: RotationInfoType, value: int): int {
-      return this.convertOrientationAndRotation(this.nativeObj, from as int, to as int, value);
+      return this.convertOrientationAndRotation(this.nativeObj, from, to, value);
     }
 
     public setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void> {
@@ -4030,7 +4030,7 @@ export class WindowInternal implements Window {
     }
 
     public getWindowColorSpace(): ColorSpace {
-      return this.getWindowColorSpace(this.nativeObj) as ColorSpace;
+      return ColorSpace.fromValue(this.getWindowColorSpace(this.nativeObj));
     }
 
     public setWakeUpScreen(wakeUp: boolean): void {
@@ -4140,7 +4140,7 @@ export class WindowInternal implements Window {
     }
 
     public getWindowAvoidAreaIgnoringVisibility(type: AvoidAreaType): AvoidArea {
-      return this.getWindowAvoidAreaIgnoringVisibilitySync(this.nativeObj, type as AvoidAreaType);
+      return this.getWindowAvoidAreaIgnoringVisibilitySync(this.nativeObj, type);
     }
 
     public setWaterMarkFlag(enable: boolean): Promise<void> {
@@ -4892,7 +4892,7 @@ export class WindowInternal implements Window {
     }
 
     public getWindowStatus(): WindowStatusType {
-      return this.getWindowStatus(this.nativeObj) as WindowStatusType;
+      return WindowStatusType.fromValue(this.getWindowStatus(this.nativeObj));
     }
 
     public minimize(): Promise<void> {
@@ -5796,7 +5796,7 @@ export function getVisibleWindowInfo(): Promise<Array<WindowInfo>> {
           let visibleWindowInfos = getVisibleWindowInfo(nativeObj);
           for (let i = 0; i < visibleWindowInfos.length; i++) {
             visibleWindowInfos[i].windowStatusType =
-              visibleWindowInfos[i].windowStatusTypeInternal as WindowStatusType;
+              WindowStatusType.fromValue(visibleWindowInfos[i].windowStatusTypeInternal);
             visibleWindowInfos[i].isFocused = visibleWindowInfos[i].isFocusedInternal;
           }
           return visibleWindowInfos;
@@ -6091,17 +6091,17 @@ function runSystemBarTintChangeCallback(cb: object, tint: object): void {
 
 function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
   const func = cb as (data: AvoidAreaOptions) => void;
-  func({type: type as AvoidAreaType, area: area as AvoidArea});
+  func({type: AvoidAreaType.fromValue(type), area: area as AvoidArea});
 }
 
 function runWindowStageLifecycleEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageLifecycleEventType) => void;
-    func(cbArg as WindowStageLifecycleEventType);
+    func(WindowStageLifecycleEventType.fromValue(cbArg));
 }
 
 function runWindowEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowEventType) => void;
-    func(cbArg as WindowEventType);
+    func(WindowEventType.fromValue(cbArg));
 }
 
 function runWindowSizeCallback(cb: object, cbArg: object): void {
@@ -6111,7 +6111,7 @@ function runWindowSizeCallback(cb: object, cbArg: object): void {
 
 function runWindowRectChangeCallback(cb: object, rect: object, reason: int): void {
     const func = cb as (data: RectChangeOptions) => void;
-    func({rect: rect as Rect, reason: reason as RectChangeReason});
+    func({rect: rect as Rect, reason: RectChangeReason.fromValue(reason)});
 }
 
 function runKeyboardHeightChangeCallback(cb: object, cbArg: int): void {
@@ -6141,12 +6141,12 @@ function runKeyboardWillHideCallback(cb: object, cbArg: object): void {
 
 function runWindowStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStatusType) => void;
-    func(cbArg as WindowStatusType);
+    func(WindowStatusType.fromValue(cbArg));
 }
 
 function runOcclusionStateChangeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: OcclusionState) => void;
-    func(cbArg as OcclusionState);
+    func(OcclusionState.fromValue(cbArg));
 }
 
 function runFrameMetricsChangeCallback(cb: object, cbArg: object): void {
@@ -6171,7 +6171,7 @@ function runWindowNoInteractionCallback(cb: object): void {
 
 function runWindowStageEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageEventType) => void;
-    func(cbArg as WindowStageEventType);
+    func(WindowStageEventType.fromValue(cbArg));
 }
 
 function runMainWindowFullScreenAcrossDisplaysChangedCallback(cb: object, cbArg: boolean): void {
@@ -6191,7 +6191,7 @@ function runWindowTitleButtonRectChangedCallback(cb: object, cbArg: object): voi
 
 function runRectChangeInGlobalDisplayCallback(cb: object, rect: object, reason: int): void {
   const func = cb as (data: RectChangeOptions) => void;
-  func({rect: rect as Rect, reason: reason as RectChangeReason});
+  func({rect: rect as Rect, reason: RectChangeReason.fromValue(reason)});
 }
 
 function runUiExtensionSecureLimitChangeCallback(cb: object, cbArg: boolean): void {
@@ -6201,7 +6201,7 @@ function runUiExtensionSecureLimitChangeCallback(cb: object, cbArg: boolean): vo
 
 function runWindowStatusDidChangeCallback(cb: object, windowStatus: int): void {
   const func = cb as (windowStatus: WindowStatusType) => void;
-  func(windowStatus as WindowStatusType);
+  func(WindowStatusType.fromValue(windowStatus));
 }
 
 function runParentWindowSizeChangeCallback(cb: object, cbArg: object): void {
@@ -6211,12 +6211,12 @@ function runParentWindowSizeChangeCallback(cb: object, cbArg: object): void {
 
 function runParentWindowStatusChangeCallback(cb: object, windowStatus: int): void {
   const func = cb as (windowStatus: WindowStatusType) => void;
-  func(windowStatus as WindowStatusType);
+  func(WindowStatusType.fromValue(windowStatus));
 }
 
 function runParentLifecycleEventCallback(cb: object, windowId: int, event: int): void {
   const func = cb as (windowId: int, event: WindowEventType) => void;
-  func(windowId, event as WindowEventType);
+  func(windowId, WindowEventType.fromValue(event));
 }
 }
 
