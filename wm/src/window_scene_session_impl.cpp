@@ -1538,17 +1538,19 @@ uint32_t WindowSceneSessionImpl::UpdateConfigValInVP(uint32_t minVal, uint32_t m
     return validConfig ? configVal : defaultVal;
 }
 
-void WindowSceneSessionImpl::ApplyForcibleLimits(WindowLimits& sysLimitsPX, WindowLimits& sysLimitsVP, float vpr)
+void WindowSceneSessionImpl::ApplyForcibleLimits(
+    WindowLimits& sysLimitsPX, WindowLimits& sysLimitsVP, float vpr, SystemPermissionChecker systemPermChecker)
 {
     bool isWindowLimitsForcible = property_->GetIsWindowLimitsForcible();
     if (!isWindowLimitsForcible) {
         TLOGD(WmsLogTag::WMS_LAYOUT,
-            "The window limits are not forcible, no need to break system limits.");
+            "The window limits are not forcible, no need to break system constraints.");
         return;
     }
-    if (!SessionPermission::IsSystemCalling()) {
+    // Only system apps can break system limits; others are currently restricted.
+    if (!systemPermChecker()) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
-            "The caller doesn't have system permissions, cannot to break system limits.");
+            "The caller doesn't have system permissions, cannot to break system constraints.");
         return;
     }
 
@@ -1557,10 +1559,10 @@ void WindowSceneSessionImpl::ApplyForcibleLimits(WindowLimits& sysLimitsPX, Wind
     // Note: The graphic subsystem enforces an upper bound of 8000vp.
     constexpr uint32_t FORCIBLE_MAX_VP = 8000;
     constexpr uint32_t FORCIBLE_MIN = 1;
-    const uint32_t maxPx = static_cast<uint32_t>(FORCIBLE_MAX_VP * vpr);
+    const uint32_t forcibleMaxPx = static_cast<uint32_t>(FORCIBLE_MAX_VP * vpr);
 
-    sysLimitsPX.maxWidth_  = maxPx;
-    sysLimitsPX.maxHeight_ = maxPx;
+    sysLimitsPX.maxWidth_  = forcibleMaxPx;
+    sysLimitsPX.maxHeight_ = forcibleMaxPx;
     sysLimitsPX.minWidth_  = std::min(sysLimitsPX.minWidth_, FORCIBLE_MIN);
     sysLimitsPX.minHeight_ = std::min(sysLimitsPX.minHeight_, FORCIBLE_MIN);
 
@@ -1586,7 +1588,7 @@ std::pair<WindowLimits, WindowLimits> WindowSceneSessionImpl::GetSystemSizeLimit
     systemLimitsVP.maxHeight_ = configMaxSize;
 
     SetMinimumDimensions(systemLimits, systemLimitsVP, displayWidth, displayHeight, vpr);
-    ApplyForcibleLimits(systemLimits, systemLimitsVP, vpr);
+    ApplyForcibleLimits(systemLimits, systemLimitsVP, vpr, SessionPermission::IsSystemCalling);
     TLOGI(WmsLogTag::WMS_LAYOUT,
           "systemLimitsPX: %{public}s, systemLimitsVP: %{public}s, configMaxSize: %{public}u, "
           "vpr: %{public}f, winType: %{public}u",
