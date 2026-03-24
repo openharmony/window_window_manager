@@ -19237,7 +19237,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
 }
 
 WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
-    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey = "")
+    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
