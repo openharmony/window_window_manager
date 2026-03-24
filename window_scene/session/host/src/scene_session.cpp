@@ -8437,6 +8437,40 @@ void SceneSession::SetSkipEventOnCastPlus(bool isSkip)
     }, __func__);
 }
 
+WMError SceneSession::AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+    const std::unordered_set<std::string>& privacyWindowTags)
+{
+    return PostSyncTask([weakThis = wptr(this), &bundleNames, &privacyWindowTags, where = __func__]() -> WMError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        if (!session->specificCallback_ || !session->specificCallback_->onAddSessionBlackList_) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s specific callback or add callback is null", where);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        return session->specificCallback_->onAddSessionBlackList_(bundleNames, privacyWindowTags);
+    }, __func__);
+}
+
+WMError SceneSession::RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
+    const std::unordered_set<std::string>& privacyWindowTags)
+{
+    return PostSyncTask([weakThis = wptr(this), &bundleNames, &privacyWindowTags, where = __func__]() -> WMError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        if (!session->specificCallback_ || !session->specificCallback_->onRemoveSessionBlackList_) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s specific callback or remove callback is null", where);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        return session->specificCallback_->onRemoveSessionBlackList_(bundleNames, privacyWindowTags);
+    }, __func__);
+}
+
 WMError SceneSession::SetUniqueDensityDpi(bool useUnique, float dpi)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "SceneSession set unique dpi: id=%{public}d, dpi=%{public}f",

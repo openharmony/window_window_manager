@@ -2257,6 +2257,14 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onSetSkipEventOnCastPlus_ = [this](int32_t windowId, bool isSkip) {
         this->SetSkipEventOnCastPlusInner(windowId, isSkip);
     };
+    specificCb->onAddSessionBlackList_ = [this](const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) {
+        return this->AddSessionBlackList(bundleNames, privacyWindowTags);
+    };
+    specificCb->onRemoveSessionBlackList_ = [this](const std::unordered_set<std::string>& bundleNames,
+        const std::unordered_set<std::string>& privacyWindowTags) {
+        return this->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+    };
     specificCb->onPiPStateChange_ = [this](const std::string& bundleName, bool isForeground) {
         this->UpdatePiPWindowStateChanged(bundleName, isForeground);
     };
@@ -11948,7 +11956,7 @@ WMError SceneSessionManager::AddSessionBlackList(
 WMError SceneSessionManager::AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
     const std::unordered_set<std::string>& privacyWindowTags)
 {
-    for (const auto& sceneSession : sceneSessionList) {
+    for (const auto& sceneSession : sceneSessionList) {  
         for (const auto& privacyWindowTag : privacyWindowTags) {
             sessionRSBlackListConfigSet_.insert(
                 { .windowId = sceneSession->GetPersistentId(), .privacyWindowTag = privacyWindowTag });
