@@ -16,7 +16,6 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 
-#include "parameters.h"
 #include "session/host/include/system_session.h"
 #include "transaction/rs_sync_transaction_controller.h"
 
