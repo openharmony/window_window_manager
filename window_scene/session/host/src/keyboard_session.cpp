@@ -16,7 +16,6 @@
 #include "session/host/include/keyboard_session.h"
 
 #include <hitrace_meter.h>
-#include "parameters.h"
 #include "perform_reporter.h"
 #include "rs_adapter.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -38,8 +37,6 @@ namespace {
     constexpr float MOVE_DRAG_POSITION_Z = 100.5f;
     constexpr int32_t INSERT_TO_THE_END = -1;
     const std::string KEYBOARD_ANIM_SYNC_EVENT_NAME { "KeyboardAnimationSyncException" };
-    static const std::string REAL_TIME_ENABLED =
-        OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0");
 }
 KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback,
     const sptr<KeyboardSessionCallback>& keyboardCallback)
@@ -777,8 +774,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
     const WindowAnimationInfo& animationInfo, const CallingWindowInfoData& callingWindowInfoData)
 {
     // "1" means constructing a fault scenario and printing it in real time
-    bool realTimeEnabled = (REAL_TIME_ENABLED == "1");
-    int32_t THRESHOLD = realTimeEnabled ? 6000 : 0;
+    int32_t THRESHOLD = realTimeEnabled_ ? 6000 : 0;
     PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, animationInfo, callingWindowInfoData]() {
         auto session = weakThis.promote();
         if (!session) {

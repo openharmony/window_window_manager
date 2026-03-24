@@ -16,6 +16,7 @@
 #ifndef OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 #define OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
 
+#include "parameters.h"
 #include "session/host/include/system_session.h"
 #include "transaction/rs_sync_transaction_controller.h"
 
@@ -131,6 +132,7 @@ private:
     WMError IsLandscape(uint64_t screenId, bool& isLandscape);
     void PrintRectsInfo(const std::vector<Rect>& rects, const std::string& infoTag);
     CallingWindowInfoData callingWindowInfoData_;
+    bool realTimeEnabled_ = (OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0") == "1");
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
