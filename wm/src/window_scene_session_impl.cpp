@@ -6751,7 +6751,7 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     auto rsMask = RSMask::CreatePixelMapMask(mask);
     surfaceNode_->SetCornerRadius(0.0f);
     if (property_->GetWindowShadows().hasRadiusValue_) {
-        surfaceNode_->SetShadowRadius(-1.0f);
+        surfaceNode_->SetShadowRadius(WINDOW_SHADOW_RADIUS_INVALID);
     }
     surfaceNode_->SetAbilityBGAlpha(0);
     surfaceNode_->SetMask(rsMask); // RS interface to set mask
@@ -6792,8 +6792,8 @@ WMError WindowSceneSessionImpl::ClearWindowMask()
     bool hasShadowRadius = shadowsInfo.hasRadiusValue_;
     if (hasShadowRadius) {
         hostSession->SetWindowShadows(shadowsInfo);
-        surfaceNode_->SetShadowRadius(
-            MathHelper::NearEqual(shadowsInfo.radius_, 0.0f) ? -1.0f : ConvertRadiusToSigma(shadowsInfo.radius_));
+        surfaceNode_->SetShadowRadius(MathHelper::NearEqual(shadowsInfo.radius_, 0.0f) ?
+            WINDOW_SHADOW_RADIUS_INVALID : ConvertRadiusToSigma(shadowsInfo.radius_));
     }
 
     if (!(hasCornerRadius && hasShadowRadius)) {
