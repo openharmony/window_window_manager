@@ -361,7 +361,7 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
 }
 
 WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
-    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) 
+    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey = "") 
 {
     if (!listener) {
         TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
@@ -399,18 +399,6 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
         std::vector<sptr<ISessionLifecycleListener>> newListenerList;
         newListenerList.emplace_back(listener);
         listenerMapByBundleInstance_.emplace(key, newListenerList);
-    }
-
-    std::vector<sptr<SceneSession>> mainSessions;
-    SceneSessionManager::GetInstance().GetMainSessionByBundleNameAndAppIndexAndInstanceKey(
-        bundleName, appIndex, appInstanceKey, mainSessions);
-    for (const auto& mainSession : mainSessions) {
-        if (mainSession == nullptr) {
-            continue;
-        }
-        ISessionLifecycleListener::LifecycleEventPayload payload;
-        ConstructPayload(payload, mainSession->GetSessionInfo(), 0, 0, 0, LifeCycleChangeReason::DEFAULT);
-        listener->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::FOREGROUND, payload);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "register sessionLifecycleListener by bundle+appIndex+appInstanceKey finished.");
     return WMError::WM_OK;
