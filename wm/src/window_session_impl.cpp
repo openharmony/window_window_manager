@@ -2516,10 +2516,18 @@ void WindowSessionImpl::SetForceSplitConfig(const AppForceLandscapeConfig& confi
 
 void WindowSessionImpl::SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
 {
-    std::unique_lock<std::shared_mutex> lock(hookWindowInfoMutex_);
-    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, preHookWindowInfo:[%{public}s], newHookWindowInfo:[%{public}s]",
-        GetWindowId(), hookWindowInfo_.ToString().c_str(), hookWindowInfo.ToString().c_str());
-    hookWindowInfo_ = hookWindowInfo;
+    bool notifyWindowChange = hookWindowInfo.notifyWindowChange;
+    {
+        std::unique_lock<std::shared_mutex> lock(hookWindowInfoMutex_);
+        TLOGI(WmsLogTag::WMS_COMPAT, "Id:%{public}u, preHookWindowInfo:[%{public}s], newHookWindowInfo:[%{public}s]",
+            GetWindowId(), hookWindowInfo_.ToString().c_str(), hookWindowInfo.ToString().c_str());
+        hookWindowInfo_ = hookWindowInfo;
+    }
+    if (notifyWindowChange) {
+        const auto& windowRect = GetRect();
+        NotifySizeChange(windowRect, WindowSizeChangeReason::HOOK_INFO_CHANGE);
+        NotifyGlobalDisplayRectChange(windowRect, WindowSizeChangeReason::HOOK_INFO_CHANGE);
+    }
 }
 
 HookWindowInfo WindowSessionImpl::GetAppHookWindowInfo()

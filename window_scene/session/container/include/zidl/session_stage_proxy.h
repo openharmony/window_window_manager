@@ -117,6 +117,7 @@ public:
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
+    WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
     WSError CloseSpecificScene() override;
     void NotifyLifecyclePausedStatus() override;
     void NotifyAppUseControlStatus(bool isUseControl) override;

@@ -565,6 +565,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SCENE_WITH_ANIMATION,
     LS_STATE_CHANGE,
     FULL_SCREEN_IN_FORCE_SPLIT,
+    HOOK_INFO_CHANGE,
     END,
 };
 
@@ -689,6 +690,7 @@ struct KeyFramePolicy : public Parcelable {
 struct HookWindowInfo : public Parcelable {
     bool enableHookWindow{ false };
     float widthHookRatio{ 1.0f };
+    bool notifyWindowChange{ false };
 
     static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
 
@@ -712,7 +714,8 @@ struct HookWindowInfo : public Parcelable {
         std::ostringstream oss;
         oss << std::boolalpha  // For true/false instead of 1/0
             << "enableHookWindow: " << enableHookWindow
-            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio;
+            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio
+            << ", notifyWindowChange: " << notifyWindowChange;
         return oss.str();
     }
 
@@ -720,13 +723,15 @@ private:
     bool WriteAllFields(Parcel& parcel) const
     {
         return parcel.WriteBool(enableHookWindow) &&
-               parcel.WriteFloat(widthHookRatio);
+               parcel.WriteFloat(widthHookRatio) &&
+               parcel.WriteBool(notifyWindowChange);
     }
 
     static bool ReadAllFields(Parcel& parcel, HookWindowInfo& info)
     {
         return parcel.ReadBool(info.enableHookWindow) &&
-               parcel.ReadFloat(info.widthHookRatio);
+               parcel.ReadFloat(info.widthHookRatio) &&
+               parcel.ReadBool(info.notifyWindowChange);
     }
 };
 
