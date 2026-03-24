@@ -13118,7 +13118,6 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
 #ifdef WM_MULTI_SCREEN_ENABLE
     TLOGNFW(WmsLogTag::DMS, "mainScreenId:%{public}" PRIu64",secondaryScreenId:%{public}" PRIu64",Mode:%{public}u",
         mainScreenId, secondaryScreenId, screenMode);
-    std::lock_guard<std::recursive_mutex> lock(screenModeChangeMutex_);
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
         TLOGNFE(WmsLogTag::DMS, "permission denied! calling: %{public}s, pid: %{public}d",
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
@@ -13128,23 +13127,26 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         return DMError::DM_ERROR_INVALID_MODE_ID;
     }
     CreateExtendVirtualScreen(secondaryScreenId);
-    if (mainScreenId == secondaryScreenId && mainScreenId == SCREEN_ID_OUTER_ONLY) {
-        TLOGNFW(WmsLogTag::DMS, "set to outer only mode.");
-        SetIsOuterOnlyMode(true);
-        MultiScreenModeChange(mainScreenId, mainScreenId, "off");
-        return DMError::DM_OK;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenModeChangeMutex_);
+        if (mainScreenId == secondaryScreenId && mainScreenId == SCREEN_ID_OUTER_ONLY) {
+            TLOGNFW(WmsLogTag::DMS, "set to outer only mode.");
+            SetIsOuterOnlyMode(true);
+            MultiScreenModeChange(mainScreenId, mainScreenId, "off");
+            return DMError::DM_OK;
+        }
+        if (GetIsOuterOnlyMode()) {
+            SetIsOuterOnlyMode(false);
+            TLOGNFI(WmsLogTag::DMS, "exit outer only mode.");
+            ExitOuterOnlyMode(mainScreenId, secondaryScreenId, screenMode);
+            return DMError::DM_OK;
+        }
+        SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
+        sptr<ScreenSession> secondaryScreenSession = GetScreenSessionByRsId(secondaryScreenId);
+        auto combination = screenMode == MultiScreenMode::SCREEN_MIRROR ?
+            ScreenCombination::SCREEN_MIRROR : ScreenCombination::SCREEN_EXPAND;
+        SetScreenCastInfo(secondaryScreenId, mainScreenId, combination);
     }
-    if (GetIsOuterOnlyMode()) {
-        SetIsOuterOnlyMode(false);
-        TLOGNFI(WmsLogTag::DMS, "exit outer only mode.");
-        ExitOuterOnlyMode(mainScreenId, secondaryScreenId, screenMode);
-        return DMError::DM_OK;
-    }
-    SetMultiScreenModeInner(mainScreenId, secondaryScreenId, screenMode);
-    sptr<ScreenSession> secondaryScreenSession = GetScreenSessionByRsId(secondaryScreenId);
-    auto combination = screenMode == MultiScreenMode::SCREEN_MIRROR ?
-        ScreenCombination::SCREEN_MIRROR : ScreenCombination::SCREEN_EXPAND;
-    SetScreenCastInfo(secondaryScreenId, mainScreenId, combination);
     NotifyScreenModeChange();
 #endif
     return DMError::DM_OK;
