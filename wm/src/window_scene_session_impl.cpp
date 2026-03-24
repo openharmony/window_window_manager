@@ -6792,7 +6792,8 @@ WMError WindowSceneSessionImpl::ClearWindowMask()
     bool hasShadowRadius = shadowsInfo.hasRadiusValue_;
     if (hasShadowRadius) {
         hostSession->SetWindowShadows(shadowsInfo);
-        surfaceNode_->SetShadowRadius(shadowsInfo.radius_ == 0? -1.0f : ConvertRadiusToSigma(shadowsInfo.radius_));
+        surfaceNode_->SetShadowRadius(
+            MathHelper::NearEqual(shadowsInfo.radius_, 0.0f) ? -1.0f : ConvertRadiusToSigma(shadowsInfo.radius_));
     }
 
     if (!(hasCornerRadius && hasShadowRadius)) {
