@@ -15,6 +15,8 @@
 
 #include "ani_window_animation_utils.h"
 
+#include <optional>
+
 #include <accesstoken_kit.h>
 #include <ipc_skeleton.h>
 #include <tokenid_kit.h>

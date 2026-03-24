@@ -416,14 +416,19 @@ protected:
      */
     void UpdateWindowSizeLimits();
 
+    // Checker to determine whether the caller has system permission.
+    using SystemPermissionChecker = std::function<bool()>;
+
     /**
-     * @brief Apply forcible system size limits by relaxing default constraints.
+     * @brief Apply forcible window size limits by widening system constraints.
      *
      * @param sysLimitsPX System config of window size limits in physical pixels.
      * @param sysLimitsVP System config of window size limits in virtual pixels.
-     * @param vpr Virtual pixel ratio of the display.
+     * @param vpr Virtual pixel ratio used to convert VP limits to PX.
+     * @param systemPermChecker Checker to check if the caller has permission to break system limits.
      */
-    void ApplyForcibleLimits(WindowLimits& sysLimitsPX, WindowLimits& sysLimitsVP, float vpr);
+    void ApplyForcibleLimits(
+        WindowLimits& sysLimitsPX, WindowLimits& sysLimitsVP, float vpr, SystemPermissionChecker systemPermChecker);
 
     // First windowLimits uses px(physical pixels), second uses vp(virtual pixels)
     std::pair<WindowLimits, WindowLimits> GetSystemSizeLimits(uint32_t displayWidth,
