@@ -122,7 +122,7 @@ public:
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList) override;
     WMError RegisterSessionLifecycleListenerByBundle(const sptr<ISessionLifecycleListener>& listener,
-        const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) override;
+        const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey = "") override;
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override;
     WSError GetRecentMainSessionInfoList(std::vector<RecentSessionInfo>& recentSessionInfoList) override;
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener) override;

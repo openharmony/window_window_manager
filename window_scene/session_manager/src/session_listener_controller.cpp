@@ -361,7 +361,7 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
 }
 
 WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
-    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey = "") 
+    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) 
 {
     if (!listener) {
         TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
