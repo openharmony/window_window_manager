@@ -8093,6 +8093,17 @@ WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()
     return WSError::WS_OK;
 }
 
+WSError WindowSceneSessionImpl::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
+    const WindowType windowType = GetType();
+    if (!WindowHelper::IsMainWindow(windowType)) {
+        return WSError::WS_DO_NOTHING;
+    }
+    SetAppHookWindowInfo(hookWindowInfo);
+    return WSError::WS_OK;
+}
+
 WMError WindowSceneSessionImpl::SetSubWindowSource(SubWindowSource source)
 {
     if (IsWindowSessionInvalid()) {

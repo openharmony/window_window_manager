@@ -272,6 +272,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdatePropertyWhenTriggerMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PARENT_LIFECYCLE_EVENT):
             return HandleNotifyParentLifecycleEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO):
+            return HandleUpdateAppHookWindowInfo(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1406,6 +1408,18 @@ int SessionStageStub::HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, 
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     NotifyAppHookWindowInfoUpdated();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateAppHookWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    sptr<HookWindowInfo> hookInfo = data.ReadParcelable<HookWindowInfo>();
+    if (hookInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "hookInfo is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    UpdateAppHookWindowInfo(*hookInfo);
     return ERR_NONE;
 }
 
