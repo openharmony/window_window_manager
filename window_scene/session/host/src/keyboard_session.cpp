@@ -773,8 +773,6 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
     const WindowAnimationInfo& animationInfo, const CallingWindowInfoData& callingWindowInfoData)
 {
-    // This means execute after a delay of 6 seconds or execute immediately.
-    int32_t THRESHOLD = realTimeEnabled_ ? 6000 : 0;
     PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, animationInfo, callingWindowInfoData]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -829,7 +827,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             session->CloseRSTransaction();
         }
         return WSError::WS_OK;
-    }, "CloseKeyboardSyncTransaction", THRESHOLD);
+    }, "CloseKeyboardSyncTransaction");
 }
 
 void KeyboardSession::CloseRSTransaction()
