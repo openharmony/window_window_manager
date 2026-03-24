@@ -166,6 +166,23 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendScreenDpiFromSettingData, TestSize.L
     ssm_->SetExtendScreenDpiFromSettingData();
     EXPECT_TRUE(g_errLog.find("screen session is null") != std::string::npos);
 }
+
+/**
+ * @tc.name: SetExtendScreenDpi
+ * @tc.desc: SetExtendScreenDpi test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetExtendScreenDpi, TestSize.Level1)
+{
+    if (!SUPPORT_COMPATIBLE_MODE) {
+        GTEST_SKIP();
+    }
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetExtendScreenDpi();
+    EXPECT_TRUE(g_errLog.find("get setting extend screen dpi") != std::string::npos);
+}
  
 /**
  * @tc.name: SetExtendScreenIndepDpi
