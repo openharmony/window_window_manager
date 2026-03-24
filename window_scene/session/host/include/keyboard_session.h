@@ -132,8 +132,6 @@ private:
     WMError IsLandscape(uint64_t screenId, bool& isLandscape);
     void PrintRectsInfo(const std::vector<Rect>& rects, const std::string& infoTag);
     CallingWindowInfoData callingWindowInfoData_;
-    // "1" means constructing a fault scenario and printing it in real time.
-    bool realTimeEnabled_ = (OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0") == "1");
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
