@@ -1741,6 +1741,7 @@ HWTEST_F(WindowPatternSnapshotTest, ConfigPersistentScaledSnapshot, TestSize.Lev
         "<Configs>"
         "<persistDifferentScaledSnapshot enable=\"true\"/>"
         "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigPersistentScaledSnapshot();
     EXPECT_EQ(ssm_->enablePersistentScaledSnapshot_, true);
 }
