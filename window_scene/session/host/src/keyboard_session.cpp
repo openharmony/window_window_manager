@@ -776,6 +776,9 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
     const WindowAnimationInfo& animationInfo, const CallingWindowInfoData& callingWindowInfoData)
 {
+    // "1" means constructing a fault scenario and printing it in real time
+    bool realTimeEnabled = (REAL_TIME_ENABLED == "1");
+    int32_t THRESHOLD = realTimeEnabled ? 6000 : 0;
     PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, animationInfo, callingWindowInfoData]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -830,7 +833,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             session->CloseRSTransaction();
         }
         return WSError::WS_OK;
-    }, "CloseKeyboardSyncTransaction");
+    }, "CloseKeyboardSyncTransaction", THRESHOLD);
 }
 
 void KeyboardSession::CloseRSTransaction()
@@ -1139,8 +1142,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
 {
     // anim_sync_exception
-    bool realTimeEnabled = (REAL_TIME_ENABLED == "1");
-    int32_t THRESHOLD = realTimeEnabled ? 0 : 5000;
+    int32_t const THRESHOLD = 5000;
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {

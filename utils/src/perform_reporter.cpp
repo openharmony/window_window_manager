@@ -526,7 +526,7 @@ void WindowInfoReporter::ReportWindowFrozen(WindowDFXHelperType detectionType, c
         "DETECTION_NAME", detectionName,
         "MSG", windowInfo);
     if (ret != 0) {
-        WLOGFE("Write HiSysEvent error, ret:%{public}d", ret);
+        TLOGE(WmsLogTag::DEFAULT, "Write HiSysEvent error, ret:%{public}d", ret);
     }
 }
 } // namespace Rosen
