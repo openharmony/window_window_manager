@@ -110,8 +110,9 @@ void AnomalyDetection::CheckWallpaper(const sptr<SceneSession>& session)
     if (!(session->GetWindowType() == WindowType::WINDOW_TYPE_WALLPAPER)) {
         return;
     }
-    // "1" means constructing a fault scenario and printing it in real time
+    // "1" means constructing a fault scenario and printing it in real time.
     bool realTimeEnabled = (REAL_TIME_ENABLED == "1");
+    // This means setting the default wallpaper ZOder to 1 or 2.
     uint32_t defaultWallpaperZOrder = realTimeEnabled ? 1 : 2;
     if (!SceneSessionManager::GetInstance().IsScreenLocked() && session->GetZOrder() != defaultWallpaperZOrder) {
         TLOGD(WmsLogTag::WMS_HIERARCHY,
