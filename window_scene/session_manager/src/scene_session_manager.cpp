@@ -19236,6 +19236,39 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey = "")
+{
+    if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    if (listenerController_->IsListenerMapByBundleSizeReachLimit(bundleNameList.empty())) {
+        TLOGW(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
+        return WMError::WM_ERROR_NO_MEM;
+    }
+    taskScheduler_->PostAsyncTask([this, listener, bundleName, appIndex, appInstanceKey, where = __func__] {
+        WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
+        std::vector<sptr<SceneSession>> mainSessions;
+        SceneSessionManager::GetInstance().GetMainSessionByBundleNameAndAppIndexAndInstanceKey(
+            bundleName, appIndex, appInstanceKey, mainSessions);
+        for (const auto& mainSession : mainSessions) {
+            if (mainSession == nullptr) {
+                continue;
+            }
+            ISessionLifecycleListener::LifecycleEventPayload payload;
+            ConstructPayload(payload, mainSession->GetSessionInfo(), 0, 0, 0, LifeCycleChangeReason::DEFAULT);
+            listener->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
+
 WMError SceneSessionManager::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
 {
     if (!SessionPermission::IsSystemAppCall() && !SessionPermission::IsSACalling()) {

@@ -848,6 +848,8 @@ public:
         const std::vector<int32_t>& persistentIdList);
     WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList);
+    WMError RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
+        const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey = "");
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener);
     bool IsMainWindowByPersistentId(int32_t persistentId);
     WMError MinimizeByWindowId(const std::vector<int32_t>& windowIds) override;
