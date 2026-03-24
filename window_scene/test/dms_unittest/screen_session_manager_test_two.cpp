@@ -174,6 +174,9 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendScreenDpiFromSettingData, TestSize.L
  */
 HWTEST_F(ScreenSessionManagerTest, SetExtendScreenIndepDpi, TestSize.Level1)
 {
+    if (!SUPPORT_COMPATIBLE_MODE) {
+        GTEST_SKIP();
+    }
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     ASSERT_NE(ssm_, nullptr);
