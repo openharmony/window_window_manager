@@ -829,7 +829,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             session->CloseRSTransaction();
         }
         return WSError::WS_OK;
-    }, "CloseKeyboardSyncTransaction", delayTime);
+    },
+        "CloseKeyboardSyncTransaction", delayTime);
 }
 
 void KeyboardSession::CloseRSTransaction()
