@@ -9143,21 +9143,20 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
 
 WSError WindowSessionImpl::GetSceneNodeCount(uint32_t& nodeCount)
 {
-    handler_->PostSyncTask(
-        [weakWindow = wptr(this), &nodeCount, where = __func__] {
-            auto window = weakWindow.promote();
-            if (window == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: window is null", where);
-                return;
-            }
-            if (window->rsUIDirector_ == nullptr) {
-                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s rsUIDirector is nullptr", where);
-                return;
-            }
-            nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());
-            TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s success, count: %{public}u", where, nodeCount);
-            },
-        __func__);
+    handler_->PostSyncTask([weakWindow = wptr(this), &nodeCount, where = __func__] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: window is null", where);
+            return;
+        }
+        if (window->rsUIDirector_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s rsUIDirector is nullptr", where);
+            return;
+        }
+        nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s success, count: %{public}u", where, nodeCount);
+        },
+    __func__);
     return WSError::WS_OK;
 }
 
