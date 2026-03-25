@@ -256,6 +256,7 @@ void SessionListenerController::ConstructPayload(ISessionLifecycleListener::Life
     payload.abilityName_ = sessionInfo.abilityName_;
     payload.appIndex_ = sessionInfo.appIndex_;
     payload.persistentId_ = sessionInfo.persistentId_;
+    payload.appInstanceKey_ = sessionInfo.appInstanceKey_;
     payload.resultCode_ = resultCode;
     payload.fromScreenId_ = fromScreenId;
     payload.toScreenId_ = toScreenId;

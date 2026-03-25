@@ -2062,17 +2062,22 @@ void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
     }
 }
 
-void SceneSessionManager::GetMainSessionByBundleNameAndAppIndexAndInstanceKey(const std::string& bundleName,
-    int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& mainSessionVec)
+void SceneSessionManager::GetSceneSessionVectorByBundleInstance(const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& bundleInstanceSessions)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
-        if (sceneSession && sceneSession->GetSessionInfo().bundleName_ == bundleName &&
-            sceneSession->GetSessionInfo().appIndex_ == appIndex &&
-            sceneSession->GetSessionInfo().appInstanceKey_ == appInstanceKey &&
-            SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            mainSessionVec.push_back(sceneSession);
+        if (!sceneSession) {
+            continue;
         }
+        if (sceneSession && sceneSession->GetSessionInfo().bundleName_ != bundleName &&
+            sceneSession->GetSessionInfo().appIndex_ != appIndex) {
+            continue;
+        }
+        if (!appInstanceKey.empty() && sceneSession->GetSessionInfo().appInstanceKey_ != appInstanceKey) {
+            continue;
+        }
+        bundleInstanceSessions.push_back(sceneSession);
     }
 }
 
@@ -19254,15 +19259,15 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
     taskScheduler_->PostAsyncTask([this, listener, bundleName, appIndex, appInstanceKey, where = __func__] {
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
-        std::vector<sptr<SceneSession>> mainSessions;
-        SceneSessionManager::GetInstance().GetMainSessionByBundleNameAndAppIndexAndInstanceKey(
-            bundleName, appIndex, appInstanceKey, mainSessions);
-        for (const auto& mainSession : mainSessions) {
-            if (mainSession == nullptr) {
+        std::vector<sptr<SceneSession>> bundleInstanceSessions;
+        SceneSessionManager::GetInstance().GetSceneSessionVectorByBundleInstance(
+            bundleName, appIndex, appInstanceKey, bundleInstanceSessions);
+        for (const auto& session : bundleInstanceSessions) {
+            if (session == nullptr) {
                 continue;
             }
             ISessionLifecycleListener::LifecycleEventPayload payload;
-            ConstructPayload(payload, mainSession->GetSessionInfo(), 0, 0, 0, LifeCycleChangeReason::DEFAULT);
+            listenerController_->ConstructPayload(payload, session->GetSessionInfo(), 0, 0, 0, LifeCycleChangeReason::DEFAULT);
             listener->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
         }
     }, __func__);

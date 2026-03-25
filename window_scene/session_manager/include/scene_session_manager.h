@@ -784,8 +784,8 @@ public:
      */
     void GetMainSessionByBundleNameAndAppIndex(
         const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
-    void GetMainSessionByBundleNameAndAppIndexAndInstanceKey(const std::string& bundleName,
-        int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& mainSessions);
+    void GetSceneSessionVectorByBundleInstance(const std::string& bundleName,
+        int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& bundleInstanceSessions);
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void NotifyAppUseControlListInner(
