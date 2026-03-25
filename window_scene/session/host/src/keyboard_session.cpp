@@ -773,6 +773,8 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
     const WindowAnimationInfo& animationInfo, const CallingWindowInfoData& callingWindowInfoData)
 {
+    // When true, inject a 6000 delay fault that causes the keyboard frozen.
+    int32_t delayTime = WindowInfoReporter::GetInstance().IsKeyboardFrozenEnabled() ? 6000 : 0;
     PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, animationInfo, callingWindowInfoData]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -827,7 +829,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             session->CloseRSTransaction();
         }
         return WSError::WS_OK;
-    }, "CloseKeyboardSyncTransaction");
+    }, "CloseKeyboardSyncTransaction", delayTime);
 }
 
 void KeyboardSession::CloseRSTransaction()
