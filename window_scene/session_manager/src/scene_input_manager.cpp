@@ -16,6 +16,7 @@
 #include "scene_input_manager.h"
 
 #include <hitrace_meter.h>
+#include "parameters.h"
 #include "perform_reporter.h"
 #include "scene_session_dirty_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -37,6 +38,7 @@ constexpr int INVALID_PERSISTENT_ID = 0;
 constexpr int DEFAULT_SCREEN_POS = 0;
 constexpr int DEFAULT_SCREEN_SCALE = 100;
 constexpr int DEFAULT_EXPAND_HEIGHT = 0;
+constexpr int DELAY_REPORT_TIME = 3000;
 constexpr float DIRECTION90 = 90.0F;
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
@@ -769,15 +771,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
         std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
         ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
         if (displayGroupMap.empty()) {
-            std::ostringstream oss;
-            oss << "displayInfos flush to MMI is empty!";
-            int32_t ret = WindowInfoReporter::GetInstance().ReportEventDispatchException(
-                static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION),
-                getpid(), oss.str()
-            );
-            if (ret != 0) {
-                TLOGNI(WmsLogTag::WMS_EVENT, "ReportEventDispatchException message failed, ret: %{public}d", ret);
-            }
+            HandleEmptyDisplayGroup();
             return;
         }
         std::vector<MMI::DisplayInfo> displayInfos;
@@ -923,5 +917,48 @@ void SceneInputManager::ConstructDumpWindowInfo(const MMI::WindowInfo& windowInf
                           << windowInfo.windowNameType << "|groupId:" << windowInfo.groupId
                           << "|flags:" << windowInfo.flags << ", ";
 }
+
+void SceneInputManager::HandleEmptyDisplayGroup()
+{
+    const bool delayTimeDisabled = (OHOS::system::GetParameter("persist.window.delayTimeDisabled", "0") == "1");
+    const int32_t delayReportTime = delayTimeDisabled ? 0 : DELAY_REPORT_TIME;
+    auto currentState_ = rootSessionState_.load();
+    std::ostringstream oss;
+    oss << "displayInfos flush to MMI is empty!";
+    if (currentState_ == RootSessionState::CREATED_SUBSEQUENT) {
+        WindowInfoReporter::GetInstance().ReportWindowFrozen(
+            static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION),
+            oss.str()
+        );
+        return;
+    }
+    int32_t ret = WindowInfoReporter::GetInstance().ReportEventDispatchException(
+        static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION),
+        getpid(), oss.str()
+    );
+    if (ret != 0) {
+        TLOGNI(WmsLogTag::WMS_EVENT, "ReportEventDispatchException message failed, ret: %{public}d", ret);
+    }
+    bool hasDelayedTaskScheduled = false;
+    if (hasDelayedTaskScheduled_.compare_exchange_strong(hasDelayedTaskScheduled, true)) {
+        currentState_ = rootSessionState_.load();
+        if (currentState_ == RootSessionState::CREATED_FIRST_TIME) {
+            auto task = [this]() {
+                rootSessionState_.store(RootSessionState::CREATED_SUBSEQUENT);
+                hasDelayedTaskScheduled_.store(false);
+            };
+            eventHandler_->PostTask(task, "EmptyDisplayGroupDelay", delayReportTime);
+        } else {
+            hasDelayedTaskScheduled_.store(false);
+        }
+    }
+}
+
+void SceneInputManager::SetRootSceneSessionCreated(bool created)
+{
+    if (rootSessionState_.compare_exchange_strong(RootSessionState::NOT_CREATED,
+        RootSessionState::CREATED_FIRST_TIME)) {
+        TLOGI(WmsLogTag::WMS_EVENT, "Root scene session created for first time");
+    }
 }
 } // namespace OHOS::Rosen
