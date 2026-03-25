@@ -2257,13 +2257,27 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onSetSkipEventOnCastPlus_ = [this](int32_t windowId, bool isSkip) {
         this->SetSkipEventOnCastPlusInner(windowId, isSkip);
     };
-    specificCb->onAddSessionBlackList_ = [this](const std::unordered_set<std::string>& bundleNames,
+    specificCb->onAddSessionBlackList_ = [this](int32_t persistentId,
         const std::unordered_set<std::string>& privacyWindowTags) {
-        return this->AddSessionBlackList(bundleNames, privacyWindowTags);
+        auto sceneSession = this->GetSceneSession(persistentId);
+        if (!sceneSession) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "AddSessionBlackList failed, session is null, id:%{public}d",
+                persistentId);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        std::vector<sptr<SceneSession>> sceneSessionList = { sceneSession };
+        return this->AddSessionBlackList(sceneSessionList, privacyWindowTags);
     };
-    specificCb->onRemoveSessionBlackList_ = [this](const std::unordered_set<std::string>& bundleNames,
+    specificCb->onRemoveSessionBlackList_ = [this](int32_t persistentId,
         const std::unordered_set<std::string>& privacyWindowTags) {
-        return this->RemoveSessionBlackList(bundleNames, privacyWindowTags);
+        auto sceneSession = this->GetSceneSession(persistentId);
+        if (!sceneSession) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "RemoveSessionBlackList failed, session is null, id:%{public}d",
+                persistentId);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        std::vector<sptr<SceneSession>> sceneSessionList = { sceneSession };
+        return this->RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
     };
     specificCb->onPiPStateChange_ = [this](const std::string& bundleName, bool isForeground) {
         this->UpdatePiPWindowStateChanged(bundleName, isForeground);

@@ -107,6 +107,16 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         sessionProperty->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
         sessionProperty->SetDisplayId(targetDisplayId);
         session->UseFocusIdIfCallingSessionIdInvalid(property->GetCallingSessionId());
+        auto panelSession = session->GetKeyboardPanelSession();
+        if (const auto callingSession = session->GetCallingSession()) {
+            if (callingSession->isSkipSelfWhenShowOnVirtualScreen_) {
+                session->AddSessionBlacklist({ "SCB_KEYBOARD_FLOATING" });
+                panelSession->AddSessionBlacklist({ "SCB_KEYBOARD_FLOATING" });
+            } else {
+                session->RemoveSessionBlacklist({ "SCB_KEYBOARD_FLOATING" });
+                panelSession->RemoveSessionBlacklist({ "SCB_KEYBOARD_FLOATING" });
+            }
+        }
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
             "effectOption: %{public}s",
@@ -1129,6 +1139,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         if (session->specificCallback_ != nullptr
             && session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+            session->isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
         }
     }, __func__);
 }
