@@ -1136,7 +1136,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
 {
     // anim_sync_exception
-    int32_t const THRESHOLD = 1000;
+    int32_t const THRESHOLD = 5000;
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1147,11 +1147,11 @@ void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
             TLOGND(WmsLogTag::WMS_KEYBOARD, "closed anim_sync in time");
             return;
         }
-        std::string msg("close anim_sync timeout");
-        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(
-            session->GetPersistentId(),
-            KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION,
-            msg);
+        TLOGNW(WmsLogTag::WMS_KEYBOARD, "Window keyboard anim timeout check, persistentId=%{public}d",
+            session->GetPersistentId());
+        std::string msg("windowId: " + std::to_string(session->GetPersistentId()) + ", close anim_sync timeout");
+        WindowInfoReporter::GetInstance().ReportWindowFrozen(
+            WindowDFXHelperType::WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK, msg);
     };
     auto handler = GetEventHandler();
     if (!handler) {
