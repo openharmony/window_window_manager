@@ -1201,17 +1201,16 @@ HWTEST_F(WindowSceneSessionImplTest6, ApplyForcibleLimitsWithPermission, TestSiz
     vp.minHeight_ = 50;
 
     constexpr float vpr = 2.0f;
-    constexpr uint32_t FORCIBLE_MAX_VP = 8000;
+    constexpr uint32_t FORCIBLE_MAX = static_cast<uint32_t>(INT32_MAX);
     constexpr uint32_t FORCIBLE_MIN = 1;
-    constexpr uint32_t FORCIBLE_MAX_PX = static_cast<uint32_t>(FORCIBLE_MAX_VP * vpr);
 
     window->ApplyForcibleLimits(px, vp, vpr, []() { return true; });
 
     // max should be expanded
-    EXPECT_EQ(px.maxWidth_, FORCIBLE_MAX_PX);
-    EXPECT_EQ(px.maxHeight_, FORCIBLE_MAX_PX);
-    EXPECT_EQ(vp.maxWidth_, FORCIBLE_MAX_VP);
-    EXPECT_EQ(vp.maxHeight_, FORCIBLE_MAX_VP);
+    EXPECT_EQ(px.maxWidth_, FORCIBLE_MAX);
+    EXPECT_EQ(px.maxHeight_, FORCIBLE_MAX);
+    EXPECT_EQ(vp.maxWidth_, FORCIBLE_MAX);
+    EXPECT_EQ(vp.maxHeight_, FORCIBLE_MAX);
     // min should be relaxed to 1
     EXPECT_EQ(px.minWidth_, FORCIBLE_MIN);
     EXPECT_EQ(px.minHeight_, FORCIBLE_MIN);

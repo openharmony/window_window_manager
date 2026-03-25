@@ -695,8 +695,6 @@ bool ConvertWindowCreateParamsFromAniValue(ani_env* env, ani_object aniObject,
             GetOptionalBoolProp(env, aniObject, "isWindowLimitsForcible").value_or(false);
     } else {
         windowCreateParams.isWindowLimitsForcible = false;
-        TLOGW(WmsLogTag::WMS_LAYOUT,
-            "[ANI] isWindowLimitsForcible is only for system calling, set to false by default.");
     }
     return true;
 }
