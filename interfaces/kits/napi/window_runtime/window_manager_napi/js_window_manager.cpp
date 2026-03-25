@@ -1185,9 +1185,9 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
                     "[window][getLatsWindow]msg: Get top window failed"));
             }
             if (lists->window == nullptr) {
-                WLOGFE("[window][getLatsWindow]msg: Get top window failed, window is nullptr");
+                WLOGFE("Get top window failed, window is nullptr");
             } else {
-                WLOGFE("[window][getLatsWindow]msg: Get top window failed, window is destroyed");
+                WLOGFE("Get top window failed, window is destroyed");
             }
             return;
         }
