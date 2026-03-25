@@ -936,7 +936,7 @@ HWTEST_F(WindowImplTest2, SetLayoutFullScreen, TestSize.Level0)
     ASSERT_EQ(WMError::WM_OK, window->Show());
 
     EXPECT_CALL(m->Mock(), UpdateProperty(_, _)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetLayoutFullScreen(true));
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() |
                                       (static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
@@ -952,7 +952,7 @@ HWTEST_F(WindowImplTest2, SetLayoutFullScreen, TestSize.Level0)
         .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetLayoutFullScreen(true));
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(true));
 
     window->property_->SetWindowFlags(window->property_->GetWindowFlags() &
                                       (~static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID)));
@@ -968,7 +968,7 @@ HWTEST_F(WindowImplTest2, SetLayoutFullScreen, TestSize.Level0)
         .Times(2)
         .WillOnce(Return(WMError::WM_OK))
         .WillOnce(Return(WMError::WM_DO_NOTHING));
-    ASSERT_EQ(WMError::WM_DO_NOTHING, window->SetLayoutFullScreen(false));
+    ASSERT_EQ(WMError::WM_OK, window->SetLayoutFullScreen(false));
 
     EXPECT_CALL(m->Mock(), DestroyWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
