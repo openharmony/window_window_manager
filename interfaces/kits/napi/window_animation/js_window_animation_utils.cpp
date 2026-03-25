@@ -417,8 +417,6 @@ bool ConvertWindowCreateParamsFromJsValue(napi_env env, napi_value jsObject,
             GetOptionalBoolProp(env, jsObject, "isWindowLimitsForcible").value_or(false);
     } else {
         windowCreateParams.isWindowLimitsForcible = false;
-        TLOGW(WmsLogTag::WMS_LAYOUT,
-            "isWindowLimitsForcible is only for system calling, set to false by default.");
     }
     return true;
 }

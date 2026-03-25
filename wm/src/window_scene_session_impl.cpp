@@ -1554,20 +1554,16 @@ void WindowSceneSessionImpl::ApplyForcibleLimits(
         return;
     }
 
-    // Break system limits by widening the allowed range instead of removing them.
-    // This is achieved by expanding max bounds and relaxing min bounds.
-    // Note: The graphic subsystem enforces an upper bound of 8000vp.
-    constexpr uint32_t FORCIBLE_MAX_VP = 8000;
+    constexpr uint32_t FORCIBLE_MAX = static_cast<uint32_t>(INT32_MAX);
     constexpr uint32_t FORCIBLE_MIN = 1;
-    const uint32_t forcibleMaxPx = static_cast<uint32_t>(FORCIBLE_MAX_VP * vpr);
 
-    sysLimitsPX.maxWidth_  = forcibleMaxPx;
-    sysLimitsPX.maxHeight_ = forcibleMaxPx;
+    sysLimitsPX.maxWidth_  = FORCIBLE_MAX;
+    sysLimitsPX.maxHeight_ = FORCIBLE_MAX;
     sysLimitsPX.minWidth_  = std::min(sysLimitsPX.minWidth_, FORCIBLE_MIN);
     sysLimitsPX.minHeight_ = std::min(sysLimitsPX.minHeight_, FORCIBLE_MIN);
 
-    sysLimitsVP.maxWidth_  = FORCIBLE_MAX_VP;
-    sysLimitsVP.maxHeight_ = FORCIBLE_MAX_VP;
+    sysLimitsVP.maxWidth_  = FORCIBLE_MAX;
+    sysLimitsVP.maxHeight_ = FORCIBLE_MAX;
     sysLimitsVP.minWidth_  = std::min(sysLimitsVP.minWidth_, FORCIBLE_MIN);
     sysLimitsVP.minHeight_ = std::min(sysLimitsVP.minHeight_, FORCIBLE_MIN);
 }
