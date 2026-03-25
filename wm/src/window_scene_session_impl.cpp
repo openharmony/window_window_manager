@@ -3775,7 +3775,7 @@ SystemBarProperty WindowSceneSessionImpl::GetCurrentActiveSystemBarProperty(Wind
                 prop.enable_ = pair.second.enable_;
                 flag.enableFlag = true;
                 prop.settingFlag_ = pair.second.isolate_ ?
-                    prop.settingFlag_ | (prop.settingFlag_ | SystemBarSettingFlag::ENABLE_SETTING);
+                    prop.settingFlag_ : (prop.settingFlag_ | SystemBarSettingFlag::ENABLE_SETTING);
             }
             if (!flag.enableAnimationFlag && pair.second.flag_.enableAnimationFlag) {
                 prop.enableAnimation_= pair.second.enableAnimation_;
