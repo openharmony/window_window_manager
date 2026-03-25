@@ -11970,7 +11970,7 @@ WMError SceneSessionManager::AddSessionBlackList(
 WMError SceneSessionManager::AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
     const std::unordered_set<std::string>& privacyWindowTags)
 {
-    for (const auto& sceneSession : sceneSessionList) {  
+    for (const auto& sceneSession : sceneSessionList) {
         for (const auto& privacyWindowTag : privacyWindowTags) {
             sessionRSBlackListConfigSet_.insert(
                 { .windowId = sceneSession->GetPersistentId(), .privacyWindowTag = privacyWindowTag });
