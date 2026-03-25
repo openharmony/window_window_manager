@@ -927,7 +927,7 @@ void SceneInputManager::HandleEmptyDisplayGroup()
     oss << "displayInfos flush to MMI is empty!";
     if (currentState_ == RootSessionState::CREATED_SUBSEQUENT) {
         WindowInfoReporter::GetInstance().ReportWindowFrozen(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION),
+            WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION,
             oss.str()
         );
         return;
@@ -956,9 +956,11 @@ void SceneInputManager::HandleEmptyDisplayGroup()
 
 void SceneInputManager::SetRootSceneSessionCreated(bool created)
 {
-    if (rootSessionState_.compare_exchange_strong(RootSessionState::NOT_CREATED,
+    RootSessionState rootSessionState = RootSessionState::NOT_CREATED;
+    if (rootSessionState_.compare_exchange_strong(rootSessionState,
         RootSessionState::CREATED_FIRST_TIME)) {
         TLOGI(WmsLogTag::WMS_EVENT, "Root scene session created for first time");
     }
+}
 }
 } // namespace OHOS::Rosen
