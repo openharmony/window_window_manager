@@ -3329,7 +3329,7 @@ public:
      * @param SystemBarProperty WINDOW_TYPE_STATUS_BAR or WINDOW_TYPE_NAVIGATION_BAR
      */
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& property) {}
+        SystemBarProperty& property, bool& isolate) {}
 
     /**
      * @brief Set Specific System Bar(include status bar and nav bar) Enable and Animation Properties
@@ -3350,8 +3350,8 @@ public:
      * @param property System Bar Property
      * @param systemBarPropertyFlag is System Bar Property Flag
      */
-    virtual WMError UpdateSystemBarPropertyForPage(WindowType type,
-        const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
+    virtual WMError UpdateSystemBarPropertyForPage(WindowType type, const SystemBarProperty& systemBarProperty,
+        const SystemBarPropertyFlag& systemBarPropertyFlag, bool isolate = false)
     {
         return WMError::WM_OK;
     }
