@@ -607,6 +607,15 @@ enum class DragResizeType : uint32_t {
 };
 
 /**
+ * @brief Enumerates select mode.
+ */
+enum class SelectMode : uint32_t {
+    WIDE_MODE = 0,
+    SQUARE_MODE = 1,
+    INVALID_MODE = 2,
+};
+
+/**
  * @struct KeyFramePolicy
  *
  * @brief info for drag key frame policy.
@@ -1278,7 +1287,7 @@ struct HookInfo {
     uint32_t displayOrientation_;
     bool enableHookDisplayOrientation_;
     Rect actualRect_ = { 0, 0, 0, 0};
-    
+
     std::string ToString() const
     {
         std::ostringstream oss;

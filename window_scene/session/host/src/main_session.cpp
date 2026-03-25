@@ -678,6 +678,11 @@ void MainSession::RegisterPageEnableCallback(PageEnableCallback&& callback)
     pageEnableCallback_ = std::move(callback);
 }
 
+WMError MainSession::NotifySplitRatioChanged(float newRatio)
+{
+    return WMError::WM_OK;
+}
+
 WSError MainSession::NotifyPageEnable(const std::string& action, const std::string& message)
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "action:%{public}zu, message:%{public}zu", action.length(), message.length());
@@ -742,13 +747,13 @@ WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
     return WMError::WM_OK;
 }
 
-WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
+WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
 {
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
+    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, selectMode);
 }
 
 bool MainSession::GetSessionBoundedSystemTray(

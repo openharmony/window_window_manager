@@ -289,6 +289,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SetAppForceLandscapeConfig);
     BindNativeFunction(env, exportObj, "setAppForceLandscapeConfigEnable", moduleName,
         JsSceneSessionManager::SetAppForceLandscapeConfigEnable);
+    BindNativeFunction(env, exportObj, "setSelectMode", moduleName,
+        JsSceneSessionManager::SetSelectMode);
     BindNativeFunction(env, exportObj, "isScbCoreEnabled", moduleName,
         JsSceneSessionManager::IsScbCoreEnabled);
     BindNativeFunction(env, exportObj, "updateAppHookDisplayInfo", moduleName,
@@ -4790,10 +4792,10 @@ napi_value JsSceneSessionManager::SetAppForceLandscapeConfigEnable(napi_env env,
 
 napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_THREE;
-    napi_value argv[ARGC_THREE] = { nullptr };
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != OHOS::Rosen::ARGC_TWO && argc != OHOS::Rosen::ARGC_THREE) {
+    if (argc != OHOS::Rosen::ARGC_FOUR) {
         TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -4813,17 +4815,52 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfigEnable(napi_env en
         RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_ONE], enableForceSplit, "enableForceSplit", WmsLogTag::DEFAULT);
     }
     bool needUpdateViewport = false;
-    if (argc == OHOS::Rosen::ARGC_THREE && GetType(env, argv[ARG_INDEX_TWO]) == napi_boolean) {
+    if (GetType(env, argv[ARG_INDEX_TWO]) == napi_boolean) {
         RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_TWO], needUpdateViewport, "needUpdateViewport", WmsLogTag::DEFAULT);
+    }
+    SelectMode selectMode = SelectMode::WIDE_MODE;
+    if (GetType(env, argv[ARG_INDEX_THREE]) == napi_number) {
+        RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_THREE], selectMode, "selectMode", WmsLogTag::DEFAULT);
     }
 
     TLOGI(WmsLogTag::DEFAULT, "SetAppForceLandscapeConfigEnable bundleName: %{public}s, enable: %{public}d, "
-        "needUpdateViewport: %{public}d", bundleName.c_str(), enableForceSplit, needUpdateViewport);
+        "needUpdateViewport: %{public}d, selectMode: %{public}u", bundleName.c_str(),
+        enableForceSplit, needUpdateViewport, static_cast<uint32_t>(selectMode));
 
     SceneSessionManager::GetInstance().SetAppForceLandscapeConfigEnable(bundleName, enableForceSplit,
-        needUpdateViewport);
+        needUpdateViewport, selectMode);
     return NapiGetUndefined(env);
 }
+
+napi_value JsSceneSessionManager::SetSelectMode(napi_env env, napi_callback_info info)
+{
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetSelectMode(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSetSelectMode(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != OHOS::Rosen::ARGC_ONE) {
+        TLOGE(WmsLogTag::DEFAULT, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    SelectMode selectMode = SelectMode::INVALID_MODE;
+    if (GetType(env, argv[ARG_INDEX_ZERO]) == napi_number) {
+        RETURN_IF_CONVERT_FAIL(env, argv[ARG_INDEX_ZERO], selectMode, "selectMode", WmsLogTag::DEFAULT);
+    }
+
+    TLOGI(WmsLogTag::DEFAULT, "SetSelectMode selectMode: %{public}u", static_cast<uint32_t>(selectMode));
+
+    SceneSessionManager::GetInstance().SetSelectMode(selectMode);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSessionManager::OnIsScbCoreEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;

@@ -5299,6 +5299,16 @@ public:
     {
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
+
+    /**
+     * @brief notify split ratio changed
+     *
+     * @param newRatio new ratio
+     */
+    virtual WMError NotifySplitRatioChanged(float newRatio)
+    {
+        return WMError::WM_OK;
+    }
 };
 }
 }
