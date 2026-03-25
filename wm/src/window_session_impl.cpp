@@ -7647,7 +7647,7 @@ void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, boo
     // isolate on api 18
     if (GetTargetAPIVersion() >= API_VERSION_18) {
         property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
-        isolate = true;
+        isolate = false;
     }
 }
 
