@@ -1184,11 +1184,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
                     "[window][getLatsWindow]msg: Get top window failed"));
             }
-            if (lists->window == nullptr) {
-                WLOGFE("Get top window failed, window is nullptr");
-            } else {
-                WLOGFE("Get top window failed, window is destroyed");
-            }
+            WLOGFE("Get top window failed, %{public}d", lists->window == nullptr);
             return;
         }
         task.Resolve(env, CreateJsWindowObject(env, lists->window));
