@@ -836,12 +836,13 @@ WMError WindowSceneSessionImpl::SetPcAppInpadSpecificSystemBarInvisible()
     if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMultiWindowCompatibleMode() &&
         property_->GetPcAppInpadSpecificSystemBarInvisible()) {
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        UpdateSpecificSystemBarEnabled(false, false, statusProperty);
+        bool isolate = true;
+        UpdateSpecificSystemBarEnabled(false, false, statusProperty, isolate);
         SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
 
         SystemBarProperty NavigationIndicatorPorperty =
             GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-        UpdateSpecificSystemBarEnabled(false, false, NavigationIndicatorPorperty);
+        UpdateSpecificSystemBarEnabled(false, false, NavigationIndicatorPorperty, isolate);
         SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, NavigationIndicatorPorperty);
         return WMError::WM_OK;
     }
@@ -3537,14 +3538,15 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 }
 
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
-    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
+    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag, bool isolate)
 {
     PartialSystemBarProperty prop = {
         .enable_ = systemBarProperty.enable_,
         .backgroundColor_ = systemBarProperty.backgroundColor_,
         .contentColor_ = systemBarProperty.contentColor_,
         .enableAnimation_ = systemBarProperty.enableAnimation_,
-        .flag_ = systemBarPropertyFlag
+        .flag_ = systemBarPropertyFlag,
+        .isolate_ = isolate
     };
     auto ret = SetOwnSystemBarProperty(type, prop, SystemBarPropertyOwner::APPLICATION);
     if (ret == WMError::WM_OK) {
@@ -3688,7 +3690,7 @@ WMError WindowSceneSessionImpl::SetOwnSystemBarProperty(WindowType type, const P
         }
         auto& ownPropList = ownSystemBarPropertyMap_[type];
         auto it = std::find_if(ownPropList.begin(), ownPropList.end(), [owner, &prop](OwnSystemBarPropertyPair& pair) {
-            return pair.first == owner && pair.second.flag_ == prop.flag_;
+            return pair.first == owner && pair.second.flag_ == prop.flag_ && pair.second.isolate_ == prop.isolate_;
         });
         if (it != ownPropList.end()) {
             ownPropList.erase(it);
@@ -3703,10 +3705,10 @@ WMError WindowSceneSessionImpl::SetOwnSystemBarProperty(WindowType type, const P
         }
         ownPropList.insert(insertIt, insertPair);
         TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u owner %{public}u "
-            "prop [%{public}u %{public}x %{public}x %{public}u] "
+            "prop [%{public}u %{public}x %{public}x %{public}u, %{public}u] "
             "flag [%{public}u%{public}u%{public}u%{public}u] size %{public}u",
             GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), static_cast<uint32_t>(owner),
-            prop.enable_, prop.backgroundColor_, prop.contentColor_, prop.enableAnimation_,
+            prop.enable_, prop.backgroundColor_, prop.contentColor_, prop.enableAnimation_, prop.isolate_,
             prop.flag_.enableFlag, prop.flag_.backgroundColorFlag,
             prop.flag_.contentColorFlag, prop.flag_.enableAnimationFlag, static_cast<uint32_t>(ownPropList.size()));
     }
@@ -3772,7 +3774,8 @@ SystemBarProperty WindowSceneSessionImpl::GetCurrentActiveSystemBarProperty(Wind
             if (!flag.enableFlag && pair.second.flag_.enableFlag) {
                 prop.enable_ = pair.second.enable_;
                 flag.enableFlag = true;
-                prop.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+                prop.settingFlag_ = pair.second.isolate_ ?
+                    prop.settingFlag_ : (prop.settingFlag_ | SystemBarSettingFlag::ENABLE_SETTING);
             }
             if (!flag.enableAnimationFlag && pair.second.flag_.enableAnimationFlag) {
                 prop.enableAnimation_= pair.second.enableAnimation_;

@@ -7640,13 +7640,14 @@ void WindowSessionImpl::HookCompatibleModeAvoidAreaNotify()
 }
 
 void WindowSessionImpl::UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-    SystemBarProperty& property)
+    SystemBarProperty& property, bool& isolate)
 {
     property.enable_ = systemBarEnable;
     property.enableAnimation_ = systemBarEnableAnimation;
     // isolate on api 18
     if (GetTargetAPIVersion() >= API_VERSION_18) {
         property.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+        isolate = true;
     }
 }
 
