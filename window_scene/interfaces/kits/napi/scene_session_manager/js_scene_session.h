@@ -235,6 +235,8 @@ private:
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
+    static napi_value AddSessionBlackList(napi_env env, napi_callback_info info);
+    static napi_value RemoveSessionBlackList(napi_env env, napi_callback_info info);
     static napi_value ToggleCompatibleMode(napi_env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
@@ -336,6 +338,8 @@ private:
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
+    napi_value OnAddSessionBlackList(napi_env env, napi_callback_info info);
+    napi_value OnRemoveSessionBlackList(napi_env env, napi_callback_info info);
     napi_value OnToggleCompatibleMode(napi_env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
