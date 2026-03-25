@@ -741,9 +741,10 @@ WMError WindowSessionImpl::Connect()
             TLOGW(WmsLogTag::WMS_LIFE, "Connect timeout, persistentId:%{public}d", GetPersistentId());
         }
     }
-    TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u",
-        property_->GetWindowName().c_str(), GetPersistentId(), property_->GetWindowType(), ret);
-    if (originDisplayId != property_->GetDisplayId()) {
+    TLOGI(WmsLogTag::WMS_LIFE, "Window Connect [name:%{public}s, id:%{public}d, type:%{public}u], ret:%{public}u, "
+        "oriDisplayId:%{public}" PRIu64 ", curDisplayId:%{public}" PRIu64, property_->GetWindowName().c_str(),
+        GetPersistentId(), property_->GetWindowType(), ret, originDisplayId, property_->GetDisplayId());
+    if (originDisplayId != property_->GetDisplayId() && property_->GetDisplayId() != DISPLAY_ID_C) {
         NotifyDmsDisplayMove(property_->GetDisplayId());
     }
     if (IsInCompatScaleMode() || WindowHelper::IsUIExtensionWindow(GetType())) {
