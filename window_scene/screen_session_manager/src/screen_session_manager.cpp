@@ -345,10 +345,12 @@ void ScreenSessionManager::LoadDmsExtension()
 }
 bool ScreenSessionManager::GetScreenSessionMngSystemAbility()
 {
-    if (DEVICE_TYPE != "phone") {
-        ScreenSessionManager::LoadDmsExtension();
-    }
+#ifdef DMS_UNIT_TEST
+    return true;
+#else
+    ScreenSessionManager::LoadDmsExtension();
     return SystemAbility::MakeAndRegisterAbility(&ScreenSessionManager::GetInstance());
+#endif
 }
 const bool REGISTER_RESULT = !SceneBoardJudgement::IsSceneBoardEnabled() ? false : ScreenSessionManager::GetScreenSessionMngSystemAbility();
 
