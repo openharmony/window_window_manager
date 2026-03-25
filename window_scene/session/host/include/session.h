@@ -887,6 +887,8 @@ public:
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
     WSError UpdateBrightness(float brightness);
 
+    std::atomic<bool> isSkipSelfWhenShowOnVirtualScreen_ { false };
+
     /*
      * Window Pattern
      */
