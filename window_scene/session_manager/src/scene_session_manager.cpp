@@ -1909,6 +1909,7 @@ void SceneSessionManager::CreateRootSceneSession()
     rootSceneSession_->RegisterGetStatusBarConstantlyShowFunc([this](DisplayId displayId, bool& isVisible) {
         return this->GetStatusBarConstantlyShow(displayId, isVisible);
     });
+    SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
 }
 
 void SceneSessionManager::RegisterRootSceneSession()
