@@ -39,11 +39,11 @@
             OHOS::Rosen::FloatingBallController::UnRegisterFbLifecycle*;
             OHOS::Rosen::FloatingBallController::UpdateFloatingBall*;
             OHOS::Rosen::FloatingBallController::UpdateMainWindow*;
-            OHOS::Rosen::FloatingBallController::SetInApplicationVisible*;
             OHOS::Rosen::FloatingBallManager::IsActiveController*;
             OHOS::Rosen::FloatingBallManager::IsSupportFloatingBall*;
             OHOS::Rosen::FloatingBallManager::RemoveActiveController*;
             OHOS::Rosen::FloatingBallManager::SetActiveController*;
+            OHOS::Rosen::FloatingBallController::SetInApplicationVisible*;
             OHOS::Rosen::GetSnapshotCallback::GetSyncResult*;
             OHOS::Rosen::GetSnapshotCallback::OnNotifyResult*;
             OHOS::Rosen::GetSnapshotCallback::RegisterFunc*;
