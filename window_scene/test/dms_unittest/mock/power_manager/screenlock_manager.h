@@ -13,21 +13,32 @@
  * limitations under the License.
  */
 
-#ifndef STARTUP_SYSPARAM_PARAMETER_API_H
-#define STARTUP_SYSPARAM_PARAMETER_API_H
-#include <cstdint>
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif /* __cplusplus */
-typedef void (*ParameterChgPtr)(const char* key, const char* value, void* context);
-int WatchParameter(const char* keyprefix, ParameterChgPtr callback, void* contex);
+#ifndef TEST_SCREEN_LOCK_MANAGER_H
+#define TEST_SCREEN_LOCK_MANAGER_H
 
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif
-#endif /* __cplusplus */
+namespace OHOS {
+namespace ScreenLock {
 
-#endif // STARTUP_SYSPARAM_PARAMETER_API_H
+class ScreenLockManager {
+public:
+    static ScreenLockManager* GetInstance()
+    {
+        static ScreenLockManager instance;
+        return &instance;
+    }
+
+    int32_t Lock(int32_t userId)
+    {
+        return 0;
+    }
+
+    bool IsScreenLocked()
+    {
+        return false;
+    }
+};
+
+}  // namespace ScreenLock
+}  // namespace OHOS
+
+#endif
