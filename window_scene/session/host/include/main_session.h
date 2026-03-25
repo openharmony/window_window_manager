@@ -34,7 +34,8 @@ public:
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) override;
 
     /*
      * Window Hierarchy
@@ -92,6 +93,7 @@ public:
     void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
     WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WMError NotifySplitRatioChanged(float newRatio) override;
 
     /*
      * Window Pattern

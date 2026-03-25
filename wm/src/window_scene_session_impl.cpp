@@ -6376,6 +6376,11 @@ void WindowSceneSessionImpl::NotifyIsFullScreenInForceSplitMode(bool isFullScree
     }
 }
 
+WMError WindowSceneSessionImpl::NotifySplitRatioChanged(float newRatio)
+{
+    return WMError::WM_OK;
+}
+
 WSError WindowSceneSessionImpl::NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property)
 {
     if (IsWindowSessionInvalid()) {
@@ -8022,20 +8027,22 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+    SelectMode selectMode)
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
     WindowType winType = GetType();
     bool enableForceSplit = false;
     if (WindowHelper::IsMainWindow(winType) &&
         GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport);
+        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport, selectMode);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
 }
 
-void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport)
+void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport,
+    SelectMode selectMode)
 {
     WindowType winType = GetType();
     if (!WindowHelper::IsMainWindow(winType)) {
@@ -8046,9 +8053,18 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bo
         TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
         return;
     }
-    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u",
-        enableForceSplit, needUpdateViewport);
-    uiContent->SetForceSplitEnable(enableForceSplit, needUpdateViewport);
+    ForceSplitMode splitMode = ForceSplitMode::NOT_SPLIT;
+    if (enableForceSplit) {
+        if (selectMode == SelectMode::WIDE_MODE) {
+            splitMode = ForceSplitMode::WIDE_SPLIT;
+        } else if (selectMode == SelectMode::SQUARE_MODE) {
+            splitMode = ForceSplitMode::SQUARE_SPLIT;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u, "
+        "selectMode: %{public}u, splitMode: %{public}u", enableForceSplit, needUpdateViewport,
+        static_cast<uint32_t>(selectMode), static_cast<uint32_t>(splitMode));
+    uiContent->SetForceSplitEnable(enableForceSplit, splitMode, needUpdateViewport);
 }
 
 void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()
@@ -8075,6 +8091,13 @@ WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& h
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
+}
+
+WMError WindowSceneSessionImpl::GetSelectMode(SelectMode& selectMode)
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetSelectMode(selectMode);
 }
 
 WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()

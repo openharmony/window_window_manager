@@ -148,6 +148,7 @@ public:
     static napi_value GetAllJsonProfile(napi_env env, napi_callback_info info);
     static napi_value GetJsonProfile(napi_env env, napi_callback_info info);
     static napi_value SetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info);
+    static napi_value SetSelectMode(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -293,7 +294,8 @@ private:
     napi_value OnGetAllJsonProfile(napi_env env, napi_callback_info info);
     napi_value OnGetJsonProfile(napi_env env, napi_callback_info info);
     napi_value OnSetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info);
-    
+    napi_value OnSetSelectMode(napi_env env, napi_callback_info info);
+
     /*
      * PC Window
      */
