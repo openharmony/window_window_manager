@@ -349,7 +349,7 @@ napi_value JsWindow::SetUIContent(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetUIContent(env, info) : nullptr;
-} m
+}
 
 napi_value JsWindow::SetFullScreen(napi_env env, napi_callback_info info)
 {
