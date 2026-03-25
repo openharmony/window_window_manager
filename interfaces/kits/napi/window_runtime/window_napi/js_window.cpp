@@ -3518,7 +3518,7 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         }
         auto property = window->GetSystemBarPropertyByType(systemBarType);
         auto isSetAnimation = argc > ARG_COUNT_TWO;
-        bool isolate = false;
+        bool isolate = true;
         window->UpdateSpecificSystemBarEnabled(systemBarEnable,
             isSetAnimation ? systemBarEnableAnimation : property.enableAnimation_, property, isolate);
         SystemBarPropertyFlag propertyFlag = { true, false, false, isSetAnimation };
