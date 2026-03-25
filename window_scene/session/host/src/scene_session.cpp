@@ -4255,17 +4255,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(
     const bool isDragMoveOrEnd = reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END;
 
     if (isTouchDrag && allowThrowSlip && isDragMoveOrEnd) {
-        // Foldable PC Slip Animation Path
-        bool hasAnimation = reason == SizeChangeReason::DRAG_END && pcFoldScreenController_->NeedFollowHandAnimation();
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, hasAnimation=%{public}d",
-              static_cast<uint32_t>(reason), hasAnimation);
-        if (hasAnimation) {
-            auto movingPair = std::make_pair(pcFoldScreenController_->GetMovingTimingProtocol(),
-                                             pcFoldScreenController_->GetMovingTimingCurve());
-            SetSurfaceBoundsWithAnimation(movingPair, globalRect, nullptr, isGlobal);
-        } else {
-            SetSurfaceBounds(globalRect, isGlobal, needFlush);
-        }
+        SetSurfaceBounds(globalRect, isGlobal, needFlush);
         pcFoldScreenController_->RecordMoveRects(rect);
     } else if (reason == SizeChangeReason::DRAG_START) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Drag-start event doesn't set surface bounds");
