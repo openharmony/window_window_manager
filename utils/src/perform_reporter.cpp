@@ -537,6 +537,7 @@ bool WindowInfoReporter::IsKeyboardFrozenEnabled()
         TLOGNI(WmsLogTag::WMS_KEYBOARD, "IsKeyboardFrozenEnabled: %{public}d", isFrozen);
         return isFrozen;
     }();
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "enabled: %{public}d", enabled);
     return enabled;
 }
 } // namespace Rosen
