@@ -1021,7 +1021,7 @@ HWTEST_F(SceneInputManagerTest, SetRootSceneSessionCreated001, TestSize.Level1)
 {
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
 }
 
 /**
@@ -1033,7 +1033,7 @@ HWTEST_F(SceneInputManagerTest, SetRootSceneSessionCreated002, TestSize.Level1)
 {
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(false);
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::NOT_CREATED);
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::NOT_CREATED);
 }
 
 /**
@@ -1045,7 +1045,7 @@ HWTEST_F(SceneInputManagerTest, SetRootSceneSessionCreated003, TestSize.Level1)
 {
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::CREATED_FIRST_TIME);
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
 }
 
 /**
@@ -1057,7 +1057,7 @@ HWTEST_F(SceneInputManagerTest, SetRootSceneSessionCreated004, TestSize.Level1)
 {
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::CREATED_SUBSEQUENT);
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_SUBSEQUENT);
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_SUBSEQUENT);
 }
 
 /**
@@ -1069,10 +1069,10 @@ HWTEST_F(SceneInputManagerTest, SetRootSceneSessionCreated005, TestSize.Level1)
 {
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
 
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
 }
 
 /**
@@ -1085,8 +1085,8 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup001, TestSize.Level1)
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::CREATED_SUBSEQUENT);
     SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(false);
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_SUBSEQUENT);
-    ASSERT_FALSE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_SUBSEQUENT);
+    EXPECT_FALSE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
 
 /**
@@ -1099,8 +1099,8 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup002, TestSize.Level1)
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
     SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(false);
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::NOT_CREATED);
-    ASSERT_FALSE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::NOT_CREATED);
+    EXPECT_FALSE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
 
 /**
@@ -1113,7 +1113,7 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup003, TestSize.Level1)
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::CREATED_FIRST_TIME);
     SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(false);
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+    EXPECT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
 
 /**
@@ -1126,7 +1126,7 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup004, TestSize.Level1)
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::CREATED_FIRST_TIME);
     SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(true);
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+    EXPECT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
 
 /**
@@ -1138,12 +1138,12 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup005, TestSize.Level1)
 {
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::CREATED_FIRST_TIME);
     SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(false);
-    
+
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
-    
+    EXPECT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+    EXPECT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
 
 /**
@@ -1156,7 +1156,7 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup006, TestSize.Level1)
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
     SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(false);
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_FALSE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+    EXPECT_FALSE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
 
 /**
@@ -1169,8 +1169,8 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup007, TestSize.Level1)
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
     SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(true);
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
-    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::NOT_CREATED);
-    ASSERT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+    EXPECT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::NOT_CREATED);
+    EXPECT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
 } // namespace
 } // namespace Rosen
