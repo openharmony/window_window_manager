@@ -3545,7 +3545,8 @@ WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
         .contentColor_ = systemBarProperty.contentColor_,
         .enableAnimation_ = systemBarProperty.enableAnimation_,
         .flag_ = systemBarPropertyFlag,
-        .isolate_ = isolate
+        .isolate_ = systemBarPropertyFlag.enableFlag &&
+            !(systemBarProperty.settingFlag_ & SystemBarSettingFlag::ENABLE_SETTING)
     };
     auto ret = SetOwnSystemBarProperty(type, prop, SystemBarPropertyOwner::APPLICATION);
     if (ret == WMError::WM_OK) {
