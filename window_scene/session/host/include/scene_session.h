@@ -648,6 +648,7 @@ public:
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
+    WMError SetPreferredOrientationWithResult(Orientation orientation, uint32_t promiseId, bool needAnimation = true);
     WSError SetCurrentRotation(int32_t currentRotation);
     WSError GetSceneNodeCount(uint32_t& nodeCount);
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
@@ -655,6 +656,8 @@ public:
     WSError ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation);
     WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
         const int32_t value, int32_t& convertedValue) override;
+    WMError SetPreferredOrientationWithResult(
+        Orientation orientation, uint32_t promiseId, bool needAnimation = true) override;
     WSError ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue);
     WSError ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue);
     WSError ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation);

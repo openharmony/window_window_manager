@@ -294,6 +294,10 @@ private:
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
 
+    static std::<uint32_t> orientationResultPromiseIdGenerator_;
+    static std::unordered_map<uint32_t, std::shared_ptr<NapiAsyncTask>>orientationResultPromiseMap_;
+    static std::mutex orientationResultMapMutex_;
+
     /*
      * Window Layout
      */
@@ -521,6 +525,7 @@ private:
     napi_value OnIsReceiveDragEventEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetSeparationTouchEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSeparationTouchEnabled(napi_env env, napi_callback_info info);
+
 };
 }  // namespace Rosen
 }  // namespace OHOS

@@ -7175,6 +7175,26 @@ WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProp
     return WMError::WM_OK;
 }
 
+WMError SceneSession::SetPreferredOrientationWithResult(Orientation orientation, uint32_t promiseId, bool needAnimation = true)
+{
+    PostTask([weakThis = wptr(this), orientation, promiseId, needAnimation, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ROTATION, "winId: %{public}d orientation: %{public}u promiseId: %{public}u",
+            session->GetPersistentId(), static_cast<uint32_t>(orientation), promiseId);
+        session->GetSessionProperty()->SetRequestedOrientation(orientation, needAnimation);
+        if (!session->onRequestedOrientationChange_) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s onRequestedOrientationChange is null", where);
+            return;
+        }
+        onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation, promiseId);
+    }, __func__);
+    return WMError::WM_OK;
+}
+
 WMError SceneSession::HandleActionUpdatePrivacyMode(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {

@@ -2566,6 +2566,18 @@ public:
     virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
 
     /**
+     * @brief Set requested orientation.
+     *
+     * @param Orientation Screen orientation.
+     * @param animation true means window rotation needs animation. Otherwise not needed.
+     */
+    virtual WMError SetPreferredOrientationWithResult(
+        Orientation orientation, uint32_t promiseId, bool needAnimation = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Get the Target Orientation ConfigInfo.
      *
      * @param targetOrientation target Orientation.
