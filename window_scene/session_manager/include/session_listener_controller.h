@@ -120,7 +120,7 @@ private:
     struct BundleInstanceFilterKey {
         std::string bundleName_;
         int32_t appIndex_ = 0;
-        std::string appInstanceKey_;
+        std::string appInstanceKey_ = "";
 
         bool operator<(const BundleInstanceFilterKey& other) const
         {

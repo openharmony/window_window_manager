@@ -59,11 +59,11 @@ void SessionLifecycleListenerProxy::OnBatchLifecycleEvent(const vector<sptr<Scen
     for (size_t i = 0; i < sessions.size() && i < payloads.size(); ++i) {
         const auto& sessionState = sessions[i]->state_;
         const auto& payload = payloads[i];
-        SendRequestBundleInstance(sessionState, payload);
+        OnBundleInstanceLifecycleEvent(sessionState, payload);
     }
 }
 
-void SessionLifecycleListenerProxy::SendRequestBundleInstance(
+void SessionLifecycleListenerProxy::OnBundleInstanceLifecycleEvent(
     SessionState state, const LifecycleEventPayload& payload)
 {
     MessageParcel data;
