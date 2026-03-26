@@ -42,7 +42,7 @@ napi_value NapiThrowError(napi_env env, WmErrorCode errCode);
 napi_value NapiThrowError(napi_env env, WmErrorCode errCode, const std::string& msg);
 class JsWindow final {
 public:
-    explicit JsWindow(const sptr<Window>& window);
+    explicit JsWindow(const sptr<Window>& window, napi_env env);
     ~JsWindow();
     sptr<Window> GetWindow() { return windowToken_; }
     static void Finalizer(napi_env env, void* data, void* hint);
@@ -294,6 +294,7 @@ private:
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
 
+    napi_env env_;
     static std::<uint32_t> orientationResultPromiseIdGenerator_;
     static std::unordered_map<uint32_t, std::shared_ptr<NapiAsyncTask>>orientationResultPromiseMap_;
     static std::mutex orientationResultMapMutex_;
@@ -331,6 +332,7 @@ private:
     napi_value OnIsWindowShowingSync(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientationWithResult(napi_env env, napi_callback_info info);
+    void NotifyOrientationResult(uint32_t promiseId, uint32_t action);
     napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnConvertOrientationAndRotation(napi_env env, napi_callback_info info);
     napi_value OnRaiseToAppTop(napi_env env, napi_callback_info info);
