@@ -4260,6 +4260,7 @@ void JsWindow::NotifyOrientationResult(uint32_t promiseId, uint32_t action)
         auto it = orientationResultPromiseMap_.find(promiseId);
         if (it == orientationResultPromiseMap_.end()) {
             TLOGE(WmsLogTag::WMS_ROTATION, "promise not found for id: %{public}u", promiseId);
+            return;
         }
         napiAsyncTask = it->second;
         orientationResultPromiseMap_.erase(it);
