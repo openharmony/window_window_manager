@@ -161,9 +161,9 @@ public:
         const std::unordered_map<WindowType, SystemBarPropertyFlag>& systemBarPropertyFlags) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
-        SystemBarProperty& property, bool& isolate) override;
-    WMError UpdateSystemBarPropertyForPage(WindowType type, const SystemBarProperty& systemBarProperty,
-        const SystemBarPropertyFlag& systemBarPropertyFlag) override;
+        SystemBarProperty& property) override;
+    WMError UpdateSystemBarPropertyForPage(WindowType type,
+        const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag) override;
 
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
