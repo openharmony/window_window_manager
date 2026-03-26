@@ -90,7 +90,7 @@ public:
     virtual WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     virtual WMError SetStatusBarColorForNavigation(const std::optional<uint32_t> color) override;
-    virtual WMError UpdateSystemBarPropertyForPage(WindowType type, const SystemBarProperty& systemBarProperty,
+    WMError UpdateSystemBarPropertyForPage(WindowType type, const SystemBarProperty& systemBarProperty,
         const SystemBarPropertyFlag& systemBarPropertyFlag, bool isolate = false) override;
     virtual WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
