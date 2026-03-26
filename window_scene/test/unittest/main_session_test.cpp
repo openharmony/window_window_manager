@@ -342,23 +342,24 @@ HWTEST_F(MainSessionTest, RectCheck03, TestSize.Level1)
     mainSession_->parentSession_ = session;
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    ScreenProperty screenProperty;
+    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
 
     curWidth = 300;
     curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
 
     curWidth = 1930;
     curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
 
     curWidth = 330;
     curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
 
     curWidth = 330;
     curHeight = 1930;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
 }
 
 /**

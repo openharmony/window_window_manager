@@ -1,0 +1,385 @@
+From d0b1841a87e86994f154fd14b04295b6e3d0c3de Mon Sep 17 00:00:00 2001
+From: Moyamo <baiyusheng@h-partners.com>
+Date: Thu, 26 Mar 2026 17:10:54 +0800
+Subject: [PATCH] DFX window rect check
+
+Signed-off-by: Moyamo <baiyusheng@h-partners.com>
+---
+ .../session/host/include/main_session.h       |  2 +-
+ window_scene/session/host/include/session.h   |  7 +--
+ .../session/host/include/sub_session.h        |  2 +-
+ .../session/host/include/system_session.h     |  2 +-
+ .../session/host/src/main_session.cpp         |  5 +-
+ window_scene/session/host/src/session.cpp     | 47 +++++++++++++++----
+ window_scene/session/host/src/sub_session.cpp |  5 +-
+ .../session/host/src/system_session.cpp       |  5 +-
+ .../test/unittest/main_session_test.cpp       | 11 +++--
+ window_scene/test/unittest/session_test3.cpp  |  9 ++--
+ .../unittest/sub_session_lifecycle_test.cpp   |  9 ++--
+ .../test/unittest/sub_session_test.cpp        | 11 +++--
+ .../test/unittest/system_session_test.cpp     | 11 +++--
+ 13 files changed, 80 insertions(+), 46 deletions(-)
+
+diff --git a/window_scene/session/host/include/main_session.h b/window_scene/session/host/include/main_session.h
+index 1b9513753e8..58d08a5c606 100644
+--- a/window_scene/session/host/include/main_session.h
++++ b/window_scene/session/host/include/main_session.h
+@@ -32,7 +32,7 @@ public:
+     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
+     void NotifyForegroundInteractiveStatus(bool interactive) override;
+     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+-    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
++    void RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty) override;
+     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
+     WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
+ 
+diff --git a/window_scene/session/host/include/session.h b/window_scene/session/host/include/session.h
+index 29f4144241b..3aeebcf3bbd 100644
+--- a/window_scene/session/host/include/session.h
++++ b/window_scene/session/host/include/session.h
+@@ -31,6 +31,7 @@
+ #include "session/container/include/zidl/session_stage_interface.h"
+ #include "session/host/include/zidl/session_stub.h"
+ #include "session/host/include/scene_persistence.h"
++#include "session/screen/include/screen_property.h"
+ #include "thread_safety_annotations.h"
+ #include "vsync_station.h"
+ #include "window_visibility_info.h"
+@@ -763,9 +764,9 @@ public:
+ 
+     SystemSessionConfig GetSystemConfig() const;
+     void RectCheckProcess();
+-    virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
+-    void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
+-        uint32_t minHeight, uint32_t maxFloatingWindowSize);
++    virtual void RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty) {};
++    void RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
++        uint32_t minHeight, ScreenProperty& screenProperty);
+     DetectTaskInfo GetDetectTaskInfo() const;
+     void SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo);
+     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
+diff --git a/window_scene/session/host/include/sub_session.h b/window_scene/session/host/include/sub_session.h
+index 0d651516442..5fe59696f95 100644
+--- a/window_scene/session/host/include/sub_session.h
++++ b/window_scene/session/host/include/sub_session.h
+@@ -33,7 +33,7 @@ public:
+     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
+     int32_t GetMissionId() const override;
+     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
+-    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
++    void RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty) override;
+     bool IsVisibleForeground() const override;
+     bool IsVisibleNotBackground() const override;
+     bool IsNeedCrossDisplayRendering() const override;
+diff --git a/window_scene/session/host/include/system_session.h b/window_scene/session/host/include/system_session.h
+index 8ab4f351eda..c9ada104f88 100644
+--- a/window_scene/session/host/include/system_session.h
++++ b/window_scene/session/host/include/system_session.h
+@@ -37,7 +37,7 @@ public:
+ 
+     WSError NotifyClientToUpdateRect(const std::string& updateReason,
+         std::shared_ptr<RSTransaction> rsTransaction) override;
+-    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
++    void RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty) override;
+     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
+     int32_t GetSubWindowZLevel() const override;
+ 
+diff --git a/window_scene/session/host/src/main_session.cpp b/window_scene/session/host/src/main_session.cpp
+index db102bbe3d2..a6718255243 100644
+--- a/window_scene/session/host/src/main_session.cpp
++++ b/window_scene/session/host/src/main_session.cpp
+@@ -220,12 +220,11 @@ bool MainSession::IsMainWindowTopmost() const
+     return GetSessionProperty()->IsMainWindowTopmost();
+ }
+ 
+-void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
++void MainSession::RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty)
+ {
+     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
+     uint32_t minHeight = GetSystemConfig().miniHeightOfMainWindow_;
+-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
+-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
++    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenProperty);
+ }
+ 
+ void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
+diff --git a/window_scene/session/host/src/session.cpp b/window_scene/session/host/src/session.cpp
+index 68f7499c12b..ec86b033e94 100644
+--- a/window_scene/session/host/src/session.cpp
++++ b/window_scene/session/host/src/session.cpp
+@@ -4415,18 +4415,46 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
+ }
+ 
+ /** @note @window.layout */
+-void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
+-    uint32_t minHeight, uint32_t maxFloatingWindowSize)
++void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
++    uint32_t minHeight, ScreenProperty& screenProperty)
+ {
+-    constexpr uint32_t marginOfError = 2; // The max vp bias for preventing giant logs.
+-    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
+-        curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
++
++    constexpr uint32_t MARGIN_OF_ERROR = 2; // The max vp bias for preventing giant logs.
++    constexpr float DEFAULT_DENSITY = 1.0f;
++
++    const auto& systemConfig = GetSystemConfig();
++    const uint32_t maxFloatingWindowSize = systemConfig.maxFloatingWindowSize_;
++
++    const bool isSizeBelowMin = (curWidth + MARGIN_OF_ERROR < minWidth) ||
++                                (curHeight + MARGIN_OF_ERROR < minHeight);
++    const bool isSizeAboveMax = (curWidth > maxFloatingWindowSize + MARGIN_OF_ERROR) ||
++                                (curHeight > maxFloatingWindowSize + MARGIN_OF_ERROR);
++
++    const WindowType winType = GetWindowType();
++    const bool isSystemWindowButNotDialog = WindowHelper::IsSystemWindowButNotDialog(winType);
++
++    const auto& bounds = screenProperty.GetBounds().rect_;
++    const uint32_t screenWidth = static_cast<uint32_t>(bounds.width_);
++    const uint32_t screenHeight = static_cast<uint32_t>(bounds.height_);
++
++    const float density = screenProperty.GetDensity();
++    const float safeDensity = (!NearZero(density)) ? density : DEFAULT_DENSITY;
++    const float screenWidthVp = screenWidth / safeDensity;
++    const float screenHeightVp = screenHeight / safeDensity;
++
++    const bool isSizeBelowScreen = (curWidth + MARGIN_OF_ERROR < screenWidthVp) ||
++                                   (curHeight + MARGIN_OF_ERROR < screenHeightVp);
++
++    const bool needReportException = isSizeAboveMax ||
++                                     (!isSystemWindowButNotDialog && isSizeBelowMin && isSizeBelowScreen);
++
++    if (needReportException) {
+         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
+             GetPersistentId(), GetSessionRect().ToString().c_str());
+         std::ostringstream oss;
+         oss << " RectCheck err size ";
+         oss << " cur persistentId: " << GetPersistentId() << ",";
+-        oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
++        oss << " windowType: " << static_cast<uint32_t>(winType) << ",";
+         auto property = GetSessionProperty();
+         if (property) {
+             oss << " windowName: " << property->GetWindowName() << ",";
+@@ -4436,10 +4464,11 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
+         oss << " curHeight: " << curHeight << ",";
+         oss << " minWidth: " << minWidth << ",";
+         oss << " minHeight: " << minHeight << ",";
++        oss << " screenWidth: " << screenWidth << ",";
++        oss << " screenHeight: " << screenHeight << ",";
+         oss << " maxFloatingWindowSize: " << maxFloatingWindowSize << ",";
+         oss << " sessionRect: " << GetSessionRect().ToString() << ";";
+-        WindowInfoReporter::GetInstance().ReportWindowException(
+-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
++        WindowInfoReporter::GetInstance().ReportWindowFrozen(WindowDFXHelperType::WINDOW_RECT_CHECK, oss.str());
+     }
+ }
+ 
+@@ -4482,7 +4511,7 @@ void Session::RectCheckProcess()
+             WindowInfoReporter::GetInstance().ReportWindowException(
+                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
+         }
+-        RectCheck(curWidth, curHeight);
++        RectCheck(curWidth, curHeight, screenProperty);
+     }
+ }
+ 
+diff --git a/window_scene/session/host/src/sub_session.cpp b/window_scene/session/host/src/sub_session.cpp
+index bc8363e333c..4208d6c851a 100644
+--- a/window_scene/session/host/src/sub_session.cpp
++++ b/window_scene/session/host/src/sub_session.cpp
+@@ -269,12 +269,11 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
+     return true;
+ }
+ 
+-void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
++void SubSession::RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty)
+ {
+     uint32_t minWidth = GetSystemConfig().miniWidthOfSubWindow_;
+     uint32_t minHeight = GetSystemConfig().miniHeightOfSubWindow_;
+-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
+-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
++    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenProperty);
+ }
+ 
+ bool SubSession::IsTopmost() const
+diff --git a/window_scene/session/host/src/system_session.cpp b/window_scene/session/host/src/system_session.cpp
+index 2b40de00821..47e5a550ca3 100644
+--- a/window_scene/session/host/src/system_session.cpp
++++ b/window_scene/session/host/src/system_session.cpp
+@@ -332,12 +332,11 @@ void SystemSession::UpdatePointerArea(const WSRect& rect)
+     Session::UpdatePointerArea(rect);
+ }
+ 
+-void SystemSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
++void SystemSession::RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty)
+ {
+     uint32_t minWidth = MIN_SYSTEM_WINDOW_WIDTH;
+     uint32_t minHeight = MIN_SYSTEM_WINDOW_HEIGHT;
+-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
+-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
++    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenProperty);
+ }
+ 
+ WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)
+diff --git a/window_scene/test/unittest/main_session_test.cpp b/window_scene/test/unittest/main_session_test.cpp
+index 9cdb3bb1e80..a8aaacaacd7 100644
+--- a/window_scene/test/unittest/main_session_test.cpp
++++ b/window_scene/test/unittest/main_session_test.cpp
+@@ -342,23 +342,24 @@ HWTEST_F(MainSessionTest, RectCheck03, TestSize.Level1)
+     mainSession_->parentSession_ = session;
+     uint32_t curWidth = 100;
+     uint32_t curHeight = 200;
+-    mainSession_->RectCheck(curWidth, curHeight);
++    ScreenProperty screenProperty;
++    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 300;
+     curHeight = 200;
+-    mainSession_->RectCheck(curWidth, curHeight);
++    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 1930;
+     curHeight = 200;
+-    mainSession_->RectCheck(curWidth, curHeight);
++    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 330;
+     curHeight = 200;
+-    mainSession_->RectCheck(curWidth, curHeight);
++    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 330;
+     curHeight = 1930;
+-    mainSession_->RectCheck(curWidth, curHeight);
++    mainSession_->RectCheck(curWidth, curHeight, screenProperty);
+ }
+ 
+ /**
+diff --git a/window_scene/test/unittest/session_test3.cpp b/window_scene/test/unittest/session_test3.cpp
+index 02c95417d12..722734a3b98 100755
+--- a/window_scene/test/unittest/session_test3.cpp
++++ b/window_scene/test/unittest/session_test3.cpp
+@@ -870,10 +870,11 @@ HWTEST_F(WindowSessionTest3, UpdateWindowMode, TestSize.Level1)
+ HWTEST_F(WindowSessionTest3, RectSizeCheckProcess, TestSize.Level1)
+ {
+     ASSERT_NE(session_, nullptr);
+-    session_->RectSizeCheckProcess(1, 0, 2, 0, 0);
+-    session_->RectSizeCheckProcess(1, 0, 1, 0, 0);
+-    session_->RectSizeCheckProcess(0, 1, 0, 2, 0);
+-    session_->RectSizeCheckProcess(0, 1, 0, 0, 0);
++    ScreenProperty screenProperty;
++    session_->RectSizeCheckProcess(1, 0, 2, 0, screenProperty);
++    session_->RectSizeCheckProcess(1, 0, 1, 0, screenProperty);
++    session_->RectSizeCheckProcess(0, 1, 0, 2, screenProperty);
++    session_->RectSizeCheckProcess(0, 1, 0, 0, screenProperty);
+     EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
+ }
+ 
+diff --git a/window_scene/test/unittest/sub_session_lifecycle_test.cpp b/window_scene/test/unittest/sub_session_lifecycle_test.cpp
+index b5f4bd19b76..89d634efb02 100644
+--- a/window_scene/test/unittest/sub_session_lifecycle_test.cpp
++++ b/window_scene/test/unittest/sub_session_lifecycle_test.cpp
+@@ -153,8 +153,9 @@ HWTEST_F(SessionStubLifecycleTest, Hide01, TestSize.Level1)
+     subSession_->sessionStage_ = tempStage_;
+ 
+     WSRect rect;
++    ScreenProperty screenProperty;
+     subSession_->UpdatePointerArea(rect);
+-    subSession_->RectCheck(50, 100);
++    subSession_->RectCheck(50, 100, screenProperty);
+     ASSERT_EQ(WSError::WS_OK, subSession_->ProcessPointDownSession(50, 100));
+ }
+ 
+@@ -277,8 +278,9 @@ HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession01, TestSize.Level1)
+     ASSERT_TRUE(subSession_->GetParentSession() != nullptr);
+ 
+     WSRect rect;
++    ScreenProperty screenProperty;
+     subSession_->UpdatePointerArea(rect);
+-    subSession_->RectCheck(50, 100);
++    subSession_->RectCheck(50, 100, screenProperty);
+     ASSERT_EQ(subSession_->ProcessPointDownSession(50, 100), WSError::WS_OK);
+ }
+ 
+@@ -291,8 +293,9 @@ HWTEST_F(SessionStubLifecycleTest, ProcessPointDownSession02, TestSize.Level1)
+ {
+     subSession_->Hide();
+     WSRect rect;
++    ScreenProperty screenProperty;
+     subSession_->UpdatePointerArea(rect);
+-    subSession_->RectCheck(50, 100);
++    subSession_->RectCheck(50, 100, screenProperty);
+ 
+     auto property = subSession_->GetSessionProperty();
+     ASSERT_NE(property, nullptr);
+diff --git a/window_scene/test/unittest/sub_session_test.cpp b/window_scene/test/unittest/sub_session_test.cpp
+index 0431f57b36d..cbb5ebdfad7 100644
+--- a/window_scene/test/unittest/sub_session_test.cpp
++++ b/window_scene/test/unittest/sub_session_test.cpp
+@@ -307,23 +307,24 @@ HWTEST_F(SubSessionTest, RectCheck, TestSize.Level1)
+     subSession_->parentSession_ = session;
+     uint32_t curWidth = 100;
+     uint32_t curHeight = 200;
+-    subSession_->RectCheck(curWidth, curHeight);
++    ScreenProperty screenProperty;
++    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 300;
+     curHeight = 200;
+-    subSession_->RectCheck(curWidth, curHeight);
++    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 1930;
+     curHeight = 200;
+-    subSession_->RectCheck(curWidth, curHeight);
++    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 330;
+     curHeight = 200;
+-    subSession_->RectCheck(curWidth, curHeight);
++    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 330;
+     curHeight = 1930;
+-    subSession_->RectCheck(curWidth, curHeight);
++    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+ }
+ 
+ /**
+diff --git a/window_scene/test/unittest/system_session_test.cpp b/window_scene/test/unittest/system_session_test.cpp
+index 4770b27ae31..a2949ac420b 100644
+--- a/window_scene/test/unittest/system_session_test.cpp
++++ b/window_scene/test/unittest/system_session_test.cpp
+@@ -247,23 +247,24 @@ HWTEST_F(SystemSessionTest, RectCheck, TestSize.Level1)
+     systemSession_->parentSession_ = session;
+     uint32_t curWidth = 100;
+     uint32_t curHeight = 200;
+-    systemSession_->RectCheck(curWidth, curHeight);
++    ScreenProperty screenProperty;
++    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 0;
+     curHeight = 0;
+-    systemSession_->RectCheck(curWidth, curHeight);
++    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 1930;
+     curHeight = 0;
+-    systemSession_->RectCheck(curWidth, curHeight);
++    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 330;
+     curHeight = 0;
+-    systemSession_->RectCheck(curWidth, curHeight);
++    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+ 
+     curWidth = 330;
+     curHeight = 1930;
+-    systemSession_->RectCheck(curWidth, curHeight);
++    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+ }
+ 
+ /**
+-- 
+GitCode
+

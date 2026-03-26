@@ -870,10 +870,11 @@ HWTEST_F(WindowSessionTest3, UpdateWindowMode, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, RectSizeCheckProcess, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    session_->RectSizeCheckProcess(1, 0, 2, 0, 0);
-    session_->RectSizeCheckProcess(1, 0, 1, 0, 0);
-    session_->RectSizeCheckProcess(0, 1, 0, 2, 0);
-    session_->RectSizeCheckProcess(0, 1, 0, 0, 0);
+    ScreenProperty screenProperty;
+    session_->RectSizeCheckProcess(1, 0, 2, 0, screenProperty);
+    session_->RectSizeCheckProcess(1, 0, 1, 0, screenProperty);
+    session_->RectSizeCheckProcess(0, 1, 0, 2, screenProperty);
+    session_->RectSizeCheckProcess(0, 1, 0, 0, screenProperty);
     EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
 }
 
