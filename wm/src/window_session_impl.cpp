@@ -3370,6 +3370,11 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
+void WindowSessionImpl::RegisterNotifyOrientationResultFunc(NotifyOrientationResultFunc&& func)
+{
+    onNotifyOrientationResult_ = std::move(func);
+}
+
 WMError WindowSessionImpl::SetPreferredOrientationWithResult(Orientation orientation, uint32_t promiseId, bool needAnimation)
 {
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetRequestedOrientation");
@@ -3380,6 +3385,7 @@ WMError WindowSessionImpl::SetPreferredOrientationWithResult(Orientation orienta
     TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
     if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+        onNotifyOrientationResult_(promiseId, 1);
         return WMError::WM_OK;
     }
     if (property_->IsSupportRotateFullScreen()) {

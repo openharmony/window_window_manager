@@ -90,6 +90,7 @@ using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams
 using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
 using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
+using NotifyOrientationResultFunc = std::function<void(uint32_t, uint32_t)>;
 class RSSurfaceNode;
 class RSTransaction;
 class RSUIContext;
@@ -2294,6 +2295,7 @@ public:
      * @param func Function to notify window destroyed.
      */
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) {}
+    virtual void RegisterNotifyOrientationResultFunc(const NotifyOrientationResultFunc& func) {}
 
     /**
      * @brief Unregister window destroyed listener.
