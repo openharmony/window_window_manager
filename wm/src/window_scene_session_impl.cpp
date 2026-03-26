@@ -3539,8 +3539,8 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
     const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
-    bool hasEnableSetting = static<uint32_t>(systemBarProperty.settingFlag_) &
-        static<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING);
+    bool hasEnableSetting = static_cast<uint32_t>(systemBarProperty.settingFlag_) &
+        static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING);
     PartialSystemBarProperty prop = {
         .enable_ = systemBarProperty.enable_,
         .backgroundColor_ = systemBarProperty.backgroundColor_,
