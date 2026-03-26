@@ -80,6 +80,7 @@ group("unittest") {
       ":wm_window_scene_session_impl_test6",
       "rotation:wm_window_scene_session_impl_rotation_test",
       ":wm_window_scene_test",
+      ":wm_window_session_impl_compatible_mode_test",
       ":wm_window_session_impl_test",
       ":wm_window_session_impl_test2",
       ":wm_window_session_impl_test3",
@@ -292,6 +293,26 @@ ohos_unittest("wm_compatible_mode_window_session_impl_test") {
   sources = [ "compatible_mode_window_session_impl_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_window_session_impl_compatible_mode_test") {
+  module_out_path = module_out_path
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  sources = [ "compatible_mode/window_session_impl_compatible_mode_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
 
   external_deps = test_external_deps
 }
