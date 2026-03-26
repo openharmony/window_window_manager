@@ -1550,7 +1550,7 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
 {
     wptr<Window> weakToken(windowToken_);
-    napi_value result = nullptr;->Resolve(
+    napi_value result = nullptr;
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4198,7 +4198,7 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientation");
+    OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientationWithResult");
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
     }
