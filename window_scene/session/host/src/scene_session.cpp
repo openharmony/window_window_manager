@@ -9495,9 +9495,7 @@ void SceneSession::SetWindowCornerRadiusCallback(NotifySetWindowCornerRadiusFunc
         session->onSetWindowCornerRadiusFunc_ = std::move(func);
         auto property = session->GetSessionProperty();
         float cornerRadius = property ? property->GetWindowCornerRadius() : WINDOW_CORNER_RADIUS_INVALID;
-        if (property->GetIsShaped()) {
-            session->onSetWindowCornerRadiusFunc_(0.0f);
-        } else if (!MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
+        if (!MathHelper::LessNotEqual(cornerRadius, 0.0f)) {
             // Valid corner radius menas app has set corner radius of the window, need to update to scb.
             session->onSetWindowCornerRadiusFunc_(cornerRadius);
         }
