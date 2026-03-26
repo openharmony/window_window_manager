@@ -3539,14 +3539,15 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
     const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
+    bool hasEnableSetting = static<uint32_t>(systemBarProperty.settingFlag_) &
+        static<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING);
     PartialSystemBarProperty prop = {
         .enable_ = systemBarProperty.enable_,
         .backgroundColor_ = systemBarProperty.backgroundColor_,
         .contentColor_ = systemBarProperty.contentColor_,
         .enableAnimation_ = systemBarProperty.enableAnimation_,
         .flag_ = systemBarPropertyFlag,
-        .isolate_ = systemBarPropertyFlag.enableFlag &&
-            !(systemBarProperty.settingFlag_ & SystemBarSettingFlag::ENABLE_SETTING)
+        .isolate_ = systemBarPropertyFlag.enableFlag && !hasEnableSetting;
     };
     auto ret = SetOwnSystemBarProperty(type, prop, SystemBarPropertyOwner::APPLICATION);
     if (ret == WMError::WM_OK) {
