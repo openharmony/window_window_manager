@@ -956,7 +956,7 @@ void SceneInputManager::SetRootSceneSessionCreated(bool created)
     RootSessionState rootSessionState = RootSessionState::NOT_CREATED;
     if (rootSessionState_.compare_exchange_strong(rootSessionState,
         RootSessionState::CREATED_FIRST_TIME)) {
-        TLOGI(WmsLogTag::WMS_EVENT, "Root scene session created for first time");
+        TLOGI(WmsLogTag::WMS_EVENT, "Root scene session created for the first time");
     }
 }
 }
