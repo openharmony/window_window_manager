@@ -527,7 +527,6 @@ private:
     napi_value OnIsReceiveDragEventEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetSeparationTouchEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSeparationTouchEnabled(napi_env env, napi_callback_info info);
-
 };
 }  // namespace Rosen
 }  // namespace OHOS

@@ -5742,7 +5742,8 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
 {
     TLOGNI(WmsLogTag::WMS_ROTATION, "orientation=%{public}u, needAnimation=%{public}d", orientation, needAnimation);
     auto task =
-    [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation, needAnimation, promiseId, env = env_] {
+    [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation,
+        needAnimation, promiseId, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_ROTATION,

@@ -3375,7 +3375,8 @@ void WindowSessionImpl::RegisterNotifyOrientationResultFunc(NotifyOrientationRes
     onNotifyOrientationResult_ = std::move(func);
 }
 
-WMError WindowSessionImpl::SetPreferredOrientationWithResult(Orientation orientation, uint32_t promiseId, bool needAnimation)
+WMError WindowSessionImpl::SetPreferredOrientationWithResult(
+    Orientation orientation, uint32_t promiseId, bool needAnimation)
 {
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetRequestedOrientation");
     if (IsWindowSessionInvalid()) {
