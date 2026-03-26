@@ -1158,6 +1158,20 @@ HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup006, TestSize.Level1)
     SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
     ASSERT_FALSE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
 }
+
+/**
+ * @tc.name: HandleEmptyDisplayGroup007
+ * @tc.desc: Test HandleEmptyDisplayGroup when state is NOT_CREATED and task already scheduled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneInputManagerTest, HandleEmptyDisplayGroup007, TestSize.Level1)
+{
+    SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
+    SceneInputManager::GetInstance().hasDelayedTaskScheduled_.store(true);
+    SceneInputManager::GetInstance().HandleEmptyDisplayGroup();
+    ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::NOT_CREATED);
+    ASSERT_TRUE(SceneInputManager::GetInstance().hasDelayedTaskScheduled_.load());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

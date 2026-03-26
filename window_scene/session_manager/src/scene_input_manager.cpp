@@ -40,6 +40,7 @@ constexpr int DEFAULT_SCREEN_SCALE = 100;
 constexpr int DEFAULT_EXPAND_HEIGHT = 0;
 constexpr int DELAY_REPORT_TIME = 3000;
 constexpr float DIRECTION90 = 90.0F;
+static const std::string DELAY_TIME_DISABLED = OHOS::system::GetParameter("persist.window.delayTimeDisabled", "0");
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -771,6 +772,7 @@ void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& win
         std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
         ConstructDisplayGroupInfos(screensProperties, displayGroupMap);
         if (displayGroupMap.empty()) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "displayGroupMap is empty");
             HandleEmptyDisplayGroup();
             return;
         }
@@ -920,7 +922,7 @@ void SceneInputManager::ConstructDumpWindowInfo(const MMI::WindowInfo& windowInf
 
 void SceneInputManager::HandleEmptyDisplayGroup()
 {
-    const bool delayTimeDisabled = (OHOS::system::GetParameter("persist.window.delayTimeDisabled", "0") == "1");
+    const bool delayTimeDisabled = (DELAY_TIME_DISABLED == "1");
     const int32_t delayReportTime = delayTimeDisabled ? 0 : DELAY_REPORT_TIME;
     auto currentState_ = rootSessionState_.load();
     std::ostringstream oss;
@@ -931,13 +933,6 @@ void SceneInputManager::HandleEmptyDisplayGroup()
             oss.str()
         );
         return;
-    }
-    int32_t ret = WindowInfoReporter::GetInstance().ReportEventDispatchException(
-        static_cast<int32_t>(WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION),
-        getpid(), oss.str()
-    );
-    if (ret != 0) {
-        TLOGNI(WmsLogTag::WMS_EVENT, "ReportEventDispatchException message failed, ret: %{public}d", ret);
     }
     bool hasDelayedTaskScheduled = false;
     if (hasDelayedTaskScheduled_.compare_exchange_strong(hasDelayedTaskScheduled, true)) {
