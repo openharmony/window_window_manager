@@ -112,6 +112,8 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
                 session->GetSessionProperty()->GetCallingSessionId())) {
             session->SetSessionBlackListWhenShow(
                 callingSession->isSkipSelfWhenShowOnVirtualScreen_.load(), panelSession);
+            session->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
+            panelSession->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
