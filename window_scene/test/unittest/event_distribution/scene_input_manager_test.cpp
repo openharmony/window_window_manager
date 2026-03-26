@@ -1070,7 +1070,7 @@ HWTEST_F(SceneInputManagerTest, SetRootSceneSessionCreated005, TestSize.Level1)
     SceneInputManager::GetInstance().rootSessionState_.store(RootSessionState::NOT_CREATED);
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
     ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
-    
+
     SceneInputManager::GetInstance().SetRootSceneSessionCreated(true);
     ASSERT_EQ(SceneInputManager::GetInstance().rootSessionState_.load(), RootSessionState::CREATED_FIRST_TIME);
 }

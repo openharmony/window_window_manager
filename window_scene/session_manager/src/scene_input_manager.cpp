@@ -951,6 +951,10 @@ void SceneInputManager::HandleEmptyDisplayGroup()
 
 void SceneInputManager::SetRootSceneSessionCreated(bool created)
 {
+    if (!created) {
+        return;
+    }
+
     RootSessionState rootSessionState = RootSessionState::NOT_CREATED;
     if (rootSessionState_.compare_exchange_strong(rootSessionState,
         RootSessionState::CREATED_FIRST_TIME)) {
