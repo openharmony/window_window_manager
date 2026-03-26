@@ -74,8 +74,8 @@ static std::mutex g_mutex;
 static int g_ctorCnt = 0;
 static int g_dtorCnt = 0;
 static int g_finalizerCnt = 0;
-JsWindow::JsWindow(const sptr<Window>& window)
-    : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>())
+JsWindow::JsWindow(const sptr<Window>& window, napi_env env)
+    : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>()), env_(env)
 {
     NotifyNativeWinDestroyFunc func = [this](const std::string& windowName) {
         {
@@ -1540,7 +1540,7 @@ napi_value JsWindow::OnShow(napi_env env, napi_callback_info info)
 napi_value JsWindow::OnShowWindow(napi_env env, napi_callback_info info)
 {
     wptr<Window> weakToken(windowToken_);
-    napi_value result = nullptr;
+    napi_value result = nullptr;->Resolve(
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -4220,21 +4220,48 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
         }
         if (requestedOrientation == Orientation::INVALID) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                    "[window][setPreferredOrientationWithResult]msg: Invalid parameter value range."));
+                    "[window][setPreferredOrientationWithResult]msg: Send event failed."));
             RemoveOrientationPromiseFromMap(promiseId);
             return;
         }
-        weakWindow->SetRequestedOrientation(requestedOrientation);
-        task->Resolve(env, NapiGetUndefined(env));
-        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u",
-            where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
-            static_cast<uint32_t>(requestedOrientation));
+        WMError ret = weakWindow->SetPreferredOrientationWithResult(requestedOrientation);
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u"
+            " result=%{public}d", where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+            static_cast<uint32_t>(requestedOrientation), ret);
+        auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
+        WmErrorCode code = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+        if (code != WMError::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, code,
+                "[window][setPreferredOrientationWithResult]msg: failed."));
+        }
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientation") != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientationWithResult") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setPreferredOrientationWithResult]msg: Send event failed."));
     }
     return result;
+}
+
+void JsWindow::NotifyOrientationResult(uint32_t promiseId, uint32_t action)
+{
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask;
+    {
+        std::lock_guard<std::mutex> lock(orientationResultMapMutex_);
+        auto it = orientationResultPromiseMap_.find(promiseId);
+        if (it == orientationResultPromiseMap_.end()) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "promise not found for id: %{public}u", promiseId);
+        }
+        napiAsyncTask = it->second;
+        orientationResultPromiseMap_.erase(it);
+    }
+    auto asyncTask = [task = napiAsyncTask, env = env_, action, where = __func__] {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s action=%{public}u", where, action);
+        task->Resolve(env, JsErrUtils::CreateJsError(env, code))
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "NotifyOrientationResult") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][NotifyOrientationResult]msg: Send event failed."));
+    }
 }
 
 napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
