@@ -163,7 +163,7 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property, bool& isolate) override;
     WMError UpdateSystemBarPropertyForPage(WindowType type, const SystemBarProperty& systemBarProperty,
-        const SystemBarPropertyFlag& systemBarPropertyFlag, bool isolate = false) override;
+        const SystemBarPropertyFlag& systemBarPropertyFlag) override;
 
     WMError SetIntentParam(const std::string& intentParam, const std::function<void()>& loadPageCallback,
         bool isColdStart) override;
