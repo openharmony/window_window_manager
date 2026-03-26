@@ -3537,7 +3537,7 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 }
 
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
-    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag, bool isolate)
+    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
     PartialSystemBarProperty prop = {
         .enable_ = systemBarProperty.enable_,

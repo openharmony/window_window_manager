@@ -1044,7 +1044,7 @@ WMError WindowImpl::UpdateSystemBarProperties(
 }
 
 WMError WindowImpl::UpdateSystemBarPropertyForPage(WindowType type,
-    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag, bool isolate)
+    const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
     return SetSystemBarProperty(type, systemBarProperty);
 }

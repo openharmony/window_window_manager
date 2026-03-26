@@ -235,8 +235,8 @@ public:
         SystemBarPropertyOwner owner) { return WMError::WM_OK; }
     virtual void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) {}
-    virtual WMError UpdateSystemBarPropertyForPage(WindowType type, const SystemBarProperty& systemBarProperty,
-        const SystemBarPropertyFlag& systemBarPropertyFlag)
+    virtual WMError UpdateSystemBarPropertyForPage(WindowType type,
+        const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
     {
         return WMError::WM_OK;
     }
