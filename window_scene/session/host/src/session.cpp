@@ -4415,18 +4415,46 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
 }
 
 /** @note @window.layout */
-void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
-    uint32_t minHeight, uint32_t maxFloatingWindowSize)
+void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
+    uint32_t minHeight, ScreenProperty& screenProperty)
 {
-    constexpr uint32_t marginOfError = 2; // The max vp bias for preventing giant logs.
-    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
-        curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
+
+    constexpr uint32_t MARGIN_OF_ERROR = 2; // The max vp bias for preventing giant logs.
+    constexpr float DEFAULT_DENSITY = 1.0f;
+
+    const auto& systemConfig = GetSystemConfig();
+    const uint32_t maxFloatingWindowSize = systemConfig.maxFloatingWindowSize_;
+
+    const bool isSizeBelowMin = (curWidth + MARGIN_OF_ERROR < minWidth) ||
+                                (curHeight + MARGIN_OF_ERROR < minHeight);
+    const bool isSizeAboveMax = (curWidth > maxFloatingWindowSize + MARGIN_OF_ERROR) ||
+                                (curHeight > maxFloatingWindowSize + MARGIN_OF_ERROR);
+
+    const WindowType winType = GetWindowType();
+    const bool isSystemWindowButNotDialog = WindowHelper::IsSystemWindowButNotDialog(winType);
+
+    const auto& bounds = screenProperty.GetBounds().rect_;
+    const uint32_t screenWidth = static_cast<uint32_t>(bounds.width_);
+    const uint32_t screenHeight = static_cast<uint32_t>(bounds.height_);
+
+    const float density = screenProperty.GetDensity();
+    const float safeDensity = (!NearZero(density)) ? density : DEFAULT_DENSITY;
+    const float screenWidthVp = screenWidth / safeDensity;
+    const float screenHeightVp = screenHeight / safeDensity;
+
+    const bool isSizeBelowScreen = (curWidth + MARGIN_OF_ERROR < screenWidthVp) ||
+                                   (curHeight + MARGIN_OF_ERROR < screenHeightVp);
+
+    const bool needReportException = isSizeAboveMax ||
+                                     (!isSystemWindowButNotDialog && isSizeBelowMin && isSizeBelowScreen);
+
+    if (needReportException) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
         std::ostringstream oss;
         oss << " RectCheck err size ";
         oss << " cur persistentId: " << GetPersistentId() << ",";
-        oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
+        oss << " windowType: " << static_cast<uint32_t>(winType) << ",";
         auto property = GetSessionProperty();
         if (property) {
             oss << " windowName: " << property->GetWindowName() << ",";
@@ -4436,10 +4464,11 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " curHeight: " << curHeight << ",";
         oss << " minWidth: " << minWidth << ",";
         oss << " minHeight: " << minHeight << ",";
+        oss << " screenWidth: " << screenWidth << ",";
+        oss << " screenHeight: " << screenHeight << ",";
         oss << " maxFloatingWindowSize: " << maxFloatingWindowSize << ",";
         oss << " sessionRect: " << GetSessionRect().ToString() << ";";
-        WindowInfoReporter::GetInstance().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
+        WindowInfoReporter::GetInstance().ReportWindowFrozen(WindowDFXHelperType::WINDOW_RECT_CHECK, oss.str());
     }
 }
 
@@ -4482,7 +4511,7 @@ void Session::RectCheckProcess()
             WindowInfoReporter::GetInstance().ReportWindowException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
         }
-        RectCheck(curWidth, curHeight);
+        RectCheck(curWidth, curHeight, screenProperty);
     }
 }
 
