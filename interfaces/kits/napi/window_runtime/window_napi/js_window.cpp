@@ -90,7 +90,17 @@ JsWindow::JsWindow(const sptr<Window>& window, napi_env env)
         windowToken_ = nullptr;
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
     };
+    NotifyOrientationResultFunc orientationResultFunc = [weakThis = wptr(this), where](uint32_t promiseId, uint32_t action) {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "Notify orientation result [%{public}u, %{public}u]", promiseId, action);
+        auto jsWindow = weakThis.promote();
+        if (!jsWindow) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "NotifyOrientationResultFunc jsSceneSession is null");
+            return;
+        }
+        jsWindow->NotifyOrientationResult(promiseId, action);
+    };
     windowToken_->RegisterWindowDestroyedListener(func);
+    windowToken_->RegisterNotifyOrientationResultFunc(orientationResultFunc);
     windowName_ = windowToken_->GetWindowName();
     TLOGI(WmsLogTag::WMS_LIFE, "window: %{public}s, ctorCnt: %{public}d", windowName_.c_str(), ++g_ctorCnt);
 }
