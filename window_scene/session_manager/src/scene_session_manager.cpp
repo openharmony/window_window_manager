@@ -19262,7 +19262,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         std::vector<sptr<SceneSession>> bundleInstanceSessions;
         SceneSessionManager::GetInstance().GetSceneSessionVectorByBundleInstance(
             bundleName, appIndex, appInstanceKey, bundleInstanceSessions);
-        vector<ISessionLifecycleListener::BundleInstanceLifecycleEventPayload> payloads;
+        vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
         listenerController_->ConstructBatchPayload(payloads, bundleInstanceSessions);
         listener->OnBatchLifecycleEvent(bundleInstanceSessions, payloads);
     }, __func__);

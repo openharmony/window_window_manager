@@ -29,10 +29,10 @@ public:
 
     void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override;
     void OnBatchLifecycleEvent(const vector<sptr<SceneSession>>& sessions, const std::vector<LifecycleEventPayload>& payloads) override;
+    void OnBundleInstanceLifecycleEvent(SessionState state, const LifecycleEventPayload& payload);
 
 private:
     void SendRequestCommon(SessionLifecycleEvent event, const LifecycleEventPayload& payload);
-    void SendRequestBundleInstance(SessionState state, const LifecycleEventPayload& payload);
     static inline BrokerDelegator<SessionLifecycleListenerProxy> delegator_;
 };
 } // namespace OHOS

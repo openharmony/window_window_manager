@@ -28,7 +28,17 @@ int SessionLifecycleListenerStub::OnRemoteRequest(
         TLOGE(WmsLogTag::WMS_LIFE, "local descriptor not equal to remote.");
         return ERR_INVALID_STATE;
     }
-    return HandleOnLifecycleEvent(data, reply);
+    switch (code)
+    {
+    case static_cast<uint32_t>(ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_LIFECYCLE_EVENT):
+        return HandleOnLifecycleEvent(data, reply);
+    
+    case static_cast<uint32_t>(ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_BUNDLE_INSTANCE_LIFECYCLE_EVENT):
+        return HandleOnBundleInstanceLifecycleEvent(data, reply);
+    default:
+        WLOGFE("Failed to handle request, code: %{public}u", code);
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
 }
 
 int SessionLifecycleListenerStub::HandleOnLifecycleEvent(MessageParcel& data, MessageParcel& reply)
@@ -50,6 +60,28 @@ int SessionLifecycleListenerStub::HandleOnLifecycleEvent(MessageParcel& data, Me
         return ERR_INVALID_DATA;
     }
     OnLifecycleEvent(static_cast<SessionLifecycleEvent>(event), *payload);
+    return 0;
+}
+
+int SessionLifecycleListenerStub::HandleOnBundleInstanceLifecycleEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    int32_t sessionState = 0;
+    if (!data.ReadInt32(sessionState)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read session state");
+        return ERR_INVALID_DATA;
+    }
+    if (sessionState < static_cast<int32_t>(SessionState::STATE_DISCONNECTED) ||
+        sessionState >= static_cast<int32_t>(SessionState::STATE_END)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid session state");
+        return ERR_INVALID_DATA;
+    }
+    std::unique_ptr<LifecycleEventPayload> payload(data.ReadParcelable<LifecycleEventPayload>());
+    if (!payload) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid payload");
+        return ERR_INVALID_DATA;
+    }
+    OnBundleInstanceLifecycleEvent(static_cast<SessionState>(sessionState), *payload);
     return 0;
 }
 }

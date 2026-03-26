@@ -28,6 +28,7 @@ public:
 
     enum class ISessionLifecycleListenerMessage : uint32_t {
         TRANS_ON_LIFECYCLE_EVENT = 0,
+        TRANS_ON_BUNDLE_INSTANCE_LIFECYCLE_EVENT
     };
 
     enum SessionLifecycleEvent {
@@ -53,6 +54,7 @@ public:
                    parcel.WriteString(abilityName_) &&
                    parcel.WriteInt32(appIndex_) &&
                    parcel.WriteInt32(persistentId_) &&
+                   parcel.WriteString(appInstanceKey_) &&
                    parcel.WriteUint32(resultCode_) &&
                    parcel.WriteUint64(fromScreenId_) &&
                    parcel.WriteUint64(toScreenId_) &&
@@ -63,56 +65,6 @@ public:
         static LifecycleEventPayload* Unmarshalling(Parcel& parcel)
         {
             auto payload = std::make_unique<LifecycleEventPayload>();
-            if (!parcel.ReadString(payload->bundleName_) ||
-                !parcel.ReadString(payload->moduleName_) ||
-                !parcel.ReadString(payload->abilityName_) ||
-                !parcel.ReadInt32(payload->appIndex_) ||
-                !parcel.ReadInt32(payload->persistentId_) ||
-                !parcel.ReadUint32(payload->resultCode_) ||
-                !parcel.ReadUint64(payload->fromScreenId_) ||
-                !parcel.ReadUint64(payload->toScreenId_) ||
-                !parcel.ReadUint64(payload->screenId_)) {
-                return nullptr;
-            }
-            uint32_t reason = 0;
-            if (!parcel.ReadUint32(reason) || reason >= static_cast<uint32_t>(LifeCycleChangeReason::REASON_END)) {
-                return nullptr;
-            }
-            payload->lifeCycleChangeReason_ = static_cast<LifeCycleChangeReason>(reason);
-            return payload.release();
-        }
-
-        std::string bundleName_;
-        std::string moduleName_;
-        std::string abilityName_;
-        int32_t appIndex_ = 0;
-        int32_t persistentId_ = 0;
-        uint32_t resultCode_ = 0;
-        uint64_t fromScreenId_ = 0;
-        uint64_t toScreenId_ = 0;
-        uint64_t screenId_ = 0;
-        LifeCycleChangeReason lifeCycleChangeReason_ = LifeCycleChangeReason::DEFAULT;
-    };
-
-    struct BundleInstanceLifecycleEventPayload : public Parcelable {
-        bool Marshalling(Parcel& parcel) const override
-        {
-            return parcel.WriteString(bundleName_) &&
-                   parcel.WriteString(moduleName_) &&
-                   parcel.WriteString(abilityName_) &&
-                   parcel.WriteInt32(appIndex_) &&
-                   parcel.WriteInt32(persistentId_) &&
-                   parcel.WriteString(appInstanceKey_) &&
-                   parcel.WriteUint32(resultCode_) &&
-                   parcel.WriteUint64(fromScreenId_) &&
-                   parcel.WriteUint64(toScreenId_) &&
-                   parcel.WriteUint64(screenId_) &&
-                   parcel.WriteUint32(static_cast<uint32_t>(lifeCycleChangeReason_));
-        }
-
-        static BundleInstanceLifecycleEventPayload* Unmarshalling(Parcel& parcel)
-        {
-            auto payload = std::make_unique<BundleInstanceLifecycleEventPayload>();
             if (!parcel.ReadString(payload->bundleName_) ||
                 !parcel.ReadString(payload->moduleName_) ||
                 !parcel.ReadString(payload->abilityName_) ||
