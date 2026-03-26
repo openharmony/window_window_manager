@@ -204,6 +204,7 @@ public:
     float ConvertRotationToFloat(Rotation sensorRotation);
 
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
+    void SetPhyBounds(const RectF& rect);
     void SetExtendProperty(RRect bounds, bool isCurrentOffScreenRendering);
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
