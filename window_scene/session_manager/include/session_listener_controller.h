@@ -139,6 +139,8 @@ private:
     void ConstructPayload(ISessionLifecycleListener::LifecycleEventPayload& payload, const SessionInfo& sessionInfo,
         const uint32_t resultCode = 0, const uint64_t fromScreenId = 0, const uint64_t toScreenId = 0,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
+    void ConstructBatchPayload(std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
+        const std::vector<SceneSession>& sessions);
     void OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote);
     void RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target);
 

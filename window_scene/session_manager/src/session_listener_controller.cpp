@@ -264,6 +264,16 @@ void SessionListenerController::ConstructPayload(ISessionLifecycleListener::Life
     payload.lifeCycleChangeReason_ = reason;
 }
 
+void SessionListenerController::ConstructBatchPayload(std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
+    const std::vector<SceneSession>& sessions)
+{
+    for (const auto& session : sessions) {
+        ISessionLifecycleListener::LifecycleEventPayload payload;
+        ConstructPayload(payload, session.GetSessionInfo());
+        payloads.emplace_back(std::move(payload));
+    }
+}
+
 WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
     const std::vector<int32_t>& persistentIdList)
 {
@@ -489,9 +499,9 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
                 bundleName.c_str(), persistentId, event, payload.lifeCycleChangeReason_);
             controller->NotifyListeners(controller->listenerMapById_, persistentId, event, payload);
             controller->NotifyListeners(controller->listenerMapByBundle_, bundleName, event, payload);
-            BundleInstanceFilterKey bundleInstanceFilterKey = { bundleName, appIndex, appInstanceKey };
-            controller->NotifyListeners(controller->listenerMapByBundleInstance_, bundleInstanceFilterKey,
-                event, payload);
+            // BundleInstanceFilterKey bundleInstanceFilterKey = { bundleName, appIndex, appInstanceKey };
+            // controller->NotifyListeners(controller->listenerMapByBundleInstance_, bundleInstanceFilterKey,
+            //     event, payload);
             for (const auto& listener : controller->listenersOfAllBundles_) {
                 if (listener != nullptr) {
                     listener->OnLifecycleEvent(event, payload);
@@ -544,13 +554,11 @@ void SessionListenerController::NotifySessionTransferToTargetScreenEvent(const S
         return;
     }
     std::string bundleName = sessionInfo.bundleName_;
-    int32_t appIndex = sessionInfo.appIndex_;
-    std::string appInstanceKey = sessionInfo.appInstanceKey_;
     auto event = ISessionLifecycleListener::SessionLifecycleEvent::TRANSFER_TO_TARGET_SCREEN;
     ISessionLifecycleListener::LifecycleEventPayload payload;
     ConstructPayload(payload, sessionInfo, resultCode, fromScreenId, toScreenId, reason);
     taskScheduler_->PostAsyncTask(
-        [weakThis = weak_from_this(), event, payload, bundleName, appIndex, appInstanceKey, persistentId,
+        [weakThis = weak_from_this(), event, payload, bundleName, persistentId,
             where = __func__] {
             auto controller = weakThis.lock();
             if (controller == nullptr) {
@@ -563,9 +571,6 @@ void SessionListenerController::NotifySessionTransferToTargetScreenEvent(const S
                 bundleName.c_str(), persistentId, event, payload.lifeCycleChangeReason_);
             controller->NotifyListeners(controller->listenerMapById_, persistentId, event, payload);
             controller->NotifyListeners(controller->listenerMapByBundle_, bundleName, event, payload);
-            BundleInstanceFilterKey bundleInstanceFilterKey = { bundleName, appIndex, appInstanceKey };
-            controller->NotifyListeners(controller->listenerMapByBundleInstance_, bundleInstanceFilterKey,
-                event, payload);
             for (const auto& listener : controller->listenersOfAllBundles_) {
                 if (listener != nullptr) {
                     listener->OnLifecycleEvent(event, payload);
@@ -588,6 +593,13 @@ bool SessionListenerController::IsListenerMapByBundleSizeReachLimit(bool isBundl
             return listenersOfAllBundles_.size() >= MAX_LIFECYCLE_LISTENER_LIMIT;
         }
         return listenerMapByBundle_.size() >= MAX_LISTEN_TARGET_LIMIT;
+    }, __func__);
+}
+
+bool SessionListenerController::IsListenerMapByBundleInstanceSizeReachLimit() const
+{
+    return taskScheduler_->PostSyncTask([this] {
+        return listenerMapByBundleInstance_.size() >= MAX_LISTEN_TARGET_LIMIT;
     }, __func__);
 }
 } // namespace Rosen

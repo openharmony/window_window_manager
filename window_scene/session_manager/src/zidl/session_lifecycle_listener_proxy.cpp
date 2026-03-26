@@ -53,4 +53,44 @@ void SessionLifecycleListenerProxy::SendRequestCommon(
         return;
     }
 }
+
+void SessionLifecycleListenerProxy::OnBatchLifecycleEvent(const vector<sptr<SceneSession>>& sessions, const std::vector<LifecycleEventPayload>& payloads)
+{
+    for (size_t i = 0; i < sessions.size() && i < payloads.size(); ++i) {
+        const auto& sessionState = sessions[i]->state_;
+        const auto& payload = payloads[i];
+        SendRequestBundleInstance(sessionState, payload);
+    }
+}
+
+void SessionLifecycleListenerProxy::SendRequestBundleInstance(
+    SessionState state, const LifecycleEventPayload& payload)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (!data.WriteInterfaceToken(ISessionLifecycleListener::GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interface token failed.");
+        return;
+    }
+    if (!data.WriteInt32(state)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write state failed.");
+        return;
+    }
+    if (!data.WriteParcelable(&payload)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write payload failed");
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(
+        ISessionLifecycleListenerMessage::TRANS_ON_BUNDLE_INSTANCE_LIFECYCLE_EVENT), data, reply, option) != NO_ERROR) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
+        return;
+    }
+}
 }

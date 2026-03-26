@@ -19252,7 +19252,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (listenerController_->IsListenerMapByBundleSizeReachLimit(bundleNameList.empty())) {
+    if (listenerController_->IsListenerMapByBundleInstanceSizeReachLimit()) {
         TLOGW(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
         return WMError::WM_ERROR_NO_MEM;
     }
@@ -19262,14 +19262,9 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         std::vector<sptr<SceneSession>> bundleInstanceSessions;
         SceneSessionManager::GetInstance().GetSceneSessionVectorByBundleInstance(
             bundleName, appIndex, appInstanceKey, bundleInstanceSessions);
-        for (const auto& session : bundleInstanceSessions) {
-            if (session == nullptr) {
-                continue;
-            }
-            ISessionLifecycleListener::LifecycleEventPayload payload;
-            listenerController_->ConstructPayload(payload, session->GetSessionInfo(), 0, 0, 0, LifeCycleChangeReason::DEFAULT);
-            listener->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
-        }
+        vector<ISessionLifecycleListener::BundleInstanceLifecycleEventPayload> payloads;
+        listenerController_->ConstructBatchPayload(payloads, bundleInstanceSessions);
+        listener->OnBatchLifecycleEvent(bundleInstanceSessions, payloads);
     }, __func__);
     return WMError::WM_OK;
 }
