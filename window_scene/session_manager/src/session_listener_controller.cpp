@@ -476,8 +476,6 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
     const SessionInfo& sessionInfo, LifeCycleChangeReason reason)
 {
     std::string bundleName = sessionInfo.bundleName_;
-    int32_t appIndex = sessionInfo.appIndex_;
-    std::string appInstanceKey = sessionInfo.appInstanceKey_;
     int32_t persistentId = sessionInfo.persistentId_;
     if (persistentId <= INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_LIFE, "invalid persistentId!");
@@ -487,7 +485,7 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
     ConstructPayload(payload, sessionInfo, 0, 0, 0, reason);
     NotifyMissionEvent(event, persistentId);
     taskScheduler_->PostAsyncTask(
-        [weakThis = weak_from_this(), event, payload, bundleName, appIndex, appInstanceKey, persistentId,
+        [weakThis = weak_from_this(), event, payload, bundleName, persistentId,
             where = __func__] {
             auto controller = weakThis.lock();
             if (controller == nullptr) {
@@ -499,14 +497,40 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
                 bundleName.c_str(), persistentId, event, payload.lifeCycleChangeReason_);
             controller->NotifyListeners(controller->listenerMapById_, persistentId, event, payload);
             controller->NotifyListeners(controller->listenerMapByBundle_, bundleName, event, payload);
-            // BundleInstanceFilterKey bundleInstanceFilterKey = { bundleName, appIndex, appInstanceKey };
-            // controller->NotifyListeners(controller->listenerMapByBundleInstance_, bundleInstanceFilterKey,
-            //     event, payload);
             for (const auto& listener : controller->listenersOfAllBundles_) {
                 if (listener != nullptr) {
                     listener->OnLifecycleEvent(event, payload);
                 }
             }
+        }, __func__);
+}
+
+void SessionListenerController::NotifyBundleInstanceLifecycleEvent(SessionState state,
+    const SessionInfo& sessionInfo, LifeCycleChangeReason reason)
+{
+    std::string bundleName = sessionInfo.bundleName_;
+    int32_t appIndex = sessionInfo.appIndex_;
+    std::string appInstanceKey = sessionInfo.appInstanceKey_;
+    int32_t persistentId = sessionInfo.persistentId_;
+    if (persistentId <= INVALID_SESSION_ID) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid persistentId!");
+        return;
+    }
+    ISessionLifecycleListener::LifecycleEventPayload payload;
+    ConstructBundleInstancePayload(payload, sessionInfo, 0, 0, 0, reason);
+    taskScheduler_->PostAsyncTask(
+        [weakThis = weak_from_this(), state, payload, bundleName, appIndex, appInstanceKey, persistentId,
+            where = __func__] {
+            auto controller = weakThis.lock();
+            if (controller == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "controller is null.");
+                return;
+            }
+            TLOGI(WmsLogTag::WMS_LIFE,
+                "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d, reason: %{public}u",
+                bundleName.c_str(), persistentId, state, payload.lifeCycleChangeReason_);
+            controller->NotifyListeners(controller->listenerMapByBundleInstance_, BundleInstanceFilterKey{ bundleName,
+                appIndex, appInstanceKey }, state, payload);
         }, __func__);
 }
 
@@ -521,6 +545,22 @@ void SessionListenerController::NotifyListeners(const MapType& listenerMap, cons
         for (const auto& listener : listeners) {
             if (listener != nullptr) {
                 listener->OnLifecycleEvent(event, payload);
+            }
+        }
+    }
+}
+
+template <typename KeyType, typename MapType>
+void SessionListenerController::NotifyListeners(const MapType& listenerMap, const KeyType& key,
+    const ISessionLifecycleListener::SessionState state,
+    const ISessionLifecycleListener::LifecycleEventPayload& payload)
+{
+    auto it = listenerMap.find(key);
+    if (it != listenerMap.end()) {
+        const auto& listeners = it->second;
+        for (const auto& listener : listeners) {
+            if (listener != nullptr) {
+                listener->OnBundleInstanceLifecycleEvent(state, payload);
             }
         }
     }
@@ -558,8 +598,7 @@ void SessionListenerController::NotifySessionTransferToTargetScreenEvent(const S
     ISessionLifecycleListener::LifecycleEventPayload payload;
     ConstructPayload(payload, sessionInfo, resultCode, fromScreenId, toScreenId, reason);
     taskScheduler_->PostAsyncTask(
-        [weakThis = weak_from_this(), event, payload, bundleName, persistentId,
-            where = __func__] {
+        [weakThis = weak_from_this(), event, payload, bundleName, persistentId, where = __func__] {
             auto controller = weakThis.lock();
             if (controller == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "controller is null.");
