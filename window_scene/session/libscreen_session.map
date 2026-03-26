@@ -215,6 +215,7 @@
             OHOS::Rosen::ScreenSession::SetDefaultDeviceRotationOffset*;
             OHOS::Rosen::ScreenSession::SetDensityInCurResolution*;
             OHOS::Rosen::ScreenSession::SetDisplayBoundary*;
+            OHOS::Rosen::ScreenSession::SetPhyBounds*;
             OHOS::Rosen::ScreenSession::SetDisplayGroupId*;
             OHOS::Rosen::ScreenSession::SetDisplayNode*;
             OHOS::Rosen::ScreenSession::SetDisplayNodeScreenId*;
