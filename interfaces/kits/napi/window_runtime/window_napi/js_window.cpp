@@ -3518,12 +3518,11 @@ napi_value JsWindow::OnSetSpecificSystemBarEnabled(napi_env env, napi_callback_i
         }
         auto property = window->GetSystemBarPropertyByType(systemBarType);
         auto isSetAnimation = argc > ARG_COUNT_TWO;
-        bool isolate = true;
         window->UpdateSpecificSystemBarEnabled(systemBarEnable,
-            isSetAnimation ? systemBarEnableAnimation : property.enableAnimation_, property, isolate);
+            isSetAnimation ? systemBarEnableAnimation : property.enableAnimation_, property);
         SystemBarPropertyFlag propertyFlag = { true, false, false, isSetAnimation };
         auto errCode = WM_JS_TO_ERROR_CODE_MAP.at(
-            window->UpdateSystemBarPropertyForPage(systemBarType, property, propertyFlag, isolate));
+            window->UpdateSystemBarPropertyForPage(systemBarType, property, propertyFlag));
         if (errCode == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {

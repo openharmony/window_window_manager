@@ -836,13 +836,12 @@ WMError WindowSceneSessionImpl::SetPcAppInpadSpecificSystemBarInvisible()
     if (WindowHelper::IsMainWindow(GetType()) && IsPadAndNotFreeMultiWindowCompatibleMode() &&
         property_->GetPcAppInpadSpecificSystemBarInvisible()) {
         SystemBarProperty statusProperty = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-        bool isolate = true;
-        UpdateSpecificSystemBarEnabled(false, false, statusProperty, isolate);
+        UpdateSpecificSystemBarEnabled(false, false, statusProperty);
         SetSpecificBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusProperty);
 
         SystemBarProperty NavigationIndicatorPorperty =
             GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
-        UpdateSpecificSystemBarEnabled(false, false, NavigationIndicatorPorperty, isolate);
+        UpdateSpecificSystemBarEnabled(false, false, NavigationIndicatorPorperty);
         SetSpecificBarProperty(WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, NavigationIndicatorPorperty);
         return WMError::WM_OK;
     }
