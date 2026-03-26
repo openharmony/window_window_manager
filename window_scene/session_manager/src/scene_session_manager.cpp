@@ -2070,7 +2070,7 @@ void SceneSessionManager::GetSceneSessionVectorByBundleInstance(const std::strin
         if (!sceneSession) {
             continue;
         }
-        if (sceneSession && sceneSession->GetSessionInfo().bundleName_ != bundleName &&
+        if (sceneSession->GetSessionInfo().bundleName_ != bundleName ||
             sceneSession->GetSessionInfo().appIndex_ != appIndex) {
             continue;
         }
