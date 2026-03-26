@@ -2232,13 +2232,13 @@ void JsSceneSession::ProcessRequestedOrientationChange()
         return;
     }
     session->RegisterRequestedOrientationChangeCallback(
-        [weakThis = wptr(this)](uint32_t orientation, bool needAnimation) {
+        [weakThis = wptr(this)](uint32_t orientation, bool needAnimation, uint32_t promiseId) {
             auto jsSceneSession = weakThis.promote();
             if (!jsSceneSession) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
                 return;
             }
-            jsSceneSession->OnReuqestedOrientationChange(orientation, needAnimation);
+            jsSceneSession->OnReuqestedOrientationChange(orientation, needAnimation, promiseId);
         });
 }
 
@@ -5738,11 +5738,11 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
     taskScheduler_->PostMainThreadTask(task, "OnShowWhenLocked:" +std::to_string(showWhenLocked));
 }
 
-void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation)
+void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation, uint32_t promiseId)
 {
     TLOGNI(WmsLogTag::WMS_ROTATION, "orientation=%{public}u, needAnimation=%{public}d", orientation, needAnimation);
     auto task =
-    [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation, needAnimation, env = env_] {
+    [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation, needAnimation, promiseId, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_ROTATION,
@@ -5757,7 +5757,8 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         }
         napi_value rotationValue = CreateJsValue(env, rotation);
         napi_value animationValue = CreateJsValue(env, needAnimation);
-        napi_value argv[] = { rotationValue, animationValue };
+        napi_value promiseId = CreateJsValue(env, promiseId);
+        napi_value argv[] = { rotationValue, animationValue, promiseId };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         TLOGI(WmsLogTag::DEFAULT, "%{public}u", rotation);
     };

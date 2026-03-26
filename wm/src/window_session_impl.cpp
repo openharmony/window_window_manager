@@ -3370,6 +3370,38 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
+WMError WindowSessionImpl::SetPreferredOrientationWithResult(Orientation orientation, uint32_t promiseId, bool needAnimation)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetRequestedOrientation");
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
+        GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
+    if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+        return WMError::WM_OK;
+    }
+    if (property_->IsSupportRotateFullScreen()) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "compatible request orientation %{public}u", orientation);
+        property_->SetIsLayoutFullScreen(IsHorizontalOrientation(orientation));
+    }
+    if (needAnimation) {
+        NotifyPreferredOrientationChange(orientation);
+        SetUserRequestedOrientation(orientation);
+    }
+    if (orientation == Orientation::INVALID) {
+        Orientation requestedOrientation = ConvertInvalidOrientation();
+        property_->SetRequestedOrientation(requestedOrientation, needAnimation);
+    } else {
+        property_->SetRequestedOrientation(orientation, needAnimation);
+        property_->SetIsSpecificSessionRequestOrientation(true);
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+}
+
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetRequestedOrientation");
