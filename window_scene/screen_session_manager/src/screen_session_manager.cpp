@@ -14082,7 +14082,7 @@ void ScreenSessionManager::RegisterSettingExtendScreenIndepDpiObserver()
 
 void ScreenSessionManager::SetExtendScreenDpi()
 {
-    if (SUPPORT_COMPATIBLE_MODE && !g_offScreenRenderValue) {
+    if (!g_offScreenRenderValue) {
         TLOGNFI(WmsLogTag::DMS, "current is independent dpi mode.");
         return;
     }
@@ -14102,7 +14102,7 @@ void ScreenSessionManager::SetExtendScreenDpi()
 
 void ScreenSessionManager::SetExtendScreenIndepDpi()
 {
-    if (SUPPORT_COMPATIBLE_MODE && g_offScreenRenderValue) {
+    if (g_offScreenRenderValue) {
         TLOGNFI(WmsLogTag::DMS, "current is not independent dpi mode.");
         return;
     }
