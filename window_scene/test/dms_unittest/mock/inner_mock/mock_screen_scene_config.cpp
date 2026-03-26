@@ -341,6 +341,11 @@ bool ScreenSceneConfig::IsConcurrentUser()
 }
 // LCOV_EXCL_STOP
 
+void ScreenSceneConfig::SetRogResolution(const RogResolution& rogResolution)
+{
+    rogResolution_ = rogResolution;
+}
+
 uint32_t ScreenSceneConfig::GetNumberConfigValue(const std::string& name, const uint32_t& default_value)
 {
     if (intNumbersConfig_.count(name) != 0) {
