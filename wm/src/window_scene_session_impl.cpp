@@ -3691,7 +3691,7 @@ WMError WindowSceneSessionImpl::SetOwnSystemBarProperty(WindowType type, const P
         }
         auto& ownPropList = ownSystemBarPropertyMap_[type];
         auto it = std::find_if(ownPropList.begin(), ownPropList.end(), [owner, &prop](OwnSystemBarPropertyPair& pair) {
-            return pair.first == owner && pair.second.flag_ == prop.flag_ && pair.second.isolate_ == prop.isolate_;
+            return pair.first == owner && pair.second.flag_ == prop.flag_;
         });
         if (it != ownPropList.end()) {
             ownPropList.erase(it);
