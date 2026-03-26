@@ -924,20 +924,18 @@ void SceneInputManager::HandleEmptyDisplayGroup()
 {
     const bool delayTimeDisabled = (DELAY_TIME_DISABLED == "1");
     const int32_t delayReportTime = delayTimeDisabled ? 0 : DELAY_REPORT_TIME;
-    auto currentState_ = rootSessionState_.load();
-    std::ostringstream oss;
-    oss << "displayInfos flush to MMI is empty!";
-    if (currentState_ == RootSessionState::CREATED_SUBSEQUENT) {
+    auto currentState = rootSessionState_.load();
+    if (currentState == RootSessionState::CREATED_SUBSEQUENT) {
         WindowInfoReporter::GetInstance().ReportWindowFrozen(
             WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION,
-            oss.str()
+            "displayInfos flush to MMI is empty!"
         );
         return;
     }
     bool hasDelayedTaskScheduled = false;
     if (hasDelayedTaskScheduled_.compare_exchange_strong(hasDelayedTaskScheduled, true)) {
-        currentState_ = rootSessionState_.load();
-        if (currentState_ == RootSessionState::CREATED_FIRST_TIME) {
+        currentState = rootSessionState_.load();
+        if (currentState == RootSessionState::CREATED_FIRST_TIME) {
             auto task = [this]() {
                 rootSessionState_.store(RootSessionState::CREATED_SUBSEQUENT);
                 hasDelayedTaskScheduled_.store(false);
