@@ -1085,6 +1085,11 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(ScreenId screenId, bool& immer
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
+    return GetDisplayInfo(displayId, true);
+}
+
+sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId, bool isHookRequired)
+{
     TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "screen id is invalid");
@@ -1093,7 +1098,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     INIT_PROXY_CHECK_RETURN(nullptr);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetDisplayInfoById(displayId);
+        return screenSessionManagerServiceProxy_->GetDisplayInfoById(displayId, isHookRequired);
     }
 
     sptr<DisplayInfo> displayInfo;

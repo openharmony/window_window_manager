@@ -247,6 +247,15 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
 
     /**
+     * @brief Get the display object by id.
+     *
+     * @param displayId Id of the target display.
+     * @param isHookRequired Whether to call HookDisplayInfoByUid.
+     * @return Default display object.
+     */
+    sptr<Display> GetDisplayById(DisplayId displayId, bool isHookRequired);
+
+    /**
      * @brief Get the display object by id.Only for PC.
      *
      * @param displayId Id of the target display.
