@@ -169,7 +169,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
-            auto info = GetDisplayInfoById(displayId);
+            bool isHookRequired = data.ReadBool();
+            auto info = GetDisplayInfoById(displayId, isHookRequired);
             reply.WriteParcelable(info);
             break;
         }

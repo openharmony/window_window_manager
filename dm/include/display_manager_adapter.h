@@ -81,6 +81,7 @@ public:
     virtual void NotifyDisplayEvent(DisplayEvent event);
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId, bool isHookRequired);
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area);
