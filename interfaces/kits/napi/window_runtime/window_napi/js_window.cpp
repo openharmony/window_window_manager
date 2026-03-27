@@ -4095,7 +4095,7 @@ napi_value JsWindow::OnIsWindowShowingSync(napi_env env, napi_callback_info info
     return CreateJsValue(env, state);
 }
 
-OrientationParams JsWindow::ValidateOrientationParams(napi_env env, size_t argc, napi_value* argv, const std::string* funcName)
+OrientationParams JsWindow::ValidateOrientationParams(napi_env env, size_t argc, napi_value* argv, const std::string& funcName)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
     Orientation requestedOrientation = Orientation::UNSPECIFIED;
@@ -4135,7 +4135,14 @@ OrientationParams JsWindow::ValidateOrientationParams(napi_env env, size_t argc,
     return params;
 }
 
-void JsWindow::RemoveOrientationPromiseFromMap(unint32_t promiseId)
+void JsWindow::AddOrientationPromiseToMap(uint32_t promiseId)
+{
+    uint32_t promiseId = orientationResultPromiseIdGenerator_.fetch_add(1);
+    std::lock_guard<std::mutex> lock(orientationResultMapMutex_);
+    orientationResultPromiseMap_[promiseId] = napiAsyncTask;
+}
+
+void JsWindow::RemoveOrientationPromiseFromMap(uint32_t promiseId)
 {
     std::lock_guard<std::mutex> lock(orientationResultMapMutex_);
     orientationResultPromiseMap_.erase(promiseId);
@@ -4147,7 +4154,7 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientation");
-    WMErrorCode errCode = params.errCode;
+    WmErrorCode errCode = params.errCode;
     Orientation requestedOrientation = params.requestedOrientation;
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
@@ -4193,9 +4200,9 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    WMErrorCode errCode = params.errCode;
-    Orientation requestedOrientation = params.requestedOrientation;
     OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientationWithResult");
+    WmErrorCode errCode = params.errCode;
+    Orientation requestedOrientation = params.requestedOrientation;
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
     }
@@ -4208,7 +4215,7 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
         std::lock_guard<std::mutex> lock(orientationResultMapMutex_);
         orientationResultPromiseMap_[promiseId] = napiAsyncTask;
     }
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, requestedOrientation, env,
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, errMsgPrefix, requestedOrientation, env,
             promiseId, task = napiAsyncTask, where = __func__] {
         auto weakWindow = windowToken.promote();
         if (weakWindow == nullptr) {
@@ -4223,13 +4230,14 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
             RemoveOrientationPromiseFromMap(promiseId);
             return;
         }
-        WMError ret = weakWindow->SetPreferredOrientationWithResult(requestedOrientation);
+        WMError ret = weakWindow->SetPreferredOrientationWithResult(requestedOrientation, promiseId);
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u"
             " result=%{public}d", where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
             static_cast<uint32_t>(requestedOrientation), ret);
         WmErrorCode errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         if (errCode != WmErrorCode::WM_OK) {
-            task->Reject(env, JsErrUtils::CreateJsError( env, code, errMsgPrefix + "failed."));
+            task->Reject(env, JsErrUtils::CreateJsError( env, errCode, errMsgPrefix + "failed."));
+            RemoveOrientationPromiseFromMap(promiseId);
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientationWithResult") != napi_status::napi_ok) {
@@ -4254,7 +4262,7 @@ void JsWindow::NotifyOrientationResult(uint32_t promiseId, uint32_t action)
     }
     auto asyncTask = [task = napiAsyncTask, env = env_, action, where = __func__] {
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s action=%{public}u", where, action);
-        task->Resolve(env, CreateJsValue(env, action))
+        task->Resolve(env, CreateJsValue(env, action));
     };
     if (napi_send_event(env_, asyncTask, napi_eprio_high, "NotifyOrientationResult") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env_, JsErrUtils::CreateJsError(env_, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,

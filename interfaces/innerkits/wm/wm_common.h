@@ -3063,7 +3063,7 @@ struct OrientationParams {
     WmErrorCode errCode;
     Orientation requestedOrientation;
     std::string errMsg;
-}
+};
 
 /*
  * @brief Enumerates rotation change type.
