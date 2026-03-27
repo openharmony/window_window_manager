@@ -3059,6 +3059,12 @@ struct OrientationInfo {
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
 };
 
+struct OrientationParams {
+    WmErrorCode errCode;
+    Orientation requestedOrientation;
+    std::string errMsg;
+}
+
 /*
  * @brief Enumerates rotation change type.
  */

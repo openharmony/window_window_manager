@@ -63,17 +63,14 @@ constexpr double MAX_GRAY_SCALE = 1.0;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
 }
 
-struct OrientationParams {
-    WmErrorCode errCode;
-    Orientation requestedOrientation;
-    std::string errMsg;
-}
-
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
 static std::mutex g_mutex;
 static int g_ctorCnt = 0;
 static int g_dtorCnt = 0;
 static int g_finalizerCnt = 0;
+std::atomic<uint32_t> orientationResultPromiseIdGenerator_ = 0;
+std::unordered_map<uint32_t, std::shared_ptr<AbilityRuntime::NapiAsyncTask>>orientationResultPromiseMap_;
+std::mutex orientationResultMapMutex_;
 JsWindow::JsWindow(const sptr<Window>& window, napi_env env)
     : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>()), env_(env)
 {
@@ -90,14 +87,9 @@ JsWindow::JsWindow(const sptr<Window>& window, napi_env env)
         windowToken_ = nullptr;
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
     };
-    NotifyOrientationResultFunc orientationResultFunc = [weakThis = wptr(this), where](uint32_t promiseId, uint32_t action) {
+    NotifyOrientationResultFunc orientationResultFunc = [this](uint32_t promiseId, uint32_t action) {
         TLOGNI(WmsLogTag::WMS_ROTATION, "Notify orientation result [%{public}u, %{public}u]", promiseId, action);
-        auto jsWindow = weakThis.promote();
-        if (!jsWindow) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "NotifyOrientationResultFunc jsSceneSession is null");
-            return;
-        }
-        jsWindow->NotifyOrientationResult(promiseId, action);
+        this->NotifyOrientationResult(promiseId, action);
     };
     windowToken_->RegisterWindowDestroyedListener(func);
     windowToken_->RegisterNotifyOrientationResultFunc(orientationResultFunc);
@@ -4155,14 +4147,17 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientation");
+    WMErrorCode errCode = params.errCode;
+    Orientation requestedOrientation = params.requestedOrientation;
     if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsg);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
     }
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, requestedOrientation, env, task, where = __func__] {
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, requestedOrientation, env,
+            task = napiAsyncTask, where = __func__] {
         if (errCode != WmErrorCode::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: invalid param", where);
@@ -4171,7 +4166,7 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
         auto weakWindow = windowToken.promote();
         if (weakWindow == nullptr) {
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                errMsgPrefix + "Window is nullptr."));
+                "[window][setPreferredOrientation]msg: Window is nullptr."));
             return;
         }
         if (requestedOrientation == Orientation::INVALID) {
@@ -4198,6 +4193,8 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    WMErrorCode errCode = params.errCode;
+    Orientation requestedOrientation = params.requestedOrientation;
     OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientationWithResult");
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
@@ -4237,7 +4234,7 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientationWithResult") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setPreferredOrientationWithResult]msg: Send event failed."));
+            errMsgPrefix + "Send event failed."));
     }
     return result;
 }
@@ -4257,10 +4254,10 @@ void JsWindow::NotifyOrientationResult(uint32_t promiseId, uint32_t action)
     }
     auto asyncTask = [task = napiAsyncTask, env = env_, action, where = __func__] {
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s action=%{public}u", where, action);
-        task->Resolve(env, JsErrUtils::CreateJsError(env, code))
+        task->Resolve(env, CreateJsValue(env, action))
     };
-    if (napi_send_event(env, asyncTask, napi_eprio_high, "NotifyOrientationResult") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+    if (napi_send_event(env_, asyncTask, napi_eprio_high, "NotifyOrientationResult") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env_, JsErrUtils::CreateJsError(env_, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][NotifyOrientationResult]msg: Send event failed."));
     }
 }
@@ -7626,7 +7623,7 @@ __attribute__((no_sanitize("cfi")))
     napi_create_object(env, &objValue);
 
     WLOGI("CreateJsWindow %{public}s", windowName.c_str());
-    std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window);
+    std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window, env);
     napi_wrap(env, objValue, jsWindow.release(), JsWindow::Finalizer, nullptr, nullptr);
 
     BindFunctions(env, objValue, "JsWindow");

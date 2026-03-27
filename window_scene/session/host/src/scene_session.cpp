@@ -6009,7 +6009,7 @@ void SceneSession::SetRequestedOrientation(Orientation orientation, bool needAni
     WLOGFI("id: %{public}d orientation: %{public}u", GetPersistentId(), static_cast<uint32_t>(orientation));
     GetSessionProperty()->SetRequestedOrientation(orientation, needAnimation);
     if (onRequestedOrientationChange_) {
-        onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation);
+        onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation, 0);
     }
 }
 
@@ -7175,7 +7175,8 @@ WMError SceneSession::HandleActionUpdateOrientation(const sptr<WindowSessionProp
     return WMError::WM_OK;
 }
 
-WMError SceneSession::SetPreferredOrientationWithResult(Orientation orientation, uint32_t promiseId, bool needAnimation = true)
+WMError SceneSession::SetPreferredOrientationWithResult(
+    Orientation orientation, uint32_t promiseId, bool needAnimation)
 {
     PostTask([weakThis = wptr(this), orientation, promiseId, needAnimation, where = __func__] {
         auto session = weakThis.promote();
@@ -7190,7 +7191,7 @@ WMError SceneSession::SetPreferredOrientationWithResult(Orientation orientation,
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s onRequestedOrientationChange is null", where);
             return;
         }
-        onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation, promiseId);
+        session->onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation, promiseId);
     }, __func__);
     return WMError::WM_OK;
 }
