@@ -529,5 +529,16 @@ void WindowInfoReporter::ReportWindowFrozen(WindowDFXHelperType detectionType, c
         TLOGE(WmsLogTag::DEFAULT, "Write HiSysEvent error, ret:%{public}d", ret);
     }
 }
+
+bool WindowInfoReporter::IsKeyboardFrozenEnabled()
+{
+    static bool enabled = [] {
+        bool isFrozen = OHOS::system::GetBoolParameter("persist.window.keyboard.frozen", false);
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "IsKeyboardFrozenEnabled: %{public}d", isFrozen);
+        return isFrozen;
+    }();
+    TLOGD(WmsLogTag::WMS_KEYBOARD, "enabled: %{public}d", enabled);
+    return enabled;
+}
 } // namespace Rosen
 }
