@@ -919,6 +919,29 @@ SessionState Session::GetSessionState() const
     return state_;
 }
 
+SessionState Session::GetRealSessionState()
+{
+    auto state = GetSessionState();
+    auto winType = GetWindowType();
+    if (!IsSessionForeground()) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType));
+        return state;
+    }
+    if (WindowHelper::IsSubWindow(winType) || WindowHelper::IsDialogWindow(winType)) {
+        int32_t mainWinId = INVALID_SESSION_ID;
+        auto mainSession = GetMainSession();
+        if (mainSession != nullptr) {
+            state = mainSession->GetSessionState();
+            mainWinId = mainSession->GetWindowId();
+        }
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d, mainWinId=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType), mainWinId);
+    }
+    return state;
+}
+
 void Session::SetSessionState(SessionState state)
 {
     if (state < SessionState::STATE_DISCONNECT || state > SessionState::STATE_END) {
