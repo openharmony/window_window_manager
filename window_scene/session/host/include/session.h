@@ -31,7 +31,6 @@
 #include "session/container/include/zidl/session_stage_interface.h"
 #include "session/host/include/zidl/session_stub.h"
 #include "session/host/include/scene_persistence.h"
-#include "session/screen/include/screen_property.h"
 #include "thread_safety_annotations.h"
 #include "vsync_station.h"
 #include "window_visibility_info.h"
@@ -50,6 +49,7 @@ class PixelMap;
 } // namespace OHOS::Media
 
 namespace OHOS::Rosen {
+class ScreenProperty;
 class RSSurfaceNode;
 class RSUIContext;
 class RSTransaction;
