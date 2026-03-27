@@ -1941,7 +1941,7 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
 
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     if (GetForegroundInteractiveStatus()) {
-        if (IsImmersiveType() && updateReason == "OnBoundsChanged") {
+        if (IsImmersiveType() && updateReason == BOUNDS_CHANGED) {
             MarkAvoidAreaAsDirty();
         } else {
             GetAllAvoidAreas(avoidAreas);
