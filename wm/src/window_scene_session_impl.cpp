@@ -213,11 +213,23 @@ void RecalculateLimits(double maxRatio, double minRatio, WindowLimits& limits)
     limits.minHeight_ = std::max(newMinHeight, limits.minHeight_);
 }
 
-void UpdateLimitIfInRange(uint32_t& currentLimit, uint32_t newLimit, uint32_t minBound, uint32_t maxBound)
+/**
+ * @brief Returns candidate if it lies within the inclusive range; otherwise returns fallback.
+ *
+ * Performs a range check against [lowerBound, upperBound]. Unlike std::clamp,
+ * this function does not adjust out-of-range values but instead returns fallback.
+ *
+ * @tparam T Type supporting comparison operators.
+ * @param candidate Value to evaluate.
+ * @param lowerBound Inclusive lower bound.
+ * @param upperBound Inclusive upper bound.
+ * @param fallback Value returned when candidate is out of range.
+ * @return candidate if within range; otherwise fallback.
+ */
+template<typename T>
+static inline T SafeBoundAssign(T candidate, T lowerBound, T upperBound, T fallback)
 {
-    if (minBound <= newLimit && newLimit <= maxBound) {
-        currentLimit = newLimit;
-    }
+    return (candidate >= lowerBound && candidate <= upperBound) ? candidate : fallback;
 }
 }
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
@@ -1467,6 +1479,9 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
     }
     auto abilityInfo = abilityContext->GetAbilityInfo();
     if (abilityInfo != nullptr) {
+        // NOTE: The windowSizeLimits are retrieved from the window server.
+        // One of their sources is the configuration passed when launching
+        // the application via the startAbility API.
         WindowSizeLimits windowSizeLimits = property_->GetWindowSizeLimits();
         GetWindowSizeLimits(abilityInfo, windowSizeLimits);
         property_->SetConfigWindowLimitsVP({
@@ -1476,6 +1491,7 @@ void WindowSceneSessionImpl::GetConfigurationFromAbilityInfo()
             1.0f, PixelUnit::VP
         });
         UpdateWindowSizeLimits();
+        // Sync the updated WindowLimits to the window server.
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
         // get support modes configuration
         uint32_t windowModeSupportType = GetSupportedWindowModesConfiguration(abilityInfo);
@@ -1522,6 +1538,36 @@ uint32_t WindowSceneSessionImpl::UpdateConfigValInVP(uint32_t minVal, uint32_t m
     return validConfig ? configVal : defaultVal;
 }
 
+void WindowSceneSessionImpl::ApplyForcibleLimits(
+    WindowLimits& sysLimitsPX, WindowLimits& sysLimitsVP, float vpr, SystemPermissionChecker systemPermChecker)
+{
+    bool isWindowLimitsForcible = property_->GetIsWindowLimitsForcible();
+    if (!isWindowLimitsForcible) {
+        TLOGD(WmsLogTag::WMS_LAYOUT,
+            "The window limits are not forcible, no need to break system constraints.");
+        return;
+    }
+    // Only system apps can break system limits; others are currently restricted.
+    if (!systemPermChecker()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+            "The caller doesn't have system permissions, cannot to break system constraints.");
+        return;
+    }
+
+    constexpr uint32_t FORCIBLE_MAX = static_cast<uint32_t>(INT32_MAX);
+    constexpr uint32_t FORCIBLE_MIN = 1;
+
+    sysLimitsPX.maxWidth_  = FORCIBLE_MAX;
+    sysLimitsPX.maxHeight_ = FORCIBLE_MAX;
+    sysLimitsPX.minWidth_  = std::min(sysLimitsPX.minWidth_, FORCIBLE_MIN);
+    sysLimitsPX.minHeight_ = std::min(sysLimitsPX.minHeight_, FORCIBLE_MIN);
+
+    sysLimitsVP.maxWidth_  = FORCIBLE_MAX;
+    sysLimitsVP.maxHeight_ = FORCIBLE_MAX;
+    sysLimitsVP.minWidth_  = std::min(sysLimitsVP.minWidth_, FORCIBLE_MIN);
+    sysLimitsVP.minHeight_ = std::min(sysLimitsVP.minHeight_, FORCIBLE_MIN);
+}
+
 /** @note @window.layout */
 std::pair<WindowLimits, WindowLimits> WindowSceneSessionImpl::GetSystemSizeLimits(uint32_t displayWidth,
                                                                                   uint32_t displayHeight,
@@ -1538,12 +1584,12 @@ std::pair<WindowLimits, WindowLimits> WindowSceneSessionImpl::GetSystemSizeLimit
     systemLimitsVP.maxHeight_ = configMaxSize;
 
     SetMinimumDimensions(systemLimits, systemLimitsVP, displayWidth, displayHeight, vpr);
-
-    TLOGI(WmsLogTag::WMS_LAYOUT, "px[%{public}u,%{public}u,%{public}u,%{public}u], "
-        "vp[%{public}u,%{public}u,%{public}u,%{public}u], configMax:%{public}u, vpr:%{public}f, "
-        "winType:%{public}u", systemLimits.maxWidth_, systemLimits.maxHeight_, systemLimits.minWidth_,
-        systemLimits.minHeight_, systemLimitsVP.maxWidth_, systemLimitsVP.maxHeight_, systemLimitsVP.minWidth_,
-        systemLimitsVP.minHeight_, configMaxSize, vpr, GetType());
+    ApplyForcibleLimits(systemLimits, systemLimitsVP, vpr, SessionPermission::IsSystemCalling);
+    TLOGI(WmsLogTag::WMS_LAYOUT,
+          "systemLimitsPX: %{public}s, systemLimitsVP: %{public}s, configMaxSize: %{public}u, "
+          "vpr: %{public}f, winType: %{public}u",
+          systemLimits.ToString().c_str(), systemLimitsVP.ToString().c_str(),
+          configMaxSize, vpr, GetType());
     return std::make_pair(systemLimits, systemLimitsVP);
 }
 
@@ -1641,17 +1687,15 @@ void WindowSceneSessionImpl::ProcessVirtualPixelLimits(WindowLimits& newLimits, 
                                                        const WindowLimits& customizedLimits,
                                                        const WindowLimits& systemLimitsVP, float virtualPixelRatio)
 {
-    const uint32_t limitMinWidth = systemLimitsVP.minWidth_;
-    const uint32_t limitMinHeight = systemLimitsVP.minHeight_;
+    const uint32_t sysMinW = systemLimitsVP.minWidth_;
+    const uint32_t sysMinH = systemLimitsVP.minHeight_;
+    const uint32_t sysMaxW = systemLimitsVP.maxWidth_;
+    const uint32_t sysMaxH = systemLimitsVP.maxHeight_;
 
-    // Update the maximum width and height limitations
-    UpdateLimitIfInRange(newLimitsVP.maxWidth_, customizedLimits.maxWidth_, limitMinWidth, systemLimitsVP.maxWidth_);
-    UpdateLimitIfInRange(newLimitsVP.maxHeight_, customizedLimits.maxHeight_, limitMinHeight,
-        systemLimitsVP.maxHeight_);
-
-    // Update the minimum width and height limitations
-    UpdateLimitIfInRange(newLimitsVP.minWidth_, customizedLimits.minWidth_, limitMinWidth, newLimitsVP.maxWidth_);
-    UpdateLimitIfInRange(newLimitsVP.minHeight_, customizedLimits.minHeight_, limitMinHeight, newLimitsVP.maxHeight_);
+    newLimitsVP.maxWidth_ = SafeBoundAssign(customizedLimits.maxWidth_, sysMinW, sysMaxW, sysMaxW);
+    newLimitsVP.maxHeight_ = SafeBoundAssign(customizedLimits.maxHeight_, sysMinH, sysMaxH, sysMaxH);
+    newLimitsVP.minWidth_ = SafeBoundAssign(customizedLimits.minWidth_, sysMinW, newLimitsVP.maxWidth_, sysMinW);
+    newLimitsVP.minHeight_ = SafeBoundAssign(customizedLimits.minHeight_, sysMinH, newLimitsVP.maxHeight_, sysMinH);
 
     // Convert virtual pixels to physical pixels
     RecalculatePxLimitsByVp(newLimitsVP, newLimits, virtualPixelRatio);
@@ -1662,30 +1706,20 @@ void WindowSceneSessionImpl::ProcessPhysicalPixelLimits(WindowLimits& newLimits,
                                                         const WindowLimits& customizedLimits,
                                                         const WindowLimits& systemLimits, float virtualPixelRatio)
 {
-    uint32_t limitMinWidth = systemLimits.minWidth_;
-    uint32_t limitMinHeight = systemLimits.minHeight_;
+    bool needAdjustMinBound = forceLimits_ && IsPcOrFreeMultiWindowCapabilityEnabled();
+    const uint32_t sysMinW = needAdjustMinBound ?
+        std::min(static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio), systemLimits.minWidth_) :
+        systemLimits.minWidth_;
+    const uint32_t sysMinH = needAdjustMinBound ?
+        std::min(static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio), systemLimits.minHeight_) :
+        systemLimits.minHeight_;
+    const uint32_t sysMaxW = systemLimits.maxWidth_;
+    const uint32_t sysMaxH = systemLimits.maxHeight_;
 
-    // Breaking through system limitations
-    if (forceLimits_ && IsPcOrFreeMultiWindowCapabilityEnabled()) {
-        const uint32_t forceLimitMinWidth =
-            static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_WIDTH * virtualPixelRatio);
-        const uint32_t forceLimitMinHeight =
-            static_cast<uint32_t>(FORCE_LIMIT_MIN_FLOATING_HEIGHT * virtualPixelRatio);
-
-        limitMinWidth = std::min(forceLimitMinWidth, limitMinWidth);
-        limitMinHeight = std::min(forceLimitMinHeight, limitMinHeight);
-
-        newLimits.minWidth_ = limitMinWidth;
-        newLimits.minHeight_ = limitMinHeight;
-    }
-
-    // Update the maximum width and height limitations
-    UpdateLimitIfInRange(newLimits.maxWidth_, customizedLimits.maxWidth_, limitMinWidth, systemLimits.maxWidth_);
-    UpdateLimitIfInRange(newLimits.maxHeight_, customizedLimits.maxHeight_, limitMinHeight, systemLimits.maxHeight_);
-
-    // Update the minimum width and height limitations
-    UpdateLimitIfInRange(newLimits.minWidth_, customizedLimits.minWidth_, limitMinWidth, newLimits.maxWidth_);
-    UpdateLimitIfInRange(newLimits.minHeight_, customizedLimits.minHeight_, limitMinHeight, newLimits.maxHeight_);
+    newLimits.maxWidth_ = SafeBoundAssign(customizedLimits.maxWidth_, sysMinW, sysMaxW, sysMaxW);
+    newLimits.maxHeight_ = SafeBoundAssign(customizedLimits.maxHeight_, sysMinH, sysMaxH, sysMaxH);
+    newLimits.minWidth_ = SafeBoundAssign(customizedLimits.minWidth_, sysMinW, newLimits.maxWidth_, sysMinW);
+    newLimits.minHeight_ = SafeBoundAssign(customizedLimits.minHeight_, sysMinH, newLimits.maxHeight_, sysMinH);
 
     // Convert physical pixel to virtual pixels
     RecalculateVpLimitsByPx(newLimits, newLimitsVP, virtualPixelRatio);
