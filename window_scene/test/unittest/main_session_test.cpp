@@ -22,7 +22,6 @@
 #include "mock/mock_session_stage.h"
 #include "session/host/include/session.h"
 #include "session/host/include/system_session.h"
-#include "session/screen/include/screen_property.h"
 #include <ui/rs_surface_node.h>
 #include "window_event_channel_base.h"
 #include "window_helper.h"
