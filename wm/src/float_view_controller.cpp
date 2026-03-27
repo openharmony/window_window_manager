@@ -457,7 +457,12 @@ sptr<Window> FloatViewController::GetWindow() const
 
 void FloatViewController::OnStateChange(const FloatViewState& state, std::string stopReason)
 {
-    for (auto& listener : stateChangeObservers_) {
+    std::vector<sptr<IFvStateChangeObserver>> listeners;
+    {
+        std::lock_guard<std::mutex> lock(listenerMutex_);
+        listeners.assign(stateChangeObservers_.begin(), stateChangeObservers_.end());
+    }
+    for (auto& listener : listeners) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "state change listener is nullptr");
             continue;
@@ -468,7 +473,12 @@ void FloatViewController::OnStateChange(const FloatViewState& state, std::string
 
 void FloatViewController::OnRectChange(const Rect& window, double scale, const std::string& reason)
 {
-    for (auto& listener : rectChangeObservers_) {
+    std::vector<sptr<IFvRectChangeObserver>> listeners;
+    {
+        std::lock_guard<std::mutex> lock(listenerMutex_);
+        listeners.assign(rectChangeObservers_.begin(), rectChangeObservers_.end());
+    }
+    for (auto& listener : listeners) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "rectangle change listener is nullptr");
             continue;
@@ -479,7 +489,12 @@ void FloatViewController::OnRectChange(const Rect& window, double scale, const s
 
 void FloatViewController::OnLimitsChange(const FloatViewLimits& specificationInfo)
 {
-    for (auto& listener : limitsChangeObservers_) {
+    std::vector<sptr<IFvLimitsChangeObserver>> listeners;
+    {
+        std::lock_guard<std::mutex> lock(listenerMutex_);
+        listeners.assign(limitsChangeObservers_.begin(), limitsChangeObservers_.end());
+    }
+    for (auto& listener : listeners) {
         if (listener == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "limits change listener is nullptr");
             continue;

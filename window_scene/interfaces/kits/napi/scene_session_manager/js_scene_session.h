@@ -492,7 +492,7 @@ private:
      * Float View
     */
     void ProcessFloatViewStopRegister();
-    void OnFloatViewStop();
+    void OnFloatViewStop(const std::string& reason);
     void ProcessFloatViewUpdateRegister();
     void OnFloatViewUpdate(const FloatViewTemplateInfo& fvTemplateInfo);
 

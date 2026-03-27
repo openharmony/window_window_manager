@@ -25,9 +25,6 @@ namespace Rosen {
 using namespace AbilityRuntime;
 
 namespace {
-const std::string CALLBACK_TYPE_STATE_CHANGE = "stateChange";
-const std::string CALLBACK_TYPE_RECT_CHANGE = "rectChange";
-const std::string CALLBACK_TYPE_LIMITS_CHANGE = "limitsChange";
 const std::string FLOATING_BALL_PERMISSION = "ohos.permission.FLOAT_VIEW";
 constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_ONE = 1;
@@ -66,7 +63,12 @@ napi_value CreateJsFloatViewControllerObject(napi_env env, const sptr<FloatViewC
     TLOGI(WmsLogTag::WMS_SYSTEM, "CreateJsFloatViewControllerObject");
     std::unique_ptr<JsFloatViewController> jsFloatViewController =
         std::make_unique<JsFloatViewController>(floatViewController);
-    napi_wrap(env, objValue, jsFloatViewController.release(), JsFloatViewController::Finalizer, nullptr, nullptr);
+    status = napi_wrap(
+        env, objValue, jsFloatViewController.release(), JsFloatViewController::Finalizer, nullptr, nullptr);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "napi bind object failed, %{public}d", status);
+        return NapiGetUndefined(env);
+    }
 
     BindFunctions(env, objValue, "JsFloatViewController");
     return objValue;
@@ -85,7 +87,7 @@ JsFloatViewController::~JsFloatViewController()
 void JsFloatViewController::Finalizer(napi_env env, void* data, void* hint)
 {
     TLOGD(WmsLogTag::WMS_SYSTEM, "Finalizer is called");
-    std::unique_ptr<JsFloatViewController>(static_cast<JsFloatViewController*>(data));
+    delete static_cast<JsFloatViewController*>(data);
 }
 
 napi_value JsFloatViewController::Start(napi_env env, napi_callback_info info)
@@ -415,7 +417,7 @@ napi_value JsFloatViewController::OnRestoreMainWindow(napi_env env, napi_callbac
     if (argc > ARG_COUNT_ZERO) {
         napi_value wantValue = argv[INDEX_ZERO];
         if (wantValue != nullptr && !AppExecFwk::UnwrapWantParams(env, wantValue, wantParams)) {
-            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameters to wantParameters");
+            TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameters to wantParameters");
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 "Failed to convert parameters to wantParameters.");
         }
@@ -458,10 +460,10 @@ sptr<FloatViewController> JsFloatViewController::GetController() const
     return fvController_;
 }
 
-bool JsFloatViewController::IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsCallback)
+bool JsFloatViewController::IsCallbackRegistered(napi_env env, const CallbackType& type, napi_value jsCallback)
 {
     if (jsCallbackMap_.empty() || jsCallbackMap_.find(type) == jsCallbackMap_.end()) {
-        TLOGI(WmsLogTag::WMS_SYSTEM, "methodName %{public}s not registered!", type.c_str());
+        TLOGI(WmsLogTag::WMS_SYSTEM, "callback type %{public}d not registered!", type);
         return false;
     }
     for (auto& listener : jsCallbackMap_[type]) {
@@ -475,9 +477,10 @@ bool JsFloatViewController::IsCallbackRegistered(napi_env env, const std::string
 }
 
 napi_value JsFloatViewController::RegisterCallbackWithType(
-    const std::string& callbackType, napi_env env, napi_callback_info info)
+    const CallbackType& callbackType, napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "RegisterCallbackWithType is called, type: %{public}s", callbackType.c_str());
+    std::lock_guard<std::mutex> lock(jsCallbackMutex_);
+    TLOGI(WmsLogTag::WMS_SYSTEM, "RegisterCallbackWithType is called, type: %{public}d", callbackType);
     size_t argc = ARG_COUNT_ONE;
     napi_value argv[ONE_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -510,18 +513,19 @@ napi_value JsFloatViewController::RegisterCallbackWithType(
     }
     WMError errCode = DoRegisterCallbackWithType(callbackType, fvWindowListener);
     if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Register callback failed, type: %{public}s", callbackType.c_str());
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Register callback failed, type: %{public}d", callbackType);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Register callback failed.");
     }
     jsCallbackMap_[callbackType].insert(fvWindowListener);
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Register type %{public}s success", callbackType.c_str());
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Register type %{public}d success", callbackType);
     return NapiGetUndefined(env);
 }
 
 napi_value JsFloatViewController::UnregisterCallbackWithType(
-    const std::string& callbackType, napi_env env, napi_callback_info info)
+    const CallbackType& callbackType, napi_env env, napi_callback_info info)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "UnegisterCallbackWithType is called, type: %{public}s", callbackType.c_str());
+    std::lock_guard<std::mutex> lock(jsCallbackMutex_);
+    TLOGI(WmsLogTag::WMS_SYSTEM, "UnegisterCallbackWithType is called, type: %{public}d", callbackType);
     size_t argc = ARG_COUNT_ONE;
     napi_value argv[ONE_PARAMS_SIZE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -530,7 +534,7 @@ napi_value JsFloatViewController::UnregisterCallbackWithType(
         for (auto& callback : jsCallbackMap_[callbackType]) {
             WMError ret = DoUnregisterCallbackWithType(callbackType, callback);
             if (ret != WMError::WM_OK) {
-                TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}s failed, no value", callbackType.c_str());
+                TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d failed, no value", callbackType);
                 return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "unRegister failed.");
             }
         }
@@ -543,7 +547,7 @@ napi_value JsFloatViewController::UnregisterCallbackWithType(
             if (isEquals) {
                 WMError ret = DoUnregisterCallbackWithType(callbackType, callback);
                 if (ret != WMError::WM_OK) {
-                    TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}s failed, no value", callbackType.c_str());
+                    TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d failed, no value", callbackType);
                     return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "unRegister failed.");
                 }
                 jsCallbackMap_[callbackType].erase(callback);
@@ -551,38 +555,46 @@ napi_value JsFloatViewController::UnregisterCallbackWithType(
             }
         }
     }
-    TLOGI(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}s success", callbackType.c_str());
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d success", callbackType);
     return NapiGetUndefined(env);
 }
 
 WMError JsFloatViewController::DoRegisterCallbackWithType(
-    const std::string& callbackType, const sptr<JsFloatViewListener>& listener)
+    const CallbackType& callbackType, const sptr<JsFloatViewListener>& listener)
 {
     WMError errCode = WMError::WM_OK;
-    if (callbackType == CALLBACK_TYPE_STATE_CHANGE) {
-        errCode = fvController_->RegisterStateChangeListener(listener);
-    }
-    if (callbackType == CALLBACK_TYPE_RECT_CHANGE) {
-        errCode = fvController_->RegisterRectChangeListener(listener);
-    }
-    if (callbackType == CALLBACK_TYPE_LIMITS_CHANGE) {
-        errCode = fvController_->RegisterLimitsChangeListener(listener);
+    switch (callbackType) {
+        case CallbackType::STATE_CHANGE:
+            errCode = fvController_->RegisterStateChangeListener(listener);
+            break;
+        case CallbackType::RECT_CHANGE:
+            errCode = fvController_->RegisterRectChangeListener(listener);
+            break;
+        case CallbackType::LIMITS_CHANGE:
+            errCode = fvController_->RegisterLimitsChangeListener(listener);
+            break;
+        default:
+            break;
     }
     return errCode;
 }
 
 WMError JsFloatViewController::DoUnregisterCallbackWithType(
-    const std::string& callbackType, const sptr<JsFloatViewListener>& listener)
+    const CallbackType& callbackType, const sptr<JsFloatViewListener>& listener)
 {
     WMError errCode = WMError::WM_OK;
-    if (callbackType == CALLBACK_TYPE_STATE_CHANGE) {
-        errCode = fvController_->UnregisterStateChangeListener(listener);
-    }
-    if (callbackType == CALLBACK_TYPE_RECT_CHANGE) {
-        errCode = fvController_->UnregisterRectChangeListener(listener);
-    }
-    if (callbackType == CALLBACK_TYPE_LIMITS_CHANGE) {
-        errCode = fvController_->UnregisterLimitsChangeListener(listener);
+    switch (callbackType) {
+        case CallbackType::STATE_CHANGE:
+            errCode = fvController_->UnregisterStateChangeListener(listener);
+            break;
+        case CallbackType::RECT_CHANGE:
+            errCode = fvController_->UnregisterRectChangeListener(listener);
+            break;
+        case CallbackType::LIMITS_CHANGE:
+            errCode = fvController_->UnregisterLimitsChangeListener(listener);
+            break;
+        default:
+            break;
     }
     return errCode;
 }
@@ -590,37 +602,37 @@ WMError JsFloatViewController::DoUnregisterCallbackWithType(
 napi_value JsFloatViewController::OnStateChange(napi_env env, napi_callback_info info)
 {
     JsFloatViewController* me = CheckParamsAndGetThis<JsFloatViewController>(env, info);
-    return (me != nullptr) ? me->RegisterCallbackWithType(CALLBACK_TYPE_STATE_CHANGE, env, info) : nullptr;
+    return (me != nullptr) ? me->RegisterCallbackWithType(CallbackType::STATE_CHANGE, env, info) : nullptr;
 }
 
 napi_value JsFloatViewController::OffStateChange(napi_env env, napi_callback_info info)
 {
     JsFloatViewController* me = CheckParamsAndGetThis<JsFloatViewController>(env, info);
-    return (me != nullptr) ? me->UnregisterCallbackWithType(CALLBACK_TYPE_STATE_CHANGE, env, info) : nullptr;
+    return (me != nullptr) ? me->UnregisterCallbackWithType(CallbackType::STATE_CHANGE, env, info) : nullptr;
 }
 
 napi_value JsFloatViewController::OnRectChange(napi_env env, napi_callback_info info)
 {
     JsFloatViewController* me = CheckParamsAndGetThis<JsFloatViewController>(env, info);
-    return (me != nullptr) ? me->RegisterCallbackWithType(CALLBACK_TYPE_RECT_CHANGE, env, info) : nullptr;
+    return (me != nullptr) ? me->RegisterCallbackWithType(CallbackType::RECT_CHANGE, env, info) : nullptr;
 }
 
 napi_value JsFloatViewController::OffRectChange(napi_env env, napi_callback_info info)
 {
     JsFloatViewController* me = CheckParamsAndGetThis<JsFloatViewController>(env, info);
-    return (me != nullptr) ? me->UnregisterCallbackWithType(CALLBACK_TYPE_RECT_CHANGE, env, info) : nullptr;
+    return (me != nullptr) ? me->UnregisterCallbackWithType(CallbackType::RECT_CHANGE, env, info) : nullptr;
 }
 
 napi_value JsFloatViewController::OnLimitsChange(napi_env env, napi_callback_info info)
 {
     JsFloatViewController* me = CheckParamsAndGetThis<JsFloatViewController>(env, info);
-    return (me != nullptr) ? me->RegisterCallbackWithType(CALLBACK_TYPE_LIMITS_CHANGE, env, info) : nullptr;
+    return (me != nullptr) ? me->RegisterCallbackWithType(CallbackType::LIMITS_CHANGE, env, info) : nullptr;
 }
 
 napi_value JsFloatViewController::OffLimitsChange(napi_env env, napi_callback_info info)
 {
     JsFloatViewController* me = CheckParamsAndGetThis<JsFloatViewController>(env, info);
-    return (me != nullptr) ? me->UnregisterCallbackWithType(CALLBACK_TYPE_LIMITS_CHANGE, env, info) : nullptr;
+    return (me != nullptr) ? me->UnregisterCallbackWithType(CallbackType::LIMITS_CHANGE, env, info) : nullptr;
 }
 
 } // namespace Rosen
