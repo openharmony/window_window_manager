@@ -32,7 +32,7 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty) override;
+    void RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
 

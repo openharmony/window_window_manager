@@ -22,7 +22,6 @@
 #include "mock/mock_session.h"
 #include "mock/mock_session_stage.h"
 #include "session/host/include/session.h"
-#include "session/screen/include/screen_property.h"
 #include <ui/rs_surface_node.h>
 #include "window_event_channel_base.h"
 #include "window_helper.h"
@@ -248,24 +247,24 @@ HWTEST_F(SystemSessionTest, RectCheck, TestSize.Level1)
     systemSession_->parentSession_ = session;
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
-    ScreenProperty screenProperty;
-    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+    ScreenMetrics screenMetrics{1920, 1080, 2.0f};
+    systemSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 0;
     curHeight = 0;
-    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+    systemSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 1930;
     curHeight = 0;
-    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+    systemSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 0;
-    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+    systemSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 1930;
-    systemSession_->RectCheck(curWidth, curHeight, screenProperty);
+    systemSession_->RectCheck(curWidth, curHeight, screenMetrics);
 }
 
 /**

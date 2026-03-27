@@ -28,7 +28,6 @@
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
-#include "session/screen/include/screen_property.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "wm_common.h"
@@ -871,11 +870,11 @@ HWTEST_F(WindowSessionTest3, UpdateWindowMode, TestSize.Level1)
 HWTEST_F(WindowSessionTest3, RectSizeCheckProcess, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
-    ScreenProperty screenProperty;
-    session_->RectSizeCheckProcess(1, 0, 2, 0, screenProperty);
-    session_->RectSizeCheckProcess(1, 0, 1, 0, screenProperty);
-    session_->RectSizeCheckProcess(0, 1, 0, 2, screenProperty);
-    session_->RectSizeCheckProcess(0, 1, 0, 0, screenProperty);
+    ScreenMetrics screenMetrics{1920, 1080, 2.0f};
+    session_->RectSizeCheckProcess(1, 0, 2, 0, screenMetrics);
+    session_->RectSizeCheckProcess(1, 0, 1, 0, screenMetrics);
+    session_->RectSizeCheckProcess(0, 1, 0, 2, screenMetrics);
+    session_->RectSizeCheckProcess(0, 1, 0, 0, screenMetrics);
     EXPECT_EQ(true, session_->CheckPointerEventDispatch(nullptr));
 }
 

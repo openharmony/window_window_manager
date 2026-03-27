@@ -332,11 +332,11 @@ void SystemSession::UpdatePointerArea(const WSRect& rect)
     Session::UpdatePointerArea(rect);
 }
 
-void SystemSession::RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty)
+void SystemSession::RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics)
 {
     uint32_t minWidth = MIN_SYSTEM_WINDOW_WIDTH;
     uint32_t minHeight = MIN_SYSTEM_WINDOW_HEIGHT;
-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenProperty);
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenMetrics);
 }
 
 WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)

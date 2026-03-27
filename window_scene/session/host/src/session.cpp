@@ -45,7 +45,6 @@
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "screen_manager.h"
-#include "session/screen/include/screen_property.h"
 
 #define RETURN_IF_NULL(param, ...)                                       \
     do {                                                                 \
@@ -4417,7 +4416,7 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
 
 /** @note @window.layout */
 void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
-    uint32_t minHeight, ScreenProperty& screenProperty)
+    uint32_t minHeight, const ScreenMetrics& screenMetrics)
 {
 
     constexpr uint32_t MARGIN_OF_ERROR = 2; // The max vp bias for preventing giant logs.
@@ -4434,11 +4433,10 @@ void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t min
     const WindowType winType = GetWindowType();
     const bool isSystemWindowButNotDialog = WindowHelper::IsSystemWindowButNotDialog(winType);
 
-    const auto& bounds = screenProperty.GetBounds().rect_;
-    const uint32_t screenWidth = static_cast<uint32_t>(bounds.width_);
-    const uint32_t screenHeight = static_cast<uint32_t>(bounds.height_);
+    uint32_t screenWidth = std::get<0>(screenMetrics);
+    uint32_t screenHeight = std::get<1>(screenMetrics);
+    float density = std::get<2>(screenMetrics);
 
-    const float density = screenProperty.GetDensity();
     const float safeDensity = (!NearZero(density)) ? density : DEFAULT_DENSITY;
     const float screenWidthVp = screenWidth / safeDensity;
     const float screenHeightVp = screenHeight / safeDensity;
@@ -4492,6 +4490,11 @@ void Session::RectCheckProcess()
     }
     auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
+    ScreenMetrics screenMetrics = std::make_tuple(
+        static_cast<uint32_t>(screenProperty.GetBounds().rect_.width_),
+        static_cast<uint32_t>(screenProperty.GetBounds().rect_.height_),
+        density
+    );
     if (!NearZero(density) && !NearZero(GetSessionRect().height_)) {
         float curWidth = GetSessionRect().width_ / density;
         float curHeight = GetSessionRect().height_ / density;
@@ -4512,7 +4515,7 @@ void Session::RectCheckProcess()
             WindowInfoReporter::GetInstance().ReportWindowException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
         }
-        RectCheck(curWidth, curHeight, screenProperty);
+        RectCheck(curWidth, curHeight, screenMetrics);
     }
 }
 

@@ -128,6 +128,7 @@ using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSes
 using GetRsCmdBlockingCountFunc = std::function<int32_t()>;
 using GetAppUseControlDisplayMapFunc = std::function<std::unordered_map<DisplayId, bool>&()>;
 using SaveStartWindowFunc = std::function<void(std::string, std::string)>;
+using ScreenMetrics = std::tuple<uint32_t, uint32_t, float>;
 
 class ILifecycleListener {
 public:
@@ -764,9 +765,9 @@ public:
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
-    virtual void RectCheck(float curWidth, float curHeight, ScreenProperty& screenProperty) {};
+    virtual void RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics) {};
     void RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
-        uint32_t minHeight, ScreenProperty& screenProperty);
+        uint32_t minHeight, const ScreenMetrics& screenMetrics);
     DetectTaskInfo GetDetectTaskInfo() const;
     void SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo);
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
