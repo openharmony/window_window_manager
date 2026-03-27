@@ -297,7 +297,7 @@ private:
     static std::atomic<uint32_t> orientationResultPromiseIdGenerator_;
     static std::unordered_map<uint32_t, std::shared_ptr<AbilityRuntime::NapiAsyncTask>> orientationResultPromiseMap_;
     static std::mutex orientationResultMapMutex_;
-    static void RemoveOrientationPromiseFromMap(unint32_t promiseId);
+    static void RemoveOrientationPromiseFromMap(uint32_t promiseId);
 
     /*
      * Window Layout
@@ -333,7 +333,7 @@ private:
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientationWithResult(napi_env env, napi_callback_info info);
     OrientationParams ValidateOrientationParams(
-        napi_env env, size_t argc, napi_value* argv, const std::string* funcName);
+        napi_env env, size_t argc, napi_value* argv, const std::string& funcName);
     void NotifyOrientationResult(uint32_t promiseId, uint32_t action);
     napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnConvertOrientationAndRotation(napi_env env, napi_callback_info info);
