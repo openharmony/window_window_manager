@@ -19264,7 +19264,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
             bundleName, appIndex, appInstanceKey, bundleInstanceSessions);
         vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
         listenerController_->ConstructBatchPayload(payloads, bundleInstanceSessions);
-        listener->OnBatchLifecycleEvent(bundleInstanceSessions, payloads);
+        listener->OnBatchLifecycleEvent(payloads);
     }, __func__);
     return WMError::WM_OK;
 }

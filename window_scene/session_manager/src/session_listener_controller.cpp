@@ -265,11 +265,12 @@ void SessionListenerController::ConstructPayload(ISessionLifecycleListener::Life
 }
 
 void SessionListenerController::ConstructBatchPayload(std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
-    const std::vector<SceneSession>& sessions)
+    const std::vector<sptr<SceneSession>>& sessions)
 {
     for (const auto& session : sessions) {
         ISessionLifecycleListener::LifecycleEventPayload payload;
-        ConstructPayload(payload, session.GetSessionInfo());
+        ConstructPayload(payload, session->GetSessionInfo());
+        payload.sessionState_ = session->state_;
         payloads.emplace_back(std::move(payload));
     }
 }
@@ -518,8 +519,9 @@ void SessionListenerController::NotifyBundleInstanceLifecycleEvent(SessionState 
     }
     ISessionLifecycleListener::LifecycleEventPayload payload;
     ConstructBundleInstancePayload(payload, sessionInfo, 0, 0, 0, reason);
+    payload.sessionState_ = state;
     taskScheduler_->PostAsyncTask(
-        [weakThis = weak_from_this(), state, payload, bundleName, appIndex, appInstanceKey, persistentId,
+        [weakThis = weak_from_this(), payload, bundleName, appIndex, appInstanceKey, persistentId,
             where = __func__] {
             auto controller = weakThis.lock();
             if (controller == nullptr) {
@@ -528,9 +530,9 @@ void SessionListenerController::NotifyBundleInstanceLifecycleEvent(SessionState 
             }
             TLOGI(WmsLogTag::WMS_LIFE,
                 "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d, reason: %{public}u",
-                bundleName.c_str(), persistentId, state, payload.lifeCycleChangeReason_);
+                bundleName.c_str(), persistentId, payload.sessionState_, payload.lifeCycleChangeReason_);
             controller->NotifyListeners(controller->listenerMapByBundleInstance_, BundleInstanceFilterKey{ bundleName,
-                appIndex, appInstanceKey }, state, payload);
+                appIndex, appInstanceKey }, payload);
         }, __func__);
 }
 
@@ -552,7 +554,6 @@ void SessionListenerController::NotifyListeners(const MapType& listenerMap, cons
 
 template <typename KeyType, typename MapType>
 void SessionListenerController::NotifyListeners(const MapType& listenerMap, const KeyType& key,
-    const ISessionLifecycleListener::SessionState state,
     const ISessionLifecycleListener::LifecycleEventPayload& payload)
 {
     auto it = listenerMap.find(key);
@@ -560,7 +561,7 @@ void SessionListenerController::NotifyListeners(const MapType& listenerMap, cons
         const auto& listeners = it->second;
         for (const auto& listener : listeners) {
             if (listener != nullptr) {
-                listener->OnBundleInstanceLifecycleEvent(state, payload);
+                listener->OnBundleInstanceLifecycleEvent(payload);
             }
         }
     }

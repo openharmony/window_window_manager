@@ -66,22 +66,12 @@ int SessionLifecycleListenerStub::HandleOnLifecycleEvent(MessageParcel& data, Me
 int SessionLifecycleListenerStub::HandleOnBundleInstanceLifecycleEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
-    int32_t sessionState = 0;
-    if (!data.ReadInt32(sessionState)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read session state");
-        return ERR_INVALID_DATA;
-    }
-    if (sessionState < static_cast<int32_t>(SessionState::STATE_DISCONNECTED) ||
-        sessionState >= static_cast<int32_t>(SessionState::STATE_END)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Invalid session state");
-        return ERR_INVALID_DATA;
-    }
     std::unique_ptr<LifecycleEventPayload> payload(data.ReadParcelable<LifecycleEventPayload>());
     if (!payload) {
         TLOGE(WmsLogTag::WMS_LIFE, "Invalid payload");
         return ERR_INVALID_DATA;
     }
-    OnBundleInstanceLifecycleEvent(static_cast<SessionState>(sessionState), *payload);
+    OnBundleInstanceLifecycleEvent(*payload);
     return 0;
 }
 }

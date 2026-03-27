@@ -54,17 +54,14 @@ void SessionLifecycleListenerProxy::SendRequestCommon(
     }
 }
 
-void SessionLifecycleListenerProxy::OnBatchLifecycleEvent(const vector<sptr<SceneSession>>& sessions, const std::vector<LifecycleEventPayload>& payloads)
+void SessionLifecycleListenerProxy::OnBatchLifecycleEvent(const std::vector<LifecycleEventPayload>& payloads)
 {
-    for (size_t i = 0; i < sessions.size() && i < payloads.size(); ++i) {
-        const auto& sessionState = sessions[i]->state_;
-        const auto& payload = payloads[i];
-        OnBundleInstanceLifecycleEvent(sessionState, payload);
+    for (const auto& payload : payloads) {
+        OnBundleInstanceLifecycleEvent(payload);
     }
 }
 
-void SessionLifecycleListenerProxy::OnBundleInstanceLifecycleEvent(
-    SessionState state, const LifecycleEventPayload& payload)
+void SessionLifecycleListenerProxy::OnBundleInstanceLifecycleEvent(const LifecycleEventPayload& payload)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -72,10 +69,6 @@ void SessionLifecycleListenerProxy::OnBundleInstanceLifecycleEvent(
 
     if (!data.WriteInterfaceToken(ISessionLifecycleListener::GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write interface token failed.");
-        return;
-    }
-    if (!data.WriteInt32(state)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Write state failed.");
         return;
     }
     if (!data.WriteParcelable(&payload)) {
