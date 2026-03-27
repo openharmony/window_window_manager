@@ -4493,7 +4493,7 @@ void Session::RectCheckProcess()
         static_cast<uint32_t>(screenProperty.GetBounds().rect_.width_),
         static_cast<uint32_t>(screenProperty.GetBounds().rect_.height_),
         density
-    );
+        );
     if (!NearZero(density) && !NearZero(GetSessionRect().height_)) {
         float curWidth = GetSessionRect().width_ / density;
         float curHeight = GetSessionRect().height_ / density;
