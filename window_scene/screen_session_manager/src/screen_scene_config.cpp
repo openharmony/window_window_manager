@@ -556,7 +556,7 @@ uint64_t ScreenSceneConfig::GetUptimeSeconds()
     return static_cast<uint64_t>(ts.tv_sec);
 }
 
-void ScreenSceneConfig::SetRogResolution(const RogResolution rogResolution)
+void ScreenSceneConfig::SetRogResolution(const RogResolution& rogResolution)
 {
     rogResolution_ = rogResolution;
 }
