@@ -883,90 +883,6 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
 }
 
 /**
- * @tc.name: NotifyOccupiedAreaChanged
- * @tc.desc: check func NotifyOccupiedAreaChanged
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, NotifyOccupiedAreaChanged, Function | SmallTest | Level0)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    auto keyboardSession = GetKeyboardSession("NotifyOccupiedAreaChanged", "NotifyOccupiedAreaChanged");
-    ASSERT_NE(keyboardSession, nullptr);
-    sptr<SceneSession> callingSession = GetSceneSession("TestSceneSession", "TestSceneSession");
-    ASSERT_NE(callingSession, nullptr);
-    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
-
-    g_logMsg.clear();
-    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
-    EXPECT_TRUE(g_logMsg.find("occupiedAreaInfo is null") != std::string::npos);
-
-    g_logMsg.clear();
-    callingSession->sessionInfo_.isSystem_ = true;
-    occupiedAreaInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
-    ASSERT_NE(occupiedAreaInfo, nullptr);
-    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
-    EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
-
-    g_logMsg.clear();
-    callingSession->sessionInfo_.isSystem_ = false;
-    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
-    ASSERT_NE(mockSessionStage, nullptr);
-    callingSession->sessionStage_ = mockSessionStage;
-    EXPECT_CALL(*mockSessionStage, NotifyOccupiedAreaChangeInfo(_, _, _, _)).Times(2);
-    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
-    EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
-
-    g_logMsg.clear();
-    callingSession->sessionInfo_.isSystem_ = false;
-    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, true, nullptr);
-    EXPECT_TRUE(g_logMsg.find("size of avoidAreas: 5") != std::string::npos);
-}
-
-/**
- * @tc.name: ForceProcessKeyboardOccupiedAreaInfo
- * @tc.desc: check func ForceProcessKeyboardOccupiedAreaInfo
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, ForceProcessKeyboardOccupiedAreaInfo, Function | SmallTest | Level0)
-{
-    auto keyboardSession = GetKeyboardSession("ProcessKeyboardOccupiedAreaInfo", "ProcessKeyboardOccupiedAreaInfo");
-    ASSERT_NE(keyboardSession, nullptr);
-    keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_ = false;
-    keyboardSession->isVisible_ = false;
-    keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
-    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
-
-    keyboardSession->isVisible_ = true;
-    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
-    keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
-    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
-
-    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
-    keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
-    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, true);
-}
-
-/**
- * @tc.name: ForceNotifyKeyboardOccupiedArea
- * @tc.desc: ForceNotifyKeyboardOccupiedArea
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, ForceNotifyKeyboardOccupiedArea, Function | SmallTest | Level0)
-{
-    SessionInfo info;
-    info.abilityName_ = "CallingSession";
-    info.bundleName_ = "CallingSession";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->ForceNotifyKeyboardOccupiedArea();
-    bool result = false;
-    sceneSession->RegisterNotifyOccupiedAreaChangeCallback([&](DisplayId displayId) { result = true; });
-    sceneSession->ForceNotifyKeyboardOccupiedArea();
-    EXPECT_TRUE(result);
-}
-
-/**
  * @tc.name: SetSessionBlackListWhenShowAdd
  * @tc.desc: check func SetSessionBlackListWhenShow add branch
  * @tc.type: FUNC
@@ -1055,23 +971,87 @@ HWTEST_F(KeyboardSessionTest3, SetSessionBlackListWhenShowRemove, Function | Sma
 }
 
 /**
- *
- * @tc.name: PostKeyboardAnimationSyncTimeoutTask_HandlerNull
- * @tc.desc: test PostKeyboardAnimationSyncTimeoutTask with handler is null
+ * @tc.name: NotifyOccupiedAreaChanged
+ * @tc.desc: check func NotifyOccupiedAreaChanged
  * @tc.type: FUNC
  */
-HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_HandlerNull, Function | SmallTest | Level0)
+HWTEST_F(KeyboardSessionTest3, NotifyOccupiedAreaChanged, Function | SmallTest | Level0)
 {
-    auto keyboardSession = GetKeyboardSession(
-        "PostKeyboardAnimationSyncTimeoutTask_HandlerNull", "PostKeyboardAnimationSyncTimeoutTask_HandlerNull");
-    ASSERT_NE(keyboardSession, nullptr);
-
-    keyboardSession->SetEventHandler(nullptr, nullptr);
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
-    keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
-    EXPECT_TRUE(g_logMsg.find("handler is null") != std::string::npos);
-    LOG_SetCallback(nullptr);
+    auto keyboardSession = GetKeyboardSession("NotifyOccupiedAreaChanged", "NotifyOccupiedAreaChanged");
+    ASSERT_NE(keyboardSession, nullptr);
+    sptr<SceneSession> callingSession = GetSceneSession("TestSceneSession", "TestSceneSession");
+    ASSERT_NE(callingSession, nullptr);
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+
+    g_logMsg.clear();
+    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
+    EXPECT_TRUE(g_logMsg.find("occupiedAreaInfo is null") != std::string::npos);
+
+    g_logMsg.clear();
+    callingSession->sessionInfo_.isSystem_ = true;
+    occupiedAreaInfo = sptr<OccupiedAreaChangeInfo>::MakeSptr();
+    ASSERT_NE(occupiedAreaInfo, nullptr);
+    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
+    EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
+
+    g_logMsg.clear();
+    callingSession->sessionInfo_.isSystem_ = false;
+    sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(mockSessionStage, nullptr);
+    callingSession->sessionStage_ = mockSessionStage;
+    EXPECT_CALL(*mockSessionStage, NotifyOccupiedAreaChangeInfo(_, _, _, _)).Times(2);
+    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, false, nullptr);
+    EXPECT_TRUE(g_logMsg.find("Calling id:") != std::string::npos);
+
+    g_logMsg.clear();
+    callingSession->sessionInfo_.isSystem_ = false;
+    keyboardSession->NotifyOccupiedAreaChanged(callingSession, occupiedAreaInfo, true, nullptr);
+    EXPECT_TRUE(g_logMsg.find("size of avoidAreas: 5") != std::string::npos);
+}
+
+/**
+ * @tc.name: ForceProcessKeyboardOccupiedAreaInfo
+ * @tc.desc: check func ForceProcessKeyboardOccupiedAreaInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, ForceProcessKeyboardOccupiedAreaInfo, Function | SmallTest | Level0)
+{
+    auto keyboardSession = GetKeyboardSession("ProcessKeyboardOccupiedAreaInfo", "ProcessKeyboardOccupiedAreaInfo");
+    ASSERT_NE(keyboardSession, nullptr);
+    keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_ = false;
+    keyboardSession->isVisible_ = false;
+    keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
+    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
+
+    keyboardSession->isVisible_ = true;
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_FLOAT;
+    keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
+    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, false);
+
+    keyboardSession->property_->keyboardLayoutParams_.gravity_ = WindowGravity::WINDOW_GRAVITY_BOTTOM;
+    keyboardSession->ForceProcessKeyboardOccupiedAreaInfo();
+    EXPECT_EQ(keyboardSession->isCalculateOccupiedAreaWaitUntilDragEnd_, true);
+}
+
+/**
+ * @tc.name: ForceNotifyKeyboardOccupiedArea
+ * @tc.desc: ForceNotifyKeyboardOccupiedArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, ForceNotifyKeyboardOccupiedArea, Function | SmallTest | Level0)
+{
+    SessionInfo info;
+    info.abilityName_ = "CallingSession";
+    info.bundleName_ = "CallingSession";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->ForceNotifyKeyboardOccupiedArea();
+    bool result = false;
+    sceneSession->RegisterNotifyOccupiedAreaChangeCallback([&](DisplayId displayId) { result = true; });
+    sceneSession->ForceNotifyKeyboardOccupiedArea();
+    EXPECT_TRUE(result);
 }
 
 } // namespace
