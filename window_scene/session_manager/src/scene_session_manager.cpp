@@ -2290,7 +2290,7 @@ WMError SceneSessionManager::AddSessionBlackListForSession(int32_t persistentId,
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
-        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "AddSessionBlackList failed, session is null, id:%{public}d", persistentId);
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "AddSessionBlackList failed, session is null, id:%{public}d", persistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
     std::vector<sptr<SceneSession>> sceneSessionList = { sceneSession };
@@ -2302,7 +2302,7 @@ WMError SceneSessionManager::RemoveSessionBlackListForSession(int32_t persistent
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
-        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "RemoveSessionBlackList failed, session is null, id:%{public}d",
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RemoveSessionBlackList failed, session is null, id:%{public}d",
             persistentId);
         return WMError::WM_ERROR_INVALID_SESSION;
     }
