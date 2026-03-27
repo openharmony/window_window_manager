@@ -1416,8 +1416,8 @@ void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const R
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_)
-        || !postTaskDone_ || notifySizeChangeFlag_) {
+    if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_ ||
+        notifySizeChangeFlag_ || notifySizeChangeInCompatibleMode_.compare_exchange_strong(except_true_, false)) {
         NotifySizeChange(wmRect, wmReason);
         SetNotifySizeChangeFlag(false);
         lastSizeChangeReason_ = wmReason;
@@ -2525,9 +2525,14 @@ void WindowSessionImpl::SetAppHookWindowInfo(const HookWindowInfo& hookWindowInf
         hookWindowInfo_ = hookWindowInfo;
     }
     if (notifyWindowChange) {
-        const auto& windowRect = GetRect();
-        NotifySizeChange(windowRect, WindowSizeChangeReason::HOOK_INFO_CHANGE);
-        NotifyGlobalDisplayRectChange(windowRect, WindowSizeChangeReason::HOOK_INFO_CHANGE);
+        if (state_ == WindowState::STATE_SHOWN) {
+            const auto& windowRect = GetRect();
+            NotifySizeChange(windowRect, WindowSizeChangeReason::HOOK_INFO_CHANGE);
+            NotifyGlobalDisplayRectChange(windowRect, WindowSizeChangeReason::HOOK_INFO_CHANGE);
+        } else {
+            notifySizeChangeInCompatibleMode_.store(true);
+            notifyRectChangeInCompatibleMode_.store(true);
+        }
     }
 }
 
@@ -2885,6 +2890,9 @@ WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect,
 
     Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     if (newRect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
+        if (notifyRectChangeInCompatibleMode_.compare_exchange_strong(except_true_, false)) {
+            NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
+        }
         TLOGD(WmsLogTag::WMS_LAYOUT,
             "No change in rect or reason, windowId: %{public}d, rect: %{public}s, reason: %{public}u",
             windowId, rect.ToString().c_str(), reason);

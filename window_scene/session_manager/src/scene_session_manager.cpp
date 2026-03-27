@@ -10903,6 +10903,14 @@ int SceneSessionManager::GetRemoteSessionInfos(const std::string& deviceId, int3
 WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
                                             int32_t persistentId, SessionInfoBean& sessionInfo)
 {
+    AAFwk::DisplayInfo displayInfo;
+    return GetSessionInfo(deviceId, persistentId, sessionInfo, displayInfo);
+}
+
+WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
+                                            int32_t persistentId, SessionInfoBean& sessionInfo,
+                                            AAFwk::DisplayInfo& displayInfo)
+{
     TLOGI(WmsLogTag::DEFAULT, "id %{public}d", persistentId);
     if (!SessionPermission::JudgeCallerIsAllowedToUseSystemAPI()) {
         TLOGE(WmsLogTag::DEFAULT, "The caller is not system-app, can not use system-api");
@@ -10912,7 +10920,7 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
         TLOGE(WmsLogTag::DEFAULT, "The caller has not permission granted");
         return WSError::WS_ERROR_INVALID_PERMISSION;
     }
-    return taskScheduler_->PostSyncTask([this, &deviceId, persistentId, &sessionInfo]() {
+    return taskScheduler_->PostSyncTask([this, &deviceId, persistentId, &sessionInfo, &displayInfo]() {
         if (CheckIsRemote(deviceId)) {
             if (GetRemoteSessionInfo(deviceId, persistentId, sessionInfo) != ERR_OK) {
                 return WSError::WS_ERROR_INVALID_PARAM;
@@ -10942,7 +10950,7 @@ WSError SceneSessionManager::GetSessionInfo(const std::string& deviceId,
             }
             TLOGND(WmsLogTag::WMS_LIFE, "GetSessionInfo sessionId:%{public}d bundleName:%{public}s", persistentId,
                 sceneSessionInfo.bundleName_.c_str());
-            return SceneSessionConverter::ConvertToMissionInfo(sceneSession, sessionInfo);
+            return SceneSessionConverter::ConvertToMissionInfo(sceneSession, sessionInfo, displayInfo);
         } else {
             TLOGNW(WmsLogTag::WMS_LIFE, "sessionId: %{public}d not found", persistentId);
             return WSError::WS_ERROR_INVALID_PARAM;
