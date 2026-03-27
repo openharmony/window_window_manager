@@ -49,7 +49,6 @@ class PixelMap;
 } // namespace OHOS::Media
 
 namespace OHOS::Rosen {
-class ScreenProperty;
 class RSSurfaceNode;
 class RSUIContext;
 class RSTransaction;
