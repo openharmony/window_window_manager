@@ -1584,13 +1584,13 @@ void JsSceneSession::ProcessFloatViewStopRegister()
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return;
     }
-    session->SetFloatViewStopCallback([weakThis = wptr(this)]() {
+    session->SetFloatViewStopCallback([weakThis = wptr(this)](const std::string& reason) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGE(WmsLogTag::WMS_LIFE, "ProcessFloatViewStopRegister jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnFloatViewStop();
+        jsSceneSession->OnFloatViewStop(reason);
     });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
@@ -4564,10 +4564,10 @@ void JsSceneSession::OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::OnFloatViewStop()
+void JsSceneSession::OnFloatViewStop(const std::string& reasonn)
 {
     TLOGND(WmsLogTag::WMS_LAYOUT, "[NAPI] OnFloatViewStop");
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, reason, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "OnFloatViewStop jsSceneSession id:%{public}d has been destroyed",
@@ -4579,8 +4579,8 @@ void JsSceneSession::OnFloatViewStop()
             TLOGNE(WmsLogTag::WMS_LAYOUT, "jsCallBack is nullptr");
             return;
         }
-        napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        napi_value argv[] = { CreateJsValue(env, reason) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
 }

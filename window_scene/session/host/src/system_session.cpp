@@ -808,7 +808,7 @@ void SystemSession::NotifyStopFloatView()
         }
         if (session->stopFloatViewFunc_) {
             TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatView Func");
-            session->stopFloatViewFunc_();
+            session->stopFloatViewFunc_("AppInvokeAPIStop");
         } else {
             TLOGW(WmsLogTag::WMS_SYSTEM, "%{public}s StopFloatView Func is null", where);
             session->needStopFv_ = true;
@@ -828,7 +828,7 @@ void SystemSession::SetFloatViewStopCallback(NotifyStopFloatViewFunc&& func)
         session->stopFloatViewFunc_ = std::move(func);
         if (session->needStopFv_) {
             TLOGW(WmsLogTag::WMS_SYSTEM, "StopFloatView when register callBack");
-            session->stopFloatViewFunc_();
+            session->stopFloatViewFunc_("AppInvokeAPIStop");
             session->needStopFv_ = false;
         }
     }, __func__);

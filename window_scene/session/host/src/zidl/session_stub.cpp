@@ -754,7 +754,7 @@ int SessionStub::HandleRestoreFloatMainWindow(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     WMError ret = RestoreFloatMainWindow(wantParams);
-    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
@@ -1890,15 +1890,15 @@ int SessionStub::HandleUpdateFloatView(MessageParcel& data, MessageParcel& reply
 
 int SessionStub::HandleRestoreFloatViewMainWindow(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "HandleRestoreFloatViewMainWindow In");
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleRestoreFloatViewMainWindow In");
     std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
     if (wantParams == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "wantParams is nullptr");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "wantParams is nullptr");
         return ERR_INVALID_VALUE;
     }
-    WMError ret = RestoreFloatMainWindow(wantParams);
-    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
-        TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
+    WMError ret = RestoreFloatViewMainWindow(wantParams);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

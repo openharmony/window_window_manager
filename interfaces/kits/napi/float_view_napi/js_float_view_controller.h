@@ -22,6 +22,13 @@
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+enum class CallbackType : uint32_t {
+    STATE_CHANGE,
+    RECT_CHANGE,
+    LIMITS_CHANGE,
+};
+};
 napi_value CreateJsFloatViewControllerObject(napi_env env, const sptr<FloatViewController>& floatViewController);
 class JsFloatViewController {
 public:
@@ -44,7 +51,7 @@ public:
     static napi_value OnLimitsChange(napi_env env, napi_callback_info info);
     static napi_value OffLimitsChange(napi_env env, napi_callback_info info);
 private:
-    bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsCallback);
+    bool IsCallbackRegistered(napi_env env, const CallbackType& type, napi_value jsCallback);
     napi_value OnStartFloatView(napi_env env, napi_callback_info info);
     napi_value OnStopFloatView(napi_env env, napi_callback_info info);
     napi_value OnSetUIContext(napi_env env, napi_callback_info info);
@@ -56,13 +63,14 @@ private:
     napi_value OnGetWindowProperties(napi_env env, napi_callback_info info);
     napi_value OnRestoreMainWindow(napi_env env, napi_callback_info info);
 
-    napi_value RegisterCallbackWithType(const std::string& callbackType, napi_env env, napi_callback_info info);
-    napi_value UnregisterCallbackWithType(const std::string& callbackType, napi_env env, napi_callback_info info);
-    WMError DoRegisterCallbackWithType(const std::string& callbackType, const sptr<JsFloatViewListener>& listener);
-    WMError DoUnregisterCallbackWithType(const std::string& callbackType, const sptr<JsFloatViewListener>& listener);
+    napi_value RegisterCallbackWithType(const CallbackType& callbackType, napi_env env, napi_callback_info info);
+    napi_value UnregisterCallbackWithType(const CallbackType& callbackType, napi_env env, napi_callback_info info);
+    WMError DoRegisterCallbackWithType(const CallbackType& callbackType, const sptr<JsFloatViewListener>& listener);
+    WMError DoUnregisterCallbackWithType(const CallbackType& callbackType, const sptr<JsFloatViewListener>& listener);
 
     sptr<FloatViewController> fvController_ = nullptr;
-    std::unordered_map<std::string, std::set<sptr<JsFloatViewListener>>> jsCallbackMap_;
+    std::unordered_map<CallbackType, std::set<sptr<JsFloatViewListener>>> jsCallbackMap_;
+    std::mutex jsCallbackMutex_;
 };
 } // namespace Rosen
 } // namespace OHOS
