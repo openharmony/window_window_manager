@@ -52,6 +52,9 @@ ohos_shared_library("screen_session_manager_client") {
   ]
 
   external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "accessibility:accessibility_common",
     "c_utils:utils",
     "ffrt:libffrt",
     "graphic_2d:librender_service_base",
