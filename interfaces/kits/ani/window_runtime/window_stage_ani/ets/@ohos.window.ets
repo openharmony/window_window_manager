@@ -1683,12 +1683,14 @@ export interface WindowCreateParams {
     animationParams?: StartAnimationParams;
     systemAnimationParams?: StartAnimationSystemParams;
     needAnimation?: boolean;
+    isWindowLimitsForcible?: boolean;
 }
 
 export class WindowCreateParamsInternal implements WindowCreateParams {
     animationParams?: StartAnimationParams;
     systemAnimationParams?: StartAnimationSystemParams;
     needAnimation?: boolean;
+    isWindowLimitsForcible?: boolean;
 }
 
 /**
