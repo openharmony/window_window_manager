@@ -1055,6 +1055,7 @@ HWTEST_F(KeyboardSessionTest3, SetSessionBlackListWhenShowRemove, Function | Sma
 }
 
 /**
+ *
  * @tc.name: PostKeyboardAnimationSyncTimeoutTask_HandlerNull
  * @tc.desc: test PostKeyboardAnimationSyncTimeoutTask with handler is null
  * @tc.type: FUNC
