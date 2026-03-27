@@ -79,7 +79,7 @@ using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
-using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation, bool needAnimation)>;
+using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation, bool needAnimation, uint32_t promiseId)>;
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
@@ -648,7 +648,6 @@ public:
      * Window Rotation
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
-    WMError SetPreferredOrientationWithResult(Orientation orientation, uint32_t promiseId, bool needAnimation = true);
     WSError SetCurrentRotation(int32_t currentRotation);
     WSError GetSceneNodeCount(uint32_t& nodeCount);
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);

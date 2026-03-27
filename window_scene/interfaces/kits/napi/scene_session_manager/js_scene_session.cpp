@@ -5758,8 +5758,8 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         }
         napi_value rotationValue = CreateJsValue(env, rotation);
         napi_value animationValue = CreateJsValue(env, needAnimation);
-        napi_value promiseId = CreateJsValue(env, promiseId);
-        napi_value argv[] = { rotationValue, animationValue, promiseId };
+        napi_value promiseIdValue = CreateJsValue(env, promiseId);
+        napi_value argv[] = { rotationValue, animationValue, promiseIdValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         TLOGI(WmsLogTag::DEFAULT, "%{public}u", rotation);
     };

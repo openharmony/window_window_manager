@@ -244,6 +244,7 @@
             OHOS::Rosen::JsWindow::SetSystemBarProperties*;
             OHOS::Rosen::JsWindow::SetTitleAndDockHoverShown*;
             OHOS::Rosen::JsWindow::SetTitleButtonVisible*;
+            OHOS::Rosen::JsWindow::SetPreferredOrientationWithResult*;
             OHOS::Rosen::JsWindow::SetTopmost*;
             OHOS::Rosen::JsWindow::SetTouchable*;
             OHOS::Rosen::JsWindow::SetTouchableAreas*;

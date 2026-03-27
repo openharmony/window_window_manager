@@ -1474,11 +1474,11 @@ int SessionStub::HandleSetPreferredOrientationWithResult(MessageParcel& data, Me
     uint32_t orientation;
     uint32_t promiseId;
     bool needAnimation;
-    if (!data.ReadUint32(orientation) || !data.ReadUint32promiseId || !data.ReadBool(needAnimation)) {
+    if (!data.ReadUint32(orientation) || !data.ReadUint32(promiseId) || !data.ReadBool(needAnimation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read value failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = SetPreferredOrientationWithResult(static_cast<Orientation>orientation, promiseId, needAnimation);
+    WMError errCode = SetPreferredOrientationWithResult(static_cast<Orientation>(orientation), promiseId, needAnimation);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write errCode fail.");
         return ERR_INVALID_DATA;

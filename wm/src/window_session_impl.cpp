@@ -3370,7 +3370,7 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-void WindowSessionImpl::RegisterNotifyOrientationResultFunc(NotifyOrientationResultFunc&& func)
+void WindowSessionImpl::RegisterNotifyOrientationResultFunc(const NotifyOrientationResultFunc& func)
 {
     onNotifyOrientationResult_ = std::move(func);
 }

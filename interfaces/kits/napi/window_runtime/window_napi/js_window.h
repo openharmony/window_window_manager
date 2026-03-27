@@ -294,10 +294,10 @@ private:
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
 
-    napi_env env_;
-    static std::<uint32_t> orientationResultPromiseIdGenerator_;
-    static std::unordered_map<uint32_t, std::shared_ptr<NapiAsyncTask>>orientationResultPromiseMap_;
+    static std::atomic<uint32_t> orientationResultPromiseIdGenerator_;
+    static std::unordered_map<uint32_t, std::shared_ptr<AbilityRuntime::NapiAsyncTask>>orientationResultPromiseMap_;
     static std::mutex orientationResultMapMutex_;
+    static void RemoveOrientationPromiseFromMap(unint32_t promiseId);
 
     /*
      * Window Layout
@@ -332,6 +332,8 @@ private:
     napi_value OnIsWindowShowingSync(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientationWithResult(napi_env env, napi_callback_info info);
+    OrientationParams ValidateOrientationParams(
+        napi_env env, size_t argc, napi_value* argv, const std::string* funcName);
     void NotifyOrientationResult(uint32_t promiseId, uint32_t action);
     napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnConvertOrientationAndRotation(napi_env env, napi_callback_info info);
@@ -492,6 +494,7 @@ private:
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
+    napi_env env_;
 
     /*
      * Window Immersive
