@@ -228,6 +228,7 @@ ohos_shared_library("scene_session_manager") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   public_configs = [ ":session_manager_public_config" ]
@@ -377,6 +378,7 @@ ohos_shared_library("session_manager") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = session_manager_sources
 
@@ -430,6 +432,7 @@ ohos_shared_library("session_manager_lite") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "../session_manager_service/src/session_manager_service_proxy.cpp",

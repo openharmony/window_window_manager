@@ -60,6 +60,7 @@ ohos_shared_library("screen_session_manager") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "../../dm/src/zidl/display_manager_agent_proxy.cpp",

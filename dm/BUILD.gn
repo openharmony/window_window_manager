@@ -48,6 +48,7 @@ ohos_static_library("libdm_static") {
     integer_overflow = true
     ubsan = true
     boundary_sanitize = true
+    cfi_policy = "adaptive"
   }
   sources = [
     "../window_scene/screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
@@ -106,6 +107,7 @@ ohos_shared_library("libdm") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "../window_scene/screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
@@ -182,6 +184,7 @@ ohos_shared_library("libdm_ndk") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   public_configs = [ ":libdm_ndk_public_config" ]
