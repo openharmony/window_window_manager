@@ -28,8 +28,8 @@ public:
     virtual ~SessionLifecycleListenerProxy() = default;
 
     void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override;
-    void OnBatchLifecycleEvent(const vector<sptr<SceneSession>>& sessions, const std::vector<LifecycleEventPayload>& payloads) override;
-    void OnBundleInstanceLifecycleEvent(SessionState state, const LifecycleEventPayload& payload);
+    void OnBatchLifecycleEvent(const std::vector<LifecycleEventPayload>& payloads) override;
+    void OnBundleInstanceLifecycleEvent(const LifecycleEventPayload& payload);
 
 private:
     void SendRequestCommon(SessionLifecycleEvent event, const LifecycleEventPayload& payload);
