@@ -545,8 +545,7 @@ void ScreenSession::SetIsFakeSession(bool isFakeSession)
 
 void ScreenSession::SetPhyWidthAndHeight(uint32_t phyWidth, uint32_t phyHeight)
 {
-    TLOGNFI(WmsLogTag::DMS, "phyWidth=%{public}u, phyHeight=%{public}u",
-          phyWidth, phyHeight);
+    TLOGNFI(WmsLogTag::DMS, "phyWidth=%{public}u, phyHeight=%{public}u", phyWidth, phyHeight);
     property_.SetPhyWidth(phyWidth);
     property_.SetPhyHeight(phyHeight);
     property_.CalculateXYDpi(phyWidth, phyHeight);
