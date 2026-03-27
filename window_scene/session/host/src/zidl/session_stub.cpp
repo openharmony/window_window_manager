@@ -1478,7 +1478,8 @@ int SessionStub::HandleSetPreferredOrientationWithResult(MessageParcel& data, Me
         TLOGE(WmsLogTag::WMS_ROTATION, "read value failed");
         return ERR_INVALID_DATA;
     }
-    WMError errCode = SetPreferredOrientationWithResult(static_cast<Orientation>(orientation), promiseId, needAnimation);
+    WMError errCode =
+        SetPreferredOrientationWithResult(static_cast<Orientation>(orientation), promiseId, needAnimation);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write errCode fail.");
         return ERR_INVALID_DATA;
