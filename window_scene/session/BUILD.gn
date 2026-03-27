@@ -53,6 +53,7 @@ ohos_source_set("ui_effect_controller_client") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "host/src/ui_effect_controller_client.cpp",
@@ -79,6 +80,7 @@ ohos_source_set("ui_effect_controller") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "host/src/ui_effect_controller.cpp",
@@ -254,6 +256,7 @@ ohos_shared_library("scene_session") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "container/src/window_event_channel.cpp",
@@ -433,6 +436,7 @@ ohos_static_library("screen_session_static") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   public_configs = [ ":session_public_config" ]
@@ -466,6 +470,7 @@ ohos_shared_library("screen_session") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   public_configs = [ ":session_public_config" ]

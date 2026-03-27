@@ -202,6 +202,7 @@ ohos_shared_library("libwm") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   include_dirs = [
     "../utils/include",
@@ -462,6 +463,7 @@ ohos_shared_library("libwm_ndk") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   include_dirs = [
@@ -530,6 +532,7 @@ ohos_shared_library("libpip_web") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   install_enable = true
   sources = [
@@ -611,6 +614,7 @@ ohos_shared_library("libpip_ndk") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   public_configs = [ ":libpip_ndk_public_config" ]
@@ -676,6 +680,7 @@ ohos_shared_library("libmmi_client_adapter") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   include_dirs = [

@@ -31,6 +31,7 @@ ohos_shared_library("display_napi") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "js_display.cpp",
@@ -84,6 +85,7 @@ ohos_shared_library("display_kit") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "js_display.cpp",
