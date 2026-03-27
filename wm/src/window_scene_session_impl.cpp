@@ -552,7 +552,8 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     if (WindowHelper::IsSubWindow(type) && !property_->GetIsUIExtFirstSubWindow()) { // sub window
         TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
-        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+        if ((parentSession == nullptr || parentSession->GetHostSession() == nullptr) &&
+            !property_->GetIsCrossProcessWindow()) {
             TLOGE(WmsLogTag::WMS_RECOVER, "parentSession is null");
             return WMError::WM_ERROR_NULLPTR;
         }

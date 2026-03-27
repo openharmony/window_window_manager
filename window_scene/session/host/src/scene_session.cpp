@@ -479,6 +479,7 @@ WSError SceneSession::Foreground(
             return WSError::WS_OK;
         }
     }
+    NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
     return ForegroundTask(property);
 }
 
@@ -521,7 +522,6 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
         session->DisableUIFirstIfNeed();
-        session->NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
         session->SyncUISessionState();
         return WSError::WS_OK;
     }, __func__);
@@ -6424,13 +6424,16 @@ void SceneSession::NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent even
 {
     TLOGI(WmsLogTag::WMS_LIFE, "parentId: %{public}d, event: %{public}u",
         GetPersistentId(), static_cast<uint32_t>(event));
-    int32_t parentPid = GetCallingPid();
     const auto& subSessions = GetSubSession();
     for (const auto& subSession : subSessions) {
         if (subSession == nullptr) {
             continue;
         }
-        if (parentPid != subSession->GetCallingPid()) {
+        if (subSession->GetSessionProperty() == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "id:%{public}d, property is null", subSession->GetPersistentId());
+            continue;
+        }
+        if (subSession->GetSessionProperty()->GetIsCrossProcessWindow()) {
             TLOGI(WmsLogTag::WMS_LIFE, "Cross-process subWindow found, subId: %{public}d, event: %{public}u",
                 subSession->GetPersistentId(), static_cast<uint32_t>(event));
             subSession->NotifyParentLifecycleEvent(event);
