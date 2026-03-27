@@ -545,6 +545,7 @@ void ScreenSession::SetIsFakeSession(bool isFakeSession)
 
 void ScreenSession::SetPhyWidthAndHeight(uint32_t phyWidth, uint32_t phyHeight)
 {
+    TLOGNFI(WmsLogTag::DMS, "phyWidth=%{public}u, phyHeight=%{public}u", phyWidth, phyHeight);
     property_.SetPhyWidth(phyWidth);
     property_.SetPhyHeight(phyHeight);
     property_.CalculateXYDpi(phyWidth, phyHeight);
@@ -2568,6 +2569,11 @@ void ScreenSession::SetExtendProperty(RRect bounds, bool isCurrentOffScreenRende
 {
     property_.SetBounds(bounds);
     property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
+}
+
+void ScreenSession::SetPhyBounds(const RectF& rect)
+{
+    property_.SetPhyBounds(RRect(rect, 0.0f, 0.0f));
 }
 
 void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync)

@@ -8559,6 +8559,7 @@ sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId
     screenSession->SetVirtualPixelRatio(option.density_);
     screenSession->SetIsPcUse(g_isPcDevice ? true : false);
     screenSession->SetDisplayBoundary(RectF(0, 0, option.width_, option.height_), 0);
+    screenSession->SetPhyBounds(RectF(0, 0, option.width_, option.height_));
     screenSession->RegisterScreenChangeListener(this);
     screenSession->SetSerialNumber(option.serialNumber_);
     screenSession->SetPhyWidthAndHeight(option.phyWidth_, option.phyHeight_);
