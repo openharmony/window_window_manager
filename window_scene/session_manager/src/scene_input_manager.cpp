@@ -40,7 +40,6 @@ constexpr int DEFAULT_SCREEN_SCALE = 100;
 constexpr int DEFAULT_EXPAND_HEIGHT = 0;
 constexpr int DELAY_REPORT_TIME = 3000;
 constexpr float DIRECTION90 = 90.0F;
-static const std::string DELAY_TIME_DISABLED = OHOS::system::GetParameter("persist.window.delayTimeDisabled", "0");
 
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
@@ -922,8 +921,6 @@ void SceneInputManager::ConstructDumpWindowInfo(const MMI::WindowInfo& windowInf
 
 void SceneInputManager::HandleEmptyDisplayGroup()
 {
-    const bool delayTimeDisabled = (DELAY_TIME_DISABLED == "1");
-    const int32_t delayReportTime = delayTimeDisabled ? 0 : DELAY_REPORT_TIME;
     auto currentState = rootSessionState_.load();
     if (currentState == RootSessionState::CREATED_SUBSEQUENT) {
         TLOGI(WmsLogTag::WMS_EVENT, "Report window frozen");
@@ -942,7 +939,7 @@ void SceneInputManager::HandleEmptyDisplayGroup()
                     static_cast<int>(rootSessionState_.load()));
                 hasDelayedTaskScheduled_.store(false);
             };
-            eventHandler_->PostTask(task, "EmptyDisplayGroupDelay", delayReportTime);
+            eventHandler_->PostTask(task, "EmptyDisplayGroupDelay", DELAY_REPORT_TIME);
         } else {
             hasDelayedTaskScheduled_.store(false);
         }
