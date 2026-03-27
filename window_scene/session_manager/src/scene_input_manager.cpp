@@ -926,6 +926,7 @@ void SceneInputManager::HandleEmptyDisplayGroup()
     const int32_t delayReportTime = delayTimeDisabled ? 0 : DELAY_REPORT_TIME;
     auto currentState = rootSessionState_.load();
     if (currentState == RootSessionState::CREATED_SUBSEQUENT) {
+        TLOGI(WmsLogTag::WMS_EVENT, "Report window frozen");
         WindowInfoReporter::GetInstance().ReportWindowFrozen(
             WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION,
             "displayInfos flush to MMI is empty!");
@@ -937,6 +938,8 @@ void SceneInputManager::HandleEmptyDisplayGroup()
         if (currentState == RootSessionState::CREATED_FIRST_TIME) {
             auto task = [this]() {
                 rootSessionState_.store(RootSessionState::CREATED_SUBSEQUENT);
+                TLOGI(WmsLogTag::WMS_EVENT, "rootSessionState_: %{public}d",
+                    static_cast<int>(rootSessionState_.load()));
                 hasDelayedTaskScheduled_.store(false);
             };
             eventHandler_->PostTask(task, "EmptyDisplayGroupDelay", delayReportTime);
@@ -949,6 +952,7 @@ void SceneInputManager::HandleEmptyDisplayGroup()
 void SceneInputManager::SetRootSceneSessionCreated(bool created)
 {
     if (!created) {
+        TLOGE(WmsLogTag::WMS_EVENT, "false");
         return;
     }
 
