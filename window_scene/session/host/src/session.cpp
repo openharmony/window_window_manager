@@ -4418,7 +4418,6 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
 void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
     uint32_t minHeight, const ScreenMetrics& screenMetrics)
 {
-
     constexpr uint32_t MARGIN_OF_ERROR = 2; // The max vp bias for preventing giant logs.
     constexpr float DEFAULT_DENSITY = 1.0f;
 
