@@ -4140,7 +4140,9 @@ void WindowSceneSessionImpl::MaximizeEvent(const sptr<ISession> &hostSession)
             UpdateIsShowDecorInFreeMultiWindow(false);
             hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE_FULLSCREEN);
         } else {
-            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE);
+            SessionEventParam param;
+            param.titleButtonEventType_ = static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_MAXIMIZE);
+            hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE, param);
         }
         SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
         UpdateDecorEnable(true);

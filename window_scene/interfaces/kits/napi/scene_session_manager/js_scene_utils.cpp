@@ -2453,6 +2453,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "compatibleStyleMode", CreateJsValue(env, param.compatibleStyleMode));
     napi_set_named_property(env, objValue, "windowGlobalPosX", CreateJsValue(env, param.windowGlobalPosX_));
     napi_set_named_property(env, objValue, "windowGlobalPosY", CreateJsValue(env, param.windowGlobalPosY_));
+    napi_set_named_property(env, objValue, "titleButtonEventType", CreateJsValue(env, param.titleButtonEventType_));
     return objValue;
 }
 
@@ -3051,6 +3052,27 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
     napi_set_named_property(env, objValue, "LANDSCAPE_SPLIT",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_SPLIT)));
+    return objValue;
+}
+
+napi_value CreateTitleButtonEventType(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "EVENT_TYPE_UNDEFINED",
+        CreateJsValue(env, static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_UNDEFINED)));
+    napi_set_named_property(env, objValue, "EVENT_TYPE_MAXIMIZE",
+        CreateJsValue(env, static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_MAXIMIZE)));
+    napi_set_named_property(env, objValue, "EVENT_TYPE_END",
+        CreateJsValue(env, static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_END)));
     return objValue;
 }
 

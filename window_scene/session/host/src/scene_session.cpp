@@ -1072,6 +1072,7 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
     switch (event) {
         case SessionEvent::EVENT_MAXIMIZE:
             sessionEventParam_.waterfallResidentState = param.waterfallResidentState;
+            sessionEventParam_.titleButtonEventType_ = param.titleButtonEventType_;
             break;
         case SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE:
             sessionEventParam_.compatibleStyleMode = param.compatibleStyleMode;
@@ -1079,6 +1080,7 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
         default:
             sessionEventParam_.waterfallResidentState = static_cast<uint32_t>(WaterfallResidentState::UNCHANGED);
             sessionEventParam_.compatibleStyleMode = static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_DEFAULT);
+            sessionEventParam_.titleButtonEventType_ = static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_UNDEFINED);
             break;
     }
 }
