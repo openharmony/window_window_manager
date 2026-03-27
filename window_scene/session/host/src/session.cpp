@@ -928,7 +928,13 @@ SessionState Session::GetRealSessionState()
             GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType));
         return state;
     }
-    if (WindowHelper::IsSubWindow(winType) || WindowHelper::IsDialogWindow(winType)) {
+    if (auto parent = GetParentSession()) {
+        state = parent->GetSessionState();
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d, parentId=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType), parent->GetWindowId());
+    }
+    if (WindowHelper::IsSubWindow(winType)) {
         int32_t mainWinId = INVALID_SESSION_ID;
         auto mainSession = GetMainSession();
         if (mainSession != nullptr) {
