@@ -1943,7 +1943,11 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
 
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     if (GetForegroundInteractiveStatus()) {
-        GetAllAvoidAreas(avoidAreas);
+        if (IsImmersiveType() && updateReason == BOUNDS_CHANGED) {
+            MarkAvoidAreaAsDirty();
+        } else {
+            GetAllAvoidAreas(avoidAreas);
+        }
     } else {
         TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", GetPersistentId());
     }
