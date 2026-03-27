@@ -25,7 +25,6 @@
 #include "session/host/include/main_session.h"
 #include "session/host/include/session.h"
 #include "session/host/include/system_session.h"
-#include "session/screen/include/screen_property.h"
 #include "session/screen/include/screen_session.h"
 #include "window_event_channel_base.h"
 #include "window_helper.h"
@@ -308,24 +307,24 @@ HWTEST_F(SubSessionTest, RectCheck, TestSize.Level1)
     subSession_->parentSession_ = session;
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
-    ScreenProperty screenProperty;
-    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+    ScreenMetrics screenMetrics{1920, 1080, 2.0f};
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 300;
     curHeight = 200;
-    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 1930;
     curHeight = 200;
-    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 200;
-    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 1930;
-    subSession_->RectCheck(curWidth, curHeight, screenProperty);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 }
 
 /**
