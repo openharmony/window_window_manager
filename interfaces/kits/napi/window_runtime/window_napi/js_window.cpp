@@ -68,9 +68,9 @@ static std::mutex g_mutex;
 static int g_ctorCnt = 0;
 static int g_dtorCnt = 0;
 static int g_finalizerCnt = 0;
-std::atomic<uint32_t> orientationResultPromiseIdGenerator_ = 0;
-std::unordered_map<uint32_t, std::shared_ptr<AbilityRuntime::NapiAsyncTask>>orientationResultPromiseMap_;
-std::mutex orientationResultMapMutex_;
+std::atomic<uint32_t> JsWindow::orientationResultPromiseIdGenerator_ = 0;
+std::unordered_map<uint32_t, std::shared_ptr<AbilityRuntime::NapiAsyncTask>> JsWindow::orientationResultPromiseMap_;
+std::mutex JsWindow::orientationResultMapMutex_;
 JsWindow::JsWindow(const sptr<Window>& window, napi_env env)
     : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>()), env_(env)
 {
