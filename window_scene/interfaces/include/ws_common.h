@@ -57,6 +57,7 @@ constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 extern const std::string WINDOW_SCREEN_LOCK_PREFIX;
 extern const std::string VIEW_SCREEN_LOCK_PREFIX;
+constexpr const char* BOUNDS_CHANGED = "OnBoundsChanged";
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 
