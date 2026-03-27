@@ -1064,6 +1064,7 @@ HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_HandlerNull,
     auto keyboardSession = GetKeyboardSession(
         "PostKeyboardAnimationSyncTimeoutTask_HandlerNull", "PostKeyboardAnimationSyncTimeoutTask_HandlerNull");
     ASSERT_NE(keyboardSession, nullptr);
+
     keyboardSession->SetEventHandler(nullptr, nullptr);
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
@@ -1071,6 +1072,7 @@ HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_HandlerNull,
     EXPECT_TRUE(g_logMsg.find("handler is null") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
