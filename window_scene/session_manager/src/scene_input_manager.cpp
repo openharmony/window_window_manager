@@ -928,8 +928,7 @@ void SceneInputManager::HandleEmptyDisplayGroup()
     if (currentState == RootSessionState::CREATED_SUBSEQUENT) {
         WindowInfoReporter::GetInstance().ReportWindowFrozen(
             WindowDFXHelperType::WINDOW_FLUSH_EMPTY_DISPLAY_INFO_TO_MMI_EXCEPTION,
-            "displayInfos flush to MMI is empty!"
-        );
+            "displayInfos flush to MMI is empty!");
         return;
     }
     bool hasDelayedTaskScheduled = false;
