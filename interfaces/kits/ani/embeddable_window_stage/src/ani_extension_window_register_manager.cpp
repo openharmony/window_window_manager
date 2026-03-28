@@ -164,7 +164,7 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window>& wi
     if (retCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Register type %{public}s listener failed, ret: %{public}d",
             type.c_str(), retCode);
-        if (env_->GlobalReference_Delete(fnRef) != ANI_OK) {
+        if (env->GlobalReference_Delete(fnRef) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
         }
         return retCode;
