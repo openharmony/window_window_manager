@@ -379,6 +379,103 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
 int32_t OH_WindowManager_UnlockCursor(int32_t windowId);
 
 /**
+ * @brief Get the default density from a density information object.
+ *
+ * @param densityInfo Density information object returned by callback or OH_WindowManager_GetDensityInfoCopy.
+ * @param defaultDensity This parameter is the return value of the function, indicating the default density.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_DensityInfo_GetDefaultDensity(
+    const OH_WindowManager_DensityInfo* densityInfo, float* defaultDensity);
+
+/**
+ * @brief Get the system density from a density information object.
+ *
+ * @param densityInfo Density information object returned by callback or OH_WindowManager_GetDensityInfoCopy.
+ * @param systemDensity This parameter is the return value of the function, indicating the system density.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_DensityInfo_GetSystemDensity(
+    const OH_WindowManager_DensityInfo* densityInfo, float* systemDensity);
+
+/**
+ * @brief Get the custom density from a density information object.
+ *
+ * @param densityInfo Density information object returned by callback or OH_WindowManager_GetDensityInfoCopy.
+ * @param customDensity This parameter is the return value of the function, indicating the custom density.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_DensityInfo_GetCustomDensity(
+    const OH_WindowManager_DensityInfo* densityInfo, float* customDensity);
+
+/**
+ * @brief Get a copy of the density information of the specified window.
+ *
+ * @param windowId WindowId when window is created.
+ * @param densityInfo This parameter is the return value of the function, indicating the copied density information.
+ *                    The caller must release the returned object by calling OH_WindowManager_DensityInfo_Release.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_DensityInfo** densityInfo);
+
+/**
+ * @brief Subscribe to the listening event for density information changes of the specified window.
+ *
+ * @param windowId WindowId when window is created.
+ * @param callback Callback used to return updated density information.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_RegisterDensityInfoChangeCallback(
+    int32_t windowId, OH_WindowManager_DensityInfoCallback callback);
+
+/**
+ * @brief Unsubscribe from the listening event for density information changes of the specified window.
+ *
+ * @param windowId WindowId when window is created.
+ * @param callback Callback used to return updated density information.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INVALID_PARAM} parameter error.
+ *         {@link WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED} capability not supported.
+ *         {@link WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL} this window state is abnormal.
+ *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
+ * @since 26.0.0
+ */
+int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
+    int32_t windowId, OH_WindowManager_DensityInfoCallback callback);
+
+/**
+ * @brief Release the density information object returned by OH_WindowManager_GetDensityInfoCopy.
+ *
+ * @param densityInfo Density information object returned by OH_WindowManager_GetDensityInfoCopy.
+ * @since 26.0.0
+ */
+void OH_WindowManager_DensityInfo_Release(OH_WindowManager_DensityInfo* densityInfo);
+
+/**
  * @brief Check whether the current frame is the first frame.
  *
  * @param metrics Frame metrics data object.

@@ -37,11 +37,29 @@ struct OH_PixelmapNative;
 typedef struct OH_WindowManager_FrameMetrics OH_WindowManager_FrameMetrics;
 
 /**
+ * @brief Density information object.
+ *
+ * @since 26.0.0
+ */
+typedef struct OH_WindowManager_DensityInfo OH_WindowManager_DensityInfo;
+
+/**
  * @brief Frame metrics callback type.
  *
  * @since 26.0.0
  */
 typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(int32_t windowId, OH_WindowManager_FrameMetrics* metrics);
+
+/**
+ * @brief Density information change callback type.
+ *
+ * @param windowId WindowId when window is created.
+ * @param densityInfo Density information object. The object is managed by the framework and is valid only during
+ *                    the current callback. If a persistent copy is required, call
+ *                    OH_WindowManager_GetDensityInfoCopy.
+ * @since 26.0.0
+ */
+typedef void (*OH_WindowManager_DensityInfoCallback)(int32_t windowId, const OH_WindowManager_DensityInfo* densityInfo);
 
 /**
  * @brief Enumerates the result types of the wm interface
