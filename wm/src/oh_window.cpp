@@ -924,7 +924,7 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_D
             return;
         }
         *densityInfo = densityInfoInner;
-    }, __func__);
+        }, __func__);
     return errCode;
 }
 
@@ -949,7 +949,7 @@ int32_t OH_WindowManager_RegisterDensityInfoChangeCallback(
     auto callbackId = reinterpret_cast<uintptr_t>(callback);
     eventHandler->PostSyncTask([windowId, callback, callbackId, &errCode] {
         errCode = RegisterDensityInfoChangeCallbackInner(windowId, callback, callbackId);
-    }, __func__);
+        }, __func__);
     return errCode;
 }
 
@@ -969,7 +969,7 @@ int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
     auto callbackId = reinterpret_cast<uintptr_t>(callback);
     eventHandler->PostSyncTask([windowId, callbackId, &errCode] {
         errCode = UnregisterDensityInfoChangeCallbackInner(windowId, callbackId);
-    }, __func__);
+        }, __func__);
     return errCode;
 }
 
