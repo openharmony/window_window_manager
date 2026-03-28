@@ -37,8 +37,6 @@
 #include <ui_extension_utils.h>
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 
-#include "proxy/include/window_info.h"
-
 #include "application_context.h"
 #include "common/include/session_permission.h"
 #include "hisysevent.h"
@@ -3478,6 +3476,19 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
         return 0;
     }
     return ret->second;
+}
+
+void SceneSession::GetAllUIExtensionTokenInfo(std::vector<MMI::UserScreenInfo::UIExtensionInfo>& uiExtensionInfoList)
+{
+    std::for_each(extensionTokenInfos_.begin(), extensionTokenInfos_.end(),
+        [hostWindowId = GetPersistentId(), &uiExtensionInfoList](const UIExtensionTokenInfo& tokenInfo){
+        MMI::UserScreenInfo::UIExtensionInfo uiExtensionInfo = {
+            .token = tokenInfo.abilityToken,
+            .pid = tokenInfo.pid,
+            .hostWindowId = hostWindowId
+        };
+        uiExtensionInfoList.push_back(uiExtensionInfo);
+    });
 }
 
 bool SceneSession::IsInLSState() const
