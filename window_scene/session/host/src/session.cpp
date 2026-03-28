@@ -1820,6 +1820,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
+    NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
     UpdateSessionState(SessionState::STATE_FOREGROUND);
     if (!isActive_ || GetSessionInfo().reuseDelegatorWindow) {
         SetActive(true);
