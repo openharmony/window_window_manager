@@ -38,7 +38,9 @@ constexpr const char* ETS_WINDOW_RECT_CHANGE_CB = "windowRectChangeCallback";
 AniExtensionWindowListener::~AniExtensionWindowListener()
 {
     if (aniCallback_ != nullptr) {
-        env_->GlobalReference_Delete(aniCallback_);
+        if (env_->GlobalReference_Delete(aniCallback_) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
+        }
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]~AniExtensionWindowListener");
 }
@@ -176,9 +178,12 @@ void AniExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason 
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s This listener or env is nullptr", where);
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(env, ETS_UIEXTENSION_NAMESPACE_DESCRIPTOR,
+        ani_status ret = AniWindowUtils::CallAniFunctionVoid(env, ETS_UIEXTENSION_NAMESPACE_DESCRIPTOR,
             ETS_WINDOW_RECT_CHANGE_CB, nullptr, thisListener->aniCallback_,
             AniWindowUtils::CreateAniRect(env, rect), ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "call windowRectChangeCallback failed");
+        }
     };
     eventHandler_->PostTask(onRectChangeTask, "wms:AniExtensionWindowListener::RectChangeCallback", 0,
         AppExecFwk::EventQueue::Priority::IMMEDIATE);

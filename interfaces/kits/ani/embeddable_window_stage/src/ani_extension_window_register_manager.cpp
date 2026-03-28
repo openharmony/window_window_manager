@@ -120,7 +120,9 @@ bool AniExtensionWindowRegisterManager::IsCallbackRegistered(ani_env* env, const
     for (auto iter = aniCbMap_[type].begin(); iter != aniCbMap_[type].end(); ++iter) {
         ani_ref callback = static_cast<ani_ref>(fn);
         ani_boolean isEqual = ANI_FALSE;
-        env->Reference_StrictEquals(callback, iter->first, &isEqual);
+        if (env->Reference_StrictEquals(callback, iter->first, &isEqual) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to check value strictEquals");
+        }
         if (isEqual) {
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Method %{public}s has already been registered", type.c_str());
             return true;
@@ -162,7 +164,9 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window>& wi
     if (retCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Register type %{public}s listener failed, ret: %{public}d",
             type.c_str(), retCode);
-        env->GlobalReference_Delete(fnRef);
+        if (env_->GlobalReference_Delete(fnRef) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
+        }
         return retCode;
     }
     aniCbMap_[type][fnRef] = extensionWindowListener;
@@ -203,7 +207,9 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& 
         for (auto it = aniCbMap_[type].begin(); it != aniCbMap_[type].end(); ++it) {
             ani_ref callback = static_cast<ani_ref>(fn);
             ani_boolean isEqual = ANI_FALSE;
-            env->Reference_StrictEquals(callback, it->first, &isEqual);
+            if (env->Reference_StrictEquals(callback, it->first, &isEqual) != ANI_OK) {
+                TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to check value strictEquals");
+            }
             if (!isEqual) {
                 continue;
             }
