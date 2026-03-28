@@ -9868,13 +9868,8 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         if (displayId != currentDisplayId) {
             continue;
         }
-        bool isForeground = sceneSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
-                            sceneSession->GetSessionState() == SessionState::STATE_ACTIVE;
-        if (isForeground && sceneSession->GetParentSession() != nullptr) {
-            isForeground = isForeground &&
-                (sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_FOREGROUND ||
-                 sceneSession->GetParentSession()->GetSessionState() == SessionState::STATE_ACTIVE);
-        }
+        bool isForeground = sceneSession->GetRealSessionState() == SessionState::STATE_FOREGROUND ||
+                            sceneSession->GetRealSessionState() == SessionState::STATE_ACTIVE;
         bool isPrivate = sessionProperty->GetPrivacyMode() ||
             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
