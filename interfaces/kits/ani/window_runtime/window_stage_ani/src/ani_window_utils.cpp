@@ -2693,21 +2693,32 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
         return false;
     }
     ani_ref titleRef;
-    env->Object_GetPropertyByName_Ref(aniObject, "title", &titleRef);
     std::string title;
-    ani_status ret = GetStdString(env, static_cast<ani_string>(titleRef), title);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "title", &titleRef);
+    if (ret == ANI_OK) {
+        ret = GetStdString(env, static_cast<ani_string>(titleRef), title);
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to title");
+            return false;
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property title");
         return false;
     }
     ani_boolean decorEnabled = false;
-    env->Object_GetPropertyByName_Boolean(aniObject, "decorEnabled", &decorEnabled);
+    ret = env->Object_GetPropertyByName_Boolean(aniObject, "decorEnabled", &decorEnabled);
 
     // optional
     bool maximizeSupported = false;
-    GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
+    ret = GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property maximizeSupported");
+    }
     bool outlineEnabled = false;
-    GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
+    ret = GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property outlineEnabled");
+    }
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
@@ -2756,13 +2767,19 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
         return false;
     }
     bool isModal = false;
-    GetPropertyBoolObject(env, "isModal", aniObject, isModal);
+    ani_status ret = GetPropertyBoolObject(env, "isModal", aniObject, isModal);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isModal");
+    }
     if (isModal) {
         windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
     }
 
     bool isTopmost = false;
-    GetPropertyBoolObject(env, "isTopmost", aniObject, isTopmost);
+    ret = GetPropertyBoolObject(env, "isTopmost", aniObject, isTopmost);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isTopmost");
+    }
     if (!isModal && isTopmost) {
         TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
         return false;
@@ -2770,9 +2787,12 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
     windowOption->SetWindowTopmost(isTopmost);
 
     ani_ref modalityTypeRef;
-    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
+    ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
     ani_boolean isUndefined = false;
-    env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
+    ani_status isUndefineRet = env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
+    if (isUndefineRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to check reference isUndefined");
+    }
     ani_int modalityType;
     if (ret == ANI_OK && !isUndefined &&
         env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(modalityTypeRef), &modalityType) == ANI_OK) {
