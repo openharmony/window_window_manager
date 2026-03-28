@@ -127,7 +127,6 @@ using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSes
 using GetRsCmdBlockingCountFunc = std::function<int32_t()>;
 using GetAppUseControlDisplayMapFunc = std::function<std::unordered_map<DisplayId, bool>&()>;
 using SaveStartWindowFunc = std::function<void(std::string, std::string)>;
-using ScreenMetrics = std::tuple<uint32_t, uint32_t, float>;
 
 class ILifecycleListener {
 public:
@@ -178,6 +177,12 @@ struct DetectTaskInfo {
 struct ControlInfo {
     bool isNeedControl;
     bool isControlRecentOnly;
+};
+
+struct ScreenMetrics {
+    uint32_t widthPx;
+    uint32_t heightPx;
+    float density;
 };
 
 extern const std::string ATTACH_EVENT_NAME;
