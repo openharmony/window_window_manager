@@ -3065,6 +3065,27 @@ struct OrientationParams {
     std::string errMsg;
 };
 
+enum class OrientationExecutionResult : uint32_t {
+    START = 0,
+
+    /**
+     * Orientation policy is applied.
+     */
+    ORIENTATION_APPLIED = START,
+
+    /**
+     * Orientation policy is ignored.
+     */
+    ORIENTATION_IGNORED,
+
+    /**
+     * Orientation policy is pending and will be applied soon.
+     */
+    ORIENTATION_PENDING,
+
+    END,
+};
+
 /*
  * @brief Enumerates rotation change type.
  */

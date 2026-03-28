@@ -439,6 +439,22 @@ napi_value OrientationInit(napi_env env)
     return objValue;
 }
 
+napi_value OrientationExecutionResultInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "ORIENTATION_APPLIED", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_APPLIED)));
+    napi_set_named_property(env, objValue, "ORIENTATION_IGNORED", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_IGNORED)));
+    napi_set_named_property(env, objValue, "ORIENTATION_PENDING", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_PENDING)));
+    return objValue;
+}
+
 napi_value WindowStageEventTypeInit(napi_env env)
 {
     WLOGFD("WindowStageEventTypeInit");
@@ -1765,6 +1781,19 @@ napi_value RotationInfoTypeInit(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(RotationInfoType::DISPLAY_ORIENTATION)));
     napi_set_named_property(env, objValue, "DISPLAY_ROTATION",
         CreateJsValue(env, static_cast<uint32_t>(RotationInfoType::DISPLAY_ROTATION)));
+    return objValue;
+}
+
+napi_value ConvertRotationResultToJsValue(napi_env env, const AvoidArea& avoidArea,
+    AvoidAreaType type, bool useActualVisibility)
+{
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "leftRect", GetRectAndConvertToJsValue(env, avoidArea.leftRect_));
+    napi_set_named_property(env, objValue, "topRect", GetRectAndConvertToJsValue(env, avoidArea.topRect_));
+    napi_set_named_property(env, objValue, "rightRect", GetRectAndConvertToJsValue(env, avoidArea.rightRect_));
+    napi_set_named_property(env, objValue, "bottomRect", GetRectAndConvertToJsValue(env, avoidArea.bottomRect_));
     return objValue;
 }
 

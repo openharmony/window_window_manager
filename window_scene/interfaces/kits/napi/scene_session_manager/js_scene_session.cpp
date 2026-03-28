@@ -608,6 +608,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::UpdateSceneAnimationConfig);
     BindNativeFunction(env, objValue, "setMobileAppInPadLayoutFullScreen",
         moduleName, JsSceneSession::SetMobileAppInPadLayoutFullScreen);
+    BindNativeFunction(env, objValue, "notifyOrientationExecutionResult", moduleName,
+        JsSceneSession::NotifyOrientationExecutionResult);
     BindNativeFunction(env, objValue, "getSceneNodeCount", moduleName,
         JsSceneSession::GetSceneNodeCount);
 }
@@ -3021,6 +3023,12 @@ napi_value JsSceneSession::SetCurrentRotation(napi_env env, napi_callback_info i
     TLOGD(WmsLogTag::WMS_ROTATION, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetCurrentRotation(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::NotifyOrientationExecutionResult(napi_env env, napi_callback_info info)
+{
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnNotifyOrientationExecutionResult(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::GetSceneNodeCount(napi_env env, napi_callback_info info)
@@ -8814,6 +8822,48 @@ napi_value JsSceneSession::OnSetCurrentRotation(napi_env env, napi_callback_info
                                       "Set failed"));
         return NapiGetUndefined(env);
     }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnNotifyOrientationExecutionResult(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[NAPI]OnNotifyOrientationExecutionResult");
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    uint32_t promiseId = 0;
+    if (!ConvertFromJsValue(env, argv[0], promiseId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to promiseId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    uint32_t result = static_cast<uint32_t>(OrientationExecutionResult::END);
+    if (!ConvertFromJsValue(env, argv[1], result)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to result");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    OrientationExecutionResult orientationResult = static_cast<OrientationExecutionResult>(result);
+    if (orientationResult < OrientationExecutionResult::START ||
+        orientationResult >= OrientationExecutionResult::END) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[NAPI]result %{public}u invalid, id:%{public}d",
+            orientationResult, persistentId_);
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->NotifyOrientationExecutionResult(promiseId, orientationResult);
     return NapiGetUndefined(env);
 }
 

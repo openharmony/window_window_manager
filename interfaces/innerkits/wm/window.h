@@ -85,12 +85,12 @@ class AccessibilityEventInfo;
 namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
+using NotifyOrientationExecutionResultFunc = std::function<void(uint32_t, uint32_t)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
 using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
 using MouseEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
 using TouchEventFilterFunc = std::function<bool(const MMI::PointerEvent&)>;
-using NotifyOrientationResultFunc = std::function<void(uint32_t, uint32_t)>;
 class RSSurfaceNode;
 class RSTransaction;
 class RSUIContext;
@@ -2295,7 +2295,7 @@ public:
      * @param func Function to notify window destroyed.
      */
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) {}
-    virtual void RegisterNotifyOrientationResultFunc(const NotifyOrientationResultFunc& func) {}
+    virtual void RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func) {}
 
     /**
      * @brief Unregister window destroyed listener.
