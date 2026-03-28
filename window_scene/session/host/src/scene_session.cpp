@@ -479,7 +479,6 @@ WSError SceneSession::Foreground(
             return WSError::WS_OK;
         }
     }
-    NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
     return ForegroundTask(property);
 }
 
