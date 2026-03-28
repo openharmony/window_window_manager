@@ -1166,6 +1166,7 @@ struct PartialSystemBarProperty {
     uint32_t contentColor_ = 0;
     bool enableAnimation_ = false;
     SystemBarPropertyFlag flag_;
+    bool isolate_ = false;
 };
 
 /*
