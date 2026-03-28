@@ -144,6 +144,32 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoById, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplayInfoByIdWithHookRequired
+ * @tc.desc: GetDisplayInfoById with isHookRequired = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoByIdWithHookRequired, TestSize.Level1)
+{
+    ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
+    DisplayId displayId = 0;
+    sptr<DisplayInfo> ret = screenSessionManagerLite.GetDisplayInfoById(displayId, true);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetDisplayInfoByIdWithHookRequiredFalse
+ * @tc.desc: GetDisplayInfoById with isHookRequired = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoByIdWithHookRequiredFalse, TestSize.Level1)
+{
+    ScreenSessionManagerLite screenSessionManagerLite = ScreenSessionManagerLite();
+    DisplayId displayId = 0;
+    sptr<DisplayInfo> ret = screenSessionManagerLite.GetDisplayInfoById(displayId, false);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
  * @tc.name: GetCutoutInfo
  * @tc.desc: GetCutoutInfo
  * @tc.type: FUNC

@@ -95,6 +95,8 @@ private:
     void SetDuringCallState(std::string input);
     bool IsDeveloperModeCommand();
     void ShowCurrentLcdStatus(ScreenId screenId);
+    void SetDisplayHookInfo(std::string input);
+    void DumpDisplayHookInfo(DisplayId displayId, int32_t uid, bool isHookEnabled);
 private:
     const std::map<FoldStatus, std::string> statusMap_ = {
         {FoldStatus::EXPAND, "EXPAND"},
