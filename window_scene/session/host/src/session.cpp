@@ -4492,8 +4492,7 @@ void Session::RectCheckProcess()
     ScreenMetrics screenMetrics = std::make_tuple(
         static_cast<uint32_t>(screenProperty.GetBounds_.width_),
         static_cast<uint32_t>(screenProperty.GetBounds().rect_.height_),
-        density
-    );
+        density);
     if (!NearZero(density) && !NearZero(GetSessionRect().height_)) {
         float curWidth = GetSessionRect().width_ / density;
         float curHeight = GetSessionRect().height_ / density;
