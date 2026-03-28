@@ -269,12 +269,11 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
     return true;
 }
 
-void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+void SubSession::RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfSubWindow_;
     uint32_t minHeight = GetSystemConfig().miniHeightOfSubWindow_;
-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenMetrics);
 }
 
 bool SubSession::IsTopmost() const
