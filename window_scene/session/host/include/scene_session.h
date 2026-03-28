@@ -30,6 +30,7 @@
 #include "session/host/include/pc_fold_screen_controller.h"
 #include "vsync_station.h"
 #include "wm_common.h"
+#include "proxy/include/window_info.h"
 
 namespace OHOS::PowerMgr {
 class RunningLock;
@@ -169,6 +170,13 @@ struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
     uint32_t callingTokenId { 0 };
     sptr<IRemoteObject> abilityToken;
+    int32_t pid;
+};
+
+struct FullInfoForMMI {
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    std::vector<MMI::UserScreenInfo::UIExtensionInfo> uiExtensionInfoList;
 };
 
 class SceneSession : public Session {
@@ -784,6 +792,7 @@ public:
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
+    void GetAllUIExtensionTokenInfo(std::vector<MMI::UserScreenInfo::UIExtensionInfo>& uiExtensionInfoList);
     bool IsFreeMultiWindowMode() const
     {
         return systemConfig_.IsFreeMultiWindowMode();
