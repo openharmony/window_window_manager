@@ -1301,7 +1301,7 @@ private:
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);
-
+    bool IsAncoInFullScreen();
     /**
      * @brief Get the current FPS for this session.
      *
