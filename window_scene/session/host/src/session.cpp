@@ -4432,9 +4432,9 @@ void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t min
     const WindowType winType = GetWindowType();
     const bool isSystemWindowButNotDialog = WindowHelper::IsSystemWindowButNotDialog(winType);
 
-    uint32_t screenWidth = std::get<0>(screenMetrics);
-    uint32_t screenHeight = std::get<1>(screenMetrics);
-    float density = std::get<2>(screenMetrics);
+    const uint32_t screenWidth = screenMetrics.widthPx;
+    const uint32_t screenHeight = screenMetrics.heightPx;
+    const float density = screenMetrics.density;
 
     const float safeDensity = (!NearZero(density)) ? density : DEFAULT_DENSITY;
     const float screenWidthVp = screenWidth / safeDensity;
@@ -4489,10 +4489,10 @@ void Session::RectCheckProcess()
     }
     auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
-    ScreenMetrics screenMetrics = std::make_tuple(
-        static_cast<uint32_t>(screenProperty.GetBounds_.width_),
-        static_cast<uint32_t>(screenProperty.GetBounds().rect_.height_),
-        density);
+    ScreenMetrics screenMetrics{
+        .widthPx = static_cast<uint32_t>(screenProperty.GetBounds().rect_.width_),
+        .heightPx = static_cast<uint32_t>(screenProperty.GetBounds().rect_.height_),
+        .density = screenProperty.GetDensity()};
     if (!NearZero(density) && !NearZero(GetSessionRect().height_)) {
         float curWidth = GetSessionRect().width_ / density;
         float curHeight = GetSessionRect().height_ / density;
