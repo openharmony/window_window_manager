@@ -1826,6 +1826,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
+    NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
     UpdateSessionState(SessionState::STATE_FOREGROUND);
     if (!isActive_ || GetSessionInfo().reuseDelegatorWindow) {
         SetActive(true);
@@ -2029,13 +2030,11 @@ WSError Session::SetActive(bool active)
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
         isActive_ = active;
-        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::ACTIVE);
     }
     if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
         sessionStage_->SetActive(false);
         UpdateSessionState(SessionState::STATE_INACTIVE);
         isActive_ = active;
-        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::INACTIVE);
     }
     return WSError::WS_OK;
 }
@@ -4079,6 +4078,7 @@ WSError Session::NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo,
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
+    NotifyCrossProcessChildrenLifecycle(isFocused ? ParentLifeCycleEvent::ACTIVE : ParentLifeCycleEvent::INACTIVE);
     sessionStage_->UpdateFocus(focusNotifyInfo, isFocused);
 
     return WSError::WS_OK;

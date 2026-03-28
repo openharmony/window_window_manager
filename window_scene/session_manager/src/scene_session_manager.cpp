@@ -4230,12 +4230,12 @@ void SceneSessionManager::DestroySubSession(const sptr<SceneSession>& sceneSessi
         TLOGW(WmsLogTag::WMS_SUB, "sceneSession is nullptr");
         return;
     }
-    int32_t parentPid = sceneSession->GetCallingPid();
     for (const auto& subSession : sceneSession->GetSubSession()) {
         if (subSession == nullptr) {
             continue;
         }
-        if (parentPid == subSession->GetCallingPid()) {
+        if (subSession->GetSessionProperty() == nullptr ||
+            !subSession->GetSessionProperty()->GetIsCrossProcessWindow()) {
             const auto persistentId = subSession->GetPersistentId();
             TLOGI(WmsLogTag::WMS_SUB, "id: %{public}d", persistentId);
             DestroyAndDisconnectSpecificSessionInner(persistentId);
