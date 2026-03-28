@@ -374,6 +374,50 @@ HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequest13, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnRemoteRequestGetDisplayByIdWithHookRequired
+ * @tc.desc: test GetDisplayById with isHookRequired parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequestGetDisplayByIdWithHookRequired, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    DisplayId displayId = 0;
+    data.WriteUint64(displayId);
+    bool isHookRequired = true;
+    data.WriteBool(isHookRequired);
+
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: OnRemoteRequestGetDisplayByIdWithHookRequiredFalse
+ * @tc.desc: test GetDisplayById with isHookRequired = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerStubTest, OnRemoteRequestGetDisplayByIdWithHookRequiredFalse, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(ScreenSessionManagerStub::GetDescriptor());
+    DisplayId displayId = 0;
+    data.WriteUint64(displayId);
+    bool isHookRequired = false;
+    data.WriteBool(isHookRequired);
+
+    uint32_t code = static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, 0);
+}
+
+/**
  * @tc.name: OnRemoteRequest14
  * @tc.desc: normal function
  * @tc.type: FUNC

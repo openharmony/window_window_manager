@@ -65,6 +65,28 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfo, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplayInfoWithHookRequired
+ * @tc.desc: test GetDisplayInfo with isHookRequired = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfoWithHookRequired, TestSize.Level1)
+{
+    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID, true);
+    ASSERT_EQ(info, nullptr);
+}
+
+/**
+ * @tc.name: GetDisplayInfoWithHookRequiredFalse
+ * @tc.desc: test GetDisplayInfo with isHookRequired = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfoWithHookRequiredFalse, TestSize.Level1)
+{
+    sptr<DisplayInfo> info = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(DISPLAY_ID_INVALID, false);
+    ASSERT_EQ(info, nullptr);
+}
+
+/**
  * @tc.name: GetCutoutInfo
  * @tc.desc: test nullptr
  * @tc.type: FUNC

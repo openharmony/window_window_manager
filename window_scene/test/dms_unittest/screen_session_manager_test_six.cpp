@@ -371,6 +371,88 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoById01, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: GetDisplayInfoByIdWithHookRequired
+ * @tc.desc: GetDisplayInfoById with isHookRequired = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoByIdWithHookRequired, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    DisplayId id = 50;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->GetDisplayInfoById(id, true);
+    ASSERT_EQ(res, nullptr);
+    ssm->screenSessionMap_.erase(50);
+}
+
+/**
+ * @tc.name: GetDisplayInfoByIdWithHookRequiredFalse
+ * @tc.desc: GetDisplayInfoById with isHookRequired = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoByIdWithHookRequiredFalse, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    DisplayId id = 50;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->GetDisplayInfoById(id, false);
+    ASSERT_EQ(res, nullptr);
+    ssm->screenSessionMap_.erase(50);
+}
+
+/**
+ * @tc.name: FindDisplayInfoInSession
+ * @tc.desc: FindDisplayInfoInSession with nullptr session
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, FindDisplayInfoInSession, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    DisplayId id = 50;
+    auto res = ssm->FindDisplayInfoInSession(nullptr, id, true);
+    ASSERT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: FindDisplayInfoInSessionWithHookRequired
+ * @tc.desc: FindDisplayInfoInSession with isHookRequired parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, FindDisplayInfoInSessionWithHookRequired, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    DisplayId id = 50;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->FindDisplayInfoInSession(screenSession, id, true);
+    ASSERT_EQ(res, nullptr);
+    ssm->screenSessionMap_.erase(50);
+}
+
+/**
+ * @tc.name: FindDisplayInfoInSessionWithHookRequiredFalse
+ * @tc.desc: FindDisplayInfoInSession with isHookRequired = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, FindDisplayInfoInSessionWithHookRequiredFalse, Function | SmallTest | Level3)
+{
+    ScreenSessionManager* ssm = new ScreenSessionManager();
+    ASSERT_NE(ssm, nullptr);
+    DisplayId id = 50;
+    sptr<ScreenSession> screenSession = nullptr;
+    ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
+    auto res = ssm->FindDisplayInfoInSession(screenSession, id, false);
+    ASSERT_EQ(res, nullptr);
+    ssm->screenSessionMap_.erase(50);
+}
+
+/**
  * @tc.name: GetVisibleAreaDisplayInfoById01
  * @tc.desc: GetVisibleAreaDisplayInfoById01
  * @tc.type: FUNC
