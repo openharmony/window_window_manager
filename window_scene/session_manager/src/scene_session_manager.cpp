@@ -4681,14 +4681,19 @@ WSError SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<IRemot
             property->GetParentPersistentId());
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
+    AAFwk::UIExtensionSessionInfo info;
+    AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
+    // Check if session blocks subwindow
+    if (info.isBlockSubwindow) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "create agent subwindow denied!");
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto parentPid = extensionParentSession->GetCallingPid();
     if (pid == parentPid) { // Determine Whether to create a sub window in the same process.
         TLOGI(WmsLogTag::WMS_UIEXT, "pid == parentPid");
         return WSError::WS_OK;
     }
-    AAFwk::UIExtensionSessionInfo info;
-    AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
     if (info.persistentId != INVALID_SESSION_ID && info.hostWindowId != INVALID_SESSION_ID) {
         int32_t parentId = static_cast<int32_t>(info.hostWindowId);
         // Check the parent ids are the same in cross-process scenarios.
