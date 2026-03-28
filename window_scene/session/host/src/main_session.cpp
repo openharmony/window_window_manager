@@ -220,12 +220,11 @@ bool MainSession::IsMainWindowTopmost() const
     return GetSessionProperty()->IsMainWindowTopmost();
 }
 
-void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+void MainSession::RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
     uint32_t minHeight = GetSystemConfig().miniHeightOfMainWindow_;
-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenMetrics);
 }
 
 void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
