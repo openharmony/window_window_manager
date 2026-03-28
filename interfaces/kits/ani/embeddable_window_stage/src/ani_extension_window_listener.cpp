@@ -144,9 +144,12 @@ void AniExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]thisListener, eng or callback is nullptr");
             return;
         }
-        AniWindowUtils::CallAniFunctionVoid(eng, ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR,
+        ani_status ret = AniWindowUtils::CallAniFunctionVoid(eng, ETS_UIEXTENSION_HOST_NAMESPACE_DESCRIPTOR,
             ETS_KEYBOARD_HEIGHT_CHANGE_CB, nullptr, thisListener->aniCallback_,
             static_cast<ani_int>(info->rect_.height_));
+        if (ret != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "call keyboardHeightChangeCallback failed");
+        }
     };
     if (!eventHandler_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "Get main event handler failed!");
