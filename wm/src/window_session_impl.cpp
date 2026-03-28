@@ -3370,9 +3370,18 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
-void WindowSessionImpl::RegisterNotifyOrientationResultFunc(const NotifyOrientationResultFunc& func)
+void WindowSessionImpl::RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func)
 {
-    onNotifyOrientationResult_ = std::move(func);
+    onNotifyOrientationExecutionResult_ = std::move(func);
+}
+
+void WindowSessionImpl::NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result)
+{
+    if (!onNotifyOrientationExecutionResult_) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "winId: %{public}d NotifyOrientationExecutionResult is null", GetPersistentId());
+        return;
+    }
+    onNotifyOrientationExecutionResult_(promiseId, result);
 }
 
 WMError WindowSessionImpl::SetPreferredOrientationWithResult(
@@ -3386,7 +3395,7 @@ WMError WindowSessionImpl::SetPreferredOrientationWithResult(
     TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
         GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
     if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
-        onNotifyOrientationResult_(promiseId, 1);
+        NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_IGNORED);
         return WMError::WM_OK;
     }
     if (property_->IsSupportRotateFullScreen()) {

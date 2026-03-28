@@ -226,6 +226,7 @@
             OHOS::Rosen::SceneSession::SetSessionGetTargetOrientationConfigInfoCallback*;
             OHOS::Rosen::SceneSession::HasExtensionTokenInfoWithTokenID*;
             OHOS::Rosen::SceneSession::GetSceneNodeCount*;
+            OHOS::Rosen::SceneSession::NotifyOrientationExecutionResult*;
             OHOS::Rosen::SceneSession::AnimateTo*;
             OHOS::Rosen::SceneSession::SceneSession*;
             OHOS::Rosen::SceneSession::RegisterGetAppUseControlDisplayMapFunc*;

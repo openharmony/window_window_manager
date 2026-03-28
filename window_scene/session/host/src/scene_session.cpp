@@ -7184,8 +7184,8 @@ WMError SceneSession::SetPreferredOrientationWithResult(
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_ROTATION, "winId: %{public}d orientation: %{public}u promiseId: %{public}u",
-            session->GetPersistentId(), static_cast<uint32_t>(orientation), promiseId);
+        TLOGNI(WmsLogTag::WMS_ROTATION, "${public}s winId: %{public}d orientation: %{public}u promiseId: %{public}u",
+            where, session->GetPersistentId(), static_cast<uint32_t>(orientation), promiseId);
         session->GetSessionProperty()->SetRequestedOrientation(orientation, needAnimation);
         if (!session->onRequestedOrientationChange_) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s onRequestedOrientationChange is null", where);
@@ -10165,6 +10165,26 @@ WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->GetSceneNodeCount(nodeCount);
+}
+
+
+WSError SceneSession::NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result)
+{
+    PostTask([weakThis = wptr(this), promiseId, result, where = __func__] {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s winId: %{public}d promiseId: %{public}u result: %{public}u",
+            where, session->GetPersistentId(), promiseId, result);
+        if (!session->sessionStage_) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s sessionStage is nullptr", where);
+            return;
+        }
+        session->sessionStage_->NotifyOrientationExecutionResult(promiseId, result);
+        }, __func__);
+    return WSError::WS_OK;
 }
 
 WSError SceneSession::UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister)

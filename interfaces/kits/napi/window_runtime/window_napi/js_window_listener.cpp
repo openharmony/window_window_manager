@@ -221,7 +221,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
             napi_set_named_property(env, objValue, "area", avoidAreaValue);
             napi_value argv[] = { objValue };
-            thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+            thisListener->CallJssMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     };
     if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnAvoidAreaChanged") != napi_status::napi_ok) {

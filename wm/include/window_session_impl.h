@@ -208,7 +208,7 @@ public:
     WMError SetWindowType(WindowType type) override;
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
-    void RegisterNotifyOrientationResultFunc(const NotifyOrientationResultFunc& func) override;
+    void RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func) override;
     WMError SetPreferredOrientationWithResult(
         Orientation orientation, uint32_t promiseId, bool needAnimation = true) override;
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
@@ -1320,7 +1320,8 @@ private:
     /*
      * Window Rotation
      */
-    NotifyOrientationResultFunc onNotifyOrientationResult_;
+    NotifyOrientationExecutionResultFunc onNotifyOrientationExecutionResult_;
+    void NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result);
     void NotifyClientOrientationChange();
     void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
     void NotifyRotationChangeResultInner(const RotationChangeInfo& rotationChangeInfo);
