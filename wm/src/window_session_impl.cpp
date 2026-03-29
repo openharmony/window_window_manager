@@ -3375,13 +3375,16 @@ void WindowSessionImpl::RegisterNotifyOrientationExecutionResultFunc(const Notif
     onNotifyOrientationExecutionResult_ = std::move(func);
 }
 
-void WindowSessionImpl::NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result)
+WSError WindowSessionImpl::NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result)
 {
+    TLOGI(WmsLogTag::WMS_ROTATION, "winId: %{public}d promiseId: %{public}u, result: %{public}u",
+        GetPersistentId(), promiseId, result);
     if (!onNotifyOrientationExecutionResult_) {
         TLOGE(WmsLogTag::WMS_ROTATION, "winId: %{public}d NotifyOrientationExecutionResult is null", GetPersistentId());
-        return;
+        return WSError::WS_ERROR_NULLPTR;
     }
     onNotifyOrientationExecutionResult_(promiseId, result);
+    return WSError::WS_OK;
 }
 
 WMError WindowSessionImpl::SetPreferredOrientationWithResult(
