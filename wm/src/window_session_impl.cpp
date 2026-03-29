@@ -3390,31 +3390,15 @@ WSError WindowSessionImpl::NotifyOrientationExecutionResult(uint32_t promiseId, 
 WMError WindowSessionImpl::SetPreferredOrientationWithResult(
     Orientation orientation, uint32_t promiseId, bool needAnimation)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetRequestedOrientation");
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "window is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetPreferredOrientationWithResult");
+    WMError error = HandleSetOrientationCommon(orientation, needAnimation);
+    if (error == WMError::WM_ERROR_INVALID_WINDOW) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
+        return error;
     }
-    TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
-        GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
-    if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+    if (error == WMError::WM_DO_NOTHING) {
         NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_IGNORED);
         return WMError::WM_OK;
-    }
-    if (property_->IsSupportRotateFullScreen()) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "compatible request orientation %{public}u", orientation);
-        property_->SetIsLayoutFullScreen(IsHorizontalOrientation(orientation));
-    }
-    if (needAnimation) {
-        NotifyPreferredOrientationChange(orientation);
-        SetUserRequestedOrientation(orientation);
-    }
-    if (orientation == Orientation::INVALID) {
-        Orientation requestedOrientation = ConvertInvalidOrientation();
-        property_->SetRequestedOrientation(requestedOrientation, needAnimation);
-    } else {
-        property_->SetRequestedOrientation(orientation, needAnimation);
-        property_->SetIsSpecificSessionRequestOrientation(true);
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
@@ -3424,14 +3408,27 @@ WMError WindowSessionImpl::SetPreferredOrientationWithResult(
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetRequestedOrientation");
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
+    WMError error = HandleSetOrientationCommon(orientation, needAnimation);
+    if (error == WMError::WM_ERROR_INVALID_WINDOW) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
         return;
     }
-    TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
-        GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
-    if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+    if (error == WMError::WM_DO_NOTHING) {
         return;
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+}
+
+WMError WindowSessionImpl::HandleSetOrientationCommon(Orientation orientation, bool needAnimation)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
+          GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
+    if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+        return WMError::WM_DO_NOTHING;
     }
     if (property_->IsSupportRotateFullScreen()) {
         TLOGI(WmsLogTag::WMS_COMPAT, "compatible request orientation %{public}u", orientation);
@@ -3448,7 +3445,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
         property_->SetRequestedOrientation(orientation, needAnimation);
         property_->SetIsSpecificSessionRequestOrientation(true);
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    return WMError::WM_OK;
 }
 
 Orientation WindowSessionImpl::GetRequestedOrientation()
