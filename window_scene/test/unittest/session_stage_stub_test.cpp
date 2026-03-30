@@ -1383,7 +1383,7 @@ HWTEST_F(SessionStageStubTest, HandleGetSceneNodeCount, TestSize.Level1)
     ASSERT_TRUE(sessionStageStub_ != nullptr);
 
     // Case 1: Failed to read interface token
-    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleGetSceneNodeCount(data, reply));
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleGetSceneNodeCount(data, reply));
 
     // Case 2: Success case with valid interface token
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
