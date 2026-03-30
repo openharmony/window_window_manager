@@ -42,7 +42,6 @@ public:
     std::shared_ptr<NativeReference> GetCustomNodeController() override;
     std::shared_ptr<NativeReference> GetTypeNode() const override;
     bool IsTypeNodeEnabled() const override;
-    bool IsPullPiPAndHandleNavigation();
     std::string GetPiPNavigationId() const override;
 
 protected:
@@ -57,11 +56,9 @@ protected:
 
     wptr<PictureInPictureController> weakRef_ = nullptr;
     std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
-    int32_t firstHandleId_ = -1;
 
 private:
     void DeletePIPMode();
-    virtual NavigationController* GetNavigationController(const std::string& navId);
 };
 } // namespace Rosen
 } // namespace OHOS

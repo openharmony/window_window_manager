@@ -4564,7 +4564,7 @@ void JsSceneSession::OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
 
-void JsSceneSession::OnFloatViewStop(const std::string& reasonn)
+void JsSceneSession::OnFloatViewStop(const std::string& reason)
 {
     TLOGND(WmsLogTag::WMS_LAYOUT, "[NAPI] OnFloatViewStop");
     auto task = [weakThis = wptr(this), persistentId = persistentId_, reason, env = env_] {

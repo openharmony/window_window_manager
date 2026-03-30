@@ -27,9 +27,11 @@ public:
     static bool isSupportFloatView_;
 
     static bool HasActiveController();
-    static bool IsActiveController(const wptr<FloatViewController>& fvController);
-    static void SetActiveController(const sptr<FloatViewController>& fvController);
-    static void RemoveActiveController(const wptr<FloatViewController>& fvController);
+    static bool IsActiveController(const wptr<FloatViewController>& fvControllerWeak);
+    static void SetActiveController(const wptr<FloatViewController>& fvControllerWeak);
+    static void RemoveActiveController(const wptr<FloatViewController>& fvControllerWeak);
+
+    static sptr<FloatViewController> GetActiveController() { return activeController_; }
 
     static void DoActionEvent(const std::string& actionName, const std::string& reason);
     static void DoActionClose(const std::string& reason);
@@ -40,7 +42,6 @@ public:
     static void SyncFvWindowInfo(uint32_t windowId, const FloatViewWindowInfo& windowInfo, const std::string& reason);
     static void SyncFvLimits(uint32_t windowId, const FloatViewLimits& limits);
 private:
-    static sptr<FloatViewController> GetActiveController() { return activeController_; }
     // controller in use
     static sptr<FloatViewController> activeController_;
 };

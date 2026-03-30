@@ -65,7 +65,7 @@ public:
     void SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo) override;
     WSError StopFloatView() override;
     void SetFloatViewStopCallback(NotifyStopFloatViewFunc&& func) override;
-    WSError SendFvActionEvent(const std::string&action, const std::string& reason) override;
+    WSError SendFvActionEvent(const std::string& action, const std::string& reason) override;
     WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) override;
     WMError UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) override;
     WMError RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters) override;

@@ -63,12 +63,7 @@ napi_value CreateJsFloatViewControllerObject(napi_env env, const sptr<FloatViewC
     TLOGI(WmsLogTag::WMS_SYSTEM, "CreateJsFloatViewControllerObject");
     std::unique_ptr<JsFloatViewController> jsFloatViewController =
         std::make_unique<JsFloatViewController>(floatViewController);
-    status = napi_wrap(
-        env, objValue, jsFloatViewController.release(), JsFloatViewController::Finalizer, nullptr, nullptr);
-    if (status != napi_ok) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "napi bind object failed, %{public}d", status);
-        return NapiGetUndefined(env);
-    }
+    napi_wrap(env, objValue, jsFloatViewController.release(), JsFloatViewController::Finalizer, nullptr, nullptr);
 
     BindFunctions(env, objValue, "JsFloatViewController");
     return objValue;
@@ -87,7 +82,7 @@ JsFloatViewController::~JsFloatViewController()
 void JsFloatViewController::Finalizer(napi_env env, void* data, void* hint)
 {
     TLOGD(WmsLogTag::WMS_SYSTEM, "Finalizer is called");
-    delete static_cast<JsFloatViewController*>(data);
+    std::unique_ptr<JsFloatViewController>(static_cast<JsFloatViewController*>(data));
 }
 
 napi_value JsFloatViewController::Start(napi_env env, napi_callback_info info)
@@ -346,6 +341,10 @@ napi_value JsFloatViewController::OnSetWindowSizeTask(napi_env env, const Rect &
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
+        if (rect.width_ <= 0 || rect.height_ <= 0) {
+            *errCodePtr = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+            return;
+        }
         *errCodePtr = ConvertErrorToCode(fvController->SetWindowSize(rect));
     };
     NapiAsyncTask::CompleteCallback complete =
@@ -539,21 +538,23 @@ napi_value JsFloatViewController::UnregisterCallbackWithType(
             }
         }
         jsCallbackMap_.erase(callbackType);
-    } else {
-        napi_value value = argv[INDEX_ZERO];
-        for (auto& callback : jsCallbackMap_[callbackType]) {
-            bool isEquals = false;
-            napi_strict_equals(env, value, callback->GetCallbackRef()->GetNapiValue(), &isEquals);
-            if (isEquals) {
-                WMError ret = DoUnregisterCallbackWithType(callbackType, callback);
-                if (ret != WMError::WM_OK) {
-                    TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d failed, no value", callbackType);
-                    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "unRegister failed.");
-                }
-                jsCallbackMap_[callbackType].erase(callback);
-                break;
-            }
+        TLOGI(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d success", callbackType);
+        return NapiGetUndefined(env);
+    }
+    napi_value value = argv[INDEX_ZERO];
+    for (auto& callback : jsCallbackMap_[callbackType]) {
+        bool isEquals = false;
+        napi_strict_equals(env, value, callback->GetCallbackRef()->GetNapiValue(), &isEquals);
+        if (!isEquals) {
+            continue;
         }
+        WMError ret = DoUnregisterCallbackWithType(callbackType, callback);
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d failed, no value", callbackType);
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "unRegister failed.");
+        }
+        jsCallbackMap_[callbackType].erase(callback);
+        break;
     }
     TLOGI(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d success", callbackType);
     return NapiGetUndefined(env);

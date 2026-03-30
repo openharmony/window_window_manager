@@ -41,23 +41,27 @@ bool FloatViewManager::HasActiveController()
     return activeController_ != nullptr;
 }
 
-bool FloatViewManager::IsActiveController(const wptr<FloatViewController>& fvController)
+bool FloatViewManager::IsActiveController(const wptr<FloatViewController>& fvControllerWeak)
 {
     if (!HasActiveController()) {
         return false;
     }
-    bool res = fvController.GetRefPtr() == activeController_.GetRefPtr();
+    bool res = fvControllerWeak.GetRefPtr() == activeController_.GetRefPtr();
     return res;
 }
 
-void FloatViewManager::SetActiveController(const sptr<FloatViewController>& fvController)
+void FloatViewManager::SetActiveController(const wptr<FloatViewController>& fvControllerWeak)
 {
+    auto fvController = fvControllerWeak.promote();
+    if (fvController == nullptr) {
+        return;
+    }
     activeController_ = fvController;
 }
 
-void FloatViewManager::RemoveActiveController(const wptr<FloatViewController>& fvController)
+void FloatViewManager::RemoveActiveController(const wptr<FloatViewController>& fvControllerWeak)
 {
-    if (HasActiveController() && fvController.GetRefPtr() == activeController_.GetRefPtr()) {
+    if (HasActiveController() && fvControllerWeak.GetRefPtr() == activeController_.GetRefPtr()) {
         activeController_ = nullptr;
     }
 }

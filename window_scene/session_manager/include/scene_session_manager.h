@@ -765,6 +765,7 @@ public:
     WMError GetCurrentPiPWindowInfo(std::string& bundleName);
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override;
     WMError GetIsPipEnabled(bool& isPipEnabled) override;
+    int32_t GetPipTemplateType() override;
     void SetPiPSettingSwitchStatus(bool switchStatus);
     void SetIsPipEnabled(bool isPipEnabled);
     void SetStartPiPFailedListener(NotifyStartPiPFailedFunc&& func);

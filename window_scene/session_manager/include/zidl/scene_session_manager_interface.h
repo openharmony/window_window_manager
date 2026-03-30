@@ -182,6 +182,7 @@ public:
         TRANS_ID_SNAPSHOT_BY_WINDOW_ID,
         TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO,
         TRANS_ID_GET_FLOAT_VIEW_LIMITS,
+        TRANS_ID_GET_PIP_TEMPLATE_TYPE,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -498,6 +499,7 @@ public:
         sptr<IUIEffectController>& controller, int32_t& controllerId) override { return WMError::WM_OK; };
     WMError GetPiPSettingSwitchStatus(bool& switchStatus) override { return WMError::WM_OK; }
     WMError GetIsPipEnabled(bool& isPipEnabled) override { return WMError::WM_OK; }
+    int32_t GetPipTemplateType() override { return -1; }
     WMError AddSessionBlackList(const std::unordered_set<std::string>& bundleNames,
         const std::unordered_set<std::string>& privacyWindowTags) override { return WMError::WM_OK; }
     WMError RemoveSessionBlackList(const std::unordered_set<std::string>& bundleNames,
