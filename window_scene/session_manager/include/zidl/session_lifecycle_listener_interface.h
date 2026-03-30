@@ -28,7 +28,7 @@ public:
 
     enum class ISessionLifecycleListenerMessage : uint32_t {
         TRANS_ON_LIFECYCLE_EVENT = 0,
-        TRANS_ON_BUNDLE_INSTANCE_LIFECYCLE_EVENT
+        TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT
     };
 
     enum SessionLifecycleEvent {
@@ -108,7 +108,7 @@ public:
     };
 
     virtual void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) {};
-    virtual void OnBundleInstanceLifecycleEvent(const LifecycleEventPayload& payload) {};
+    virtual void OnAppInstanceLifecycleEvent(const LifecycleEventPayload& payload) {};
     virtual void OnBatchLifecycleEvent(const std::vector<LifecycleEventPayload>& payloads) {};
 };
 } // namespace OHOS

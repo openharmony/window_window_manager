@@ -2062,8 +2062,8 @@ void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
     }
 }
 
-void SceneSessionManager::GetSceneSessionVectorByBundleInstance(const std::string& bundleName,
-    int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& bundleInstanceSessions)
+void SceneSessionManager::GetSceneSessionVectorByAppInstance(const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& appInstanceSessions)
 {
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
@@ -2077,7 +2077,7 @@ void SceneSessionManager::GetSceneSessionVectorByBundleInstance(const std::strin
         if (!appInstanceKey.empty() && sceneSession->GetSessionInfo().appInstanceKey_ != appInstanceKey) {
             continue;
         }
-        bundleInstanceSessions.push_back(sceneSession);
+        appInstanceSessions.push_back(sceneSession);
     }
 }
 
@@ -19252,18 +19252,18 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    if (listenerController_->IsListenerMapByBundleInstanceSizeReachLimit()) {
+    if (listenerController_->IsListenerMapByAppInstanceSizeReachLimit()) {
         TLOGW(WmsLogTag::WMS_LIFE, "The number of listeners has reached the upper limit.");
         return WMError::WM_ERROR_NO_MEM;
     }
     taskScheduler_->PostAsyncTask([this, listener, bundleName, appIndex, appInstanceKey, where = __func__] {
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
-        std::vector<sptr<SceneSession>> bundleInstanceSessions;
-        SceneSessionManager::GetInstance().GetSceneSessionVectorByBundleInstance(
-            bundleName, appIndex, appInstanceKey, bundleInstanceSessions);
+        std::vector<sptr<SceneSession>> appInstanceSessions;
+        SceneSessionManager::GetInstance().GetSceneSessionVectorByAppInstance(
+            bundleName, appIndex, appInstanceKey, appInstanceSessions);
         vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
-        listenerController_->ConstructBatchPayload(payloads, bundleInstanceSessions);
+        listenerController_->ConstructBatchPayload(payloads, appInstanceSessions);
         listener->OnBatchLifecycleEvent(payloads);
     }, __func__);
     return WMError::WM_OK;

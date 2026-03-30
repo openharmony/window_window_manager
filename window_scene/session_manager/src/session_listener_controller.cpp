@@ -399,9 +399,9 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
         TLOGW(WmsLogTag::WMS_LIFE, "invalid bundleName");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    BundleInstanceFilterKey key = { bundleName, appIndex, appInstanceKey };
-    auto it = listenerMapByBundleInstance_.find(key);
-    if (it != listenerMapByBundleInstance_.end()) {
+    AppInstanceFilterKey key = { bundleName, appIndex, appInstanceKey };
+    auto it = listenerMapByAppInstance_.find(key);
+    if (it != listenerMapByAppInstance_.end()) {
         if (it->second.size() >= MAX_LIFECYCLE_LISTENER_LIMIT) {
             TLOGE(WmsLogTag::WMS_LIFE, "The number of listen target has reached the upper limit.");
             return WMError::WM_ERROR_INVALID_OPERATION;
@@ -410,7 +410,7 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
     } else {
         std::vector<sptr<ISessionLifecycleListener>> newListenerList;
         newListenerList.emplace_back(listener);
-        listenerMapByBundleInstance_.emplace(key, newListenerList);
+        listenerMapByAppInstance_.emplace(key, newListenerList);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "register sessionLifecycleListener by bundle+appIndex+appInstanceKey finished.");
     return WMError::WM_OK;
@@ -458,11 +458,11 @@ void SessionListenerController::RemoveSessionLifecycleListener(const sptr<IRemot
         }
     }
 
-    for (auto it = listenerMapByBundleInstance_.begin(); it != listenerMapByBundleInstance_.end();) {
+    for (auto it = listenerMapByAppInstance_.begin(); it != listenerMapByAppInstance_.end();) {
         auto& listeners = it->second;
         listeners.erase(std::remove_if(listeners.begin(), listeners.end(), compareByAsObject), listeners.end());
         if (listeners.empty()) {
-            it = listenerMapByBundleInstance_.erase(it);
+            it = listenerMapByAppInstance_.erase(it);
         } else {
             ++it;
         }
@@ -486,8 +486,7 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
     ConstructPayload(payload, sessionInfo, 0, 0, 0, reason);
     NotifyMissionEvent(event, persistentId);
     taskScheduler_->PostAsyncTask(
-        [weakThis = weak_from_this(), event, payload, bundleName, persistentId,
-            where = __func__] {
+        [weakThis = weak_from_this(), event, payload, bundleName, persistentId, where = __func__] {
             auto controller = weakThis.lock();
             if (controller == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "controller is null.");
@@ -506,7 +505,7 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
         }, __func__);
 }
 
-void SessionListenerController::NotifyBundleInstanceLifecycleEvent(SessionState state,
+void SessionListenerController::NotifyAppInstanceLifecycleEvent(SessionState state,
     const SessionInfo& sessionInfo, LifeCycleChangeReason reason)
 {
     std::string bundleName = sessionInfo.bundleName_;
@@ -518,7 +517,7 @@ void SessionListenerController::NotifyBundleInstanceLifecycleEvent(SessionState 
         return;
     }
     ISessionLifecycleListener::LifecycleEventPayload payload;
-    ConstructBundleInstancePayload(payload, sessionInfo, 0, 0, 0, reason);
+    ConstructAppInstancePayload(payload, sessionInfo, 0, 0, 0, reason);
     payload.sessionState_ = state;
     taskScheduler_->PostAsyncTask(
         [weakThis = weak_from_this(), payload, bundleName, appIndex, appInstanceKey, persistentId,
@@ -531,7 +530,7 @@ void SessionListenerController::NotifyBundleInstanceLifecycleEvent(SessionState 
             TLOGI(WmsLogTag::WMS_LIFE,
                 "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d, reason: %{public}u",
                 bundleName.c_str(), persistentId, payload.sessionState_, payload.lifeCycleChangeReason_);
-            controller->NotifyListeners(controller->listenerMapByBundleInstance_, BundleInstanceFilterKey{ bundleName,
+            controller->NotifyListeners(controller->listenerMapByAppInstance_, AppInstanceFilterKey{ bundleName,
                 appIndex, appInstanceKey }, payload);
         }, __func__);
 }
@@ -561,7 +560,7 @@ void SessionListenerController::NotifyListeners(const MapType& listenerMap, cons
         const auto& listeners = it->second;
         for (const auto& listener : listeners) {
             if (listener != nullptr) {
-                listener->OnBundleInstanceLifecycleEvent(payload);
+                listener->OnAppInstanceLifecycleEvent(payload);
             }
         }
     }
@@ -636,10 +635,10 @@ bool SessionListenerController::IsListenerMapByBundleSizeReachLimit(bool isBundl
     }, __func__);
 }
 
-bool SessionListenerController::IsListenerMapByBundleInstanceSizeReachLimit() const
+bool SessionListenerController::IsListenerMapByAppInstanceSizeReachLimit() const
 {
     return taskScheduler_->PostSyncTask([this] {
-        return listenerMapByBundleInstance_.size() >= MAX_LISTEN_TARGET_LIMIT;
+        return listenerMapByAppInstance_.size() >= MAX_LISTEN_TARGET_LIMIT;
     }, __func__);
 }
 } // namespace Rosen

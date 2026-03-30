@@ -178,8 +178,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
         case static_cast<uint32_t>(
             SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES):
             return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLE_INSTANCE):
-            return HandleRegisterSessionLifecycleListenerByBundle(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_APP_INSTANCE):
+            return HandleRegisterSessionLifecycleListenerByAppInstance(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
             return HandleUnregisterSessionLifecycleListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST):
@@ -1634,7 +1634,7 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundle(
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appInstanceKey");
         return ERR_INVALID_DATA;
     }
-    WMError ret = RegisterSessionLifecycleListenerByBundle(listener, bundleName, appIndex, appInstanceKey);
+    WMError ret = RegisterSessionLifecycleListenerByAppInstance(listener, bundleName, appIndex, appInstanceKey);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }

@@ -105,7 +105,7 @@ public:
         TRANS_ID_GET_CALLING_WINDOW_INFO,
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS,
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
-        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLE_INSTANCE,
+        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_APP_INSTANCE,
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
         TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_BY_PERSISTENTID,
@@ -308,7 +308,7 @@ public:
      * @param appInstanceKey The app instance key for which the listener should be registered
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
-    virtual WMError RegisterSessionLifecycleListenerByBundle(const sptr<ISessionLifecycleListener>& listener,
+    virtual WMError RegisterSessionLifecycleListenerByAppInstance(const sptr<ISessionLifecycleListener>& listener,
         const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) = 0;
 
     /**

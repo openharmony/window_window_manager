@@ -57,11 +57,11 @@ void SessionLifecycleListenerProxy::SendRequestCommon(
 void SessionLifecycleListenerProxy::OnBatchLifecycleEvent(const std::vector<LifecycleEventPayload>& payloads)
 {
     for (const auto& payload : payloads) {
-        OnBundleInstanceLifecycleEvent(payload);
+        OnAppInstanceLifecycleEvent(payload);
     }
 }
 
-void SessionLifecycleListenerProxy::OnBundleInstanceLifecycleEvent(const LifecycleEventPayload& payload)
+void SessionLifecycleListenerProxy::OnAppInstanceLifecycleEvent(const LifecycleEventPayload& payload)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -81,7 +81,7 @@ void SessionLifecycleListenerProxy::OnBundleInstanceLifecycleEvent(const Lifecyc
         return;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        ISessionLifecycleListenerMessage::TRANS_ON_BUNDLE_INSTANCE_LIFECYCLE_EVENT), data, reply, option) != NO_ERROR) {
+        ISessionLifecycleListenerMessage::TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT), data, reply, option) != NO_ERROR) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
         return;
     }

@@ -29,7 +29,7 @@ public:
 
     void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override;
     void OnBatchLifecycleEvent(const std::vector<LifecycleEventPayload>& payloads) override;
-    void OnBundleInstanceLifecycleEvent(const LifecycleEventPayload& payload);
+    void OnAppInstanceLifecycleEvent(const LifecycleEventPayload& payload);
 
 private:
     void SendRequestCommon(SessionLifecycleEvent event, const LifecycleEventPayload& payload);

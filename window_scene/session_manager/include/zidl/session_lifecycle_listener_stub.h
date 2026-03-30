@@ -32,7 +32,7 @@ public:
 
 private:
     int HandleOnLifecycleEvent(MessageParcel& data, MessageParcel& reply);
-    int HandleOnBundleInstanceLifecycleEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleOnAppInstanceLifecycleEvent(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS
-#endif //OHOS_SESSION_LIFECYCLE_LISTENER_PROXY_H
+#endif //OHOS_SESSION_LIFECYCLE_LISTENER_STUB_H
