@@ -4305,9 +4305,7 @@ void SceneSession::InitializeCrossMoveDrag()
     RETURN_IF_NULL(movedSurfaceNode);
     auto originalPositionZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     moveDragController_->SetOriginalPositionZ(originalPositionZ);
-    auto property = GetSessionProperty();
-    RETURN_IF_NULL(property);
-    moveDragController_->InitCrossDisplayProperty(property->GetDisplayId());
+    moveDragController_->InitCrossDisplayProperty(GetSessionProperty()->GetDisplayId());
 }
 
 /** @note @window.drag */
