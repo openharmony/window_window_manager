@@ -33,8 +33,8 @@ int SessionLifecycleListenerStub::OnRemoteRequest(
     case static_cast<uint32_t>(ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_LIFECYCLE_EVENT):
         return HandleOnLifecycleEvent(data, reply);
     
-    case static_cast<uint32_t>(ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_BUNDLE_INSTANCE_LIFECYCLE_EVENT):
-        return HandleOnBundleInstanceLifecycleEvent(data, reply);
+    case static_cast<uint32_t>(ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT):
+        return HandleOnAppInstanceLifecycleEvent(data, reply);
     default:
         WLOGFE("Failed to handle request, code: %{public}u", code);
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -63,7 +63,7 @@ int SessionLifecycleListenerStub::HandleOnLifecycleEvent(MessageParcel& data, Me
     return 0;
 }
 
-int SessionLifecycleListenerStub::HandleOnBundleInstanceLifecycleEvent(MessageParcel& data, MessageParcel& reply)
+int SessionLifecycleListenerStub::HandleOnAppInstanceLifecycleEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     std::unique_ptr<LifecycleEventPayload> payload(data.ReadParcelable<LifecycleEventPayload>());
@@ -71,7 +71,7 @@ int SessionLifecycleListenerStub::HandleOnBundleInstanceLifecycleEvent(MessagePa
         TLOGE(WmsLogTag::WMS_LIFE, "Invalid payload");
         return ERR_INVALID_DATA;
     }
-    OnBundleInstanceLifecycleEvent(*payload);
+    OnAppInstanceLifecycleEvent(*payload);
     return 0;
 }
 }

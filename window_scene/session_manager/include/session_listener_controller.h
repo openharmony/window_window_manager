@@ -117,12 +117,12 @@ private:
     };
 
 private:
-    struct BundleInstanceFilterKey {
+    struct AppInstanceFilterKey {
         std::string bundleName_;
         int32_t appIndex_ = 0;
         std::string appInstanceKey_ = "";
 
-        bool operator<(const BundleInstanceFilterKey& other) const
+        bool operator<(const AppInstanceFilterKey& other) const
         {
             return std::tie(bundleName_, appIndex_, appInstanceKey_) <
                 std::tie(other.bundleName_, other.appIndex_, other.appInstanceKey_);
@@ -152,7 +152,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
     std::map<int32_t, std::vector<sptr<ISessionLifecycleListener>>> listenerMapById_;
     std::map<std::string, std::vector<sptr<ISessionLifecycleListener>>> listenerMapByBundle_;
-    std::map<BundleInstanceFilterKey, std::vector<sptr<ISessionLifecycleListener>>> listenerMapByBundleInstance_;
+    std::map<AppInstanceFilterKey, std::vector<sptr<ISessionLifecycleListener>>> listenerMapByAppInstance_;
     std::vector<sptr<ISessionLifecycleListener>> listenersOfAllBundles_;
 };
 }  // namespace Rosen
