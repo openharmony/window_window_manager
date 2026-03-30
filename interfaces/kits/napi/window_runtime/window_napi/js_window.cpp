@@ -87,9 +87,10 @@ JsWindow::JsWindow(const sptr<Window>& window, napi_env env)
         windowToken_ = nullptr;
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
     };
-    NotifyOrientationExecutionResultFunc orientationExecutionResultFunc = [this](uint32_t promiseId, uint32_t action) {
-        TLOGNI(WmsLogTag::WMS_ROTATION, "Notify orientation result [%{public}u, %{public}u]", promiseId, action);
-        this->NotifyOrientationExecutionResult(promiseId, action);
+    NotifyOrientationExecutionResultFunc orientationExecutionResultFunc = [this](
+        uint32_t promiseId, OrientationExecutionResult result) {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "Notify orientation result [%{public}u, %{public}u]", promiseId, result);
+        this->NotifyOrientationExecutionResult(promiseId, result);
     };
     windowToken_->RegisterWindowDestroyedListener(func);
     windowToken_->RegisterNotifyOrientationExecutionResultFunc(orientationExecutionResultFunc);
@@ -4259,16 +4260,17 @@ void JsWindow::NotifyOrientationExecutionResult(uint32_t promiseId, OrientationE
         napiAsyncTask = it->second;
         orientationExecutionResultPromiseMap_.erase(it);
     }
-    auto asyncTask = [task = napiAsyncTask, env = env_, executionResult, where = __func__] {
-        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s action=%{public}u", where, action);
+    const char* const where = __func__;
+    auto asyncTask = [task = napiAsyncTask, env = env_, executionResult, where] {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s result=%{public}u", where, executionResult);
         if (env == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ROTATION, "${public}s env is null", where);
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s env is null", where);
             return;
         }
         napi_value objValue = nullptr;
         napi_create_object(env, &objValue);
         if (objValue == nullptr) {
-            TLOGNE(WmsLogTag::WMS_ROTATION, "${public}s Failed to get object", where)
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s Failed to get object", where);
             return;
         }
         napi_set_named_property(env, objValue, "executionResult",
