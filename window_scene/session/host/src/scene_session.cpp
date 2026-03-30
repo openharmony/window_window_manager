@@ -5162,7 +5162,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             // When the drag-to-move or drag-to-scale operation ends, if the window's current screen
             // is the same as the starting screen, the cloned node is removed immediately. Otherwise,
             // the removal of the cloned node is submitted along with the vsync refresh.
-            if (!moveDragController_->IsWindowCrossScreenOnDragEnd()) {
+            if (moveDragController_->ShouldFlushOnDragEnd()) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "Cloned node removed immediately");
                 RSTransactionAdapter::FlushImplicitTransaction({ targetSurfaceNode, dragMoveMountedNode });
             }
@@ -5295,9 +5295,9 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
     // relayout triggered on the next vsync, so no explicit flush is required here.
     // If the window is NOT crossing screens, the changes should be flushed
     // immediately to avoid affecting the next drag operation.
-    if (!needFlush) {
-        needFlush = moveDragController_ && !moveDragController_->IsWindowCrossScreenOnDragEnd();
-        TLOGD(WmsLogTag::WMS_KEYBOARD, "On drag end, needFlush: %{public}d", needFlush);
+    if (!needFlush && moveDragController_) {
+        needFlush = moveDragController_->ShouldFlushOnDragEnd();
+        TLOGD(WmsLogTag::WMS_LAYOUT, "On drag end, needFlush: %{public}d", needFlush);
     }
 
     // If the bounds update needs to be flushed to RS immediately, operate on a
