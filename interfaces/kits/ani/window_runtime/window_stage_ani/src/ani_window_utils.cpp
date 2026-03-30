@@ -2707,17 +2707,22 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
     }
     ani_boolean decorEnabled = false;
     ret = env->Object_GetPropertyByName_Boolean(aniObject, "decorEnabled", &decorEnabled);
-
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property decorEnabled");
+        return false;
+    }
     // optional
     bool maximizeSupported = false;
     ret = GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to get property maximizeSupported");
+        return false;
     }
     bool outlineEnabled = false;
     ret = GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to get property outlineEnabled");
+        return false;
     }
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
@@ -2760,38 +2765,19 @@ bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sp
     return true;
 }
 
-bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+bool AniWindowUtils::HandleModalityTypeParsing(ani_env* env, ani_object aniObject, const sptr<WindowOption>& windowOption, bool isModal)
 {
-    if (aniObject == nullptr || windowOption == nullptr) {
-        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
-        return false;
-    }
-    bool isModal = false;
-    ani_status ret = GetPropertyBoolObject(env, "isModal", aniObject, isModal);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isModal");
-    }
-    if (isModal) {
-        windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
-    }
-
-    bool isTopmost = false;
-    ret = GetPropertyBoolObject(env, "isTopmost", aniObject, isTopmost);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isTopmost");
-    }
-    if (!isModal && isTopmost) {
-        TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
-        return false;
-    }
-    windowOption->SetWindowTopmost(isTopmost);
-
     ani_ref modalityTypeRef;
-    ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
+    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property modalityType");
+        return false;
+    }
     ani_boolean isUndefined = false;
     ani_status isUndefineRet = env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
     if (isUndefineRet != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to check reference isUndefined");
+        return false;
     }
     ani_int modalityType;
     if (ret == ANI_OK && !isUndefined &&
@@ -2812,6 +2798,39 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
             TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to modalityType");
             return false;
         }
+    }
+    return true;
+}
+
+bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption)
+{
+    if (aniObject == nullptr || windowOption == nullptr) {
+        TLOGE(WmsLogTag::WMS_SUB, "aniObject or windowOption is null");
+        return false;
+    }
+    bool isModal = false;
+    ani_status ret = GetPropertyBoolObject(env, "isModal", aniObject, isModal);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isModal");
+        return false;
+    }
+    if (isModal) {
+        windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    }
+
+    bool isTopmost = false;
+    ret = GetPropertyBoolObject(env, "isTopmost", aniObject, isTopmost);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isTopmost");
+        return false;
+    }
+    if (!isModal && isTopmost) {
+        TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
+        return false;
+    }
+    windowOption->SetWindowTopmost(isTopmost);
+    if (!HandleModalityTypeParsing(env, aniObject, windowOption, isModal)) {
+        return false;
     }
     TLOGI(WmsLogTag::WMS_SUB, "isModal: %{public}d, isTopmost: %{public}d, WindowFlag: %{public}d",
         isModal, isTopmost, windowOption->GetWindowFlags());
