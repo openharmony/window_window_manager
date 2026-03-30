@@ -1352,6 +1352,12 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         }
     }
 
+    int32_t priority = 0;
+    if (argc > 2 && ConvertFromJsValue(env, argv[2], priority) && priority < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "priority=%{public}d is less than 0", priority);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+    }
+
     std::shared_ptr<Media::PixelMap> pixelMap;
     pixelMap = OHOS::Media::PixelMapNapi::GetPixelMap(env, nativeObject);
     if (pixelMap == nullptr) {
@@ -1378,10 +1384,16 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         (GetType(env, argv[2]) == napi_function ? argv[2] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    auto asyncTask = [env, pixelMap, isShow, task = napiAsyncTask] {
-        RSInterfaces::GetInstance().ShowWatermark(pixelMap, isShow);
+    auto asyncTask = [env, pixelMap, isShow, priority, task = napiAsyncTask, where = __func__] {
+        WMError errCode = WMError::WM_OK;
+        if (isShow) {
+            errCode= SingletonContainer::Get<WindowManager>().SetScreenWatermarkImage(pixelMap, priority);
+        } else {
+            errCode= SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage(pixelMap);
+        }
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: enable=%{public}d, priority=%{public}d, errCode=%{public}d",
+            where, isShow, priority, static_cast<int32_t>(errCode));
         task->Resolve(env, NapiGetUndefined(env));
-        WLOGD("OnSetWaterMarkImage success");
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWaterMarkImage") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
