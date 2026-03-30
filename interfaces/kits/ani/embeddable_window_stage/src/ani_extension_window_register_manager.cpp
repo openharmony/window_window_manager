@@ -122,6 +122,7 @@ bool AniExtensionWindowRegisterManager::IsCallbackRegistered(ani_env* env, const
         ani_boolean isEqual = ANI_FALSE;
         if (env->Reference_StrictEquals(callback, iter->first, &isEqual) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to check value strictEquals");
+            return false;
         }
         if (isEqual) {
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Method %{public}s has already been registered", type.c_str());
@@ -166,12 +167,65 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window>& wi
             type.c_str(), retCode);
         if (env->GlobalReference_Delete(fnRef) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
+            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         }
         return retCode;
     }
     aniCbMap_[type][fnRef] = extensionWindowListener;
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]Register type %{public}s listener success! callback map size: %{public}zu",
         type.c_str(), aniCbMap_[type].size());
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode AniExtensionWindowRegisterManager::UnregisterAllListeners(
+    CaseType caseType, sptr<Window>& window, const std::string& type, ani_env* env)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]Unregister all callback, type: %{public}s", type.c_str());
+    for (auto it = aniCbMap_[type].begin(); it != aniCbMap_[type].end();) {
+        WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Unregister type %{public}s listener failed, ret: %{public}d",
+                type.c_str(), ret);
+            return ret;
+        }
+        env->GlobalReference_Delete(it->second->GetAniCallback());
+        it->second->SetAniCallback(nullptr);
+        it = aniCbMap_[type].erase(it);
+    }
+    return WmErrorCode::WM_OK;
+}
+
+WmErrorCode AniExtensionWindowRegisterManager::UnregisterSpecificListener(
+    CaseType caseType, sptr<Window>& window, const std::string& type, ani_env* env, ani_object fn)
+{
+    bool findFlag = false;
+    for (auto it = aniCbMap_[type].begin(); it != aniCbMap_[type].end(); ++it) {
+        ani_ref callback = static_cast<ani_ref>(fn);
+        ani_boolean isEqual = ANI_FALSE;
+        if (env->Reference_StrictEquals(callback, it->first, &isEqual) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to check value strictEquals");
+            continue;
+        }
+        if (!isEqual) {
+            continue;
+        }
+        findFlag = true;
+        WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
+        if (ret != WmErrorCode::WM_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Unregister type %{public}s listener failed, ret: %{public}d",
+                type.c_str(), ret);
+            return ret;
+        }
+        env->GlobalReference_Delete(it->second->GetAniCallback());
+        it->second->SetAniCallback(nullptr);
+        aniCbMap_[type].erase(it);
+        break;
+    }
+    if (!findFlag) {
+        TLOGE(WmsLogTag::WMS_UIEXT,
+            "[ANI]Unregister type %{public}s listener failed because not found callback!", type.c_str());
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     return WmErrorCode::WM_OK;
 }
 
@@ -189,47 +243,15 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& 
     }
     ani_boolean isUndefined = ANI_FALSE;
     env->Reference_IsUndefined(static_cast<ani_ref>(fn), &isUndefined);
+    WmErrorCode ret = WmErrorCode::WM_OK;
     if (isUndefined == ANI_TRUE) {
-        TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]Unregister all callback, type: %{public}s", type.c_str());
-        for (auto it = aniCbMap_[type].begin(); it != aniCbMap_[type].end();) {
-            WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
-            if (ret != WmErrorCode::WM_OK) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Unregister type %{public}s listener failed, ret: %{public}d",
-                    type.c_str(), ret);
-                return ret;
-            }
-            env->GlobalReference_Delete(it->second->GetAniCallback());
-            it->second->SetAniCallback(nullptr);
-            aniCbMap_[type].erase(it++);
-        }
+        ret = UnregisterAllListeners(caseType, window, type, env);
     } else {
-        bool findFlag = false;
-        for (auto it = aniCbMap_[type].begin(); it != aniCbMap_[type].end(); ++it) {
-            ani_ref callback = static_cast<ani_ref>(fn);
-            ani_boolean isEqual = ANI_FALSE;
-            if (env->Reference_StrictEquals(callback, it->first, &isEqual) != ANI_OK) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to check value strictEquals");
-            }
-            if (!isEqual) {
-                continue;
-            }
-            findFlag = true;
-            WmErrorCode ret = ProcessRegister(caseType, it->second, window, type, false);
-            if (ret != WmErrorCode::WM_OK) {
-                TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Unregister type %{public}s listener failed, ret: %{public}d",
-                    type.c_str(), ret);
-                return ret;
-            }
-            env->GlobalReference_Delete(it->second->GetAniCallback());
-            it->second->SetAniCallback(nullptr);
-            aniCbMap_[type].erase(it);
-            break;
-        }
-        if (!findFlag) {
-            TLOGE(WmsLogTag::WMS_UIEXT,
-                "[ANI]Unregister type %{public}s listener failed because not found callback!", type.c_str());
-            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-        }
+        ret = UnregisterSpecificListener(caseType, window, type, env, fn);
+    }
+
+    if (ret != WmErrorCode::WM_OK) {
+        return ret;
     }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]Unregister type %{public}s listener success! callback map size: %{public}zu",
         type.c_str(), aniCbMap_[type].size());

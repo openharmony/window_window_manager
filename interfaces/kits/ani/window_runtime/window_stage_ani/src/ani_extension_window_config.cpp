@@ -61,18 +61,15 @@ ani_enum_item GetAniModalityType(ani_env* env, ModalityType enumObj)
     if (ANI_OK != env->Enum_GetEnumItemByIndex(enumType, static_cast<ani_int>(enumObj), &enumItem)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Get modalityType enum failed, index: %{public}d",
             static_cast<int32_t>(enumObj));
+        return nullptr;
     }
 
     return enumItem;
 }
 
-ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
+ani_object CreateAndInitAniOptionsObject(
+    ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
 {
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowConfig is null");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
     ani_class aniClass;
     ani_status ret = env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass);
     if (ret != ANI_OK) {
@@ -101,6 +98,7 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
     ret = env->Object_CallMethod_Void(aniOptions, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to setNativeObj");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniOptions, &ref) == ANI_OK) {
@@ -108,25 +106,59 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
         localObjs.insert(std::pair(ref, config.release()));
     } else {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
+    return aniOptions;
+}
 
-    SubWindowOptions subWindowOptions = extensionWindowConfig->subWindowOptions;
-    ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>zLevel", nullptr,
+bool SetAniOptionsProperties(ani_env* env, ani_object aniOptions, ani_class aniClass,
+    const SubWindowOptions& subWindowOptions)
+{
+    ani_status ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>zLevel", nullptr,
         AniWindowUtils::CreateOptionalInt(env, static_cast<ani_int>(subWindowOptions.zLevel)));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set zLevel");
+        return false;
     }
     ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>maximizeSupported", nullptr,
         AniWindowUtils::CreateOptionalBool(env, static_cast<ani_boolean>(subWindowOptions.maximizeSupported)));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set maximizeSupported");
+        return false;
     }
     ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>modalityType", nullptr,
         GetAniModalityType(env, subWindowOptions.modalityType));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set modalityType");
+        return false;
     }
+    return true;
+}
 
+ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
+{
+    if (extensionWindowConfig == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowConfig is null");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_object aniOptions = CreateAndInitAniOptionsObject(env, extensionWindowConfig);
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(aniOptions, &isUndefined) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check aniOptions isUndefined");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (isUndefined) {
+        TLOGI(WmsLogTag::DEFAULT, "aniOptions is undefined");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_class aniClass;
+    if (env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass) != ANI_OK) {
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    if (!SetAniOptionsProperties(env, aniOptions, aniClass, extensionWindowConfig->subWindowOptions)) {
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
     return aniOptions;
 }
 
@@ -154,6 +186,7 @@ ani_enum_item GetAniWindowType(ani_env* env, int32_t apiType)
     ani_enum_item enumItem = nullptr;
     if (ANI_OK != env->Enum_GetEnumItemByName(enumType, typeName.c_str(), &enumItem)) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Get WindowType enum failed, name: %{public}s", typeName.c_str());
+        return nullptr;
     }
 
     return enumItem;
@@ -195,6 +228,7 @@ ani_object CreatAniSystemWindowOptions(ani_env* env,
     ret = env->Object_CallMethod_Void(aniOptions, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to setNativeObj");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniOptions, &ref) == ANI_OK) {
@@ -218,6 +252,7 @@ ani_enum_item GetAniExtensionWindowAttribute(ani_env* env, ExtensionWindowAttrib
     if (env->Enum_GetEnumItemByIndex(enumType, static_cast<ani_int>(enumObj), &enumItem) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] Get extensionWindowAttribute enum failed, index: %{public}d",
             static_cast<int32_t>(enumObj));
+        return nullptr;
     }
 
     return enumItem;
@@ -258,6 +293,7 @@ ani_object CreatAniRect(ani_env* env, const std::shared_ptr<ExtensionWindowConfi
     ret = env->Object_CallMethod_Void(aniRect, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to setNativeObj");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniRect, &ref) == ANI_OK) {
@@ -302,6 +338,7 @@ ani_object CreateAniExtensionWindowConfig(ani_env* env,
     ret = env->Object_CallMethod_Void(aniConfig, setObjFunc, reinterpret_cast<ani_long>(config.get()));
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to setNativeObj");
+        return AniWindowUtils::CreateAniUndefined(env);
     }
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(aniConfig, &ref) == ANI_OK) {
@@ -344,6 +381,7 @@ ani_string AniExtensionWindowConfig::OnGetWindowName(ani_env* env)
     ani_string windowName = nullptr;
     if (AniWindowUtils::GetAniString(env, extensionWindowConfig_->windowName, &windowName) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] get ani windowName failed");
+        return nullptr;
     }
     return windowName;
 }
@@ -388,6 +426,7 @@ ani_string AniExtensionWindowConfig::OnGetSubWindowOptionsTitle(ani_env* env)
     ani_string title = nullptr;
     if (AniWindowUtils::GetAniString(env, extensionWindowConfig_->subWindowOptions.title, &title) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] get ani subWindowOptions title failed");
+        return nullptr;
     }
     return title;
 }
@@ -423,6 +462,7 @@ void AniExtensionWindowConfig::OnSetWindowName(ani_env* env, ani_string value)
     std::string result;
     if (AniWindowUtils::GetStdString(env, value, result) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to convert parameter to windowName");
+        return;
     }
     extensionWindowConfig_->windowName = result;
 }
@@ -433,6 +473,7 @@ void AniExtensionWindowConfig::OnSetWindowAttribute(ani_env* env, ani_enum_item 
     ani_int enumValue;
     if (env->EnumItem_GetValue_Int(value, &enumValue) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to convert windowAttribute to int");
+        return;
     }
     extensionWindowConfig_->windowAttribute = static_cast<ExtensionWindowAttribute>(enumValue);
 }
@@ -485,6 +526,7 @@ void AniExtensionWindowConfig::OnSetSubWindowOptions(ani_env* env, ani_object va
     ani_boolean isUndefined;
     if (env->Reference_IsUndefined(value, &isUndefined) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check value isUndefined");
+        return;
     }
     if (isUndefined) {
         TLOGI(WmsLogTag::DEFAULT, "SubWindowOptions is undefined");
@@ -499,6 +541,7 @@ void AniExtensionWindowConfig::OnSetSubWindowOptions(ani_env* env, ani_object va
     if (env->Object_GetPropertyByName_Ref(value, "title", &titleRef) == ANI_OK) {
         if (env->Reference_IsUndefined(titleRef, &isUndefined) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check value isUndefined");
+            return;
         }
         if (!isUndefined) {
             std::string title;
@@ -506,26 +549,31 @@ void AniExtensionWindowConfig::OnSetSubWindowOptions(ani_env* env, ani_object va
                 extensionWindowConfig_->subWindowOptions.title = title;
             } else {
                 TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to convert parameter to title");
+                return;
             }
         }
     } else {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get title");
+        return;
     }
     ani_boolean decorEnabled = false;
     if (env->Object_GetPropertyByName_Boolean(value, "decorEnabled", &decorEnabled) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get decorEnabled");
+        return;
     }
     extensionWindowConfig_->subWindowOptions.decorEnabled = decorEnabled;
 
     bool isModal = false;
     if (AniWindowUtils::GetPropertyBoolObject(env, "isModal", value, isModal) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isModal");
+        return;
     }
     extensionWindowConfig_->subWindowOptions.isModal = isModal;
 
     bool isTopmost = false;
     if (AniWindowUtils::GetPropertyBoolObject(env, "isTopmost", value, isTopmost) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isTopmost");
+        return;
     }
     extensionWindowConfig_->subWindowOptions.isTopmost = isTopmost;
 }
@@ -536,6 +584,7 @@ void AniExtensionWindowConfig::OnSetSubWindowOptionsTitle(ani_env* env, ani_stri
     std::string title;
     if (AniWindowUtils::GetStdString(env, value, title) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to convert parameter to subWindowOptions title");
+        return;
     }
     extensionWindowConfig_->subWindowOptions.title = title;
 }
@@ -565,6 +614,7 @@ void AniExtensionWindowConfig::OnSetSystemWindowOptions(ani_env* env, ani_object
     ani_status ret = env->Reference_IsUndefined(value, &isUndefined);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check value isUndefined");
+        return;
     }
     if (isUndefined) {
         TLOGI(WmsLogTag::DEFAULT, "SystemWindowOptions is undefined ");
@@ -577,11 +627,13 @@ void AniExtensionWindowConfig::OnSetSystemWindowOptions(ani_env* env, ani_object
     if (ret == ANI_OK) {
         if (env->Reference_IsUndefined(result, &isUndefined) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check value isUndefined");
+            return;
         }
         if (!isUndefined) {
             ret = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(result), &type);
             if (ret != ANI_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to convert windowType to int");
+                return;
             } else {
                 TLOGI(WmsLogTag::DEFAULT, "[ANI] winType: %{public}u", static_cast<int32_t>(type));
                 extensionWindowConfig_->systemWindowOptions.windowType = static_cast<int32_t>(type);
@@ -612,6 +664,7 @@ static ani_string GetWindowName(ani_env* env, ani_object obj, ani_long nativeObj
         ani_string ret = nullptr;
         if (AniWindowUtils::GetAniString(env, "", &ret) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to convert to ani string");
+            return nullptr;
         }
         return ret;
     }
@@ -712,6 +765,7 @@ static ani_string GetSubWindowOptionsTitle(ani_env* env, ani_object obj, ani_lon
         ani_string ret = nullptr;
         if (AniWindowUtils::GetAniString(env, "", &ret) != ANI_OK) {
             TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to convert to ani string");
+            return nullptr;
         }
         return ret;
     }

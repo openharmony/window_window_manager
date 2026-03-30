@@ -151,6 +151,7 @@ void AniExtensionWindowListener::OnSizeChange(const sptr<OccupiedAreaChangeInfo>
             static_cast<ani_int>(info->rect_.height_));
         if (ret != ANI_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "call keyboardHeightChangeCallback failed");
+            return;
         }
     };
     if (!eventHandler_) {
@@ -183,6 +184,7 @@ void AniExtensionWindowListener::OnRectChange(Rect rect, WindowSizeChangeReason 
             AniWindowUtils::CreateAniRect(env, rect), ComponentRectChangeReason::HOST_WINDOW_RECT_CHANGE);
         if (ret != ANI_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "call windowRectChangeCallback failed");
+            return;
         }
     };
     eventHandler_->PostTask(onRectChangeTask, "wms:AniExtensionWindowListener::RectChangeCallback", 0,
