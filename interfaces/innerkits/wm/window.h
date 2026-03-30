@@ -3830,6 +3830,28 @@ public:
     }
 
     /**
+     * @brief Set screen watermark image.
+     *
+     * @param pixelMap the watermark image to set.
+     * @param priority the priority of application, less value means higher priority.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Cancel screen watermark image.
+     *
+     * @return WM_OK means success, others means failed.
+     */
+    virtual WMError CancelScreenWatermarkImage()
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief Hide the display content when snapshot.
      *
      * @param needHide bool.

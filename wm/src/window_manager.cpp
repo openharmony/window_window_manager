@@ -2048,6 +2048,16 @@ WMError WindowManager::SetWatermarkImageForApp(const std::shared_ptr<Media::Pixe
     return WindowAdapter::GetInstance(userId_).SetWatermarkImageForApp(pixelMap);
 }
 
+WMError WindowManager::SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority)
+{
+    return WindowAdapter::GetInstance(userId_).SetScreenWatermarkImage(pixelMap, priority);
+}
+
+WMError WindowManager::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WindowAdapter::GetInstance(userId_).CleanScreenWatermarkImage(pixelMap);
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = WindowAdapter::GetInstance(userId_).GetVisibilityWindowInfo(infos);

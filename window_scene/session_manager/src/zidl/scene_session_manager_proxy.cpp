@@ -2655,6 +2655,116 @@ WMError SceneSessionManagerProxy::GetTopNavDestinationName(int32_t windowId, std
     return static_cast<WMError>(errCode);
 }
 
+WMError SceneSessionManagerProxy::SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    uint32_t priority, std::string& bundleName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(pixelMap.get())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write pixelMap failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write priority failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto reqErrCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_SET_SCREEN_WATERMARK_IMAGE), data, reply, option);
+    if (reqErrCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send request failed, errCode: %{public}d", reqErrCode);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!reply.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read bundleName failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
+WMError SceneSessionManagerProxy::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteParcelable(pixelMap.get())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write pixelMap failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto reqErrCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_CLEAN_SCREEN_WATERMARK_IMAGE), data, reply, option);
+    if (reqErrCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send request failed, errCode: %{public}d", reqErrCode);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
+WMError SceneSessionManagerProxy::RecoverScreenWatermarkImage(const std::string& bundleName, uint32_t priority)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write bundleName failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(priority)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write priority failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto reqErrCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_SCREEN_WATERMARK_IMAGE),
+        data, reply, option);
+    if (reqErrCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "send request failed, errCode: %{public}d", reqErrCode);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
+}
+
 WMError SceneSessionManagerProxy::SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
     std::string& watermarkName)
 {
