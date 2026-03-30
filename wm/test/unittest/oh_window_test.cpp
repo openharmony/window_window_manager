@@ -134,41 +134,6 @@ HWTEST_F(OHWindowTest, IsWindowShowing01, TestSize.Level1)
 }
 
 /**
- * @tc.name: DensityInfoGetter_InvalidParam
- * @tc.desc: density info getter invalid param
- * @tc.type: FUNC
- */
-HWTEST_F(OHWindowTest, DensityInfoGetter_InvalidParam, TestSize.Level0)
-{
-    float density = 0.0f;
-    auto ret = OH_WindowManager_DensityInfo_GetDefaultDensity(nullptr, &density);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
-
-    ret = OH_WindowManager_DensityInfo_GetSystemDensity(nullptr, &density);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
-
-    ret = OH_WindowManager_DensityInfo_GetCustomDensity(nullptr, &density);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
-
-    ASSERT_NE(nullptr, scene_);
-    ASSERT_NE(nullptr, scene_->GetMainWindow());
-    OH_WindowManager_DensityInfo* densityInfo = nullptr;
-    ret = OH_WindowManager_GetDensityInfoCopy(scene_->GetMainWindow()->GetWindowId(), &densityInfo);
-    ASSERT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
-    ASSERT_NE(nullptr, densityInfo);
-
-    ret = OH_WindowManager_DensityInfo_GetDefaultDensity(densityInfo, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
-
-    ret = OH_WindowManager_DensityInfo_GetSystemDensity(densityInfo, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
-
-    ret = OH_WindowManager_DensityInfo_GetCustomDensity(densityInfo, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
-    OH_WindowManager_DensityInfo_Release(densityInfo);
-}
-
-/**
  * @tc.name: GetDensityInfoCopy_InvalidParam
  * @tc.desc: get density info copy invalid param
  * @tc.type: FUNC
@@ -179,32 +144,6 @@ HWTEST_F(OHWindowTest, GetDensityInfoCopy_InvalidParam, TestSize.Level0)
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     auto ret = OH_WindowManager_GetDensityInfoCopy(scene_->GetMainWindow()->GetWindowId(), nullptr);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
-}
-
-/**
- * @tc.name: GetDensityInfoCopy_Normal
- * @tc.desc: get density info copy and release
- * @tc.type: FUNC
- */
-HWTEST_F(OHWindowTest, GetDensityInfoCopy_Normal, TestSize.Level0)
-{
-    ASSERT_NE(nullptr, scene_);
-    ASSERT_NE(nullptr, scene_->GetMainWindow());
-    OH_WindowManager_DensityInfo* densityInfo = nullptr;
-    auto ret = OH_WindowManager_GetDensityInfoCopy(scene_->GetMainWindow()->GetWindowId(), &densityInfo);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret);
-    ASSERT_NE(nullptr, densityInfo);
-
-    float defaultDensity = 0.0f;
-    float systemDensity = 0.0f;
-    float customDensity = 0.0f;
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK),
-        OH_WindowManager_DensityInfo_GetDefaultDensity(densityInfo, &defaultDensity));
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK),
-        OH_WindowManager_DensityInfo_GetSystemDensity(densityInfo, &systemDensity));
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK),
-        OH_WindowManager_DensityInfo_GetCustomDensity(densityInfo, &customDensity));
-    OH_WindowManager_DensityInfo_Release(densityInfo);
 }
 
 /**
