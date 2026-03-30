@@ -37,6 +37,7 @@ ohos_shared_library("intention_event_anr_manager") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "../dfx/src/dfx_hisysevent.cpp",
