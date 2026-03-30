@@ -43,6 +43,7 @@
             OHOS::Rosen::FloatingBallManager::IsSupportFloatingBall*;
             OHOS::Rosen::FloatingBallManager::RemoveActiveController*;
             OHOS::Rosen::FloatingBallManager::SetActiveController*;
+            OHOS::Rosen::FloatingBallController::SetInApplicationVisible*;
             OHOS::Rosen::GetSnapshotCallback::GetSyncResult*;
             OHOS::Rosen::GetSnapshotCallback::OnNotifyResult*;
             OHOS::Rosen::GetSnapshotCallback::RegisterFunc*;
@@ -297,6 +298,7 @@
             OHOS::Rosen::WindowManager::UpdateOutline*;
             OHOS::Rosen::WindowManager::UpdateScreenLockStatusForApp*;
             OHOS::Rosen::WindowManager::UpdateWindowVisibilityInfo*;
+            OHOS::Rosen::WindowManager::WindowManager*;
             OHOS::Rosen::WindowManagerAgent::WindowManagerAgent*;
             OHOS::Rosen::WindowOption::AddWindowFlag*;
             OHOS::Rosen::WindowOption::ChangeCallingWindowId*;
@@ -388,6 +390,8 @@
             OHOS::Rosen::WindowOption::SetZIndex*;
             OHOS::Rosen::WindowOption::WindowOption*;
             OHOS::Rosen::WindowOption::SetIsCrossProcessWindow*;
+            OHOS::Rosen::WindowOption::SetIsBlockSubwindow*;
+            OHOS::Rosen::WindowOption::IsBlockSubwindow*;
             OHOS::Rosen::WindowScene::CreateWindow*;
             OHOS::Rosen::WindowScene::GetContentInfo*;
             OHOS::Rosen::WindowScene::GetMainWindow*;
