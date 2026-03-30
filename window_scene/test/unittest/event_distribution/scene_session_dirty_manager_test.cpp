@@ -107,7 +107,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, TestSize.Level1)
  */
 HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
 {
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    auto fullInfoForMMI = manager_->GetFullWindowInfoList();
+    auto windowInfoList = fullInfoForMMI.windowInfoList;
+    auto pixelMapList = fullInfoForMMI.pixelMapList;
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
@@ -136,7 +138,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
         propertyModal1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
         ssm_->sceneSessionMap_.insert({ sceneSessionModal1->GetPersistentId(), sceneSessionModal1 });
     }
-    auto [windowInfoList1, pixelMapList1] = manager_->GetFullWindowInfoList();
+    auto fullInfoForMMI1 = manager_->GetFullWindowInfoList();
+    auto windowInfoList1 = fullInfoForMMI1.windowInfoList;
+    auto pixelMapList1 = fullInfoForMMI1.pixelMapList;
     ASSERT_EQ(windowInfoList.size() + 3, windowInfoList1.size());
 }
 
