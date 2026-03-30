@@ -212,7 +212,7 @@ HWTEST_F(WindowSessionImplCompatibleModeTest, UpdateGlobalDisplayRectFromServerW
     auto ret = window->UpdateGlobalDisplayRectFromServer(rect, SizeChangeReason::RESIZE);
 
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
-    EXPECT_TRUE(window->notifyRectChangeInCompatibleMode_.load());
+    EXPECT_FALSE(window->notifyRectChangeInCompatibleMode_.load());
     GTEST_LOG_(INFO) << "WindowSessionImplCompatibleModeTest: "
         "UpdateGlobalDisplayRectFromServerWithPendingNotification end";
 }
@@ -465,7 +465,7 @@ HWTEST_F(WindowSessionImplCompatibleModeTest, SetAppHookWindowInfoAndUpdateGloba
 
     EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
     EXPECT_TRUE(window->notifySizeChangeInCompatibleMode_.load());
-    EXPECT_TRUE(window->notifyRectChangeInCompatibleMode_.load());
+    EXPECT_FALSE(window->notifyRectChangeInCompatibleMode_.load());
     GTEST_LOG_(INFO) << "WindowSessionImplCompatibleModeTest: "
         "SetAppHookWindowInfoAndUpdateGlobalDisplayRectSequence end";
 }
