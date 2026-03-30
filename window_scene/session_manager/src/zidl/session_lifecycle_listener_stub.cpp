@@ -28,16 +28,17 @@ int SessionLifecycleListenerStub::OnRemoteRequest(
         TLOGE(WmsLogTag::WMS_LIFE, "local descriptor not equal to remote.");
         return ERR_INVALID_STATE;
     }
-    switch (code)
-    {
-    case static_cast<uint32_t>(ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_LIFECYCLE_EVENT):
-        return HandleOnLifecycleEvent(data, reply);
-    
-    case static_cast<uint32_t>(ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT):
-        return HandleOnAppInstanceLifecycleEvent(data, reply);
-    default:
-        WLOGFE("Failed to handle request, code: %{public}u", code);
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    switch (code) {
+        case static_cast<uint32_t>(
+            ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_LIFECYCLE_EVENT):
+            return HandleOnLifecycleEvent(data, reply);
+        
+        case static_cast<uint32_t>(
+            ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT):
+            return HandleOnAppInstanceLifecycleEvent(data, reply);
+        default:
+            WLOGFE("Failed to handle request, code: %{public}u", code);
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 }
 

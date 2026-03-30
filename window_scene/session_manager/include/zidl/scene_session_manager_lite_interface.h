@@ -294,14 +294,16 @@ public:
 
     /**
      * @brief Register a session lifecycle listener for specific bundle with appIndex and appInstanceKey
-     * 
-     * This function is used to register a session lifecycle listener for a specific bundle with appIndex and appInstanceKey.
-     * The listener will be notified when registered and lifecycle events occur 
-     * for the specified bundle with appIndex and appInstanceKey
-     * 
+     *
+     * This function is used to register a session lifecycle listener
+     * for a specific bundle with appIndex and appInstanceKey.
+     *
+     * The listener will be notified when registered and lifecycle events occur
+     * for the specified bundle with appIndex and appInstanceKey.
+     *
      * @caller SA
      * @permission SA permission
-     * 
+     *
      * @param listener The session lifecycle listener to be registered
      * @param bundleName The bundle name for which the listener should be registered
      * @param appIndex The app index for which the listener should be registered

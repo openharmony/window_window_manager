@@ -396,10 +396,12 @@ WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
     return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleNameList);
 }
 
-WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByAppInstance(const sptr<ISessionLifecycleListener>& listener,
-    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) 
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByAppInstance(
+    const sptr<ISessionLifecycleListener>& listener, const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey)
 {
-    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(
+        listener, bundleName, appIndex, appInstanceKey);
 }
 
 WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)

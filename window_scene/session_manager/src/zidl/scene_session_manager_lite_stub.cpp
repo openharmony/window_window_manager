@@ -178,7 +178,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
         case static_cast<uint32_t>(
             SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES):
             return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_APP_INSTANCE):
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_APP_INSTANCE):
             return HandleRegisterSessionLifecycleListenerByAppInstance(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
             return HandleUnregisterSessionLifecycleListener(data, reply);
@@ -1606,7 +1607,8 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundles
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundle(MessageParcel& data, MessageParcel& reply)
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundle(
+    MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();

@@ -264,7 +264,8 @@ void SessionListenerController::ConstructPayload(ISessionLifecycleListener::Life
     payload.lifeCycleChangeReason_ = reason;
 }
 
-void SessionListenerController::ConstructBatchPayload(std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
+void SessionListenerController::ConstructBatchPayload(
+    std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
     const std::vector<sptr<SceneSession>>& sessions)
 {
     for (const auto& session : sessions) {
@@ -373,7 +374,7 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
 }
 
 WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener,
-    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey) 
+    const std::string& bundleName, int32_t appIndex, const std::string& appInstanceKey)
 {
     if (!listener) {
         TLOGE(WmsLogTag::WMS_LIFE, "listener is invalid.");
@@ -639,7 +640,7 @@ bool SessionListenerController::IsListenerMapByAppInstanceSizeReachLimit() const
 {
     return taskScheduler_->PostSyncTask([this] {
         return listenerMapByAppInstance_.size() >= MAX_LISTEN_TARGET_LIMIT;
-    }, __func__);
+        }, __func__);
 }
 } // namespace Rosen
 } // namespace OHOS
