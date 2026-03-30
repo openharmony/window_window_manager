@@ -61,6 +61,7 @@ public:
     WMError UnregisterLimitsChangeListener(const sptr<IFvLimitsChangeObserver>& listener);
 private:
     WMError StartFloatViewInner();
+    WMError PrepareStartFloatView(bool showWhenCreate);
     WMError CreateFloatViewWindow();
     WMError SetFloatViewContext();
     WMError DestroyFloatViewWindow(const std::string& reason);
@@ -98,7 +99,6 @@ private:
     std::vector<sptr<IFvLimitsChangeObserver>> limitsChangeObservers_;
 
     std::mutex controllerMutex_;
-    std::mutex optionMutex_;
     FloatViewWindowInfo windowInfo_ {};
 };
 } // namespace Rosen

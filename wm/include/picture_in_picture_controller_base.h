@@ -156,6 +156,9 @@ protected:
     WMError ShowPictureInPictureWindow(StartPipType startType);
     WMError StartPictureInPictureInner(StartPipType startType);
     WMError StopPictureInPictureInner(StopPipType stopType, bool withAnim);
+    bool IsPullPiPAndHandleNavigation();
+    WMError PrepareStart(StartPipType startType);
+    NavigationController* GetNavigationController(const std::string& navId);
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError UnregisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
     template<typename T> WMError WebRegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -183,6 +186,7 @@ protected:
     int32_t handleId_ = -1;
     uint64_t surfaceId_ = 0;
     PiPStateChangeReason stateChangeReason_ = PiPStateChangeReason::OTHER;
+    int32_t firstHandleId_ = -1;
 
     // diffrent between normal and web
     virtual WMError CreatePictureInPictureWindow(StartPipType startType) = 0;

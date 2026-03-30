@@ -16,6 +16,7 @@
 #include "singleton_container.h"
 #include "parameters.h"
 #include "picture_in_picture_manager.h"
+#include "float_window_manager.h"
 #include "web_picture_in_picture_controller.h"
 #include "window_manager_hilog.h"
 #include "window_scene_session_impl.h"
@@ -91,9 +92,27 @@ WMError WebPictureInPictureController::StartPictureInPicture(StartPipType startT
             pipOption_->GetPipTemplate(), PipConst::FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
+
+    uint64_t token = FloatWindowManager::AcquireToken();
+    if (token == 0) {
+        TLOGW(WmsLogTag::WMS_PIP, "AcquireToken timeout, continue start judgement");
+    }
+    if (FloatWindowManager::IsPipConflict()) {
+        TLOGI(WmsLogTag::WMS_PIP, "StartPictureInPicture abort, float controller is active");
+        FloatWindowManager::ReleaseToken(token);
+        return WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+    }
+
     curState_ = PiPWindowState::STATE_STARTING;
+    PictureInPictureManager::AddRunningController(this);
+    FloatWindowManager::ReleaseToken(token);
+
     PictureInPictureManager::DoClose(true, true);
-    return StartPictureInPictureInner(startType);
+    WMError ret = StartPictureInPictureInner(startType);
+    if (ret != WMError::WM_OK) {
+        PictureInPictureManager::RemoveRunningController(weakRef_);
+    }
+    return ret;
 }
 
 void WebPictureInPictureController::SetUIContent() const

@@ -18,7 +18,7 @@
 #include "float_view_controller.h"
 #include "float_view_manager.h"
 #include "floating_ball_manager.h"
-#include "float_bind_manager.h"
+#include "float_window_manager.h"
 #include "window_manager_hilog.h"
 #include "window_manager.h"
 #include "js_err_utils.h"
@@ -316,7 +316,7 @@ napi_value JsFloatViewManager::BindTask(napi_env env, const sptr<FloatViewContro
             *errCodePtr = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
             return;
         }
-        *errCodePtr = ConvertErrorToCode(FloatBindManager::Bind(fvController, fbController, option));
+        *errCodePtr = ConvertErrorToCode(FloatWindowManager::Bind(fvController, fbController, option));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -389,7 +389,7 @@ napi_value JsFloatViewManager::UnBindTask(napi_env env, const sptr<FloatViewCont
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        *errCodePtr = ConvertErrorToCode(FloatBindManager::UnBind(fvController, fbController));
+        *errCodePtr = ConvertErrorToCode(FloatWindowManager::UnBind(fvController, fbController));
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {

@@ -19,8 +19,12 @@
 #include <map>
 
 #include "float_view_manager.h"
-#include "float_bind_manager.h"
+#include "float_window_manager.h"
+#include "floating_ball_manager.h"
+#include "picture_in_picture_manager.h"
 #include "window_manager_hilog.h"
+#include "singleton_container.h"
+#include "window_adapter.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -45,7 +49,7 @@ FloatViewController::FloatViewController(const FvOption &option, napi_env env)
     : weakRef_(this), option_(option), env_(env)
 {
     curState_ = FvWindowState::FV_STATE_UNDEFINED;
-    id_ = FloatBindManager::GetControllerId();
+    id_ = FloatWindowManager::GetControllerId();
     TLOGI(WmsLogTag::WMS_SYSTEM, "FloatViewController created, id: %{public}s", id_.c_str());
 }
 
@@ -115,47 +119,72 @@ WMError FloatViewController::StartFloatView()
     TLOGI(WmsLogTag::WMS_SYSTEM, "StartFloatView called, bindState_ %{public}d, id: %{public}s", bindState_,
         id_.c_str());
     if (IsBind()) {
-        return FloatBindManager::StartBindFloatView(weakRef_);
+        return FloatWindowManager::StartBindFloatView(weakRef_);
     }
     return StartFloatViewSingle();
 }
 
 WMError FloatViewController::StartFloatViewSingle(bool showWhenCreate)
 {
-    {
-        std::lock_guard<std::mutex> lock(controllerMutex_);
-        if (FloatViewManager::HasActiveController() && !FloatViewManager::IsActiveController(this)) {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "StartFloatView abort");
-            return WMError::WM_ERROR_FV_START_FAILED;
-        }
-        templateType_ = option_.GetTemplate();
-        if (curState_ == FvWindowState::FV_STATE_STARTING || curState_ == FvWindowState::FV_STATE_STARTED) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "fvWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
-                curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
-            return WMError::WM_ERROR_FV_REPEAT_OPERATION;
-        }
-        if (curState_ == FvWindowState::FV_STATE_STOPPING) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "fvWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
-                curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
-            return WMError::WM_ERROR_FV_INVALID_STATE;
-        }
-        curState_ = FvWindowState::FV_STATE_STARTING;
-        FloatViewManager::SetActiveController(this);
-        option_.SetShowWhenCreate(showWhenCreate);
+    uint64_t token = FloatWindowManager::AcquireToken();
+    if (token == 0) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "AcquireToken timeout, continue start, id: %{public}s", id_.c_str());
     }
-    auto errorCode = StartFloatViewInner();
+    auto errorCode = PrepareStartFloatView(showWhenCreate);
+    FloatWindowManager::ReleaseToken(token);
+    if (errorCode != WMError::WM_OK) {
+        return errorCode;
+    }
+    int32_t templateType = SingletonContainer::Get<WindowAdapter>().GetPipTemplateType();
+    TLOGI(WmsLogTag::WMS_SYSTEM, "Current pip templateType: %{public}d", templateType);
+    if (templateType == static_cast<int32_t>(PiPTemplateType::VIDEO_CALL) ||
+        templateType == static_cast<int32_t>(PiPTemplateType::VIDEO_MEETING)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Current has high priority pip templateType: %{public}d, cannot start float view",
+            templateType);
+        return WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+    }
+    errorCode = StartFloatViewInner();
     if (errorCode != WMError::WM_OK) {
         curState_ = FvWindowState::FV_STATE_ERROR;
         OnStateChange(FloatViewState::FV_ERROR);
-        FloatViewManager::RemoveActiveController(this);
+        FloatViewManager::RemoveActiveController(weakRef_);
     }
     return errorCode;
+}
+
+WMError FloatViewController::PrepareStartFloatView(bool showWhenCreate)
+{
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    if (FloatViewManager::HasActiveController() && !FloatViewManager::IsActiveController(weakRef_)) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "StartFloatView abort");
+        return WMError::WM_ERROR_FV_START_FAILED;
+    }
+    if (FloatWindowManager::IsFloatViewConflict(weakRef_)) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "StartFloatView abort, other controller is active");
+        return WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+    }
+
+    templateType_ = option_.GetTemplate();
+    if (curState_ == FvWindowState::FV_STATE_STARTING || curState_ == FvWindowState::FV_STATE_STARTED) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "fvWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
+            curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
+        return WMError::WM_ERROR_FV_REPEAT_OPERATION;
+    }
+    if (curState_ == FvWindowState::FV_STATE_STOPPING) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "fvWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
+            curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
+        return WMError::WM_ERROR_FV_INVALID_STATE;
+    }
+    curState_ = FvWindowState::FV_STATE_STARTING;
+    FloatViewManager::SetActiveController(weakRef_);
+    option_.SetShowWhenCreate(showWhenCreate);
+    return WMError::WM_OK;
 }
 
 WMError FloatViewController::StartFloatViewInner()
 {
     {
-        std::lock_guard<std::mutex> lock(optionMutex_);
+        std::lock_guard<std::mutex> lock(controllerMutex_);
         WMError errCode = CreateFloatViewWindow();
         if (errCode != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Create fv window failed, err: %{public}u", errCode);
@@ -242,7 +271,7 @@ WMError FloatViewController::StopFloatViewFromClient()
     TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatViewFromClient called, bindState_ %{public}d, id: %{public}s", bindState_,
         id_.c_str());
     if (IsBind()) {
-        return FloatBindManager::StopBindFloatView(weakRef_);
+        return FloatWindowManager::StopBindFloatView(weakRef_);
     }
     return StopFloatViewFromClientSingle();
 }
@@ -334,11 +363,11 @@ WMError FloatViewController::SetUIContext(const std::string contextUrl,
     const std::shared_ptr<NativeReference>& contentStorage)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "SetUIContext called");
-    std::lock_guard<std::mutex> lock(optionMutex_);
+    std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetUIPath(contextUrl);
     option_.SetStorage(contentStorage);
     if (window_ == nullptr) {
-        if (IsStateWithWindow(GetCurState())) {
+        if (IsStateWithWindow(curState_)) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
             return WMError::WM_ERROR_INVALID_WINDOW;
         }
@@ -368,7 +397,7 @@ WMError FloatViewController::SetUIContextInner()
 WMError FloatViewController::SetVisibilityInApp(bool visibleInApp)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "SetVisibilityInApp called");
-    std::lock_guard<std::mutex> lock(optionMutex_);
+    std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetVisibilityInApp(visibleInApp);
     if (window_ == nullptr) {
         if (IsStateWithWindow(curState_)) {
@@ -391,7 +420,7 @@ WMError FloatViewController::SetVisibilityInApp(bool visibleInApp)
 WMError FloatViewController::SetWindowSize(const Rect &rect)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "SetWindowSize called");
-    std::lock_guard<std::mutex> lock(optionMutex_);
+    std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetRect(rect);
     if (window_ == nullptr) {
         if (IsStateWithWindow(curState_)) {

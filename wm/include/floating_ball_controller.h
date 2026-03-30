@@ -60,6 +60,7 @@ public:
     void SetBindWindowId(uint32_t windowId);
 private:
     WMError CreateFloatingBallWindow(const sptr<FbOption>& option);
+    WMError PrepareStartFloatingBall(const sptr<FbOption>& option, bool showWhenCreate);
     WMError StartFloatingBallInner(const sptr<FbOption>& option);
  
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);

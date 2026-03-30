@@ -1729,6 +1729,14 @@ WMError WindowAdapter::GetIsPipEnabled(bool& isPipEnabled)
     return wmsProxy->GetIsPipEnabled(isPipEnabled);
 }
 
+int32_t WindowAdapter::GetPipTemplateType()
+{
+    INIT_PROXY_CHECK_RETURN(-1);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, -1);
+    return wmsProxy->GetPipTemplateType();
+}
+
 WMError WindowAdapter::AddSessionBlackList(
     const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
 {

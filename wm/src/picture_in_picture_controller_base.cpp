@@ -22,9 +22,14 @@
 #include "window_adapter.h"
 #include "window_manager_hilog.h"
 #include "window_session_impl.h"
+#include "float_window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
+
+namespace {
+    const int32_t INVALID_HANDLE_ID = -1;
+}
 
 static const std::map<std::string, PiPControlType> CONTROL_TYPE_MAP = {
     {"playbackStateChanged", PiPControlType::VIDEO_PLAY_PAUSE},
@@ -176,6 +181,41 @@ WMError PictureInPictureControllerBase::StartPictureInPictureInner(StartPipType 
     return WMError::WM_OK;
 }
 
+WMError PictureInPictureControllerBase::PrepareStart(StartPipType startType)
+{
+    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
+    if (curState_ == PiPWindowState::STATE_STARTING || curState_ == PiPWindowState::STATE_STARTED) {
+        TLOGW(WmsLogTag::WMS_PIP, "pipWindow is starting, state: %{public}u, id: %{public}u, mainWindow: %{public}u",
+            curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
+        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
+            pipOption_->GetPipTemplate(), PipConst::FAILED, "Pip window is starting");
+        return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
+    }
+    // Token acquisition is best-effort: timeout should not fail the start directly.
+    uint64_t token = FloatWindowManager::AcquireToken();
+    if (token == 0) {
+        TLOGW(WmsLogTag::WMS_PIP, "AcquireToken timeout, continue start judgement");
+    }
+    if (FloatWindowManager::IsPipConflict()) {
+        TLOGI(WmsLogTag::WMS_PIP, "StartPictureInPicture abort, float controller is active");
+        FloatWindowManager::ReleaseToken(token);
+        return WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+    }
+
+    if (!IsPullPiPAndHandleNavigation()) {
+        TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
+        FloatWindowManager::ReleaseToken(token);
+        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    }
+    curState_ = PiPWindowState::STATE_STARTING;
+    PictureInPictureManager::AddRunningController(this);
+    FloatWindowManager::ReleaseToken(token);
+    return WMError::WM_OK;
+}
+
 WMError PictureInPictureControllerBase::StopPictureInPictureFromClient()
 {
     if (!window_) {
@@ -241,6 +281,7 @@ WMError PictureInPictureControllerBase::StopPictureInPicture(bool destroyWindow,
             listener->OnPictureInPictureStop(controllerId_);
         }
         PictureInPictureManager::RemoveActiveController(weakRef_);
+        PictureInPictureManager::RemoveRunningController(weakRef_);
         PictureInPictureManager::RemovePipControllerInfo(window_->GetWindowId());
         return WMError::WM_OK;
     }
@@ -319,6 +360,7 @@ WMError PictureInPictureControllerBase::DestroyPictureInPictureWindow()
     window_ = nullptr;
     NotifyStateChangeInner(PiPState::STOPPED);
     PictureInPictureManager::RemoveActiveController(this);
+    PictureInPictureManager::RemoveRunningController(weakRef_);
     return WMError::WM_OK;
 }
 
@@ -494,6 +536,64 @@ void PictureInPictureControllerBase::OnPictureInPictureStart()
         listener->OnPictureInPictureStart(GetStateChangeReason());
         listener->OnPictureInPictureStart(controllerId_);
     }
+}
+
+NavigationController* PictureInPictureControllerBase::GetNavigationController(const std::string& navId)
+{
+    return NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
+}
+
+bool PictureInPictureControllerBase::IsPullPiPAndHandleNavigation()
+{
+    if (IsTypeNodeEnabled()) {
+        TLOGI(WmsLogTag::WMS_PIP, "App use typeNode");
+        return true;
+    }
+    if (pipOption_->GetNavigationId() == "") {
+        TLOGI(WmsLogTag::WMS_PIP, "App not use navigation");
+        return true;
+    }
+    if (mainWindow_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Main window init error");
+        return false;
+    }
+    std::string navId = pipOption_->GetNavigationId();
+    int32_t pipOptionHandleId = pipOption_->GetHandleId();
+    auto navController = GetNavigationController(navId);
+    if (navController == nullptr) {
+        TLOGE(WmsLogTag::WMS_PIP, "Get navController error");
+        return false;
+    }
+
+    if (pipOptionHandleId != INVALID_HANDLE_ID) {
+        navController->SetInPIPMode(pipOptionHandleId);
+        handleId_ = pipOptionHandleId;
+        TLOGI(WmsLogTag::WMS_PIP, "SetInPIPMode handleId_: %{public}d, top result: %{public}d",
+            handleId_, navController->GetTopHandle());
+        return true;
+    }
+
+    if (!navController->IsNavDestinationInTopStack()) {
+        TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
+        return false;
+    }
+
+    TLOGI(WmsLogTag::WMS_PIP, "IsPullPiPAndHandleNavigation IsNavDestinationInTopStack");
+    handleId_ = navController->GetTopHandle();
+    if (handleId_ == INVALID_HANDLE_ID) {
+        TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
+        return false;
+    }
+    if (firstHandleId_ != INVALID_HANDLE_ID) {
+        handleId_ = firstHandleId_;
+        navController->SetInPIPMode(handleId_);
+        TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
+    } else {
+        TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
+        firstHandleId_ = handleId_;
+        navController->SetInPIPMode(handleId_);
+    }
+    return true;
 }
 
 WMError PictureInPictureControllerBase::RegisterPiPLifecycle(const sptr<IPiPLifeCycle>& listener)

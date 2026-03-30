@@ -66,8 +66,8 @@
             OHOS::Rosen::FloatViewController::GetController*;
             OHOS::Rosen::FloatViewController::UpdateMainWindow*;
             OHOS::Rosen::FloatViewManager::isSupportFloatView*;
-            OHOS::Rosen::FloatBindManager::Bind*;
-            OHOS::Rosen::FloatBindManager::UnBind*;
+            OHOS::Rosen::FloatWindowManager::Bind*;
+            OHOS::Rosen::FloatWindowManager::UnBind*;
             OHOS::Rosen::FvOption::FvOption*;
             OHOS::Rosen::FvOption::SetContext*;
             OHOS::Rosen::FvOption::SetTemplate*;
@@ -330,11 +330,8 @@
             OHOS::Rosen::WindowManager::UpdateOutline*;
             OHOS::Rosen::WindowManager::UpdateScreenLockStatusForApp*;
             OHOS::Rosen::WindowManager::UpdateWindowVisibilityInfo*;
-<<<<<<< HEAD
             OHOS::Rosen::WindowManager::WindowManager*;
-=======
             OHOS::Rosen::WindowManager::GetFloatViewLimits*;
->>>>>>> 9ecbd39e20 (悬浮窗v2接口)
             OHOS::Rosen::WindowManagerAgent::WindowManagerAgent*;
             OHOS::Rosen::WindowOption::AddWindowFlag*;
             OHOS::Rosen::WindowOption::ChangeCallingWindowId*;

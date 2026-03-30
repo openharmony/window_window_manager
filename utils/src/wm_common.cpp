@@ -65,7 +65,7 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_FV_INVALID_STATE,               WmErrorCode::WM_ERROR_FV_INVALID_STATE  },
     {WMError::WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED  },
     {WMError::WM_ERROR_FV_START_FAILED,                WmErrorCode::WM_ERROR_FV_START_FAILED          },
-    {WMError::WM_ERROR_FV_CONFLICT_WITH_OTHERS,        WmErrorCode::WM_ERROR_FV_CONFLICT_WITH_OTHERS      },
+    {WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS,     WmErrorCode::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS      },
 };
 
 WmErrorCode ConvertErrorToCode(WMError error, WmErrorCode defaultCode)

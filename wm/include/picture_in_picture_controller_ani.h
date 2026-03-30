@@ -45,7 +45,6 @@ public:
     ani_ref GetANICustomNodeController() override;
     ani_ref GetANITypeNode() const override;
     bool IsTypeNodeEnabled() const override;
-    bool IsPullPiPAndHandleNavigation();
     std::string GetPiPNavigationId() const override;
 
 protected:
@@ -64,11 +63,9 @@ protected:
 
     wptr<PictureInPictureControllerAni> weakRef_ = nullptr;
     std::shared_ptr<XComponentController> mainWindowXComponentController_ = nullptr;
-    int32_t firstHandleId_ = -1;
 
 private:
     void DeletePIPMode();
-    virtual NavigationController* GetNavigationController(const std::string& navId);
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -1692,7 +1692,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
 
     Parcel parcel;
     std::shared_ptr<Media::PixelMap> icon;
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, icon};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, 0, true}, icon};
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
     ASSERT_NE(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);

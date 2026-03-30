@@ -15,6 +15,7 @@
 
 #include "picture_in_picture_controller.h"
 #include "picture_in_picture_manager.h"
+#include "float_window_manager.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
 
@@ -25,7 +26,6 @@ namespace {
     const std::string DESTROY_TIMEOUT_TASK = "PipDestroyTimeout";
     const std::string STATE_CHANGE = "stateChange";
     const std::string UPDATE_NODE = "nodeUpdate";
-    const int32_t INVALID_HANDLE_ID = -1;
 }
 
 PictureInPictureController::PictureInPictureController(sptr<PipOption> pipOption, sptr<Window> mainWindow,
@@ -94,22 +94,11 @@ WMError PictureInPictureController::CreatePictureInPictureWindow(StartPipType st
 WMError PictureInPictureController::StartPictureInPicture(StartPipType startType)
 {
     TLOGI(WmsLogTag::WMS_PIP, "called");
-    if (pipOption_ == nullptr || pipOption_->GetContext() == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "pipOption is null or Get PictureInPictureOption failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+    auto errCode = PrepareStart(startType);
+    if (errCode != WMError::WM_OK) {
+        return errCode;
     }
-    if (curState_ == PiPWindowState::STATE_STARTING || curState_ == PiPWindowState::STATE_STARTED) {
-        TLOGW(WmsLogTag::WMS_PIP, "pipWindow is starting, state: %{public}u, id: %{public}u, mainWindow: %{public}u",
-            curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
-        SingletonContainer::Get<PiPReporter>().ReportPiPStartWindow(static_cast<int32_t>(startType),
-            pipOption_->GetPipTemplate(), PipConst::FAILED, "Pip window is starting");
-        return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
-    }
-    if (!IsPullPiPAndHandleNavigation()) {
-        TLOGE(WmsLogTag::WMS_PIP, "Navigation operate failed");
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
-    }
-    curState_ = PiPWindowState::STATE_STARTING;
+
     if (PictureInPictureManager::HasActiveController() && !PictureInPictureManager::IsActiveController(weakRef_)) {
         // if current controller is not the active one, but belongs to the same mainWindow, reserve pipWindow
         if (PictureInPictureManager::IsAttachedToSameWindow(mainWindowId_)) {
@@ -117,6 +106,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
             if (window_ == nullptr) {
                 TLOGE(WmsLogTag::WMS_PIP, "Reuse pipWindow failed");
                 curState_ = PiPWindowState::STATE_UNDEFINED;
+                PictureInPictureManager::RemoveRunningController(weakRef_);
                 return WMError::WM_ERROR_PIP_CREATE_FAILED;
             }
             TLOGI(WmsLogTag::WMS_PIP, "Reuse pipWindow: %{public}u as attached to the same mainWindow: %{public}u",
@@ -129,6 +119,7 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
             WMError err = ShowPictureInPictureWindow(startType);
             if (err != WMError::WM_OK) {
                 curState_ = PiPWindowState::STATE_UNDEFINED;
+                PictureInPictureManager::RemoveRunningController(weakRef_);
             } else {
                 curState_ = PiPWindowState::STATE_STARTED;
             }
@@ -138,8 +129,9 @@ WMError PictureInPictureController::StartPictureInPicture(StartPipType startType
         PictureInPictureManager::DoClose(true, true);
     }
 
-    WMError errCode = StartPictureInPictureInner(startType);
+    errCode = StartPictureInPictureInner(startType);
     if (errCode != WMError::WM_OK) {
+        PictureInPictureManager::RemoveRunningController(weakRef_);
         DeletePIPMode();
     }
     return errCode;
@@ -498,59 +490,6 @@ bool PictureInPictureController::IsTypeNodeEnabled() const
     return pipOption_ != nullptr ? pipOption_->IsTypeNodeEnabled() : false;
 }
 
-bool PictureInPictureController::IsPullPiPAndHandleNavigation()
-{
-    if (IsTypeNodeEnabled()) {
-        TLOGI(WmsLogTag::WMS_PIP, "App use typeNode");
-        return true;
-    }
-    if (pipOption_->GetNavigationId() == "") {
-        TLOGI(WmsLogTag::WMS_PIP, "App not use navigation");
-        return true;
-    }
-    if (mainWindow_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Main window init error");
-        return false;
-    }
-    std::string navId = pipOption_->GetNavigationId();
-    int32_t pipOptionHandleId = pipOption_->GetHandleId();
-    auto navController = GetNavigationController(navId);
-    if (navController == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get navController error");
-        return false;
-    }
-
-    if (pipOptionHandleId != INVALID_HANDLE_ID) {
-        navController->SetInPIPMode(pipOptionHandleId);
-        handleId_ = pipOptionHandleId;
-        TLOGI(WmsLogTag::WMS_PIP, "SetInPIPMode handleId_: %{public}d, top result: %{public}d",
-            handleId_, navController->GetTopHandle());
-        return true;
-    }
-
-    if (!navController->IsNavDestinationInTopStack()) {
-        TLOGE(WmsLogTag::WMS_PIP, "Top is not navDestination");
-        return false;
-    }
-
-    TLOGI(WmsLogTag::WMS_PIP, "IsPullPiPAndHandleNavigation IsNavDestinationInTopStack");
-    handleId_ = navController->GetTopHandle();
-    if (handleId_ == INVALID_HANDLE_ID) {
-        TLOGE(WmsLogTag::WMS_PIP, "Get top handle error");
-        return false;
-    }
-    if (firstHandleId_ != INVALID_HANDLE_ID) {
-        handleId_ = firstHandleId_;
-        navController->SetInPIPMode(handleId_);
-        TLOGI(WmsLogTag::WMS_PIP, "Cache first navigation");
-    } else {
-        TLOGI(WmsLogTag::WMS_PIP, "First top handle id: %{public}d", handleId_);
-        firstHandleId_ = handleId_;
-        navController->SetInPIPMode(handleId_);
-    }
-    return true;
-}
-
 std::string PictureInPictureController::GetPiPNavigationId() const
 {
     return (pipOption_ != nullptr && !IsTypeNodeEnabled()) ? pipOption_->GetNavigationId() : "";
@@ -564,11 +503,6 @@ std::shared_ptr<NativeReference> PictureInPictureController::GetCustomNodeContro
 std::shared_ptr<NativeReference> PictureInPictureController::GetTypeNode() const
 {
     return pipOption_ == nullptr ? nullptr : pipOption_->GetTypeNodeRef();
-}
-
-NavigationController* PictureInPictureController::GetNavigationController(const std::string& navId)
-{
-    return NavigationController::GetNavigationController(mainWindow_->GetUIContent(), navId);
 }
 
 void PictureInPictureController::DeletePIPMode()

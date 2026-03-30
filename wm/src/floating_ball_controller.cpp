@@ -23,7 +23,7 @@
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "floating_ball_manager.h"
-#include "float_bind_manager.h"
+#include "float_window_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -37,7 +37,7 @@ FloatingBallController::FloatingBallController(const sptr<Window>& mainWindow,
     : weakRef_(this), mainWindow_(mainWindow), mainWindowId_(windowId), contextPtr_(contextPtr)
 {
     curState_ = FbWindowState::STATE_UNDEFINED;
-    id_ = FloatBindManager::GetControllerId();
+    id_ = FloatWindowManager::GetControllerId();
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr_);
     if (context == nullptr) {
         return;
@@ -138,50 +138,68 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
     TLOGI(WmsLogTag::WMS_SYSTEM, "StartFloatingBall called, bindState_ %{public}d, id: %{public}s", bindState_,
         id_.c_str());
     if (IsBind()) {
-        return FloatBindManager::StartBindFloatingBall(weakRef_, option_);
+        return FloatWindowManager::StartBindFloatingBall(weakRef_, option_);
     }
     return StartFloatingBallSingle(option);
 }
 
 WMError FloatingBallController::StartFloatingBallSingle(const sptr<FbOption>& option, bool showWhenCreate)
 {
-    {
-        std::lock_guard<std::mutex> lock(controllerMutex_);
-        if (FloatingBallManager::HasActiveController() && !FloatingBallManager::IsActiveController(this)) {
-            TLOGI(WmsLogTag::WMS_SYSTEM, "OnStartFloatingBall abort");
-            return WMError::WM_ERROR_FB_REPEAT_CONTROLLER;
-        }
-        TLOGI(WmsLogTag::WMS_SYSTEM, "called");
-        if (option == nullptr) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "fbOption is null");
-            return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
-        }
-        templateType_ = option->GetTemplate();
-        if (curState_ == FbWindowState::STATE_STARTING || curState_ == FbWindowState::STATE_STARTED) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "fbWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
-                curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
-            SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
-                templateType_, "fbWindow state is starting or started");
-            return WMError::WM_ERROR_FB_REPEAT_OPERATION;
-        }
-        if (curState_ == FbWindowState::STATE_STOPPING) {
-            TLOGW(WmsLogTag::WMS_SYSTEM, "fbWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
-                curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
-            SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
-                templateType_, "fbWindow state is stopping");
-            return WMError::WM_ERROR_FB_INVALID_STATE;
-        }
-        curState_ = FbWindowState::STATE_STARTING;
-        FloatingBallManager::SetActiveController(this);
-        option->SetShowWhenCreate(showWhenCreate);
-        option_ = option;
+    uint64_t token = FloatWindowManager::AcquireToken();
+    if (token == 0) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "AcquireToken timeout, continue start, id: %{public}s", id_.c_str());
     }
-    auto errorCode = StartFloatingBallInner(option);
+    auto errorCode = PrepareStartFloatingBall(option, showWhenCreate);
+    FloatWindowManager::ReleaseToken(token);
+    if (errorCode != WMError::WM_OK) {
+        return errorCode;
+    }
+    errorCode = StartFloatingBallInner(option);
     if (errorCode != WMError::WM_OK) {
         curState_ = FbWindowState::STATE_UNDEFINED;
         FloatingBallManager::RemoveActiveController(this);
     }
     return errorCode;
+}
+
+WMError FloatingBallController::PrepareStartFloatingBall(const sptr<FbOption>& option, bool showWhenCreate)
+{
+    // Token acquisition is best-effort: timeout should not fail the start directly.
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    if (FloatingBallManager::HasActiveController() && !FloatingBallManager::IsActiveController(this)) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "OnStartFloatingBall abort");
+        return WMError::WM_ERROR_FB_REPEAT_CONTROLLER;
+    }
+    TLOGI(WmsLogTag::WMS_SYSTEM, "called");
+    if (option == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "fbOption is null");
+        return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
+    }
+    if (FloatWindowManager::IsFloatingBallConflict(weakRef_)) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "StartFloatingBall abort, other controller is active");
+        return WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+    }
+
+    templateType_ = option->GetTemplate();
+    if (curState_ == FbWindowState::STATE_STARTING || curState_ == FbWindowState::STATE_STARTED) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "fbWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
+            curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "fbWindow state is starting or started");
+        return WMError::WM_ERROR_FB_REPEAT_OPERATION;
+    }
+    if (curState_ == FbWindowState::STATE_STOPPING) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "fbWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
+            curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "fbWindow state is stopping");
+        return WMError::WM_ERROR_FB_INVALID_STATE;
+    }
+    curState_ = FbWindowState::STATE_STARTING;
+    FloatingBallManager::SetActiveController(this);
+    option->SetShowWhenCreate(showWhenCreate);
+    option_ = option;
+    return WMError::WM_OK;
 }
 
 WMError FloatingBallController::StartFloatingBallInner(const sptr<FbOption>& option)
@@ -257,7 +275,7 @@ WMError FloatingBallController::StopFloatingBallFromClient()
     TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatingBallFromClient called, bindState_ %{public}d, id: %{public}s", bindState_,
         id_.c_str());
     if (IsBind()) {
-        return FloatBindManager::StopBindFloatingBall(weakRef_);
+        return FloatWindowManager::StopBindFloatingBall(weakRef_);
     }
     return StopFloatingBallFromClientSingle();
 }

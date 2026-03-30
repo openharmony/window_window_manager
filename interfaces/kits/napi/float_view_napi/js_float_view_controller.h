@@ -22,16 +22,14 @@
 
 namespace OHOS {
 namespace Rosen {
-namespace {
-enum class CallbackType : uint32_t {
-    STATE_CHANGE,
-    RECT_CHANGE,
-    LIMITS_CHANGE,
-};
-};
 napi_value CreateJsFloatViewControllerObject(napi_env env, const sptr<FloatViewController>& floatViewController);
 class JsFloatViewController {
 public:
+    enum class CallbackType : uint32_t {
+        STATE_CHANGE,
+        RECT_CHANGE,
+        LIMITS_CHANGE,
+    };
     explicit JsFloatViewController(const sptr<FloatViewController>& floatViewController);
     virtual ~JsFloatViewController();
     sptr<FloatViewController> GetController() const;
