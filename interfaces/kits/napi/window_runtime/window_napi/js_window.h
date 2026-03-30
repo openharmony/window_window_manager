@@ -335,7 +335,7 @@ private:
     napi_value OnSetPreferredOrientationWithResult(napi_env env, napi_callback_info info);
     OrientationParams ValidateOrientationParams(
         napi_env env, size_t argc, napi_value* argv, const std::string& funcName);
-    void NotifyOrientationExecutionResult(uint32_t promiseId, orientationExecutionResult executionResult);
+    void NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult executionResult);
     napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnConvertOrientationAndRotation(napi_env env, napi_callback_info info);
     napi_value OnRaiseToAppTop(napi_env env, napi_callback_info info);

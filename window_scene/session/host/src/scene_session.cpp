@@ -7184,7 +7184,7 @@ WMError SceneSession::SetPreferredOrientationWithResult(
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
             return;
         }
-        TLOGNI(WmsLogTag::WMS_ROTATION, "${public}s winId: %{public}d orientation: %{public}u promiseId: %{public}u",
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s winId: %{public}d orientation: %{public}u promiseId: %{public}u",
             where, session->GetPersistentId(), static_cast<uint32_t>(orientation), promiseId);
         session->GetSessionProperty()->SetRequestedOrientation(orientation, needAnimation);
         if (!session->onRequestedOrientationChange_) {

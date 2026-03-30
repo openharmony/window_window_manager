@@ -37,7 +37,7 @@ const std::string AVOID_AREA_CHANGE_CB = "avoidAreaChange";
 const std::string LIFECYCLE_EVENT_CB = "lifeCycleEvent";
 const std::string WINDOW_STAGE_EVENT_CB = "windowStageEvent";
 const std::string WINDOW_STAGE_LIFECYCLE_EVENT_CB = "windowStageLifecycleEvent";
-const std::string WINDOW_EVENT_CB = "windowEvent";
+const std::string WINDOW_EVENT_CB = "windowEvent";f
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
 const std::string KEYBOARD_WILL_SHOW_CB = "keyboardWillShow";
 const std::string KEYBOARD_WILL_HIDE_CB = "keyboardWillHide";
@@ -221,7 +221,7 @@ void JsWindowListener::OnAvoidAreaChanged(const AvoidArea avoidArea, AvoidAreaTy
             napi_set_named_property(env, objValue, "type", CreateJsValue(env, static_cast<uint32_t>(type)));
             napi_set_named_property(env, objValue, "area", avoidAreaValue);
             napi_value argv[] = { objValue };
-            thisListener->CallJssMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
+            thisListener->CallJsMethod(AVOID_AREA_CHANGE_CB.c_str(), argv, ArraySize(argv));
         }
     };
     if (napi_send_event(env_, jsCallback, napi_eprio_immediate, "OnAvoidAreaChanged") != napi_status::napi_ok) {
