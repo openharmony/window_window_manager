@@ -4206,8 +4206,7 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
     if (errCode != WmErrorCode::WM_OK) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
     }
-    napi_value lastParam = (argc <= 1) ? nullptr :
-        ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
+    napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     uint32_t promiseId = orientationExecutionResultPromiseIdGenerator_.fetch_add(1);

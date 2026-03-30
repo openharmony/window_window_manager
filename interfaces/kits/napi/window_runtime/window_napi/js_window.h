@@ -295,7 +295,8 @@ private:
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
 
     static std::atomic<uint32_t> orientationExecutionResultPromiseIdGenerator_;
-    static std::unordered_map<uint32_t, std::shared_ptr<AbilityRuntime::NapiAsyncTask>> orientationExecutionResultPromiseMap_;
+    static std::unordered_map<uint32_t,
+        std::shared_ptr<AbilityRuntime::NapiAsyncTask>> orientationExecutionResultPromiseMap_;
     static std::mutex orientationExecutionResultMapMutex_;
     static void RemoveOrientationPromiseFromMap(uint32_t promiseId);
 
