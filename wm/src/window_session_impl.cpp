@@ -9155,7 +9155,7 @@ WSError WindowSessionImpl::GetSceneNodeCount(uint32_t& nodeCount)
         }
         nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s success, count: %{public}u", where, nodeCount);
-        }, __func__);
+    }, __func__);
     return WSError::WS_OK;
 }
 
