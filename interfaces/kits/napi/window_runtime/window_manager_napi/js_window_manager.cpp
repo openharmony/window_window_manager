@@ -1393,7 +1393,15 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         }
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: enable=%{public}d, priority=%{public}d, errCode=%{public}d",
             where, isShow, priority, static_cast<int32_t>(errCode));
-        task->Resolve(env, NapiGetUndefined(env));
+        if (errCode == WMError::WM_OK || errCode == WMError::WM_DO_NOTHING) {
+            task->Resolve(env, NapiGetUndefined(env));
+            return;
+        }
+        auto ret = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+        if (WM_JS_TO_ERROR_CODE_MAP.count(errCode) > 0) {
+            ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+        }
+        task->Reject(env, JsErrUtils::CreateJsError(env, ret, "setWaterMarkImage failed"));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWaterMarkImage") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
