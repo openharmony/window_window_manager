@@ -67,15 +67,9 @@ ani_enum_item GetAniModalityType(ani_env* env, ModalityType enumObj)
     return enumItem;
 }
 
-ani_object CreateAndInitAniOptionsObject(
-    ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
+ani_object CreateAndInitAniOptionsObject(ani_env* env, ani_class aniClass,
+    const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
 {
-    ani_class aniClass;
-    ani_status ret = env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
     ani_method aniCtor;
     ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
@@ -142,7 +136,13 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
         return AniWindowUtils::CreateAniUndefined(env);
     }
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    ani_object aniOptions = CreateAndInitAniOptionsObject(env, extensionWindowConfig);
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    ani_object aniOptions = CreateAndInitAniOptionsObject(env, aniClass, extensionWindowConfig);
     ani_boolean isUndefined;
     if (env->Reference_IsUndefined(aniOptions, &isUndefined) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check aniOptions isUndefined");
@@ -150,10 +150,6 @@ ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<Extensio
     }
     if (isUndefined) {
         TLOGI(WmsLogTag::DEFAULT, "aniOptions is undefined");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    ani_class aniClass;
-    if (env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass) != ANI_OK) {
         return AniWindowUtils::CreateAniUndefined(env);
     }
     if (!SetAniOptionsProperties(env, aniOptions, aniClass, extensionWindowConfig->subWindowOptions)) {
