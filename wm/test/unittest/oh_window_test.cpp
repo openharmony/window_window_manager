@@ -80,7 +80,7 @@ void OHWindowTest::TearDown()
 }
 
 namespace {
-void FrameMetricsMeasuredCallback(int32_t windowId, OH_WindowManager_FrameMetrics* metrics)
+void FrameMetricsMeasuredCallback(int32_t windowId, const OH_WindowManager_FrameMetrics* metrics)
 {
     (void)windowId;
     if (metrics == nullptr) {
@@ -96,7 +96,7 @@ void FrameMetricsMeasuredCallback(int32_t windowId, OH_WindowManager_FrameMetric
     (void)OH_WindowManager_FrameMetrics_GetVsyncTimestamp(metrics, &vsyncTimestamp);
 }
 
-void FrameMetricsMeasuredCallback2(int32_t windowId, OH_WindowManager_FrameMetrics* metrics)
+void FrameMetricsMeasuredCallback2(int32_t windowId, const OH_WindowManager_FrameMetrics* metrics)
 {
     FrameMetricsMeasuredCallback(windowId, metrics);
 }
