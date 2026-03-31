@@ -66,7 +66,7 @@ class RSTransaction;
 class RSUIContext;
 class RSUIDirector;
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
-using NotifyOrientationExecutionResultFunc = std::function<void(uint32_t, uint32_t)>;
+using NotifyOrientationExecutionResultFunc = std::function<void(uint32_t, OrientationExecutionResult)>;
 using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t, const int32_t, const uint64_t);
 using ContentInfoCallback = std::function<void(std::string contentInfo)>;
 enum class ImageFit;
