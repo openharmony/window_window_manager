@@ -271,7 +271,7 @@ void SessionListenerController::ConstructBatchPayload(
     for (const auto& session : sessions) {
         ISessionLifecycleListener::LifecycleEventPayload payload;
         ConstructPayload(payload, session->GetSessionInfo());
-        payload.sessionState_ = session->state_;
+        payload.sessionState_ = session->GetSessionState();
         payloads.emplace_back(std::move(payload));
     }
 }
@@ -504,6 +504,12 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
                 }
             }
         }, __func__);
+    SessionState state = sessionInfo.sessionState_;
+    auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(persistentId);
+    if (sceneSession != nullptr) {
+        state = sceneSession->GetSessionState();
+    }
+    NotifyAppInstanceLifecycleEvent(state, sessionInfo, reason);
 }
 
 void SessionListenerController::NotifyAppInstanceLifecycleEvent(SessionState state,
@@ -518,7 +524,7 @@ void SessionListenerController::NotifyAppInstanceLifecycleEvent(SessionState sta
         return;
     }
     ISessionLifecycleListener::LifecycleEventPayload payload;
-    ConstructAppInstancePayload(payload, sessionInfo, 0, 0, 0, reason);
+    ConstructPayload(payload, sessionInfo, 0, 0, 0, reason);
     payload.sessionState_ = state;
     taskScheduler_->PostAsyncTask(
         [weakThis = weak_from_this(), payload, bundleName, appIndex, appInstanceKey, persistentId,

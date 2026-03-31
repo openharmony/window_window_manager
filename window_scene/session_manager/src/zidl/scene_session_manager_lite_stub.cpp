@@ -1607,7 +1607,7 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundles
     return ERR_NONE;
 }
 
-int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundle(
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByAppInstance(
     MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");

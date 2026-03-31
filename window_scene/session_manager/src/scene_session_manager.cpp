@@ -241,6 +241,26 @@ std::string GetCurrentTime()
         static_cast<uint64_t>(tn.tv_nsec);
     return std::to_string(uTime);
 }
+
+void ConstructBatchLifecyclePayload(
+    std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
+    const std::vector<sptr<SceneSession>>& sessions)
+{
+    for (const auto& session : sessions) {
+        ISessionLifecycleListener::LifecycleEventPayload payload;
+        const SessionInfo& info = session->GetSessionInfo();
+        payload.bundleName_ = info.bundleName_;
+        payload.moduleName_ = info.moduleName_;
+        payload.abilityName_ = info.abilityName_;
+        payload.appIndex_ = info.appIndex_;
+        payload.persistentId_ = info.persistentId_;
+        payload.appInstanceKey_ = info.appInstanceKey_;
+        payload.screenId_ = info.screenId_;
+        payload.sessionState_ = session->GetSessionState();
+        payloads.emplace_back(std::move(payload));
+    }
+}
+
 int Comp(const std::pair<uint64_t, WindowVisibilityState>& a, const std::pair<uint64_t, WindowVisibilityState>& b)
 {
     return a.first < b.first;
@@ -19262,8 +19282,8 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         std::vector<sptr<SceneSession>> appInstanceSessions;
         SceneSessionManager::GetInstance().GetSceneSessionVectorByAppInstance(
             bundleName, appIndex, appInstanceKey, appInstanceSessions);
-        vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
-        listenerController_->ConstructBatchPayload(payloads, appInstanceSessions);
+        std::vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
+        ConstructBatchLifecyclePayload(payloads, appInstanceSessions);
         listener->OnBatchLifecycleEvent(payloads);
     }, __func__);
     return WMError::WM_OK;
