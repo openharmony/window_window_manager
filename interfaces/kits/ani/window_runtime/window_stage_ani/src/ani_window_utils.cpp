@@ -2765,7 +2765,8 @@ bool AniWindowUtils::ParseRectParam(ani_env *env, ani_object aniObject, const sp
     return true;
 }
 
-bool AniWindowUtils::HandleModalityTypeParsing(ani_env* env, ani_object aniObject, const sptr<WindowOption>& windowOption, bool isModal)
+bool AniWindowUtils::HandleModalityTypeParsing(ani_env* env, ani_object aniObject,
+    const sptr<WindowOption>& windowOption, bool isModal)
 {
     ani_ref modalityTypeRef;
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
