@@ -73,6 +73,8 @@ public:
 
     bool IsListenerMapByBundleSizeReachLimit(bool isBundleNameListEmpty) const;
 
+    bool IsListenerMapByAppInstanceSizeReachLimit() const;
+
     void NotifySessionClosed(const SessionInfo& sessionInfo,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
 
@@ -155,7 +157,6 @@ private:
     template <typename KeyType, typename MapType>
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
-    bool IsListenerMapByAppInstanceSizeReachLimit() const;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
     std::map<int32_t, std::vector<sptr<ISessionLifecycleListener>>> listenerMapById_;
