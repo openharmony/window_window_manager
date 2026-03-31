@@ -34,6 +34,7 @@
 namespace OHOS {
 namespace Rosen {
 using ISessionListener = AAFwk::IMissionListener;
+class SceneSession;
 class SessionListenerController : public std::enable_shared_from_this<SessionListenerController> {
 public:
     SessionListenerController() = default;
@@ -48,6 +49,9 @@ public:
     * Window Lifecycle
     */
     void NotifySessionLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent event,
+        const SessionInfo& sessionInfo, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
+
+    void NotifyAppInstanceLifecycleEvent(SessionState state,
         const SessionInfo& sessionInfo, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
 
     void NotifySessionTransferToTargetScreenEvent(const SessionInfo& sessionInfo,
@@ -140,7 +144,7 @@ private:
         const uint32_t resultCode = 0, const uint64_t fromScreenId = 0, const uint64_t toScreenId = 0,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     void ConstructBatchPayload(std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
-        const std::vector<SceneSession>& sessions);
+        const std::vector<sptr<SceneSession>>& sessions);
     void OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote);
     void RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target);
 
@@ -148,6 +152,10 @@ private:
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,
         const ISessionLifecycleListener::SessionLifecycleEvent event,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
+    template <typename KeyType, typename MapType>
+    void SessionListenerController::NotifyListeners(const MapType& listenerMap, const KeyType& key,
+        const ISessionLifecycleListener::LifecycleEventPayload& payload);
+    bool SessionListenerController::IsListenerMapByAppInstanceSizeReachLimit() const;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
     std::map<int32_t, std::vector<sptr<ISessionLifecycleListener>>> listenerMapById_;

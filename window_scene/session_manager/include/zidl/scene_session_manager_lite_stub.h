@@ -101,7 +101,7 @@ private:
     int HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterSessionLifecycleListenerByIds(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterSessionLifecycleListenerByBundles(MessageParcel& data, MessageParcel& reply);
-    int HandleRegisterSessionLifecycleListenerByBundle(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterSessionLifecycleListenerByAppInstance(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToBackgroundByPersistentId(MessageParcel& data, MessageParcel& reply);

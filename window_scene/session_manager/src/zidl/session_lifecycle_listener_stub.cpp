@@ -37,7 +37,7 @@ int SessionLifecycleListenerStub::OnRemoteRequest(
             ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT):
             return HandleOnAppInstanceLifecycleEvent(data, reply);
         default:
-            WLOGFE("Failed to handle request, code: %{public}u", code);
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to handle request, code: %{public}u", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 }
