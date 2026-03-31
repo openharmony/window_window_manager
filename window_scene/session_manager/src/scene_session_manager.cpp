@@ -12810,6 +12810,12 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
     windowVisibilityInfo->SetZOrder(session->GetZOrder());
     windowVisibilityInfo->SetCollaboratorType(session->GetCollaboratorType());
+    if (auto sceneSession = GetSceneSession(session->GetMainWindowPersistentId())) {
+        windowVisibilityInfo->SetMainWindowPersistentId(session->GetMainWindowPersistentId());
+        windowVisibilityInfo->SetControlAppType(sceneSession->GetControlAppType());
+    } else {
+        TLOGW(WmsLogTag::WMS_MAIN, "Main window id: %{public}d not exist", session->GetMainWindowPersistentId());
+    }
 
     int32_t callingWindowId = session->GetSessionInfo().callerPersistentId_;
     sptr<SceneSession> callerSession = GetSceneSession(callingWindowId);
@@ -15631,11 +15637,22 @@ WMError SceneSessionManager::ListWindowInfo(const WindowInfoOption& windowInfoOp
             }
             if (IsChosenWindowOption(windowInfoOption.windowInfoTypeOption, WindowInfoTypeOption::WINDOW_META_INFO)) {
                 windowInfo->windowMetaInfo = sceneSession->GetWindowMetaInfoForWindowInfo();
+                AddOptionWindowMetaInfo(windowInfo, sceneSession);
             }
             infos.emplace_back(windowInfo);
         }
         return WMError::WM_OK;
     }, __func__);
+}
+
+void SceneSessionManager::AddOptionWindowMetaInfo(sptr<WindowInfo> &windowInfo, const sptr<SceneSession> &session)
+{
+    if (auto sceneSession = GetSceneSession(session->GetMainWindowPersistentId())) {
+        windowInfo->windowMetaInfo.mainWindowPersistentId = session->GetMainWindowPersistentId();
+        windowInfo->windowMetaInfo.controlAppType = sceneSession->GetControlAppType();
+    } else {
+        TLOGW(WmsLogTag::WMS_MAIN, "Main window id: %{public}d not exist", session->GetMainWindowPersistentId());
+    }
 }
 
 bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& windowInfoOption,

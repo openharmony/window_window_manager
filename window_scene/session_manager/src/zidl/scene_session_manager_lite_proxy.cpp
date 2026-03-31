@@ -548,6 +548,16 @@ WSError SceneSessionManagerLiteProxy::GetParcelableInfos(MessageParcel& reply, s
     return WSError::WS_OK;
 }
 
+bool SceneSessionManagerLiteProxy::CheckCollaborator(int32_t type)
+{
+    if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE &&
+        type != CollaboratorType::REDIRECT_TYPE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "collaborator type is invalid");
+        return false;
+    }
+    return true;
+}
+
 WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
     bool needStartCaller, bool isFromBroker)
 {
@@ -1537,7 +1547,7 @@ WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int3
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!CheckCollaboratorType(type)) {
+    if (!CheckCollaborator(type)) {
         TLOGE(WmsLogTag::WMS_MAIN, "type is invalid.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
