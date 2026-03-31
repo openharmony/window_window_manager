@@ -3248,6 +3248,55 @@ void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea, bo
     PatchAINavigationBarArea(avoidArea);
 }
 
+void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
+{
+    auto display = DisplayManager::GetInstance().GetDisplayById(GetSessionProperty()->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to get display");
+        return;
+    }
+    sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
+    if (cutoutInfo == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
+        return;
+    }
+    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
+    if (cutoutAreas.empty()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
+        return;
+    }
+    for (auto& cutoutArea : cutoutAreas) {
+        WSRect cutoutRect = {
+            cutoutArea.posX_,
+            cutoutArea.posY_,
+            cutoutArea.width_,
+            cutoutArea.height_
+        };
+        auto isOverlap = SessionHelper::GetOverlap(floatNavigationArea,
+            cutoutRect, floatNavigationArea.posX_, floatNavigationArea.posY_) == WsRect::EMPTY_RECT;
+        floatNavigationArea.posX_ =
+            isOverlap ? (cutoutRect.posX_ - floatNavigationArea.width_) : floatNavigationArea.posX_;
+    }
+}
+
+void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
+{
+    bool visible = false;
+    WSRect floatNavigationArea;
+    if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_) {
+        WSRect landspaceRect;
+        [visible, floatNavigationArea, landspaceRect] = specificCallback_->onGetAINavigationBarArea_(
+            GetSessionProperty()->GetDisplayId());
+        floatNavigationArea = xxxx ? floatNavigationArea : landspaceRect;
+    }
+    if (!visible && !ignoreVisibility) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());
+        continue;
+    }
+    PatchFloatNavigationArea(floatNavigationArea);
+    CalculateAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect, floatNavigationArea, avoidArea);
+}
+
 void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType,
     AvoidArea& avoidArea) const
 {
@@ -3586,6 +3635,10 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
             return avoidArea;
         }
         case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
+            GetAINavigationBarArea(sessionRect, avoidArea, ignoreVisibility);
+            return avoidArea;
+        }
+        case AvoidAreaType::TYPE_FLOAT_NAVIGATION: {
             GetAINavigationBarArea(sessionRect, avoidArea, ignoreVisibility);
             return avoidArea;
         }

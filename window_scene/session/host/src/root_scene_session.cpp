@@ -139,6 +139,12 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
 }
 
+void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
+{
+    // Phase 1: Minimal implementation - just return empty avoid area
+    return;
+}
+
 AvoidArea RootSceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, bool ignoreVisibility)
 {
     auto task = [weakThis = wptr(this), type, ignoreVisibility]() -> AvoidArea {
@@ -167,6 +173,10 @@ AvoidArea RootSceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, bool ign
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_NAVIGATION_INDICATOR: {
+                session->GetAINavigationBarAreaForRoot(sessionRect, avoidArea, ignoreVisibility);
+                return avoidArea;
+            }
+            case AvoidAreaType::TYPE_FLOAT_NAVIGATION: {
                 session->GetAINavigationBarAreaForRoot(sessionRect, avoidArea, ignoreVisibility);
                 return avoidArea;
             }

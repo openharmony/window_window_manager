@@ -2236,6 +2236,10 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         DisplayId displayId, AvoidAreaType type, std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo) {
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
+    specificCb->onGetFloatNavagationInfo_ = [this](
+        DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
+        return this->GetNextAvoidRectInfo(displayId, floatNavagationInfo);
+    };
     specificCb->onGetLSState_ = [this]() {
         return this->GetLSState();
     };
@@ -13856,6 +13860,29 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidArea
         nextSystemBarAvoidAreaRectInfo = nextAvoidRectInfoMap_[type][displayId];
     }
     return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::NotifyFloatNavagationInfo(
+    DisplayId displayId, bool visible, const WSRect& portraitRect, const WSRect& landspaceRect)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public} " PRIu64 " visible %{public}d "
+        "portraitRect %{public}s, landspaceRect %{public}s",
+        displayId, visible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
+    std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
+    floatNavagationInfoMap_[displayId] = { visible, portraitRect, landspaceRect };
+    return WSError::WS_OK;
+}
+
+WSError SceneSessionManager::GetFloatNavagationInfo(
+    DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo)
+{
+    std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
+    auto iter = floatNavagationInfoMap_.find(displayId);
+    if (auto iter = floatNavagationInfoMap_.find(displayId); iter != floatNavagationInfoMap_.end()) {
+        floatNavagationInfo = *iter;
+        return WSError::WS_OK;
+    }
+    return WSError::WS_DO_NOTHING;
 }
 
 void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentId)
