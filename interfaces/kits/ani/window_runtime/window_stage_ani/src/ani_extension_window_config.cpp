@@ -71,7 +71,7 @@ ani_object CreateAndInitAniOptionsObject(ani_env* env, ani_class aniClass,
     const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
 {
     ani_method aniCtor;
-    ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
+    ani_status ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
