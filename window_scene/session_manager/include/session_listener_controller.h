@@ -153,9 +153,9 @@ private:
         const ISessionLifecycleListener::SessionLifecycleEvent event,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
     template <typename KeyType, typename MapType>
-    void SessionListenerController::NotifyListeners(const MapType& listenerMap, const KeyType& key,
+    void NotifyListeners(const MapType& listenerMap, const KeyType& key,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
-    bool SessionListenerController::IsListenerMapByAppInstanceSizeReachLimit() const;
+    bool IsListenerMapByAppInstanceSizeReachLimit() const;
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
     std::map<int32_t, std::vector<sptr<ISessionLifecycleListener>>> listenerMapById_;
