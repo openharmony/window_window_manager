@@ -145,6 +145,7 @@ public:
 private:
     template<typename T>
     WSError GetParcelableInfos(MessageParcel& reply, std::vector<T>& parcelableInfos);
+    bool CheckCollaborator(int32_t type);
 };
 } // namespace OHOS::Rosen
 
