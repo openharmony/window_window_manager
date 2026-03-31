@@ -520,6 +520,49 @@ void AniExtensionWindowConfig::OnSetWindowRectHeight(ani_env* env, ani_int value
     extensionWindowConfig_->windowRect.height_ = static_cast<uint32_t>(value);
 }
 
+void AniExtensionWindowConfig::ParseSubWindowOptionsProperties(ani_env* env, ani_object value,
+    SubWindowOptions& options)
+{
+    ani_ref titleRef;
+    ani_boolean isUndefined;
+    if (env->Object_GetPropertyByName_Ref(value, "title", &titleRef) == ANI_OK) {
+        if (env->Reference_IsUndefined(titleRef, &isUndefined) != ANI_OK) {
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check value isUndefined");
+            return;
+        }
+        if (!isUndefined) {
+            std::string title;
+            if (AniWindowUtils::GetStdString(env, static_cast<ani_string>(titleRef), title) == ANI_OK) {
+                options.title = title;
+            } else {
+                TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to convert parameter to title");
+                return;
+            }
+        }
+    } else {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get title");
+        return;
+    }
+    ani_boolean decorEnabled = false;
+    if (env->Object_GetPropertyByName_Boolean(value, "decorEnabled", &decorEnabled) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get decorEnabled");
+        return;
+    }
+    options.decorEnabled = decorEnabled;
+    bool isModal = false;
+    if (AniWindowUtils::GetPropertyBoolObject(env, "isModal", value, isModal) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isModal");
+        return;
+    }
+    options.isModal = isModal;
+    bool isTopmost = false;
+    if (AniWindowUtils::GetPropertyBoolObject(env, "isTopmost", value, isTopmost) != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isTopmost");
+        return;
+    }
+    options.isTopmost = isTopmost;
+}
+
 void AniExtensionWindowConfig::OnSetSubWindowOptions(ani_env* env, ani_object value)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -536,46 +579,7 @@ void AniExtensionWindowConfig::OnSetSubWindowOptions(ani_env* env, ani_object va
         extensionWindowConfig_->subWindowOptions.isTopmost = false;
         return;
     }
-
-    ani_ref titleRef;
-    if (env->Object_GetPropertyByName_Ref(value, "title", &titleRef) == ANI_OK) {
-        if (env->Reference_IsUndefined(titleRef, &isUndefined) != ANI_OK) {
-            TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check value isUndefined");
-            return;
-        }
-        if (!isUndefined) {
-            std::string title;
-            if (AniWindowUtils::GetStdString(env, static_cast<ani_string>(titleRef), title) == ANI_OK) {
-                extensionWindowConfig_->subWindowOptions.title = title;
-            } else {
-                TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to convert parameter to title");
-                return;
-            }
-        }
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get title");
-        return;
-    }
-    ani_boolean decorEnabled = false;
-    if (env->Object_GetPropertyByName_Boolean(value, "decorEnabled", &decorEnabled) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get decorEnabled");
-        return;
-    }
-    extensionWindowConfig_->subWindowOptions.decorEnabled = decorEnabled;
-
-    bool isModal = false;
-    if (AniWindowUtils::GetPropertyBoolObject(env, "isModal", value, isModal) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isModal");
-        return;
-    }
-    extensionWindowConfig_->subWindowOptions.isModal = isModal;
-
-    bool isTopmost = false;
-    if (AniWindowUtils::GetPropertyBoolObject(env, "isTopmost", value, isTopmost) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isTopmost");
-        return;
-    }
-    extensionWindowConfig_->subWindowOptions.isTopmost = isTopmost;
+    ParseSubWindowOptionsProperties(env, value, extensionWindowConfig_->subWindowOptions);
 }
 
 void AniExtensionWindowConfig::OnSetSubWindowOptionsTitle(ani_env* env, ani_string value)
