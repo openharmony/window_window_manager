@@ -167,7 +167,6 @@ WmErrorCode AniExtensionWindowRegisterManager::RegisterListener(sptr<Window>& wi
             type.c_str(), retCode);
         if (env->GlobalReference_Delete(fnRef) != ANI_OK) {
             TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
-            return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
         }
         return retCode;
     }
