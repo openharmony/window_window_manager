@@ -5856,6 +5856,10 @@ void ScreenSessionManager::RecoverMultiScreenRelativePosition(ScreenId screenId)
         return;
     }
     auto info = multiScreenInfoMap[serialNumber];
+    if (info.outerOnly || GetIsOuterOnlyMode() == true) {
+        TLOGNFI(WmsLogTag::DMS, "is outer only");
+        return;
+    }
     sptr<ScreenSession> internalSession = GetInternalScreenSession();
     if(internalSession == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "internalSession is nullptr!");
