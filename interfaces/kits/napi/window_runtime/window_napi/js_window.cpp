@@ -4136,13 +4136,6 @@ OrientationParams JsWindow::ValidateOrientationParams(napi_env env, size_t argc,
     return params;
 }
 
-void JsWindow::AddOrientationPromiseToMap(uint32_t promiseId)
-{
-    uint32_t promiseId = orientationExecutionResultPromiseIdGenerator_.fetch_add(1);
-    std::lock_guard<std::mutex> lock(orientationExecutionResultMapMutex_);
-    orientationExecutionResultPromiseMap_[promiseId] = napiAsyncTask;
-}
-
 void JsWindow::RemoveOrientationPromiseFromMap(uint32_t promiseId)
 {
     std::lock_guard<std::mutex> lock(orientationExecutionResultMapMutex_);
