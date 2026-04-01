@@ -187,7 +187,9 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterAllListeners(
                 type.c_str(), ret);
             return ret;
         }
-        env->GlobalReference_Delete(it->second->GetAniCallback());
+        if (env->GlobalReference_Delete(it->second->GetAniCallback()) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
+        }
         it->second->SetAniCallback(nullptr);
         it = aniCbMap_[type].erase(it);
     }
@@ -215,7 +217,9 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterSpecificListener(
                 type.c_str(), ret);
             return ret;
         }
-        env->GlobalReference_Delete(it->second->GetAniCallback());
+        if (env->GlobalReference_Delete(it->second->GetAniCallback()) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
+        }
         it->second->SetAniCallback(nullptr);
         aniCbMap_[type].erase(it);
         break;
@@ -241,7 +245,10 @@ WmErrorCode AniExtensionWindowRegisterManager::UnregisterListener(sptr<Window>& 
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     ani_boolean isUndefined = ANI_FALSE;
-    env->Reference_IsUndefined(static_cast<ani_ref>(fn), &isUndefined);
+    if (env->Reference_IsUndefined(static_cast<ani_ref>(fn), &isUndefined) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] fail to check fn isUndefined");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (isUndefined == ANI_TRUE) {
         ret = UnregisterAllListeners(caseType, window, type, env);

@@ -2716,13 +2716,11 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
     ret = GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to get property maximizeSupported");
-        return false;
     }
     bool outlineEnabled = false;
     ret = GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to get property outlineEnabled");
-        return false;
     }
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
@@ -2813,7 +2811,6 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
     ani_status ret = GetPropertyBoolObject(env, "isModal", aniObject, isModal);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isModal");
-        return false;
     }
     if (isModal) {
         windowOption->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
@@ -2823,7 +2820,6 @@ bool AniWindowUtils::ParseModalityParam(ani_env *env, ani_object aniObject, cons
     ret = GetPropertyBoolObject(env, "isTopmost", aniObject, isTopmost);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to get property isTopmost");
-        return false;
     }
     if (!isModal && isTopmost) {
         TLOGE(WmsLogTag::WMS_SUB, "Normal subwindow not support topmost");
