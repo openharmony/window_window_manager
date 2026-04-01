@@ -73,7 +73,7 @@ private:
 
     void OnStateChange(const FloatViewState& state, std::string stopReason = "");
     void OnRectChange(const Rect& window, double scale, const std::string& reason);
-    void OnLimitsChange(const FloatViewLimits& specificationInfo);
+    void OnLimitsChange(const FloatViewLimits& limits);
 
     wptr<FloatViewController> weakRef_ = nullptr;
     sptr<Window> window_ = nullptr;

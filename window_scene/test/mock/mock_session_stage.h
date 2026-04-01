@@ -109,6 +109,9 @@ public:
     MOCK_METHOD1(UpdateWindowUIType, WSError(WindowUIType windowUIType));
     MOCK_METHOD1(UpdatePropertyWhenTriggerMode, WSError(const sptr<WindowSessionProperty>& property));
     MOCK_METHOD1(UpdateAppHookWindowInfo, WSError(const HookWindowInfo& hookWindowInfo));
+    MOCK_METHOD2(SendFvActionEvent, WSError(const std::string& action, const std::string& reason));
+    MOCK_METHOD2(SyncFvWindowInfo, WSError(const FloatViewWindowInfo& windowInfo, const std::string& reason));
+    MOCK_METHOD1(SyncFvLimits, WSError(const FloatViewLimits& limits));
 };
 } // namespace Rosen
 } // namespace OHOS

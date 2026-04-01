@@ -516,7 +516,7 @@ void FloatViewController::OnRectChange(const Rect& window, double scale, const s
     }
 }
 
-void FloatViewController::OnLimitsChange(const FloatViewLimits& specificationInfo)
+void FloatViewController::OnLimitsChange(const FloatViewLimits& limits)
 {
     std::vector<sptr<IFvLimitsChangeObserver>> listeners;
     {
@@ -528,7 +528,7 @@ void FloatViewController::OnLimitsChange(const FloatViewLimits& specificationInf
             TLOGE(WmsLogTag::WMS_SYSTEM, "limits change listener is nullptr");
             continue;
         }
-        listener->OnLimitsChange(specificationInfo);
+        listener->OnLimitsChange(limits);
     }
 }
 

@@ -49,7 +49,7 @@ public:
  */
 class IFvLimitsChangeObserver : virtual public RefBase {
 public:
-    virtual void OnLimitsChange(const FloatViewLimits& specificationInfo) = 0;
+    virtual void OnLimitsChange(const FloatViewLimits& limits) = 0;
 };
 
 } // namespace Rosen

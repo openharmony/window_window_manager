@@ -35,7 +35,7 @@ public:
 
     void OnStateChange(const FloatViewState& state, const std::string& stopReason) override;
     void OnRectangleChange(const Rect& window, double scale, const std::string& reason) override;
-    void OnLimitsChange(const FloatViewLimits& specificationInfo) override;
+    void OnLimitsChange(const FloatViewLimits& limits) override;
 
 private:
     napi_env env_ = nullptr;

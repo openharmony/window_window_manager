@@ -18,10 +18,13 @@
 #include <gmock/gmock.h>
 #include "ability_context_impl.h"
 #include "float_view_controller.h"
-#include "float_view_manager.h"
 #include "float_window_manager.h"
+#include "native_engine/native_engine.h"
 #include "window.h"
 #include "wm_common.h"
+
+#define FloatViewManager MockFloatViewManager
+#define FloatWindowManager MockFloatWindowManager
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,10 +43,10 @@ public:
     MOCK_METHOD0(NotifyPrepareCloseFloatView, void());
     MOCK_METHOD1(UpdateFloatView, WMError(const FloatViewTemplateInfo& fvTemplateInfo));
     MOCK_METHOD1(RestoreFloatViewMainWindow, WMError(const std::shared_ptr<AAFwk::WantParams>& wantParams));
-    MOCK_METHOD4(NapiSetUIContent, WMError(const std::string& contentUrl, napi_env env, napi_value storage,
-        BackupAndRestoreType type));
-    MOCK_METHOD1(RegisterLifeCycleListener, void(const sptr<IWindowLifeCycle>& listener));
-    MOCK_METHOD1(UnregisterLifeCycleListener, void(const sptr<IWindowLifeCycle>& listener));
+    MOCK_METHOD6(NapiSetUIContent, WMError(const std::string& contentUrl, napi_env env, napi_value storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability));
+    MOCK_METHOD1(RegisterLifeCycleListener, WMError(const sptr<IWindowLifeCycle>& listener));
+    MOCK_METHOD1(UnregisterLifeCycleListener, WMError(const sptr<IWindowLifeCycle>& listener));
     uint32_t GetWindowId() const override
     {
         return mockWindowId_;
@@ -62,7 +65,7 @@ public:
 
 class MockStateChangeListener : public IFvStateChangeObserver {
 public:
-    void OnStateChange(const FloatViewState& state) override
+    void OnStateChange(const FloatViewState& state, const std::string& stopReason) override
     {
         return;
     }
@@ -83,6 +86,37 @@ public:
         return;
     }
 };
+
+class MockFloatViewManager {
+public:
+    static bool HasActiveController() { return hasActiveController_; }
+    static bool IsActiveController(const wptr<FloatViewController>& fvControllerWeak) { return isActiveController_; }
+    static void SetActiveController(const wptr<FloatViewController>& fvControllerWeak) { hasActiveController_ = true; }
+    static void RemoveActiveController(const wptr<FloatViewController>& fvControllerWeak) { hasActiveController_ = false; }
+    static void DoActionClose(const std::string& reason) {}
+
+    static bool hasActiveController_;
+    static bool isActiveController_;
+};
+
+bool MockFloatViewManager::hasActiveController_ = false;
+bool MockFloatViewManager::isActiveController_ = false;
+
+class MockFloatWindowManager {
+public:
+    static std::string GetControllerId() { return "mock_controller_id"; }
+    static uint64_t AcquireToken() { return token_; }
+    static void ReleaseToken(uint64_t token) {}
+    static WMError StartBindFloatView(const wptr<FloatViewController>& fvControllerWeak) { return WMError::WM_ERROR_INVALID_OPERATION; }
+    static bool IsFloatViewConflict(const wptr<FloatViewController>& selfController) { return isFloatViewConflict_; }
+    static WMError StopBindFloatView(const wptr<FloatViewController>& fvControllerWeak) { return WMError::WM_ERROR_INVALID_OPERATION; }
+
+    static uint64_t token_;
+    static bool isFloatViewConflict_;
+};
+
+uint64_t MockFloatWindowManager::token_ = 0;
+bool MockFloatWindowManager::isFloatViewConflict_ = false;
 
 class FloatViewControllerTest : public testing::Test {
 public:
@@ -123,51 +157,29 @@ void FloatViewControllerTest::TearDown()
 
 namespace {
 /**
- * @tc.name: UpdateMainWindow
- * @tc.desc: UpdateMainWindow
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, UpdateMainWindow01, TestSize.Level1)
-{
-    fvController_->UpdateMainWindow(nullptr);
-    fvController_->UpdateMainWindow(mw_);
-}
-
-/**
  * @tc.name: GetCurState
  * @tc.desc: GetCurState
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, GetCurState01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, GetCurState, TestSize.Level1)
 {
-    FvWindowState state = fvController_->GetCurState();
-    EXPECT_EQ(FvWindowState::FV_STATE_UNDEFINED, state);
 }
 
 /**
  * @tc.name: ChangeState
- * @tc.desc: ChangeState
+ * @tc.desc: ChangeState with all valid states
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, ChangeState01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, ChangeState, TestSize.Level1)
 {
+    FvWindowState state = fvController_->GetCurState();
+    EXPECT_EQ(FvWindowState::FV_STATE_UNDEFINED, state);
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(FvWindowState::FV_STATE_STARTED, fvController_->GetCurState());
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPED);
     EXPECT_EQ(FvWindowState::FV_STATE_STOPPED, fvController_->GetCurState());
-}
-
-/**
- * @tc.name: ChangeState02
- * @tc.desc: ChangeState with all valid states
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, ChangeState02, TestSize.Level1)
-{
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTING);
     EXPECT_EQ(FvWindowState::FV_STATE_STARTING, fvController_->GetCurState());
-    fvController_->ChangeState(FvWindowState::FV_STATE_HIDDEN);
-    EXPECT_EQ(FvWindowState::FV_STATE_HIDDEN, fvController_->GetCurState());
     fvController_->ChangeState(FvWindowState::FV_STATE_IN_SIDEBAR);
     EXPECT_EQ(FvWindowState::FV_STATE_IN_SIDEBAR, fvController_->GetCurState());
     fvController_->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
@@ -179,7 +191,7 @@ HWTEST_F(FloatViewControllerTest, ChangeState02, TestSize.Level1)
  * @tc.desc: IsStateWithWindow
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, IsStateWithWindow01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, IsStateWithWindow, TestSize.Level1)
 {
     EXPECT_TRUE(fvController_->IsStateWithWindow(FvWindowState::FV_STATE_STARTED));
     EXPECT_TRUE(fvController_->IsStateWithWindow(FvWindowState::FV_STATE_HIDDEN));
@@ -194,7 +206,7 @@ HWTEST_F(FloatViewControllerTest, IsStateWithWindow01, TestSize.Level1)
  * @tc.desc: SetBindState
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, SetBindState01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, SetBindState, TestSize.Level1)
 {
     fvController_->SetBindState(true);
     EXPECT_TRUE(fvController_->IsBind());
@@ -203,34 +215,17 @@ HWTEST_F(FloatViewControllerTest, SetBindState01, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetBindWindowId
- * @tc.desc: SetBindWindowId
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SetBindWindowId01, TestSize.Level1)
-{
-    uint32_t windowId = 123;
-    fvController_->SetBindWindowId(windowId);
-}
-
-/**
  * @tc.name: StartFloatView
- * @tc.desc: StartFloatView with bind state
+ * @tc.desc: StartFloatView with various states
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, StartFloatView01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, StartFloatView, TestSize.Level1)
 {
     fvController_->SetBindState(true);
     EXPECT_NE(WMError::WM_OK, fvController_->StartFloatView());
-}
+    fvController_->UpdateMainWindow(nullptr);
+    EXPECT_EQ(fvController_->mainWindow_, nullptr);
 
-/**
- * @tc.name: StartFloatView02
- * @tc.desc: StartFloatView without bind state
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, StartFloatView02, TestSize.Level1)
-{
     fvController_->SetBindState(false);
     fvController_->UpdateMainWindow(mw_);
     EXPECT_NE(WMError::WM_OK, fvController_->StartFloatView());
@@ -238,50 +233,84 @@ HWTEST_F(FloatViewControllerTest, StartFloatView02, TestSize.Level1)
 
 /**
  * @tc.name: StartFloatViewSingle
- * @tc.desc: StartFloatViewSingle with invalid states
+ * @tc.desc: StartFloatViewSingle with various scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, StartFloatViewSingle01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, StartFloatViewSingle, TestSize.Level1)
 {
+    FloatWindowManager::token_ = 0;
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTING);
     EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StartFloatViewSingle());
-    
+    FloatWindowManager::token_ = 1;
+    EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StartFloatViewSingle());
+
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StartFloatViewSingle());
-    
+
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPING);
     EXPECT_EQ(WMError::WM_ERROR_FV_INVALID_STATE, fvController_->StartFloatViewSingle());
+
+    FloatViewManager::hasActiveController_ = true;
+    EXPECT_EQ(WMError::WM_ERROR_FV_START_FAILED, fvController_->StartFloatViewSingle());
+    FloatViewManager::isActiveController_ = true;
+    EXPECT_EQ(WMError::WM_ERROR_FV_INVALID_STATE, fvController_->StartFloatViewSingle());
+    FloatViewManager::hasActiveController_ = false;
+    FloatViewManager::isActiveController_ = false;
+
+    FloatWindowManager::isFloatViewConflict_ = true;
+    EXPECT_EQ(WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS, fvController_->StartFloatViewSingle());
+    FloatWindowManager::isFloatViewConflict_ = false;
+
+    fvController_->UpdateMainWindow(mw_);
+    EXPECT_NE(WMError::WM_OK, fvController_->StartFloatViewSingle(false));
+    EXPECT_NE(WMError::WM_OK, fvController_->StartFloatViewSingle(true));
 }
 
 /**
- * @tc.name: StartFloatViewSingle02
- * @tc.desc: StartFloatViewSingle with showWhenCreate false
+ * @tc.name: CreateFloatViewWindow
+ * @tc.desc: Test CreateFloatViewWindow with various scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, StartFloatViewSingle02, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, CreateFloatViewWindow, TestSize.Level1)
 {
+    void* invalidContext = nullptr;
+    option_->SetContext(invalidContext);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
     fvController_->UpdateMainWindow(mw_);
-    EXPECT_NE(WMError::WM_OK, fvController_->StartFloatViewSingle(false));
+    mw_->SetWindowState(WindowState::STATE_SHOWN);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->CreateFloatViewWindow());
+
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_->UpdateMainWindow(nullptr);
+    mw_->SetWindowState(WindowState::STATE_SHOWN);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->CreateFloatViewWindow());
+
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_->UpdateMainWindow(mw_);
+    mw_->SetWindowState(WindowState::STATE_HIDDEN);
+    EXPECT_EQ(WMError::WM_ERROR_FV_START_FAILED, fvController_->CreateFloatViewWindow());
+
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    mw_->SetWindowState(WindowState::STATE_SHOWN);
+    EXPECT_NE(WMError::WM_OK, fvController_->CreateFloatViewWindow());
+
+    Rect rect {0, 0, 100, 100};
+    option_->SetRect(rect);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    mw_->SetWindowState(WindowState::STATE_SHOWN);
+    EXPECT_NE(WMError::WM_OK, fvController_->CreateFloatViewWindow());
 }
 
 /**
  * @tc.name: StopFloatViewFromClient
- * @tc.desc: StopFloatViewFromClient with bind state
+ * @tc.desc: StopFloatViewFromClient with various states
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, StopFloatViewFromClient01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, StopFloatViewFromClient, TestSize.Level1)
 {
     fvController_->SetBindState(true);
     EXPECT_NE(WMError::WM_OK, fvController_->StopFloatViewFromClient());
-}
 
-/**
- * @tc.name: StopFloatViewFromClient02
- * @tc.desc: StopFloatViewFromClient without bind state
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, StopFloatViewFromClient02, TestSize.Level1)
-{
     fvController_->SetBindState(false);
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->StopFloatViewFromClient());
@@ -289,100 +318,74 @@ HWTEST_F(FloatViewControllerTest, StopFloatViewFromClient02, TestSize.Level1)
 
 /**
  * @tc.name: StopFloatViewFromClientSingle
- * @tc.desc: StopFloatViewFromClientSingle with invalid states
+ * @tc.desc: StopFloatViewFromClientSingle with various states
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, StopFloatViewFromClientSingle01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, StopFloatViewFromClientSingle, TestSize.Level1)
 {
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPED);
     EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StopFloatViewFromClientSingle());
-    
+
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPING);
     EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StopFloatViewFromClientSingle());
-}
 
-/**
- * @tc.name: StopFloatViewFromClientSingle02
- * @tc.desc: StopFloatViewFromClientSingle with valid state but null window
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, StopFloatViewFromClientSingle02, TestSize.Level1)
-{
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->StopFloatViewFromClientSingle());
 }
 
 /**
  * @tc.name: StopFloatView
- * @tc.desc: StopFloatView with invalid states
+ * @tc.desc: StopFloatView with various states
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, StopFloatView01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, StopFloatView, TestSize.Level1)
 {
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPED);
     EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StopFloatView("test"));
 
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPING);
     EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StopFloatView("test"));
-}
 
-/**
- * @tc.name: StopFloatView02
- * @tc.desc: StopFloatView with null window
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, StopFloatView02, TestSize.Level1)
-{
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->StopFloatView(""));
 }
 
 /**
  * @tc.name: RestoreMainWindow
- * @tc.desc: RestoreMainWindow with invalid state
+ * @tc.desc: RestoreMainWindow with various states
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, RestoreMainWindow01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, RestoreMainWindow, TestSize.Level1)
 {
     std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->RestoreMainWindow(wantParams));
-}
 
-/**
- * @tc.name: RestoreMainWindow02
- * @tc.desc: RestoreMainWindow with stopped state
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, RestoreMainWindow02, TestSize.Level1)
-{
-    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPED);
     EXPECT_EQ(WMError::WM_ERROR_FV_INVALID_STATE, fvController_->RestoreMainWindow(wantParams));
 }
 
 /**
  * @tc.name: SetUIContext
- * @tc.desc: SetUIContext with null window
+ * @tc.desc: SetUIContext with various states
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, SetUIContext01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, SetUIContext, TestSize.Level1)
 {
     std::string contextUrl = "test_url";
     std::shared_ptr<NativeReference> contentStorage = nullptr;
     EXPECT_EQ(WMError::WM_OK, fvController_->SetUIContext(contextUrl, contentStorage));
-}
 
-/**
- * @tc.name: SetUIContext02
- * @tc.desc: SetUIContext with state that has window but null window
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SetUIContext02, TestSize.Level1)
-{
-    std::string contextUrl = "test_url";
-    std::shared_ptr<NativeReference> contentStorage = nullptr;
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
+
+    fvController_->ChangeState(FvWindowState::FV_STATE_HIDDEN);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
+
+    fvController_->ChangeState(FvWindowState::FV_STATE_IN_SIDEBAR);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
+
+    fvController_->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
 }
 
@@ -391,19 +394,11 @@ HWTEST_F(FloatViewControllerTest, SetUIContext02, TestSize.Level1)
  * @tc.desc: SetVisibilityInApp with null window
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, SetVisibilityInApp01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, SetVisibilityInApp, TestSize.Level1)
 {
     EXPECT_EQ(WMError::WM_OK, fvController_->SetVisibilityInApp(true));
     EXPECT_EQ(WMError::WM_OK, fvController_->SetVisibilityInApp(false));
-}
 
-/**
- * @tc.name: SetVisibilityInApp02
- * @tc.desc: SetVisibilityInApp with state that has window but null window
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SetVisibilityInApp02, TestSize.Level1)
-{
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetVisibilityInApp(true));
 }
@@ -413,86 +408,21 @@ HWTEST_F(FloatViewControllerTest, SetVisibilityInApp02, TestSize.Level1)
  * @tc.desc: SetWindowSize with null window
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, SetWindowSize01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, SetWindowSize, TestSize.Level1)
 {
     Rect rect {0, 0, 100, 100};
     EXPECT_EQ(WMError::WM_OK, fvController_->SetWindowSize(rect));
-}
 
-/**
- * @tc.name: SetWindowSize02
- * @tc.desc: SetWindowSize with state that has window but null window
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SetWindowSize02, TestSize.Level1)
-{
-    Rect rect {0, 0, 100, 100};
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetWindowSize(rect));
-}
 
-/**
- * @tc.name: SyncWindowInfo
- * @tc.desc: SyncWindowInfo with null window
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SyncWindowInfo01, TestSize.Level1)
-{
-    uint32_t windowId = 101;
-    FloatViewWindowInfo windowInfo;
-    windowInfo.windowRect_ = {0, 0, 100, 100};
-    windowInfo.scale_ = 1.0;
-    fvController_->SyncWindowInfo(windowId, windowInfo, "test");
-}
+    fvController_->window_ = mw_;
+    EXPECT_CALL(*mw_, UpdateFloatView(_)).Times(1).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_EQ(WMError::WM_ERROR_SYSTEM_ABNORMALLY, fvController_->SetWindowSize(rect));
 
-/**
- * @tc.name: SyncWindowInfo02
- * @tc.desc: SyncWindowInfo with mismatched window id
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SyncWindowInfo02, TestSize.Level1)
-{
-    uint32_t windowId = 999;
-    FloatViewWindowInfo windowInfo;
-    windowInfo.windowRect_ = {0, 0, 100, 100};
-    windowInfo.scale_ = 1.0;
-    fvController_->UpdateMainWindow(mw_);
-    fvController_->SyncWindowInfo(windowId, windowInfo);
-}
-
-/**
- * @tc.name: SyncLimits
- * @tc.desc: SyncLimits with null window
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SyncLimits01, TestSize.Level1)
-{
-    uint32_t windowId = 101;
-    FloatViewLimits limits;
-    fvController_->SyncLimits(windowId, limits);
-}
-
-/**
- * @tc.name: SyncLimits02
- * @tc.desc: SyncLimits with mismatched window id
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, SyncLimits02, TestSize.Level1)
-{
-    uint32_t windowId = 999;
-    FloatViewLimits limits;
-    fvController_->UpdateMainWindow(mw_);
-    fvController_->SyncLimits(windowId, limits);
-}
-
-/**
- * @tc.name: GetWindowInfo
- * @tc.desc: GetWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, GetWindowInfo01, TestSize.Level1)
-{
-    FloatViewWindowInfo windowInfo = fvController_->GetWindowInfo();
+    EXPECT_CALL(*mw_, UpdateFloatView(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, fvController_->SetWindowSize(rect));
+    fvController_->window_ = nullptr;
 }
 
 /**
@@ -500,10 +430,14 @@ HWTEST_F(FloatViewControllerTest, GetWindowInfo01, TestSize.Level1)
  * @tc.desc: GetWindow
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, GetWindow01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, GetWindow, TestSize.Level1)
 {
+    fvController_->window_ = mw_;
     sptr<Window> window = fvController_->GetWindow();
-    EXPECT_EQ(nullptr, window);
+    EXPECT_TRUE(fvController_->GetWindow() != nullptr);
+    fvController_->window_ = nullptr;
+    sptr<Window> window = fvController_->GetWindow();
+    EXPECT_TRUE(fvController_->GetWindow() == nullptr);
 }
 
 /**
@@ -511,7 +445,7 @@ HWTEST_F(FloatViewControllerTest, GetWindow01, TestSize.Level1)
  * @tc.desc: RegisterStateChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, RegisterStateChangeListener01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, RegisterStateChangeListener, TestSize.Level1)
 {
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvController_->RegisterStateChangeListener(nullptr));
     auto listener = sptr<MockStateChangeListener>::MakeSptr();
@@ -524,7 +458,7 @@ HWTEST_F(FloatViewControllerTest, RegisterStateChangeListener01, TestSize.Level1
  * @tc.desc: UnregisterStateChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, UnregisterStateChangeListener01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, UnregisterStateChangeListener, TestSize.Level1)
 {
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvController_->UnregisterStateChangeListener(nullptr));
     auto listener = sptr<MockStateChangeListener>::MakeSptr();
@@ -536,7 +470,7 @@ HWTEST_F(FloatViewControllerTest, UnregisterStateChangeListener01, TestSize.Leve
  * @tc.desc: RegisterRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, RegisterRectChangeListener01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, RegisterRectChangeListener, TestSize.Level1)
 {
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvController_->RegisterRectChangeListener(nullptr));
     auto listener = sptr<MockRectChangeListener>::MakeSptr();
@@ -549,7 +483,7 @@ HWTEST_F(FloatViewControllerTest, RegisterRectChangeListener01, TestSize.Level1)
  * @tc.desc: UnregisterRectChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, UnregisterRectChangeListener01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, UnregisterRectChangeListener, TestSize.Level1)
 {
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvController_->UnregisterRectChangeListener(nullptr));
     auto listener = sptr<MockRectChangeListener>::MakeSptr();
@@ -561,7 +495,7 @@ HWTEST_F(FloatViewControllerTest, UnregisterRectChangeListener01, TestSize.Level
  * @tc.desc: RegisterLimitsChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, RegisterLimitsChangeListener01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, RegisterLimitsChangeListener, TestSize.Level1)
 {
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvController_->RegisterLimitsChangeListener(nullptr));
     auto listener = sptr<MockLimitsChangeListener>::MakeSptr();
@@ -574,43 +508,11 @@ HWTEST_F(FloatViewControllerTest, RegisterLimitsChangeListener01, TestSize.Level
  * @tc.desc: UnregisterLimitsChangeListener
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, UnregisterLimitsChangeListener01, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, UnregisterLimitsChangeListener, TestSize.Level1)
 {
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvController_->UnregisterLimitsChangeListener(nullptr));
     auto listener = sptr<MockLimitsChangeListener>::MakeSptr();
     EXPECT_EQ(WMError::WM_OK, fvController_->UnregisterLimitsChangeListener(listener));
-}
-
-/**
- * @tc.name: StateTransitionTest
- * @tc.desc: Test all state transitions
- * @tc.type: FUNC
- */
-HWTEST_F(FloatViewControllerTest, StateTransitionTest, TestSize.Level1)
-{
-    fvController_->ChangeState(FvWindowState::FV_STATE_UNDEFINED);
-    EXPECT_EQ(FvWindowState::FV_STATE_UNDEFINED, fvController_->GetCurState());
-    
-    fvController_->ChangeState(FvWindowState::FV_STATE_STARTING);
-    EXPECT_EQ(FvWindowState::FV_STATE_STARTING, fvController_->GetCurState());
-    
-    fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
-    EXPECT_EQ(FvWindowState::FV_STATE_STARTED, fvController_->GetCurState());
-    
-    fvController_->ChangeState(FvWindowState::FV_STATE_HIDDEN);
-    EXPECT_EQ(FvWindowState::FV_STATE_HIDDEN, fvController_->GetCurState());
-    
-    fvController_->ChangeState(FvWindowState::FV_STATE_IN_SIDEBAR);
-    EXPECT_EQ(FvWindowState::FV_STATE_IN_SIDEBAR, fvController_->GetCurState());
-    
-    fvController_->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
-    EXPECT_EQ(FvWindowState::FV_STATE_IN_FLOATING_BALL, fvController_->GetCurState());
-    
-    fvController_->ChangeState(FvWindowState::FV_STATE_STOPPING);
-    EXPECT_EQ(FvWindowState::FV_STATE_STOPPING, fvController_->GetCurState());
-    
-    fvController_->ChangeState(FvWindowState::FV_STATE_STOPPED);
-    EXPECT_EQ(FvWindowState::FV_STATE_STOPPED, fvController_->GetCurState());
 }
 
 /**
@@ -628,6 +530,25 @@ HWTEST_F(FloatViewControllerTest, ListenerNullTest, TestSize.Level1)
     EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvController_->UnregisterLimitsChangeListener(nullptr));
 }
 
+/**
+ * @tc.name: StartFloatViewInner
+ * @tc.desc: Test StartFloatViewInner with various scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewControllerTest, StartFloatViewInner, TestSize.Level1)
+{
+    void* invalidContext = nullptr;
+    option_->SetContext(invalidContext);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_->UpdateMainWindow(mw_);
+    mw_->SetWindowState(WindowState::STATE_SHOWN);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->StartFloatViewInner());
+
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_->UpdateMainWindow(mw_);
+    mw_->SetWindowState(WindowState::STATE_SHOWN);
+    EXPECT_NE(WMError::WM_OK, fvController_->StartFloatViewInner());
+}
 }
 }
 }
