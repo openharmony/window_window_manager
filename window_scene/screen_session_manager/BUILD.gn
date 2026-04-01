@@ -220,6 +220,7 @@ ohos_shared_library("screen_session_manager") {
       "infra/src/fold_screen/screen_sensor_mgr.cpp",
       "infra/src/fold_screen/sensor_fold_state_mgr.cpp",
       "infra/src/common/product_config.cpp",
+      "infra/src/common/product_ext_wrapper.cpp",
       "infra/src/ffrt/ffrt_queue.cpp",
     ]
     print("window manager fold ability is enabled.")

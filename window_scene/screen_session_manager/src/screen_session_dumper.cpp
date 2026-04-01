@@ -59,9 +59,12 @@ const std::string ARG_PUBLISH_CAST_EVENT = "-publishcastevent";
 const std::string ARG_FOLD_DISPLAY_FULL = "-f";
 const std::string ARG_FOLD_DISPLAY_MAIN = "-m";
 const std::string ARG_FOLD_DISPLAY_GLOBALL_FULL = "-g";
+const std::string ARG_FOLD_DISPLAY_L_FULL = "-lf";
+const std::string ARG_FOLD_DISPLAY_N_MAIN = "-n";
+const std::string ARG_FOLD_DISPLAY_V_MAIN = "-v";
 const std::string ARG_FOLD_DISPLAY_SUB = "-sub";
 const std::string ARG_FOLD_DISPLAY_COOR = "-coor";
-const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor", "-g"};
+const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor", "-g", "-lf", "-n", "-v"};
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string ARG_FORCE_SET_FOLD_STATUS_AND_LOCK = "-ln";
@@ -909,6 +912,12 @@ int32_t ScreenSessionDumper::SetFoldDisplayMode()
         displayMode = FoldDisplayMode::COORDINATION;
     } else if (modeParam == ARG_FOLD_DISPLAY_GLOBALL_FULL) {
         displayMode = FoldDisplayMode::GLOBAL_FULL;
+    } else if (modeParam == ARG_FOLD_DISPLAY_L_FULL) {
+        displayMode = FoldDisplayMode::L_FULL;
+    } else if (modeParam == ARG_FOLD_DISPLAY_N_MAIN) {
+        displayMode = FoldDisplayMode::N_MAIN;
+    } else if (modeParam == ARG_FOLD_DISPLAY_V_MAIN) {
+        displayMode = FoldDisplayMode::V_MAIN;
     } else {
         TLOGW(WmsLogTag::DMS, "SetFoldDisplayMode mode not support");
         return -1;
@@ -1094,8 +1103,8 @@ void ScreenSessionDumper::SetHallAndPostureStatus(std::string input)
                 SuperFoldSensorManager::GetInstance().UnregisterPostureCallback();
                 SuperFoldSensorManager::GetInstance().UnregisterHallCallback();
             } else {
-                DMS::ScreenSensorMgr::GetInstance().UnRegisterHallCallback();
-                DMS::ScreenSensorMgr::GetInstance().UnRegisterPostureCallback();
+                DMS::ScreenSensorMgr::GetInstance().UnRegisterHallCallbackForTest();
+                DMS::ScreenSensorMgr::GetInstance().UnRegisterPostureCallbackForTest();
                 ScreenSensorConnector::UnsubscribeRotationSensor();
             }
         }
@@ -1152,7 +1161,8 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
 void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
 {
 #ifdef FOLD_ABILITY_ENABLE
-    if (!FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+    if (!(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice)) {
         TLOGD(WmsLogTag::DMS, "not secondary device");
         return;
     }
@@ -1337,6 +1347,11 @@ void ScreenSessionDumper::TriggerSecondarySensor(const std::string &valueStr)
     TLOGI(WmsLogTag::DMS, "mock secondary sensor: %{public}s, %{public}s",
         FoldScreenStateInternel::TransVec2Str(postures, ANGLE_STR).c_str(),
         FoldScreenStateInternel::TransVec2Str(halls, HALL_STR).c_str());
+    if (FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) {
+        DMS::ScreenSensorMgr::GetInstance().HandleHallData(&hallEvent);
+        DMS::ScreenSensorMgr::GetInstance().HandlePostureData(&postureEvent);
+        return;
+    }
     SecondaryFoldSensorManager::GetInstance().HandleHallDataExt(&hallEvent);
     SecondaryFoldSensorManager::GetInstance().HandlePostureData(&postureEvent);
 }

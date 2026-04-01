@@ -1798,7 +1798,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
+        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) {
         isVerticalScreen = true;
     }
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
