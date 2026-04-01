@@ -2619,6 +2619,40 @@ WMError SceneSessionManagerProxy::GetGlobalWindowMode(DisplayId displayId, Globa
     return static_cast<WMError>(errCode);
 }
 
+WMError SceneSessionManagerProxy::GetFloatViewLimits(FloatViewLimits& limits)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto reqErrCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FLOAT_VIEW_LIMITS), data, reply, option);
+    if (reqErrCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "send request failed, errCode: %{public}d", reqErrCode);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<FloatViewLimits> limitsInfo(reply.ReadParcelable<FloatViewLimits>());
+    if (limitsInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read float view limits failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    limits = *limitsInfo;
+    return static_cast<WMError>(errCode);
+}
+
 WMError SceneSessionManagerProxy::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName)
 {
     MessageParcel data;

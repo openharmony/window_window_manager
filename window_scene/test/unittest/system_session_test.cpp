@@ -1190,11 +1190,11 @@ HWTEST_F(SystemSessionTest, RestoreFloatMainWindow, Function | SmallTest | Level
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_START_ABILITY_FAILED);
     parentSession->SetForegroundInteractiveStatus(true);
 
-    systemSession->floatWindowDownEventCnt_ = 0;
+    systemSession->floatDownEventCnt_ = 0;
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
-    systemSession->floatWindowDownEventCnt_ = 2;
+    systemSession->floatDownEventCnt_ = 2;
     EXPECT_EQ(systemSession->RestoreFloatMainWindow(wantParams), WMError::WM_OK);
-    EXPECT_EQ(systemSession->floatWindowDownEventCnt_, 0);
+    EXPECT_EQ(systemSession->floatDownEventCnt_, 0);
 }
 
 /**

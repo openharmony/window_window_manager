@@ -113,6 +113,11 @@ public:
         return (type == WindowType::WINDOW_TYPE_FB);
     }
 
+    static inline bool IsFvWindow(WindowType type)
+    {
+        return (type == WindowType::WINDOW_TYPE_FV);
+    }
+
     static inline bool IsBelowSystemWindow(WindowType type)
     {
         return (type >= WindowType::BELOW_APP_SYSTEM_WINDOW_BASE && type < WindowType::BELOW_APP_SYSTEM_WINDOW_END);
@@ -216,7 +221,8 @@ public:
     static inline bool IsWindowInApp(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_FLOAT || type == WindowType::WINDOW_TYPE_DIALOG ||
-                type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_FB);
+                type == WindowType::WINDOW_TYPE_PIP || type == WindowType::WINDOW_TYPE_FB ||
+                type == WindowType::WINDOW_TYPE_FV);
     }
 
     static inline bool IsFullScreenWindow(WindowMode mode)
@@ -246,7 +252,8 @@ public:
     {
         return mode == WindowMode::WINDOW_MODE_FULLSCREEN || mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY || mode == WindowMode::WINDOW_MODE_FLOATING ||
-            mode == WindowMode::WINDOW_MODE_PIP || mode == WindowMode::WINDOW_MODE_FB;
+            mode == WindowMode::WINDOW_MODE_PIP || mode == WindowMode::WINDOW_MODE_FB ||
+            mode == WindowMode::WINDOW_MODE_FV;
     }
 
     static inline bool IsEmptyRect(const Rect& r)
@@ -294,6 +301,8 @@ public:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_PIP & windowModeSupportType;
             case WindowMode::WINDOW_MODE_FB:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_FB & windowModeSupportType;
+            case WindowMode::WINDOW_MODE_FV:
+                return WindowModeSupport::WINDOW_MODE_SUPPORT_FV & windowModeSupportType;
             case WindowMode::WINDOW_MODE_UNDEFINED:
                 return false;
             default:
@@ -319,6 +328,8 @@ public:
                 return WindowMode::WINDOW_MODE_PIP;
             case WindowModeSupport::WINDOW_MODE_SUPPORT_FB:
                 return WindowMode::WINDOW_MODE_FB;
+            case WindowModeSupport::WINDOW_MODE_SUPPORT_FV:
+                return WindowMode::WINDOW_MODE_FV;
             default:
                 return WindowMode::WINDOW_MODE_UNDEFINED;
         }

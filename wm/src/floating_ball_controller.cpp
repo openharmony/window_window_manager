@@ -23,6 +23,7 @@
 #include "window_manager_hilog.h"
 #include "window_option.h"
 #include "floating_ball_manager.h"
+#include "float_bind_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -36,6 +37,7 @@ FloatingBallController::FloatingBallController(const sptr<Window>& mainWindow,
     : weakRef_(this), mainWindow_(mainWindow), mainWindowId_(windowId), contextPtr_(contextPtr)
 {
     curState_ = FbWindowState::STATE_UNDEFINED;
+    id_ = FloatBindManager::GetControllerId();
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr_);
     if (context == nullptr) {
         return;
@@ -45,18 +47,15 @@ FloatingBallController::FloatingBallController(const sptr<Window>& mainWindow,
         return;
     }
     SingletonContainer::Get<FloatingBallReporter>().SetCurrentPackageName(abilityContext->GetApplicationInfo()->name);
+    TLOGI(WmsLogTag::WMS_SYSTEM, "FloatingBallController created, id: %{public}s", id_.c_str());
 }
 
 FloatingBallController::~FloatingBallController()
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "FloatingBallController release");
+    TLOGI(WmsLogTag::WMS_SYSTEM, "FloatingBallController release, id: %{public}s", id_.c_str());
 }
 
 // LCOV_EXCL_START
-FbWindowState FloatingBallController::GetControllerState() const
-{
-    return curState_;
-}
 
 void FloatingBallController::UpdateMainWindow(const sptr<Window>& mainWindow)
 {
@@ -65,6 +64,45 @@ void FloatingBallController::UpdateMainWindow(const sptr<Window>& mainWindow)
     }
     mainWindow_ = mainWindow;
     mainWindowId_ = mainWindow->GetWindowId();
+}
+
+FbWindowState FloatingBallController::GetCurState()
+{
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    return curState_;
+}
+
+void FloatingBallController::SetOption(const sptr<FbOption> &option)
+{
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    option_ = option;
+}
+
+sptr<FbOption> FloatingBallController::GetOption()
+{
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    return option_;
+}
+
+void FloatingBallController::SetBindState(bool isBind)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "FloatingBallController SetBindState %{public}d, id: %{public}s", isBind, id_.c_str());
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    bindState_ = isBind;
+}
+
+bool FloatingBallController::IsBind()
+{
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    return bindState_;
+}
+
+void FloatingBallController::SetBindWindowId(uint32_t windowId)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "FloatingBallController SetBindWindowId %{public}d, id: %{public}s", windowId,
+        id_.c_str());
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    bindWindowId_ = windowId;
 }
 // LCOV_EXCL_STOP
 
@@ -83,6 +121,7 @@ WMError FloatingBallController::UpdateFloatingBall(sptr<FbOption>& option)
             templateType_, "option or window is nullptr");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
+    option_ = option;
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
     option->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
     auto errCode = window_->UpdateFloatingBall(fbTemplateBaseInfo, option->GetIcon());
@@ -95,6 +134,16 @@ WMError FloatingBallController::UpdateFloatingBall(sptr<FbOption>& option)
 }
 
 WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "StartFloatingBall called, bindState_ %{public}d, id: %{public}s", bindState_,
+        id_.c_str());
+    if (IsBind()) {
+        return FloatBindManager::StartBindFloatingBall(weakRef_, option_);
+    }
+    return StartFloatingBallSingle(option);
+}
+
+WMError FloatingBallController::StartFloatingBallSingle(const sptr<FbOption>& option, bool showWhenCreate)
 {
     {
         std::lock_guard<std::mutex> lock(controllerMutex_);
@@ -124,6 +173,8 @@ WMError FloatingBallController::StartFloatingBall(sptr<FbOption>& option)
         }
         curState_ = FbWindowState::STATE_STARTING;
         FloatingBallManager::SetActiveController(this);
+        option->SetShowWhenCreate(showWhenCreate);
+        option_ = option;
     }
     auto errorCode = StartFloatingBallInner(option);
     if (errorCode != WMError::WM_OK) {
@@ -185,6 +236,8 @@ WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& o
     windowOption->SetTouchable(false);
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
     option->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
+    fbTemplateBaseInfo.isBind_ = bindState_;
+    fbTemplateBaseInfo.bindWindowId_ = bindWindowId_;
     WMError errCode = WMError::WM_OK;
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr_);
     sptr<Window> window = Window::CreateFb(windowOption, fbTemplateBaseInfo, option->GetIcon(),
@@ -200,6 +253,16 @@ WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& o
 
 // LCOV_EXCL_START
 WMError FloatingBallController::StopFloatingBallFromClient()
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatingBallFromClient called, bindState_ %{public}d, id: %{public}s", bindState_,
+        id_.c_str());
+    if (IsBind()) {
+        return FloatBindManager::StopBindFloatingBall(weakRef_);
+    }
+    return StopFloatingBallFromClientSingle();
+}
+
+WMError FloatingBallController::StopFloatingBallFromClientSingle()
 {
     {
         std::lock_guard<std::mutex> lock(controllerMutex_);
@@ -224,7 +287,7 @@ WMError FloatingBallController::StopFloatingBall()
 {
     {
         std::lock_guard<std::mutex> lock(controllerMutex_);
-        TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatingBall in");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatingBall in, id: %{public}s", id_.c_str());
         if ((!stopFromClient_ && curState_ == FbWindowState::STATE_STOPPING) ||
             curState_ == FbWindowState::STATE_STOPPED) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Repeat stop request, curState: %{public}u", curState_);
@@ -244,7 +307,7 @@ WMError FloatingBallController::StopFloatingBall()
 
 WMError FloatingBallController::DestroyFloatingBallWindow()
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "called");
+    TLOGI(WmsLogTag::WMS_SYSTEM, "called, id: %{public}s", id_.c_str());
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when destroy fb");
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;
@@ -264,6 +327,7 @@ WMError FloatingBallController::DestroyFloatingBallWindow()
     }
     window_ = nullptr;
     stopFromClient_ = false;
+    bindWindowId_ = INVALID_WINDOW_ID;
     return WMError::WM_OK;
     // LCOV_EXCL_STOP
 }

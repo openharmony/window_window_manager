@@ -1575,6 +1575,14 @@ public:
      */
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
+    /**
+     * @brief Get Float View Limits.
+     *
+     * @param floatViewLimits Float view limits.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetFloatViewLimits(FloatViewLimits& floatViewLimits) const;
+
 private:
     /**
      * multi user and multi screen

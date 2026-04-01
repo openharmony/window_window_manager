@@ -924,6 +924,18 @@ FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
     return fbTemplateInfo_;
 }
 
+void WindowSessionProperty::SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo)
+{
+    std::lock_guard<std::mutex> lock(fvTemplateMutex_);
+    fvTemplateInfo_ = fvTemplateInfo;
+}
+
+FloatViewTemplateInfo WindowSessionProperty::GetFvTemplateInfo() const
+{
+    std::lock_guard<std::mutex> lock(fvTemplateMutex_);
+    return fvTemplateInfo_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -1155,6 +1167,26 @@ void WindowSessionProperty::UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSe
         return;
     }
     property->SetFbTemplateInfo(*fbTemplateInfo);
+}
+
+bool WindowSessionProperty::MarshallingFvTemplateInfo(Parcel& parcel) const
+{
+    if (!WindowHelper::IsFvWindow(type_)) {
+        return true;
+    }
+    return parcel.WriteParcelable(&fvTemplateInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingFvTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    if (!WindowHelper::IsFvWindow(property->GetWindowType())) {
+        return;
+    }
+    sptr<FloatViewTemplateInfo> fvTemplateInfo = parcel.ReadParcelable<FloatViewTemplateInfo>();
+    if (fvTemplateInfo == nullptr) {
+        return;
+    }
+    property->SetFvTemplateInfo(*fvTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -1510,7 +1542,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(frameNum_) &&
         parcel.WriteBool(isPrelaunch_) &&
         parcel.WriteBool(isAppBufferReady_) &&
-        parcel.WriteBool(isCrossProcessWindow_);
+        parcel.WriteBool(isCrossProcessWindow_) &&
+        MarshallingFvTemplateInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1636,6 +1669,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPrelaunch(parcel.ReadBool());
     property->SetAppBufferReady(parcel.ReadBool());
     property->SetIsCrossProcessWindow(parcel.ReadBool());
+    UnmarshallingFvTemplateInfo(parcel, property);
     return property;
 }
 
@@ -2893,6 +2927,11 @@ int32_t WindowSessionProperty::GetStatusBarHeightInImmersive() const
 void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue)
 {
     supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
+}
+
+void SystemSessionConfig::ConvertSupportCreateFloatView(const std::string& itemValue)
+{
+    supportCreateFloatView_ = StringUtil::ConvertStringToBool(itemValue);
 }
 
 void WindowSessionProperty::SetPrelaunch(bool isPrelaunch)

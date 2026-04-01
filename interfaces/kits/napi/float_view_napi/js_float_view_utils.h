@@ -17,9 +17,19 @@
 
 #include "js_runtime_utils.h"
 
+#include "wm_common.h"
+#include "window.h"
+
 namespace OHOS {
 namespace Rosen {
 napi_value NapiGetUndefined(napi_env env);
+napi_value NapiThrowError(napi_env env, WmErrorCode errCode, const std::string& msg);
+bool NapiIsCallable(napi_env env, napi_value value);
+napi_status InitFvEnums(napi_env env, napi_value exports);
+napi_value GetRectAndConvertToJsValue(napi_env env, const Rect& rect);
+napi_value CreateJsFvWindowInfoObject(napi_env env, const sptr<Window>& window, const FloatViewWindowInfo &windowInfo,
+    const FvWindowState &state);
+napi_value CreateJsFloatViewLimitsObject(napi_env env, const FloatViewLimits& limits);
 } // namespace Rosen
 } // namespace OHOS
 #endif

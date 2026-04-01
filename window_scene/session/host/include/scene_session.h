@@ -415,6 +415,20 @@ public:
     virtual void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) {};
     virtual void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) {};
 
+    /**
+     * Float view
+     */
+    virtual void SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo) {};
+    virtual FloatViewTemplateInfo GetFvTemplateInfo() const { return fvTemplateInfo_; };
+    virtual void SetFloatViewStopCallback(NotifyStopFloatViewFunc&& func) {};
+    virtual WSError SendFvActionEvent(const std::string& action, const std::string& reason) { return WSError::WS_OK; };
+    virtual WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo,
+        const std::string& reason){ return WSError::WS_OK; };
+    WMError UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) override { return WMError::WM_OK; };
+    virtual void SetFloatViewUpdateCallback(NotifyUpdateFloatViewFunc&& func) {};
+    virtual WSError SyncFloatViewLimits(const FloatViewLimits &limits) { return WSError::WS_OK; };
+
+
     /*
      * Float Window
      */
@@ -1175,10 +1189,10 @@ protected:
     NotifyUseImplicitAnimationChangeFunc useImplicitAnimationChangeFunc_;
 
     /*
-     * Float Window
+     * Float Window and Float View
      */
-    std::mutex floatWindowDownEventMutex_;
-    uint8_t floatWindowDownEventCnt_ {0};
+    std::mutex floatDownEventMutex_;
+    uint8_t floatDownEventCnt_ {0};
 
     /*
      * PiP Window
@@ -1230,6 +1244,14 @@ protected:
     uint8_t fbClickCnt_ {0};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
     mutable std::mutex fbTemplateMutex_;
+
+    /*
+     * Float View Window
+     */
+    virtual void NotifyStopFloatView() {};
+    virtual void NotifyUpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) {};
+    FloatViewTemplateInfo fvTemplateInfo_ = {};
+    mutable std::mutex fvTemplateMutex_;
 
     /*
      * Window Lifecycle

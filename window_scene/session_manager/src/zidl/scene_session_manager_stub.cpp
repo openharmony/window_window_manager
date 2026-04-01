@@ -310,6 +310,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMoveMainWindowToTargetDisplay(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO):
             return HandleGetCrossProcessWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FLOAT_VIEW_LIMITS):
+            return HandleGetFloatViewLimits(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1712,6 +1714,20 @@ int SceneSessionManagerStub::HandleGetGlobalWindowMode(MessageParcel& data, Mess
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(globalWinMode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write global window mode");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetFloatViewLimits(MessageParcel& data, MessageParcel& reply)
+{
+    FloatViewLimits limits;
+    if (!reply.WriteInt32(static_cast<int32_t>(GetFloatViewLimits(limits)))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteParcelable(&limits)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to write float view limits");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

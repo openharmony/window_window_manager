@@ -26,13 +26,11 @@ class FloatingBallTemplateInfo : public FloatingBallTemplateBaseInfo,
                                  public Parcelable {
 public:
     FloatingBallTemplateInfo() = default;
-    FloatingBallTemplateInfo(const uint32_t& templateType, const std::string& title, const std::string& content,
-        const std::string& color, const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(
-        templateType, title, content, color), icon_(icon) {};
     // LCOV_EXCL_START
     FloatingBallTemplateInfo(const FloatingBallTemplateBaseInfo& baseInfo,
         const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(baseInfo.template_,
-        baseInfo.title_, baseInfo.content_, baseInfo.backgroundColor_), icon_(icon) {};
+        baseInfo.title_, baseInfo.content_, baseInfo.backgroundColor_, baseInfo.isBind_, baseInfo.bindWindowId_,
+        baseInfo.showWhenCreate_), icon_(icon) {};
     // LCOV_EXCL_STOP
     ~FloatingBallTemplateInfo() override = default;
 
@@ -42,7 +40,8 @@ public:
     bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteUint32(template_) || !parcel.WriteString(title_) ||
-            !parcel.WriteString(content_) || !parcel.WriteString(backgroundColor_)) {
+            !parcel.WriteString(content_) || !parcel.WriteString(backgroundColor_) || !parcel.WriteBool(isBind_) ||
+            !parcel.WriteUint32(bindWindowId_) || !parcel.WriteBool(showWhenCreate_)) {
             return false;
         }
         bool hasIcon = icon_ ? true : false;
@@ -60,7 +59,9 @@ public:
     {
         std::unique_ptr<FloatingBallTemplateInfo> fbTemplateInfo = std::make_unique<FloatingBallTemplateInfo>();
         if (!parcel.ReadUint32(fbTemplateInfo->template_) || !parcel.ReadString(fbTemplateInfo->title_) ||
-            !parcel.ReadString(fbTemplateInfo->content_) || !parcel.ReadString(fbTemplateInfo->backgroundColor_)) {
+            !parcel.ReadString(fbTemplateInfo->content_) || !parcel.ReadString(fbTemplateInfo->backgroundColor_) ||
+            !parcel.ReadBool(fbTemplateInfo->isBind_) || !parcel.ReadUint32(fbTemplateInfo->bindWindowId_) ||
+            !parcel.ReadBool(fbTemplateInfo->showWhenCreate_)) {
             return nullptr;
         }
         bool hasIcon = false;
