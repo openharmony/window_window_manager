@@ -16,6 +16,7 @@
 #define OHOS_FLOAT_VIEW_MANAGER_H
 
 #include "window.h"
+#include "float_view_controller.h"
  
 namespace OHOS {
 namespace Rosen {
@@ -23,7 +24,25 @@ class FloatViewManager {
 public:
     FloatViewManager() = default;
     virtual ~FloatViewManager() = default;
-    static bool IsSupportFloatView();
+    static bool isSupportFloatView_;
+
+    static bool HasActiveController();
+    static bool IsActiveController(const wptr<FloatViewController>& fvController);
+    static void SetActiveController(const sptr<FloatViewController>& fvController);
+    static void RemoveActiveController(const wptr<FloatViewController>& fvController);
+
+    static void DoActionEvent(const std::string& actionName, const std::string& reason);
+    static void DoActionClose(const std::string& reason);
+    static void DoActionHide(const std::string& reason);
+    static void DoActionInSidebar(const std::string& reason);
+    static void DoActionInFloatingBall(const std::string& reason);
+
+    static void SyncFvWindowInfo(uint32_t windowId, const FloatViewWindowInfo& windowInfo, const std::string& reason);
+    static void SyncFvLimits(uint32_t windowId, const FloatViewLimits& limits);
+private:
+    static sptr<FloatViewController> GetActiveController() { return activeController_; }
+    // controller in use
+    static sptr<FloatViewController> activeController_;
 };
 } // namespace Rosen
 } // namespace OHOS

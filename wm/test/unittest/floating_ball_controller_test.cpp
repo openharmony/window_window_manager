@@ -175,7 +175,7 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
         std::make_unique<AbilityRuntime::AbilityContextImpl>();
     fbController_->contextPtr_ = contextPtr.get();
     EXPECT_NE(WMError::WM_OK, fbController_->StartFloatingBall(option_));
-    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->GetControllerState());
+    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->GetCurState());
     fbController_->contextPtr_ = nullptr;
 }
 
@@ -281,7 +281,7 @@ HWTEST_F(FloatingBallControllerTest, StopFloatingBall02, TestSize.Level1)
     EXPECT_CALL(*(mw_), Destroy(_)).Times(1);
     fbController_->window_ = mw_;
     EXPECT_EQ(WMError::WM_OK, fbController_->StopFloatingBall());
-    EXPECT_EQ(FbWindowState::STATE_STOPPED, fbController_->GetControllerState());
+    EXPECT_EQ(FbWindowState::STATE_STOPPED, fbController_->GetCurState());
 
     fbController_->window_ = nullptr;
     fbController_->curState_ = FbWindowState::STATE_STARTED;

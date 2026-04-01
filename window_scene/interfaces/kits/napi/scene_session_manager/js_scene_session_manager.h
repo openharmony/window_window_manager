@@ -206,6 +206,11 @@ public:
      */
     static napi_value SendAxisEvent(napi_env env, napi_callback_info info);
 
+    /*
+     * Float view
+     */
+    static napi_value SyncFloatViewLimits(napi_env env, napi_callback_info info);
+
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -475,6 +480,11 @@ private:
     void RegisterPageEnableCallback();
     void OnNotifyPageEnableRegistered(const std::string& bundleName, int32_t windowId,
         const std::string& action, const std::string& message);
+    
+    /*
+     * Float view
+     */
+    napi_value OnSyncFloatViewLimits(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 

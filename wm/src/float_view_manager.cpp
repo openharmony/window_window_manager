@@ -15,12 +15,111 @@
 #include "float_view_manager.h"
 
 #include "window.h"
+#include "window_manager_hilog.h"
  
 namespace OHOS {
 namespace Rosen {
-bool FloatViewManager::IsSupportFloatView()
+namespace {
+const std::string ACTION_CLOSE = "close";
+const std::string ACTION_HIDE = "hide";
+const std::string ACTION_IN_SIDEBAR = "inSidebar";
+const std::string ACTION_IN_FLOATING_BALL = "inFloatingBall";
+
+const std::map<std::string, std::function<void(const std::string&)>> FV_ACTION_MAP {
+    {ACTION_CLOSE, FloatViewManager::DoActionClose},
+    {ACTION_HIDE, FloatViewManager::DoActionHide},
+    {ACTION_IN_SIDEBAR, FloatViewManager::DoActionInSidebar},
+    {ACTION_IN_FLOATING_BALL, FloatViewManager::DoActionInFloatingBall},
+};
+}
+
+bool FloatViewManager::isSupportFloatView_ = false;
+sptr<FloatViewController> FloatViewManager::activeController_ = nullptr;
+
+bool FloatViewManager::HasActiveController()
 {
-    return false;
+    return activeController_ != nullptr;
+}
+
+bool FloatViewManager::IsActiveController(const wptr<FloatViewController>& fvController)
+{
+    if (!HasActiveController()) {
+        return false;
+    }
+    bool res = fvController.GetRefPtr() == activeController_.GetRefPtr();
+    return res;
+}
+
+void FloatViewManager::SetActiveController(const sptr<FloatViewController>& fvController)
+{
+    activeController_ = fvController;
+}
+
+void FloatViewManager::RemoveActiveController(const wptr<FloatViewController>& fvController)
+{
+    if (HasActiveController() && fvController.GetRefPtr() == activeController_.GetRefPtr()) {
+        activeController_ = nullptr;
+    }
+}
+
+void FloatViewManager::DoActionEvent(const std::string& actionName, const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "in, actionName %{public}s, reason: %{public}s", actionName.c_str(), reason.c_str());
+    auto func = FV_ACTION_MAP.find(actionName);
+    if (func == FV_ACTION_MAP.end()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "no func to process");
+        return;
+    }
+    func->second(reason);
+}
+
+void FloatViewManager::DoActionClose(const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "close in, reason: %{public}s", reason.c_str());
+    if (auto controller = GetActiveController()) {
+        controller->StopFloatView(reason);
+    }
+}
+
+void FloatViewManager::DoActionHide(const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "hide in");
+    if (auto controller = GetActiveController()) {
+        controller->ChangeState(FvWindowState::FV_STATE_HIDDEN);
+    }
+}
+
+void FloatViewManager::DoActionInSidebar(const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "inSidebar in");
+    if (auto controller = GetActiveController()) {
+        controller->ChangeState(FvWindowState::FV_STATE_IN_SIDEBAR);
+    }
+}
+
+void FloatViewManager::DoActionInFloatingBall(const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "inFloatingBall in");
+    if (auto controller = GetActiveController()) {
+        controller->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
+    }
+}
+
+void FloatViewManager::SyncFvWindowInfo(uint32_t windowId, const FloatViewWindowInfo& windowInfo,
+    const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "SyncFvWindowInfo in, reason: %{public}s", reason.c_str());
+    if (auto controller = GetActiveController()) {
+        controller->SyncWindowInfo(windowId, windowInfo, reason);
+    }
+}
+
+void FloatViewManager::SyncFvLimits(uint32_t windowId, const FloatViewLimits& limits)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "SyncFvLimits in");
+    if (auto controller = GetActiveController()) {
+        controller->SyncLimits(windowId, limits);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS

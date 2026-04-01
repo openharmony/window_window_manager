@@ -247,6 +247,13 @@ public:
     WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want) override;
     
     WMError SendCommonEvent(int32_t command, const std::vector<int32_t>& parameters) override;
+
+    /**
+     * Float View
+     */
+    void NotifyFloatViewPrepareClose() override;
+    WMError UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) override;
+    WMError RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams) override;
 private:
     static inline BrokerDelegator<SessionProxy> delegator_;
 };

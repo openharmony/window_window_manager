@@ -17,6 +17,7 @@
 
 #include "float_view_controller.h"
 
+#include "js_float_view_listener.h"
 #include "js_runtime_utils.h"
 
 namespace OHOS {
@@ -26,9 +27,42 @@ class JsFloatViewController {
 public:
     explicit JsFloatViewController(const sptr<FloatViewController>& floatViewController);
     virtual ~JsFloatViewController();
+    sptr<FloatViewController> GetController() const;
     static void Finalizer(napi_env env, void* data, void* hint);
+    static napi_value Start(napi_env env, napi_callback_info info);
+    static napi_value Stop(napi_env env, napi_callback_info info);
+    static napi_value SetUIContext(napi_env env, napi_callback_info info);
+    static napi_value SetFloatViewVisibilityInApp(napi_env env, napi_callback_info info);
+    static napi_value SetWindowSize(napi_env env, napi_callback_info info);
+    static napi_value GetWindowProperties(napi_env env, napi_callback_info info);
+    static napi_value RestoreMainWindow(napi_env env, napi_callback_info info);
+
+    static napi_value OnStateChange(napi_env env, napi_callback_info info);
+    static napi_value OffStateChange(napi_env env, napi_callback_info info);
+    static napi_value OnRectChange(napi_env env, napi_callback_info info);
+    static napi_value OffRectChange(napi_env env, napi_callback_info info);
+    static napi_value OnLimitsChange(napi_env env, napi_callback_info info);
+    static napi_value OffLimitsChange(napi_env env, napi_callback_info info);
 private:
+    bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsCallback);
+    napi_value OnStartFloatView(napi_env env, napi_callback_info info);
+    napi_value OnStopFloatView(napi_env env, napi_callback_info info);
+    napi_value OnSetUIContext(napi_env env, napi_callback_info info);
+    napi_value SetUIContextTask(napi_env env, const std::string contextUrl,
+        const std::shared_ptr<NativeReference>& contentStorage);
+    napi_value OnSetFloatViewVisibilityInApp(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowSize(napi_env env, napi_callback_info info);
+    napi_value OnSetWindowSizeTask(napi_env env, const Rect &rect);
+    napi_value OnGetWindowProperties(napi_env env, napi_callback_info info);
+    napi_value OnRestoreMainWindow(napi_env env, napi_callback_info info);
+
+    napi_value RegisterCallbackWithType(const std::string& callbackType, napi_env env, napi_callback_info info);
+    napi_value UnregisterCallbackWithType(const std::string& callbackType, napi_env env, napi_callback_info info);
+    WMError DoRegisterCallbackWithType(const std::string& callbackType, const sptr<JsFloatViewListener>& listener);
+    WMError DoUnregisterCallbackWithType(const std::string& callbackType, const sptr<JsFloatViewListener>& listener);
+
     sptr<FloatViewController> fvController_ = nullptr;
+    std::unordered_map<std::string, std::set<sptr<JsFloatViewListener>>> jsCallbackMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

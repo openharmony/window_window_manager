@@ -15,7 +15,10 @@ import("//build/ohos.gni")
 import("../../../../windowmanager_aafwk.gni")
 
 config("float_view_config") {
-    include_dirs = ["../../../../wm/include"]
+    include_dirs = [
+      "../../../../wm/include",
+      "../floating_ball_napi"
+    ]
 }
 
 ohos_shared_library("floatview_napi") {
@@ -31,6 +34,7 @@ ohos_shared_library("floatview_napi") {
     "js_float_view_module.cpp",
     "js_float_view_manager.cpp",
     "js_float_view_utils.cpp",
+    "js_float_view_listener.cpp",
   ]
 
   configs = [
@@ -41,6 +45,7 @@ ohos_shared_library("floatview_napi") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
+    "../floating_ball_napi:floatingball_kit",
   ]
 
   external_deps = [

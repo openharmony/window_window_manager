@@ -121,6 +121,10 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_UPDATE_PROPERTY_WHEN_TRIGGER_MODE,
     TRANS_ID_NOTIFY_PARENT_LIFECYCLE_EVENT,
     TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO,
+    // Float view
+    TRANS_ID_SEND_FV_ACTION_EVENT,
+    TRANS_ID_SYNC_FV_WINDOW_INFO,
+    TRANS_ID_SYNC_FV_LIMITS,
 };
 }   // namespace Rosen
 }   // namespace OHOS

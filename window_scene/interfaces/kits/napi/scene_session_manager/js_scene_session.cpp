@@ -40,6 +40,8 @@ const std::string SESSION_WINDOW_LIMITS_CHANGE_CB = "sessionWindowLimitsChange";
 const std::string FLOATING_BALL_UPDATE_CB = "updateFbTemplateInfo";
 const std::string FLOATING_BALL_STOP_CB = "prepareRemoveFb";
 const std::string FLOATING_BALL_RESTORE_MAIN_WINDOW_CB = "restoreFbMainWindow";
+const std::string FLOAT_VIEW_STOP_CB = "prepareRemoveFv";
+const std::string FLOAT_VIEW_UPDATE_CB = "updateFvTemplateInfo";
 const std::string WINDOW_MOVING_CB = "windowMoving";
 const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatusChange";
 const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
@@ -240,6 +242,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {COMPATIBLE_MODE_CHANGE_CB,             ListenerFuncType::COMPATIBLE_MODE_CHANGE_CB},
     {RECOVER_WINDOW_EFFECT_CB,              ListenerFuncType::RECOVER_WINDOW_EFFECT_CB},
     {PRE_CALC_WINDOW_PROPERTY_CB,           ListenerFuncType::PRE_CALC_WINDOW_PROPERTY_CB},
+    {FLOAT_VIEW_STOP_CB,                    ListenerFuncType::FLOAT_VIEW_STOP_CB},
+    {FLOAT_VIEW_UPDATE_CB,                  ListenerFuncType::FLOAT_VIEW_UPDATE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -327,7 +331,8 @@ static napi_value CreatePipTemplateInfo(napi_env env, const PiPTemplateInfo& pip
 
 static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateInfo& fbTemplateInfo)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "template %{public}d", fbTemplateInfo.template_);
+    TLOGI(WmsLogTag::WMS_SYSTEM, "fbTemplate %{public}d, bindWindowId %{public}d, showWhenCreate %{public}d",
+        fbTemplateInfo.template_, fbTemplateInfo.bindWindowId_, fbTemplateInfo.showWhenCreate_);
     napi_value fbTemplateInfoValue = nullptr;
     napi_create_object(env, &fbTemplateInfoValue);
     napi_set_named_property(env, fbTemplateInfoValue, "template",
@@ -338,6 +343,12 @@ static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateI
         CreateJsValue(env, fbTemplateInfo.content_));
     napi_set_named_property(env, fbTemplateInfoValue, "backgroundColor",
         CreateJsValue(env, fbTemplateInfo.backgroundColor_));
+    napi_set_named_property(env, fbTemplateInfoValue, "isBind",
+        CreateJsValue(env, fbTemplateInfo.isBind_));
+    napi_set_named_property(env, fbTemplateInfoValue, "bindWindowId",
+        CreateJsValue(env, fbTemplateInfo.bindWindowId_));
+    napi_set_named_property(env, fbTemplateInfoValue, "showWhenCreate",
+        CreateJsValue(env, fbTemplateInfo.showWhenCreate_));
 
     if (fbTemplateInfo.icon_ != nullptr) {
         napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, fbTemplateInfo.icon_);
@@ -348,6 +359,32 @@ static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateI
         napi_set_named_property(env, fbTemplateInfoValue, "icon", jsIcon);
     }
     return fbTemplateInfoValue;
+}
+
+static napi_value CreateFvTemplateInfo(napi_env env, const FloatViewTemplateInfo& fvTemplateInfo)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "fvTemplate %{public}d, bindWindowId %{public}d, showWhenCreate %{public}d",
+        fvTemplateInfo.template_, fvTemplateInfo.bindWindowId_, fvTemplateInfo.showWhenCreate_);
+    napi_value fvTemplateInfoValue = nullptr;
+    napi_create_object(env, &fvTemplateInfoValue);
+    napi_set_named_property(env, fvTemplateInfoValue, "template",
+        CreateJsValue(env, fvTemplateInfo.template_));
+    napi_set_named_property(env, fvTemplateInfoValue, "visibleInApp",
+        CreateJsValue(env, fvTemplateInfo.visibleInApp_));
+    napi_set_named_property(env, fvTemplateInfoValue, "isBind",
+        CreateJsValue(env, fvTemplateInfo.isBind_));
+    napi_set_named_property(env, fvTemplateInfoValue, "bindWindowId",
+        CreateJsValue(env, fvTemplateInfo.bindWindowId_));
+    napi_set_named_property(env, fvTemplateInfoValue, "showWhenCreate",
+        CreateJsValue(env, fvTemplateInfo.showWhenCreate_));
+
+    napi_value jsRect = CreateJsSessionRect(env, fvTemplateInfo.rect_);
+    if (jsRect == nullptr) {
+        TLOGNE(WmsLogTag::WMS_SYSTEM, "CreateFvTemplateInfo jsRect is nullptr");
+        return nullptr;
+    }
+    napi_set_named_property(env, fvTemplateInfoValue, "rect", jsRect);
+    return fvTemplateInfoValue;
 }
 
 static void ParseMetadataConfiguration(napi_env env, napi_value objValue, const sptr<SceneSession>& session)
@@ -442,6 +479,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreatePipTemplateInfo(env, session->GetPiPTemplateInfo()));
     napi_set_named_property(env, objValue, "fbTemplateInfo",
         CreateFbTemplateInfo(env, session->GetFbTemplateInfo()));
+    napi_set_named_property(env, objValue, "fvTemplateInfo",
+        CreateFvTemplateInfo(env, session->GetFvTemplateInfo()));
     napi_set_named_property(env, objValue, "keyboardGravity",
         CreateJsValue(env, static_cast<int32_t>(session->GetKeyboardGravity())));
     napi_set_named_property(env, objValue, "isTopmost",
@@ -620,6 +659,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::GetSceneNodeCount);
     BindNativeFunction(env, objValue, "notifyPreCalcWindowProperty", moduleName,
         JsSceneSession::NotifyPreCalcWindowProperty);
+    BindNativeFunction(env, objValue, "sendFvActionEvent", moduleName, JsSceneSession::SendFvActionEvent);
+    BindNativeFunction(env, objValue, "syncFvWindowInfo", moduleName, JsSceneSession::SyncFvWindowInfo);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -1532,6 +1573,42 @@ void JsSceneSession::ProcessFloatingBallRestoreMainWindowRegister()
             return;
         }
         jsSceneSession->OnFloatingBallRestoreMainWindow(want);
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
+}
+
+void JsSceneSession::ProcessFloatViewStopRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetFloatViewStopCallback([weakThis = wptr(this)]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessFloatViewStopRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnFloatViewStop();
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
+}
+
+void JsSceneSession::ProcessFloatViewUpdateRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetFloatViewUpdateCallback([weakThis = wptr(this)](const FloatViewTemplateInfo& fvTemplateInfo) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessFloatViewUpdateRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnFloatViewUpdate(fvTemplateInfo);
     });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
@@ -3073,6 +3150,20 @@ napi_value JsSceneSession::SendFbActionEvent(napi_env env, napi_callback_info in
     return (me != nullptr) ? me->OnSendFbActionEvent(env, info) : nullptr;
 }
 
+napi_value JsSceneSession::SendFvActionEvent(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSendFvActionEvent(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SyncFvWindowInfo(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSyncFvWindowInfo(env, info) : nullptr;
+}
+
 napi_value JsSceneSession::SetPcAppInpadCompatibleMode(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
@@ -3463,6 +3554,11 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::PRE_CALC_WINDOW_PROPERTY_CB):
             ProcessPreCalcWindowPropertyRegister();
+        case static_cast<uint32_t>(ListenerFuncType::FLOAT_VIEW_STOP_CB):
+            ProcessFloatViewStopRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::FLOAT_VIEW_UPDATE_CB):
+            ProcessFloatViewUpdateRegister();
             break;
         default:
             break;
@@ -4463,6 +4559,52 @@ void JsSceneSession::OnFloatingBallRestoreMainWindow(const std::shared_ptr<AAFwk
             return;
         }
         napi_value argv[] = {jsWant};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
+void JsSceneSession::OnFloatViewStop()
+{
+    TLOGND(WmsLogTag::WMS_LAYOUT, "[NAPI] OnFloatViewStop");
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnFloatViewStop jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(FLOAT_VIEW_STOP_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
+void JsSceneSession::OnFloatViewUpdate(const FloatViewTemplateInfo& fvTemplateInfo)
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, fvTemplateInfo, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnFloatViewUpdate jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(FLOAT_VIEW_UPDATE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value jsFvTemplateInfo = CreateFvTemplateInfo(env, fvTemplateInfo);
+        if (jsFvTemplateInfo == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "float view TemplateInfo is nullptr");
+            return;
+        }
+        napi_value argv[] = {jsFvTemplateInfo};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
@@ -6499,6 +6641,119 @@ napi_value JsSceneSession::OnSendFbActionEvent(napi_env env, napi_callback_info 
     }
     session->SendFbActionEvent(action);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSendFvActionEvent(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_2;
+    napi_value argv[ARG_COUNT_2] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string action;
+    if (!ConvertFromJsValue(env, argv[0], action)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert action parameter to string");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::string reason = "";
+    if (argc == ARG_COUNT_2) {
+        if (!ConvertFromJsValue(env, argv[1], reason)) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert reason parameter to string");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                        "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SendFvActionEvent(action, reason);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSyncFvWindowInfo(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_2;
+    napi_value argv[ARG_COUNT_2] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARG_COUNT_2) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    napi_value jsWindowInfo = argv[0];
+    if (jsWindowInfo == nullptr || GetType(env, jsWindowInfo) != napi_object) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "window info is null"));
+        return NapiGetUndefined(env);
+    }
+    FloatViewWindowInfo windowInfo;
+    if (!GetFloatViewWindowInfo(env, jsWindowInfo, windowInfo)) {
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                      "Failed to get window info"));
+        return NapiGetUndefined(env);
+    }
+
+    std::string reason = "";
+    if (!ConvertFromJsValue(env, argv[1], reason)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert reason parameter to string");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                    "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    if (reason.empty()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "reason is empty");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                    "reason is empty"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SyncFvWindowInfo(windowInfo, reason);
+    return NapiGetUndefined(env);
+}
+
+bool JsSceneSession::GetFloatViewWindowInfo(napi_env env, napi_value jsValue, FloatViewWindowInfo& windowInfo)
+{
+    if (jsValue == nullptr || GetType(env, jsValue) != napi_object) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "jsValue is null or not object");
+        return false;
+    }
+    bool hasProperty = false;
+    napi_has_named_property(env, jsValue, "windowRect", &hasProperty);
+    if (hasProperty) {
+        napi_value jsWindowRect = nullptr;
+        napi_get_named_property(env, jsValue, "windowRect", &jsWindowRect);
+        ConvertRectFromJsValue(env, jsWindowRect, windowInfo.windowRect_);
+    }
+    napi_has_named_property(env, jsValue, "titleBarRect", &hasProperty);
+    if (hasProperty) {
+        napi_value jsTitleBarRect = nullptr;
+        napi_get_named_property(env, jsValue, "titleBarRect", &jsTitleBarRect);
+        ConvertRectFromJsValue(env, jsTitleBarRect, windowInfo.titleBarRect_);
+    }
+    napi_has_named_property(env, jsValue, "scale", &hasProperty);
+    if (hasProperty) {
+        double scale = 1.0f;
+        napi_value jsScale = nullptr;
+        napi_get_named_property(env, jsValue, "scale", &jsScale);
+        ConvertFromJsValue(env, jsScale, scale);
+        windowInfo.scale_ = static_cast<float>(scale);
+    }
+    return true;
 }
 
 napi_value JsSceneSession::OnSetPipActionEvent(napi_env env, napi_callback_info info)

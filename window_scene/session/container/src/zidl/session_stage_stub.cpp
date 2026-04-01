@@ -276,6 +276,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyParentLifecycleEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO):
             return HandleUpdateAppHookWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FV_ACTION_EVENT):
+            return HandleSendFvActionEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_WINDOW_INFO):
+            return HandleSyncFvWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_LIMITS):
+            return HandleSyncFvLimits(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -884,6 +890,66 @@ int SessionStageStub::HandleSendFbActionEvent(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     auto error = SendFbActionEvent(action);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSendFvActionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSendFvActionEvent");
+    std::string action;
+    if (!data.ReadString(action)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read action failed.");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    std::string reason;
+    if (!data.ReadString(reason)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read reason failed.");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SendFvActionEvent(action, reason);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSyncFvWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSyncFvWindowInfo");
+    sptr<FloatViewWindowInfo> windowInfo = data.ReadParcelable<FloatViewWindowInfo>();
+    if (windowInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read windowInfo failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    std::string reason = "";
+    if (!data.ReadString(reason)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read reason failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SyncFvWindowInfo(*windowInfo, reason);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSyncFvLimits(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSyncFvLimits");
+    sptr<FloatViewLimits> limits = data.ReadParcelable<FloatViewLimits>();
+    if (limits == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read limits failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SyncFvLimits(*limits);
     if (!reply.WriteInt32(static_cast<int32_t>(error))) {
         return ERR_INVALID_VALUE;
     }

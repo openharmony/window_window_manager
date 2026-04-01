@@ -30,20 +30,24 @@ public:
     void SetContent(const std::string& content);
     void SetBackgroundColor(const std::string& color);
     void SetIcon(const std::shared_ptr<Media::PixelMap>& icon);
+    void SetShowWhenCreate(bool showWhenCreate);
  
     uint32_t GetTemplate() const;
     std::string GetTitle() const;
     std::string GetContent() const;
     std::string GetBackgroundColor() const;
     std::shared_ptr<Media::PixelMap> GetIcon() const;
+    bool GetShowWhenCreate() const;
  
     void GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBaseInfo);
+    bool IsValid(std::string &errMsg) const;
 private:
     uint32_t template_ {};
     std::string title_ {};
     std::string content_ {};
     std::string backgroundColor_ {};
     std::shared_ptr<Media::PixelMap> icon_ {};
+    bool showWhenCreate_ {true};
 };
 }
 }

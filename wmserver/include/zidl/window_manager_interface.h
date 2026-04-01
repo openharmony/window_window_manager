@@ -101,6 +101,7 @@ public:
         TRANS_ID_SET_IMAGE_FOR_RECENT,
         TRANS_ID_SET_IMAGE_FOR_RECENT_PIXELMAP,
         TRANS_ID_REMOVE_IMAGE_FOR_RECENT,
+        TRANS_ID_GET_FLOAT_VIEW_LIMITS,
     };
     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -424,6 +425,13 @@ public:
     virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams)
     {
         return WMError::WM_OK;
+    }
+    /*
+     * Float view
+     */
+    virtual WMError GetFloatViewLimits(FloatViewLimits& limits)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 };
 }

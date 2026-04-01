@@ -179,6 +179,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_MAGNIFICATION_MENU,
     WINDOW_TYPE_SELECTION,
     WINDOW_TYPE_FB,
+    WINDOW_TYPE_FV,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -212,7 +213,8 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_FLOATING,
     WINDOW_MODE_PIP,
     WINDOW_MODE_FB,
-    END = WINDOW_MODE_FB,
+    WINDOW_MODE_FV,
+    END = WINDOW_MODE_FV,
 };
 
 /**
@@ -269,6 +271,7 @@ enum WindowModeSupport : uint32_t {
     WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
     WINDOW_MODE_SUPPORT_PIP = 1 << 4,
     WINDOW_MODE_SUPPORT_FB = 1 << 5,
+    WINDOW_MODE_SUPPORT_FV = 1 << 6,
     WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FULLSCREEN |
                               WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                               WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
@@ -362,6 +365,11 @@ enum class WMError : int32_t {
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,
     WM_ERROR_INVALID_WINDOW_TYPE,
+    WM_ERROR_FV_REPEAT_OPERATION,
+    WM_ERROR_FV_INVALID_STATE,
+    WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED,
+    WM_ERROR_FV_START_FAILED,
+    WM_ERROR_FV_CONFLICT_WITH_OTHERS,
     WM_ERROR_FORBID_SUBWINDOW,
 };
 
@@ -422,6 +430,11 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED = 1300027,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED = 1300028,
     WM_ERROR_INVALID_WINDOW_TYPE = 1300029,
+    WM_ERROR_FV_REPEAT_OPERATION = 1300030,
+    WM_ERROR_FV_INVALID_STATE = 1300031,
+    WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED = 1300032,
+    WM_ERROR_FV_START_FAILED = 1300033,
+    WM_ERROR_FV_CONFLICT_WITH_OTHERS = 1300034,
     WM_ERROR_FORBID_SUBWINDOW = 1300035,
 };
 
@@ -1996,6 +2009,122 @@ struct PiPTemplateInfo : public Parcelable {
     }
 };
 
+struct FloatViewWindowInfo : public Parcelable {
+    Rect windowRect_ {};
+    Rect titleBarRect_ {};
+    float scale_ {1.0f};
+
+    FloatViewWindowInfo() {}
+
+    static inline bool WriteRectParcel(Parcel& parcel, const Rect& rect)
+    {
+        return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) &&
+            parcel.WriteUint32(rect.width_) && parcel.WriteUint32(rect.height_);
+    }
+
+    static inline bool ReadRectParcel(Parcel& parcel, Rect& rect)
+    {
+        return parcel.ReadInt32(rect.posX_) && parcel.ReadInt32(rect.posY_) &&
+            parcel.ReadUint32(rect.width_) && parcel.ReadUint32(rect.height_);
+    }
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!WriteRectParcel(parcel, windowRect_) || !WriteRectParcel(parcel, titleBarRect_)) {
+            return false;
+        }
+        if (!parcel.WriteFloat(scale_)) {
+            return false;
+        }
+        return true;
+    }
+
+    static FloatViewWindowInfo* Unmarshalling(Parcel& parcel)
+    {
+        auto* floatViewWindowInfo = new FloatViewWindowInfo();
+        if (!ReadRectParcel(parcel, floatViewWindowInfo->windowRect_) ||
+            !ReadRectParcel(parcel, floatViewWindowInfo->titleBarRect_)) {
+            delete floatViewWindowInfo;
+            return nullptr;
+        }
+        if (!parcel.ReadFloat(floatViewWindowInfo->scale_)) {
+            delete floatViewWindowInfo;
+            return nullptr;
+        }
+        return floatViewWindowInfo;
+    }
+
+    std::string ToString() const
+    {
+        constexpr int precision = 6; // Print float with precision of 6 decimal places.
+        std::ostringstream oss;
+        oss << "window rect [" << windowRect_.posX_ << " " << windowRect_.posY_ << " "
+            << windowRect_.width_ << " " << windowRect_.height_ << "]"
+            << " titleBar rect [" << titleBarRect_.posX_ << " " << titleBarRect_.posY_ << " "
+            << titleBarRect_.width_ << " " << titleBarRect_.height_ << "]"
+            << " scale [" << std::fixed << std::setprecision(precision) << scale_ << "]";
+        return oss.str();
+    }
+};
+
+struct FloatViewLimits : public Parcelable {
+    uint32_t maxWidth_ {0};
+    uint32_t maxHeight_ {0};
+    uint32_t minWidth_ {0};
+    uint32_t minHeight_ {0};
+    std::vector<std::pair<float, float>> ratioLimits_ {};
+    uint32_t ratioLimitsCount_ {0};
+    FloatViewLimits() {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        if (!parcel.WriteUint32(maxWidth_) || !parcel.WriteUint32(maxHeight_) ||
+            !parcel.WriteUint32(minWidth_) || !parcel.WriteUint32(minHeight_)) {
+            return false;
+        }
+        if (!parcel.WriteUint32(ratioLimits_.size())) {
+            return false;
+        }
+        for (const auto& ratioLimit : ratioLimits_) {
+            if (!parcel.WriteFloat(ratioLimit.first) || !parcel.WriteFloat(ratioLimit.second)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static FloatViewLimits* Unmarshalling(Parcel& parcel)
+    {
+        auto* floatViewLimits = new FloatViewLimits();
+        if (!parcel.ReadUint32(floatViewLimits->maxWidth_) ||
+            !parcel.ReadUint32(floatViewLimits->maxHeight_) ||
+            !parcel.ReadUint32(floatViewLimits->minWidth_) ||
+            !parcel.ReadUint32(floatViewLimits->minHeight_)) {
+            delete floatViewLimits;
+            return nullptr;
+        }
+        if (!parcel.ReadUint32(floatViewLimits->ratioLimitsCount_)) {
+            delete floatViewLimits;
+            return nullptr;
+        }
+        floatViewLimits->ratioLimits_.resize(floatViewLimits->ratioLimitsCount_);
+        for (auto& ratioLimit : floatViewLimits->ratioLimits_) {
+            if (!parcel.ReadFloat(ratioLimit.first) || !parcel.ReadFloat(ratioLimit.second)) {
+                delete floatViewLimits;
+                return nullptr;
+            }
+        }
+        return floatViewLimits;
+    }
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "width limit [" << minWidth_ << " " << maxWidth_ << "]"
+            << " height limit [" << minHeight_ << " " << maxHeight_ << "]";
+        return oss.str();
+    }
+};
 
 /**
  * @brief Enumerates floating ball state.
@@ -2032,6 +2161,41 @@ enum class FbWindowState : uint32_t {
     STATE_STARTED = 2,
     STATE_STOPPING = 3,
     STATE_STOPPED = 4,
+};
+
+/**
+ * @brief Enumerates float view state.
+ */
+enum class FloatViewState : uint32_t {
+    FV_STARTED = 1,
+    FV_HIDDEN = 2,
+    FV_STOPPED = 3,
+    FV_IN_SIDEBAR = 4,
+    FV_IN_FLOATING_BALL = 5,
+    FV_ERROR = 6,
+};
+ 
+/**
+ * @brief Enumerates float view template.
+ */
+enum class FloatViewTemplate : uint32_t {
+    ROUNDED_RECTANGLE = 0,
+    END = 1,
+};
+
+/**
+ * @brief Enumerates float view window state.
+ */
+enum class FvWindowState : uint32_t {
+    FV_STATE_UNDEFINED = 0,
+    FV_STATE_STARTING = 1,
+    FV_STATE_STARTED = 2,
+    FV_STATE_HIDDEN = 3,
+    FV_STATE_STOPPING = 4,
+    FV_STATE_STOPPED = 5,
+    FV_STATE_IN_SIDEBAR = 6,
+    FV_STATE_IN_FLOATING_BALL = 7,
+    FV_STATE_ERROR = 8,
 };
 
 /**

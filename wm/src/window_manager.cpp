@@ -2038,6 +2038,11 @@ WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     return WindowAdapter::GetInstance(userId_).GetGlobalWindowMode(displayId, globalWinMode);
 }
 
+WMError WindowManager::GetFloatViewLimits(FloatViewLimits &limits) const
+{
+    return WindowAdapter::GetInstance(userId_).GetFloatViewLimits(limits);
+}
+
 WMError WindowManager::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const
 {
     return WindowAdapter::GetInstance(userId_).GetTopNavDestinationName(windowId, topNavDestName);
