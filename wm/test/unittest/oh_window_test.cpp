@@ -313,7 +313,7 @@ HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsMeasuredCallback_Normal, Te
         EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret3);
         return;
     }
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
 }
 
 /**
@@ -328,7 +328,7 @@ HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsMeasuredCallback_MultiCallb
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
     auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     if (ret != static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
-        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
         return;
     }
 
@@ -355,7 +355,7 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_WindowDestroyed, T
     int32_t windowId = mainWindow->GetWindowId();
     auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     if (ret != static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
-        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
         return;
     }
 
@@ -377,7 +377,7 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_WindowDestroyedCal
     int32_t windowId = mainWindow->GetWindowId();
     auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     if (ret != static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
-        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
         return;
     }
 
@@ -398,7 +398,7 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_CallbackNotRegiste
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
     auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     if (ret != static_cast<int32_t>(WindowManager_ErrorCode::OK)) {
-        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+        EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL), ret);
         return;
     }
 
