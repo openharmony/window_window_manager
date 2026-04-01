@@ -4203,7 +4203,7 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
     napi_value lastParam = nullptr;
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-    uint32_t promiseId = orientationExecutionResultPromiseIdGenerator_.fetch_add(1);
+    uint32_t promiseId = ++orientationExecutionResultPromiseIdGenerator_;
     {
         std::lock_guard<std::mutex> lock(orientationExecutionResultMapMutex_);
         orientationExecutionResultPromiseMap_[promiseId] = napiAsyncTask;
@@ -4225,8 +4225,8 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
         }
         WMError ret = weakWindow->SetPreferredOrientationWithResult(requestedOrientation, promiseId);
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u"
-            " result=%{public}d", where, weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
-            static_cast<uint32_t>(requestedOrientation), ret);
+            " primiseId=%{public}d result=%{public}d", where, weakWindow->GetWindowId(),
+            weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(requestedOrientation), promiseId, ret);
         WmErrorCode errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         if (errCode != WmErrorCode::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError( env, errCode, errMsgPrefix + "failed."));
