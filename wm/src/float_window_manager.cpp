@@ -318,9 +318,6 @@ bool FloatWindowManager::IsFloatViewConflict(const wptr<FloatViewController>& se
 
 bool FloatWindowManager::IsFloatingBallConflict(const wptr<FloatingBallController>& selfController)
 {
-    if (PictureInPictureManager::HasRunningControllerStartingOrStarted()) {
-        return true;
-    }
     if (!FloatViewManager::HasActiveController()) {
         return false;
     }
@@ -337,7 +334,7 @@ bool FloatWindowManager::IsFloatingBallConflict(const wptr<FloatingBallControlle
 
 bool FloatWindowManager::IsPipConflict()
 {
-    return FloatViewManager::HasActiveController() || FloatingBallManager::HasActiveController();
+    return FloatViewManager::HasActiveController();
 }
 
 sptr<FloatingBallController> FloatWindowManager::GetBoundFloatingBall(const sptr<FloatViewController>& fvController)

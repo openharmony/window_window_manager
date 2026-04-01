@@ -99,7 +99,7 @@ void JsFloatViewListener::OnRectangleChange(const Rect& window, double scale, co
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnStateChange");
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnRectangleChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to SendEvent");
         }
@@ -108,14 +108,14 @@ void JsFloatViewListener::OnRectangleChange(const Rect& window, double scale, co
     }
 }
 
-void JsFloatViewListener::OnLimitsChange(const FloatViewLimits& specificationInfo)
+void JsFloatViewListener::OnLimitsChange(const FloatViewLimits& limits)
 {
-    auto napiTask = [jsCallback = jsCallBack_, specificationInfo, env = env_]() {
+    auto napiTask = [jsCallback = jsCallBack_, limits, env = env_]() {
         if (jsCallback == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "js callback is null");
             return;
         }
-        auto jsLimitsInfo = CreateJsFloatViewLimitsObject(env, specificationInfo);
+        auto jsLimitsInfo = CreateJsFloatViewLimitsObject(env, limits);
         if (jsLimitsInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to get jsLimitsInfo");
             return;
@@ -124,7 +124,7 @@ void JsFloatViewListener::OnLimitsChange(const FloatViewLimits& specificationInf
         CallJsFunction(env, jsCallback->GetNapiValue(), argv, ArraySize(argv));
     };
     if (env_ != nullptr) {
-        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnStateChange");
+        napi_status ret = napi_send_event(env_, napiTask, napi_eprio_immediate, "OnLimitsChange");
         if (ret != napi_status::napi_ok) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to SendEvent");
         }
