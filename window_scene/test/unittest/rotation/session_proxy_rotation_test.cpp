@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "mock_message_parcel.h"
 #include "iremote_object_mocker.h"
 #include "ws_common.h"
 
