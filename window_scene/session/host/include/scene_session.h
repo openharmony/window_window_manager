@@ -536,6 +536,7 @@ public:
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
     WSError SetIsStatusBarVisibleInner(bool isVisible);
+    WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) override;
     WSError HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidArea = AvoidAreaType::TYPE_END);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
@@ -1267,6 +1268,7 @@ private:
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
     template<typename T>
     Rect CalculateAvoidAreaByScale(WSRectT<T>& avoidAreaRect) const;
+    bool GetFloatNavigationAvoidAreaEnabled() const { return isFloatNavigationAvoidAreaEnabled_ };
 
     /*
      * Window Lifecycle
@@ -1644,6 +1646,7 @@ private:
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;
     std::unordered_map<AvoidAreaType, std::tuple<DisplayId, WSRect, WSRect>> lastAvoidAreaInputParamtersMap_;
+    bool isFloatNavigationAvoidAreaEnabled_ { false };
 
     /**
      * Window Layout

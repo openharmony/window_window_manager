@@ -522,15 +522,20 @@ public:
      */
     virtual WSError RecoverWindowEffect(bool recoverCorner, bool recoverShadow) { return WSError::WS_OK; }
 
-    /**
+    /*
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
 
     /**
+     *  Float Navigation Avoid Area
+     */
+    virtual WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) { return WMError::WM_OK; }
+
+    /**
      * @brief Get waterfall mode.
      *
-     * @param isWaterfallMode Indicates the waterfall mode.
+     * @param isWaterfallMode Indicates waterfall mode.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError GetWaterfallMode(bool& isWaterfallMode) { return WSError::WS_OK; }

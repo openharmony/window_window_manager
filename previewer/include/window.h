@@ -670,17 +670,31 @@ public:
 
     /**
      * @brief Set whether to enable gesture back.
-     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @param enable value true means to enable gesture back, and false means to opposite.
      * @return WM_OK means set success, others means set failed.
      */
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
 
     /**
      * @brief Get whether to enable gesture back.
-     * @param enable the value true means to enable gesture back, and false means the opposite.
+     * @param enable value true means to enable gesture back, and false means to opposite.
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) const { return WMError::WM_OK; }
+
+    /**
+     * @brief Set whether to enable float navigation avoid area.
+     * @param enable value true means to enable float navigation avoid area, and false means to opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetFloatNavigationAvoidAreaEnabled(bool enable) { return WMError::WM_OK; }
+
+    /**
+     * @brief Get whether to enable float navigation avoid area.
+     * @param enable value true means to enable float navigation avoid area, and false means to opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const { return WMError::WM_OK; }
 
     /**
      * @brief Flush layout size.

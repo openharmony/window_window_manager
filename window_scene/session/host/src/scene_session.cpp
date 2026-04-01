@@ -6826,6 +6826,12 @@ bool SceneSession::GetEnableGestureBackHadSet()
     return isEnableGestureBackHadSet_;
 }
 
+WMError SceneSession::SetFloatNavigationAvoidAreaEnabled(bool isEnabled)
+{
+    isFloatNavigationAvoidAreaEnabled_ = isEnabled;
+    return WMError::WM_OK;
+}
+
 void SceneSession::UpdateFullScreenWaterfallMode(bool isWaterfallMode)
 {
     PostTask([weakThis = wptr(this), isWaterfallMode, where = __func__] {

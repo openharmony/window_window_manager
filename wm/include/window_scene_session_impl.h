@@ -554,6 +554,7 @@ private:
     std::atomic<bool> cacheEnableImmersiveMode_ = false;
     std::atomic<bool> maximizeLayoutFullScreen_ = false;
     std::atomic<bool> titleHoverShowEnabled_ = true;
+    std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
@@ -579,9 +580,9 @@ private:
     bool IsLandscape(uint64_t screenId);
     void RegisterListenerForKeyboard();
 
-    /*
-     * Gesture Back
-     */
+     /*
+      * Gesture Back
+      */
     bool gestureBackEnabled_ = true;
 
     /*
