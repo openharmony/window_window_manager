@@ -947,7 +947,7 @@ export interface WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
   globalRect?: Rect;
-  displayId?: int;
+  displayId?: long;
   bundleName: string;
   abilityName: string;
   windowId: int;
@@ -959,7 +959,7 @@ export class WindowInfoInternal implements WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
   globalRect?: Rect;
-  displayId?: int;
+  displayId?: long;
   bundleName: string;
   abilityName: string;
   windowId: int;
