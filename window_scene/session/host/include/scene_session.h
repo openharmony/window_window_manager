@@ -1254,6 +1254,7 @@ private:
     void GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void GetCutoutAvoidArea(WSRect& rect, AvoidArea& avoidArea);
     void GetKeyboardAvoidArea(WSRect& rect, AvoidArea& avoidArea);
+    void GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility = false);
     void PatchAINavigationBarArea(AvoidArea& avoidArea);
     AvoidArea GetAvoidAreaByTypeInner(AvoidAreaType type,

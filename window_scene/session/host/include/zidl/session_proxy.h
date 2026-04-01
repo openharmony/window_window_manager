@@ -147,8 +147,8 @@ public:
     void NotifyExtensionDetachToDisplay() override;
 
     /*
-      * Gesture Back
-      */
+    * Gesture Back
+    */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
     /*

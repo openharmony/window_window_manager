@@ -580,9 +580,9 @@ private:
     bool IsLandscape(uint64_t screenId);
     void RegisterListenerForKeyboard();
 
-     /*
-      * Gesture Back
-      */
+    /*
+     * Gesture Back
+     */
     bool gestureBackEnabled_ = true;
 
     /*

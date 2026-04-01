@@ -535,7 +535,7 @@ public:
     /**
      * @brief Get waterfall mode.
      *
-     * @param isWaterfallMode Indicates waterfall mode.
+     * @param isWaterfallMode Indicates the waterfall mode.
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError GetWaterfallMode(bool& isWaterfallMode) { return WSError::WS_OK; }
