@@ -167,7 +167,6 @@ bool ScreenSensorMgr::UnRegisterPostureCallbackInner()
     if (ret == SENSOR_SUCCESS) {
         TLOGI(WmsLogTag::DMS, "success.");
         return true;
- 
     }
     TLOGE(WmsLogTag::DMS, "UnRegisterPostureCallback failed with ret: %{public}d", ret);
     return false;
