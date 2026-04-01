@@ -134,6 +134,54 @@ HWTEST_F(SessionStageStubRotationTest, HandleNotifyRotationChange, Function | Sm
     sessionStageStub->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: HandleNotifyOrientationExecutionResult
+ * @tc.desc: 测试正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleNotifyOrientationExecutionResult, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult start";
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(123);
+    data.WriteUint32(static_cast<uint32_t>(OrientationExecutionResult::ORIENTATION_APPLIED));
+    auto result = sessionStageStub_->HandleNotifyOrientationExecutionResult(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult end";
+}
+
+/**
+ * @tc.name: HandleNotifyOrientationExecutionResult02
+ * @tc.desc: 测试 ReadUint32(promiseId) 失败
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleNotifyOrientationExecutionResult02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult02 start";
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = sessionStageStub_->HandleNotifyOrientationExecutionResult(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult02 end";
+}
+
+/**
+ * @tc.name: HandleNotifyOrientationExecutionResult03
+ * @tc.desc: 测试 ReadUint32(result) 失败
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleNotifyOrientationExecutionResult03, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult03 start";
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(123);
+    auto result = sessionStageStub_->HandleNotifyOrientationExecutionResult(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult03 end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
