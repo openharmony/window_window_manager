@@ -10105,6 +10105,9 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         TLOGD(WmsLogTag::DEFAULT, "session is nullptr");
         return;
     }
+    if (state >= SessionState::STATE_DISCONNECT && state < SessionState::STATE_END) {
+        listenerController_->NotifyAppInstanceLifecycleEvent(state, sceneSession->GetSessionInfo());
+    }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
             ProcessFocusWhenForeground(sceneSession);
