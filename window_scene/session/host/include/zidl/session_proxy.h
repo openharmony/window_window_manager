@@ -147,9 +147,14 @@ public:
     void NotifyExtensionDetachToDisplay() override;
 
     /*
-     * Gesture Back
-     */
+      * Gesture Back
+      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
+
+    /*
+     * Float Navigation Avoid Area
+     */
+    WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) override;
 
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
