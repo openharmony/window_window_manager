@@ -1387,9 +1387,9 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
     auto asyncTask = [env, pixelMap, isShow, priority, task = napiAsyncTask, where = __func__] {
         WMError errCode = WMError::WM_OK;
         if (isShow) {
-            errCode= SingletonContainer::Get<WindowManager>().SetScreenWatermarkImage(pixelMap, priority);
+            errCode = SingletonContainer::Get<WindowManager>().SetScreenWatermarkImage(pixelMap, priority);
         } else {
-            errCode= SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage(pixelMap);
+            errCode = SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage(pixelMap);
         }
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: enable=%{public}d, priority=%{public}d, errCode=%{public}d",
             where, isShow, priority, static_cast<int32_t>(errCode));
