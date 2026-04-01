@@ -40,7 +40,6 @@ namespace {
         g_logMsg += msg;
     }
 }
-using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 
 class MockWindowChangeListener : public IWindowChangeListener {
 public:
@@ -69,7 +68,6 @@ public:
     void TearDown() override;
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
