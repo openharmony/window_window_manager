@@ -1826,6 +1826,18 @@ HWTEST_F(ScreenSessionDumperTest, SetFoldDisplayMode, TestSize.Level1)
     ret = dumper->SetFoldDisplayMode();
     ASSERT_EQ(ret, 0);
 
+    dumper->params_[0] = "-lf";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-n";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
+    dumper->params_[0] = "-v";
+    ret = dumper->SetFoldDisplayMode();
+    ASSERT_EQ(ret, 0);
+
     dumper->params_[0] = "-test";
     ret = dumper->SetFoldDisplayMode();
     ASSERT_EQ(ret, -1);
