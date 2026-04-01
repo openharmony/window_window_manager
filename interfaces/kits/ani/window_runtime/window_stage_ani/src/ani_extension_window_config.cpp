@@ -67,11 +67,41 @@ ani_enum_item GetAniModalityType(ani_env* env, ModalityType enumObj)
     return enumItem;
 }
 
-ani_object CreateAndInitAniOptionsObject(ani_env* env, ani_class aniClass,
-    const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
+void SetAniOptionsProperties(ani_env* env, ani_object aniOptions, ani_class aniClass,
+    const SubWindowOptions& subWindowOptions)
 {
+    ani_status ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>zLevel", nullptr,
+        AniWindowUtils::CreateOptionalInt(env, static_cast<ani_int>(subWindowOptions.zLevel)));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set zLevel");
+    }
+    ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>maximizeSupported", nullptr,
+        AniWindowUtils::CreateOptionalBool(env, static_cast<ani_boolean>(subWindowOptions.maximizeSupported)));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set maximizeSupported");
+    }
+    ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>modalityType", nullptr,
+        GetAniModalityType(env, subWindowOptions.modalityType));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set modalityType");
+    }
+}
+
+ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
+{
+    if (extensionWindowConfig == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowConfig is null");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
+    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
+    ani_class aniClass;
+    ani_status ret = env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
+        return AniWindowUtils::CreateAniUndefined(env);
+    }
     ani_method aniCtor;
-    ani_status ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
+    ret = env->Class_FindMethod(aniClass, "<ctor>", ":", &aniCtor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] ctor not found");
         return AniWindowUtils::CreateAniUndefined(env);
@@ -102,59 +132,8 @@ ani_object CreateAndInitAniOptionsObject(ani_env* env, ani_class aniClass,
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] create global ref fail");
         return AniWindowUtils::CreateAniUndefined(env);
     }
-    return aniOptions;
-}
 
-bool SetAniOptionsProperties(ani_env* env, ani_object aniOptions, ani_class aniClass,
-    const SubWindowOptions& subWindowOptions)
-{
-    ani_status ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>zLevel", nullptr,
-        AniWindowUtils::CreateOptionalInt(env, static_cast<ani_int>(subWindowOptions.zLevel)));
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set zLevel");
-        return false;
-    }
-    ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>maximizeSupported", nullptr,
-        AniWindowUtils::CreateOptionalBool(env, static_cast<ani_boolean>(subWindowOptions.maximizeSupported)));
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set maximizeSupported");
-        return false;
-    }
-    ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>modalityType", nullptr,
-        GetAniModalityType(env, subWindowOptions.modalityType));
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set modalityType");
-        return false;
-    }
-    return true;
-}
-
-ani_object CreatAniSubWindowOptions(ani_env* env, const std::shared_ptr<ExtensionWindowConfig>& extensionWindowConfig)
-{
-    if (extensionWindowConfig == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] ExtensionWindowConfig is null");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    ani_class aniClass;
-    ani_status ret = env->FindClass("@ohos.window.window.ExtConfigSubWindowOptions", &aniClass);
-    if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] class not found");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    ani_object aniOptions = CreateAndInitAniOptionsObject(env, aniClass, extensionWindowConfig);
-    ani_boolean isUndefined;
-    if (env->Reference_IsUndefined(aniOptions, &isUndefined) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to check aniOptions isUndefined");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    if (isUndefined) {
-        TLOGI(WmsLogTag::DEFAULT, "aniOptions is undefined");
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
-    if (!SetAniOptionsProperties(env, aniOptions, aniClass, extensionWindowConfig->subWindowOptions)) {
-        return AniWindowUtils::CreateAniUndefined(env);
-    }
+    SetAniOptionsProperties(env, aniOptions, aniClass, extensionWindowConfig->subWindowOptions);
     return aniOptions;
 }
 
@@ -548,13 +527,11 @@ void AniExtensionWindowConfig::ParseSubWindowOptionsProperties(ani_env* env, ani
     bool isModal = false;
     if (AniWindowUtils::GetPropertyBoolObject(env, "isModal", value, isModal) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isModal");
-        return;
     }
     options.isModal = isModal;
     bool isTopmost = false;
     if (AniWindowUtils::GetPropertyBoolObject(env, "isTopmost", value, isTopmost) != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isTopmost");
-        return;
     }
     options.isTopmost = isTopmost;
 }
@@ -633,7 +610,6 @@ void AniExtensionWindowConfig::OnSetSystemWindowOptions(ani_env* env, ani_object
             ret = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(result), &type);
             if (ret != ANI_OK) {
                 TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to convert windowType to int");
-                return;
             } else {
                 TLOGI(WmsLogTag::DEFAULT, "[ANI] winType: %{public}u", static_cast<int32_t>(type));
                 extensionWindowConfig_->systemWindowOptions.windowType = static_cast<int32_t>(type);
