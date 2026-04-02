@@ -24,7 +24,7 @@ using namespace std;
 
 namespace OHOS {
 namespace Rosen {
-class WindowSceneSessionImplUiextensionTest : public testing::Test {
+class WindowSceneSessionImplUIExtensionTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -36,15 +36,15 @@ private:
     static constexpr uint32_t WAIT_SYNC_IN_NS = 200000;
 };
 
-void WindowSceneSessionImplUiextensionTest::SetUpTestCase()
+void WindowSceneSessionImplUIExtensionTest::SetUpTestCase()
 {
 }
 
-void WindowSceneSessionImplUiextensionTest::TearDownTestCase()
+void WindowSceneSessionImplUIExtensionTest::TearDownTestCase()
 {
 }
 
-void WindowSceneSessionImplUiextensionTest::SetUp()
+void WindowSceneSessionImplUIExtensionTest::SetUp()
 {
     sptr<WindowOption> option = new(std::nothrow) WindowOption();
     ASSERT_NE(nullptr, option);
@@ -58,7 +58,7 @@ void WindowSceneSessionImplUiextensionTest::SetUp()
     window_->handler_ = handler_;
 }
 
-void WindowSceneSessionImplUiextensionTest::TearDown()
+void WindowSceneSessionImplUIExtensionTest::TearDown()
 {
     window_ = nullptr;
 }
@@ -68,7 +68,7 @@ void WindowSceneSessionImplUiextensionTest::TearDown()
  * @tc.desc: RecoverExtension Test
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplUiextensionTest, RecoverExtension, TestSize.Level2)
+HWTEST_F(WindowSceneSessionImplUIExtensionTest, RecoverExtension, TestSize.Level2)
 {
     window_->RecoverExtension();
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
