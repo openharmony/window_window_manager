@@ -3279,15 +3279,28 @@ void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
     }
 }
 
+bool SceneSession::isDisplayLand(bool isBarPhoneStatus)
+{
+    sptr<ScreenSession> screenSession =
+        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
+    if (screenSession == nullptr) {
+        TLOGW(WmsLogTag::WMS_IMMS, "Screen session is null");
+        return false;
+    }
+    uint32_t width = screenSession->GetScreenProperty().GetBounds().rect_.width_;
+    uint32_t height = screenSession->GetScreenProperty().GetBounds().rect_.height_;
+    return width > height ? true : false;
+}
+
 void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     bool visible = false;
     WSRect floatNavigationArea;
     if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_) {
         WSRect landspaceRect;
-        [visible, floatNavigationArea, landspaceRect] = specificCallback_->onGetAINavigationBarArea_(
-            GetSessionProperty()->GetDisplayId());
-        floatNavigationArea = xxxx ? floatNavigationArea : landspaceRect;
+        [visible, isBarPhoneStatus, floatNavigationArea, landspaceRect] =
+            specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
+        floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
     }
     if (!visible && !ignoreVisibility) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());

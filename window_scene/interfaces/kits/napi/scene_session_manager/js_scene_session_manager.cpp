@@ -62,6 +62,7 @@ constexpr int ARG_INDEX_ONE = 1;
 constexpr int ARG_INDEX_TWO = 2;
 constexpr int ARG_INDEX_THREE = 3;
 constexpr int ARG_INDEX_FOUR = 4;
+constexpr int ARG_INDEX_FIVE = 5;
 constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
@@ -3850,9 +3851,9 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
 napi_value JsSceneSessionManager::OnNotifyFloatNavagationInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = DEFAULT_ARG_COUNT;
-    napi_value argv[ARG_INDEX_FOUR] = { nullptr };
+    napi_value argv[ARG_INDEX_FIVE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_FOUR) {
+    if (argc < ARG_INDEX_FIVE) {
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3867,27 +3868,34 @@ napi_value JsSceneSessionManager::OnNotifyFloatNavagationInfo(napi_env env, napi
     }
     bool visible = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], visible)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to enable");
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to visible");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    bool isBarPhoneStatus = false;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isBarPhoneStatus)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to isBarPhoneStatus");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     WSRect portraitRect;
-    if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], portraitRect)) {
+    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], portraitRect)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to portraitRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     WSRect landspaceRect;
-    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], landspaceRect)) {
+    if (argv[ARG_INDEX_FOUR] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_FOUR], landspaceRect)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to landspaceRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().NotifyFloatNavagationInfo(
-        static_cast<uint64_t>(displayId), visible, portraitRect, landspaceRect);
+        static_cast<uint64_t>(displayId), isBarPhoneStatus, visible, portraitRect, landspaceRect);
     return NapiGetUndefined(env);
 }
 
