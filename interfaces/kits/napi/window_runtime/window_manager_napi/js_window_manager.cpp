@@ -1353,7 +1353,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
     }
 
     int32_t priority = 0;
-    if (argc > 2 && ConvertFromJsValue(env, argv[2], priority) && priority < 0) {
+    if (argc > ARGC_TWO && ConvertFromJsValue(env, argv[ARGC_TWO], priority) && priority < 0) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "priority=%{public}d is less than 0", priority);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
     }
