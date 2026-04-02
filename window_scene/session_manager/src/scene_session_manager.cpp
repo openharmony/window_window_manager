@@ -257,11 +257,13 @@ void ConstructBatchLifecyclePayload(
         payload.bundleName_ = info.bundleName_;
         payload.moduleName_ = info.moduleName_;
         payload.abilityName_ = info.abilityName_;
+        payload.windowName_ = session->GetWindowName();
         payload.appIndex_ = info.appIndex_;
         payload.persistentId_ = info.persistentId_;
         payload.appInstanceKey_ = info.appInstanceKey_;
         payload.screenId_ = info.screenId_;
         payload.sessionState_ = session->GetSessionState();
+
         payloads.emplace_back(std::move(payload));
     }
     TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: end, payloadCount:%{public}zu", __func__, payloads.size());
