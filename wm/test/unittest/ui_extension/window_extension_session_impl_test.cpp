@@ -3139,6 +3139,25 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostRectChangeInGlobalDisplay, TestSi
 }
 
 /**
+ * @tc.name: OnRecover
+ * @tc.desc: OnRecover Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnRecover, TestSize.Level2)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    window_->OnRecover(std::move(want), reply);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    window_->OnRecover(std::move(want), reply);
+    sptr<IRemoteObject> iRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(nullptr, iRemoteObject);
+    window_->abilityToken_ = iRemoteObject;
+    window_->OnRecover(std::move(want), reply);
+}
+
+/**
  * @tc.name: OnResyncExtensionConfig
  * @tc.desc: OnResyncExtensionConfig Test
  * @tc.type: FUNC

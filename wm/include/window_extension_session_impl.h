@@ -259,6 +259,7 @@ private:
     WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostStatusBarContentColorChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostRectChangeInGlobalDisplay(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnRecover(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
