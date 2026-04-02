@@ -522,7 +522,7 @@ public:
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
     WSError NotifyFloatNavagationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
         const WSRect& portraitRect, const WSRect& landspaceRect);
-    WSError GetFloatNavagationInfo(DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo);
+    WSError GetFloatNavagationInfo(DisplayId displayId);
     WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
         std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
     WSRect GetAINavigationBarArea(uint64_t displayId, bool ignoreVisibility = false);

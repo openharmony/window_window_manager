@@ -131,8 +131,7 @@ using GetStatusBarConstantlyShowFunc = std::function<void(DisplayId displayId, b
 using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
     std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
-using GetFloatNavagationInfoFunc = std::function<WSError(DisplayId displayId,
-    std::tuple<bool, WSRect, WSRect>& floatNavagationInfo)>;
+using GetFloatNavagationInfoFunc = std::function<WSError(DisplayId displayId)>;
 using GetLSStateFunc = std::function<bool()>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
@@ -1269,7 +1268,7 @@ private:
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
     template<typename T>
     Rect CalculateAvoidAreaByScale(WSRectT<T>& avoidAreaRect) const;
-    bool GetFloatNavigationAvoidAreaEnabled() const { return isFloatNavigationAvoidAreaEnabled_ };
+    bool GetFloatNavigationAvoidAreaEnabled() const { return isFloatNavigationAvoidAreaEnabled_; }
     bool isDisplayLand(bool isBarPhoneStatus);
 
     /*

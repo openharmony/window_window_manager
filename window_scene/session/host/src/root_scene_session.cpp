@@ -139,20 +139,21 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
 }
 
-void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(
-    const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
+void RootSceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     bool visible = false;
     WSRect floatNavigationArea;
-    if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_) {
+    std::tuple<bool, bool, WSRect, WSRect> floatNavagationInfo;
+    if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
+        specificCallback_->onGetFloatNavagationInfo_(
+            GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
         WSRect landspaceRect;
-        [visible, isBarPhoneStatus, floatNavigationArea, landspaceRect] =
-            specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
+        auto [visible, isBarPhoneStatus, floatNavigationArea, landspaceRect] = floatNavagationInfo;
         floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
     }
     if (!visible && !ignoreVisibility) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());
-        continue;
+        return;
     }
     PatchFloatNavigationArea(floatNavigationArea);
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect, floatNavigationArea, avoidArea);
