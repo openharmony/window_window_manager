@@ -291,7 +291,7 @@ HWTEST_F(SceneInputManagerTest, UpdateDisplayAndWindowInfo, TestSize.Level1)
     std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
-    std::vector<MMI::UserScreenInfo::UIExtensionInfo> uiExtensionInfoList;
+    std::vector<MMI::UIExtensionInfo> uiExtensionInfoList;
     MMI::DisplayInfo displayinfo;
     displayInfos.emplace_back(displayinfo);
     SceneInputManager::GetInstance().UpdateDisplayAndWindowInfo(
@@ -560,7 +560,7 @@ HWTEST_F(SceneInputManagerTest, FlushFullInfoToMMI, TestSize.Level1)
     std::map<DisplayGroupId, MMI::DisplayGroupInfo> displayGroupMap;
     std::vector<MMI::DisplayInfo> displayInfos;
     std::vector<MMI::WindowInfo> windowInfoList;
-    std::vector<MMI::UserScreenInfo::UIExtensionInfo> uiExtensionInfoList;
+    std::vector<MMI::UIExtensionInfo> uiExtensionInfoList;
     SceneInputManager::GetInstance().FlushFullInfoToMMI(
         screenInfos, displayGroupMap, windowInfoList, uiExtensionInfoList);
     ASSERT_EQ(displayInfos.size(), 0);
