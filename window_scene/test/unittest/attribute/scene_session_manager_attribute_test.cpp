@@ -184,6 +184,251 @@ HWTEST_F(SceneSessionManagerAttributeTest, SetWindowSnapshotSkip, TestSize.Level
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_ = oldSceneSessionMap;
 }
+
+/**
+ * @tc.name: SetScreenWatermarkImage001
+ * @tc.desc: test SetScreenWatermarkImage with null pixelMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, SetScreenWatermarkImage001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::string bundleName;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    EXPECT_EQ(ssm_->SetScreenWatermarkImage(pixelMap, 1, bundleName), WMError::WM_ERROR_ILLEGAL_PARAM);
+}
+
+/**
+ * @tc.name: SetScreenWatermarkImage002
+ * @tc.desc: test SetScreenWatermarkImage without system permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, SetScreenWatermarkImage002, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::string bundleName;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(ssm_->SetScreenWatermarkImage(pixelMap, 1, bundleName), WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: SetScreenWatermarkImage003
+ * @tc.desc: test SetScreenWatermarkImage with system permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, SetScreenWatermarkImage003, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "";
+    ssm_->screenWatermarkPriority_ = 0;
+    std::string bundleName;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(ssm_->SetScreenWatermarkImage(pixelMap, 1, bundleName), WMError::WM_OK);
+    EXPECT_FALSE(bundleName.empty());
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: SetScreenWatermarkImage004
+ * @tc.desc: test SetScreenWatermarkImage with lower priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, SetScreenWatermarkImage004, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "test.bundle";
+    ssm_->screenWatermarkPriority_ = 1;
+    std::string bundleName;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(true);
+    EXPECT_EQ(ssm_->SetScreenWatermarkImage(pixelMap, 2, bundleName), WMError::WM_DO_NOTHING);
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: SetScreenWatermarkImage005
+ * @tc.desc: test SetScreenWatermarkImage with higher priority
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, SetScreenWatermarkImage005, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "test.bundle";
+    ssm_->screenWatermarkPriority_ = 2;
+    std::string bundleName;
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(ssm_->SetScreenWatermarkImage(pixelMap, 1, bundleName), WMError::WM_OK);
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: CleanScreenWatermarkImage001
+ * @tc.desc: test CleanScreenWatermarkImage without system permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_ERROR_NOT_SYSTEM_APP);
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: CleanScreenWatermarkImage002
+ * @tc.desc: test CleanScreenWatermarkImage when no watermark exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage002, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "";
+    ssm_->screenWatermarkPriority_ = 0;
+    MockAccesstokenKit::MockIsSystemApp(true);
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_DO_NOTHING);
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: CleanScreenWatermarkImage003
+ * @tc.desc: test CleanScreenWatermarkImage when watermark exists but not owner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage003, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "test.bundle";
+    ssm_->screenWatermarkPriority_ = 1;
+    MockAccesstokenKit::MockIsSystemApp(true);
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_DO_NOTHING);
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: CleanScreenWatermarkImage004
+ * @tc.desc: test CleanScreenWatermarkImage when watermark exists and is owner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage004, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "test.bundle";
+    sessionInfo.callingPid_ = IPCSkeleton::GetCallingRealPid();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetPersistentId(100);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    ssm_->screenWatermarkBundleName_ = "test.bundle";
+    ssm_->screenWatermarkPriority_ = 1;
+    MockAccesstokenKit::MockIsSystemApp(true);
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_OK);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+    MockAccesstokenKit::ChangeMockStateToInit();
+}
+
+/**
+ * @tc.name: RecoverScreenWatermarkImage001
+ * @tc.desc: test RecoverScreenWatermarkImage with empty bundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "";
+    ssm_->screenWatermarkPriority_ = 0;
+    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("", 1), WMError::WM_OK);
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+}
+
+/**
+ * @tc.name: RecoverScreenWatermarkImage002
+ * @tc.desc: test RecoverScreenWatermarkImage when no watermark exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage002, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "";
+    ssm_->screenWatermarkPriority_ = 0;
+    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 1), WMError::WM_OK);
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+}
+
+/**
+ * @tc.name: RecoverScreenWatermarkImage003
+ * @tc.desc: test RecoverScreenWatermarkImage when watermark exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage003, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreenWatermarkBundleName = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "existing.bundle";
+    ssm_->screenWatermarkPriority_ = 1;
+    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 2), WMError::WM_OK);
+    ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+}
+
+/**
+ * @tc.name: RecoverScreenWatermarkImage004
+ * @tc.desc: test RecoverScreenWatermarkImage with different priorities
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage004, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldScreen = ssm_->screenWatermarkBundleName_;
+    auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
+    ssm_->screenWatermarkBundleName_ = "";
+    ssm_->screenWatermarkPriority_ = 0;
+    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 100), WMError::WM_OK);
+    ssm_->screenWatermarkBundleName_ = oldScreen;
+    ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
