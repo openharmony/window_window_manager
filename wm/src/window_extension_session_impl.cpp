@@ -2435,6 +2435,21 @@ WMError WindowExtensionSessionImpl::OnHostRectChangeInGlobalDisplay(AAFwk::Want&
     return WMError::WM_OK;
 }
 
+WMError WindowExtensionSessionImpl::OnRecover(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "id: %{public}d", GetPersistentId());
+    AddExtensionWindowStageToSCB(property_->IsConstrainedModal());
+    CheckAndAddExtWindowFlags();
+    if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL && abilityToken_) {
+        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(abilityToken_, property_->GetWindowRect());
+    }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::RECOVER_EXTENSION), data,
+            static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
+    return WMError::WM_OK;
+}
+
 WMError WindowExtensionSessionImpl::OnScreenshot(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
@@ -2532,6 +2547,9 @@ void WindowExtensionSessionImpl::RegisterDataConsumer()
         this, std::placeholders::_1, std::placeholders::_2));
     RegisterConsumer(Extension::Businesscode::NOTIFY_HOST_RECT_CHANGE_IN_GLOBAL_DISPLAY,
         std::bind(&WindowExtensionSessionImpl::OnHostRectChangeInGlobalDisplay,
+        this, std::placeholders::_1, std::placeholders::_2));
+    RegisterConsumer(Extension::Businesscode::RECOVER_EXTENSION,
+        std::bind(&WindowExtensionSessionImpl::OnRecover,
         this, std::placeholders::_1, std::placeholders::_2));
 
     auto consumersEntry = [weakThis = wptr(this)](SubSystemId id, uint32_t customId, AAFwk::Want&& data,
