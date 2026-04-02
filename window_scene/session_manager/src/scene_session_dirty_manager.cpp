@@ -719,7 +719,7 @@ auto SceneSessionDirtyManager::GetFullWindowInfoList() -> FullInfoForMMI
     // all input event should trans to dialog window if dialog exists
     const auto dialogMap = GetDialogSessionMap(sceneSessionMap);
     uint32_t maxHotAreasNum = 0;
-    std::vector<MMI::UserScreenInfo::UIExtensionInfo> uiExtensionInfoList;
+    std::vector<MMI::UIExtensionInfo> uiExtensionInfoList;
     for (const auto& sceneSessionValuePair : sceneSessionMap) {
         const auto& sceneSessionValue = sceneSessionValuePair.second;
         if (sceneSessionValue == nullptr) {

@@ -176,7 +176,7 @@ struct UIExtensionTokenInfo {
 struct FullInfoForMMI {
     std::vector<MMI::WindowInfo> windowInfoList;
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
-    std::vector<MMI::UserScreenInfo::UIExtensionInfo> uiExtensionInfoList;
+    std::vector<MMI::UIExtensionInfo> uiExtensionInfoList;
 };
 
 class SceneSession : public Session {
@@ -792,7 +792,7 @@ public:
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
-    void GetAllUIExtensionTokenInfo(std::vector<MMI::UserScreenInfo::UIExtensionInfo>& uiExtensionInfoList);
+    void GetAllUIExtensionTokenInfo(std::vector<MMI::UIExtensionInfo>& uiExtensionInfoList);
     bool IsFreeMultiWindowMode() const
     {
         return systemConfig_.IsFreeMultiWindowMode();

@@ -368,7 +368,7 @@ std::unordered_map<DisplayId, int32_t> SceneInputManager::GetFocusedSessionMap()
 void SceneInputManager::FlushFullInfoToMMI(const std::vector<MMI::ScreenInfo>& screenInfos,
     std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
     const std::vector<MMI::WindowInfo>& windowInfoList,
-    const std::vector<MMI::UserScreenInfo::UIExtensionInfo>& uiExtensionInfoList, bool isOverBatchSize)
+    const std::vector<MMI::UIExtensionInfo>& uiExtensionInfoList, bool isOverBatchSize)
 {
     auto focusInfoMap = GetFocusedSessionMap();
     std::unordered_map<DisplayGroupId, std::vector<MMI::WindowInfo>> windowInfoMap;
@@ -700,7 +700,7 @@ void SceneInputManager::SetCurrentUserId(int32_t userId)
 void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::ScreenInfo>& screenInfos,
     std::map<DisplayGroupId, MMI::DisplayGroupInfo>& displayGroupMap,
     std::vector<MMI::WindowInfo> windowInfoList,
-    const std::vector<MMI::UserScreenInfo::UIExtensionInfo>& uiExtensionInfoList)
+    const std::vector<MMI::UIExtensionInfo>& uiExtensionInfoList)
 {
     if (windowInfoList.size() == 0) {
         FlushFullInfoToMMI(screenInfos, displayGroupMap, windowInfoList, uiExtensionInfoList);
@@ -748,7 +748,7 @@ void SceneInputManager::UpdateDisplayAndWindowInfo(const std::vector<MMI::Screen
 }
 
 void SceneInputManager::FlushDisplayInfoToMMI(std::vector<MMI::WindowInfo>&& windowInfoList,
-                                              std::vector<MMI::UserScreenInfo::UIExtensionInfo>&& uiExtensionInfoList,
+                                              std::vector<MMI::UIExtensionInfo>&& uiExtensionInfoList,
                                               std::vector<std::shared_ptr<Media::PixelMap>>&& pixelMapList,
                                               const bool forceFlush)
 {
