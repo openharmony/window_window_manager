@@ -2053,9 +2053,9 @@ WMError WindowManager::SetScreenWatermarkImage(const std::shared_ptr<Media::Pixe
     return WindowAdapter::GetInstance(userId_).SetScreenWatermarkImage(pixelMap, priority);
 }
 
-WMError WindowManager::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+WMError WindowManager::CleanScreenWatermarkImage()
 {
-    return WindowAdapter::GetInstance(userId_).CleanScreenWatermarkImage(pixelMap);
+    return WindowAdapter::GetInstance(userId_).CleanScreenWatermarkImage();
 }
 
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const

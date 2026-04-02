@@ -1094,7 +1094,7 @@ public:
      *
      * @return WM_OK means get success, others means get failed.
      */
-    WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    WMError CleanScreenWatermarkImage();
 
     /**
      * @brief Get visibility window info.

@@ -235,7 +235,7 @@ public:
     virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
     virtual WMError RecoverWatermarkImageForApp();
     virtual WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority);
-    virtual WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    virtual WMError CleanScreenWatermarkImage();
     virtual WMError RecoverScreenWatermarkImage();
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,

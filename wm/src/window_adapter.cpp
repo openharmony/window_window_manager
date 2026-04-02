@@ -439,12 +439,12 @@ WMError WindowAdapter::SetScreenWatermarkImage(const std::shared_ptr<Media::Pixe
     return errCode;
 }
 
-WMError WindowAdapter::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+WMError WindowAdapter::CleanScreenWatermarkImage()
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    auto errCode = wmsProxy->CleanScreenWatermarkImage(pixelMap);
+    auto errCode = wmsProxy->CleanScreenWatermarkImage();
     if (errCode == WMError::WM_OK) {
         screenWatermarkBundleName_ = "";
         screenWatermarkPriority_ = 0;

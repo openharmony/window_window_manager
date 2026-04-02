@@ -2696,17 +2696,13 @@ WMError SceneSessionManagerProxy::SetScreenWatermarkImage(const std::shared_ptr<
     return static_cast<WMError>(errCode);
 }
 
-WMError SceneSessionManagerProxy::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+WMError SceneSessionManagerProxy::CleanScreenWatermarkImage()
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write interfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteParcelable(pixelMap.get())) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write pixelMap failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

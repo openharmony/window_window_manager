@@ -1116,7 +1116,7 @@ void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelM
     if (enable) {
         errCode = SingletonContainer::Get<WindowManager>().SetScreenWatermarkImage(pixelMap, priority);
     } else {
-        errCode = SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage(pixelMap);
+        errCode = SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage();
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "enable=%{public}d, priority=%{public}d, errCode=%{public}d",
         enable, priority, static_cast<int32_t>(errCode));
