@@ -19291,6 +19291,10 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         return WMError::WM_ERROR_NO_MEM;
     }
     taskScheduler_->PostAsyncTask([this, listener, bundleName, appIndex, appInstanceKey, where = __func__] {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+            return;
+        }
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
         std::vector<sptr<SceneSession>> appInstanceSessions;
