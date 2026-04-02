@@ -2770,13 +2770,11 @@ bool AniWindowUtils::HandleModalityTypeParsing(ani_env* env, ani_object aniObjec
     ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, "modalityType", &modalityTypeRef);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to get property modalityType");
-        return false;
     }
     ani_boolean isUndefined = false;
     ani_status isUndefineRet = env->Reference_IsUndefined(modalityTypeRef, &isUndefined);
     if (isUndefineRet != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to check reference isUndefined");
-        return false;
     }
     ani_int modalityType;
     if (ret == ANI_OK && !isUndefined &&
