@@ -53,6 +53,7 @@ public:
             return parcel.WriteString(bundleName_) &&
                    parcel.WriteString(moduleName_) &&
                    parcel.WriteString(abilityName_) &&
+                   parcel.WriteString(windowName_) &&
                    parcel.WriteInt32(appIndex_) &&
                    parcel.WriteInt32(persistentId_) &&
                    parcel.WriteString(appInstanceKey_) &&
@@ -71,6 +72,7 @@ public:
             if (!parcel.ReadString(payload->bundleName_) ||
                 !parcel.ReadString(payload->moduleName_) ||
                 !parcel.ReadString(payload->abilityName_) ||
+                !parcel.ReadString(payload->windowName_) ||
                 !parcel.ReadInt32(payload->appIndex_) ||
                 !parcel.ReadInt32(payload->persistentId_) ||
                 !parcel.ReadString(payload->appInstanceKey_) ||
@@ -97,6 +99,7 @@ public:
         std::string bundleName_;
         std::string moduleName_;
         std::string abilityName_;
+        std::string windowName_;
         int32_t appIndex_ = 0;
         int32_t persistentId_ = 0;
         std::string appInstanceKey_;
