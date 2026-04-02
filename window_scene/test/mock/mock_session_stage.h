@@ -93,7 +93,6 @@ public:
     MOCK_METHOD1(SetStageKeyFramePolicy, WSError(const KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
     MOCK_METHOD1(GetSceneNodeCount, WSError(uint32_t& nodeCount));
-    MOCK_METHOD2(NotifyOrientationExecutionResult, WSError(uint32_t promiseId, OrientationExecutionResult result));
     MOCK_METHOD0(NotifyLifecyclePausedStatus, void(void));
     MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
