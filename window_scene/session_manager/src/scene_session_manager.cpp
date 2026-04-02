@@ -15495,15 +15495,14 @@ WSError SceneSessionManager::MoveMainWindowToTargetDisplay(DisplayId displayId, 
         ", isFromScreenVirtual: %{public}d, isToScreenVirtual: %{public}d",
         windowId, displayId, isFromScreenVirtual, isToScreenVirtual);
     const char* const where = __func__;
-    return taskScheduler_->PostAsyncTask([this, windowId, displayId, isFromScreenVirtual, isToScreenVirtual, where] {
-        TLOGNI(WmsLogTag::WMS_LIFE, "windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
+    taskScheduler_->PostAsyncTask([this, windowId, displayId, isFromScreenVirtual, isToScreenVirtual, where] {
         if (moveMainWindowToTargetDisplayFunc_) {
             moveMainWindowToTargetDisplayFunc_(displayId, windowId, isFromScreenVirtual, isToScreenVirtual);
         } else {
             TLOGNE(WmsLogTag::WMS_LIFE, "moveMainWindowToTargetDisplayFunc_ is nullptr");
         }
-        return WSError::WS_OK;
     }, __func__);
+    return WSError::WS_OK;
 }
 
 /** @note @window.hierarchy */

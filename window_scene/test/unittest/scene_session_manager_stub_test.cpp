@@ -3118,6 +3118,46 @@ HWTEST_F(SceneSessionManagerStubTest, ResetSpecificWindowZIndex, Function | Smal
 }
 
 /**
+ * @tc.name: HandleMoveMainWindowToTargetDisplay
+ * @tc.desc: HandleMoveMainWindowToTargetDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleMoveMainWindowToTargetDisplay, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    data.WriteInt32(1);
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+
+    res = stub_->HandleMoveMainWindowToTargetDisplay(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleMoveMainWindowToTargetDisplay1
+ * @tc.desc: HandleMoveMainWindowToTargetDisplay read error
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleMoveMainWindowToTargetDisplay1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    int res = stub_->HandleMoveMainWindowToTargetDisplay(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: HandleNotifySupportRotationRegistered
  * @tc.desc: HandleNotifySupportRotationRegistered
  * @tc.type: FUNC
