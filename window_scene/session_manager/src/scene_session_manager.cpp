@@ -18627,9 +18627,10 @@ WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit 
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (!abilityInfo->applicationInfo.isSystemApp) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "%{public}d is not a systemApp", persistentId);
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_RECENT_SNAPSHOT) &&
+        !SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "permission not allowed");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     bool isCropped;
     std::shared_ptr<Media::PixelMap> pixelMap = GetPixelMap(imgResourceId, abilityInfo, false, isCropped);
@@ -18664,14 +18665,10 @@ WMError SceneSessionManager::SetImageForRecentPixelMap(const std::shared_ptr<Med
         TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
-    auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
-    if (abilityInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
-        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
-    }
-    if (!abilityInfo->applicationInfo.isSystemApp) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "%{public}d is not a systemApp", persistentId);
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_RECENT_SNAPSHOT) &&
+        !SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "permission not allowed");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (sceneSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sessionState is invalid");
@@ -18697,14 +18694,10 @@ WMError SceneSessionManager::RemoveImageForRecent(int32_t persistentId)
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
-    auto abilityInfo = sceneSession->GetSessionInfo().abilityInfo;
-    if (abilityInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
-        return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
-    }
-    if (!abilityInfo->applicationInfo.isSystemApp) {
-        TLOGE(WmsLogTag::WMS_PATTERN, "%{public}d is not a systemApp", persistentId);
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_RECENT_SNAPSHOT) &&
+        !SessionPermission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "permission not allowed");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (sceneSession->IsSessionForeground()) {
         sceneSession->NotifyRemoveSnapshot();
