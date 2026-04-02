@@ -56,6 +56,7 @@ void SessionLifecycleListenerProxy::SendRequestCommon(
 
 void SessionLifecycleListenerProxy::OnBatchLifecycleEvent(const std::vector<LifecycleEventPayload>& payloads)
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "payloads size:%{public}zu", payloads.size());
     for (const auto& payload : payloads) {
         OnAppInstanceLifecycleEvent(payload);
     }
@@ -63,6 +64,9 @@ void SessionLifecycleListenerProxy::OnBatchLifecycleEvent(const std::vector<Life
 
 void SessionLifecycleListenerProxy::OnAppInstanceLifecycleEvent(const LifecycleEventPayload& payload)
 {
+    TLOGI(WmsLogTag::WMS_LIFE,
+        "persistentId:%{public}d, bundleName:%{public}s, appIndex:%{public}d, sessionState:%{public}d",
+        payload.persistentId_, payload.bundleName_.c_str(), payload.appIndex_, payload.sessionState_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
