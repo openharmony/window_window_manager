@@ -1417,8 +1417,9 @@ void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const R
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    bool exceptedTrue = true;
     if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_ ||
-        notifySizeChangeFlag_ || notifySizeChangeInCompatibleMode_.compare_exchange_strong(except_true_, false)) {
+        notifySizeChangeFlag_ || notifySizeChangeInCompatibleMode_.compare_exchange_strong(exceptedTrue, false)) {
         NotifySizeChange(wmRect, wmReason);
         SetNotifySizeChangeFlag(false);
         lastSizeChangeReason_ = wmReason;
@@ -2889,9 +2890,10 @@ WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect,
         reason = SizeChangeReason::DRAG_MOVE;
     }
 
+    bool exceptedTrue = true;
     Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     if (newRect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
-        if (notifyRectChangeInCompatibleMode_.compare_exchange_strong(except_true_, false)) {
+        if (notifyRectChangeInCompatibleMode_.compare_exchange_strong(exceptedTrue, false)) {
             NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
         }
         TLOGD(WmsLogTag::WMS_LAYOUT,

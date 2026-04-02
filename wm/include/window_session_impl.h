@@ -842,7 +842,6 @@ protected:
     std::vector<sptr<IUIContentCreateListener>> uiContentCreateListeners_;
     std::atomic_bool notifySizeChangeInCompatibleMode_ { false };
     std::atomic_bool notifyRectChangeInCompatibleMode_ { false };
-    bool except_true_ { true };
 
     /*
      * DFX
