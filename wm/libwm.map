@@ -268,6 +268,8 @@
             OHOS::Rosen::WindowManager::SetSpecificSystemWindowZIndex*;
             OHOS::Rosen::WindowManager::SetStartWindowBackgroundColor*;
             OHOS::Rosen::WindowManager::SetWatermarkImageForApp*;
+            OHOS::Rosen::WindowManager::SetScreenWatermarkImage*;
+            OHOS::Rosen::WindowManager::CleanScreenWatermarkImage*;
             OHOS::Rosen::WindowManager::SetWindowLayoutMode*;
             OHOS::Rosen::WindowManager::SetWindowSnapshotSkip*;
             OHOS::Rosen::WindowManager::ShiftAppWindowFocus*;
