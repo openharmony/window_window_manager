@@ -1270,6 +1270,7 @@ private:
     template<typename T>
     Rect CalculateAvoidAreaByScale(WSRectT<T>& avoidAreaRect) const;
     bool GetFloatNavigationAvoidAreaEnabled() const { return isFloatNavigationAvoidAreaEnabled_ };
+    bool isDisplayLand(bool isBarPhoneStatus);
 
     /*
      * Window Lifecycle

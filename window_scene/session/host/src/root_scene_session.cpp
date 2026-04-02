@@ -141,8 +141,20 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
 
 void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
-    // Phase 1: Minimal implementation - just return empty avoid area
-    return;
+    bool visible = false;
+    WSRect floatNavigationArea;
+    if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_) {
+        WSRect landspaceRect;
+        [visible, isBarPhoneStatus, floatNavigationArea, landspaceRect] =
+            specificCallback_->onGetAINavigationBarArea_(GetSessionProperty()->GetDisplayId());
+        floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
+    }
+    if (!visible && !ignoreVisibility) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());
+        continue;
+    }
+    PatchFloatNavigationArea(floatNavigationArea);
+    CalculateAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect, floatNavigationArea, avoidArea);
 }
 
 AvoidArea RootSceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, bool ignoreVisibility)

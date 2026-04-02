@@ -13862,19 +13862,19 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidArea
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::NotifyFloatNavagationInfo(
-    DisplayId displayId, bool visible, const WSRect& portraitRect, const WSRect& landspaceRect)
+WSError SceneSessionManager::NotifyFloatNavagationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
+    const WSRect& portraitRect, const WSRect& landspaceRect)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public} " PRIu64 " visible %{public}d "
+    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public} " PRIu64 " visible %{public}d isBarPhoneStatus %{public}d"
         "portraitRect %{public}s, landspaceRect %{public}s",
-        displayId, visible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
+        displayId, visible, isBarPhoneStatus, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
     std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
-    floatNavagationInfoMap_[displayId] = { visible, portraitRect, landspaceRect };
+    floatNavagationInfoMap_[displayId] = { visible, isBarPhoneStatus, portraitRect, landspaceRect };
     return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::GetFloatNavagationInfo(
-    DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo)
+    DisplayId displayId, std::tuple<bool, bool, WSRect, WSRect>& floatNavagationInfo)
 {
     std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
     auto iter = floatNavagationInfoMap_.find(displayId);
@@ -14086,7 +14086,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
                 TLOGNE(WmsLogTag::DMS, "%{public}s null scene session", where);
                 continue;
             }
-            if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
+            ion->GetSessionState() != SessionState::STATE_FOREGROUND &&
                 sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
                 continue;
             }
