@@ -139,7 +139,8 @@ void RootSceneSession::GetAINavigationBarAreaForRoot(const WSRect& rect, AvoidAr
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
 }
 
-void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
+void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(
+    const WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     bool visible = false;
     WSRect floatNavigationArea;
