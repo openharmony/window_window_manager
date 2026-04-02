@@ -57,18 +57,17 @@ public:
                    parcel.WriteInt32(appIndex_) &&
                    parcel.WriteInt32(persistentId_) &&
                    parcel.WriteString(appInstanceKey_) &&
-                   parcel.WriteInt32(static_cast<int32_t>(sessionState_)) &&
                    parcel.WriteUint32(resultCode_) &&
                    parcel.WriteUint64(fromScreenId_) &&
                    parcel.WriteUint64(toScreenId_) &&
                    parcel.WriteUint64(screenId_) &&
-                   parcel.WriteUint32(static_cast<uint32_t>(lifeCycleChangeReason_));
+                   parcel.WriteUint32(static_cast<uint32_t>(lifeCycleChangeReason_)) &&
+                   parcel.WriteUint32(static_cast<uint32_t>(sessionState_));
         }
 
         static LifecycleEventPayload* Unmarshalling(Parcel& parcel)
         {
             auto payload = std::make_unique<LifecycleEventPayload>();
-            uint32_t sessionState = 0;
             if (!parcel.ReadString(payload->bundleName_) ||
                 !parcel.ReadString(payload->moduleName_) ||
                 !parcel.ReadString(payload->abilityName_) ||
@@ -76,6 +75,16 @@ public:
                 !parcel.ReadInt32(payload->appIndex_) ||
                 !parcel.ReadInt32(payload->persistentId_) ||
                 !parcel.ReadString(payload->appInstanceKey_) ||
+                !parcel.ReadUint32(payload->resultCode_) ||
+                !parcel.ReadUint64(payload->fromScreenId_) ||
+                !parcel.ReadUint64(payload->toScreenId_) ||
+                !parcel.ReadUint64(payload->screenId_)) {
+                return nullptr;
+            }
+            uint32_t reason = 0;
+            uint32_t sessionState = 0;
+            if (!parcel.ReadUint32(reason) ||
+                reason >= static_cast<uint32_t>(LifeCycleChangeReason::REASON_END) ||
                 !parcel.ReadUint32(sessionState)) {
                 return nullptr;
             }
@@ -83,18 +92,8 @@ public:
                 sessionState >= static_cast<uint32_t>(SessionState::STATE_END)) {
                 return nullptr;
             }
-            payload->sessionState_ = static_cast<SessionState>(sessionState);
-            if (!parcel.ReadUint32(payload->resultCode_) ||
-                !parcel.ReadUint64(payload->fromScreenId_) ||
-                !parcel.ReadUint64(payload->toScreenId_) ||
-                !parcel.ReadUint64(payload->screenId_)) {
-                return nullptr;
-            }
-            uint32_t reason = 0;
-            if (!parcel.ReadUint32(reason) || reason >= static_cast<uint32_t>(LifeCycleChangeReason::REASON_END)) {
-                return nullptr;
-            }
             payload->lifeCycleChangeReason_ = static_cast<LifeCycleChangeReason>(reason);
+            payload->sessionState_ = static_cast<SessionState>(sessionState);
             return payload.release();
         }
 
@@ -105,12 +104,12 @@ public:
         int32_t appIndex_ = 0;
         int32_t persistentId_ = 0;
         std::string appInstanceKey_;
-        SessionState sessionState_ = SessionState::STATE_DISCONNECT;
         uint32_t resultCode_ = 0;
         uint64_t fromScreenId_ = 0;
         uint64_t toScreenId_ = 0;
         uint64_t screenId_ = 0;
         LifeCycleChangeReason lifeCycleChangeReason_ = LifeCycleChangeReason::DEFAULT;
+        SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     };
 
     virtual void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) {};
