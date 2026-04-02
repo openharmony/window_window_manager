@@ -1184,6 +1184,15 @@ public:
     WMError SetSpecificSystemWindowZIndex(WindowType windowType, int32_t zIndex);
 
     /**
+     * @brief Move main window to target display.
+     *
+     * @param displayId Display id of the target display
+     * @param windowId Window id of the main window
+     * @return WM_OK means move success, others means failed.
+     */
+    WMError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId);
+
+    /**
      * @brief Set start window background color.
      *
      * @param moduleName Module name that needs to be set

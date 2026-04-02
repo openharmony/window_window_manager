@@ -225,6 +225,7 @@
             OHOS::Rosen::WindowManager::ListWindowInfo*;
             OHOS::Rosen::WindowManager::MinimizeAllAppWindows*;
             OHOS::Rosen::WindowManager::MinimizeByWindowId*;
+            OHOS::Rosen::WindowManager::MoveMainWindowToTargetDisplay*;
             OHOS::Rosen::WindowManager::NotifyAccessibilityWindowInfo*;
             OHOS::Rosen::WindowManager::NotifyApplicationFocusChangedResult*;
             OHOS::Rosen::WindowManager::NotifyDisplayInfoChange*;

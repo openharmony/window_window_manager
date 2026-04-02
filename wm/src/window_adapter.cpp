@@ -1195,6 +1195,17 @@ WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zI
     return ret;
 }
 
+WMError WindowAdapter::MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    WMError ret = static_cast<WMError>(wmsProxy->MoveMainWindowToTargetDisplay(displayId, windowId));
+    TLOGI(WmsLogTag::WMS_LIFE, "displayId: %{public}" PRIu64 ", windowId: %{public}d, ret: %{public}d",
+        displayId, windowId, ret);
+    return ret;
+}
+
 void WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
