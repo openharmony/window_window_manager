@@ -246,6 +246,7 @@ void ConstructBatchLifecyclePayload(
     std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
     const std::vector<sptr<SceneSession>>& sessions)
 {
+    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: start, sessionCount:%{public}zu", __func__, sessions.size());
     for (const auto& session : sessions) {
         ISessionLifecycleListener::LifecycleEventPayload payload;
         const SessionInfo& info = session->GetSessionInfo();
@@ -259,6 +260,7 @@ void ConstructBatchLifecyclePayload(
         payload.sessionState_ = session->GetSessionState();
         payloads.emplace_back(std::move(payload));
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: end, payloadCount:%{public}zu", __func__, payloads.size());
 }
 
 int Comp(const std::pair<uint64_t, WindowVisibilityState>& a, const std::pair<uint64_t, WindowVisibilityState>& b)
@@ -2085,6 +2087,8 @@ void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
 void SceneSessionManager::GetSceneSessionVectorByAppInstance(const std::string& bundleName,
     int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& appInstanceSessions)
 {
+    TLOGD(WmsLogTag::WMS_LIFE, "start, bundleName:%{public}s, appIndex:%{public}d, appInstanceKey:%{public}s",
+            bundleName.c_str(), appIndex, appInstanceKey.c_str());
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (!sceneSession) {
@@ -2099,6 +2103,7 @@ void SceneSessionManager::GetSceneSessionVectorByAppInstance(const std::string& 
         }
         appInstanceSessions.push_back(sceneSession);
     }
+    TLOGD(WmsLogTag::WMS_LIFE, "end, matched sessions:%{public}zu", appInstanceSessions.size());
 }
 
 void SceneSessionManager::GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
