@@ -905,7 +905,7 @@ protected:
     void NotifyWindowStatusDidChange(WindowMode mode);
     void NotifyFirstValidLayoutUpdate(const Rect& preRect, const Rect& newRect);
     std::atomic_bool hasSetEnableDrag_ = false;
-    void HookWindowSizeByHookWindowInfo(Rect& rect);
+    void HookWindowSizeByHookWindowInfo(Rect& rect, bool isDrawableRect = false);
     void SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo);
     HookWindowInfo GetAppHookWindowInfo();
     virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
