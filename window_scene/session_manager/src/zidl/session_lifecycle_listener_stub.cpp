@@ -16,6 +16,7 @@
 #include <memory>
 
 #include "hilog_tag_wrapper.h"
+#include "marshalling_helper.h"
 #include "session_manager/include/zidl/session_lifecycle_listener_stub.h"
 #include "window_manager_hilog.h"
 
@@ -36,6 +37,9 @@ int SessionLifecycleListenerStub::OnRemoteRequest(
         case static_cast<uint32_t>(
             ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT):
             return HandleOnAppInstanceLifecycleEvent(data, reply);
+        case static_cast<uint32_t>(
+            ISessionLifecycleListener::ISessionLifecycleListenerMessage::TRANS_ON_BATCH_LIFECYCLE_EVENT):
+            return HandleOnBatchLifecycleEvent(data, reply);
         default:
             TLOGE(WmsLogTag::WMS_LIFE, "Failed to handle request, code: %{public}u", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -73,6 +77,29 @@ int SessionLifecycleListenerStub::HandleOnAppInstanceLifecycleEvent(MessageParce
         return ERR_INVALID_DATA;
     }
     OnAppInstanceLifecycleEvent(*payload);
+    return 0;
+}
+
+int SessionLifecycleListenerStub::HandleOnBatchLifecycleEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    std::vector<LifecycleEventPayload> payloads;
+    bool res = MarshallingHelper::UnmarshallingVectorObj<LifecycleEventPayload>(
+        data, payloads,
+        [](Parcel& parcel, LifecycleEventPayload& payload) {
+            std::unique_ptr<LifecycleEventPayload> payloadPtr(parcel.ReadParcelable<LifecycleEventPayload>());
+            if (!payloadPtr) {
+                return false;
+            }
+            payload = *payloadPtr;
+            return true;
+        }
+    );
+    if (!res) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid batch payloads");
+        return ERR_INVALID_DATA;
+    }
+    OnBatchLifecycleEvent(payloads);
     return 0;
 }
 }

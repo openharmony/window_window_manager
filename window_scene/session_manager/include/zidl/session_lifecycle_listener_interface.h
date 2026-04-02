@@ -28,7 +28,8 @@ public:
 
     enum class ISessionLifecycleListenerMessage : uint32_t {
         TRANS_ON_LIFECYCLE_EVENT = 0,
-        TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT
+        TRANS_ON_APP_INSTANCE_LIFECYCLE_EVENT,
+        TRANS_ON_BATCH_LIFECYCLE_EVENT
     };
 
     enum SessionLifecycleEvent {
