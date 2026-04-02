@@ -2237,7 +2237,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
     specificCb->onGetFloatNavagationInfo_ = [this](
-        DisplayId displayId, std::tuple<bool visible, bool, WSRect, WSRect>& floatNavagationInfo) {
+        DisplayId displayId, std::tuple<bool, bool, WSRect, WSRect>& floatNavagationInfo) {
         return this->GetFloatNavagationInfo(displayId, floatNavagationInfo);
     };
     specificCb->onGetLSState_ = [this]() {
@@ -13865,7 +13865,7 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidArea
 WSError SceneSessionManager::NotifyFloatNavagationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
     const WSRect& portraitRect, const WSRect& landspaceRect)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public} " PRIu64 " visible %{public}d isBarPhoneStatus %{public}d"
+    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " visible %{public}d isBarPhoneStatus %{public}d"
         "portraitRect %{public}s, landspaceRect %{public}s",
         displayId, visible, isBarPhoneStatus, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
     std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
@@ -13878,8 +13878,8 @@ WSError SceneSessionManager::GetFloatNavagationInfo(
 {
     std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
     auto iter = floatNavagationInfoMap_.find(displayId);
-    if (auto iter = floatNavagationInfoMap_.find(displayId); iter != floatNavagationInfoMap_.end()) {
-        floatNavagationInfo = *iter;
+    if (iter != floatNavagationInfoMap_.end()) {
+        floatNavagationInfo = iter->second;
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
@@ -14086,7 +14086,7 @@ void SceneSessionManager::ProcessUpdateRotationChange(DisplayId defaultDisplayId
                 TLOGNE(WmsLogTag::DMS, "%{public}s null scene session", where);
                 continue;
             }
-            ion->GetSessionState() != SessionState::STATE_FOREGROUND &&
+            if (sceneSession->GetSessionState() != SessionState::STATE_FOREGROUND &&
                 sceneSession->GetSessionState() != SessionState::STATE_ACTIVE) {
                 continue;
             }
