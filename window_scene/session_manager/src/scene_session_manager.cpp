@@ -17529,11 +17529,13 @@ WMError SceneSessionManager::UpdateAppHookWindowInfo(const std::string& bundleNa
         newInfo.enableHookWindow = hookWindowInfo.enableHookWindow;
         newInfo.widthHookRatio = hookWindowInfo.widthHookRatio;
         newInfo.notifyWindowChange = false;
+        newInfo.drawableRectHook = hookWindowInfo.drawableRectHook;
         appHookWindowInfoMap_[bundleName] = newInfo;
     }
 
     if (preInfo.enableHookWindow != hookWindowInfo.enableHookWindow ||
-        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio)) {
+        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio) ||
+        preInfo.drawableRectHook != hookWindowInfo.drawableRectHook) {
         //Notify the client of the info change
         std::shared_lock lock(sceneSessionMapMutex_);
         for (const auto& [_, session] : sceneSessionMap_) {
