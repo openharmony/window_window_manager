@@ -2237,8 +2237,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
     specificCb->onGetFloatNavagationInfo_ = [this](
-        DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
-        return this->GetNextAvoidRectInfo(displayId, floatNavagationInfo);
+        DisplayId displayId, std::tuple<bool visible, bool, WSRect, WSRect>& floatNavagationInfo) {
+        return this->GetFloatNavagationInfo(displayId, floatNavagationInfo);
     };
     specificCb->onGetLSState_ = [this]() {
         return this->GetLSState();
