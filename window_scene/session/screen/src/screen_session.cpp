@@ -3381,6 +3381,8 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
         screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
         screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
+        screenProperty.SetScreenRealWidth(eventPara.GetScreenRealWidth());
+        screenProperty.SetScreenRealHeight(eventPara.GetScreenRealHeight());
         TLOGI(WmsLogTag::DMS, "ProcPropertyChange : Orientation= %{public}u", deviceOrientation);
     }
     screenProperty.SetPhysicalTouchBounds(GetRotationCorrection(eventPara.GetDisplayMode()));
