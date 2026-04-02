@@ -6717,6 +6717,13 @@ WMError SceneSession::UpdateSessionPropertyByAction(const sptr<WindowSessionProp
             return WMError::WM_ERROR_INVALID_PERMISSION;
         }
     }
+    // Note: verify set touchale areas permission.
+    if (action == WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA &&
+        !SessionPermission::IsSystemCalling() &&
+        !SessionPermission::VerifyCallingPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
+        TLOGE(WmsLogTag::WMS_EVENT, "permission denied! action: %{public}" PRIu64, action);
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
 
     bool isSystemCalling = SessionPermission::IsSystemCalling() || SessionPermission::IsStartByHdcd();
     if (!isSystemCalling && IsNeedSystemPermissionByAction(action, property, sessionProperty)) {
