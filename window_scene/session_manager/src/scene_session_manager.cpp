@@ -248,6 +248,10 @@ void ConstructBatchLifecyclePayload(
 {
     TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: start, sessionCount:%{public}zu", __func__, sessions.size());
     for (const auto& session : sessions) {
+        if (!session) {
+            TLOGE(WmsLogTag::WMS_LIFE, "invalid session pointer");
+            continue;
+        }
         ISessionLifecycleListener::LifecycleEventPayload payload;
         const SessionInfo& info = session->GetSessionInfo();
         payload.bundleName_ = info.bundleName_;
@@ -19288,7 +19292,7 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
         std::vector<sptr<SceneSession>> appInstanceSessions;
-        SceneSessionManager::GetInstance().GetSceneSessionVectorByAppInstance(
+        this->GetSceneSessionVectorByAppInstance(
             bundleName, appIndex, appInstanceKey, appInstanceSessions);
         std::vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
         ConstructBatchLifecyclePayload(payloads, appInstanceSessions);
