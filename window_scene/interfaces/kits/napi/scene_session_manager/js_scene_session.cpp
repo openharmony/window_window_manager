@@ -8081,13 +8081,14 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
         napi_value return_val;
         auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv),
             argv, &return_val);
-        napi_close_handle_scope(env, scope);
         if (ret != napi_ok) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_call_function result is error", where);
+            napi_close_handle_scope(env, scope);
             return;
         }
         int32_t result;
         ret = napi_get_value_int32(env, return_val, &result);
+        napi_close_handle_scope(env, scope);
         if (ret != napi_ok) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_get_value_int32 result is error", where);
             return;
