@@ -450,6 +450,9 @@ enum class ControlAppType : uint8_t {
     CONTROL_APP_TYPE_END,
 };
 
+const ControlAppType CONTROL_APP_TYPE_ENUM_LIST[] = { ControlAppType::APP_LOCK, ControlAppType::PARENT_CONTROL,
+    ControlAppType::DLP, ControlAppType::PRIVACY_WINDOW };
+
 /**
  * @brief Enumerates flag of multiWindowUIType.
  */
@@ -2301,6 +2304,8 @@ struct WindowMetaInfo : public Parcelable {
     bool isMidScene = false;
     bool isFocused = false;
     bool isTouchable = true;
+    int32_t mainWindowPersistentId = INVALID_WINDOW_ID;
+    ControlAppType controlAppType = ControlAppType::CONTROL_APP_TYPE_BEGIN;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -2310,13 +2315,15 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
                parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
                parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode)) &&
-               parcel.WriteBool(isTouchable);
+               parcel.WriteBool(isTouchable) && parcel.WriteInt32(mainWindowPersistentId) &&
+               parcel.WriteUint8(static_cast<uint8_t>(controlAppType));
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         uint32_t windowTypeValue = 1;
         uint32_t windowModeValue = 1;
+        uint8_t ControlAppTypeValue = 0;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
@@ -2326,12 +2333,14 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
             !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
             !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue) ||
-            !parcel.ReadBool(windowMetaInfo->isTouchable)) {
+            !parcel.ReadBool(windowMetaInfo->isTouchable) ||
+            !parcel.ReadInt32(windowMetaInfo->mainWindowPersistentId) || !parcel.ReadUint8(ControlAppTypeValue)) {
             delete windowMetaInfo;
             return nullptr;
         }
         windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
         windowMetaInfo->windowMode = static_cast<WindowMode>(windowModeValue);
+        windowMetaInfo->controlAppType = static_cast<ControlAppType>(ControlAppTypeValue);
         return windowMetaInfo;
     }
 };
