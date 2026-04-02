@@ -3150,10 +3150,12 @@ HWTEST_F(WindowExtensionSessionImplTest, OnRecover, TestSize.Level2)
     window_->OnRecover(std::move(want), reply);
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    want = AAFwk::Want();
     window_->OnRecover(std::move(want), reply);
     sptr<IRemoteObject> iRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
     ASSERT_NE(nullptr, iRemoteObject);
     window_->abilityToken_ = iRemoteObject;
+    want = AAFwk::Want();
     window_->OnRecover(std::move(want), reply);
 }
 
