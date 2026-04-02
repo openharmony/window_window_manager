@@ -666,7 +666,7 @@ HWTEST_F(ScreenSessionManagerTest, GetAllDisplayPhysicalResolution04, TestSize.L
 {
     ssm_->allDisplayPhysicalResolution_.clear();
     ssm_->allDisplayPhysicalResolution_.emplace_back(DisplayPhysicalResolution());
-    ssm_->allDisplayPhysicalResolution_.back().foldDisplayMode_ = FoldDisplayMode::GLOBAL_FULL;
+    ssm_->allDisplayPhysicalResolution_.back().foldDisplayMode_ = FoldDisplayMode::FULL;
     std::vector<DisplayPhysicalResolution> resolutions = ssm_->GetAllDisplayPhysicalResolution();
     EXPECT_EQ(resolutions.back().foldDisplayMode_, FoldDisplayMode::FULL);
     ssm_->allDisplayPhysicalResolution_.clear();
