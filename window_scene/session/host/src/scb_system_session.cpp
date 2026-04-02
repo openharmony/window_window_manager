@@ -59,6 +59,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
         TLOGD(WmsLogTag::WMS_SCB, "Create RSSurfaceNode: %{public}s, name: %{public}s",
               RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(), name.c_str());
         SetIsUseControlSession(info.isUseControlSession);
+        SetMainWindowPersistentId(info.mainWindowPersistentId_);
     }
     WLOGFD("Create SCBSystemSession");
 }
@@ -253,5 +254,15 @@ bool SCBSystemSession::GetIsUseControlSession() const
 void SCBSystemSession::SetIsUseControlSession(bool isUseControlSession)
 {
     isUseControlSession_ = isUseControlSession;
+}
+
+int32_t SCBSystemSession::GetMainWindowPersistentId() const
+{
+    return mainWindowPersistentId_;
+}
+
+void SCBSystemSession::SetMainWindowPersistentId(int32_t mainWindowPersistentId)
+{
+    mainWindowPersistentId_ = mainWindowPersistentId;
 }
 } // namespace OHOS::Rosen

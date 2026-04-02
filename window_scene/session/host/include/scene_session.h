@@ -1048,6 +1048,16 @@ public:
         return true;
     };
 
+    ControlAppType GetControlAppType() const override
+    {
+        for (const auto& type : CONTROL_APP_TYPE_ENUM_LIST) {
+            if (appUseControlMap_.find(type) != appUseControlMap_.end()) {
+                return type;
+            }
+        }
+        return ControlAppType::CONTROL_APP_TYPE_BEGIN;
+    };
+
     /**
      * Window Transition Animation For PC
      */

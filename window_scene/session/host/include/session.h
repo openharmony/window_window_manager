@@ -255,6 +255,8 @@ public:
      */
     virtual bool GetIsUseControlSession() const { return false; }
     virtual void SetIsUseControlSession(bool isUseControlSession) {}
+    virtual int32_t GetMainWindowPersistentId() const { return INVALID_SESSION_ID; }
+    virtual void SetMainWindowPersistentId(int32_t mainWindowPersistentId) {}
     virtual void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) {}
 
     /*
@@ -398,6 +400,10 @@ public:
     {
         controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
         return false;
+    };
+    virtual ControlAppType GetControlAppType() const
+    {
+        return ControlAppType::CONTROL_APP_TYPE_BEGIN;
     };
     bool GetAppLockControl() const { return isAppLockControl_.load(); };
     void SetAppLockControl(bool control) { isAppLockControl_.store(control); };

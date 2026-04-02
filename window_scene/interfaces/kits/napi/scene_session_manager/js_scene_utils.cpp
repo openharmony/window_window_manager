@@ -412,6 +412,19 @@ bool IsJsPersistentIdUndefind(napi_env env, napi_value jsPersistentId, SessionIn
     return true;
 }
 
+bool IsJsMainPersistentIdUndefind(napi_env env, napi_value jsMainPersistentId, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsMainPersistentId) != napi_undefined) {
+        int32_t mainWindowPersistentId;
+        if (!ConvertFromJsValue(env, jsMainPersistentId, mainWindowPersistentId)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to mainWindowPersistentId");
+            return false;
+        }
+        sessionInfo.mainWindowPersistentId_ = mainWindowPersistentId;
+    }
+    return true;
+}
+
 bool IsJsCallStateUndefind(napi_env env, napi_value jsCallState, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsCallState) != napi_undefined) {
@@ -755,6 +768,8 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
 {
     napi_value jsPersistentId = nullptr;
     napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
+    napi_value jsMainPersistentId = nullptr;
+    napi_get_named_property(env, jsObject, "mainWindowPersistentId", &jsMainPersistentId);
     napi_value jsCallState = nullptr;
     napi_get_named_property(env, jsObject, "callState", &jsCallState);
     napi_value jsSessionType = nullptr;
@@ -773,6 +788,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isAppUseControl", &jsIsUseControlSession);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsMainPersistentIdUndefind(env, jsMainPersistentId, sessionInfo)) {
         return false;
     }
     if (!IsJsCallStateUndefind(env, jsCallState, sessionInfo)) {
