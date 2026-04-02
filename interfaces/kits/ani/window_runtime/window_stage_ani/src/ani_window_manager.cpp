@@ -87,6 +87,8 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::NotifyScreenshotEvent)},
         ani_native_function {"setSpecificSystemWindowZIndexSync", "lC{@ohos.window.window.WindowType}i:",
             reinterpret_cast<void *>(AniWindowManager::SetSpecificSystemWindowZIndex)},
+        ani_native_function {"moveMainWindowToTargetDisplaySync", "lli:",
+            reinterpret_cast<void *>(AniWindowManager::MoveMainWindowToTargetDisplay)},
         ani_native_function {"getAllWindowLayoutInfo", "ll:C{std.core.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetAllWindowLayoutInfo)},
         ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
@@ -1159,6 +1161,31 @@ ani_object AniWindowManager::OnGetWindowsByCoordinate(ani_env* env, ani_object g
         windows[i] = CreateAniWindowObject(env, window);
     }
     return AniWindowUtils::CreateAniWindowArray(env, windows);
+}
+
+void AniWindowManager::MoveMainWindowToTargetDisplay(ani_env* env, ani_long nativeObj,
+    ani_long displayId, ani_int windowId)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnMoveMainWindowToTargetDisplay(env, displayId, windowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnMoveMainWindowToTargetDisplay(ani_env* env, ani_long displayId, ani_int windowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    if (static_cast<int64_t>(displayId) < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] failed, Invalid displayId.");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_DISPLAY);
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+        MoveMainWindowToTargetDisplay(displayId, windowId));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "[window][moveMainWindowToTargetDisplay]msg:set failed");
+    }
 }
 
 void AniWindowManager::SetSpecificSystemWindowZIndex(ani_env* env, ani_long nativeObj,

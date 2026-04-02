@@ -168,6 +168,7 @@ private:
     int HandleUpdateOutline(MessageParcel& data, MessageParcel& reply);
     int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
+    int HandleMoveMainWindowToTargetDisplay(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
     int HandleGetCrossProcessWindowInfo(MessageParcel& data, MessageParcel& reply);
 };

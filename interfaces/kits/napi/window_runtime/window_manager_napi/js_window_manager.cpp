@@ -280,6 +280,13 @@ napi_value JsWindowManager::SetSpecificSystemWindowZIndex(napi_env env, napi_cal
     return (me != nullptr) ? me->OnSetSpecificSystemWindowZIndex(env, info) : nullptr;
 }
 
+/** @note @window.life */
+napi_value JsWindowManager::MoveMainWindowToTargetDisplay(napi_env env, napi_callback_info info)
+{
+    JsWindowManager* me = CheckParamsAndGetThis<JsWindowManager>(env, info);
+    return (me != nullptr) ? me->OnMoveMainWindowToTargetDisplay(env, info) : nullptr;
+}
+
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -2263,6 +2270,52 @@ napi_value JsWindowManager::OnCreateSubWindowAndBindParent(napi_env env, napi_ca
     return result;
 }
 
+napi_value JsWindowManager::OnMoveMainWindowToTargetDisplay(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    int64_t displayId = static_cast<int64_t>(DISPLAY_ID_INVALID);
+    if (!ConvertFromJsValue(env, argv[INDEX_ZERO], displayId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed to convert parameter to displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][moveMainWindowToTargetDisplay]msg: failed to convert parameter to displayId");
+    }
+    if (displayId < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid displayId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_DISPLAY,
+            "[window][moveMainWindowToTargetDisplay]msg: parameter verfication failed");
+    }
+    int32_t windowId = 0;
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], windowId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed to convert parameter to windowId");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][moveMainWindowToTargetDisplay]msg: failed to convert parameter to windowId");
+    }
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [displayId, windowId, env, task = napiAsyncTask] {
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+            MoveMainWindowToTargetDisplay(static_cast<DisplayId>(displayId), windowId));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][moveMainWindowToTargetDisplay]msg: move failed"));
+        }
+    };
+    napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnMoveMainWindowToTargetDisplay");
+    if (status != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
+            "[window][moveMainWindowToTargetDisplay]msg: send event failed"));
+    }
+    return result;
+}
+
 napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
 {
     WLOGFD("JsWindowManagerInit");
@@ -2351,6 +2404,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
         JsWindowManager::SetSpecificSystemWindowZIndex);
     BindNativeFunction(env, exportObj, "createSubWindowAndBindParent", moduleName,
         JsWindowManager::CreateSubWindowAndBindParent);
+    BindNativeFunction(env, exportObj, "moveMainWindowToTargetDisplay", moduleName,
+        JsWindowManager::MoveMainWindowToTargetDisplay);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
