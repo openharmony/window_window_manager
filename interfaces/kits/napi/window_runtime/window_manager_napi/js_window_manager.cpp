@@ -1389,7 +1389,7 @@ napi_value JsWindowManager::OnSetWaterMarkImage(napi_env env, napi_callback_info
         if (isShow) {
             errCode = SingletonContainer::Get<WindowManager>().SetScreenWatermarkImage(pixelMap, priority);
         } else {
-            errCode = SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage(pixelMap);
+            errCode = SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage();
         }
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: enable=%{public}d, priority=%{public}d, errCode=%{public}d",
             where, isShow, priority, static_cast<int32_t>(errCode));

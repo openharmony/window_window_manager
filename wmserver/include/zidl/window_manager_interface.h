@@ -162,14 +162,14 @@ public:
     virtual WMError GetTopNavDestinationName(int32_t windowId,
         std::string& topNavDestName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority,
-        std::string& bundleName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    virtual WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+        std::string& bundleName) { return WMError::WM_DO_NOTHING; }
+    virtual WMError CleanScreenWatermarkImage()
     {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        return WMError::WM_DO_NOTHING;
     }
     virtual WMError RecoverScreenWatermarkImage(const std::string& bundleName, uint32_t priority)
     {
-        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+        return WMError::WM_DO_NOTHING;
     }
     virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::string& watermarkName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
