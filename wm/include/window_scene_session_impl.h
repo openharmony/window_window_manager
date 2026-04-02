@@ -344,6 +344,8 @@ public:
         SystemBarPropertyOwner owner) override;
     WMError RemoveOwnSystemBarProperty(WindowType type, const SystemBarPropertyFlag& flag,
         SystemBarPropertyOwner owner) override;
+    WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
+    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
 
     /*
      * Window Pattern

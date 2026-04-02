@@ -3301,7 +3301,8 @@ void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidAre
         specificCallback_->onGetFloatNavagationInfo_(
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
         WSRect landspaceRect;
-        auto [visible, isBarPhoneStatus, floatNavigationArea, landspaceRect] = floatNavagationInfo;
+        auto [visibleFromTuple, isBarPhoneStatus, floatNavigationArea, landspaceRect] = floatNavagationInfo;
+        visible = visibleFromTuple;
         floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
     }
     if (!visible && !ignoreVisibility) {
@@ -3654,7 +3655,7 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
             return avoidArea;
         }
         case AvoidAreaType::TYPE_FLOAT_NAVIGATION: {
-            GetAINavigationBarArea(sessionRect, avoidArea, ignoreVisibility);
+            GetFloatNavigationAvoidArea(sessionRect, avoidArea, ignoreVisibility);
             return avoidArea;
         }
         default: {
@@ -3673,6 +3674,9 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
+        if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
+            return {};
+        }
         return session->GetAvoidAreaByTypeInner(type, rect);
     }, __func__);
 }
@@ -3683,6 +3687,9 @@ AvoidArea SceneSession::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
+            return {};
+        }
+        if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
             return {};
         }
         return session->GetAvoidAreaByTypeInner(type, rect, true);
@@ -3707,6 +3714,9 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
             auto type = static_cast<AvoidAreaType>(avoidType);
+            if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !GetFloatNavigationAvoidAreaEnabled()) {
+                continue;
+            }
             auto area = session->GetAvoidAreaByTypeInner(type);
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
