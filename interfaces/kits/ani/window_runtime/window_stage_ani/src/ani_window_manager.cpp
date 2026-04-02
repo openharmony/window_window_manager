@@ -1179,7 +1179,9 @@ void AniWindowManager::OnMoveMainWindowToTargetDisplay(ani_env* env, ani_long di
     TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
     if (static_cast<int64_t>(displayId) < 0) {
         TLOGE(WmsLogTag::WMS_LIFE, "[ANI] failed, Invalid displayId.");
-        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_DISPLAY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_DISPLAY,
+            "[window][moveMainWindowToTargetDisplay]msg: parameter verfication failed");
+        return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
         MoveMainWindowToTargetDisplay(displayId, windowId));

@@ -15471,17 +15471,13 @@ WSError SceneSessionManager::MoveMainWindowToTargetDisplay(DisplayId displayId, 
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
     auto sceneSession = GetSceneSession(windowId);
-    if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is null, windowId: %{public}d", windowId);
-        return WSError::WS_ERROR_INVALID_PARENT;
+    if (sceneSession == nullptr || sceneSession->IsTerminated()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is null or destorying, windowId: %{public}d", windowId);
+        return WSError::WS_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is null, windowId: %{public}d", windowId);
-        return WSError::WS_ERROR_INVALID_PARENT;
-    }
-    if (sceneSession->isTerminating_) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is destorying, windowId: %{public}d", windowId);
-        return WSError::WS_ERROR_INVALID_PARENT;
+        TLOGE(WmsLogTag::WMS_LIFE, "session is not a main window, windowId: %{public}d", windowId);
+        return WSError::WS_ERROR_INVALID_CALLING;
     }
     auto fromScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(sceneSession->GetDisplayId());
     auto toScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
