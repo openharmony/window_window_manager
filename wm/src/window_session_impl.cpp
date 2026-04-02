@@ -5452,7 +5452,8 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!SessionPermission::IsSystemCalling()) {
+    if (!SessionPermission::IsSystemCalling() &&
+        !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_SET_WINDOW_ALPHA)) {
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
     }
     if (IsWindowSessionInvalid()) {
