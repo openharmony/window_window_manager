@@ -15472,16 +15472,20 @@ WSError SceneSessionManager::MoveMainWindowToTargetDisplay(DisplayId displayId, 
     }
     auto sceneSession = GetSceneSession(windowId);
     if (sceneSession == nullptr || sceneSession->IsTerminated()) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is null or destorying, windowId: %{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_LIFE, "session is null or destroying, windowId: %{public}d", windowId);
         return WSError::WS_ERROR_INVALID_WINDOW;
     }
     if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is not a main window, windowId: %{public}d", windowId);
+        TLOGE(WmsLogTag::WMS_LIFE, "window is not main window, windowId: %{public}d", windowId);
         return WSError::WS_ERROR_INVALID_CALLING;
     }
     auto fromScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(sceneSession->GetDisplayId());
+    if (fromScreenSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid displayId of window, id: %{public}d", windowId);
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
     auto toScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    if (fromScreenSession == nullptr || toScreenSession == nullptr) {
+    if (toScreenSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "invalid displayId: %{public}" PRIu64, displayId);
         return WSError::WS_ERROR_INVALID_DISPLAY;
     }
@@ -15491,7 +15495,7 @@ WSError SceneSessionManager::MoveMainWindowToTargetDisplay(DisplayId displayId, 
         ", isFromScreenVirtual: %{public}d, isToScreenVirtual: %{public}d",
         windowId, displayId, isFromScreenVirtual, isToScreenVirtual);
     const char* const where = __func__;
-    return taskScheduler_->PostSyncTask([this, windowId, displayId, isFromScreenVirtual, isToScreenVirtual, where] {
+    return taskScheduler_->PostAsyncTask([this, windowId, displayId, isFromScreenVirtual, isToScreenVirtual, where] {
         TLOGNI(WmsLogTag::WMS_LIFE, "windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
         if (moveMainWindowToTargetDisplayFunc_) {
             moveMainWindowToTargetDisplayFunc_(displayId, windowId, isFromScreenVirtual, isToScreenVirtual);
