@@ -504,12 +504,6 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
                 }
             }
         }, __func__);
-    SessionState state = sessionInfo.sessionState_;
-    auto sceneSession = SceneSessionManager::GetInstance().GetSceneSession(persistentId);
-    if (sceneSession != nullptr) {
-        state = sceneSession->GetSessionState();
-    }
-    NotifyAppInstanceLifecycleEvent(state, sessionInfo, reason);
 }
 
 void SessionListenerController::NotifyAppInstanceLifecycleEvent(SessionState state,
