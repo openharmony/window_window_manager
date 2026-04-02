@@ -68,7 +68,7 @@ public:
         static LifecycleEventPayload* Unmarshalling(Parcel& parcel)
         {
             auto payload = std::make_unique<LifecycleEventPayload>();
-            int32_t sessionState = 0;
+            uint32_t sessionState = 0;
             if (!parcel.ReadString(payload->bundleName_) ||
                 !parcel.ReadString(payload->moduleName_) ||
                 !parcel.ReadString(payload->abilityName_) ||
@@ -76,18 +76,20 @@ public:
                 !parcel.ReadInt32(payload->appIndex_) ||
                 !parcel.ReadInt32(payload->persistentId_) ||
                 !parcel.ReadString(payload->appInstanceKey_) ||
-                !parcel.ReadInt32(sessionState) ||
-                !parcel.ReadUint32(payload->resultCode_) ||
+                !parcel.ReadUint32(sessionState)) {
+                return nullptr;
+            }
+            if (sessionState < static_cast<uint32_t>(SessionState::STATE_DISCONNECT) ||
+                sessionState >= static_cast<uint32_t>(SessionState::STATE_END)) {
+                return nullptr;
+            }
+            payload->sessionState_ = static_cast<SessionState>(sessionState);
+            if (!parcel.ReadUint32(payload->resultCode_) ||
                 !parcel.ReadUint64(payload->fromScreenId_) ||
                 !parcel.ReadUint64(payload->toScreenId_) ||
                 !parcel.ReadUint64(payload->screenId_)) {
                 return nullptr;
             }
-            if (sessionState < static_cast<int32_t>(SessionState::STATE_DISCONNECT) ||
-                sessionState >= static_cast<int32_t>(SessionState::STATE_END)) {
-                return nullptr;
-            }
-            payload->sessionState_ = static_cast<SessionState>(sessionState);
             uint32_t reason = 0;
             if (!parcel.ReadUint32(reason) || reason >= static_cast<uint32_t>(LifeCycleChangeReason::REASON_END)) {
                 return nullptr;

@@ -400,6 +400,10 @@ WMError SessionListenerController::RegisterSessionLifecycleListener(const sptr<I
         TLOGW(WmsLogTag::WMS_LIFE, "invalid bundleName");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
+    if (appIndex < 0) {
+        TLOGW(WmsLogTag::WMS_LIFE, "invalid appIndex");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
     AppInstanceFilterKey key = { bundleName, appIndex, appInstanceKey };
     auto it = listenerMapByAppInstance_.find(key);
     if (it != listenerMapByAppInstance_.end()) {
