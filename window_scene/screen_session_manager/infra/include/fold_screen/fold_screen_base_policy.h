@@ -101,7 +101,7 @@ public:
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void SendSensorResult(FoldStatus foldStatus);
     void UpdateDeviceStatus(FoldDisplayMode displayMode);
-    virtual ChangeScreenDisplayModeInner(FoldDisplayMode displayMode, DisplayModeChangeReason reason);
+    virtual void ChangeScreenDisplayModeInner(FoldDisplayMode displayMode, DisplayModeChangeReason reason);
     void ChangeScreenDisplayModeToMain(sptr<ScreenSession> screenSession,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayModeToFull(sptr<ScreenSession> screenSession,

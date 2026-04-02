@@ -1162,7 +1162,7 @@ void ScreenSessionDumper::SetSecondaryStatusChange(const std::string &input)
 {
 #ifdef FOLD_ABILITY_ENABLE
     if (!(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice)) {
+        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice())) {
         TLOGD(WmsLogTag::DMS, "not secondary device");
         return;
     }
