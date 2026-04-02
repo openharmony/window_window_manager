@@ -32,8 +32,6 @@ public:
     MOCK_METHOD(WSError, UpdateGlobalDisplayRect, (const WSRect& rect, SizeChangeReason reason), (override));
     MOCK_METHOD(void, SetSurfaceBounds, (const WSRect& rect, bool isGlobal, bool needFlush), (override));
     MOCK_METHOD(WSError, NotifyClientToUpdateRect, (const std::string&, std::shared_ptr<RSTransaction>), (override));
-    MOCK_METHOD3(SetPreferredOrientationWithResult, WMError(Orientation orientation, uint32_t promiseId, bool needAnimation));
-    MOCK_METHOD2(NotifyOrientationExecutionResult, WSError(uint32_t promiseId, OrientationExecutionResult result));
 };
 }
 }
