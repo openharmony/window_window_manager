@@ -246,7 +246,6 @@ void ConstructBatchLifecyclePayload(
     std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
     const std::vector<sptr<SceneSession>>& sessions)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: start, sessionCount:%{public}zu", __func__, sessions.size());
     for (const auto& session : sessions) {
         if (!session) {
             TLOGE(WmsLogTag::WMS_LIFE, "invalid session pointer");
@@ -2090,11 +2089,9 @@ void SceneSessionManager::GetMainSessionByBundleNameAndAppIndex(
     }
 }
 
-void SceneSessionManager::GetSceneSessionVectorByAppInstance(const std::string& bundleName,
-    int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& appInstanceSessions)
+void SceneSessionManager::GetSceneSessionsByAppInstance(const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& sceneSessions)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "start, bundleName:%{public}s, appIndex:%{public}d, appInstanceKey:%{public}s",
-            bundleName.c_str(), appIndex, appInstanceKey.c_str());
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [_, sceneSession] : sceneSessionMap_) {
         if (!sceneSession) {
@@ -2107,9 +2104,9 @@ void SceneSessionManager::GetSceneSessionVectorByAppInstance(const std::string& 
         if (!appInstanceKey.empty() && sceneSession->GetSessionInfo().appInstanceKey_ != appInstanceKey) {
             continue;
         }
-        appInstanceSessions.push_back(sceneSession);
+        sceneSessions.push_back(sceneSession);
     }
-    TLOGD(WmsLogTag::WMS_LIFE, "end, matched sessions:%{public}zu", appInstanceSessions.size());
+    TLOGI(WmsLogTag::WMS_LIFE, "end, matched sessions:%{public}zu", sceneSessions.size());
 }
 
 void SceneSessionManager::GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
@@ -19297,11 +19294,11 @@ WMError SceneSessionManager::RegisterSessionLifecycleListener(const sptr<ISessio
         }
         WMError ret = listenerController_->RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s, ret:%{public}d", where, ret);
-        std::vector<sptr<SceneSession>> appInstanceSessions;
-        this->GetSceneSessionVectorByAppInstance(
-            bundleName, appIndex, appInstanceKey, appInstanceSessions);
+        std::vector<sptr<SceneSession>> sceneSessions;
+        this->GetSceneSessionsByAppInstance(
+            bundleName, appIndex, appInstanceKey, sceneSessions);
         std::vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
-        ConstructBatchLifecyclePayload(payloads, appInstanceSessions);
+        ConstructBatchLifecyclePayload(payloads, sceneSessions);
         listener->OnBatchLifecycleEvent(payloads);
     }, __func__);
     return WMError::WM_OK;
