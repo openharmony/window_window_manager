@@ -3932,11 +3932,6 @@ ani_boolean AniWindow::IsFloatNavigationAvoidAreaEnabled(ani_env* env)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return false;
     }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "get failed since invalid window type");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
-        return false;
-    }
     bool enabled = true;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetFloatNavigationAvoidAreaEnabled(enabled));
     if (ret != WmErrorCode::WM_OK) {
@@ -3954,11 +3949,6 @@ void AniWindow::SetFloatNavigationAvoidAreaEnabled(ani_env* env, ani_boolean ena
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is null");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_IMMS, "invalid window type");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetFloatNavigationAvoidAreaEnabled(enabled));

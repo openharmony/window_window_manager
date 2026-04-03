@@ -5396,6 +5396,8 @@ export interface Window {
     getWindowSystemBarProperties(): SystemBarProperties;
     isGestureBackEnabled(): boolean;
     setGestureBackEnabled(enabled: boolean): Promise<void>;
+    isFloatNavigationAvoidAreaEnabled(): boolean;
+    setFloatNavigationAvoidAreaEnabled(enabled: boolean): Promise<void>;
     setSingleFrameComposerEnabled(enabled: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean): Promise<void>;
     setWaterMarkFlag(enable: boolean, callback: AsyncCallback<void>): void;

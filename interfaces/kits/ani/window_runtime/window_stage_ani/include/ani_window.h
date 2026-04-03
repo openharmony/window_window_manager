@@ -219,6 +219,8 @@ public:
     ani_object GetWindowSystemBarProperties(ani_env* env);
     ani_boolean IsGestureBackEnabled(ani_env* env);
     void SetGestureBackEnabled(ani_env* env, ani_boolean enabled);
+    ani_boolean IsFloatNavigationAvoidAreaEnabled(ani_env* env);
+    void SetFloatNavigationAvoidAreaEnabled(ani_env* env, ani_boolean enabled);
     void SetSingleFrameComposerEnabled(ani_env* env, ani_boolean enabled);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
     ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
