@@ -1050,6 +1050,7 @@ public:
 
     ControlAppType GetControlAppType() const override
     {
+        std::lock_guard lock(appUseControlMapMutex_);
         for (const auto& type : CONTROL_APP_TYPE_ENUM_LIST) {
             if (appUseControlMap_.find(type) != appUseControlMap_.end()) {
                 return type;
