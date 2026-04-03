@@ -5181,10 +5181,6 @@ napi_value JsWindow::OnSetTouchable(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnSetTouchableAreas permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
-    }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
