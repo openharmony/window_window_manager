@@ -311,7 +311,7 @@ public:
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
     virtual WMError RegisterSessionLifecycleListenerByAppInstance(const sptr<ISessionLifecycleListener>& listener,
-        const std::string& bundleName, int32_t appIndex, 
+        const std::string& bundleName, int32_t appIndex,
         const std::string& appInstanceKey = "") { return WMError::WM_OK; }
 
     /**
