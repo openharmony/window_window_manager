@@ -64,6 +64,7 @@ void SceneInputManagerTest::SetUp()
 
 void SceneInputManagerTest::TearDown()
 {
+    LOG_SetCallback(nullptr);
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -408,7 +409,6 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
     WindowInfoListZeroTest(ssm_);
     MaxWindowInfoTest(ssm_);
 
-    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "SceneInputManagerTest: FlushDisplayInfoToMMI end";
 }
 
