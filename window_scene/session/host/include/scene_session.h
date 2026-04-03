@@ -428,7 +428,6 @@ public:
     virtual void SetFloatViewUpdateCallback(NotifyUpdateFloatViewFunc&& func) {};
     virtual WSError SyncFloatViewLimits(const FloatViewLimits &limits) { return WSError::WS_OK; };
 
-
     /*
      * Float Window
      */

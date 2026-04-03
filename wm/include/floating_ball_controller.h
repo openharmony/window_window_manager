@@ -58,6 +58,7 @@ public:
     void SetBindState(bool isBind);
     bool IsBind();
     void SetBindWindowId(uint32_t windowId);
+    void SetShowWhenCreate(bool showWhenCreate);
 private:
     WMError CreateFloatingBallWindow(const sptr<FbOption>& option);
     WMError PrepareStartFloatingBall(const sptr<FbOption>& option, bool showWhenCreate);

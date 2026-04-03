@@ -67,10 +67,10 @@ WMError WebPictureInPictureController::CreatePictureInPictureWindow(StartPipType
     pipTemplateInfo.isWeb = true;
     auto context = mainWindow_->GetContext();
     SingletonContainer::Get<PiPReporter>().SetCurrentPackageName(context->GetApplicationInfo()->name);
-    sptr<Window> window = Window::CreatePiP(windowOption, pipTemplateInfo, context, errCode);
+    sptr<Window> window = FloatWindowManager::CreatePipWindow(windowOption, pipTemplateInfo, context, errCode);
     if (window == nullptr || errCode != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_PIP, "Window create failed, reason: %{public}d", errCode);
-        return WMError::WM_ERROR_PIP_CREATE_FAILED;
+        return errCode == WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS ? errCode : WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     window_ = window;
     window_->UpdatePiPRect(windowRect_, WindowSizeChangeReason::PIP_START);
@@ -92,27 +92,9 @@ WMError WebPictureInPictureController::StartPictureInPicture(StartPipType startT
             pipOption_->GetPipTemplate(), PipConst::FAILED, "Pip window is starting");
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
-
-    uint64_t token = FloatWindowManager::AcquireToken();
-    if (token == 0) {
-        TLOGW(WmsLogTag::WMS_PIP, "AcquireToken timeout, continue start judgement");
-    }
-    if (FloatWindowManager::IsPipConflict()) {
-        TLOGI(WmsLogTag::WMS_PIP, "StartPictureInPicture abort, float controller is active");
-        FloatWindowManager::ReleaseToken(token);
-        return WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
-    }
-
     curState_ = PiPWindowState::STATE_STARTING;
-    PictureInPictureManager::AddRunningController(this);
-    FloatWindowManager::ReleaseToken(token);
-
     PictureInPictureManager::DoClose(true, true);
-    WMError ret = StartPictureInPictureInner(startType);
-    if (ret != WMError::WM_OK) {
-        PictureInPictureManager::RemoveRunningController(weakRef_);
-    }
-    return ret;
+    return StartPictureInPictureInner(startType);
 }
 
 void WebPictureInPictureController::SetUIContent() const

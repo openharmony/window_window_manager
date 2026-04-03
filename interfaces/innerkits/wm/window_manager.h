@@ -1583,13 +1583,6 @@ public:
      */
     WMError GetFloatViewLimits(FloatViewLimits& floatViewLimits) const;
 
-    /**
-     * @brief Get current pip window template type.
-     *
-     * @return Pip template type.
-     */
-    int32_t GetPipTemplateType();
-
 private:
     /**
      * multi user and multi screen

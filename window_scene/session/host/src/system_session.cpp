@@ -800,7 +800,7 @@ WSError SystemSession::StopFloatView()
 void SystemSession::NotifyStopFloatView()
 {
     TLOGI(WmsLogTag::DEFAULT, "Notify StopFloatView ");
-    PostTask([weakThis = wptr(this), where = __func__] {
+    auto task = [weakThis = wptr(this), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
@@ -813,12 +813,13 @@ void SystemSession::NotifyStopFloatView()
             TLOGW(WmsLogTag::WMS_SYSTEM, "%{public}s StopFloatView Func is null", where);
             session->needStopFv_ = true;
         }
-    }, __func__);
+    };
+    PostTask(std::move(task), __func__);
 }
 
 void SystemSession::SetFloatViewStopCallback(NotifyStopFloatViewFunc&& func)
 {
-    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+    auto task = [weakThis = wptr(this), func = std::move(func), where = __func__] {
         TLOGI(WmsLogTag::WMS_SYSTEM, "Register Callback StopFloatView");
         auto session = weakThis.promote();
         if (!session || !func) {
@@ -831,7 +832,8 @@ void SystemSession::SetFloatViewStopCallback(NotifyStopFloatViewFunc&& func)
             session->stopFloatViewFunc_("AppInvokeAPIStop");
             session->needStopFv_ = false;
         }
-    }, __func__);
+    };
+    PostTask(std::move(task), __func__);
 }
 
 WSError SystemSession::SendFvActionEvent(const std::string& action, const std::string& reason)
@@ -897,7 +899,7 @@ WMError SystemSession::RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::W
         }
         if (callingPid != session->GetCallingPid()) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
-            return WMError::WM_ERROR_INVALID_OPERATION;
+            return WMError::WM_ERROR_INVALID_CALLING;
         }
         if (!session->IsSessionForeground()) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "%{public}s window state is not at foreground or active", where);
@@ -928,7 +930,7 @@ WMError SystemSession::RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::W
 
 void SystemSession::NotifyUpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo)
 {
-    PostTask([weakThis = wptr(this), fvTemplateInfo, where = __func__] {
+    auto task = [weakThis = wptr(this), fvTemplateInfo, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
@@ -940,12 +942,13 @@ void SystemSession::NotifyUpdateFloatView(const FloatViewTemplateInfo& fvTemplat
         } else {
             session->needUpdateFv_ = true;
         }
-    }, __func__);
+    };
+    PostTask(std::move(task), __func__);
 }
 
 void SystemSession::SetFloatViewUpdateCallback(NotifyUpdateFloatViewFunc&& func)
 {
-    PostTask([weakThis = wptr(this), func = std::move(func), where = __func__] {
+    auto task = [weakThis = wptr(this), func = std::move(func), where = __func__] {
         auto session = weakThis.promote();
         if (!session || !func) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s update float view func is null", where);
@@ -957,7 +960,8 @@ void SystemSession::SetFloatViewUpdateCallback(NotifyUpdateFloatViewFunc&& func)
             session->updateFloatViewFunc_(session->GetFvTemplateInfo());
             session->needUpdateFv_ = false;
         }
-    }, __func__);
+    };
+    PostTask(std::move(task), __func__);
 }
 
 WSError SystemSession::SyncFloatViewLimits(const FloatViewLimits& limits)

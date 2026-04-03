@@ -220,7 +220,8 @@ HWTEST_F(SessionPermissionTest, PermissionConstantsTest, TestSize.Level1)
 {
     ASSERT_STREQ(PermissionConstants::PERMISSION_FLOAT_VIEW, "ohos.permission.FLOAT_VIEW");
     ASSERT_STREQ(PermissionConstants::PERMISSION_FLOATING_BALL, "ohos.permission.USE_FLOAT_BALL");
-    ASSERT_STREQ(PermissionConstants::PERMISSION_FLOATING_BALL_AUTO_RESTORE, "ohos.permission.AUTO_RESTORE_MAIN_WINDOW");
+    ASSERT_STREQ(PermissionConstants::PERMISSION_FLOATING_BALL_AUTO_RESTORE,
+        "ohos.permission.AUTO_RESTORE_MAIN_WINDOW");
 }
 
 } // namespace

@@ -251,7 +251,6 @@ public:
      */
     WMError GetPiPSettingSwitchStatus(bool& switchStatus);
     WMError GetIsPipEnabled(bool& isPipEnabled);
-    int32_t GetPipTemplateType();
 
     /*
      * Window outline

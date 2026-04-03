@@ -68,6 +68,7 @@ void SceneSessionManagerSupplementTest::SetUp()
 void SceneSessionManagerSupplementTest::TearDown()
 {
     ssm_->sceneSessionMap_.clear();
+    MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
 }
 
@@ -592,7 +593,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, TestCreateAndConnectSession_01, Test
     SystemSessionConfig systemConfig;
     sptr<IRemoteObject> token;
     int32_t id = 0;
-
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
@@ -663,6 +664,9 @@ HWTEST_F(SceneSessionManagerSupplementTest, TestCreateAndConnectSession_04, Test
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     property->SetFloatingWindowAppType(true);
 
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
     auto res = ssm_->CreateAndConnectSpecificSession(
         sessionStage, eventChannel, node, property, id, session, systemConfig, token);
     ASSERT_EQ(res, WSError::WS_ERROR_NOT_SYSTEM_APP);
@@ -927,6 +931,9 @@ HWTEST_F(SceneSessionManagerSupplementTest, CheckSysWinPermWithFloatTypeThenFals
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
 
     ASSERT_NE(ssm_, nullptr);
+    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    MockAccesstokenKit::MockIsSystemApp(false);
+    MockAccesstokenKit::MockIsSACalling(false);
     bool res = ssm_->CheckSystemWindowPermission(property);
     ASSERT_EQ(res, false);
 }
@@ -1323,8 +1330,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CanCreateFloatView, TestSize.Level1)
 {
     // Test with null parent session
     sptr<SceneSession> parentSession = nullptr;
-    auto ret = ssm_->CanCreateFloatView(parentSession);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARENT);
+    EXPECT_EQ(ssm_->CanCreateFloatView(parentSession), WSError::WS_ERROR_INVALID_PARENT);
     
     // Test with disconnected parent session
     SessionInfo info;
@@ -1332,35 +1338,7 @@ HWTEST_F(SceneSessionManagerSupplementTest, CanCreateFloatView, TestSize.Level1)
     info.abilityName_ = "test2";
     parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(parentSession, nullptr);
-    parentSession->state_ = SessionState::STATE_DISCONNECT;
-    ret = ssm_->CanCreateFloatView(parentSession);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARENT);
-    
-    // Test with background parent session
-    parentSession->state_ = SessionState::STATE_BACKGROUND;
-    ret = ssm_->CanCreateFloatView(parentSession);
-    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARENT);
-    
-    // Test with valid parent session
-    parentSession->state_ = SessionState::STATE_FOREGROUND;
-    ret = ssm_->CanCreateFloatView(parentSession);
-    EXPECT_EQ(ret, WSError::WS_OK);
-    
-    // Test with high priority pip window
-    SessionInfo pipInfo;
-    pipInfo.bundleName_ = "pip_test";
-    pipInfo.abilityName_ = "pip_ability";
-    sptr<SceneSession> pipSession = sptr<SceneSession>::MakeSptr(pipInfo, nullptr);
-    ASSERT_NE(pipSession, nullptr);
-    
-    PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING);
-    pipSession->SetPiPTemplateInfo(pipTemplateInfo);
-    
-    ssm_->sceneSessionMap_.insert({ pipSession->GetPersistentId(), pipSession });
-    
-    ret = ssm_->CanCreateFloatView(parentSession);
-    EXPECT_EQ(ret, WSError::WS_DO_NOTHING);
+    EXPECT_EQ(ssm_->CanCreateFloatView(parentSession), WSError::WS_OK);
 }
 
 /**
@@ -1385,46 +1363,17 @@ HWTEST_F(SceneSessionManagerSupplementTest, SyncFloatViewLimits, TestSize.Level1
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_FV);
     sptr<SceneSession> fvSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(fvSession, nullptr);
-    ssm_->sceneSessionMap_.insert({ fvSession->GetPersistentId(), fvSession });
 
-    SessionInfo info;
     info.bundleName_ = "test3";
     info.abilityName_ = "test4";
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_FLOAT);
-    sptr<SceneSession> fvSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(fvSession1, nullptr);
-    ssm_->sceneSessionMap_.insert({ fvSession1->GetPersistentId(), fvSession1 });
-    ssm_->sceneSessionMap_.insert({ fvSession1->GetPersistentId(), nullptr });
+    sptr<SceneSession> fakeSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(fakeSession, nullptr);
+    ssm_->sceneSessionMap_.insert({ fakeSession->GetPersistentId(), fakeSession });
+    ssm_->sceneSessionMap_.insert({ fvSession->GetPersistentId(), nullptr });
+    ssm_->sceneSessionMap_.insert({ fvSession->GetPersistentId(), fvSession });
     ret = ssm_->SyncFloatViewLimits(limits);
     EXPECT_EQ(ret, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetPipTemplateType
- * @tc.desc: GetPipTemplateType test
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerSupplementTest, GetPipTemplateType, TestSize.Level1)
-{
-    // Test without pip window
-    auto ret = ssm_->GetPipTemplateType();
-    EXPECT_EQ(ret, -1);
-    
-    // Test with pip window
-    SessionInfo info;
-    info.bundleName_ = "pip_test";
-    info.abilityName_ = "pip_ability";
-    sptr<SceneSession> pipSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(pipSession, nullptr);
-    
-    PiPTemplateInfo pipTemplateInfo;
-    pipTemplateInfo.pipTemplateType = static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL);
-    pipSession->SetPiPTemplateInfo(pipTemplateInfo);
-    
-    ssm_->sceneSessionMap_.insert({ pipSession->GetPersistentId(), pipSession });
-    
-    ret = ssm_->GetPipTemplateType();
-    EXPECT_EQ(ret, static_cast<int32_t>(PiPTemplateType::VIDEO_CALL));
 }
 
 /**
@@ -1440,7 +1389,6 @@ HWTEST_F(SceneSessionManagerSupplementTest, GetFloatViewLimits, TestSize.Level1)
     testLimits.maxWidth_ = 1000;
     testLimits.maxHeight_ = 1000;
     ssm_->floatViewLimits_ = testLimits;
-    
     FloatViewLimits limits;
     auto ret = ssm_->GetFloatViewLimits(limits);
     EXPECT_EQ(ret, WMError::WM_OK);

@@ -947,25 +947,6 @@ HWTEST_F(SceneSessionManagerTest2, ConfigDecor06, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConfigDecor
- * @tc.desc: call ConfigDecor fv
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest2, ConfigDecor07, TestSize.Level1)
-{
-    std::string xmlStr =
-        "<?xml version='1.0' encoding=\"utf-8\"?>"
-        "<Configs>"
-        "<decor enable=\"true\">"
-        "<supportedMode>fv</supportedMode>"
-        "</decor>"
-        "</Configs>";
-    WindowSceneConfig::config_ = ReadConfig(xmlStr);
-    ssm_->ConfigWindowSceneXml();
-    ASSERT_EQ(ssm_->systemConfig_.decorWindowModeSupportType_, WindowModeSupport::WINDOW_MODE_SUPPORT_FV);
-}
-
-/**
  * @tc.name: ConfigWindowSceneXml01
  * @tc.desc: call defaultWindowMode
  * @tc.type: FUNC

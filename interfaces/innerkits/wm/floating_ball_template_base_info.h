@@ -24,8 +24,9 @@ public:
     FloatingBallTemplateBaseInfo() = default;
     FloatingBallTemplateBaseInfo(const uint32_t& templateType, const std::string& title,
         const std::string& content, const std::string& color, bool isBind, uint32_t bindWindowId,
-        bool showWhenCreate) : template_(templateType), title_(title), content_(content),
-        backgroundColor_(color), isBind_(isBind), bindWindowId_(bindWindowId), showWhenCreate_(showWhenCreate) {};
+        bool showWhenCreate, const std::string &id) : template_(templateType), title_(title), content_(content),
+        backgroundColor_(color), isBind_(isBind), bindWindowId_(bindWindowId), showWhenCreate_(showWhenCreate),
+        id_(id) {};
     virtual ~FloatingBallTemplateBaseInfo() = default;
 
     uint32_t template_ {};
@@ -35,6 +36,7 @@ public:
     bool isBind_ {false};
     uint32_t bindWindowId_ {INVALID_WINDOW_ID};
     bool showWhenCreate_ { true };
+    std::string id_ {};
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_FLOATING_BALL_TEMPLATE_BASE_INFO_H

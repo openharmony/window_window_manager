@@ -16,16 +16,19 @@
 
 #include "window.h"
 #include "window_manager_hilog.h"
+#include "float_window_manager.h"
  
 namespace OHOS {
 namespace Rosen {
 namespace {
+const std::string ACTION_START = "start";
 const std::string ACTION_CLOSE = "close";
 const std::string ACTION_HIDE = "hide";
 const std::string ACTION_IN_SIDEBAR = "inSidebar";
 const std::string ACTION_IN_FLOATING_BALL = "inFloatingBall";
 
 const std::map<std::string, std::function<void(const std::string&)>> FV_ACTION_MAP {
+    {ACTION_START, FloatViewManager::DoActionStart},
     {ACTION_CLOSE, FloatViewManager::DoActionClose},
     {ACTION_HIDE, FloatViewManager::DoActionHide},
     {ACTION_IN_SIDEBAR, FloatViewManager::DoActionInSidebar},
@@ -77,6 +80,17 @@ void FloatViewManager::DoActionEvent(const std::string& actionName, const std::s
     func->second(reason);
 }
 
+void FloatViewManager::DoActionStart(const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "start in");
+    if (auto controller = GetActiveController()) {
+        controller->ChangeState(FvWindowState::FV_STATE_STARTED);
+        if (controller->IsBind()) {
+            FloatWindowManager::ProcessBindFloatViewStateChange(controller, FvWindowState::FV_STATE_STARTED);
+        }
+    }
+}
+
 void FloatViewManager::DoActionClose(const std::string& reason)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "close in, reason: %{public}s", reason.c_str());
@@ -106,6 +120,9 @@ void FloatViewManager::DoActionInFloatingBall(const std::string& reason)
     TLOGI(WmsLogTag::WMS_SYSTEM, "inFloatingBall in");
     if (auto controller = GetActiveController()) {
         controller->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
+        if (controller->IsBind()) {
+            FloatWindowManager::ProcessBindFloatViewStateChange(controller, FvWindowState::FV_STATE_IN_FLOATING_BALL);
+        }
     }
 }
 

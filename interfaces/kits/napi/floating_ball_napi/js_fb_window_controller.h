@@ -38,7 +38,6 @@ public:
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetFloatingBallWindowInfo(napi_env env, napi_callback_info info);
     napi_value GetFloatingBallOptionFromJs(napi_env env, napi_value optionObject, FbOption& option);
-    bool CheckParams(napi_env env, const FbOption& option, std::string &errMsg);
     sptr<FloatingBallController> GetController() const;
 private:
     napi_value OnStartFloatingBall(napi_env env, napi_callback_info info);

@@ -7777,6 +7777,20 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
     return iter->second.second;
 }
 
+bool WindowSessionImpl::IsAnyWindowMatchState(const WindowState& state)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& [name, windowPair] : windowSessionMap_) {
+        if (windowPair.second == nullptr) {
+            continue;
+        }
+        if (windowPair.second->GetWindowState() == state) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void WindowSessionImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -8347,9 +8361,32 @@ WMError WindowSessionImpl::UpdateFloatView(const FloatViewTemplateInfo& fvTempla
         TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    GetProperty()->SetFvTemplateInfo(fvTemplateInfo);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     return hostSession->UpdateFloatView(fvTemplateInfo);
+}
+
+WMError WindowSessionImpl::UpdateFloatShowWhenCreate(const bool showWhenCreate)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (GetType() == WindowType::WINDOW_TYPE_FB) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "update floating ball show when create: %{public}d", showWhenCreate);
+        auto templateInfo = GetProperty()->GetFbTemplateInfo();
+        templateInfo.showWhenCreate_ = showWhenCreate;
+        GetProperty()->SetFbTemplateInfo(templateInfo);
+    }
+
+    if (GetType() == WindowType::WINDOW_TYPE_FV) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "update float view show when create: %{public}d", showWhenCreate);
+        auto templateInfo = GetProperty()->GetFvTemplateInfo();
+        templateInfo.showWhenCreate_ = showWhenCreate;
+        GetProperty()->SetFvTemplateInfo(templateInfo);
+    }
+    return WMError::WM_OK;
 }
 
 WMError WindowSessionImpl::RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)

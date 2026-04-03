@@ -312,8 +312,6 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetCrossProcessWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FLOAT_VIEW_LIMITS):
             return HandleGetFloatViewLimits(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_TEMPLATE_TYPE):
-            return HandleGetPipTemplateType(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -2841,16 +2839,6 @@ int SceneSessionManagerStub::HandleGetIsPipEnabled(MessageParcel& data, MessageP
     }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_PIP, "Write errCode fail.");
-        return ERR_INVALID_DATA;
-    }
-    return ERR_NONE;
-}
-
-int SceneSessionManagerStub::HandleGetPipTemplateType(MessageParcel& data, MessageParcel& reply)
-{
-    int32_t templateType = GetPipTemplateType();
-    if (!reply.WriteInt32(templateType)) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write templateType fail.");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

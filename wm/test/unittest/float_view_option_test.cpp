@@ -195,11 +195,11 @@ HWTEST_F(FloatViewOptionTest, IsRectValid, TestSize.Level1)
     option_->SetRect(rect);
     EXPECT_FALSE(option_->IsRectValid());
 
-    rect = {0, 0, -100, 100};
+    rect = {0, 0, 0, 100};
     option_->SetRect(rect);
     EXPECT_FALSE(option_->IsRectValid());
 
-    rect = {0, 0, 100, -100};
+    rect = {0, 0, 100, 0};
     option_->SetRect(rect);
     EXPECT_FALSE(option_->IsRectValid());
 }

@@ -350,7 +350,7 @@ HWTEST_F(PictureInPictureControllerTest, StartPictureInPicture03, TestSize.Level
     ASSERT_NE(nullptr, option);
     auto pipControl = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
     
-    pipControl->curState_ = PiPWindowState::STATE_STOPPING;
+    pipControl->curState_ = PiPWindowState::STATE_STARTING;
     EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, pipControl->StartPictureInPicture(startType));
 }
 

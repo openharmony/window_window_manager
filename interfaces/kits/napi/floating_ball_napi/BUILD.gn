@@ -16,7 +16,10 @@ import("../../../../windowmanager_aafwk.gni")
 
 config("fb_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "../../../../wm/include" ]
+  include_dirs = [
+    "../../../../wm/include",
+    "../common"
+  ]
 }
 
 ohos_shared_library("floatingball_kit") {
@@ -44,6 +47,7 @@ ohos_shared_library("floatingball_kit") {
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
+    "../common:wm_napi_util",
   ]
 
   external_deps = [
@@ -69,7 +73,7 @@ ohos_shared_library("floatingball_kit") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
 
-  version_script = "libfloatingball_napi.map"
+  version_script = "libfloatingball_kit.map"
 }
 
 ohos_shared_library("floatingball_napi") {

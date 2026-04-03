@@ -38,36 +38,29 @@ public:
     static WMError StopBindFloatingBall(const wptr<FloatingBallController> &fbControllerWeak);
     static std::string GetControllerId();
 
-    enum class ControllerType : uint8_t {
-        FLOAT_VIEW = 0,
-        FLOATING_BALL = 1,
-        PICTURE_IN_PICTURE = 2,
-    };
-
-    /**
-     * @brief Acquire a global token to perform a cross-controller start check.
-     *
-     * Token is only for guarding the check phase. Caller should:
-     * 1) Acquire token
-     * 2) Check other controller states via IsFloatViewConflict, IsFloatingBallConflict, IsPipConflict
-     * 3) If ok, set itself to STARTING and then ReleaseToken
-     */
-    static uint64_t AcquireToken();
-    static void ReleaseToken(uint64_t token);
-
-    // Cross-controller conflict checks (support bound FV<->FB exception).
-    static bool IsFloatViewConflict(const wptr<FloatViewController>& selfController);
-    static bool IsFloatingBallConflict(const wptr<FloatingBallController>& selfController);
-    static bool IsPipConflict();
-
     // Bound-pair helpers
     static sptr<FloatingBallController> GetBoundFloatingBall(const sptr<FloatViewController>& fvController);
     static sptr<FloatViewController> GetBoundFloatView(const sptr<FloatingBallController>& fbController);
 
+    static sptr<Window> CreateFbWindow(sptr<WindowOption> &windowOption,
+        const FloatingBallTemplateBaseInfo &templateInfo, const std::shared_ptr<Media::PixelMap>& icon,
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError &error,
+        const wptr<FloatingBallController> &fbControllerWeak);
+    static sptr<Window> CreateFvWindow(sptr<WindowOption> &windowOption,
+        const FloatViewTemplateInfo &templateInfo, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+        WMError &error, const wptr<FloatViewController> &fvControllerWeak);
+    static sptr<Window> CreatePipWindow(sptr<WindowOption> &windowOption, const PiPTemplateInfo &templateInfo,
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError &error);
+    static WMError DestroyFloatWindow(const sptr<Window> &window);
+
+    static void ProcessBindFloatViewStateChange(const wptr<FloatViewController> &fvControllerWeak,
+        const FvWindowState state);
+
 private:
     static std::recursive_mutex relationMutex_;
     static std::map<sptr<FloatViewController>, sptr<FloatingBallController>> floatViewToFloatingBallMap_;
-    static std::map<sptr<FloatingBallController>, sptr<FloatViewController>> floatingBallToFloatViewMap_;
+
+    static sptr<FloatViewController> FindFloatViewByFloatingBall(const sptr<FloatingBallController>& fbController);
 
     static void AddRelation(const sptr<FloatViewController> &fvController,
         const sptr<FloatingBallController> &fbController);
@@ -76,11 +69,10 @@ private:
     static bool IsFloatingBallStateValid(const sptr<FloatingBallController> &fbController);
     static bool IsFloatViewStateValid(const sptr<FloatViewController> &fvController);
 
-    // token + global-state guarding
-    static std::condition_variable tokenCv_;
-    static std::mutex tokenMutex_;
-    static uint64_t tokenOwner_;
-    static uint64_t tokenSeq_;
+    static std::mutex windowMutex_;
+    static uint32_t floatViewCnt_;
+    static uint32_t floatingBallCnt_;
+    static uint32_t pipCnt_;
 };
 } // namespace Rosen
 } // namespace OHOS

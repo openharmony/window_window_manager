@@ -4660,33 +4660,6 @@ WMError SceneSessionManagerProxy::GetIsPipEnabled(bool& isPipEnabled)
     return static_cast<WMError>(ret);
 }
 
-int32_t SceneSessionManagerProxy::GetPipTemplateType()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_PIP, "Write interfaceToken failed");
-        return -1;
-    }
-    sptr remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_PIP, "Remote is null");
-        return -1;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_PIP_TEMPLATE_TYPE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_PIP, "SendRequest failed");
-        return -1;
-    }
-    int32_t templateType = -1;
-    if (!reply.ReadInt32(templateType)) {
-        TLOGE(WmsLogTag::WMS_PIP, "Read templateType failed");
-        return -1;
-    }
-    return templateType;
-}
-
 WMError SceneSessionManagerProxy::AddSessionBlackList(
     const std::unordered_set<std::string>& bundleNames, const std::unordered_set<std::string>& privacyWindowTags)
 {

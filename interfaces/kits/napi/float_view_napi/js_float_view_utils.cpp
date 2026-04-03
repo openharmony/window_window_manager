@@ -205,7 +205,7 @@ napi_value CreateJsFloatViewLimitsObject(napi_env env, const FloatViewLimits& li
         napi_set_named_property(env, ratioObj, "maxRatio", CreateJsValue(env, limits.ratioLimits_[i].second));
         napi_set_element(env, ratioLimit, i, ratioObj);
     }
-    napi_set_named_property(env, objValue, "ratioLimit", ratioLimit);
+    napi_set_named_property(env, objValue, "ratioLimits", ratioLimit);
     return objValue;
 }
 } // namespace Rosen

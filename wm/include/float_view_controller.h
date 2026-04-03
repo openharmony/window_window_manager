@@ -32,14 +32,13 @@ class FloatViewController : public RefBase {
 public:
     FloatViewController(const FvOption &option, napi_env env);
     virtual ~FloatViewController();
-    void UpdateMainWindow(const sptr<Window>& mainWindow);
     WMError StartFloatView();
     WMError StartFloatViewSingle(bool showWhenCreate = true);
     WMError StopFloatViewFromClient();
     WMError StopFloatViewFromClientSingle();
     WMError StopFloatView(const std::string& reason);
     WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams);
-    WMError SetUIContext(const std::string contextUrl, const std::shared_ptr<NativeReference>& contentStorage);
+    WMError SetUIContext(const std::string &contextUrl, const std::shared_ptr<NativeReference>& contentStorage);
     WMError SetVisibilityInApp(bool visibleInApp);
     WMError SetWindowSize(const Rect &rect);
     void SyncWindowInfo(uint32_t windowId, const FloatViewWindowInfo& windowInfo, const std::string& reason);
@@ -52,6 +51,7 @@ public:
     void SetBindState(bool isBind);
     bool IsBind();
     void SetBindWindowId(uint32_t windowId);
+    void SetShowWhenCreate(bool showWhenCreate);
 
     WMError RegisterStateChangeListener(const sptr<IFvStateChangeObserver>& listener);
     WMError UnregisterStateChangeListener(const sptr<IFvStateChangeObserver>& listener);
@@ -79,7 +79,6 @@ private:
     sptr<Window> window_ = nullptr;
     sptr<Window> mainWindow_ = nullptr;
     uint32_t mainWindowId_ = 0;
-    uint32_t templateType_ = 0;
     FvWindowState curState_ = FvWindowState::FV_STATE_UNDEFINED;
     bool stopFromClient_ = false;
     FvOption option_;

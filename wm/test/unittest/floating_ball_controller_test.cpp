@@ -366,6 +366,21 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallController, TestSize.Leve
     EXPECT_EQ(packageName, SingletonContainer::Get<FloatingBallReporter>().GetPackageName());
 }
 
+/**
+ * @tc.name: SetShowWhenCreate_Test
+ * @tc.desc: SetShowWhenCreate_Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatingBallControllerTest, SetShowWhenCreate_Test, TestSize.Level1)
+{
+    FloatingBallManager::SetActiveController(fbController_);
+    fbController_->option_ = option_;
+    fbController_->SetShowWhenCreate(true);
+    fbController_->window_ = mw_;
+    fbController_->SetShowWhenCreate(true);
+    EXPECT_EQ(true, fbController_->option_->showWhenCreate_);
+}
+
 }
 }
 }
