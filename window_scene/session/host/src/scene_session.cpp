@@ -3287,9 +3287,9 @@ void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidAre
     if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
         specificCallback_->onGetFloatNavagationInfo_(
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
-        auto [visibleFromTuple, floatNavigationArea, landspaceRect] = floatNavagationInfo;
+        auto [visibleFromTuple, portraitRect, landspaceRect] = floatNavagationInfo;
         visible = visibleFromTuple;
-        floatNavigationArea = rect.width_ > rect.height_ ? landspaceRect : floatNavigationArea;
+        floatNavigationArea = rect.width_ > rect.height_ ? landspaceRect : portraitRect;
     }
     if (!visible && !ignoreVisibility) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());
