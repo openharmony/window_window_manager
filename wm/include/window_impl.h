@@ -144,7 +144,7 @@ public:
      * Window Immersive
      */
     WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
-    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override
+    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override { return WMError::WM_OK; }
         { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     WMError GetAvoidAreaByType(AvoidAreaType type, AvoidArea& avoidArea, const Rect& rect = Rect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;

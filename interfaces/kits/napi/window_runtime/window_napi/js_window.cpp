@@ -9367,11 +9367,7 @@ napi_value JsWindow::OnIsFloatNavigationAvoidAreaEnabled(napi_env env, napi_call
     }
     bool enable = false;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetFloatNavigationAvoidAreaEnabled(enable));
-    if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device is not support");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
-            "[window][isFloatNavigationAvoidAreaEnabled]");
-    } else if (ret != WmErrorCode::WM_OK) {
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][isFloatNavigationAvoidAreaEnabled]");

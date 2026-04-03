@@ -3938,14 +3938,10 @@ ani_boolean AniWindow::IsFloatNavigationAvoidAreaEnabled(ani_env* env)
         return false;
     }
     bool enabled = true;
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->IsFloatNavigationAvoidAreaEnabled(enabled));
-    if (ret == WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT) {
-        TLOGE(WmsLogTag::WMS_IMMS, "device is not support");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
-        return false;
-    } else if (ret != WmErrorCode::WM_OK) {
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetFloatNavigationAvoidAreaEnabled(enabled));
+    if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return false;
     }
     TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] enable %{public}u",
