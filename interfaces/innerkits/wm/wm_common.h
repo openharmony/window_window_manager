@@ -2323,7 +2323,7 @@ struct WindowMetaInfo : public Parcelable {
     {
         uint32_t windowTypeValue = 1;
         uint32_t windowModeValue = 1;
-        uint8_t ControlAppTypeValue = 0;
+        uint8_t controlAppTypeValue = 0;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
@@ -2334,13 +2334,13 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
             !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue) ||
             !parcel.ReadBool(windowMetaInfo->isTouchable) ||
-            !parcel.ReadInt32(windowMetaInfo->mainWindowPersistentId) || !parcel.ReadUint8(ControlAppTypeValue)) {
+            !parcel.ReadInt32(windowMetaInfo->mainWindowPersistentId) || !parcel.ReadUint8(controlAppTypeValue)) {
             delete windowMetaInfo;
             return nullptr;
         }
         windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
         windowMetaInfo->windowMode = static_cast<WindowMode>(windowModeValue);
-        windowMetaInfo->controlAppType = static_cast<ControlAppType>(ControlAppTypeValue);
+        windowMetaInfo->controlAppType = static_cast<ControlAppType>(controlAppTypeValue);
         return windowMetaInfo;
     }
 };
