@@ -12813,8 +12813,6 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
     if (auto sceneSession = GetSceneSession(session->GetMainWindowPersistentId())) {
         windowVisibilityInfo->SetMainWindowPersistentId(session->GetMainWindowPersistentId());
         windowVisibilityInfo->SetControlAppType(sceneSession->GetControlAppType());
-    } else {
-        TLOGW(WmsLogTag::WMS_MAIN, "Main window id: %{public}d not exist", session->GetMainWindowPersistentId());
     }
 
     int32_t callingWindowId = session->GetSessionInfo().callerPersistentId_;
@@ -15650,8 +15648,6 @@ void SceneSessionManager::AddOptionWindowMetaInfo(sptr<WindowInfo> &windowInfo, 
     if (auto sceneSession = GetSceneSession(session->GetMainWindowPersistentId())) {
         windowInfo->windowMetaInfo.mainWindowPersistentId = session->GetMainWindowPersistentId();
         windowInfo->windowMetaInfo.controlAppType = sceneSession->GetControlAppType();
-    } else {
-        TLOGW(WmsLogTag::WMS_MAIN, "Main window id: %{public}d not exist", session->GetMainWindowPersistentId());
     }
 }
 
