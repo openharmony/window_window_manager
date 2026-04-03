@@ -1808,6 +1808,7 @@ void ScreenSessionManager::SetCastPrivacyFromSettingData()
             continue;
         }
         bool isSuc = SetCastPrivacyToRS(screenSession, enable);
+        SetScreenPrivacyWindowTagSwitch(sessionIt.first, { "SCB_KEYBOARD_FLOATING" }, enable);
         TLOGNFI(WmsLogTag::DMS, "set cast privacy done, isSuc:%{public}d, enable:%{public}d, screenId:%{public}" PRIu64"",
         isSuc, enable, sessionIt.first);
     }
@@ -14023,6 +14024,7 @@ DMError ScreenSessionManager::SetScreenSkipProtectedWindow(const std::vector<Scr
                 HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
                     "SetCastScreenEnableSkipWindow(%" PRIu64")", screenId);
                 rsInterface_.SetCastScreenEnableSkipWindow(rsScreenId, isEnable);
+                SetScreenPrivacyWindowTagSwitch(screenId, { "SCB_KEYBOARD_FLOATING" }, isEnable);
             }
         }
     }

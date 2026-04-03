@@ -117,6 +117,7 @@ private:
     bool stateChanged_ = false;
     bool isNeedProcessKeyboardOccupiedAreaInfo(
         const KeyboardLayoutParams& lastParams, const KeyboardLayoutParams& params);
+    void SetSessionBlackListWhenShow(bool isCallingSessionSkip, const sptr<SceneSession>& panelSession);
     void CalculateOccupiedAreaAfterUIRefresh() override;
     WSRect CalculateCenterScaledRect(const WSRect& sessionRect, float scaleX, float scaleY);
     WSRect CalculateLeftTopScaledRect(const WSRect& sessionRect, float scaleX, float scaleY);

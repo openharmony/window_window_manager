@@ -201,6 +201,7 @@ void SCBSystemSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         if (session->specificCallback_ != nullptr &&
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+            session->isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
         }
         return;
     }, __func__);

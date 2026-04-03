@@ -353,6 +353,8 @@
             OHOS::Rosen::SceneSession::SetIsUserRequestedExit*;
             OHOS::Rosen::SceneSession::RegisterNotifyOccupiedAreaChangeCallback*;
             OHOS::Rosen::SceneSession::RegisterRecoverWindowEffectCallback*;
+            OHOS::Rosen::SceneSession::AddSessionBlackList*;
+            OHOS::Rosen::SceneSession::RemoveSessionBlackList*;
             OHOS::Rosen::MoveDragController::SaveMoveResampleSystemConfig*;
             OHOS::Rosen::MoveDragController::SaveMovingEventThrottleSystemConfig*;
             OHOS::Rosen::SessionStub::OnRemoteRequest*;
