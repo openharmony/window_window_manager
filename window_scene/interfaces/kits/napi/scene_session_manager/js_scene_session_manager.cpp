@@ -3851,9 +3851,9 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
 napi_value JsSceneSessionManager::OnNotifyFloatNavigationInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = DEFAULT_ARG_COUNT;
-    napi_value argv[ARG_INDEX_FIVE] = { nullptr };
+    napi_value argv[ARG_INDEX_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARG_INDEX_FIVE) {
+    if (argc < ARG_INDEX_FOUR) {
         TLOGE(WmsLogTag::WMS_IMMS, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
@@ -3873,22 +3873,15 @@ napi_value JsSceneSessionManager::OnNotifyFloatNavigationInfo(napi_env env, napi
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    bool isBarPhoneStatus = false;
-    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isBarPhoneStatus)) {
-        TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to isBarPhoneStatus");
-        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
-        return NapiGetUndefined(env);
-    }
     WSRect portraitRect;
-    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], portraitRect)) {
+    if (argv[ARG_INDEX_TWO] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_TWO], portraitRect)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to portraitRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     WSRect landspaceRect;
-    if (argv[ARG_INDEX_FOUR] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_FOUR], landspaceRect)) {
+    if (argv[ARG_INDEX_THREE] == nullptr || !ConvertRectInfoFromJs(env, argv[ARG_INDEX_THREE], landspaceRect)) {
         TLOGE(WmsLogTag::WMS_IMMS, "Failed to convert parameter to landspaceRect");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is missing or invalid"));
