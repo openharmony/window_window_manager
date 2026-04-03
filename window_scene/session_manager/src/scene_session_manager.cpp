@@ -18282,8 +18282,12 @@ WMError SceneSessionManager::SetScreenWatermarkImage(const std::shared_ptr<Media
     }, where);
 }
 
-WMError SceneSessionManager::CleanScreenWatermarkImage()
+WMError SceneSessionManager::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "pixelMap is null");
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsSACalling()) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
         return WMError::WM_ERROR_NOT_SYSTEM_APP;
@@ -18291,12 +18295,11 @@ WMError SceneSessionManager::CleanScreenWatermarkImage()
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     auto tokenId = IPCSkeleton::GetCallingTokenID();
     const char* const where = __func__;
-    return taskScheduler_->PostSyncTask([this, pid, tokenId, where]() {
+    return taskScheduler_->PostSyncTask([this, pid, tokenId, pixelMap, where]() {
         auto setterName = MakeScreenWatermarkOwnerName(pid, tokenId);
         if (!screenWatermarkBundleName_.empty() && setterName == screenWatermarkBundleName_) {
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: pid=%{public}d, setterName=%{public}s",
                 where, pid, setterName.c_str());
-            std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
             RSInterfaces::GetInstance().ShowWatermark(pixelMap, false);
             screenWatermarkPriority_ = 0;
             screenWatermarkBundleName_ = "";

@@ -1092,9 +1092,10 @@ public:
     /**
      * @brief Clean screen watermark image.
      *
+     * @param pixelMap the watermark image to clean.
      * @return WM_OK means get success, others means get failed.
      */
-    WMError CleanScreenWatermarkImage();
+    WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap);
 
     /**
      * @brief Get visibility window info.

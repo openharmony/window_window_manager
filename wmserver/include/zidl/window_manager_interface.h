@@ -163,7 +163,7 @@ public:
         std::string& topNavDestName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority,
         std::string& bundleName) { return WMError::WM_DO_NOTHING; }
-    virtual WMError CleanScreenWatermarkImage()
+    virtual WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
     {
         return WMError::WM_DO_NOTHING;
     }

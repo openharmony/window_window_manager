@@ -289,9 +289,11 @@ HWTEST_F(SceneSessionManagerAttributeTest, SetScreenWatermarkImage005, TestSize.
 HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage001, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(nullptr), WMError::WM_ERROR_ILLEGAL_PARAM);
     MockAccesstokenKit::MockIsSystemApp(false);
     MockAccesstokenKit::MockIsSACalling(false);
-    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_ERROR_NOT_SYSTEM_APP);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(pixelMap), WMError::WM_ERROR_NOT_SYSTEM_APP);
     MockAccesstokenKit::ChangeMockStateToInit();
 }
 
@@ -308,7 +310,8 @@ HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage002, TestSiz
     ssm_->screenWatermarkBundleName_ = "";
     ssm_->screenWatermarkPriority_ = 0;
     MockAccesstokenKit::MockIsSystemApp(true);
-    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_DO_NOTHING);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(pixelMap), WMError::WM_DO_NOTHING);
     ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
     ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
     MockAccesstokenKit::ChangeMockStateToInit();
@@ -327,7 +330,8 @@ HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage003, TestSiz
     ssm_->screenWatermarkBundleName_ = "test.bundle";
     ssm_->screenWatermarkPriority_ = 1;
     MockAccesstokenKit::MockIsSystemApp(true);
-    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_DO_NOTHING);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(pixelMap), WMError::WM_DO_NOTHING);
     ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
     ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
     MockAccesstokenKit::ChangeMockStateToInit();
@@ -354,7 +358,8 @@ HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage004, TestSiz
     ssm_->screenWatermarkBundleName_ = "test.bundle";
     ssm_->screenWatermarkPriority_ = 1;
     MockAccesstokenKit::MockIsSystemApp(true);
-    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(), WMError::WM_OK);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    EXPECT_EQ(ssm_->CleanScreenWatermarkImage(pixelMap), WMError::WM_OK);
     ssm_->sceneSessionMap_.clear();
     ssm_->sceneSessionMap_ = oldSceneSessionMap;
     ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
