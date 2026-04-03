@@ -408,6 +408,7 @@ HWTEST_F(SceneInputManagerTest, FlushDisplayInfoToMMI, TestSize.Level0)
     WindowInfoListZeroTest(ssm_);
     MaxWindowInfoTest(ssm_);
 
+    LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "SceneInputManagerTest: FlushDisplayInfoToMMI end";
 }
 
