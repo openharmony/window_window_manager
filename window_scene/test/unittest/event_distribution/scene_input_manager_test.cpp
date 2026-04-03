@@ -64,6 +64,7 @@ void SceneInputManagerTest::SetUp()
 
 void SceneInputManagerTest::TearDown()
 {
+    LOG_SetCallback(nullptr);
     usleep(WAIT_SYNC_IN_NS);
 }
 
