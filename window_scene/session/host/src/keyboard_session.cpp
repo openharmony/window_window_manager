@@ -1095,8 +1095,8 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
     // relayout triggered on the next vsync, so no explicit flush is required here.
     // If the window is NOT crossing screens, the changes should be flushed
     // immediately to avoid affecting the next drag operation.
-    if (!needFlush) {
-        needFlush = moveDragController_ && !moveDragController_->IsWindowCrossScreenOnDragEnd();
+    if (!needFlush && moveDragController_) {
+        needFlush = moveDragController_->ShouldFlushOnDragEnd();
         TLOGD(WmsLogTag::WMS_KEYBOARD, "On drag end, needFlush: %{public}d", needFlush);
     }
 
