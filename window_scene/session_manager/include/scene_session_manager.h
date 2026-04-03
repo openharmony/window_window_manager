@@ -670,7 +670,7 @@ public:
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override;
     WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority,
         std::string& bundleName) override;
-    WMError CleanScreenWatermarkImage() override;
+    WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError RecoverScreenWatermarkImage(const std::string& bundleName, uint32_t priority) override;
     WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::string& watermarkName) override;

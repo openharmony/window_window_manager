@@ -1764,7 +1764,8 @@ int SceneSessionManagerStub::HandleSetScreenWatermarkImage(MessageParcel& data, 
 
 int SceneSessionManagerStub::HandleCleanScreenWatermarkImage(MessageParcel& data, MessageParcel& reply)
 {
-    WMError errCode = CleanScreenWatermarkImage();
+    std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
+    WMError errCode = CleanScreenWatermarkImage(pixelMap);
     if (errCode != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_ATTRIBUTE, "clean screen watermark failed");
     }
