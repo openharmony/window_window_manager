@@ -3895,7 +3895,7 @@ napi_value JsSceneSessionManager::OnNotifyFloatNavigationInfo(napi_env env, napi
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().NotifyFloatNavigationInfo(
-        static_cast<uint64_t>(displayId), visible, isBarPhoneStatus, portraitRect, landspaceRect);
+        static_cast<uint64_t>(displayId), visible, portraitRect, landspaceRect);
     return NapiGetUndefined(env);
 }
 

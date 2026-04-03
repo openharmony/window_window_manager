@@ -3279,30 +3279,17 @@ void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
     }
 }
 
-bool SceneSession::isDisplayLand(bool isBarPhoneStatus)
-{
-    sptr<ScreenSession> screenSession =
-        ScreenSessionManagerClient::GetInstance().GetScreenSessionById(GetSessionProperty()->GetDisplayId());
-    if (screenSession == nullptr) {
-        TLOGW(WmsLogTag::WMS_IMMS, "Screen session is null");
-        return false;
-    }
-    uint32_t width = screenSession->GetScreenProperty().GetBounds().rect_.width_;
-    uint32_t height = screenSession->GetScreenProperty().GetBounds().rect_.height_;
-    return width > height ? true : false;
-}
-
 void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
 {
     bool visible = false;
     WSRect floatNavigationArea;
-    std::tuple<bool, bool, WSRect, WSRect> floatNavagationInfo;
+    std::tuple<bool, WSRect, WSRect> floatNavagationInfo;
     if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
         specificCallback_->onGetFloatNavagationInfo_(
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
-        auto [visibleFromTuple, isBarPhoneStatus, floatNavigationArea, landspaceRect] = floatNavagationInfo;
+        auto [visibleFromTuple, floatNavigationArea, landspaceRect] = floatNavagationInfo;
         visible = visibleFromTuple;
-        floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
+        floatNavigationArea = rect.width_ > rect.height_ ? landspaceRect : floatNavigationArea;
     }
     if (!visible && !ignoreVisibility) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());
