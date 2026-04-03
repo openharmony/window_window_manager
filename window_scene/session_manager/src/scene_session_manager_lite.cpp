@@ -400,7 +400,7 @@ WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByAppInstance(
     const sptr<ISessionLifecycleListener>& listener, const std::string& bundleName,
     int32_t appIndex, const std::string& appInstanceKey)
 {
-    TLOGD("in");
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
     return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(
         listener, bundleName, appIndex, appInstanceKey);
 }
