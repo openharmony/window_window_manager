@@ -13862,7 +13862,7 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidArea
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::NotifyFloatNavagationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
+WSError SceneSessionManager::NotifyFloatNavigationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
     const WSRect& portraitRect, const WSRect& landspaceRect)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " visible %{public}d isBarPhoneStatus %{public}d"

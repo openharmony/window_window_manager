@@ -257,8 +257,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
     BindNativeFunction(env, exportObj, "notifyNextAvoidRectInfo", moduleName,
         JsSceneSessionManager::NotifyNextAvoidRectInfo);
-    BindNativeFunction(env, exportObj, "notifyFloatNavagationInfo", moduleName,
-        JsSceneSessionManager::NotifyFloatNavagationInfo);
+    BindNativeFunction(env, exportObj, "NotifyFloatNavigationInfo", moduleName,
+        JsSceneSessionManager::NotifyFloatNavigationInfo);
     BindNativeFunction(env, exportObj, "updateTitleInTargetPos", moduleName, JsSceneSessionManager::UpdateTitleInTargetPos);
     BindNativeFunction(env, exportObj, "setSystemAnimatedScenes", moduleName,
         JsSceneSessionManager::SetSystemAnimatedScenes);
@@ -1328,11 +1328,11 @@ napi_value JsSceneSessionManager::NotifyNextAvoidRectInfo(napi_env env, napi_cal
     return (me != nullptr) ? me->OnNotifyNextAvoidRectInfo(env, info) : nullptr;
 }
 
-napi_value JsSceneSessionManager::NotifyFloatNavagationInfo(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::NotifyFloatNavigationInfo(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
-    return (me != nullptr) ? me->OnNotifyFloatNavagationInfo(env, info) : nullptr;
+    return (me != nullptr) ? me->OnNotifyFloatNavigationInfo(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::NotifySessionRecoverStatus(napi_env env, napi_callback_info info)
@@ -3848,7 +3848,7 @@ napi_value JsSceneSessionManager::OnNotifyNextAvoidRectInfo(napi_env env, napi_c
     return NapiGetUndefined(env);
 }
 
-napi_value JsSceneSessionManager::OnNotifyFloatNavagationInfo(napi_env env, napi_callback_info info)
+napi_value JsSceneSessionManager::OnNotifyFloatNavigationInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = DEFAULT_ARG_COUNT;
     napi_value argv[ARG_INDEX_FIVE] = { nullptr };
@@ -3894,7 +3894,7 @@ napi_value JsSceneSessionManager::OnNotifyFloatNavagationInfo(napi_env env, napi
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().NotifyFloatNavagationInfo(
+    SceneSessionManager::GetInstance().NotifyFloatNavigationInfo(
         static_cast<uint64_t>(displayId), visible, isBarPhoneStatus, portraitRect, landspaceRect);
     return NapiGetUndefined(env);
 }

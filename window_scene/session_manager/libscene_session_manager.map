@@ -102,7 +102,7 @@
             OHOS::Rosen::SceneSessionManager::NotifyForegroundInteractiveStatus*;
             OHOS::Rosen::SceneSessionManager::NotifyHookOrientationChange*;
             OHOS::Rosen::SceneSessionManager::NotifyNextAvoidRectInfo*;
-            OHOS::Rosen::SceneSessionManager::NotifyFloatNavagationInfo*;
+            OHOS::Rosen::SceneSessionManager::NotifyFloatNavigationInfo*;
             OHOS::Rosen::SceneSessionManager::NotifyOnAttachToFrameNode*;
             OHOS::Rosen::SceneSessionManager::NotifyRecoveringFinished*;
             OHOS::Rosen::SceneSessionManager::NotifySessionTransferToTargetScreenEvent*;

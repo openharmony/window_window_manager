@@ -336,10 +336,6 @@ private:
     sptr<WindowProperty> property_;
     mutable std::mutex mutex_;
     bool showWithOptions_ = false;
-
-    /*
-     * Window Immersive
-     */
     std::unordered_map<WindowType, SystemBarProperty> sysBarPropMap_ {
         { WindowType::WINDOW_TYPE_STATUS_BAR,           SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
         { WindowType::WINDOW_TYPE_NAVIGATION_BAR,       SystemBarProperty(true, 0x00FFFFFF, 0xFF000000) },
