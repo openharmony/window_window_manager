@@ -148,7 +148,6 @@ void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(
     if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
         specificCallback_->onGetFloatNavagationInfo_(
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
-        WSRect landspaceRect;
         auto [visibleFromTuple, isBarPhoneStatus, floatNavigationArea, landspaceRect] = floatNavagationInfo;
         visible = visibleFromTuple;
         floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
@@ -193,8 +192,8 @@ AvoidArea RootSceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, bool ign
                 return avoidArea;
             }
             case AvoidAreaType::TYPE_FLOAT_NAVIGATION: {
-                session->GetFloatNavigationAvoidArea(sessionRect, avoidArea, ignoreVisibility);
-                return session->GetFloatNavigationAvoidAreaEnabled() ? avoidArea : {};
+                session->GetFloatNavigationAvoidAreaForRoot(sessionRect, avoidArea, ignoreVisibility);
+                return session->GetFloatNavigationAvoidAreaEnabled() ? avoidArea : AvoidArea();
             }
             default: {
                 TLOGNE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",

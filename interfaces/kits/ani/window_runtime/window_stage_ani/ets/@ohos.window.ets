@@ -3056,6 +3056,8 @@ export class WindowInternal implements Window {
     private native getWindowSystemBarProperties(nativeObj: long): SystemBarProperties;
     private native isGestureBackEnabled(nativeObj: long): boolean;
     private native setGestureBackEnabled(nativeObj: long, enabled: boolean): void;
+    private native isFloatNavigationAvoidAreaEnabled(nativeObj: long): boolean;
+    private native setFloatNavigationAvoidAreaEnabled(nativeObj: long, enabled: boolean): void;
     private native setSingleFrameComposerEnabled(nativeObj: long, enabled: boolean): void;
     private native getWindowAvoidAreaIgnoringVisibilitySync(nativeObj: long, type: int): AvoidArea;
     private native setWaterMarkFlagSync(nativeObj: long, enable: boolean): void;
@@ -4121,6 +4123,22 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setGestureBackEnabled(this.nativeObj, enabled);
+        }).then((ret: Any) => {
+          resolve(undefined);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public isFloatNavigationAvoidAreaEnabled(): boolean {
+      return this.isFloatNavigationAvoidAreaEnabled(this.nativeObj);
+    }
+
+    public setFloatNavigationAvoidAreaEnabled(enabled: boolean): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setFloatNavigationAvoidAreaEnabled(this.nativeObj, enabled);
         }).then((ret: Any) => {
           resolve(undefined);
         }).catch((err: Any) => {
