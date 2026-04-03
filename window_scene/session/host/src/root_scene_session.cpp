@@ -144,13 +144,13 @@ void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(
 {
     bool visible = false;
     WSRect floatNavigationArea;
-    std::tuple<bool, bool, WSRect, WSRect> floatNavagationInfo;
+    std::tuple<bool, WSRect, WSRect> floatNavagationInfo;
     if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
         specificCallback_->onGetFloatNavagationInfo_(
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
-        auto [visibleFromTuple, isBarPhoneStatus, floatNavigationArea, landspaceRect] = floatNavagationInfo;
+        auto [visibleFromTuple, floatNavigationArea, landspaceRect] = floatNavagationInfo;
         visible = visibleFromTuple;
-        floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
+        floatNavigationArea = rect.width_ > rect.height_ ? landspaceRect : floatNavigationArea;
     }
     if (!visible && !ignoreVisibility) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());

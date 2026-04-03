@@ -520,9 +520,9 @@ public:
     void UpdateAvoidAreaForLSStateChange(int32_t curState, int32_t preState);
     WSError NotifyNextAvoidRectInfo(AvoidAreaType type,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
-    WSError NotifyFloatNavigationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
+    WSError NotifyFloatNavigationInfo(DisplayId displayId, bool visible,
         const WSRect& portraitRect, const WSRect& landspaceRect);
-    WSError GetFloatNavagationInfo(DisplayId displayId, std::tuple<bool, bool, WSRect, WSRect>& floatNavagationInfo);
+    WSError GetFloatNavagationInfo(DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo);
     WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
         std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
     WSRect GetAINavigationBarArea(uint64_t displayId, bool ignoreVisibility = false);
@@ -1333,7 +1333,7 @@ private:
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     void ClosePipWindowIfExist(WindowType type);
-    void NotifySessionAINavigationBarChange(int32_t persistentId);
+    void NotifySessionNavigationBarChange(int32_t persistentId, AvoidAreaType type);
     void ReportWindowProfileInfos();
     std::string FillWindowProfileInfo(const OHOS::sptr<OHOS::Rosen::SceneSession>& currSession, int32_t focusWindowId);
     void UpdateCameraWindowStatus(uint32_t accessTokenId, bool isShowing);
@@ -1777,7 +1777,7 @@ private:
     std::mutex nextAvoidRectInfoMapMutex_;
     std::unordered_map<AvoidAreaType, std::unordered_map<DisplayId, std::pair<WSRect, WSRect>>> nextAvoidRectInfoMap_;
     std::mutex floatNavagationInfoMapMutex_;
-    std::unordered_map<DisplayId, std::tuple<bool, bool, WSRect, WSRect>> floatNavagationInfoMap_;
+    std::unordered_map<DisplayId, std::tuple<bool, WSRect, WSRect>> floatNavagationInfoMap_;
     std::unordered_map<DisplayId, bool> statusBarDefaultVisibilityPerDisplay_;
     std::set<int32_t> avoidAreaListenerSessionSet_;
     static constexpr int32_t INVALID_STATUS_BAR_AVOID_HEIGHT = -1;

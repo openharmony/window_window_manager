@@ -2237,7 +2237,7 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         return this->GetNextAvoidRectInfo(displayId, type, nextSystemBarAvoidAreaRectInfo);
     };
     specificCb->onGetFloatNavagationInfo_ = [this](
-        DisplayId displayId, std::tuple<bool, bool, WSRect, WSRect>& floatNavagationInfo) {
+        DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
         return this->GetFloatNavagationInfo(displayId, floatNavagationInfo);
     };
     specificCb->onGetLSState_ = [this]() {
@@ -13827,7 +13827,7 @@ WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSR
             TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s isVisible %{public}u bar area %{public}s",
                 where, isVisible, barArea.ToString().c_str());
             for (auto persistentId : avoidAreaListenerSessionSet_) {
-                NotifySessionAINavigationBarChange(persistentId);
+                NotifySessionNavigationBarChange(persistentId, AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
             }
             rootSceneSession_->UpdateAvoidArea(
                 new AvoidArea(rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)),
@@ -13862,19 +13862,37 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidArea
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::NotifyFloatNavigationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
+WSError SceneSessionManager::NotifyFloatNavigationInfo(DisplayId displayId, bool visible,
     const WSRect& portraitRect, const WSRect& landspaceRect)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " visible %{public}d isBarPhoneStatus %{public}d"
-        "portraitRect %{public}s, landspaceRect %{public}s",
-        displayId, visible, isBarPhoneStatus, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
-    std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
-    floatNavagationInfoMap_[displayId] = { visible, isBarPhoneStatus, portraitRect, landspaceRect };
+    taskScheduler_->PostAsyncTask([this, displayId, isVisible, portraitRect, landspaceRect, where = __func__] {
+        bool needUpdated = false;
+        {
+            std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
+            std::tuple<bool, WSRect, WSRect> info(visible, portraitRect, landspaceRect);
+            auto iter = floatNavagationInfoMap_.find(displayId);
+            if (iter == floatNavagationInfoMap_.end() || iter->second != info) {
+                iter->second = info;
+                needUpdated = true;
+            }
+        }
+        if (needUpdated) {
+            TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s displayId %{public}" PRIu64 " visible %{public}d "
+                "portraitRect %{public}s, landspaceRect %{public}s",
+                where, displayId, isVisible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
+            for (auto persistentId : avoidAreaListenerSessionSet_) {
+                NotifySessionNavigationBarChange(persistentId, AvoidAreaType::TYPE_FLOAT_NAVIGATION);
+            }
+            rootSceneSession_->UpdateAvoidArea(
+                new AvoidArea(rootSceneSession_->GetAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION)),
+                AvoidAreaType::TYPE_FLOAT_NAVIGATION);
+        }
+    }, __func__);
     return WSError::WS_OK;
 }
 
 WSError SceneSessionManager::GetFloatNavagationInfo(
-    DisplayId displayId, std::tuple<bool, bool, WSRect, WSRect>& floatNavagationInfo)
+    DisplayId displayId, std::tuple<bool, WSRect, WSRect>& floatNavagationInfo)
 {
     std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
     auto iter = floatNavagationInfoMap_.find(displayId);
@@ -13885,14 +13903,14 @@ WSError SceneSessionManager::GetFloatNavagationInfo(
     return WSError::WS_DO_NOTHING;
 }
 
-void SceneSessionManager::NotifySessionAINavigationBarChange(int32_t persistentId)
+void SceneSessionManager::NotifySessionNavigationBarChange(int32_t persistentId, AvoidAreaType type)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr || !IsSessionVisibleForeground(sceneSession)) {
         TLOGD(WmsLogTag::WMS_IMMS, "scene session is nullptr or not visible");
         return;
     }
-    sceneSession->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+    sceneSession->HandleLayoutAvoidAreaUpdate(type);
 }
 
 WSRect SceneSessionManager::GetAINavigationBarArea(uint64_t displayId, bool ignoreVisibility)

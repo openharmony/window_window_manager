@@ -132,7 +132,7 @@ using NotifySetWindowCornerRadiusFunc = std::function<void(float cornerRadius)>;
 using GetNextAvoidAreaRectInfoFunc = std::function<WSError(DisplayId displayId, AvoidAreaType type,
     std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo)>;
 using GetFloatNavagationInfoFunc = std::function<WSError(DisplayId displayId,
-    std::tuple<bool, bool, WSRect, WSRect>& floatNavagationInfo)>;
+    std::tuple<bool, WSRect, WSRect>& floatNavagationInfo)>;
 using GetLSStateFunc = std::function<bool()>;
 using NotifyFollowParentRectFunc = std::function<void(bool isFollow)>;
 using NotifyWindowAnchorInfoChangeFunc = std::function<void(const WindowAnchorInfo& windowAnchorInfo)>;
@@ -1101,7 +1101,6 @@ protected:
     void CalculateAvoidAreaByType(AvoidAreaType type,
         const WSRect& winRect, const WSRect& avoidRect, AvoidArea& avoidArea);
     void PatchFloatNavigationArea(WSRect& floatNavigationArea);
-    bool isDisplayLand(bool isBarPhoneStatus);
     bool GetFloatNavigationAvoidAreaEnabled() const { return isFloatNavigationAvoidAreaEnabled_; }
 
     /*
