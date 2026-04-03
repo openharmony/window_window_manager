@@ -16,7 +16,6 @@
         extern "C++" {
             OHOS::Rosen::JsFbWindowManagerInit*;
             OHOS::Rosen::JsFbController::GetFloatingBallOptionFromJs*;
-            OHOS::Rosen::JsFbController::CheckParams*;
             OHOS::Rosen::JsFbController::GetController*;
         };
     local:

@@ -19,13 +19,14 @@
 #include "js_err_utils.h"
 #include "window_manager_hilog.h"
 #include "napi_common_want.h"
+#include "permission.h"
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 
 namespace {
-const std::string FLOATING_BALL_PERMISSION = "ohos.permission.FLOAT_VIEW";
+const std::string FLOAT_VIEW_PERMISSION = "ohos.permission.FLOAT_VIEW";
 constexpr size_t ARG_COUNT_ZERO = 0;
 constexpr size_t ARG_COUNT_ONE = 1;
 constexpr size_t INDEX_ZERO = 0;
@@ -98,6 +99,11 @@ napi_value JsFloatViewController::OnStartFloatView(napi_env env, napi_callback_i
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [weakController, env, task = napiAsyncTask] {
+        if (!Permission::CheckCallingPermission(FLOAT_VIEW_PERMISSION)) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NO_PERMISSION,
+                "no permission."));
+            return;
+        }
         auto fvController = weakController.promote();
         if (fvController == nullptr) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "Controller is nullptr");

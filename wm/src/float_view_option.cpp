@@ -92,9 +92,9 @@ bool FvOption::GetShowWhenCreate() const
     return showWhenCreate_;
 }
 
-bool FvOption::IsRectValid() const  
+bool FvOption::IsRectValid() const
 {
-    if (rect_.width_ <= 0 || rect_.height_ <= 0) {
+    if (rect_.width_ == 0 || rect_.height_ == 0) {
         return false;
     }
     return true;

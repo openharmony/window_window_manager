@@ -34,6 +34,7 @@ public:
     static sptr<FloatViewController> GetActiveController() { return activeController_; }
 
     static void DoActionEvent(const std::string& actionName, const std::string& reason);
+    static void DoActionStart(const std::string& reason = "");
     static void DoActionClose(const std::string& reason);
     static void DoActionHide(const std::string& reason);
     static void DoActionInSidebar(const std::string& reason);

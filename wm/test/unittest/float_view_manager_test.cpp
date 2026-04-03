@@ -28,6 +28,42 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 
+class MockFloatViewController : public FloatViewController {
+public:
+    MockFloatViewController(const FvOption& option, napi_env env) : FloatViewController(option, env) {}
+    ~MockFloatViewController() override = default;
+
+    MOCK_METHOD1(StopFloatView, WMError(const std::string& reason));
+    MOCK_METHOD3(SyncWindowInfo, void(uint32_t windowId, const FloatViewWindowInfo& windowInfo,
+        const std::string& reason));
+    MOCK_METHOD2(SyncLimits, void(uint32_t windowId, const FloatViewLimits& limits));
+    MOCK_METHOD1(ChangeState, void(const FvWindowState &newState));
+};
+
+class MockWindow : public Window {
+public:
+    WindowState state_ = WindowState::STATE_INITIAL;
+    const uint32_t mockWindowId_ = 101;
+    MockWindow() {};
+    ~MockWindow() {};
+    MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
+    MOCK_METHOD1(Destroy, WMError(uint32_t reason));
+    uint32_t GetWindowId() const override
+    {
+        return mockWindowId_;
+    }
+
+    void SetWindowState(const WindowState& state)
+    {
+        state_ = state;
+    }
+
+    WindowState GetWindowState() const override
+    {
+        return state_;
+    }
+};
+
 class FloatViewManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -37,6 +73,7 @@ public:
 
     sptr<FloatViewController> fvController_;
     sptr<FvOption> option_;
+    sptr<MockWindow> mw_;
 };
 
 void FloatViewManagerTest::SetUpTestCase()
@@ -53,6 +90,8 @@ void FloatViewManagerTest::SetUp()
     ASSERT_NE(nullptr, option_);
     fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
     ASSERT_NE(nullptr, fvController_);
+    mw_ = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw_);
 }
 
 void FloatViewManagerTest::TearDown()
@@ -193,6 +232,9 @@ HWTEST_F(FloatViewManagerTest, DoActionInFloatingBall, TestSize.Level1)
     FloatViewManager::SetActiveController(fvController_);
     FloatViewManager::DoActionInFloatingBall("test_reason");
     EXPECT_EQ(FvWindowState::FV_STATE_IN_FLOATING_BALL, fvController_->GetCurState());
+    fvController_->SetBindState(true);
+    FloatViewManager::DoActionInFloatingBall("test_reason");
+    EXPECT_EQ(FvWindowState::FV_STATE_IN_FLOATING_BALL, fvController_->GetCurState());
     FloatViewManager::RemoveActiveController(fvController_);
 }
 
@@ -228,6 +270,92 @@ HWTEST_F(FloatViewManagerTest, RemoveActiveControllerBranchCoverage, TestSize.Le
     EXPECT_EQ(nullptr, FloatViewManager::activeController_);
 }
 
+/**
+ * @tc.name: DoActionEvent
+ * @tc.desc: DoActionEvent (invalid action branch + valid action branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewManagerTest, DoActionEvent, TestSize.Level1)
+{
+    // branch: action not in map => return
+    FloatViewManager::DoActionEvent("not_exist_action", "ut");
+
+    // branch: action in map => dispatch (use "hide" to avoid depending on StopFloatView)
+    FloatViewManager::SetActiveController(fvController_);
+    FloatViewManager::DoActionEvent("hide", "ut");
+    EXPECT_EQ(FvWindowState::FV_STATE_HIDDEN, fvController_->GetCurState());
+    FloatViewManager::RemoveActiveController(fvController_);
 }
+
+/**
+ * @tc.name: DoActionStart
+ * @tc.desc: DoActionStart with and without active controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewManagerTest, DoActionStart, TestSize.Level1)
+{
+    // branch: no active controller => do nothing
+    FloatViewManager::DoActionStart();
+
+    // branch: has active controller => call controller->StopFloatView
+    auto mockController = sptr<MockFloatViewController>::MakeSptr(*option_, nullptr);
+    ASSERT_NE(nullptr, mockController);
+
+    FloatViewManager::SetActiveController(mockController);
+    FloatViewManager::DoActionStart();
+    EXPECT_EQ(FvWindowState::FV_STATE_STARTED, mockController->GetCurState());
+    mockController->SetBindState(true);
+    FloatViewManager::DoActionStart();
+    EXPECT_EQ(FvWindowState::FV_STATE_STARTED, mockController->GetCurState());
+    FloatViewManager::RemoveActiveController(mockController);
 }
+
+/**
+ * @tc.name: DoActionClose
+ * @tc.desc: DoActionClose with and without active controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewManagerTest, DoActionClose, TestSize.Level1)
+{
+    // branch: no active controller => do nothing
+    FloatViewManager::DoActionClose("ut");
+
+    // branch: has active controller => call controller->StopFloatView
+    auto mockController = sptr<MockFloatViewController>::MakeSptr(*option_, nullptr);
+    ASSERT_NE(nullptr, mockController);
+
+    FloatViewManager::SetActiveController(mockController);
+    FloatViewManager::DoActionClose("ut");
+    EXPECT_EQ(FvWindowState::FV_STATE_UNDEFINED, mockController->GetCurState());
+    FloatViewManager::RemoveActiveController(mockController);
 }
+
+/**
+ * @tc.name: SyncFvWindowInfo
+ * @tc.desc: SyncFvWindowInfo with and without active controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewManagerTest, SyncFvLimitsAndWindowInfo, TestSize.Level1)
+{
+    uint32_t windowId = 1;
+    FloatViewWindowInfo windowInfo;
+    windowInfo.scale_ = 1.1f;
+    std::string reason = "ut";
+    FloatViewLimits limits;
+    // branch: no active controller => do nothing
+    FloatViewManager::SyncFvLimits(windowId, limits);
+    FloatViewManager::SyncFvWindowInfo(windowId, windowInfo, reason);
+
+    // branch: has active controller => call controller->SyncWindowInfo
+    auto mockController = sptr<MockFloatViewController>::MakeSptr(*option_, nullptr);
+    ASSERT_NE(nullptr, mockController);
+    mockController->window_ = mw_;
+    FloatViewManager::SetActiveController(mockController);
+    FloatViewManager::SyncFvLimits(mw_->GetWindowId(), limits);
+    FloatViewManager::SyncFvWindowInfo(mw_->GetWindowId(), windowInfo, reason);
+    FloatViewManager::RemoveActiveController(mockController);
+    EXPECT_EQ(windowInfo.scale_, mockController->GetWindowInfo().scale_);
+}
+} // namespace
+} // namespace Rosen
+} // namespace OHOS

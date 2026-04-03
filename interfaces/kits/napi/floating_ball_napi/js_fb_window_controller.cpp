@@ -32,10 +32,6 @@ namespace {
 const std::string STATE_CHANGE_CB = "stateChange";
 const std::string CLICK_EVENT = "click";
 const std::string FLOATING_BALL_PERMISSION = "ohos.permission.USE_FLOAT_BALL";
-constexpr uint32_t TITLE_MIN_LEN = 1;
-constexpr uint32_t TITLE_MAX_LEN = 64;
-constexpr uint32_t CONTENT_MAX_LEN = 64;
-constexpr int32_t PIXEL_MAP_MAX_SIZE = 192 * 1024;
 constexpr int32_t NUMBER_TWO = 2;
 }
 
@@ -112,7 +108,7 @@ napi_value JsFbController::OnStartFloatingBall(napi_env env, napi_callback_info 
     }
 
     std::string errMsg = "";
-    if (!CheckParams(env, option, errMsg)) {
+    if (!option.IsValid(errMsg)) {
         napi_throw(env, AbilityRuntime::CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), errMsg));
         return NapiGetUndefined(env);
@@ -182,7 +178,7 @@ napi_value JsFbController::OnUpdateFloatingBall(napi_env env, napi_callback_info
     }
 
     std::string errMsg = "";
-    if (!CheckParams(env, option, errMsg)) {
+    if (!option.IsValid(errMsg)) {
         napi_throw(env, AbilityRuntime::CreateJsError(env,
             static_cast<int32_t>(WmErrorCode::WM_ERROR_FB_PARAM_INVALID), errMsg));
         return NapiGetUndefined(env);
@@ -369,43 +365,6 @@ napi_value JsFbController::GetFloatingBallOptionFromJs(napi_env env, napi_value 
         return nullptr;
     }
     return NapiGetUndefined(env);
-}
-
-bool JsFbController::CheckParams(napi_env env, const FbOption& option, std::string &errMsg)
-{
-    if (option.GetTemplate() < static_cast<uint32_t>(FloatingBallTemplate::STATIC) ||
-        option.GetTemplate() >= static_cast<uint32_t>(FloatingBallTemplate::END)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Template %{public}d is invalid", option.GetTemplate());
-        errMsg = "Template is invalid.";
-        return false;
-    }
-    if (option.GetTitle().length() < TITLE_MIN_LEN || option.GetTitle().length() > TITLE_MAX_LEN) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Title length Exceed the limit %{public}zu", option.GetTitle().length());
-        errMsg = "Title length Exceed the limit";
-        return false;
-    }
-    if (option.GetContent().length() > CONTENT_MAX_LEN) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Content length Exceed the limit %{public}zu", option.GetContent().length());
-        errMsg = "Content length Exceed the limit";
-        return false;
-    }
-    if (option.GetIcon() != nullptr && option.GetIcon()->GetByteCount() > PIXEL_MAP_MAX_SIZE) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Icon size Exceed the limit %{public}d", option.GetIcon()->GetByteCount());
-        errMsg = "Icon size Exceed the limit";
-        return false;
-    }
-    if (!option.GetBackgroundColor().empty() && !ColorParser::IsValidColorNoAlpha(option.GetBackgroundColor())) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "BackgroundColor is invalid");
-        errMsg = "BackgroundColor is invalid";
-        return false;
-    }
-    if (option.GetTemplate() == static_cast<uint32_t>(FloatingBallTemplate::STATIC) &&
-        option.GetIcon() == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Template %{public}u need icon", option.GetTemplate());
-        errMsg = "Current template need icon";
-        return false;
-    }
-    return true;
 }
 
 napi_value JsFbController::GetIcon(napi_env env, const napi_value value, FbOption& option)

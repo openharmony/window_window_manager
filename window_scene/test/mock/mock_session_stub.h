@@ -88,6 +88,9 @@ public:
     MOCK_METHOD1(GetFloatingBallWindowId, WMError(uint32_t& windowId));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
     MOCK_METHOD1(RestoreFbMainWindow, WMError(const std::shared_ptr<AAFwk::Want>& want));
+    MOCK_METHOD0(NotifyFloatViewPrepareClose, void(void));
+    MOCK_METHOD1(UpdateFloatView, WMError(const FloatViewTemplateInfo& fvTemplateInfo));
+    MOCK_METHOD1(RestoreFloatViewMainWindow, WMError(const std::shared_ptr<AAFwk::WantParams>& wantParams));
     MOCK_METHOD1(UpdateIsShowDecorInFreeMultiWindow, WSError(bool& isShow));
     MOCK_METHOD(WSError, SetContentAspectRatio, (float ratio, bool isPersistent, bool needUpdateRect), (override));
     MOCK_METHOD(WSError, SetDecorVisible, (bool isVisible), (override));

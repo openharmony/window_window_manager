@@ -108,6 +108,8 @@ constexpr uint32_t OUTLINE_WIDTH_MAX = 8; // vp
 constexpr uint32_t OUTLINE_FOR_WINDOW_MAX_NUM = 256; // Up to 256 windows can show simultaneously.
 constexpr uint32_t OUTLINE_COLOR_OPAQUE_OFFSET = 24; // Shift right 24 bits.
 constexpr uint32_t OUTLINE_COLOR_OPAQUE = 0xff; // Color opaque byte.
+
+constexpr uint32_t MAX_RATIO_LIMITS_COUNT = 10; // Max ratio limits count.
 }
 
 /**
@@ -271,7 +273,6 @@ enum WindowModeSupport : uint32_t {
     WINDOW_MODE_SUPPORT_SPLIT_SECONDARY = 1 << 3,
     WINDOW_MODE_SUPPORT_PIP = 1 << 4,
     WINDOW_MODE_SUPPORT_FB = 1 << 5,
-    WINDOW_MODE_SUPPORT_FV = 1 << 6,
     WINDOW_MODE_SUPPORT_ALL = WINDOW_MODE_SUPPORT_FULLSCREEN |
                               WINDOW_MODE_SUPPORT_SPLIT_PRIMARY |
                               WINDOW_MODE_SUPPORT_SPLIT_SECONDARY |
@@ -2073,7 +2074,6 @@ struct FloatViewLimits : public Parcelable {
     uint32_t minWidth_ {0};
     uint32_t minHeight_ {0};
     std::vector<std::pair<float, float>> ratioLimits_ {};
-    uint32_t ratioLimitsCount_ {0};
     FloatViewLimits() {}
 
     bool Marshalling(Parcel& parcel) const override
@@ -2103,11 +2103,16 @@ struct FloatViewLimits : public Parcelable {
             delete floatViewLimits;
             return nullptr;
         }
-        if (!parcel.ReadUint32(floatViewLimits->ratioLimitsCount_)) {
+        uint32_t limitsCount = 0;
+        if (!parcel.ReadUint32(limitsCount)) {
             delete floatViewLimits;
             return nullptr;
         }
-        floatViewLimits->ratioLimits_.resize(floatViewLimits->ratioLimitsCount_);
+        if (limitsCount > MAX_RATIO_LIMITS_COUNT) {
+            delete floatViewLimits;
+            return nullptr;
+        }
+        floatViewLimits->ratioLimits_.resize(limitsCount);
         for (auto& ratioLimit : floatViewLimits->ratioLimits_) {
             if (!parcel.ReadFloat(ratioLimit.first) || !parcel.ReadFloat(ratioLimit.second)) {
                 delete floatViewLimits;

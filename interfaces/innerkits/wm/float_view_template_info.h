@@ -25,18 +25,19 @@ public:
     ~FloatViewTemplateInfo() override = default;
 
     uint32_t template_ {};
-    bool visibleInApp_ {false};
+    bool visibleInApp_ {true};
     bool isBind_ {false};
     uint32_t bindWindowId_ {INVALID_WINDOW_ID};
     Rect rect_ {};
     bool showWhenCreate_ {true};
+    std::string id_ {};
 
     // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteUint32(template_) || !parcel.WriteBool(visibleInApp_) ||
             !parcel.WriteUint32(bindWindowId_) || !parcel.WriteBool(showWhenCreate_) ||
-            !parcel.WriteBool(isBind_)) {
+            !parcel.WriteBool(isBind_) || !parcel.WriteString(id_)) {
             return false;
         }
         if (!parcel.WriteInt32(rect_.posX_) || !parcel.WriteInt32(rect_.posY_) ||
@@ -52,7 +53,7 @@ public:
         std::unique_ptr<FloatViewTemplateInfo> fvTemplateInfo = std::make_unique<FloatViewTemplateInfo>();
         if (!parcel.ReadUint32(fvTemplateInfo->template_) || !parcel.ReadBool(fvTemplateInfo->visibleInApp_) ||
             !parcel.ReadUint32(fvTemplateInfo->bindWindowId_) || !parcel.ReadBool(fvTemplateInfo->showWhenCreate_) ||
-            !parcel.ReadBool(fvTemplateInfo->isBind_)) {
+            !parcel.ReadBool(fvTemplateInfo->isBind_) || !parcel.ReadString(fvTemplateInfo->id_)) {
             return nullptr;
         }
         if (!parcel.ReadInt32(fvTemplateInfo->rect_.posX_) || !parcel.ReadInt32(fvTemplateInfo->rect_.posY_) ||

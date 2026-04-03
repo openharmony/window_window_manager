@@ -1142,6 +1142,14 @@ public:
         const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode);
 
     /**
+     * @brief Check if any window matches the given state
+     *
+     * @param state The state to match
+     * @return True if any window matches the given state, false otherwise
+     */
+    static bool IsAnyWindowMatchState(const WindowState& state);
+
+    /**
      * @brief Get surface node from RS
      *
      * @return Surface node from RS
@@ -5377,6 +5385,16 @@ public:
      * @param wantParams the info deleverd to the main window.
      */
     virtual WMError RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief update float view.
+     *
+     * @param showWhenCreate show when create for float view or floating ball.
+     */
+    virtual WMError UpdateFloatShowWhenCreate(const bool showWhenCreate)
     {
         return WMError::WM_OK;
     }

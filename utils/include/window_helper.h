@@ -301,8 +301,6 @@ public:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_PIP & windowModeSupportType;
             case WindowMode::WINDOW_MODE_FB:
                 return WindowModeSupport::WINDOW_MODE_SUPPORT_FB & windowModeSupportType;
-            case WindowMode::WINDOW_MODE_FV:
-                return WindowModeSupport::WINDOW_MODE_SUPPORT_FV & windowModeSupportType;
             case WindowMode::WINDOW_MODE_UNDEFINED:
                 return false;
             default:
@@ -328,8 +326,6 @@ public:
                 return WindowMode::WINDOW_MODE_PIP;
             case WindowModeSupport::WINDOW_MODE_SUPPORT_FB:
                 return WindowMode::WINDOW_MODE_FB;
-            case WindowModeSupport::WINDOW_MODE_SUPPORT_FV:
-                return WindowMode::WINDOW_MODE_FV;
             default:
                 return WindowMode::WINDOW_MODE_UNDEFINED;
         }

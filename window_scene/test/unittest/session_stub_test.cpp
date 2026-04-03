@@ -435,7 +435,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_SYNC };
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true, "test"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
@@ -456,6 +456,21 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
     res = session_->ProcessRemoteRequest(
     static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_ANCHOR_INFO), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOAT_VIEW_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOAT_VIEW), data, reply, option);
+    ASSERT_NE(ERR_NONE, res);
+
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_VIEW_MAIN_WINDOW), data, reply, option);
+    ASSERT_NE(ERR_NONE, res);
 }
 
 /**
@@ -1934,7 +1949,7 @@ HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level
     auto result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
  
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true, "test"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_NONE);

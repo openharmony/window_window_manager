@@ -28,17 +28,42 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int64_t MAX_RANDOM = 999999;
-constexpr int64_t TOKEN_TIMEOUT_MS = 500;
 }
 
 std::recursive_mutex FloatWindowManager::relationMutex_;
 std::map<sptr<FloatViewController>, sptr<FloatingBallController>> FloatWindowManager::floatViewToFloatingBallMap_ = {};
-std::map<sptr<FloatingBallController>, sptr<FloatViewController>> FloatWindowManager::floatingBallToFloatViewMap_ = {};
 
-std::condition_variable FloatWindowManager::tokenCv_;
-std::mutex FloatWindowManager::tokenMutex_;
-uint64_t FloatWindowManager::tokenOwner_ = 0;
-uint64_t FloatWindowManager::tokenSeq_ = 0;
+std::mutex FloatWindowManager::windowMutex_;
+uint32_t FloatWindowManager::floatViewCnt_ = 0;
+uint32_t FloatWindowManager::floatingBallCnt_ = 0;
+uint32_t FloatWindowManager::pipCnt_ = 0;
+
+void FloatWindowManager::ProcessBindFloatViewStateChange(const wptr<FloatViewController> &fvControllerWeak,
+    const FvWindowState state)
+{
+    auto fvController = fvControllerWeak.promote();
+    if (fvController == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "fvController is null");
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(relationMutex_);
+    auto it = floatViewToFloatingBallMap_.find(fvController);
+    if (it == floatViewToFloatingBallMap_.end() || it->second == nullptr) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "can not find floating ball by float view or null floating ball controller");
+        return;
+    }
+    auto fbController = it->second;
+
+    if (state == FvWindowState::FV_STATE_STARTED) {
+        fvController->SetShowWhenCreate(true);
+        fbController->SetShowWhenCreate(false);
+        return;
+    }
+    if (state == FvWindowState::FV_STATE_IN_FLOATING_BALL) {
+        fvController->SetShowWhenCreate(false);
+        fbController->SetShowWhenCreate(true);
+    }
+}
 
 std::string FloatWindowManager::GetControllerId()
 {
@@ -81,19 +106,27 @@ bool FloatWindowManager::IsFloatingBallStateValid(const sptr<FloatingBallControl
 bool FloatWindowManager::IsFloatViewStateValid(const sptr<FloatViewController> &fvController)
 {
     auto fvState = fvController->GetCurState();
-    return fvState == FvWindowState::FV_STATE_UNDEFINED || fvState == FvWindowState::FV_STATE_STOPPED;
+    return fvState == FvWindowState::FV_STATE_UNDEFINED || fvState == FvWindowState::FV_STATE_STOPPED ||
+           fvState == FvWindowState::FV_STATE_ERROR;
 }
 
 WMError FloatWindowManager::UnBind(const sptr<FloatViewController> &fvController,
     const sptr<FloatingBallController> &fbController)
 {
     std::lock_guard<std::recursive_mutex> lock(relationMutex_);
-    if (!IsFloatingBallStateValid(fbController) || !fbController->IsBind()) {
+    if (fbController == nullptr || !IsFloatingBallStateValid(fbController) || !fbController->IsBind()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "floating ball state not supported or has not been bound");
         return WMError::WM_ERROR_FB_INVALID_STATE;
     }
-    if (!IsFloatViewStateValid(fvController) || !fvController->IsBind()) {
+    if (fvController == nullptr || !IsFloatViewStateValid(fvController) || !fvController->IsBind()) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "float view state not supported or has not been bound");
+        return WMError::WM_ERROR_FV_INVALID_STATE;
+    }
+
+    auto it = floatViewToFloatingBallMap_.find(fvController);
+    if (it == floatViewToFloatingBallMap_.end() || it->second == nullptr ||
+        it->second.GetRefPtr() != fbController.GetRefPtr()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "fvController and fbController are not a bound pair");
         return WMError::WM_ERROR_FV_INVALID_STATE;
     }
     fbController->SetBindState(false);
@@ -108,17 +141,15 @@ void FloatWindowManager::AddRelation(const sptr<FloatViewController> &fvControll
     const sptr<FloatingBallController> &fbController)
 {
     floatViewToFloatingBallMap_[fvController] = fbController;
-    floatingBallToFloatViewMap_[fbController] = fvController;
 }
 
 void FloatWindowManager::RemoveRelation(const sptr<FloatViewController> &fvController,
     const sptr<FloatingBallController> &fbController)
 {
-    if (floatViewToFloatingBallMap_.find(fvController) != floatViewToFloatingBallMap_.end()) {
-        floatViewToFloatingBallMap_.erase(fvController);
-    }
-    if (floatingBallToFloatViewMap_.find(fbController) != floatingBallToFloatViewMap_.end()) {
-        floatingBallToFloatViewMap_.erase(fbController);
+    auto it = floatViewToFloatingBallMap_.find(fvController);
+    if (it != floatViewToFloatingBallMap_.end() && it->second != nullptr && fbController != nullptr &&
+        it->second.GetRefPtr() == fbController.GetRefPtr()) {
+        floatViewToFloatingBallMap_.erase(it);
     }
 }
 
@@ -176,12 +207,11 @@ WMError FloatWindowManager::StartBindFloatingBall(const wptr<FloatingBallControl
         return WMError::WM_DO_NOTHING;
     }
     std::lock_guard<std::recursive_mutex> lock(relationMutex_);
-    auto it = floatingBallToFloatViewMap_.find(fbController);
-    if (it == floatingBallToFloatViewMap_.end() || it->second == nullptr) {
+    auto fvController = FindFloatViewByFloatingBall(fbController);
+    if (fvController == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "can not find float view by floating ball or null float view controller");
         return WMError::WM_DO_NOTHING;
     }
-    auto fvController = it->second;
 
     auto ret = fbController->StartFloatingBallSingle(option, true);
     if (ret != WMError::WM_OK) {
@@ -236,7 +266,7 @@ WMError FloatWindowManager::StopBindFloatView(const wptr<FloatViewController> &f
     ret = fbController->StopFloatingBallFromClientSingle();
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "stop floating ball failed when bind");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_INVALID_OPERATION;
     }
     return WMError::WM_OK;
 }
@@ -249,12 +279,12 @@ WMError FloatWindowManager::StopBindFloatingBall(const wptr<FloatingBallControll
         return WMError::WM_DO_NOTHING;
     }
     std::lock_guard<std::recursive_mutex> lock(relationMutex_);
-    auto it = floatingBallToFloatViewMap_.find(fbController);
-    if (it == floatingBallToFloatViewMap_.end() || it->second == nullptr) {
+    auto fvController = FindFloatViewByFloatingBall(fbController);
+    if (fvController == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "can not find float view by floating ball or null float view controller");
         return WMError::WM_DO_NOTHING;
     }
-    auto fvController = it->second;
+
     auto ret = fbController->StopFloatingBallFromClientSingle();
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "stop floating ball failed when bind");
@@ -263,78 +293,93 @@ WMError FloatWindowManager::StopBindFloatingBall(const wptr<FloatingBallControll
     ret = fvController->StopFloatViewFromClientSingle();
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "stop float view failed when bind");
-        return WMError::WM_DO_NOTHING;
+        return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
     return WMError::WM_OK;
 }
 
-uint64_t FloatWindowManager::AcquireToken()
+sptr<Window> FloatWindowManager::CreateFbWindow(sptr<WindowOption> &windowOption,
+    const FloatingBallTemplateBaseInfo &templateInfo, const std::shared_ptr<Media::PixelMap>& icon,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError &error,
+    const wptr<FloatingBallController> &fbControllerWeak)
 {
-    std::unique_lock<std::mutex> lock(tokenMutex_);
-    bool status = tokenCv_.wait_for(lock, std::chrono::milliseconds(TOKEN_TIMEOUT_MS), [] { return tokenOwner_ == 0; });
-    if (!status) {
-        return 0;
-    }
-    if (tokenSeq_ == UINT64_MAX) {
-        tokenSeq_ = 0;
-    }
-    tokenOwner_ = ++tokenSeq_;
-    return tokenOwner_;
-}
-
-void FloatWindowManager::ReleaseToken(uint64_t token)
-{
-    if (token == 0) {
-        return;
-    }
-    {
-        std::lock_guard<std::mutex> lock(tokenMutex_);
-        if (tokenOwner_ != token) {
-            return;
-        }
-        tokenOwner_ = 0;
-    }
-    tokenCv_.notify_one();
-}
-
-bool FloatWindowManager::IsFloatViewConflict(const wptr<FloatViewController>& selfController)
-{
-    if (PictureInPictureManager::HasRunningControllerStartingOrStarted()) {
-        return true;
-    }
-    if (!FloatingBallManager::HasActiveController()) {
-        return false;
-    }
-    auto selfFv = selfController.promote();
-    if (selfFv != nullptr) {
-        auto boundFb = GetBoundFloatingBall(selfFv);
-        auto activeFb = FloatingBallManager::GetActiveController();
-        if (boundFb != nullptr && activeFb != nullptr && boundFb.GetRefPtr() == activeFb.GetRefPtr()) {
-            return false;
+    std::lock_guard<std::mutex> lock(windowMutex_);
+    if (floatViewCnt_ > 0) {
+        auto fvController = GetBoundFloatView(fbControllerWeak.promote());
+        if (fvController == nullptr || !FloatViewManager::IsActiveController(fvController)) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "there are active float view can not create flaotingb ball");
+            error = WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+            return nullptr;
         }
     }
-    return true;
+    sptr<Window> window = Window::CreateFb(windowOption, templateInfo, icon, context, error);
+    if (window != nullptr) {
+        floatingBallCnt_++;
+    }
+    return window;
 }
 
-bool FloatWindowManager::IsFloatingBallConflict(const wptr<FloatingBallController>& selfController)
+sptr<Window> FloatWindowManager::CreateFvWindow(sptr<WindowOption> &windowOption,
+    const FloatViewTemplateInfo &templateInfo, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+    WMError &error, const wptr<FloatViewController> &fvControllerWeak)
 {
-    if (!FloatViewManager::HasActiveController()) {
-        return false;
+    std::lock_guard<std::mutex> lock(windowMutex_);
+    if (pipCnt_ > 0) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "there are active pip, can not create float view");
+        error = WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+        return nullptr;
     }
-    auto selfFb = selfController.promote();
-    if (selfFb != nullptr) {
-        auto boundFv = GetBoundFloatView(selfFb);
-        auto activeFv = FloatViewManager::GetActiveController();
-        if (boundFv != nullptr && activeFv != nullptr && boundFv.GetRefPtr() == activeFv.GetRefPtr()) {
-            return false;
+    if (floatingBallCnt_ > 0) {
+        auto fbController = GetBoundFloatingBall(fvControllerWeak.promote());
+        if (fbController == nullptr || !FloatingBallManager::IsActiveController(fbController)) {
+            TLOGW(WmsLogTag::WMS_SYSTEM, "there are active floating ball, can not create float view");
+            error = WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+            return nullptr;
         }
     }
-    return true;
+    sptr<Window> window = Window::CreateFv(windowOption, templateInfo, context, error);
+    if (window != nullptr) {
+        floatViewCnt_++;
+    }
+    return window;
 }
 
-bool FloatWindowManager::IsPipConflict()
+sptr<Window> FloatWindowManager::CreatePipWindow(sptr<WindowOption> &windowOption,
+    const PiPTemplateInfo &templateInfo, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
+    WMError &error)
 {
-    return FloatViewManager::HasActiveController();
+    std::lock_guard<std::mutex> lock(windowMutex_);
+    if (floatViewCnt_ > 0) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "there are active float view, can not create pip");
+        error = WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS;
+        return nullptr;
+    }
+    sptr<Window> window = Window::CreatePiP(windowOption, templateInfo, context, error);
+    if (window != nullptr) {
+        pipCnt_++;
+    }
+    return window;
+}
+
+WMError FloatWindowManager::DestroyFloatWindow(const sptr<Window> &window)
+{
+    std::lock_guard<std::mutex> lock(windowMutex_);
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when destroy float window");
+        return WMError::WM_ERROR_NULLPTR;
+    }
+    auto type = window->GetType();
+    WMError ret = window->Destroy();
+    if (type == WindowType::WINDOW_TYPE_FV) {
+        floatViewCnt_ = (floatViewCnt_ > 0) ? (floatViewCnt_ - 1) : 0;
+    } else if (type == WindowType::WINDOW_TYPE_FB) {
+        floatingBallCnt_ = (floatingBallCnt_ > 0) ? (floatingBallCnt_ - 1) : 0;
+    } else if (type == WindowType::WINDOW_TYPE_PIP) {
+        pipCnt_ = (pipCnt_ > 0) ? (pipCnt_ - 1) : 0;
+    }
+    TLOGI(WmsLogTag::WMS_SYSTEM, "DestroyFloatWindow, type: %{public}d, ret: %{public}d, floatViewCnt: %{public}u, "
+        "floatingBallCnt: %{public}u, pipCnt: %{public}u", type, ret, floatViewCnt_, floatingBallCnt_, pipCnt_);
+    return ret;
 }
 
 sptr<FloatingBallController> FloatWindowManager::GetBoundFloatingBall(const sptr<FloatViewController>& fvController)
@@ -356,11 +401,24 @@ sptr<FloatViewController> FloatWindowManager::GetBoundFloatView(const sptr<Float
         return nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(relationMutex_);
-    auto it = floatingBallToFloatViewMap_.find(fbController);
-    if (it == floatingBallToFloatViewMap_.end()) {
+    return FindFloatViewByFloatingBall(fbController);
+}
+
+sptr<FloatViewController> FloatWindowManager::FindFloatViewByFloatingBall(
+    const sptr<FloatingBallController>& fbController)
+{
+    if (fbController == nullptr) {
         return nullptr;
     }
-    return it->second;
+    for (const auto& [fv, fb] : floatViewToFloatingBallMap_) {
+        if (fv == nullptr || fb == nullptr) {
+            continue;
+        }
+        if (fb.GetRefPtr() == fbController.GetRefPtr()) {
+            return fv;
+        }
+    }
+    return nullptr;
 }
 
 } // namespace Rosen

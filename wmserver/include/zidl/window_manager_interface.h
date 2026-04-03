@@ -418,7 +418,6 @@ public:
      */
     virtual WMError GetPiPSettingSwitchStatus(bool& switchStatus) { return WMError::WM_OK; }
     virtual WMError GetIsPipEnabled(bool& isPipEnabled) { return WMError::WM_OK; }
-    virtual int32_t GetPipTemplateType() { return -1; }
 
     /*
      * Window outline

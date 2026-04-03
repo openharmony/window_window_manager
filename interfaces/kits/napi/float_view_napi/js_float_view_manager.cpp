@@ -14,6 +14,7 @@
  */
 #include "js_float_view_manager.h"
 
+#include "js_err_utils.h"
 #include "js_float_view_utils.h"
 #include "float_view_controller.h"
 #include "float_view_manager.h"
@@ -21,7 +22,6 @@
 #include "float_window_manager.h"
 #include "window_manager_hilog.h"
 #include "window_manager.h"
-#include "js_err_utils.h"
 #include "singleton_container.h"
 #include "permission.h"
 
@@ -31,6 +31,8 @@ using namespace AbilityRuntime;
 namespace {
 const std::string FLOATING_BALL_PERMISSION = "ohos.permission.USE_FLOAT_BALL";
 const std::string FLOAT_VIEW_PERMISSION = "ohos.permission.FLOAT_VIEW";
+constexpr size_t ARG_COUNT_TWO = 2;
+constexpr size_t ARG_COUNT_THREE = 3;
 }
 JsFloatViewManager::JsFloatViewManager()
 {
@@ -56,7 +58,7 @@ napi_value JsFloatViewWMInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "isFloatViewEnabled", moduleName, JsFloatViewManager::IsFloatViewEnabled);
     BindNativeFunction(env, exportObj, "getFloatViewLimits", moduleName, JsFloatViewManager::GetFloatViewLimits);
     BindNativeFunction(env, exportObj, "bind", moduleName, JsFloatViewManager::Bind);
-    BindNativeFunction(env, exportObj, "unBind", moduleName, JsFloatViewManager::UnBind);
+    BindNativeFunction(env, exportObj, "unbind", moduleName, JsFloatViewManager::UnBind);
     InitFvEnums(env, exportObj);
     return NapiGetUndefined(env);
 }
@@ -108,16 +110,10 @@ napi_value JsFloatViewManager::CreateFloatViewControllerTask(napi_env env, const
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
-        if (mainWindow == nullptr) {
-            *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
-            return;
-        }
         if (floatViewController == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        floatViewController->UpdateMainWindow(mainWindow);
     };
     NapiAsyncTask::CompleteCallback complete =
         [errCodePtr, floatViewController](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -184,8 +180,8 @@ napi_value JsFloatViewManager::IsFloatViewEnabled(napi_env env, napi_callback_in
 
 napi_value JsFloatViewManager::OnIsFloatViewEnabled(napi_env env, napi_callback_info info)
 {
-    bool isSupportFloatView_ = FloatViewManager::isSupportFloatView_;
-    return CreateJsValue(env, isSupportFloatView_);
+    bool isSupportFloatView = FloatViewManager::isSupportFloatView_;
+    return CreateJsValue(env, isSupportFloatView);
 }
 
 napi_value JsFloatViewManager::GetFloatViewLimits(napi_env env, napi_callback_info info)
@@ -205,7 +201,7 @@ napi_value JsFloatViewManager::OnGetFloatViewLimits(napi_env env, napi_callback_
     FloatViewLimits limits;
     WMError errCode = SingletonContainer::Get<WindowManager>().GetFloatViewLimits(limits);
     if (errCode != WMError::WM_OK) {
-       return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
             "Failed to get global float view limits.");
     }
     auto jsObject = CreateJsFloatViewLimitsObject(env, limits);
@@ -225,11 +221,11 @@ napi_value JsFloatViewManager::Bind(napi_env env, napi_callback_info info)
 napi_value JsFloatViewManager::OnBind(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "OnBind");
-    size_t argc = 3;
-    napi_value argv[3] = {nullptr};
+    size_t argc = ARG_COUNT_THREE;
+    napi_value argv[ARG_COUNT_THREE] = {nullptr};
     // 解析应用传参FloatViewConfiguration对象
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 3) {
+    if (argc < ARG_COUNT_THREE) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Missing args when bind.");
     }
 
@@ -300,11 +296,11 @@ napi_value JsFloatViewManager::BindTask(napi_env env, const sptr<FloatViewContro
             *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
             return;
         }
-        // if (!Permission::CheckCallingPermission(FLOATING_BALL_PERMISSION) ||
-        //     !Permission::CheckCallingPermission(FLOAT_VIEW_PERMISSION)) {
-        //     *errCodePtr = WmErrorCode::WM_ERROR_NO_PERMISSION;
-        //     return;
-        // }
+        if (!Permission::CheckCallingPermission(FLOATING_BALL_PERMISSION) ||
+            !Permission::CheckCallingPermission(FLOAT_VIEW_PERMISSION)) {
+            *errCodePtr = WmErrorCode::WM_ERROR_NO_PERMISSION;
+            return;
+        }
         if (fvController == nullptr || fbController == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "fvController or fbController is null");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
@@ -313,7 +309,7 @@ napi_value JsFloatViewManager::BindTask(napi_env env, const sptr<FloatViewContro
         std::string errMsg = "";
         if (!option.IsValid(errMsg)) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "check floating ball param failed, %{public}s", errMsg.c_str());
-            *errCodePtr = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+            *errCodePtr = WmErrorCode::WM_ERROR_FB_PARAM_INVALID;
             return;
         }
         *errCodePtr = ConvertErrorToCode(FloatWindowManager::Bind(fvController, fbController, option));
@@ -341,11 +337,11 @@ napi_value JsFloatViewManager::UnBind(napi_env env, napi_callback_info info)
 napi_value JsFloatViewManager::OnUnBind(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "OnUnBind");
-    size_t argc = 2;
-    napi_value argv[2] = {nullptr};
+    size_t argc = ARG_COUNT_TWO;
+    napi_value argv[ARG_COUNT_TWO] = {nullptr};
     // 解析应用传参FloatViewConfiguration对象
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < 2) {
+    if (argc < ARG_COUNT_TWO) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Missing args when bind.");
     }
     auto controllerPair = GetBindControllers(env, argv);

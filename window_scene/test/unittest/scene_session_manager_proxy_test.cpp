@@ -2888,7 +2888,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetFloatViewLimits01, TestSize.Level1)
     MockMessageParcel::SetReadInt32ErrorFlag(false);
 
     ret = proxy->GetFloatViewLimits(limits);
-    EXPECT_EQ(ret, WMError::WM_OK);
+    EXPECT_NE(ret, WMError::WM_OK);
 }
 } // namespace
 } // namespace Rosen

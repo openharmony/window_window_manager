@@ -55,9 +55,6 @@ std::map<int32_t, wptr<PictureInPictureControllerBase>> PictureInPictureManager:
 std::map<int32_t, sptr<PictureInPictureControllerBase>> PictureInPictureManager::windowToControllerMap_ = {};
 std::shared_ptr<NativeReference> PictureInPictureManager::innerCallbackRef_ = nullptr;
 
-std::mutex PictureInPictureManager::runningControllersMutex_;
-std::vector<wptr<PictureInPictureControllerBase>> PictureInPictureManager::runningControllers_ = {};
-
 PictureInPictureManager::PictureInPictureManager()
 {
 }
@@ -362,39 +359,5 @@ bool PictureInPictureManager::GetPipEnabled()
     SingletonContainer::Get<WindowAdapter>().GetIsPipEnabled(isPipEnabled);
     return isPipEnabled;
 }
-
-void PictureInPictureManager::AddRunningController(const sptr<PictureInPictureControllerBase>& pipController)
-{
-    if (pipController == nullptr) {
-        return;
-    }
-    std::lock_guard<std::mutex> lock(runningControllersMutex_);
-    // avoid duplicates
-    for (auto it = runningControllers_.begin(); it != runningControllers_.end(); ++it) {
-        if (it->GetRefPtr() == pipController.GetRefPtr()) {
-            return;
-        }
-    }
-    runningControllers_.emplace_back(pipController);
-}
-
-void PictureInPictureManager::RemoveRunningController(const wptr<PictureInPictureControllerBase>& pipController)
-{
-    std::lock_guard<std::mutex> lock(runningControllersMutex_);
-    for (auto it = runningControllers_.begin(); it != runningControllers_.end();) {
-        if (it->promote() == nullptr || it->GetRefPtr() == pipController.GetRefPtr()) {
-            it = runningControllers_.erase(it);
-            continue;
-        }
-        ++it;
-    }
-}
-
-bool PictureInPictureManager::HasRunningControllerStartingOrStarted()
-{
-    std::lock_guard<std::mutex> lock(runningControllersMutex_);
-    return !runningControllers_.empty();
-}
-
 }
 }

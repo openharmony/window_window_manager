@@ -469,28 +469,6 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateOutline02, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleGetPipTemplateType
- * @tc.desc: test HandleGetPipTemplateType
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest2, HandleGetPipTemplateType, Function | SmallTest | Level2)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    
-    // WriteInt32 failed
-    MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    int res = stub_->HandleGetPipTemplateType(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
-    
-    // success
-    MockMessageParcel::ClearAllErrorFlag();
-    res = stub_->HandleGetPipTemplateType(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
-}
-
-/**
  * @tc.name: HandleGetFloatViewLimits
  * @tc.desc: test HandleGetFloatViewLimits
  * @tc.type: FUNC

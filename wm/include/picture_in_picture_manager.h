@@ -40,10 +40,6 @@ public:
     static void SetActiveController(sptr<PictureInPictureControllerBase> pipController);
     static void RemoveActiveController(wptr<PictureInPictureControllerBase> pipController);
 
-    static void AddRunningController(const sptr<PictureInPictureControllerBase>& pipController);
-    static void RemoveRunningController(const wptr<PictureInPictureControllerBase>& pipController);
-    static bool HasRunningControllerStartingOrStarted();
-
     // actual impl controller
     static void AttachAutoStartController(int32_t handleId, wptr<PictureInPictureControllerBase> pipController);
     static void DetachAutoStartController(int32_t handleId, wptr<PictureInPictureControllerBase> pipController);
@@ -72,9 +68,6 @@ public:
 
 private:
     static sptr<PictureInPictureControllerBase> GetActiveController() { return activeController_; }
-
-    static std::mutex runningControllersMutex_;
-    static std::vector<wptr<PictureInPictureControllerBase>> runningControllers_;
 
     // controller in use
     static sptr<PictureInPictureControllerBase> activeController_;

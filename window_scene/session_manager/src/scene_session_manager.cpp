@@ -1133,8 +1133,6 @@ void SceneSessionManager::ConfigDecor(const WindowSceneConfig::ConfigItem& decor
                     WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_SECONDARY;
             } else if (mode == "fb") {
                 support |= WindowModeSupport::WINDOW_MODE_SUPPORT_FB;
-            } else if (mode == "fv") {
-                support |= WindowModeSupport::WINDOW_MODE_SUPPORT_FV;
             } else {
                 TLOGW(WmsLogTag::DEFAULT, "Invalid supporedMode");
                 support = WindowModeSupport::WINDOW_MODE_SUPPORT_ALL;
@@ -5044,21 +5042,9 @@ WSError SceneSessionManager::IsFloatingBallValid(const sptr<SceneSession>& paren
 
 WSError SceneSessionManager::CanCreateFloatView(const sptr<SceneSession>& parentSession)
 {
-    if (parentSession == nullptr || parentSession->GetSessionState() == SessionState::STATE_DISCONNECT ||
-        parentSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Parent is null or state invalid");
+    if (parentSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Parent is null");
         return WSError::WS_ERROR_INVALID_PARENT;
-    }
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& [_, session] : sceneSessionMap_) {
-        if (session && session->GetWindowName() == "pip_window") {
-            auto pipTemplateType = session->GetPiPTemplateInfo().pipTemplateType;
-            if (pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_MEETING) ||
-                pipTemplateType == static_cast<uint32_t>(PiPTemplateType::VIDEO_CALL)) {
-                TLOGE(WmsLogTag::WMS_LIFE, "Current has high priority pip window, can't create float view");
-                return WSError::WS_DO_NOTHING;
-            }
-        }
     }
     return WSError::WS_OK;
 }
@@ -5149,9 +5135,9 @@ bool SceneSessionManager::CheckSystemWindowPermission(const sptr<WindowSessionPr
     if (type == WindowType::WINDOW_TYPE_FB) {
         return SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL);
     }
-    // if (type == WindowType::WINDOW_TYPE_FV) {
-    //     return SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOAT_VIEW);
-    // }
+    if (type == WindowType::WINDOW_TYPE_FV) {
+        return SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOAT_VIEW);
+    }
     if (type == WindowType::WINDOW_TYPE_FLOAT) {
         // WINDOW_TYPE_FLOAT could be created with the corresponding permission
         if (SessionPermission::VerifyCallingPermission("ohos.permission.SYSTEM_FLOAT_WINDOW") &&
@@ -20350,19 +20336,6 @@ WMError SceneSessionManager::GetIsPipEnabled(bool& isPipEnabled)
     return WMError::WM_OK;
 }
 
-int32_t SceneSessionManager::GetPipTemplateType()
-{
-    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-    for (const auto& [_, session] : sceneSessionMap_) {
-        if (session && session->GetWindowName() == "pip_window") {
-            auto pipTemplateType = static_cast<int32_t>(session->GetPiPTemplateInfo().pipTemplateType);
-            TLOGI(WmsLogTag::WMS_LIFE, "current has pip template type: %{public}d", pipTemplateType);
-            return static_cast<int32_t>(pipTemplateType);
-        }
-    }
-    return -1;
-}
-
 WMError SceneSessionManager::SetPipEnableByScreenId(int32_t screenId, bool isEnabled)
 {
     if (!SessionPermission::IsSACalling()) {
@@ -20799,9 +20772,6 @@ SelectMode SceneSessionManager::GetSelectMode() const
 
 WMError SceneSessionManager::GetFloatViewLimits(FloatViewLimits &limits)
 {
-    if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOAT_VIEW)) {
-        return WMError::WM_ERROR_INVALID_PERMISSION;
-    }
     std::lock_guard<std::mutex> lock(floatViewLimitsMutex_);
     limits = floatViewLimits_;
     return WMError::WM_OK;

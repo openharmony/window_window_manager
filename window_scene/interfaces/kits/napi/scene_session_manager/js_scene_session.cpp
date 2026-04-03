@@ -349,7 +349,9 @@ static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateI
         CreateJsValue(env, fbTemplateInfo.bindWindowId_));
     napi_set_named_property(env, fbTemplateInfoValue, "showWhenCreate",
         CreateJsValue(env, fbTemplateInfo.showWhenCreate_));
-
+    napi_set_named_property(env, fbTemplateInfoValue, "id",
+        CreateJsValue(env, fbTemplateInfo.id_));
+        
     if (fbTemplateInfo.icon_ != nullptr) {
         napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, fbTemplateInfo.icon_);
         if (jsIcon == nullptr) {
@@ -377,6 +379,8 @@ static napi_value CreateFvTemplateInfo(napi_env env, const FloatViewTemplateInfo
         CreateJsValue(env, fvTemplateInfo.bindWindowId_));
     napi_set_named_property(env, fvTemplateInfoValue, "showWhenCreate",
         CreateJsValue(env, fvTemplateInfo.showWhenCreate_));
+    napi_set_named_property(env, fvTemplateInfoValue, "id",
+        CreateJsValue(env, fvTemplateInfo.id_));
 
     napi_value jsRect = CreateJsSessionRect(env, fvTemplateInfo.rect_);
     if (jsRect == nullptr) {
