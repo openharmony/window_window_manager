@@ -901,6 +901,8 @@ public:
     WSError UpdateBrightness(float brightness);
     SessionState GetRealSessionState();
 
+    std::atomic<bool> isSkipSelfWhenShowOnVirtualScreen_ { false };
+
     /*
      * Window Pattern
      */

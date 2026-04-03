@@ -107,6 +107,14 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         sessionProperty->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
         sessionProperty->SetDisplayId(targetDisplayId);
         session->UseFocusIdIfCallingSessionIdInvalid(property->GetCallingSessionId());
+        auto panelSession = session->GetKeyboardPanelSession();
+        if (const auto callingSession = session->GetSceneSession(
+                session->GetSessionProperty()->GetCallingSessionId())) {
+            session->SetSessionBlackListWhenShow(
+                callingSession->isSkipSelfWhenShowOnVirtualScreen_.load(), panelSession);
+            session->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
+            panelSession->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
+        }
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
             "effectOption: %{public}s",
@@ -117,6 +125,17 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         return session->SceneSession::Foreground(property);
     }, "Show");
     return WSError::WS_OK;
+}
+
+void KeyboardSession::SetSessionBlackListWhenShow(bool isCallingSessionSkip, const sptr<SceneSession>& panelSession)
+{
+    if (isCallingSessionSkip) {
+        AddSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+        panelSession->AddSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+    } else {
+        RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+        panelSession->RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+    }
 }
 
 WSError KeyboardSession::Hide()
@@ -1132,6 +1151,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         if (session->specificCallback_ != nullptr
             && session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+            session->isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
         }
     }, __func__);
 }

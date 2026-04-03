@@ -23,6 +23,7 @@
 #include <modifier/rs_property.h>
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <chrono>
+#include <unordered_set>
 
 #include "display_manager.h"
 #include "session/host/include/session.h"
@@ -166,6 +167,8 @@ using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 using GetIsRecentStateFunc = std::function<bool()>;
 using ForceNotifyOccupiedAreaChangeCallback = std::function<void(DisplayId displayId)>;
 using NotifyRecoverWindowEffectFunc = std::function<void(bool recoverCorner, bool recoverShadow)>;
+using NotifySessionBlackListFunc = std::function<WMError(int32_t persistentId,
+    const std::unordered_set<std::string>& privacyWindowTags)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -199,6 +202,8 @@ public:
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         SetSkipEventOnCastPlusCallback onSetSkipEventOnCastPlus_;
+        NotifySessionBlackListFunc onAddSessionBlackList_;
+        NotifySessionBlackListFunc onRemoveSessionBlackList_;
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
@@ -563,6 +568,8 @@ public:
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     virtual void SetSkipEventOnCastPlus(bool isSkip);
+    WMError AddSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags);
+    WMError RemoveSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
     WMError UpdateAnimationSpeed(float speed);
 

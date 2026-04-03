@@ -8429,6 +8429,7 @@ void SceneSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
             } else {
                 session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(session->GetMissionId(), isSkip);
             }
+            session->isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
         }
         return;
     }, __func__);
@@ -8449,6 +8450,38 @@ void SceneSession::SetSkipEventOnCastPlus(bool isSkip)
             session->specificCallback_->onSetSkipEventOnCastPlus_(session->GetPersistentId(), isSkip);
         }
         return;
+    }, __func__);
+}
+
+WMError SceneSession::AddSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags)
+{
+    return PostSyncTask([weakThis = wptr(this), &privacyWindowTags, where = __func__]() -> WMError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        if (!session->specificCallback_ || !session->specificCallback_->onAddSessionBlackList_) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s specific callback or add callback is null", where);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        return session->specificCallback_->onAddSessionBlackList_(session->GetPersistentId(), privacyWindowTags);
+    }, __func__);
+}
+
+WMError SceneSession::RemoveSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags)
+{
+    return PostSyncTask([weakThis = wptr(this), &privacyWindowTags, where = __func__]() -> WMError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s session is null", where);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        if (!session->specificCallback_ || !session->specificCallback_->onRemoveSessionBlackList_) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s specific callback or remove callback is null", where);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        return session->specificCallback_->onRemoveSessionBlackList_(session->GetPersistentId(), privacyWindowTags);
     }, __func__);
 }
 

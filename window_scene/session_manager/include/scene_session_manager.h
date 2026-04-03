@@ -1828,6 +1828,10 @@ private:
     void NotifyWindowPropertyChange(ScreenId screenId);
     void PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
         std::unordered_map<WindowInfoKey, WindowChangeInfoType>& windowPropertyChangeInfo);
+    WMError AddSessionBlackListForSession(int32_t persistentId,
+        const std::unordered_set<std::string>& privacyWindowTags);
+    WMError RemoveSessionBlackListForSession(int32_t persistentId,
+        const std::unordered_set<std::string>& privacyWindowTags);
     WMError AddSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
         const std::unordered_set<std::string>& privacyWindowTags);
     WMError RemoveSessionBlackList(const std::vector<sptr<SceneSession>>& sceneSessionList,
