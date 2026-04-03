@@ -70,6 +70,7 @@ void WindowSceneSessionImplUIExtensionTest::TearDown()
  */
 HWTEST_F(WindowSceneSessionImplUIExtensionTest, RecoverExtension, TestSize.Level2)
 {
+    ASSERT_NE(nullptr, window_);
     window_->RecoverExtension();
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     window_->RecoverExtension();
