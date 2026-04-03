@@ -347,9 +347,9 @@ HWTEST_F(SceneSessionManagerAttributeTest, CleanScreenWatermarkImage004, TestSiz
     ssm_->sceneSessionMap_.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "test.bundle";
-    sessionInfo.callingPid_ = IPCSkeleton::GetCallingRealPid();
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
     sceneSession->property_->SetPersistentId(100);
+    sceneSession->SetCallingPid(IPCSkeleton::GetCallingRealPid());
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
     ssm_->screenWatermarkBundleName_ = "test.bundle";
     ssm_->screenWatermarkPriority_ = 1;
