@@ -391,6 +391,7 @@ ScreenSessionManager::ScreenSessionManager()
     }
     SetFirstSCBConnect(true);
     SetOnBootAnimation(true);
+    isBoot_ = (ScreenSceneConfig::GetUptimeSeconds() <= ScreenSceneConfig::GetBootTimeThreshold());
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
     WatchParameter(BOOT_ANIMATION_FINISHED.c_str(), BootAnimateFinishedCallback, this);
     isSupportCapture_ = IsSupportCapture();
@@ -1238,7 +1239,22 @@ ScreenId ScreenSessionManager::GenerateSmsScreenId(ScreenId rsScreenId)
     screenIdManager_.UpdateScreenId(rsScreenId, rsScreenId);
     return rsScreenId;
 }
- void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason)
+
+void ScreenSessionManager::SetRogToRs(ScreenId screenId, const RogResolution& rogSize)
+{
+    if (screenId == SCREEN_ID_DEFAULT && rogSize.isSupportRog) {
+        auto res = RSInterfaces::GetInstance().SetRogScreenResolution(screenId, rogSize.width, rogSize.height);
+        if (res != 0) {
+            TLOGNFE(WmsLogTag::DMS, "Failed to SetRogScreenResolution, errorCode::%{public}d", res);
+        } else {
+            TLOGNFI(WmsLogTag::DMS, "SetRogScreenResolution success");
+        }
+    } else {
+        TLOGNFI(WmsLogTag::DMS, "not support rog");
+    }
+}
+
+void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason)
 {
  	if (screenEvent == ScreenEvent::DISCONNECTED) {
  	    auto screenSession = GetScreenSessionByRsId(screenId);
@@ -1269,7 +1285,10 @@ void ScreenSessionManager::OnScreenChangeInner(ScreenId screenId, ScreenEvent sc
         return;
     }
     if (reason == ScreenChangeReason::HWCDEAD && GetScreenSession(GenerateSmsScreenId(screenId))) {
-        TLOGNFW(WmsLogTag::DMS, "composer restart and screensession connected");
+        TLOGNFW(WmsLogTag::DMS,
+                "composer restart and screensession connected, SetRogScreenResolution while ExceptionReconnect");
+        RogResolution rogSize = ScreenSceneConfig::GetRogResolution(0, 0);
+        SetRogToRs(screenId, rogSize);
         // composer restart, notify powermgr poweron pc outer screen
         if (screenId != SCREEN_ID_DEFAULT && g_isPcDevice) {
             NotifyAbnormalScreenConnectChange(screenId);
@@ -4246,7 +4265,7 @@ void ScreenSessionManager::SetupScreenDensityProperties(ScreenId screenId, Scree
             TLOGNFI(WmsLogTag::DMS, "densityDpi_ = %{public}f, rogDpi_ = %{public}f", densityDpi_, rogDpi_);
             RogResolution rogSize = ScreenSceneConfig::GetRogResolution(property.GetPhyBounds().rect_.GetWidth(),
                                                                         property.GetPhyBounds().rect_.GetHeight());
-            if (rogSize.isSupportRog) {
+            if (screenId == SCREEN_ID_DEFAULT && rogSize.isSupportRog) {
                 float rogDpi = rogSize.dpi;
                 defaultDpi = static_cast<uint32_t>(rogDpi);
                 cachedSettingDpi_ = static_cast<uint32_t>(rogDpi);
@@ -4338,14 +4357,14 @@ void ScreenSessionManager::SetRogParameter(uint32_t width, uint32_t height, floa
     system::SetParameter("persist.window.screen.isSupportRog", std::to_string(isSupportRog));
 }
 
-void ScreenSessionManager::ValidateRogProperty(const RRect& screenPhyBounds, ScreenProperty& property)
+void ScreenSessionManager::ValidateRogProperty(ScreenId screenId, const RRect& screenPhyBounds,
+                                               ScreenProperty& property)
 {
-    bool isBoot = (ScreenSceneConfig::GetUptimeSeconds() <= ScreenSceneConfig::GetBootTimeThreshold());
     RogResolution rogSize =
         ScreenSceneConfig::GetRogResolution(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_);
     TLOGNFI(WmsLogTag::DMS, "ValidateRogProperty width = %{public}d, height = %{public}d, dpi = %{public}f",
             rogSize.width, rogSize.height, rogSize.dpi);
-    if (isBoot) {
+    if (isBoot_) {
         if (rogSize.isSupportRog) {
             if (rogSize.width > 0 && rogSize.height > 0 && rogSize.dpi > 0) {
                 SetRogParameter(rogSize.width, rogSize.height, rogSize.dpi, rogSize.isSupportRog);
@@ -4359,6 +4378,9 @@ void ScreenSessionManager::ValidateRogProperty(const RRect& screenPhyBounds, Scr
             SetRogParameter(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_, defaultDpi, 0);
             TLOGE(WmsLogTag::DMS, "close by aps, not support rog");
         }
+    } else {
+        TLOGNFI(WmsLogTag::DMS, "SetRogScreenResolution while ExceptionReboot");
+        SetRogToRs(screenId, rogSize);
     }
 }
 
@@ -4367,7 +4389,9 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
 {
     auto screenBounds = GetScreenBounds(screenId, screenMode);
     auto screenPhyBounds = GetPhyScreenBounds(screenId, screenMode);
-    ValidateRogProperty(screenPhyBounds, property);
+    if (screenId == SCREEN_ID_DEFAULT) {
+        ValidateRogProperty(screenId, screenPhyBounds, property);
+    }
     property.SetRotation(0.0f);
     property.SetPhyWidth(screenCapability.GetPhyWidth());
     property.SetPhyHeight(screenCapability.GetPhyHeight());
@@ -4381,7 +4405,7 @@ void ScreenSessionManager::InitScreenProperty(ScreenId screenId, RSScreenModeInf
     property.SetCurrentOffScreenRendering(false);
     RogResolution rogSize =
         ScreenSceneConfig::GetRogResolution(screenPhyBounds.rect_.width_, screenPhyBounds.rect_.height_);
-    if (rogSize.isSupportRog) {
+    if (screenId == SCREEN_ID_DEFAULT && rogSize.isSupportRog) {
         property.SetScreenRealWidth(property.GetPhyBounds().rect_.GetWidth());
         property.SetScreenRealHeight(property.GetPhyBounds().rect_.GetHeight());
     } else {
@@ -4410,7 +4434,7 @@ RRect ScreenSessionManager::GetScreenBounds(ScreenId screenId, RSScreenModeInfo&
     }
     RogResolution rogSize =
         ScreenSceneConfig::GetRogResolution(screenMode.GetScreenWidth(), screenMode.GetScreenHeight());
-    if (rogSize.isSupportRog) {
+    if (screenId == SCREEN_ID_DEFAULT && rogSize.isSupportRog) {
         float rogDpi = rogSize.dpi;
         defaultDpi = static_cast<uint32_t>(rogDpi);
         cachedSettingDpi_ = static_cast<uint32_t>(rogDpi);
@@ -4731,7 +4755,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
     screenEventTracker_.RecordEvent("create screen session success.");
     RogResolution rogSize = ScreenSceneConfig::GetRogResolution(property.GetPhyBounds().rect_.GetWidth(),
                                                                 property.GetPhyBounds().rect_.GetHeight());
-    if (rogSize.isSupportRog) {
+    if (screenId == SCREEN_ID_DEFAULT && rogSize.isSupportRog) {
         float rogScaleRatio = rogDpi_ / densityDpi_;
         TLOGNFI(WmsLogTag::DMS, "rogDpi_: %{public}f, densityDpi_: %{public}f, rogScaleRatio: %{public}f", rogDpi_, densityDpi_, rogScaleRatio);
         session->SetVprScaleRatio(rogScaleRatio);
@@ -6147,23 +6171,14 @@ void ScreenSessionManager::BootAnimateFinishedCallback(const char *key, const ch
         TLOGNFI(WmsLogTag::DMS, "boot animation finished");
         auto& that = *reinterpret_cast<ScreenSessionManager*>(context);
         auto screenSession = that.GetDefaultScreenSession();
-        if (screenSession == nullptr) {
+        if (screenSession == nullptr || !that.isBoot_) {
             TLOGNFE(WmsLogTag::DMS, "screen session is null!");
             return;
         }
         ScreenId screenId = screenSession->GetScreenId();
         RogResolution rogSize = ScreenSceneConfig::GetRogResolution(0, 0);
-        if (rogSize.isSupportRog) {
-            TLOGNFI(WmsLogTag::DMS, "SetRogScreenResolution while BootFinish");
-            auto res = RSInterfaces::GetInstance().SetRogScreenResolution(screenId, rogSize.width, rogSize.height);
-            if (res != 0) {
-                TLOGNFE(WmsLogTag::DMS, "Failed to SetRogScreenResolution BootFinish, errorCode::%{public}d", res);
-            } else {
-                TLOGNFI(WmsLogTag::DMS, "SetRogScreenResolution BootFinish success");
-            }
-        } else {
-            TLOGNFI(WmsLogTag::DMS, "not support rog");
-        }
+        TLOGNFI(WmsLogTag::DMS, "SetRogScreenResolution while BootFinish");
+        that.SetRogToRs(screenId, rogSize);
     }
 }
 
