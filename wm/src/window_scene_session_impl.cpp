@@ -3523,12 +3523,15 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
     const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
+    bool hasEnableSetting = static_cast<uint32_t>(systemBarProperty.settingFlag_) &
+        static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING);
     PartialSystemBarProperty prop = {
         .enable_ = systemBarProperty.enable_,
         .backgroundColor_ = systemBarProperty.backgroundColor_,
         .contentColor_ = systemBarProperty.contentColor_,
         .enableAnimation_ = systemBarProperty.enableAnimation_,
-        .flag_ = systemBarPropertyFlag
+        .flag_ = systemBarPropertyFlag,
+        .isolate_ = systemBarPropertyFlag.enableFlag && !hasEnableSetting
     };
     auto ret = SetOwnSystemBarProperty(type, prop, SystemBarPropertyOwner::APPLICATION);
     if (ret == WMError::WM_OK) {
@@ -3687,10 +3690,10 @@ WMError WindowSceneSessionImpl::SetOwnSystemBarProperty(WindowType type, const P
         }
         ownPropList.insert(insertIt, insertPair);
         TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u owner %{public}u "
-            "prop [%{public}u %{public}x %{public}x %{public}u] "
+            "prop [%{public}u %{public}x %{public}x %{public}u, %{public}u] "
             "flag [%{public}u%{public}u%{public}u%{public}u] size %{public}u",
             GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), static_cast<uint32_t>(owner),
-            prop.enable_, prop.backgroundColor_, prop.contentColor_, prop.enableAnimation_,
+            prop.enable_, prop.backgroundColor_, prop.contentColor_, prop.enableAnimation_, prop.isolate_,
             prop.flag_.enableFlag, prop.flag_.backgroundColorFlag,
             prop.flag_.contentColorFlag, prop.flag_.enableAnimationFlag, static_cast<uint32_t>(ownPropList.size()));
     }
@@ -3751,7 +3754,8 @@ SystemBarProperty WindowSceneSessionImpl::GetCurrentActiveSystemBarProperty(Wind
             if (!flag.enableFlag && pair.second.flag_.enableFlag) {
                 prop.enable_ = pair.second.enable_;
                 flag.enableFlag = true;
-                prop.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+                prop.settingFlag_ = pair.second.isolate_ ?
+ 	                prop.settingFlag_ : (prop.settingFlag_ | SystemBarSettingFlag::ENABLE_SETTING);
             }
             if (!flag.enableAnimationFlag && pair.second.flag_.enableAnimationFlag) {
                 prop.enableAnimation_= pair.second.enableAnimation_;
