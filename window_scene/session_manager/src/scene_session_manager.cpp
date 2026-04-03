@@ -13868,21 +13868,21 @@ WSError SceneSessionManager::NotifyFloatNavigationInfo(DisplayId displayId, bool
     TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " visible %{public}d "
         "portraitRect %{public}s, landspaceRect %{public}s",
         displayId, visible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
-    taskScheduler_->PostAsyncTask([this, displayId, isVisible, portraitRect, landspaceRect, where = __func__] {
+    taskScheduler_->PostAsyncTask([this, displayId, visible, portraitRect, landspaceRect, where = __func__] {
         bool needUpdated = false;
         {
             std::lock_guard<std::mutex> lock(floatNavagationInfoMapMutex_);
             std::tuple<bool, WSRect, WSRect> info(visible, portraitRect, landspaceRect);
             auto iter = floatNavagationInfoMap_.find(displayId);
             if (iter == floatNavagationInfoMap_.end() || iter->second != info) {
-                iter->second = info;
+                floatNavagationInfoMap_[displayId] = info;
                 needUpdated = true;
             }
         }
         if (needUpdated) {
             TLOGNI(WmsLogTag::WMS_IMMS, "%{public}s displayId %{public}" PRIu64 " visible %{public}d "
                 "portraitRect %{public}s, landspaceRect %{public}s",
-                where, displayId, isVisible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
+                where, displayId, visible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
             for (auto persistentId : avoidAreaListenerSessionSet_) {
                 NotifySessionNavigationBarChange(persistentId, AvoidAreaType::TYPE_FLOAT_NAVIGATION);
             }
