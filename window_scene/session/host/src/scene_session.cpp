@@ -108,6 +108,7 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
+constexpr int32_t CUTOUT_OFFSET_VP = 30;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 constexpr int32_t MAX_FLOAT_TITLE_BAR_HEIGHT_VP = 40;
 constexpr uint32_t ROTATION_DEGREE = 90;
@@ -3274,8 +3275,9 @@ void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
         };
         auto isOverlap = SessionHelper::GetOverlap(floatNavigationArea,
             cutoutRect, floatNavigationArea.posX_, floatNavigationArea.posY_) == WSRect::EMPTY_RECT;
+        float vpr = display->GetVirtualPixelRatio();
         floatNavigationArea.posX_ =
-            isOverlap ? (cutoutRect.posX_ - floatNavigationArea.width_) : floatNavigationArea.posX_;
+            isOverlap ? (cutoutRect.posX_ - std::ceil(vpr * CUTOUT_OFFSET_VP)) : floatNavigationArea.posX_;
     }
 }
 
