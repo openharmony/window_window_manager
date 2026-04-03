@@ -2033,11 +2033,6 @@ void AniWindow::SetTouchableAreas(ani_env* env, ani_object obj, ani_long nativeO
 
 void AniWindow::OnSetTouchableAreas(ani_env* env, ani_array rects)
 {
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]OnSetTouchableAreas permission denied!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
-        return;
-    }
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]window is nullptr!");
