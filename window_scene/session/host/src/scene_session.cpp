@@ -3300,7 +3300,6 @@ void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidAre
     if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
         specificCallback_->onGetFloatNavagationInfo_(
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
-        WSRect landspaceRect;
         auto [visibleFromTuple, isBarPhoneStatus, floatNavigationArea, landspaceRect] = floatNavagationInfo;
         visible = visibleFromTuple;
         floatNavigationArea = isDisplayLand(isBarPhoneStatus) ? landspaceRect : floatNavigationArea;
@@ -3714,7 +3713,7 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
             auto type = static_cast<AvoidAreaType>(avoidType);
-            if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !GetFloatNavigationAvoidAreaEnabled()) {
+            if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
                 continue;
             }
             auto area = session->GetAvoidAreaByTypeInner(type);
