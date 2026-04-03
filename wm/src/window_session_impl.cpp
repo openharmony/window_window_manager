@@ -3397,7 +3397,7 @@ WMError WindowSessionImpl::SetPreferredOrientationWithResult(
         return error;
     }
     if (error == WMError::WM_DO_NOTHING) {
-        NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_IGNORED);
+        NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_APPLIED);
         return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
@@ -3428,6 +3428,7 @@ WMError WindowSessionImpl::HandleSetOrientationCommon(Orientation orientation, b
     TLOGI(WmsLogTag::WMS_ROTATION, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
           GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
     if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "winId: %{public}d policy has taken effect", GetPersistentId());
         return WMError::WM_DO_NOTHING;
     }
     if (property_->IsSupportRotateFullScreen()) {
