@@ -1602,7 +1602,7 @@ HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo03, TestSize.Level1)
 
     session2->SetMainWindowPersistentId(1);
     ssm_->SetSessionVisibilityInfo(session2, visibleState, windowVisibilityInfos, visibilityInfo);
-    EXPECT_TRUE(g_logMsg.find("Main window id:") != std::string::npos);
+    EXPECT_TRUE(windowVisibilityInfos[0]->GetControlAppType() == ControlAppType::CONTROL_APP_TYPE_BEGIN);
 
     ssm_->sceneSessionMap_.clear();
     LOG_SetCallback(nullptr);
@@ -1618,7 +1618,7 @@ HWTEST_F(SceneSessionManagerTest6, AddOptionWindowMetaInfo, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
-    auto windowInfo = sptr::MakeSptr();
+    auto windowInfo = sptr<WindowInfo>::MakeSptr();
     EXPECT_NE(nullptr, ssm_);
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "SceneSessionManagerTest2";
@@ -1631,7 +1631,7 @@ HWTEST_F(SceneSessionManagerTest6, AddOptionWindowMetaInfo, TestSize.Level1)
 
     session2->SetMainWindowPersistentId(INVALID_SESSION_ID);
     ssm_->AddOptionWindowMetaInfo(windowInfo, session2);
-    EXPECT_TRUE(g_logMsg.find("Main window id:") == std::string::npos);
+    EXPECT_TRUE(windowInfo->windowMetaInfo.mainWindowPersistentId == INVALID_SESSION_ID);
 
     session2->SetMainWindowPersistentId(1);
     ssm_->sceneSessionMap_.clear();
