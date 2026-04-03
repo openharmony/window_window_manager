@@ -520,7 +520,7 @@ public:
     void UpdateAvoidAreaForLSStateChange(int32_t curState, int32_t preState);
     WSError NotifyNextAvoidRectInfo(AvoidAreaType type,
         const WSRect& portraitRect, const WSRect& landspaceRect, DisplayId displayId);
-    WSError NotifyFloatNavagationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
+    WSError NotifyFloatNavigationInfo(DisplayId displayId, bool visible, bool isBarPhoneStatus,
         const WSRect& portraitRect, const WSRect& landspaceRect);
     WSError GetFloatNavagationInfo(DisplayId displayId, std::tuple<bool, bool, WSRect, WSRect>& floatNavagationInfo);
     WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
