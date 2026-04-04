@@ -2319,6 +2319,10 @@ HWTEST_F(SessionStubTest, HandleSetFloatNavigationAvoidAreaEnabled, TestSize.Lev
         EXPECT_CALL(*session, SetFloatNavigationAvoidAreaEnabled(enable)).Times(1);
         EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
     }
+    MessageParcel data;
+    MessageParcel reply;
+    code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE);
+    session->ProcessRemoteRequest(code, data, reply, option);
 }
 
 /**
