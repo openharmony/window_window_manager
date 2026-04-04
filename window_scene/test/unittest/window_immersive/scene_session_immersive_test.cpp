@@ -596,7 +596,7 @@ HWTEST_F(SceneSessionImmersiveTest, NotifyClientToUpdateRectTask, TestSize.Level
  */
 HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidAreaForRoot, TestSize.Level1)
 {
-    sptr<RootSceneSession> session = sptr<RootSceneSession>::MakeSptr(info);
+    sptr<RootSceneSession> session = sptr<RootSceneSession>::MakeSptr();
     session->specificCallback_ = nullptr;
     WSRect rect = { 0, 0, 0, 0 };
     AvoidArea area;
@@ -616,7 +616,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidAreaForRoot, TestSize
         std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
         WSRect rect1;
         floatNavagationInfo = std::tuple<bool, WSRect, WSRect>(false, rect1, rect1);
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     };
     session->GetFloatNavigationAvoidAreaForRoot(rect, area, false);
     session->GetFloatNavigationAvoidAreaForRoot(rect, area, true);
@@ -654,7 +654,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
         std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
         WSRect rect1;
         floatNavagationInfo = std::tuple<bool, WSRect, WSRect>(false, rect1, rect1);
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     };
     session->GetFloatNavigationAvoidArea(rect, area, false);
     session->GetFloatNavigationAvoidArea(rect, area, true);
