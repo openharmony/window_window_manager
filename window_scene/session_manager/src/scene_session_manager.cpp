@@ -13865,7 +13865,7 @@ WSError SceneSessionManager::GetNextAvoidRectInfo(DisplayId displayId, AvoidArea
 WSError SceneSessionManager::NotifyFloatNavigationInfo(DisplayId displayId, bool visible,
     const WSRect& portraitRect, const WSRect& landspaceRect)
 {
-    TLOGD(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " visible %{public}d "
+    TLOGI(WmsLogTag::WMS_IMMS, "displayId %{public}" PRIu64 " visible %{public}d "
         "portraitRect %{public}s, landspaceRect %{public}s",
         displayId, visible, portraitRect.ToString().c_str(), landspaceRect.ToString().c_str());
     taskScheduler_->PostAsyncTask([this, displayId, visible, portraitRect, landspaceRect, where = __func__] {
