@@ -425,6 +425,29 @@ HWTEST_F(WindowSceneSessionImplImmersiveTest, UpdateSystemBarProperties, TestSiz
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW,
         window->UpdateSystemBarProperties(systemBarProperties, systemBarPropertyFlags));
 }
+
+/*
+ * @tc.name: SetFloatNavigationAvoidAreaEnabled
+ * @tc.desc: SetFloatNavigationAvoidAreaEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplImmersiveTest, SetFloatNavigationAvoidAreaEnabled, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    window->property_->SetPersistentId(1);
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->state_ = WindowState::STATE_DESTROYED;
+    bool enable = false;
+    EXPECT_EQ(window->SetFloatNavigationAvoidAreaEnabled(true), WMError::WM_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(window->GetFloatNavigationAvoidAreaEnabled(enable), WMError::WM_ERROR_INVALID_WINDOW);
+    window->state_ = WindowState::STATE_SHOWN;
+    EXPECT_EQ(window->SetFloatNavigationAvoidAreaEnabled(true), WMError::WM_OK);
+    EXPECT_EQ(window->GetFloatNavigationAvoidAreaEnabled(enable), WMError::WM_OK);
+
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

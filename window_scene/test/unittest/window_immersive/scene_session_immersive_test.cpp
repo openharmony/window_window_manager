@@ -588,6 +588,141 @@ HWTEST_F(SceneSessionImmersiveTest, NotifyClientToUpdateRectTask, TestSize.Level
     session->NotifyClientToUpdateRectTask("OnBoundsChanged", nullptr);
     EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::AVOID_AREA_CHANGE);
 }
+
+/*
+ * @tc.name: GetFloatNavigationAvoidAreaForRoot
+ * @tc.desc: GetFloatNavigationAvoidAreaForRoot
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidAreaForRoot, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetFloatNavigationAvoidAreaForRoot";
+    info.bundleName_ = "GetFloatNavigationAvoidAreaForRoot";
+    sptr<RootSceneSession> session = sptr<RootSceneSession>::MakeSptr(info, nullptr);
+    session->specificCallback_ = nullptr;
+    WSRect rect = { 0, 0, 0, 0 };
+    AvoidArea area;
+    session->GetFloatNavigationAvoidAreaForRoot(rect, area, false);
+    session->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    session->specificCallback_->onGetFloatNavagationInfo_ = nullptr;
+    session->GetFloatNavigationAvoidAreaForRoot(rect, area, false);
+    std::tuple<bool, WSRect, WSRect> info;
+    session->specificCallback_->onGetFloatNavagationInfo_ = [] (1, info) { 
+        info = std::tuple<bool, WSRect, WSRect>(true, rect, rect);
+        return WSError::WS_OK; 
+    };
+    session->GetFloatNavigationAvoidAreaForRoot(rect, area, false);
+    session->GetFloatNavigationAvoidAreaForRoot(rect, area, true);
+    session->specificCallback_->onGetFloatNavagationInfo_ = [] (1, info) { 
+        info = std::tuple<bool, WSRect, WSRect>(false, rect, rect);
+        return WSError::WS_OK; 
+    };
+    session->GetFloatNavigationAvoidAreaForRoot(rect, area, false);
+    session->GetFloatNavigationAvoidAreaForRoot(rect, area, true);
+    EXPECT_EQ(session->specificCallback_->onGetFloatNavagationInfo_, WSError::WS_OK);
+    EXPECT_EQ(session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_FLOAT_NAVIGATION), AvoidArea());
+    EXPECT_EQ(session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_NAVIGATION_INDICATOR), AvoidArea());
+}
+
+/*
+ * @tc.name: GetFloatNavigationAvoidArea
+ * @tc.desc: GetFloatNavigationAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "GetFloatNavigationAvoidArea";
+    info.bundleName_ = "GetFloatNavigationAvoidArea";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->specificCallback_ = nullptr;
+    WSRect rect = { 0, 0, 0, 0 };
+    AvoidArea area;
+    session->GetFloatNavigationAvoidArea(rect, area, false);
+    session->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    session->specificCallback_->onGetFloatNavagationInfo_ = nullptr;
+    session->GetFloatNavigationAvoidArea(rect, area, false);
+    std::tuple<bool, WSRect, WSRect> info;
+    session->specificCallback_->onGetFloatNavagationInfo_ = [] (1, info) { 
+        info = std::tuple<bool, WSRect, WSRect>(true, rect, rect);
+        return WSError::WS_OK; 
+    };
+    session->GetFloatNavigationAvoidArea(rect, area, false);
+    session->GetFloatNavigationAvoidArea(rect, area, true);
+    session->specificCallback_->onGetFloatNavagationInfo_ = [] (1, info) { 
+        info = std::tuple<bool, WSRect, WSRect>(false, rect, rect);
+        return WSError::WS_OK; 
+    };
+    session->GetFloatNavigationAvoidArea(rect, area, false);
+    session->GetFloatNavigationAvoidArea(rect, area, true);
+    EXPECT_EQ(session->specificCallback_->onGetFloatNavagationInfo_, WSError::WS_OK);
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect);
+    session->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect);
+    session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_NAVIGATION_INDICATOR rect);
+    session->GetAllAvoidAreas(avoidAreas);
+
+    session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
+    session->GetAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
+    session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION rect);
+    session->GetAllAvoidAreas(avoidAreas);
+
+    session->SetFloatNavigationAvoidAreaEnabled(true);
+    session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
+    session->GetAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
+    session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION rect);
+    session->GetAllAvoidAreas(avoidAreas);
+}
+
+/*
+ * @tc.name: PatchFloatNavigationArea
+ * @tc.desc: PatchFloatNavigationArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, PatchFloatNavigationArea, TestSize.Level1)
+{
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    SessionInfo info;
+    info.abilityName_ = "PatchFloatNavigationArea";
+    info.bundleName_ = "PatchFloatNavigationArea";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+}
+
+/*
+ * @tc.name: NotifyFloatNavigationInfo
+ * @tc.desc: NotifyFloatNavigationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, NotifyFloatNavigationInfo, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->floatNavagationInfoMap_.clear();
+    WSRect rect;
+    ssm_->NotifyFloatNavigationInfo(0, true, rect, rect);
+    EXPECT_EQ(ssm_->floatNavagationInfoMap_[0], std::tuple<bool, WSRect, WSRect>(true, rect, rect));
+    ssm_->avoidAreaListenerSessionSet_.insert(6);
+    ssm_->NotifyFloatNavigationInfo(0, false, rect, rect);
+    EXPECT_EQ(ssm_->floatNavagationInfoMap_[0], std::tuple<bool, WSRect, WSRect>(true, rect, rect));
+    ssm_->NotifyFloatNavigationInfo(0, false, rect, rect);
+}
+
+/*
+ * @tc.name: GetFloatNavagationInfo
+ * @tc.desc: GetFloatNavagationInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, GetFloatNavagationInfo, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->floatNavagationInfoMap_.clear();
+    WSRect rect;
+    std::tuple<bool, WSRect, WSRect> info(true, rect, rect);
+    ssm_->GetFloatNavagationInfo(0, info);
+    EXPECT_EQ(ssm_->GetFloatNavagationInfo(0, info), WSError::WS_DO_NOTHING);
+    ssm_->floatNavagationInfoMap_[0] = info;
+    EXPECT_EQ(ssm_->GetFloatNavagationInfo(0, info), WSError::WS_OK);
+}
 }
 }
 }

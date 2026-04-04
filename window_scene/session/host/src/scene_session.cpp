@@ -3274,10 +3274,14 @@ void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
             cutoutArea.height_
         };
         auto isOverlap = SessionHelper::GetOverlap(floatNavigationArea,
-            cutoutRect, floatNavigationArea.posX_, floatNavigationArea.posY_) == WSRect::EMPTY_RECT;
+            cutoutRect, floatNavigationArea.posX_, floatNavigationArea.posY_) != WSRect::EMPTY_RECT;
         float vpr = display->GetVirtualPixelRatio();
-        floatNavigationArea.posX_ =
-            isOverlap ? (cutoutRect.posX_ - std::ceil(vpr * CUTOUT_OFFSET_VP)) : floatNavigationArea.posX_;
+        auto rect = GetSessionRect();
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d floatnavigation: %{public}s, cutout: %{public}s "
+            "rect: %{public}s, vpr: %{public}f",
+            GetPersistentId(), floatNavigationArea.ToString().c_str(), cutoutRect.ToString().c_str(), rect, vpr);
+        floatNavigationArea.posX_ = (isOverlap && rect.width_ > rect.height_) ? 
+            (cutoutRect.posX_ - std::ceil(vpr * CUTOUT_OFFSET_VP)) : floatNavigationArea.posX_;
     }
 }
 
