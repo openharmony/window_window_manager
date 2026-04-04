@@ -608,7 +608,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidAreaForRoot, TestSize
         std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
         WSRect rect1;
         floatNavagationInfo = std::tuple<bool, WSRect, WSRect>(true, rect1, rect1);
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     };
     session->GetFloatNavigationAvoidAreaForRoot(rect, area, false);
     session->GetFloatNavigationAvoidAreaForRoot(rect, area, true);
@@ -646,7 +646,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
         std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
         WSRect rect1;
         floatNavagationInfo = std::tuple<bool, WSRect, WSRect>(true, rect1, rect1);
-        return WSError::WS_OK; 
+        return WSError::WS_OK;
     };
     session->GetFloatNavigationAvoidArea(rect, area, false);
     session->GetFloatNavigationAvoidArea(rect, area, true);
