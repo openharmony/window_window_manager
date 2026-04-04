@@ -3279,7 +3279,8 @@ void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
         auto rect = GetSessionRect();
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d floatnavigation: %{public}s, cutout: %{public}s "
             "rect: %{public}s, vpr: %{public}f",
-            GetPersistentId(), floatNavigationArea.ToString().c_str(), cutoutRect.ToString().c_str(), rect, vpr);
+            GetPersistentId(), floatNavigationArea.ToString().c_str(), cutoutRect.ToString().c_str(),
+            rect.ToString().c_str(), vpr);
         floatNavigationArea.posX_ = (isOverlap && rect.width_ > rect.height_) ? 
             (cutoutRect.posX_ - std::ceil(vpr * CUTOUT_OFFSET_VP)) : floatNavigationArea.posX_;
     }

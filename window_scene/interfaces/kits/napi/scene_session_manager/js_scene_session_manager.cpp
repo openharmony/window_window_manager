@@ -256,7 +256,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::NotifyAINavigationBarShowStatus);
     BindNativeFunction(env, exportObj, "notifyNextAvoidRectInfo", moduleName,
         JsSceneSessionManager::NotifyNextAvoidRectInfo);
-    BindNativeFunction(env, exportObj, "NotifyFloatNavigationInfo", moduleName,
+    BindNativeFunction(env, exportObj, "notifyFloatNavigationInfo", moduleName,
         JsSceneSessionManager::NotifyFloatNavigationInfo);
     BindNativeFunction(env, exportObj, "updateTitleInTargetPos", moduleName, JsSceneSessionManager::UpdateTitleInTargetPos);
     BindNativeFunction(env, exportObj, "setSystemAnimatedScenes", moduleName,
