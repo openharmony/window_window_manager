@@ -31,9 +31,14 @@ void FvOption::SetUIPath(const std::string& uiPath)
     uiPath_ = uiPath;
 }
 
-void FvOption::SetStorage(const std::shared_ptr<NativeReference> &storageRef)
+void FvOption::SetStorage(const std::shared_ptr<NativeReference>& storageRef)
 {
     storage_ = storageRef;
+}
+
+void FvOption::SetStorage(const ani_object& storageRef)
+{
+    aniStorage_ = storageRef;
 }
 
 void FvOption::SetRect(const Rect& rect)
@@ -70,6 +75,11 @@ const std::string& FvOption::GetUIPath() const
 std::shared_ptr<NativeReference> FvOption::GetStorage() const
 {
     return storage_;
+}
+
+ani_object FvOption::GetAniStorage() const
+{
+    return aniStorage_;
 }
 
 Rect FvOption::GetRect() const
