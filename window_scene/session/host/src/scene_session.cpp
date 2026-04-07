@@ -7189,6 +7189,7 @@ WMError SceneSession::SetPreferredOrientationWithResult(
         session->GetSessionProperty()->SetRequestedOrientation(orientation, needAnimation);
         if (!session->onRequestedOrientationChange_) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s onRequestedOrientationChange is null", where);
+            NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_IGNORED);
             return;
         }
         session->onRequestedOrientationChange_(static_cast<uint32_t>(orientation), needAnimation, promiseId);
