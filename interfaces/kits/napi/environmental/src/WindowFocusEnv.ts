@@ -20,19 +20,20 @@ const HILOG_TAG = 'WMSFocus';
 
 interface UIEnvFocus {
   isFocused: boolean;
+}
+
+interface UIEnvHighlight {
   isHighlighted: boolean;
 }
 
 @ObservedV2
 class WindowFocusEnv implements IEnvironmentValue<UIEnvFocus> {
   @Trace isFocused: boolean;
-  @Trace isHighlighted: boolean;
   #win: window.Window;
 
   get value() {
     return {
       isFocused: this.isFocused,
-      isHighlighted: this.isHighlighted
     };
   }
 
@@ -40,17 +41,47 @@ class WindowFocusEnv implements IEnvironmentValue<UIEnvFocus> {
     try {
       this.#win = window.findWindow(context.getWindowName());
       this.#win.on('windowEvent', this.#focusChangeCallback);
-      this.#win.on('windowHighlightChange', this.#highlightChangeCallback);
     } catch (error) {
       hilog.error(HILOG_DOMAIN, HILOG_TAG, `[env] focus env constructor failed, ${error.message}`);
       this.isFocused = false;
-      this.isHighlighted = false;
     }
   }
 
   #focusChangeCallback = (windowEventType: window.WindowEventType): void => {
     this.isFocused = windowEventType == window.WindowEventType.WINDOW_ACTIVE;
   };
+
+  update() {}
+
+  destroy(): void {
+    try {
+      this.#win.off('windowEvent', this.#focusChangeCallback);
+    } catch (error) {
+      hilog.error(HILOG_DOMAIN, HILOG_TAG, `[env] focus env destroy failed, ${error.message}`);
+    }
+  }
+}
+
+@ObservedV2
+class WindowHighlightEnv implements IEnvironmentValue<UIEnvHighlight> {
+  @Trace isHighlighted: boolean;
+  #win: window.Window;
+
+  get value() {
+    return {
+      isHighlighted: this.isHighlighted
+    };
+  }
+
+  constructor(context: UIContext) {
+    try {
+      this.#win = window.findWindow(context.getWindowName());
+      this.#win.on('windowHighlightChange', this.#highlightChangeCallback);
+    } catch (error) {
+      hilog.error(HILOG_DOMAIN, HILOG_TAG, `[env] highlight env constructor failed, ${error.message}`);
+      this.isHighlighted = false;
+    }
+  }
 
   #highlightChangeCallback = (highlighted: boolean): void => {
     this.isHighlighted = highlighted;
@@ -60,14 +91,14 @@ class WindowFocusEnv implements IEnvironmentValue<UIEnvFocus> {
 
   destroy(): void {
     try {
-      this.#win.off('windowEvent', this.#focusChangeCallback);
       this.#win.off('windowHighlightChange', this.#highlightChangeCallback);
     } catch (error) {
-      hilog.error(HILOG_DOMAIN, HILOG_TAG, `[env] focus env destroy failed, ${error.message}`);
+      hilog.error(HILOG_DOMAIN, HILOG_TAG, `[env] highlight env destroy failed, ${error.message}`);
     }
   }
 }
 
 export default {
-  WindowFocusEnv
+  WindowFocusEnv,
+  WindowHighlightEnv
 }
