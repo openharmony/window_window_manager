@@ -15,7 +15,7 @@
 
 const window = requireInternal('window');
 const hilog = requireInternal('hilog');
-const HILOG_DOMAIN = 0x04209;
+const HILOG_DOMAIN = 0x04207;
 const HILOG_TAG = 'WMSFocus';
 
 interface UIEnvFocus {
