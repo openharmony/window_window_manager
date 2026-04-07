@@ -5748,16 +5748,19 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
 
 void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation, uint32_t promiseId)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "winId=%{public}d, orientation=%{public}u, needAnimation=%{public}d",
+    TLOGI(WmsLogTag::WMS_ROTATION, "winId=%{public}d, orientation:%{public}u, needAnimation:%{public}d",
         persistentId_, orientation, needAnimation);
     auto task =
     [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation,
         needAnimation, promiseId, env = env_, where = __func__] {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d orientation:%{public}u promiseId:%{public}u start",
+            where, persistentId, rotation, promiseId);
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d has been destroyed", where, persistentId);
             return;
         }
+        jsSceneSession->executionResultFinish_ = true;
         auto jsCallBack = jsSceneSession->GetJSCallback(REQUESTED_ORIENTATION_CHANGE_CB);
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s winId:%{public}d jsCallBack is null", where, persistentId);
@@ -5768,7 +5771,8 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         napi_value promiseIdValue = CreateJsValue(env, promiseId);
         napi_value argv[] = { rotationValue, animationValue, promiseIdValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGNI(WmsLogTag::DEFAULT, "%{public}s winId: %{public}d success %{public}u", where, persistentId, rotation);
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d orientation:%{public}u promiseId:%{public}u end",
+            where, persistentId, rotation, promiseId);
     };
     std::string taskName;
     if (needAnimation) {
@@ -5777,6 +5781,34 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         taskName = "OnReuqestedOrientationChange:pageOrientation";
     }
     taskScheduler_->RemoveMainThreadTaskByName(taskName);
+    taskScheduler_->PostMainThreadTask(task, taskName);
+    ProcessReuqestedOrientationResult(promiseId);
+}
+
+void JsSceneSession::ProcessReuqestedOrientationResult(uint32_t promiseId)
+{
+    if (promiseId == 0) {
+        TLOGI(WmsLogTag::WMS_ROTATION, "no need process");
+        return;
+    }
+    auto task =
+    [weakThis = wptr(this), persistentId = persistentId_, weakSession = weakSession_,
+        promiseId, env = env_, where = __func__] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d has been destroyed", where, persistentId);
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d promiseId:%{public}u isFinish:%{public}u",
+            where, persistentId, promiseId, jsSceneSession->executionResultFinish_.load());
+        if (!jsSceneSession->executionResultFinish_) {
+            if (auto session = weakSession.promote()) {
+                session->NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_IGNORED);
+            }
+        }
+        jsSceneSession->executionResultFinish_ = false;
+    };
+    std::string taskName= "OnReuqestedOrientationChange:ProcessReuqestedOrientationResult";
     taskScheduler_->PostMainThreadTask(task, taskName);
 }
 

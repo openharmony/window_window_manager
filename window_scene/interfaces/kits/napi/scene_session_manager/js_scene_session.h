@@ -22,6 +22,7 @@
 #include <native_engine/native_engine.h>
 #include <native_engine/native_value.h>
 #include <refbase.h>
+#include <atomic>
 
 #include "interfaces/include/ws_common.h"
 #include "session/host/include/scene_session.h"
@@ -527,6 +528,7 @@ private:
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true, uint32_t promiseId = 0);
+    void ProcessReuqestedOrientationResult(uint32_t promiseId);
     void OnForceHideChange(bool hide);
     void OnWindowDragHotArea(uint32_t type, SizeChangeReason reason, DisplayId displayId);
     void OnTouchOutside();
@@ -608,6 +610,7 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
+    std::atomic<bool> executionResultFinish_ = true;
 };
 } // namespace OHOS::Rosen
 
