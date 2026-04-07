@@ -463,7 +463,6 @@ private:
     void OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state);
     void UpdateStartRecoverProperty(bool isSpecificSession);
     void UpdateFinishRecoverProperty(bool isSpecificSession);
-    void RecoverExtension();
     NotifyWindowRecoverStateChangeFunc windowRecoverStateChangeFunc_;
 
     /*
