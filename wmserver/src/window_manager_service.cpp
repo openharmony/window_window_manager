@@ -1391,7 +1391,7 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("Set privacy mode permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
-    // Note: verify set touchale areas permission. 
+    // Note: verify set touchale areas permission.
     if (action == PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA &&
         !Permission::IsSystemCalling() &&
         !Permission::CheckCallingPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
