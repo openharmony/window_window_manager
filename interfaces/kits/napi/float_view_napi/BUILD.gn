@@ -55,6 +55,7 @@ ohos_shared_library("floatview_napi") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
+    "runtime_core:ani",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",

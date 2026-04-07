@@ -22,6 +22,7 @@
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 #include "float_view_template_info.h"
+#include "ani.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -32,7 +33,8 @@ public:
  
     void SetTemplate(uint32_t type);
     void SetUIPath(const std::string& uiPath);
-    void SetStorage(const std::shared_ptr<NativeReference> &storageRef);
+    void SetStorage(const std::shared_ptr<NativeReference>& storageRef);
+    void SetStorage(const ani_object& storageRef);
     void SetRect(const Rect& rect);
     void SetVisibilityInApp(bool visible);
     void SetContext(void* contextPtr);
@@ -41,6 +43,7 @@ public:
     uint32_t GetTemplate() const;
     const std::string& GetUIPath() const;
     std::shared_ptr<NativeReference> GetStorage() const;
+    ani_object GetAniStorage() const;
     Rect GetRect() const;
     bool GetVisibilityInApp() const;
     void* GetContext() const;
@@ -54,6 +57,7 @@ private:
     uint32_t template_ {};
     std::string uiPath_ {};
     std::shared_ptr<NativeReference> storage_ = nullptr;
+    ani_object aniStorage_ = nullptr;
     Rect rect_ {};
     bool visibleInApp_ {true};
     void* contextPtr_ = nullptr;
