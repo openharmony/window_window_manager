@@ -5748,20 +5748,19 @@ void JsSceneSession::OnShowWhenLocked(bool showWhenLocked)
 
 void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation, uint32_t promiseId)
 {
-    TLOGNI(WmsLogTag::WMS_ROTATION, "orientation=%{public}u, needAnimation=%{public}d", orientation, needAnimation);
+    TLOGI(WmsLogTag::WMS_ROTATION, "winId=%{public}d, orientation=%{public}u, needAnimation=%{public}d",
+        persistentId_, orientation, needAnimation);
     auto task =
     [weakThis = wptr(this), persistentId = persistentId_, rotation = orientation,
-        needAnimation, promiseId, env = env_] {
+        needAnimation, promiseId, env = env_, where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_ROTATION,
-                   "OnReuqestedOrientationChange jsSceneSession id:%{public}d has been destroyed",
-                   persistentId);
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d has been destroyed", where, persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(REQUESTED_ORIENTATION_CHANGE_CB);
         if (jsCallBack == nullptr) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s winId:%{public}d jsCallBack is null", where, persistentId);
             return;
         }
         napi_value rotationValue = CreateJsValue(env, rotation);
@@ -5769,7 +5768,7 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         napi_value promiseIdValue = CreateJsValue(env, promiseId);
         napi_value argv[] = { rotationValue, animationValue, promiseIdValue };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
-        TLOGI(WmsLogTag::DEFAULT, "%{public}u", rotation);
+        TLOGNI(WmsLogTag::DEFAULT, "%{public}s winId: %{public}d success %{public}u", where, persistentId, rotation);
     };
     std::string taskName;
     if (needAnimation) {
