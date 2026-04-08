@@ -209,6 +209,7 @@ public:
     WMError SetBrightness(float brightness) override;
     virtual float GetBrightness() const override;
     void RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func) override;
+    void UnregisterNotifyOrientationExecutionResultFunc() override { onNotifyOrientationExecutionResult_ = nullptr; }
     WMError SetPreferredOrientationWithResult(
         Orientation orientation, uint32_t promiseId, bool needAnimation = true) override;
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
