@@ -3864,8 +3864,13 @@ std::shared_ptr<Media::PixelMap> WindowSessionImpl::Snapshot()
     if (IsWindowSessionInvalid()) {
         return nullptr;
     }
+    auto rsInterface = GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return nullptr;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    auto isSucceeded = rsInterface->TakeSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
         WLOGFE("Failed to TakeSurfaceCapture!");
         return nullptr;
@@ -3889,8 +3894,13 @@ WMError WindowSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
             GetPersistentId(), state_);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto rsInterface = GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    auto isSucceeded = rsInterface->TakeSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to TakeSurfaceCapture", GetPersistentId());
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -3910,8 +3920,13 @@ WMError WindowSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    auto rsInterface = GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
+    auto isSucceeded = rsInterface->TakeSelfSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -9153,6 +9168,20 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
+}
+
+std::shared_ptr<RSRenderInterface> WindowSessionImpl::GetRSRenderInterface()
+{
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
+        return nullptr;
+    }
+    auto rsUICtx = surfaceNode_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return nullptr;
+    }
+    return rsUICtx->GetRSRenderInterface();
 }
 
 nlohmann::json WindowSessionImpl::SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle)
