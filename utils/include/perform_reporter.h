@@ -148,7 +148,6 @@ public:
     // Window frozen check
     void ReportWindowFrozen(WindowDFXHelperType detectionType, const std::string& windowInfo);
     static bool IsKeyboardFrozenEnabled();
-    static bool IsKeyboardExceptionEnabled();
 
 private:
     void UpdateReportInfo(FullInfoMap& infoMap, const std::string& bundleName,

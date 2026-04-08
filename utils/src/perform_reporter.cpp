@@ -545,16 +545,5 @@ bool WindowInfoReporter::IsKeyboardFrozenEnabled()
     TLOGD(WmsLogTag::WMS_KEYBOARD, "enabled: %{public}d", enabled);
     return enabled;
 }
-
-bool WindowInfoReporter::IsKeyboardExceptionEnabled()
-{
-    static bool enabled = [] {
-        bool isException = OHOS::system::GetBoolParameter("persist.window.keyboard.exception", false);
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, "IsKeyboardExceptionEnabled: %{public}d", isException);
-        return isException;
-    }();
-    TLOGD(WmsLogTag::WMS_KEYBOARD, "enabled: %{public}d", enabled);
-    return enabled;
-}
 } // namespace Rosen
 }
