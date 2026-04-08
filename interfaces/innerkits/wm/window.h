@@ -2295,13 +2295,25 @@ public:
      * @param func Function to notify window destroyed.
      */
     virtual void RegisterWindowDestroyedListener(const NotifyNativeWinDestroyFunc& func) {}
-    virtual void RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func) {}
 
     /**
      * @brief Unregister window destroyed listener.
      *
      */
     virtual void UnregisterWindowDestroyedListener() {}
+
+    /**
+     * @brief Register window Orientation execution result listener.
+     *
+     * @param func Function to notify Orientation execution result.
+     */
+    virtual void RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func) {}
+
+    /**
+     * @brief Unregister window Orientation execution result listener.
+     *
+     */
+    virtual void UnregisterNotifyOrientationExecutionResultFunc() {}
 
     /**
      * @brief Register Occupied Area Change listener.
