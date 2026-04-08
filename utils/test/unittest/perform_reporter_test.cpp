@@ -637,6 +637,17 @@ HWTEST_F(PerformReporterTest, IsKeyboardFrozenEnabled, Function | SmallTest | Le
     bool result = WindowInfoReporter::GetInstance().IsKeyboardFrozenEnabled();
     EXPECT_TRUE(result == false);
 }
+
+/**
+ * @tc.name: IsKeyboardExceptionEnabled
+ * @tc.desc: Test IsKeyboardExceptionEnabled returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, IsKeyboardExceptionEnabled, Function | SmallTest | Level2)
+{
+    bool result = WindowInfoReporter::GetInstance().IsKeyboardExceptionEnabled();
+    EXPECT_TRUE(result == false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

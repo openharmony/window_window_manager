@@ -7136,6 +7136,10 @@ bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
     int32_t displayHeight = 0;
     displayId = (displayId == DISPLAY_ID_INVALID) ? property_->GetDisplayId() : displayId;
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
+    // build keyboard fault
+    if (WindowInfoReporter::GetInstance().IsKeyboardExceptionEnabled()) {
+        display = nullptr;
+    }
     if (display != nullptr) {
         displayWidth = display->GetWidth();
         displayHeight = display->GetHeight();
