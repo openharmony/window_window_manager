@@ -2441,7 +2441,7 @@ WMError WindowExtensionSessionImpl::OnRecover(AAFwk::Want&& data, std::optional<
     AddExtensionWindowStageToSCB(property_->IsConstrainedModal());
     CheckAndAddExtWindowFlags();
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL && abilityToken_) {
-        SingletonContainer::Get<WindowAdapter>().UpdateModalExtensionRect(abilityToken_, property_->GetWindowRect());
+        WindowAdapter::GetInstance().UpdateModalExtensionRect(abilityToken_, property_->GetWindowRect());
     }
     if (auto uiContent = GetUIContentSharedPtr()) {
         uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::RECOVER_EXTENSION), data,
