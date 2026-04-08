@@ -481,47 +481,76 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
             CreateJsValue(env, static_cast<int32_t>(SPECIFIC_ZINDEX_INVALID)));
         TLOGE(WmsLogTag::WMS_LIFE, "sessionProperty is nullptr!");
     }
-    napi_value protoKey;
-    napi_status status = napi_create_string_utf8(env, "__proto__", NAPI_AUTO_LENGTH, &protoKey);
+    napi_status status = BindJsSceneSessionProto(env, objValue);
     if (status != napi_ok) {
-        TLOGE(WmsLogTag::DEFAULT, "set proto failed");
         return NapiGetUndefined(env);
     }
-    napi_set_property(env, objValue, protoKey, GetJsSceneSessionProto(env));
-
     napi_ref jsRef = nullptr;
     status = napi_create_reference(env, objValue, 1, &jsRef);
     if (status != napi_ok) {
-        WLOGFE("get ref failed");
+        TLOGE(WmsLogTag::DEFAULT, "get ref failed");
     }
     jsSceneSessionMap_[session->GetPersistentId()] = jsRef;
     return objValue;
 }
 
-napi_value JsSceneSession::GetJsSceneSessionProto(napi_env env)
+napi_status JsSceneSession::BindJsSceneSessionProto(napi_env env, napi_value& objValue)
 {
-    napi_value proto;
-    if (jsSceneSessionProtoRef_ != nullptr) {
-        napi_get_reference_value(env, jsSceneSessionProtoRef_, &proto);
-        return proto;
+    napi_value protoKey;
+    napi_status status = napi_create_string_utf8(env, "__proto__", NAPI_AUTO_LENGTH, &protoKey);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DEFAULT, "create proto string failed");
+        return status;
     }
-    napi_create_object(env, &proto);
-    const char* moduleName = "JsSceneSessionProto";
-    BindNativeMethodForProto(env, proto, moduleName);
-    napi_create_reference(env, proto, 1, &jsSceneSessionProtoRef_);
-    return proto;
+    napi_value protoObject;
+    status = GetJsSceneSessionProto(env, protoObject);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DEFAULT, "get or create proto failed");
+        return status;
+    }
+    status = napi_set_property(env, objValue, protoKey, protoObject);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DEFAULT, "set proto failed");
+        return status;
+    }
+    return status;
 }
 
-void JsSceneSession::BindNativeMethodForProto(napi_env env, napi_value objValue, const char* moduleName)
+napi_status JsSceneSession::GetJsSceneSessionProto(napi_env env, napi_value& proto)
 {
-    BindNativeMethod(env, objValue, moduleName);
-    BindNativeMethodForKeyboard(env, objValue, moduleName);
-    BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
-    BindNativeMethodForPcAppInPadNormal(env, objValue, moduleName);
-    BindNativeMethodForSCBSystemSession(env, objValue, moduleName);
-    BindNativeMethodForFocus(env, objValue, moduleName);
-    BindNativeMethodForWaterfall(env, objValue, moduleName);
-    BindNativeFunction(env, objValue, "updateSizeChangeReason", moduleName, JsSceneSession::UpdateSizeChangeReason);
+    // Create Proto separately when called from a non-main thread.
+    auto nativeEngine = reinterpret_cast<NativeEngine*>(env);
+    if (!nativeEngine->IsMainThread()) {
+        TLOGI(WmsLogTag::DEFAULT, "No main thread call");
+        return CreateProtoAndBindNativeMethod(env, proto, "JsSceneSessionProto");
+    }
+    // Create and save Proto when called from main thread.
+    if (jsSceneSessionProtoRef_ != nullptr) {
+        return napi_get_reference_value(env, jsSceneSessionProtoRef_, &proto);
+    }
+    napi_status status = CreateProtoAndBindNativeMethod(env, proto, "JsSceneSessionProto");
+    if (status != napi_ok) {
+        return status;
+    }
+    return napi_create_reference(env, proto, 1, &jsSceneSessionProtoRef_);
+}
+
+napi_status JsSceneSession::CreateProtoAndBindNativeMethod(napi_env env, napi_value& proto, const char* moduleName)
+{
+    napi_status status = napi_create_object(env, &proto);
+    if (status != napi_ok || proto == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "proto is null");
+        return napi_object_expected;
+    }
+    BindNativeMethod(env, proto, moduleName);
+    BindNativeMethodForKeyboard(env, proto, moduleName);
+    BindNativeMethodForCompatiblePcMode(env, proto, moduleName);
+    BindNativeMethodForPcAppInPadNormal(env, proto, moduleName);
+    BindNativeMethodForSCBSystemSession(env, proto, moduleName);
+    BindNativeMethodForFocus(env, proto, moduleName);
+    BindNativeMethodForWaterfall(env, proto, moduleName);
+    BindNativeFunction(env, proto, "updateSizeChangeReason", moduleName, JsSceneSession::UpdateSizeChangeReason);
+    return status;
 }
 
 void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName)
