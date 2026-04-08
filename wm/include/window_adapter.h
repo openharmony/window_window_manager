@@ -234,6 +234,9 @@ public:
      */
     virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
     virtual WMError RecoverWatermarkImageForApp();
+    virtual WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority);
+    virtual WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    virtual WMError RecoverScreenWatermarkImage();
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId);
@@ -282,6 +285,8 @@ private:
     WMError RecoverWindowPropertyChangeFlag();
     void RegisterRecoverCallback();
     std::string appWatermarkName_;
+    std::string screenWatermarkBundleName_;
+    uint32_t screenWatermarkPriority_ = 0;
     std::unordered_map<WindowType, int32_t> specificZIndexMap_;
 
     uint32_t observedFlags_ = 0;

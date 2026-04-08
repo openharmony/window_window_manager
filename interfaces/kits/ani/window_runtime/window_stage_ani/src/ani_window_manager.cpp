@@ -99,7 +99,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::GetVisibleWindowInfo)},
         ani_native_function {"setGestureNavigationEnabled", "lz:",
             reinterpret_cast<void *>(AniWindowManager::SetGestureNavigationEnabled)},
-        ani_native_function {"setWaterMarkImage", "lC{@ohos.multimedia.image.image.PixelMap}z:",
+        ani_native_function {"setWaterMarkImage", "lC{@ohos.multimedia.image.image.PixelMap}zi:",
             reinterpret_cast<void *>(AniWindowManager::SetWaterMarkImage)},
         ani_native_function {"getWindowsByCoordinate",
             "lC{@ohos.window.window.GetWindowsByCoordinateParam}:C{std.core.Array}",
@@ -1080,25 +1080,30 @@ void AniWindowManager::OnSetGestureNavigationEnabled(ani_env* env, ani_boolean e
 }
 
 void AniWindowManager::SetWaterMarkImage(ani_env* env, ani_long nativeObj,
-    ani_object nativePixelMap, ani_boolean enable)
+    ani_object nativePixelMap, ani_boolean enable, ani_int priority)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     if (aniWindowManager != nullptr) {
-        aniWindowManager->OnSetWaterMarkImage(env, nativePixelMap, enable);
+        aniWindowManager->OnSetWaterMarkImage(env, nativePixelMap, enable, priority);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowManager is nullptr");
         return;
     }
 }
 
-void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelMap, ani_boolean enable)
+void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelMap, ani_boolean enable,
+    ani_int priority)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     std::shared_ptr<Media::PixelMap> pixelMap;
     pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, nativePixelMap);
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to PixelMap");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    if (priority < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI]enable=%{public}d, priority=%{public}d < 0", enable, priority);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
@@ -1107,7 +1112,22 @@ void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelM
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
-    RSInterfaces::GetInstance().ShowWatermark(pixelMap, enable);
+    WMError errCode = WMError::WM_OK;
+    if (enable) {
+        errCode = SingletonContainer::Get<WindowManager>().SetScreenWatermarkImage(pixelMap, priority);
+    } else {
+        errCode = SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage(pixelMap);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "enable=%{public}d, priority=%{public}d, errCode=%{public}d",
+        enable, priority, static_cast<int32_t>(errCode));
+    if (errCode == WMError::WM_OK || errCode == WMError::WM_DO_NOTHING) {
+        return;
+    }
+    auto ret = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    if (WM_JS_TO_ERROR_CODE_MAP.count(errCode) > 0) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    }
+    AniWindowUtils::AniThrowError(env, ret, "setWaterMarkImage failed!");
 }
 
 ani_object AniWindowManager::GetWindowsByCoordinate(ani_env* env, ani_long nativeObj, ani_object getWindowsParam)

@@ -5560,7 +5560,7 @@ native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<
 native function getSnapshot(nativeObj: long, windowId: int): image.PixelMap;
 native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
 native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
-native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean): void;
+native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean, priority: int): void;
 native function getWindowsByCoordinate(nativeObj: long, param: GetWindowsByCoordinateParam): Array<Window>;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function shiftAppWindowPointerEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
@@ -5837,7 +5837,7 @@ export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean): P
   return new Promise<void>((
     resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
-          return setWaterMarkImage(nativeObj, pixelMap, enabled);
+          return setWaterMarkImage(nativeObj, pixelMap, enabled, 0);
       }).then((ret: Any) => {
           resolve(undefined);
       }).catch((err: Any) => {
@@ -5848,12 +5848,25 @@ export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean): P
 
 export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
-        setWaterMarkImage(nativeObj, pixelMap, enabled);
+        setWaterMarkImage(nativeObj, pixelMap, enabled, 0);
     }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
     }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
     });
+}
+
+export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean, priority: int): Promise<void> {
+  return new Promise<void>((
+    resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setWaterMarkImage(nativeObj, pixelMap, enabled, priority);
+      }).then((ret: Any) => {
+          resolve(undefined);
+      }).catch((err: Any) => {
+          reject(err as BusinessError);
+      });
+  });
 }
 
 export function getWindowsByCoordinate(displayId: long, windowNumber?: int,
