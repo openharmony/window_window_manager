@@ -980,7 +980,10 @@ void SceneSessionManager::LoadFreeMultiWindowConfig(bool enable)
         }
     }
     systemConfig_.freeMultiWindowEnable_ = enable;
-    rsInterface_.SetFreeMultiWindowStatus(enable);
+    if (auto rsInterface = GetRSRenderInterface()) {
+        TLOGI(WmsLogTag::WMS_MULTI_WINDOW, "enable=%{public}d", enable);
+        rsInterface->SetFreeMultiWindowStatus(enable);
+    }
 }
 
 const SystemSessionConfig& SceneSessionManager::GetSystemSessionConfig() const
@@ -8187,11 +8190,15 @@ void FocusIDChange(int32_t persistentId, const sptr<SceneSession>& sceneSession)
     } else {
         focusNodeId = sceneSession->GetSurfaceNode()->GetId();
     }
-    FocusAppInfo appInfo = {
-        sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
-        sceneSession->GetSessionInfo().bundleName_,
-        sceneSession->GetSessionInfo().abilityName_, focusNodeId};
-    RSInterfaces::GetInstance().SetFocusAppInfo(appInfo);
+    if (auto rsInterface = sceneSession->GetRSRenderInterface()) {
+        FocusAppInfo appInfo = {
+            sceneSession->GetCallingPid(), sceneSession->GetCallingUid(),
+            sceneSession->GetSessionInfo().bundleName_,
+            sceneSession->GetSessionInfo().abilityName_, focusNodeId};
+        TLOGD(WmsLogTag::WMS_FOCUS, "win=%{public}d, bundleName=%{public}s",
+            sceneSession->GetPersistentId(), appInfo.bundleName.c_str());
+        rsInterface->SetFocusAppInfo(appInfo);
+    }
 }
 
 // ordered vector by compare func
@@ -9570,7 +9577,10 @@ void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& str
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
     setTopWindowBoundaryByIDFunc_(stringId);
-    rsInterface_.SetWindowContainer(rsNode->GetId(), true);
+    auto rsUICtx = rsNode->GetRSUIContext();
+    if (rsUICtx != nullptr && rsUICtx->GetRSRenderInterface() != nullptr) {
+        rsUICtx->GetRSRenderInterface()->SetWindowContainer(rsNode->GetId(), true);
+    }
 }
 
 const SingleHandCompatibleModeConfig& SceneSessionManager::GetSingleHandCompatibleModeConfig() const
@@ -11454,7 +11464,12 @@ WMError SceneSessionManager::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap
             .scaleY = config.scaleY,
             .useCurWindow = config.useCurWindow,
         };
-        if (!RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, rsConfig)) {
+        auto rsUICtx = surfaceNode->GetRSUIContext();
+        if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+            return WMError::WM_ERROR_INVALID_OPERATION;
+        }
+        if (!rsUICtx->GetRSRenderInterface()->TakeSurfaceCapture(surfaceNode, callback, rsConfig)) {
             TLOGE(WmsLogTag::WMS_ATTRIBUTE, "TakeSurfaceCapture failed: %{public}d", persistentId);
             return WMError::WM_ERROR_INVALID_OPERATION;
         }
@@ -13137,8 +13152,13 @@ void SceneSessionManager::InitWithRenderServiceAdded()
     auto windowVisibilityChangeCb = [this](std::shared_ptr<RSOcclusionData> occlusiontionData) {
         this->WindowLayerInfoChangeCallback(occlusiontionData);
     };
+    auto rsInterface = GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return;
+    }
     TLOGI(WmsLogTag::DEFAULT, "RegisterWindowVisibilityChangeCallback");
-    if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
+    if (rsInterface->RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         TLOGE(WmsLogTag::DEFAULT, "RegisterWindowVisibilityChangeCallback failed");
     }
 }
@@ -13152,10 +13172,12 @@ WMError SceneSessionManager::SetSystemAnimatedScenes(SystemAnimatedSceneType sce
 
     auto task = [this, sceneType, isRegularAnimation]() {
         TLOGND(WmsLogTag::WMS_PC, "Set system animated scene %{public}d.", sceneType);
-        bool ret = rsInterface_.SetSystemAnimatedScenes(
-            static_cast<SystemAnimatedScenes>(sceneType), isRegularAnimation);
-        if (!ret) {
-            TLOGNE(WmsLogTag::WMS_PC, "Set system animated scene failed.");
+        if (auto rsInterface = GetRSRenderInterface()) {
+            bool ret = rsInterface->SetSystemAnimatedScenes(
+                static_cast<SystemAnimatedScenes>(sceneType), isRegularAnimation);
+            if (!ret) {
+                TLOGNE(WmsLogTag::WMS_PC, "Set system animated scene failed.");
+            }
         }
     };
     taskScheduler_->PostAsyncTask(task, "SetSystemAnimatedScenes");
@@ -13927,10 +13949,12 @@ void SceneSessionManager::UpdateDarkColorModeToRS()
         TLOGE(WmsLogTag::DEFAULT, "app configuration is nullptr");
         return;
     }
-    std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    bool ret = RSInterfaces::GetInstance().SetGlobalDarkColorMode(isDark);
-    TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d", colorMode.c_str(), ret);
+    if (auto rsInterface = GetRSRenderInterface()) {
+        std::string colorMode = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+        bool ret = rsInterface->SetGlobalDarkColorMode(isDark);
+        TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d", colorMode.c_str(), ret);
+    }
 }
 
 void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func)
@@ -18176,9 +18200,14 @@ WMError SceneSessionManager::SetWatermarkImageForApp(const std::shared_ptr<Media
             watermarkName = "";
             return WMError::WM_OK;
         }
+        auto rsInterface = GetRSRenderInterface();
+        if (rsInterface == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+            return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+        }
         std::string newWatermarkName;
         auto nodeIds = GetSessionNodeIdsAndWatermarkNameByPid(pid, newWatermarkName);
-        auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(pid, newWatermarkName, pixelMap, nodeIds,
+        auto rsErrCode = rsInterface->SetSurfaceWatermark(pid, newWatermarkName, pixelMap, nodeIds,
             CUSTOM_WATER_MARK);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: pid=%{public}d, curWatermark=%{public}s, rsErrCode=%{public}u",
             where, pid, newWatermarkName.c_str(), static_cast<uint32_t>(rsErrCode));
@@ -18252,9 +18281,14 @@ void SceneSessionManager::SetWatermarkForSession(const sptr<SceneSession>& sessi
                 where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), pid);
             return WSError::WS_ERROR_INVALID_WINDOW;
         }
+        auto rsInterface = GetRSRenderInterface();
+        if (rsInterface == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+            return WSError::WS_ERROR_INVALID_WINDOW;
+        }
         std::vector<NodeId> nodeIds;
         nodeIds.push_back(surfaceNode->GetId());
-        auto rsErrCode = RSInterfaces::GetInstance().SetSurfaceWatermark(pid, watermarkName, nullptr, nodeIds,
+        auto rsErrCode = rsInterface->SetSurfaceWatermark(pid, watermarkName, nullptr, nodeIds,
             CUSTOM_WATER_MARK);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], pid=%{public}d, "
             "watermark=%{public}s, rsErrCode=%{public}u", where, sceneSession->GetWindowId(),
@@ -18283,9 +18317,14 @@ void SceneSessionManager::ClearWatermarkForSession(const sptr<SceneSession>& ses
                 where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), pid);
             return;
         }
+        auto rsInterface = GetRSRenderInterface();
+        if (rsInterface == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+            return;
+        }
         std::vector<NodeId> nodeIds;
         nodeIds.push_back(surfaceNode->GetId());
-        RSInterfaces::GetInstance().ClearSurfaceWatermarkForNodes(pid, watermarkName, nodeIds);
+        rsInterface->ClearSurfaceWatermarkForNodes(pid, watermarkName, nodeIds);
         TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], pid=%{public}d, "
             "watermark=%{public}s", where, sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(),
             pid, watermarkName.c_str());
@@ -18359,6 +18398,16 @@ void SceneSessionManager::RefreshAppInfo(const std::string& bundleName)
         MultiInstanceManager::GetInstance().RefreshAppInfo(bundleName);
     }
     AbilityInfoManager::GetInstance().RefreshAppInfo(bundleName);
+}
+
+std::shared_ptr<RSRenderInterface> SceneSessionManager::GetRSRenderInterface()
+{
+    auto rootSceneSession = GetRootSceneSession();
+    if (rootSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rootSceneSession is null");
+        return nullptr;
+    }
+    return rootSceneSession->GetRSRenderInterface();
 }
 
 WMError SceneSessionManager::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)

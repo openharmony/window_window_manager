@@ -570,7 +570,12 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
         .scaleX = scaleW,
         .scaleY = scaleH,
     };
-    if (RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config)) {
+    auto rsUICtx = surfaceNode->GetRSUIContext();
+    if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return false;
+    }
+    if (rsUICtx->GetRSRenderInterface()->TakeSurfaceCapture(surfaceNode, callback, config)) {
         pixelMap = callback->GetResult(timeoutMs); // get pixelmap time out ms
     }
     if (pixelMap == nullptr) {
