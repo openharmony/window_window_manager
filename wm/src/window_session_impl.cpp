@@ -3397,7 +3397,7 @@ WMError WindowSessionImpl::SetPreferredOrientationWithResult(
         return error;
     }
     if (error == WMError::WM_DO_NOTHING) {
-        NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_APPLIED);
+        NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_IGNORED);
         return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
