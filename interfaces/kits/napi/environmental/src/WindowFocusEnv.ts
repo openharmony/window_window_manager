@@ -31,7 +31,7 @@ class WindowFocusedEnv implements IEnvironmentValue<UIEnvFocus> {
   @Trace isFocused: boolean;
   #win: window.Window;
 
-  get value() {
+  get value(): UIEnvFocus {
     return {
       isFocused: this.isFocused,
     };
@@ -48,10 +48,10 @@ class WindowFocusedEnv implements IEnvironmentValue<UIEnvFocus> {
   }
 
   #focusChangeCallback = (windowEventType: window.WindowEventType): void => {
-    this.isFocused = windowEventType == window.WindowEventType.WINDOW_ACTIVE;
+    this.isFocused = windowEventType === window.WindowEventType.WINDOW_ACTIVE;
   };
 
-  update() {}
+  update() : void {}
 
   destroy(): void {
     try {
@@ -67,7 +67,7 @@ class WindowHighlightedEnv implements IEnvironmentValue<UIEnvHighlight> {
   @Trace isHighlighted: boolean;
   #win: window.Window;
 
-  get value() {
+  get value() : UIEnvHighlight {
     return {
       isHighlighted: this.isHighlighted
     };
@@ -87,7 +87,7 @@ class WindowHighlightedEnv implements IEnvironmentValue<UIEnvHighlight> {
     this.isHighlighted = highlighted;
   };
 
-  update() {}
+  update() : void {}
 
   destroy(): void {
     try {
