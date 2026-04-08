@@ -747,7 +747,7 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessio
     WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetFocusedSessionId(),
         KeyboardLifeCycleException::SHOW_EXCEPTION,
         "callingSessionId invalid, use focusedId: " + std::to_string(focusedSessionId) +
-        ", callingSessionId:" + GetSessionProperty()->GetCallingSessionId());
+        ", callingSessionId:" + std::to_string(GetSessionProperty()->GetCallingSessionId()));
 }
 
 void KeyboardSession::EnableCallingSessionAvoidArea()
