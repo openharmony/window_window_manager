@@ -5808,7 +5808,7 @@ void JsSceneSession::ProcessReuqestedOrientationResult(uint32_t promiseId)
         }
         jsSceneSession->executionResultFinish_ = false;
     };
-    std::string taskName= "OnReuqestedOrientationChange:ProcessReuqestedOrientationResult";
+    std::string taskName = "OnReuqestedOrientationChange:ProcessReuqestedOrientationResult";
     taskScheduler_->PostMainThreadTask(task, taskName);
 }
 
