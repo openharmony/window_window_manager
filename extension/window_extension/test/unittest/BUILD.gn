@@ -131,7 +131,7 @@ ohos_static_library("window_extension_unittest_common") {
     "../../../../resources/config/build:testcase_flags",
   ]
 
-  public_deps = [
+  deps = [
     "${window_base_path}/dm:libdm",
     "${window_base_path}/dmserver:libdms",
     "${window_base_path}/utils:libwmutil",
@@ -141,37 +141,31 @@ ohos_static_library("window_extension_unittest_common") {
     "${window_base_path}/wm:libwm_static",
     "${window_base_path}/wm:libwm_lite",
     "${window_base_path}/wmserver:libwms",
-  ]
-
-  deps = [
     "../..:libwindow_extension",
-    "../../../../interfaces/kits/napi/window_runtime:window_native_kit_static",
-    "../../../../window_scene/session:scene_session_static",
-    "../../../../wm:libwm",
-    "../../../extension_connection:libwindow_extension_client",
-  ]
-
-  public_external_deps = [
-    "ability_base:want",
-    "c_utils:utils",
-    "googletest:gmock",
-    "googletest:gtest_main",
-    "graphic_2d:librender_service_client",
-    "image_framework:image_native",
-    "input:libmmi-client",
-    "libjpeg-turbo:turbojpeg_static",
+    "${window_base_path}/interfaces/kits/napi/window_runtime:window_native_kit_static",
+    "${window_base_path}/window_scene/session:scene_session_static",
+    "${window_base_path}/wm:libwm",
+    "${window_base_path}/extension/extension_connection:libwindow_extension_client",
   ]
 
   external_deps = [
     "ability_base:configuration",
+    "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:app_context",
     "ability_runtime:runtime",
     "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "image_framework:image_native",
+    "input:libmmi-client",
     "ipc:ipc_single",
+    "libjpeg-turbo:turbojpeg_static",
     "napi:ace_napi",
   ]
   subsystem_name = "window"
