@@ -3486,7 +3486,7 @@ void SceneSession::GetAllUIExtensionTokenInfo(std::vector<MMI::UIExtensionInfo>&
         uiExtensionInfo.token = tokenInfo.abilityToken;
         uiExtensionInfo.pid = tokenInfo.pid;
         uiExtensionInfo.hostWindowId = hostWindowId;
-        uiExtensionInfoList.push_back(uiExtensionInfo);
+        uiExtensionInfoList.push_back(std::move(uiExtensionInfo));
     });
 }
 
