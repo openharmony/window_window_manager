@@ -7147,7 +7147,7 @@ bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
         }
         WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetPersistentId(),
             KeyboardLifeCycleException::HOT_AREA_EXCEPTION,
-            "IsLandscape: displayWidth=" + std::to_string(displayWidth) +
+            "IsLandscape: use default display, displayWidth=" + std::to_string(displayWidth) +
             ", displayHeight=" + std::to_string(displayHeight));
     }
     bool isLandscape = displayWidth > displayHeight;
