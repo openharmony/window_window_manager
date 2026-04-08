@@ -603,8 +603,9 @@ private:
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
     void ClearCbMap();
 
-    static napi_value GetJsSceneSessionProto(napi_env env);
-    static void BindNativeMethodForProto(napi_env env, napi_value objValue, const char* moduleName);
+    static napi_status BindJsSceneSessionProto(napi_env env, napi_value& objValue);
+    static napi_status GetJsSceneSessionProto(napi_env env, napi_value& proto);
+    static napi_status CreateProtoAndBindNativeMethod(napi_env env, napi_value& proto, const char* moduleName);
 
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
