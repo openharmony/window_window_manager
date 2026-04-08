@@ -112,6 +112,9 @@ private:
     int HandleSetWindowSnapshotSkip(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
+    int HandleSetScreenWatermarkImage(MessageParcel& data, MessageParcel& reply);
+    int HandleCleanScreenWatermarkImage(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverScreenWatermarkImage(MessageParcel& data, MessageParcel& reply);
     int HandleSetWatermarkImageForApp(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverWatermarkImageForApp(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
