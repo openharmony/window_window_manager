@@ -1008,7 +1008,7 @@ std::shared_ptr<Media::PixelMap> WindowController::GetSnapshot(int32_t windowId)
     auto rsUICtx = node->surfaceNode_->GetRSUIContext();
     if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
-        return WMError::WM_ERROR_INVALID_WINDOW;
+        return nullptr;
     }
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     bool ret = rsUICtx->GetRSRenderInterface()->TakeSurfaceCapture(node->surfaceNode_, callback);
