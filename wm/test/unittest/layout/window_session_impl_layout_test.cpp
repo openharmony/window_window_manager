@@ -552,30 +552,45 @@ HWTEST_F(WindowSessionImplLayoutTest, HookWindowSizeByHookWindowInfo, TestSize.L
     window->HookWindowSizeByHookWindowInfo(rect);
     EXPECT_NE(rect.width_, defaultSize);
 
-    // Case 5: isDrawableRect=true, drawableRectHook=false -> no hook
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: HookWindowSizeByHookWindowInfo end";
+}
+
+HWTEST_F(WindowSessionImplLayoutTest, HookWindowSizeByDrawableRectHook, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: HookWindowSizeByDrawableRectHook start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HookWindowSizeByDrawableRectHook");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(2026);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    const uint32_t defaultSize = 800;
+    HookWindowInfo hookWindowInfo;
     hookWindowInfo.enableHookWindow = true;
     hookWindowInfo.widthHookRatio = 0.5f;
+
+    // Case 1: isDrawableRect=true, drawableRectHook=false -> no hook
     hookWindowInfo.drawableRectHook = false;
     window->SetAppHookWindowInfo(hookWindowInfo);
     Rect drawableRect = { 0, 0, defaultSize, defaultSize };
     window->HookWindowSizeByHookWindowInfo(drawableRect, true);
     EXPECT_EQ(drawableRect.width_, defaultSize);
 
-    // Case 6: isDrawableRect=true, drawableRectHook=true -> hook applied
+    // Case 2: isDrawableRect=true, drawableRectHook=true -> hook applied
     hookWindowInfo.drawableRectHook = true;
     window->SetAppHookWindowInfo(hookWindowInfo);
     drawableRect = { 0, 0, defaultSize, defaultSize };
     window->HookWindowSizeByHookWindowInfo(drawableRect, true);
     EXPECT_NE(drawableRect.width_, defaultSize);
 
-    // Case 7: isDrawableRect=false (default), drawableRectHook=false -> still hooks
+    // Case 3: isDrawableRect=false (default), drawableRectHook=false -> still hooks
     hookWindowInfo.drawableRectHook = false;
     window->SetAppHookWindowInfo(hookWindowInfo);
     Rect normalRect = { 0, 0, defaultSize, defaultSize };
     window->HookWindowSizeByHookWindowInfo(normalRect);
     EXPECT_NE(normalRect.width_, defaultSize);
 
-    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: HookWindowSizeByHookWindowInfo end";
+    GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: HookWindowSizeByDrawableRectHook end";
 }
 }
 } // namespace Rosen
