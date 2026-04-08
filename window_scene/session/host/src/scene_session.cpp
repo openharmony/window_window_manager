@@ -4307,20 +4307,10 @@ bool SceneSession::SaveAspectRatio(float ratio)
 void SceneSession::InitializeCrossMoveDrag()
 {
     auto movedSurfaceNode = GetMoveDragTargetSurfaceNode();
-    if (!movedSurfaceNode) {
-        return;
-    }
-    auto parentNode = movedSurfaceNode->GetParent();
-    if (!parentNode) {
-        return;
-    }
-    auto property = GetSessionProperty();
-    if (!property) {
-        return;
-    }
+    RETURN_IF_NULL(movedSurfaceNode);
     auto originalPositionZ = movedSurfaceNode->GetStagingProperties().GetPositionZ();
     moveDragController_->SetOriginalPositionZ(originalPositionZ);
-    moveDragController_->InitCrossDisplayProperty(property->GetDisplayId());
+    moveDragController_->InitCrossDisplayProperty(GetSessionProperty()->GetDisplayId());
 }
 
 /** @note @window.drag */
