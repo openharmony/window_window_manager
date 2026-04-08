@@ -698,7 +698,8 @@ void KeyboardSession::HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeRe
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
             WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(session->GetPersistentId(),
                 KeyboardLifeCycleException::MOVE_DRAG_EXCEPTION,
-                "HandleKeyboardMoveDragEnd: GetScreenWidthAndHeightFromClient failed");
+                "HandleKeyboardMoveDragEnd: GetScreenWidthAndHeightFromClient failed"
+                "screenWidth=" + std::to_string(screenWidth) + ", screenHeight=" + std::to_string(screenHeight));
             return;
         }
         bool isLand = screenWidth > screenHeight;
@@ -745,7 +746,8 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessio
     }
     WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetFocusedSessionId(),
         KeyboardLifeCycleException::SHOW_EXCEPTION,
-        "callingSessionId invalid, use focusedId: " + std::to_string(focusedSessionId));
+        "callingSessionId invalid, use focusedId: " + std::to_string(focusedSessionId) +
+        ", callingSessionId:" + GetSessionProperty()->GetCallingSessionId());
 }
 
 void KeyboardSession::EnableCallingSessionAvoidArea()
@@ -937,7 +939,7 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     if (!result) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Get screen width and height failed");
         WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetPersistentId(),
-            KeyboardLifeCycleException::AVOID_AREA_EXCEPTION,
+            KeyboardLifeCycleException::PANEL_AVOID_HEIGHT_EXCEPTION,
             "RecalculatePanelRectForAvoidArea: GetScreenWidthAndHeightFromClient failed, "
             "screenWidth=" + std::to_string(screenWidth) + ", screenHeight=" + std::to_string(screenHeight));
         return;

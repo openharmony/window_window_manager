@@ -66,7 +66,7 @@ const std::map<KeyboardLifeCycleException, std::string> KEYBOARD_LIFE_CYCLE_EXCE
     {KeyboardLifeCycleException::CREATE_EXCEPTION, "CREATE_EXCEPTION"},
     {KeyboardLifeCycleException::SHOW_EXCEPTION, "SHOW_EXCEPTION"},
     {KeyboardLifeCycleException::HOT_AREA_EXCEPTION, "HOT_AREA_EXCEPTION"},
-    {KeyboardLifeCycleException::AVOID_AREA_EXCEPTION, "AVOID_AREA_EXCEPTION"},
+    {KeyboardLifeCycleException::PANEL_AVOID_HEIGHT_EXCEPTION, "PANEL_AVOID_HEIGHT_EXCEPTION"},
     {KeyboardLifeCycleException::MOVE_DRAG_EXCEPTION, "MOVE_DRAG_EXCEPTION"}
 };
 }
