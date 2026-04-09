@@ -1472,5 +1472,61 @@ struct PreWindowProperty {
     }
 };
 
+/**
+ * @brief Context for prelayout during window creation.
+ *
+ * Provides expected window and display parameters to improve the
+ * initial layout and rendering effect.
+ */
+struct PrelayoutContext {
+    /**
+     * @brief Whether prelayout is enabled.
+     */
+    bool enable = false;
+
+    /**
+     * @brief Target window rectangle used in prelayout.
+     */
+    WSRect winRect = WSRect::EMPTY_RECT;
+
+    /**
+     * @brief Target display parameters used in prelayout.
+     */
+    struct DisplayInfo {
+        /**
+         * @brief Display width in pixels.
+         */
+        uint32_t width = 0;
+
+        /**
+         * @brief Display height in pixels.
+         */
+        uint32_t height = 0;
+
+        /**
+         * @brief Display density (pixel ratio).
+         *
+         * Default is 1.0 to avoid invalid scaling or division-by-zero issues.
+         */
+        float density = 1.0f;
+
+        /**
+         * @brief Display rotation in degrees.
+         *
+         * Expected values: 0, 90, 180, 270 (360 is equivalent to 0).
+         */
+        uint32_t rotation = 0;
+    } display;
+
+    std::string ToString() const
+    {
+        std::ostringstream oss;
+        oss << "enable: " << enable
+            << ", winRect: " << winRect.ToString()
+            << ", display: " << display.width << ", " << display.height
+            << ", " << display.density << ", " << display.rotation;
+        return oss.str();
+    }
+};
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

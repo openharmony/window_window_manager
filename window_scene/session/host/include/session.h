@@ -18,6 +18,7 @@
 
 #include <list>
 #include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <vector>
 
@@ -52,7 +53,6 @@ namespace OHOS::Rosen {
 class RSSurfaceNode;
 class RSUIContext;
 class RSTransaction;
-class RSSyncTransactionController;
 class Session;
 using NotifySessionRectChangeFunc = std::function<void(const WSRect& rect,
     SizeChangeReason reason, DisplayId displayId)>;
@@ -127,6 +127,7 @@ using OutlineParamsChangeCallbackFunc = std::function<void(bool enabled, const O
 using NotifyRestartAppFunc = std::function<void(const SessionInfo& info, int32_t callingPid)>;
 using ProcessCallingSessionIdChangeFunc = std::function<void(uint32_t callingSessionId)>;
 using GetRsCmdBlockingCountFunc = std::function<int32_t()>;
+using UpdateAppHookDisplayInfoFunc = std::function<WMError(int32_t uid, const HookInfo& hookInfo, bool enable)>;
 using GetAppUseControlDisplayMapFunc = std::function<std::unordered_map<DisplayId, bool>&()>;
 using SaveStartWindowFunc = std::function<void(std::string, std::string)>;
 
@@ -306,8 +307,19 @@ public:
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
+    /**
+     * @brief Notify client to update window rectangle.
+     *
+     * @param updateReason Reason for the update.
+     * @param updateRect Optional target rectangle.
+     * @param rsTransaction RS transaction for synchronized rendering.
+     *
+     * @return WSError::WS_OK on success, or an appropriate error code on failure.
+     */
     virtual WSError NotifyClientToUpdateRect(const std::string& updateReason,
-        std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
+                                             std::optional<WSRect> updateRect,
+                                             std::shared_ptr<RSTransaction> rsTransaction) { return WSError::WS_OK; }
+
     WSError TransferBackPressedEventForConsumed(bool& isConsumed);
     WSError TransferKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed,
         bool isPreImeEvent = false);
@@ -873,6 +885,7 @@ public:
     virtual WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) { return WSError::WS_OK; }
     void NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason reason);
     void SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func);
+    void SetUpdateAppHookDisplayInfoFunc(const UpdateAppHookDisplayInfoFunc& func);
     WSError UpdateClientRectInfo(const WSRect& rect, SizeChangeReason reason,
                                  const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
                                  const std::shared_ptr<RSTransaction>& rsTransaction);
@@ -1155,6 +1168,7 @@ protected:
     NotifyStopFloatingBallFunc stopFloatingBallFunc_;
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
     GetRsCmdBlockingCountFunc getRsCmdBlockingCountFunc_;
+    UpdateAppHookDisplayInfoFunc updateAppHookDisplayInfoFunc_;
     NotifyRestoreFloatMainWindowFunc restoreFloatMainWindowFunc_;
     NotifyStopFloatViewFunc stopFloatViewFunc_;
     NotifyUpdateFloatViewFunc updateFloatViewFunc_;
@@ -1380,6 +1394,37 @@ private:
     /*
      * Window Layout
      */
+
+    /**
+     * @brief Get prelayout context for window creation.
+     *
+     * Pre-calculates window and display parameters to optimize the initial
+     * layout and rendering. Currently enabled only for game prelaunch scenarios.
+     *
+     * @return PrelayoutContext containing predicted window rect and display info.
+     */
+    PrelayoutContext GetPrelayoutContext();
+
+    /**
+     * @brief Apply initial window rect during session connect.
+     *
+     * For UIExtension windows, directly updates the current rect without prelayout.
+     * Otherwise, uses prelayout rect if enabled, or falls back to current session rect.
+     *
+     * @param ctx Prelayout context containing optional initial rect.
+     */
+    void HandleInitialRect(const PrelayoutContext& ctx);
+
+    /**
+     * @brief Apply prelayout display info to application via hook.
+     *
+     * Updates display parameters (size, density, rotation) when prelayout is enabled
+     * and hook function is available.
+     *
+     * @param ctx Prelayout context containing display info.
+     */
+    void HandleHookDisplay(const PrelayoutContext& ctx);
+
     std::optional<bool> clientDragEnable_;
     bool dragActivated_ = true;
     SingleHandTransform singleHandTransform_;

@@ -579,13 +579,13 @@ HWTEST_F(SceneSessionImmersiveTest, NotifyClientToUpdateRectTask, TestSize.Level
     session->layoutController_ = sptr<LayoutController>::MakeSptr(session->property_);
     session->layoutController_->reason_ = SizeChangeReason::AVOID_AREA_CHANGE;
     session->foregroundInteractiveStatus_ = false;
-    session->NotifyClientToUpdateRectTask("OnBoundsChanged", nullptr);
+    session->NotifyClientToUpdateRectTask("OnBoundsChanged", std::nullopt, nullptr);
     session->foregroundInteractiveStatus_ = true;
     session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    session->NotifyClientToUpdateRectTask("OnBounds", nullptr);
+    session->NotifyClientToUpdateRectTask("OnBounds", std::nullopt, nullptr);
     session->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    session->NotifyClientToUpdateRectTask("OnBounds", nullptr);
-    session->NotifyClientToUpdateRectTask("OnBoundsChanged", nullptr);
+    session->NotifyClientToUpdateRectTask("OnBounds", std::nullopt, nullptr);
+    session->NotifyClientToUpdateRectTask("OnBoundsChanged", std::nullopt, nullptr);
     EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::AVOID_AREA_CHANGE);
 }
 
