@@ -9296,18 +9296,18 @@ napi_value JsSceneSession::OnNotifyPreCalcWindowProperty(napi_env env, napi_call
     uint32_t width = 0;
     uint32_t height = 0;
     if (!ConvertFromJsValue(env, argv[0], rotation)) {
-        TLOGFE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: rotation");
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: rotation");
         return NapiGetUndefined(env);
     }
     if (!ConvertFromJsValue(env, argv[ARGC_ONE], width)) {
-        TLOGFE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: width");
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: width");
         return NapiGetUndefined(env);
     }
     if (!ConvertFromJsValue(env, argv[ARGC_TWO], height)) {
-        TLOGFE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: height");
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: height");
         return NapiGetUndefined(env);
     }
-    TLOGFE(WmsLogTag::WMS_ROTATION, "OnNotifyPreCalcWindowProperty: [%{public}u, %{public}u, %{public}u]", 
+    TLOGI(WmsLogTag::WMS_ROTATION, "OnNotifyPreCalcWindowProperty: [%{public}u, %{public}u, %{public}u]", 
         rotation, width, height);
     auto session = weakSession_.promote();
     if (session == nullptr) {
