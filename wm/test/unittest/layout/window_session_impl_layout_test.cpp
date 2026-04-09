@@ -569,21 +569,25 @@ HWTEST_F(WindowSessionImplLayoutTest, HookWindowSizeByDrawableRectHook, TestSize
     hookWindowInfo.enableHookWindow = true;
     hookWindowInfo.widthHookRatio = 0.5f;
 
-    // Case 1: isDrawableRect=true, drawableRectHook=false -> no hook
+    // Case 1: drawableRectHook=false -> do not call hook
     hookWindowInfo.drawableRectHook = false;
     window->SetAppHookWindowInfo(hookWindowInfo);
     Rect drawableRect = { 0, 0, defaultSize, defaultSize };
-    window->HookWindowSizeByHookWindowInfo(drawableRect, true);
+    if (window->GetAppHookWindowInfo().drawableRectHook) {
+        window->HookWindowSizeByHookWindowInfo(drawableRect);
+    }
     EXPECT_EQ(drawableRect.width_, defaultSize);
 
-    // Case 2: isDrawableRect=true, drawableRectHook=true -> hook applied
+    // Case 2: drawableRectHook=true -> call hook, applied
     hookWindowInfo.drawableRectHook = true;
     window->SetAppHookWindowInfo(hookWindowInfo);
     drawableRect = { 0, 0, defaultSize, defaultSize };
-    window->HookWindowSizeByHookWindowInfo(drawableRect, true);
+    if (window->GetAppHookWindowInfo().drawableRectHook) {
+        window->HookWindowSizeByHookWindowInfo(drawableRect);
+    }
     EXPECT_NE(drawableRect.width_, defaultSize);
 
-    // Case 3: isDrawableRect=false (default), drawableRectHook=false -> still hooks
+    // Case 3: normal rect always hooks regardless of drawableRectHook
     hookWindowInfo.drawableRectHook = false;
     window->SetAppHookWindowInfo(hookWindowInfo);
     Rect normalRect = { 0, 0, defaultSize, defaultSize };
