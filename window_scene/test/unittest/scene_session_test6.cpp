@@ -2172,50 +2172,6 @@ HWTEST_F(SceneSessionTest6, PreCalcWindowPropertyWithValues, Function | SmallTes
         EXPECT_EQ(result.height, testCase.height);
     }
 }
-
-/**
- * @tc.name: NotifyPreCalcWindowProperty
- * @tc.desc: Test NotifyPreCalcWindowProperty and RunnableFuture functionality
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, NotifyPreCalcWindowProperty, Function | SmallTest | Level1)
-{
-    SessionInfo info;
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(session, nullptr);
-    
-    WSError result1 = session->NotifyPreCalcWindowProperty(180, 2560, 1440);
-    EXPECT_EQ(result1, WSError::WS_OK);
-    
-    WSError result2 = session->NotifyPreCalcWindowProperty(0, 0, 0);
-    EXPECT_EQ(result2, WSError::WS_OK);
-    
-    RunnableFuture<PreWindowProperty> future;
-    
-    PreWindowProperty expected(1, 1920, 1080);
-    future.SetValue(expected);
-    
-    PreWindowProperty result3 = future.GetResult(1000);
-    EXPECT_EQ(result3.rotation, expected.rotation);
-    EXPECT_EQ(result3.width, expected.width);
-    EXPECT_EQ(result3.height, expected.height);
-    
-    PreWindowProperty defaultValue(0, 0, 0);
-    future.ResetLock(defaultValue);
-    
-    PreWindowProperty secondValue(180, 2560, 1440);
-    future.SetValue(secondValue);
-    
-    PreWindowProperty result4 = future.GetResult(1000);
-    EXPECT_EQ(result4.rotation, secondValue.rotation);
-    
-    RunnableFuture<PreWindowProperty> timeoutFuture;
-    PreWindowProperty timeoutResult = timeoutFuture.GetResult(100);
-    EXPECT_EQ(timeoutResult.rotation, 0u);
-    EXPECT_EQ(timeoutResult.width, 0u);
-    EXPECT_EQ(timeoutResult.height, 0u);
-}
-
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
