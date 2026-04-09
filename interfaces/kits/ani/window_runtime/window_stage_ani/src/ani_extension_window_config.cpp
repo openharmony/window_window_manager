@@ -73,17 +73,17 @@ void SetAniOptionsProperties(ani_env* env, ani_object aniOptions, ani_class aniC
     ani_status ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>zLevel", nullptr,
         AniWindowUtils::CreateOptionalInt(env, static_cast<ani_int>(subWindowOptions.zLevel)));
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set zLevel");
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] fail to set zLevel");
     }
     ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>maximizeSupported", nullptr,
         AniWindowUtils::CreateOptionalBool(env, static_cast<ani_boolean>(subWindowOptions.maximizeSupported)));
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set maximizeSupported");
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] fail to set maximizeSupported");
     }
     ret = AniWindowUtils::CallAniMethodVoid(env, aniOptions, aniClass, "<set>modalityType", nullptr,
         GetAniModalityType(env, subWindowOptions.modalityType));
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to set modalityType");
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] fail to set modalityType");
     }
 }
 
@@ -526,12 +526,12 @@ void AniExtensionWindowConfig::ParseSubWindowOptionsProperties(ani_env* env, ani
     options.decorEnabled = decorEnabled;
     bool isModal = false;
     if (AniWindowUtils::GetPropertyBoolObject(env, "isModal", value, isModal) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isModal");
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] fail to get isModal");
     }
     options.isModal = isModal;
     bool isTopmost = false;
     if (AniWindowUtils::GetPropertyBoolObject(env, "isTopmost", value, isTopmost) != ANI_OK) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to get isTopmost");
+        TLOGI(WmsLogTag::DEFAULT, "[ANI] fail to get isTopmost");
     }
     options.isTopmost = isTopmost;
 }
