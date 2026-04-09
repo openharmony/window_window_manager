@@ -372,7 +372,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoById01, Function | SmallTest | 
 
 /**
  * @tc.name: GetDisplayInfoByIdWithHookRequired
- * @tc.desc: GetDisplayInfoById with isHookRequired = true
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = true
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoByIdWithHookRequired, Function | SmallTest | Level3)
@@ -389,7 +389,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoByIdWithHookRequired, Function 
 
 /**
  * @tc.name: GetDisplayInfoByIdWithHookRequiredFalse
- * @tc.desc: GetDisplayInfoById with isHookRequired = false
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = false
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, GetDisplayInfoByIdWithHookRequiredFalse, Function | SmallTest | Level3)
@@ -420,7 +420,7 @@ HWTEST_F(ScreenSessionManagerTest, FindDisplayInfoInSession, Function | SmallTes
 
 /**
  * @tc.name: FindDisplayInfoInSessionWithHookRequired
- * @tc.desc: FindDisplayInfoInSession with isHookRequired parameter
+ * @tc.desc: FindDisplayInfoInSession with isGetActualInfo parameter
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, FindDisplayInfoInSessionWithHookRequired, Function | SmallTest | Level3)
@@ -437,7 +437,7 @@ HWTEST_F(ScreenSessionManagerTest, FindDisplayInfoInSessionWithHookRequired, Fun
 
 /**
  * @tc.name: FindDisplayInfoInSessionWithHookRequiredFalse
- * @tc.desc: FindDisplayInfoInSession with isHookRequired = false
+ * @tc.desc: FindDisplayInfoInSession with isGetActualInfo = false
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerTest, FindDisplayInfoInSessionWithHookRequiredFalse, Function | SmallTest | Level3)

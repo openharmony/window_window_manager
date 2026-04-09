@@ -1190,7 +1190,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, TestSize.Level1)
 
 /**
  * @tc.name: GetDisplayInfoByIdWithHookRequired
- * @tc.desc: GetDisplayInfoById with isHookRequired = true
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = true
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByIdWithHookRequired, TestSize.Level1)
@@ -1204,7 +1204,7 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByIdWithHookRequired, Test
 
 /**
  * @tc.name: GetDisplayInfoByIdWithHookRequiredFalse
- * @tc.desc: GetDisplayInfoById with isHookRequired = false
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = false
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByIdWithHookRequiredFalse, TestSize.Level1)

@@ -2496,7 +2496,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo(int32_t userId)
     }
 }
 
-sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId, bool isHookRequired)
+sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo)
 {
     TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64" ", displayId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
@@ -2509,14 +2509,14 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId, 
             continue;
         }
 
-        sptr<DisplayInfo> displayInfo = FindDisplayInfoInSession(screenSession, displayId, isHookRequired);
+        sptr<DisplayInfo> displayInfo = FindDisplayInfoInSession(screenSession, displayId, isGetActualInfo);
         if (displayInfo != nullptr) {
             TLOGD(WmsLogTag::DMS, "success");
             return displayInfo;
         }
 
         if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->GetScreenProperty().GetIsFakeInUse()) {
-            sptr<DisplayInfo> fakeDisplayInfo = FindDisplayInfoInSession(screenSession->GetFakeScreenSession(), displayId, isHookRequired);
+            sptr<DisplayInfo> fakeDisplayInfo = FindDisplayInfoInSession(screenSession->GetFakeScreenSession(), displayId, isGetActualInfo);
             if (fakeDisplayInfo != nullptr) {
                 TLOGD(WmsLogTag::DMS, "find fake success");
                 return fakeDisplayInfo;
@@ -2528,7 +2528,7 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId, 
     return nullptr;
 }
 
-sptr<DisplayInfo> ScreenSessionManager::FindDisplayInfoInSession(const sptr<ScreenSession>& screenSession, DisplayId displayId, bool isHookRequired)
+sptr<DisplayInfo> ScreenSessionManager::FindDisplayInfoInSession(const sptr<ScreenSession>& screenSession, DisplayId displayId, bool isGetActualInfo)
 {
     if (screenSession == nullptr) {
         return nullptr;
@@ -2542,7 +2542,7 @@ sptr<DisplayInfo> ScreenSessionManager::FindDisplayInfoInSession(const sptr<Scre
 
     HandleRotationCorrectionExemption(displayInfo);
     if (displayId == displayInfo->GetDisplayId()) {
-        if (isHookRequired) {
+        if (isGetActualInfo) {
             return HookDisplayInfoByUid(displayInfo, screenSession);
         }
         return displayInfo;

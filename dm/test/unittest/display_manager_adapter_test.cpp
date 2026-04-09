@@ -66,7 +66,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfo, TestSize.Level1)
 
 /**
  * @tc.name: GetDisplayInfoWithHookRequired
- * @tc.desc: test GetDisplayInfo with isHookRequired = true
+ * @tc.desc: test GetDisplayInfo with isGetActualInfo = true
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfoWithHookRequired, TestSize.Level1)
@@ -77,7 +77,7 @@ HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfoWithHookRequired, TestSize.Lev
 
 /**
  * @tc.name: GetDisplayInfoWithHookRequiredFalse
- * @tc.desc: test GetDisplayInfo with isHookRequired = false
+ * @tc.desc: test GetDisplayInfo with isGetActualInfo = false
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerAdapterTest, GetDisplayInfoWithHookRequiredFalse, TestSize.Level1)
