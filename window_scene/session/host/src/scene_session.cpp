@@ -37,7 +37,7 @@
 #include <ui_extension_utils.h>
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 
- #include "proxy/include/window_info.h"
+#include "proxy/include/window_info.h"
 
 #include "application_context.h"
 #include "common/include/session_permission.h"
