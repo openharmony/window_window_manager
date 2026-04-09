@@ -527,7 +527,7 @@ private:
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
     void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true, uint32_t promiseId = 0);
-    void ProcessReuqestedOrientationResult(uint32_t promiseId);
+    void ProcessRequestedOrientationResult(uint32_t promiseId);
     void OnForceHideChange(bool hide);
     void OnWindowDragHotArea(uint32_t type, SizeChangeReason reason, DisplayId displayId);
     void OnTouchOutside();

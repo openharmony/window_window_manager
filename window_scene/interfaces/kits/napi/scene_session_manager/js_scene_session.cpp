@@ -5782,7 +5782,7 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
     }
     taskScheduler_->RemoveMainThreadTaskByName(taskName);
     taskScheduler_->PostMainThreadTask(task, taskName);
-    ProcessReuqestedOrientationResult(promiseId);
+    ProcessRequestedOrientationResult(promiseId);
 }
 
 void JsSceneSession::ProcessRequestedOrientationResult(uint32_t promiseId)
@@ -5808,7 +5808,7 @@ void JsSceneSession::ProcessRequestedOrientationResult(uint32_t promiseId)
         }
         jsSceneSession->executionResultFinish_ = false;
     };
-    std::string taskName = "OnReuqestedOrientationChange:ProcessReuqestedOrientationResult";
+    std::string taskName = "OnReuqestedOrientationChange:ProcessRequestedOrientationResult";
     taskScheduler_->PostMainThreadTask(task, taskName);
 }
 
