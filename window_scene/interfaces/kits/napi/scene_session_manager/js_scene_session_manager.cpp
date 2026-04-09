@@ -66,6 +66,7 @@ constexpr int32_t RESTYPE_RECLAIM = 100001;
 const std::string RES_PARAM_RECLAIM_TAG = "reclaimTag";
 const std::string CREATE_SYSTEM_SESSION_CB = "createSpecificSession";
 const std::string SET_SPECIFIC_SESSION_ZINDEX_CB = "setSpecificWindowZIndex";
+const std::string MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB = "moveMainWindowToTargetDisplay";
 const std::string CREATE_KEYBOARD_SESSION_CB = "createKeyboardSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
@@ -121,6 +122,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {VIRTUAL_DENSITY_CHANGE_CB,   ListenerFunctionType::VIRTUAL_DENSITY_CHANGE_CB},
     {SET_SPECIFIC_SESSION_ZINDEX_CB,     ListenerFunctionType::SET_SPECIFIC_SESSION_ZINDEX_CB},
     {MINIMIZE_ALL_CB,     ListenerFunctionType::MINIMIZE_ALL_CB},
+    {MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB,     ListenerFunctionType::MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB},
     {NOTIFY_PAGE_ENABLE_REGISTERED_CB, ListenerFunctionType::NOTIFY_PAGE_ENABLE_REGISTERED_CB},
 };
 } // namespace
@@ -438,6 +440,34 @@ void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int
         std::to_string(static_cast<uint32_t>(windowType)));
 }
 
+/** @note @window.life */
+void JsSceneSessionManager::OnMoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId,
+    bool isFromScreenVirtual, bool isToScreenVirtual)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "windowId: %{public}d, displayId: %{public}" PRIu64
+        ", isFromScreenVirtual: %{public}d, isToScreenVirtual: %{public}d",
+        windowId, displayId, isFromScreenVirtual, isToScreenVirtual);
+    auto task = [this, windowId, displayId, isFromScreenVirtual, isToScreenVirtual,
+        jsCallBack = GetJSCallback(MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB), env = env_]() {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, windowId),
+                              CreateJsValue(env, static_cast<int64_t>(displayId)),
+                              CreateJsValue(env, isFromScreenVirtual),
+                              CreateJsValue(env, isToScreenVirtual) };
+        napi_status ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
+            ArraySize(argv), argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnMoveMainWindowToTargetDisplay:napi call exception ret: %{public}d", ret);
+            return;
+        }
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnMoveMainWindowToTargetDisplay, windowId:" +
+        std::to_string(windowId));
+}
+
 void JsSceneSessionManager::OnCreateKeyboardSession(const sptr<SceneSession>& keyboardSession,
     const sptr<SceneSession>& panelSession)
 {
@@ -678,6 +708,17 @@ void JsSceneSessionManager::RegisterSetSpecificWindowZIndexCallback()
         this->OnSetSpecificWindowZIndex(windowType, zIndex, reason);
     };
     SceneSessionManager::GetInstance().SetSpecificWindowZIndexListener(func);
+}
+
+/** @note @window.life */
+void JsSceneSessionManager::RegisterMoveMainWindowToTargetDisplayCallback()
+{
+    NotifyMoveMainWindowToTargetDisplayFunc func = [this](DisplayId displayId, int32_t windowId,
+        bool isFromScreenVirtual, bool isToScreenVirtual) {
+        TLOGNI(WmsLogTag::WMS_LIFE, "move main window to target display callback");
+        this->OnMoveMainWindowToTargetDisplay(displayId, windowId, isFromScreenVirtual, isToScreenVirtual);
+    };
+    SceneSessionManager::GetInstance().SetMoveMainWindowToTargetDisplayListener(std::move(func));
 }
 
 void JsSceneSessionManager::ProcessCreateKeyboardSessionRegister()
@@ -1802,6 +1843,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
             break;
         case ListenerFunctionType::MINIMIZE_ALL_CB:
             RegisterMinimizeAllCallback();
+            break;
+        case ListenerFunctionType::MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB:
+            RegisterMoveMainWindowToTargetDisplayCallback();
             break;
         case ListenerFunctionType::NOTIFY_PAGE_ENABLE_REGISTERED_CB:
             RegisterPageEnableCallback();
