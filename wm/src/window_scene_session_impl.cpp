@@ -479,7 +479,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             property_->GetWindowName().c_str());
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (renderSession == null) {
+    if (renderSession == nullptr) {
         TLOGI(WmsLogTag::WMS_LIFE, "create specific failed, renderSession is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
         return WMError::WM_ERROR_NULLPTR;
