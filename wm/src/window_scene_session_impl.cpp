@@ -6111,9 +6111,10 @@ WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowSizeChange(Rect 
     return WSError::WS_OK;
 }
 
-WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowStatusChange(WindowMode mode)
+WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+    bool isLayoutFullScreen)
 {
-    NotifyParentWindowStatusChange(mode);
+    NotifyParentWindowStatusChange(mode, maximizeMode, isLayoutFullScreen);
     return WSError::WS_OK;
 }
 
@@ -7774,6 +7775,7 @@ float WindowSceneSessionImpl::GetCustomDensity() const
 WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
 {
     const auto& property = GetProperty();
+
     if (windowAnchorInfo.isFromAttachOrDetach_ && (!(windowSystemConfig_.IsPcWindow() ||
         windowSystemConfig_.freeMultiWindowSupport_) || property_->IsAdaptToCompatibleDevice())) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
@@ -7782,27 +7784,36 @@ WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo&
             property_->IsAdaptToCompatibleDevice());
         return WMError::WM_OK;
     }
-    if (windowAnchorInfo.isFromAttachOrDetach_ && (!windowAnchorInfo.isAnchoredByAttach_ &&
-            !property->GetWindowAnchorInfo().isAnchoredByAttach_)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Repeated invoking");
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "only 1 level sub window is valid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!WindowHelper::IsSubWindow(property->GetWindowType()) || IsZLevelAboveParentLoosened()) {
+    if (IsZLevelAboveParentLoosened()) {
         TLOGE(WmsLogTag::WMS_SUB,
             "only sub window is valid, windowType: %{public}d, IsZLevelAboveParentLoosened: %{public}d",
             property->GetWindowType(), IsZLevelAboveParentLoosened());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
-        TLOGE(WmsLogTag::WMS_SUB, "not support fullscreen sub window");
+    if (windowAnchorInfo.isFromAttachOrDetach_ && (!windowAnchorInfo.isAnchoredByAttach_ &&
+            !property->GetWindowAnchorInfo().isAnchoredByAttach_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Repeated invoking");
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+    if (windowAnchorInfo.isFromAttachOrDetach_ && (WindowHelper::IsFullScreenWindow(property->GetWindowMode()) ||
+            property->IsFollowParentLayout())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "The subwindow is maximized or is following its parent window's layout.");
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+    if (IsLoosenedWithPcOrFreeMultiMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (property->GetSubWindowLevel() > 1) {
-        TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
+    if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "not support fullscreen sub window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!windowAnchorInfo.isFromAttachOrDetach_ && !windowSystemConfig_.supportFollowRelativePositionToParent_) {
-        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "not support device");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return WMError::WM_OK;
@@ -7822,14 +7833,19 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    WSError ret = hostSession->SetWindowAnchorInfo(windowAnchorInfo);
-    if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+
+    const auto& property = GetProperty();
+    WSError wsRet = hostSession->SetWindowAnchorInfo(windowAnchorInfo);
+    if (wsRet == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (ret == WSError::WS_OK) {
+    if (wsRet == WSError::WS_ERROR_NOT_SYSTEM_APP) {
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (wsRet == WSError::WS_OK) {
         GetProperty()->SetWindowAnchorInfo(windowAnchorInfo);
     }
-    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+    return wsRet != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow)
@@ -7865,6 +7881,9 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, device not support", GetWindowId());
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (ret == WSError::WS_OK) {
+        property->SetFollowParentLayout(isFollow);
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }

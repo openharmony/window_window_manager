@@ -697,7 +697,18 @@ int SessionStageStub::HandleNotifySubWindowAfterParentWindowStatusChange(Message
         TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read mode");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = NotifySubWindowAfterParentWindowStatusChange(static_cast<WindowMode>(mode));
+    uint32_t maximizeMode = static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    if (!data.ReadUint32(maximizeMode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read maximizeMode");
+        return ERR_INVALID_DATA;
+    }
+    bool isLayoutFullScreen = false;
+    if (!data.ReadBool(isLayoutFullScreen)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read isLayoutFullScreen");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifySubWindowAfterParentWindowStatusChange(static_cast<WindowMode>(mode),
+        static_cast<MaximizeMode>(maximizeMode), isLayoutFullScreen);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write stage error code failed");
         return ERR_INVALID_DATA;

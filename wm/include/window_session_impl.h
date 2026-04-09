@@ -553,7 +553,8 @@ public:
         override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override { return WSError::WS_OK; }
-    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override { return WSError::WS_OK; }
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override { return WSError::WS_DO_NOTHING; }
@@ -773,7 +774,7 @@ protected:
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyParentWindowSizeChange(Rect rect);
-    void NotifyParentWindowStatusChange(WindowMode mode);
+    void NotifyParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode, bool isLayoutFullScreen);
     void NotifyTransformChange(const Transform& transForm) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
@@ -789,7 +790,9 @@ protected:
     WMError UnregisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
-    WindowStatus GetWindowStatusInner(WindowMode mode);
+    WindowStatus GetWindowStatusInner(WindowMode mode, bool isGetParentStatus = false,
+        MaximizeMode maximizeMode = MaximizeMode::MODE_AVOID_SYSTEM_BAR,
+        bool isLayoutFullScreen = false);
 
     /*
      * PC Event Filter
