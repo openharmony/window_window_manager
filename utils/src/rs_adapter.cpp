@@ -484,7 +484,7 @@ bool RSAdapterUtil::IsClientMultiInstanceEnabled()
 }
 
 void RSAdapterUtil::InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector,
-                                     bool shouldCreateRenderThread, bool isMultiInstance,
+                                     sptr<IRemoteObject> connectToRenderToken,
                                      const std::shared_ptr<RSUIContext>& rsUiContext)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
@@ -493,9 +493,8 @@ void RSAdapterUtil::InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector
               "RSUIDirector already exists: %{public}s", RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str());
         return;
     }
-    rsUIDirector = RSUIDirector::Create();
+    rsUIDirector = RSUIDirector::Create(connectToRenderToken, rsUiContext);
     if (rsUIDirector) {
-        rsUIDirector->Init(shouldCreateRenderThread, isMultiInstance, rsUiContext);
         TLOGI(WmsLogTag::WMS_SCB, "Create RSUIDirector: %{public}s, rsUIContext: %{public}s",
               RSAdapterUtil::RSUIDirectorToStr(rsUIDirector).c_str(),
               RSAdapterUtil::RSUIContextToStr(rsUiContext).c_str());

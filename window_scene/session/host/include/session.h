@@ -937,6 +937,7 @@ public:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
+    std::shared_ptr<RSRenderInterface> GetRSRenderInterface(const char* caller = "");
 
     /*
      * Window highligt outline
