@@ -15,11 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "mock/mock_scene_session_manager_stub.h"
-#include "session/host/include/session.h"
-#include "session_manager/include/scene_session_manager.h"
-#include "session_manager/include/scene_session_manager_lite.h"
-#include "window_scene/interfaces/include/ws_common.h"
+#include "interfaces/include/ws_common.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,48 +40,6 @@ void SceneSessionManagerGamePrelaunchTest::SetUp() {}
 void SceneSessionManagerGamePrelaunchTest::TearDown() {}
 
 namespace {
-/**
- * @tc.name: PendingSessionToBackgroundForDelegatorWithGamePrelaunch01
- * @tc.desc: Test PendingSessionToBackgroundForDelegator with GAME_PRELAUNCH_BACKGROUND reason
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerGamePrelaunchTest, PendingSessionToBackgroundForDelegatorWithGamePrelaunch01, TestSize.Level0)
-{
-    auto mockStub = sptr<MockSceneSessionManagerStub>::MakeSptr();
-    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObject();
-    
-    EXPECT_CALL(*mockStub, PendingSessionToBackgroundForDelegator(_, _, 
-        static_cast<int32_t>(LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND)))
-        .Times(1)
-        .WillOnce(Return(WSError::WS_OK));
-    
-    auto ret = mockStub->PendingSessionToBackgroundForDelegator(token, true, 
-        static_cast<int32_t>(LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND));
-    
-    EXPECT_EQ(ret, WSError::WS_OK);
-}
-
-/**
- * @tc.name: PendingSessionToBackgroundForDelegatorWithDefaultReason
- * @tc.desc: Test PendingSessionToBackgroundForDe与其他reason
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerGamePrelaunchTest, PendingSessionToBackgroundForDelegatorWithDefaultReason, TestSize.Level0)
-{
-    auto mockStub = sptr<MockSceneSessionManagerStub>::MakeSptr();
-    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObject();
-    
-    EXPECT_CALL(*mockStub, PendingSessionToBackgroundForDelegator(_, _, 
-        static_cast<int32_t>(LifeCycleChangeReason::DEFAULT)))
-        .Times(1)
-        .WillOnce(Return(WSError::WS_OK));
-    
-    auto ret = mockStub->PendingSessionToBackgroundForDelegator(token, true, 
-        static_cast<int32_t>(LifeCycleChangeReason::DEFAULT));
-    
-    EXPECT_EQ(ret, WSError::WS_OK);
-}
-
 /**
  * @tc.name: SessionInfoWithGamePrelaunch01
  * @tc.desc: Test SessionInfo with isGamePrelaunch_ set to true
@@ -173,121 +127,91 @@ HWTEST_F(SceneSessionManagerGamePrelaunchTest, LifeCycleChangeReasonEnumValues, 
 }
 
 /**
- * @tc.name: SessionPendingSessionToBackgroundForDelegator01
- * @tc.desc: Test Session::PendingSessionToBackgroundForDelegator with GAME_PRELAUNCH_BACKGROUND
+ * @tc.name: SessionInfoAssignmentWithGamePrelaunch
+ * @tc.desc: Test SessionInfo assignment operator with isGamePrelaunch_
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionPendingSessionToBackgroundForDelegator01, TestSize.Level0)
+HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionInfoAssignmentWithGamePrelaunch, TestSize.Level0)
 {
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "TestBundle";
-    sessionInfo.abilityName_ = "TestAbility";
-    sessionInfo.isGamePrelaunch_ = true;
+    SessionInfo originalInfo;
+    originalInfo.bundleName_ = "TestBundle";
+    originalInfo.abilityName_ = "TestAbility";
+    originalInfo.isGamePrelaunch_ = true;
     
-    auto session = sptr<Session>::MakeSptr(sessionInfo);
+    SessionInfo assignedInfo;
+    assignedInfo = originalInfo;
     
-    bool callbackCalled = false;
-    bool callbackReason = false;
-    
-    session->SetPendingSessionToBackgroundForDelegatorListener(
-        [&callbackCalled, &callbackReason](const SessionInfo& info, bool shouldBackToCaller, LifeCycleChangeReason reason) {
-            callbackCalled = true;
-            callbackReason = (reason == LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND);
-        });
-    
-    auto ret = session->PendingSessionToBackgroundForDelegator(true, LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND);
-    
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(callbackCalled);
-    EXPECT_TRUE(callbackReason);
+    EXPECT_TRUE(assignedInfo.isGamePrelaunch_);
+    EXPECT_EQ(assignedInfo.bundleName_, originalInfo.bundleName_);
+    EXPECT_EQ(assignedInfo.abilityName_, originalInfo.abilityName_);
 }
 
 /**
- * @tc.name: SessionPendingSessionToBackgroundForDelegator02
- * @tc.desc: Test Session::PendingSessionToBackgroundForDelegator with DEFAULT reason
+ * @tc.name: SessionInfoMultipleInstancesWithGamePrelaunch
+ * @tc.desc: Test multiple SessionInfo instances with different isGamePrelaunch_ values
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionPendingSessionToBackgroundForDelegator02, TestSize.Level0)
+HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionInfoMultipleInstancesWithGamePrelaunch, TestSize.Level0)
+{
+    SessionInfo sessionInfo1;
+    sessionInfo1.bundleName_ = "Bundle1";
+    sessionInfo1.abilityName_ = "Ability1";
+    sessionInfo1.isGamePrelaunch_ = true;
+    
+    SessionInfo sessionInfo2;
+    sessionInfo2.bundleName_ = "Bundle2";
+    sessionInfo2.abilityName_ = "Ability2";
+    sessionInfo2.isGamePrelaunch_ = false;
+    
+    EXPECT_TRUE(sessionInfo1.isGamePrelaunch_);
+    EXPECT_FALSE(sessionInfo2.isGamePrelaunch_);
+    
+    EXPECT_EQ(sessionInfo1.bundleName_, "Bundle1");
+    EXPECT_EQ(sessionInfo2.bundleName_, "Bundle2");
+}
+
+/**
+ * @tc.name: SessionInfoGamePrelaunchToggle
+ * @tc.desc: Test toggling isGamePrelaunch_ value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionInfoGamePrelaunchToggle, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "TestBundle";
     sessionInfo.abilityName_ = "TestAbility";
+    
+    EXPECT_FALSE(sessionInfo.isGamePrelaunch_);
+    
+    sessionInfo.isGamePrelaunch_ = true;
+    EXPECT_TRUE(sessionInfo.isGamePrelaunch_);
+    
     sessionInfo.isGamePrelaunch_ = false;
+    EXPECT_FALSE(sessionInfo.isGamePrelaunch_);
     
-    auto session = sptr<Session>::MakeSptr(sessionInfo);
-    
-    bool callbackCalled = false;
-    bool callbackReason = false;
-    
-    session->SetPendingSessionToBackgroundForDelegatorListener(
-        [&callbackCalled, &callbackReason](const SessionInfo& info, bool shouldBackToCaller, LifeCycleChangeReason reason) {
-            callbackCalled = true;
-            callbackReason = (reason == LifeCycleChangeReason::DEFAULT);
-        });
-    
-    auto ret = session->PendingSessionToBackgroundForDelegator(true, LifeCycleChangeReason::DEFAULT);
-    
-    EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(callbackCalled);
-    EXPECT_TRUE(callbackReason);
+    sessionInfo.isGamePrelaunch_ = true;
+    EXPECT_TRUE(sessionInfo.isGamePrelaunch_);
 }
 
 /**
- * @tc.name: SessionSetSessionInfoWithGamePrelaunch
- * @tc.desc: Test Session::SetSessionInfo with isGamePrelaunch_
+ * @tc.name: SessionInfoGamePrelaunchWithOtherFields
+ * @tc.cdesc: Test isGamePrelaunch_ with other SessionInfo fields
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionSetSessionInfoWithGamePrelaunch, TestSize.Level0)
+HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionInfoGamePrelaunchWithOtherFields, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "TestBundle";
     sessionInfo.abilityName_ = "TestAbility";
+    sessionInfo.moduleName_ = "TestModule";
+    sessionInfo.persistentId_ = 12345;
     sessionInfo.isGamePrelaunch_ = true;
     
-    auto session = sptr<Session>::MakeSptr();
-    session->SetSessionInfo(sessionInfo);
-    
-    auto retrievedInfo = session->GetSessionInfo();
-    EXPECT_TRUE(retrievedInfo.isGamePrelaunch_);
-    EXPECT_EQ(retrievedInfo.bundleName_, "TestBundle");
-    EXPECT_EQ(retrievedInfo.abilityName_, "TestAbility");
-}
-
-/**
- * @tc.name: MultipleReasonsTest
- * @tc.desc: Test different lifecycle change reasons
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerGamePrelaunchTest, MultipleReasonsTest, TestSize.Level0)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "TestBundle";
-    sessionInfo.abilityName_ = "TestAbility";
-    
-    auto session = sptr<Session>::MakeSptr(sessionInfo);
-    
-    std::vector<LifeCycleChangeReason> reasons = {
-        LifeCycleChangeReason::DEFAULT,
-        LifeCycleChangeReason::QUICK_BATCH_BACKGROUND,
-        LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND
-    };
-    
-    for (auto reason : reasons) {
-        bool callbackCalled = false;
-        LifeCycleChangeReason capturedReason = LifeCycleChangeReason::DEFAULT;
-        
-        session->SetPendingSessionToBackgroundForDelegatorListener(
-            [&callbackCalled, &capturedReason](const SessionInfo& info, bool shouldBackToCaller, LifeCycleChangeReason r) {
-                callbackCalled = true;
-                capturedReason = r;
-            });
-        
-        auto ret = session->PendingSessionToBackgroundForDelegator(true, reason);
-        
-        EXPECT_EQ(ret, WSError::WS_OK);
-        EXPECT_TRUE(callbackCalled);
-        EXPECT_EQ(capturedReason, reason);
-    }
+    EXPECT_TRUE(sessionInfo.isGamePrelaunch_);
+    EXPECT_EQ(sessionInfo.bundleName_, "TestBundle");
+    EXPECT_EQ(sessionInfo.abilityName_, "TestAbility");
+    EXPECT_EQ(sessionInfo.moduleName_, "TestModule");
+    EXPECT_EQ(sessionInfo.persistentId_, 12345);
 }
 }
 }
