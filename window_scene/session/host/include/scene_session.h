@@ -820,6 +820,7 @@ public:
     WSError SetDecorVisible(bool isVisible) override;
     bool IsDecorVisible() const;
     WindowDecoration GetWindowDecoration() const;
+    WSError ConfigDockAutoHide(bool isDockAutoHide);
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;
