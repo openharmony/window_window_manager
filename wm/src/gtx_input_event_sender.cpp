@@ -89,7 +89,8 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
         TLOGI(WmsLogTag::WMS_EVENT,
               "pointerItem before, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, "
               "displayYPos:%{public}f, windowPosY:%{public}f, windowY:%{public}d",
-              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
+              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(),
+              item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
 
         int32_t displayX = item.GetDisplayX();
         int32_t WindowX = item.GetWindowX();
@@ -115,11 +116,11 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
         item.SetWindowYPos(WindowYPos * mScaleY + mOffsetY);
         item.SetGlobalY(globalY * mScaleY + mOffsetY);
 
-        TLOGI(
-            WmsLogTag::WMS_EVENT,
-            "pointerItem after, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, displayYPos:%{public}f, "
-            "windowPosY:%{public}f, windowY:%{public}d",
-            item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
+        TLOGI(WmsLogTag::WMS_EVENT,
+              "pointerItem after, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, "
+              "displayYPos:%{public}f, windowPosY:%{public}f, windowY:%{public}d",
+              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(),
+              item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
     }
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }
