@@ -5785,7 +5785,7 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
     ProcessReuqestedOrientationResult(promiseId);
 }
 
-void JsSceneSession::ProcessReuqestedOrientationResult(uint32_t promiseId)
+void JsSceneSession::ProcessRequestedOrientationResult(uint32_t promiseId)
 {
     if (promiseId == 0) {
         TLOGI(WmsLogTag::WMS_ROTATION, "no need process");

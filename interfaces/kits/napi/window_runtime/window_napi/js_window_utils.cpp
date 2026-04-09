@@ -1784,19 +1784,6 @@ napi_value RotationInfoTypeInit(napi_env env)
     return objValue;
 }
 
-napi_value ConvertRotationResultToJsValue(napi_env env, const AvoidArea& avoidArea,
-    AvoidAreaType type, bool useActualVisibility)
-{
-    napi_value objValue = nullptr;
-    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
-
-    napi_set_named_property(env, objValue, "leftRect", GetRectAndConvertToJsValue(env, avoidArea.leftRect_));
-    napi_set_named_property(env, objValue, "topRect", GetRectAndConvertToJsValue(env, avoidArea.topRect_));
-    napi_set_named_property(env, objValue, "rightRect", GetRectAndConvertToJsValue(env, avoidArea.rightRect_));
-    napi_set_named_property(env, objValue, "bottomRect", GetRectAndConvertToJsValue(env, avoidArea.bottomRect_));
-    return objValue;
-}
-
 napi_value RectTypeInit(napi_env env)
 {
     CHECK_NAPI_ENV_RETURN_IF_NULL(env);

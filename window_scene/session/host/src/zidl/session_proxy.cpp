@@ -1733,15 +1733,15 @@ WMError SessionProxy::SetPreferredOrientationWithResult(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(static_cast<uint32_t>(orientation))) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "write from type error");
+        TLOGE(WmsLogTag::WMS_ROTATION, "write orientation error");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteUint32(promiseId)) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "write to type error");
+        TLOGE(WmsLogTag::WMS_ROTATION, "write promiseId error");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!data.WriteBool(needAnimation)) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "write the value to be converted error");
+        TLOGE(WmsLogTag::WMS_ROTATION, "write needAnimation error");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();
