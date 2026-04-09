@@ -21,7 +21,7 @@
 #include <iremote_object.h>
 #include <optional>
 
-#include "../dm/dm_common.h"
+#include "dm_common.h"
 #include "wm_common.h"
 #include "window_option.h"
 #include "occupied_area_change_info.h"
