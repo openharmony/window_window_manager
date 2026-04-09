@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,7 @@ class WindowFocusedEnv implements IEnvironmentValue<UIEnvFocus> {
 
   #focusChangeCallback = (windowEventType: window.WindowEventType): void => {
     this.isFocused = windowEventType === window.WindowEventType.WINDOW_ACTIVE;
+    hilog.debug(HILOG_DOMAIN, HILOG_TAG, `[env] focusChangeCallback , ${this.isFocused}`);
   };
 
   update() : void {}
@@ -85,6 +86,7 @@ class WindowHighlightedEnv implements IEnvironmentValue<UIEnvHighlight> {
 
   #highlightChangeCallback = (highlighted: boolean): void => {
     this.isHighlighted = highlighted;
+    hilog.debug(HILOG_DOMAIN, HILOG_TAG, `[env] highlightChangeCallback , ${this.isHighlighted}`);
   };
 
   update() : void {}
