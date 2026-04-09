@@ -1135,6 +1135,18 @@ void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
     };
 }
 
+void WindowSceneSessionImpl::RecoverExtension()
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId: %{public}d", GetPersistentId());
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        Ace::UIExtOptions uiExtOptions;
+        uiExtOptions.isSendBackground = true;
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::RECOVER_EXTENSION), want,
+            static_cast<uint8_t>(SubSystemId::WM_UIEXT), uiExtOptions);
+    }
+}
+
 void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", GetPersistentId(), state);
@@ -1147,6 +1159,7 @@ void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, 
             UpdateFinishRecoverProperty(isSpecificSession);
             RecoverSessionListener();
             RecoverSessionProperty();
+            RecoverExtension();
             break;
         default:
             break;
