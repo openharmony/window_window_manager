@@ -92,7 +92,7 @@ namespace {
  * @tc.desc: Test WindowScene GoForeground with isGamePreLaunch=true
  * @tc.type: FUNC
  */
-HWxTEST_F(WindowSceneGamePrelaunchTest, WindowSceneGoForegroundWithGamePrelaunch01, TestSize.Level0)
+HWTEST_F(WindowSceneGamePrelaunchTest, WindowSceneGoForegroundWithGamePrelaunch01, TestSize.Level0)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("WindowSceneGoForegroundWithGamePrelaunch01");
