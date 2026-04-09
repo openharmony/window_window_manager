@@ -10296,8 +10296,10 @@ bool SceneSessionManager::IsInDefaultScreen(const sptr<SceneSession>& sceneSessi
 
 bool SceneSessionManager::IsNeedSkipWindowModeTypeCheck(const sptr<SceneSession>& sceneSession, bool isSmallFold)
 {
-    if (sceneSession == nullptr ||
-        !WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+    if (sceneSession == nullptr) {
+        return true;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
         !sceneSession->GetRSVisible() ||
         !sceneSession->IsSessionForeground()) {
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], isVisible=%{public}d, state=%{public}u",
