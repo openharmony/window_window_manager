@@ -22,6 +22,7 @@ config("pipwindow_common_config") {
     "../../../../wm/include",
     "../../../../window_scene/interfaces/innerkits/include",
     "../../arkui/ace_engine/interfaces/inner_api/xcomponent_controller",
+    "../../../../interfaces/kits/napi/picture_in_picture_napi",
   ]
 }
 
@@ -60,6 +61,7 @@ ohos_shared_library("pipwindowani_kit") {
   deps = [
     "${window_base_path}/wm:libwm",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+    "../../../../interfaces/kits/napi/picture_in_picture_napi:pipwindow_kit",
     "../../../../utils:libwmutil_base",
   ]
 
