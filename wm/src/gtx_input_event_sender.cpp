@@ -89,11 +89,7 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
         TLOGI(WmsLogTag::WMS_EVENT,
               "pointerItem before, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, "
               "displayYPos:%{public}f, windowPosY:%{public}f, windowY:%{public}d",
-              item.GetHeight(),
-              item.GetGlobalY(),
-              item.GetDisplayXPos(),
-              item.GetWindowYPos(),
-              item.GetWindowY());
+              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetWindowYPos(), item.GetWindowY());
 
         int32_t displayX = item.GetDisplayX();
         int32_t WindowX = item.GetWindowX();
@@ -123,19 +119,13 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
             WmsLogTag::WMS_EVENT,
             "pointerItem after, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, displayYPos:%{public}f, "
             "windowPosY:%{public}f, windowY:%{public}d",
-            item.GetHeight(),
-            item.GetGlobalY(),
-            item.GetDisplayXPos(),
-            item.GetWindowYPos(),
-            item.GetWindowY());
+            item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetWindowYPos(), item.GetWindowY());
     }
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }
 
-void GtxInputEventSender::NapiAVSessionInputRedistributeCallback::SetTouchEventScale(int offsetX,
-                                                                                     int offsetY,
-                                                                                     float scaleX,
-                                                                                     float scaleY)
+void GtxInputEventSender::NapiAVSessionInputRedistributeCallback::SetTouchEventScale(int offsetX, 
+    int offsetY, float scaleX, float scaleY)
 {
     mOffsetX = offsetX;
     mOffsetY = offsetY;
