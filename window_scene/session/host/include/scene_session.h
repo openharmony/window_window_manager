@@ -23,6 +23,7 @@
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <modifier/rs_property.h>
 #include <pipeline/rs_node_map.h>
+#include <unordered_set>
 
 #include "display_manager.h"
 #include "proxy/include/window_info.h"
