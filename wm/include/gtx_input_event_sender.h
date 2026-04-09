@@ -16,7 +16,7 @@
 #ifndef GTX_INPUT_EVENT_SENDER_H
 #define GTX_INPUT_EVENT_SENDER_H
 
-#include <mutex> 
+#include <mutex>
 #include <atomic>
 #include <algorithm>
 
@@ -76,9 +76,7 @@ public:
     class NapiAVSessionInputRedistributeCallback : public Rosen::IInputEventRecipientCallback {
     public:
         NapiAVSessionInputRedistributeCallback(int offsetX, int offsetY, float scaleX, float scaleY)
-            : mOffsetX(offsetX), mOffsetY(offsetY), mScaleX(scaleX), mScaleY(scaleY)
-        {
-        }
+            : mOffsetX(offsetX), mOffsetY(offsetY), mScaleX(scaleX), mScaleY(scaleY) {}
         Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MNI::KeyEvent>& KeyEvent) override;
         Rosen::InputAfterRedistributeBehavior
             OnInputEvent(const std::shared_ptr<MNI::PointerEvent>& PointerEvent) override;
@@ -95,6 +93,7 @@ private:
     std::atomic<bool> mIsEnable = false;
     std::shared_ptr<NapiAVSessionInputRedistributeCallback> mCallbackInstance;
     Rosen::IInputEventRecipientInfo mRecipientInfo;
+    
     int mOffsetX = 0;
     int mOffsetY = 0;
     float mScaleX = 1.0f;
