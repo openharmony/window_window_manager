@@ -4071,6 +4071,7 @@ WMError WindowSceneSessionImpl::Maximize()
     }
     if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {
         UpdateIsShowDecorInFreeMultiWindow(true);
+        isMaximizeInvoked_ = true;
         SetLayoutFullScreen(enableImmersiveMode_);
     }
     return WMError::WM_OK;
@@ -4145,6 +4146,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     }
     ApplyMaximizePresentation(presentation);
     UpdateIsShowDecorInFreeMultiWindow(true);
+    isMaximizeInvoked_ = true;
     property_->SetIsLayoutFullScreen(enableImmersiveMode_);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
@@ -4272,6 +4274,7 @@ WMError WindowSceneSessionImpl::Recover()
         }
         hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        isMaximizeInvoked_ = false;
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
@@ -4347,6 +4350,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
             UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        isMaximizeInvoked_ = false;
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
@@ -6176,6 +6180,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         UpdateIsShowDecorInFreeMultiWindow(true);
+        isMaximizeInvoked_ = false;
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
@@ -6354,6 +6359,21 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     SwitchSubWindow(enable, GetPersistentId());
     SwitchSystemWindow(enable, GetPersistentId());
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::ConfigDockAutoHide(bool isDockAutoHide)
+{
+    windowSystemConfig_.isDockAutoHide_ = isDockAutoHide;
+    UpdateDecorEnable(true);
+    std::vector<sptr<WindowSessionImpl>> subWindows;
+    GetSubWindows(GetPersistentId(), subWindows);
+    for (auto& subWindowSession : subWindows) {
+        if (subWindowSession != nullptr) {
+            subWindowSession->SetDockAutoHide(isDockAutoHide);
+            subWindowSession->UpdateDecorEnable(true);
+        }
+    }
     return WSError::WS_OK;
 }
 

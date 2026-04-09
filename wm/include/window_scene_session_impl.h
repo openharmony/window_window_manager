@@ -322,6 +322,7 @@ public:
     bool IsDecorEnable() const override;
     WMError Close() override;
     WMError CloseDirectly() override;
+    WSError ConfigDockAutoHide(bool isDockAutoHide) override;
 
     /*
      * Starting Window
