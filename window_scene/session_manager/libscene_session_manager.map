@@ -34,7 +34,6 @@
             OHOS::Rosen::SceneSessionManager::AddWindowDragHotArea*;
             OHOS::Rosen::SceneSessionManager::ApplyFeatureConfig*;
             OHOS::Rosen::SceneSessionManager::ChangeUIAbilityVisibilityBySCB*;
-            OHOS::Rosen::SceneSessionManager::CheckCollaboratorType*;
             OHOS::Rosen::SceneSessionManager::CheckIfReuseSession*;
             OHOS::Rosen::SceneSessionManager::CheckSceneZOrder*;
             OHOS::Rosen::SceneSessionManager::CloneWindow*;
@@ -219,6 +218,7 @@
             OHOS::Rosen::SceneSessionManager::VisitSnapshotFromCache*;
             OHOS::Rosen::SceneSessionManager::RegisterMinimizeAllCallback*;
             OHOS::Rosen::SceneSessionManager::NotifyRotationBegin*;
+            OHOS::Rosen::SceneSessionManager::RegisterPageEnableFunc*;
             OHOS::Rosen::SceneSessionManagerLite::GetInstance*;
             OHOS::Rosen::SessionLifecycleListenerStub::OnRemoteRequest*;
             OHOS::Rosen::SessionRouterStackListenerStub::OnRemoteRequest*;

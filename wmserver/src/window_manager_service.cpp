@@ -1076,6 +1076,11 @@ WMError WindowManagerService::DestroyWindow(uint32_t windowId, bool onlySelf)
 
 WMError WindowManagerService::RequestFocus(uint32_t windowId)
 {
+    if (!accessTokenIdMaps_.isExist(windowId, IPCSkeleton::GetCallingTokenID()) &&
+        !Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_FOCUS, "Operation rejected");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     auto task = [this, windowId]() {
         WLOGI("[WMS] RequestFocus: %{public}u", windowId);
         return windowController_->RequestFocus(windowId);
@@ -1385,6 +1390,13 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
         WLOGFE("Set privacy mode permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    // Note: verify set touchale areas permission.
+    if (action == PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA &&
+        !Permission::IsSystemCalling() &&
+        !Permission::CheckCallingPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Set hot touch areas failed due to permission denied");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
 
     windowProperty->isSystemCalling_ = Permission::IsSystemCalling();
     if (action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) {
@@ -1465,6 +1477,11 @@ WMError WindowManagerService::GetVisibilityWindowInfo(std::vector<sptr<WindowVis
 /** @note @window.hierarchy */
 WMError WindowManagerService::RaiseToAppTop(uint32_t windowId)
 {
+    if (!accessTokenIdMaps_.isExist(windowId, IPCSkeleton::GetCallingTokenID()) &&
+        !Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_HIERARCHY, "Operation rejected");
+        return WMError::WM_ERROR_INVALID_OPERATION;
+    }
     auto task = [this, windowId]() {
         return windowController_->RaiseToAppTop(windowId);
     };

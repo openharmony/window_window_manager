@@ -696,7 +696,12 @@ public:
         return WSError::WS_OK;
     }
     
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated()
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false)
+    {
+        return WSError::WS_OK;
+    }
+
+    virtual WSError NotifyPageEnable(const std::string& action, const std::string& message)
     {
         return WSError::WS_OK;
     }

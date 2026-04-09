@@ -451,7 +451,9 @@ napi_value JsScreenSession::OnRegisterCallback(napi_env env, napi_callback_info 
         mCallback_[callbackType] = callbackRef;
     }
     RegisterScreenChangeListener();
-
+    if (callbackType == ON_PROPERTY_CHANGE_CALLBACK && screenSession_ != nullptr) {
+        screenSession_->CheckAndNotifyPropertyChange();
+    }
     return NapiGetUndefined(env);
 }
 
@@ -577,8 +579,8 @@ void JsScreenSession::CallJsCallback(const std::string& callbackType)
                     callbackType.c_str());
                 return;
             }
-            napi_value argv[] = { JsScreenUtils::CreateJsScreenProperty(
-                env, screenSession->GetScreenProperty()) };
+            napi_value argv[] = { JsScreenUtils::CreateJsScreenProperty(env, screenSession->GetScreenProperty()),
+                CreateJsValue(env, screenSession->IsBootingConnect()) };
             napi_call_function(env, NapiGetUndefined(env), method, ArraySize(argv), argv, nullptr);
         } else {
             napi_value argv[] = {};

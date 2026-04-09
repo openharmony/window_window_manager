@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1191,7 +1192,8 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
         data.WriteBool(virtualOption.supportsInput_) &&
         data.WriteString(virtualOption.serialNumber_) &&
         data.WriteString(virtualOption.bundleName_) && data.WriteInt32(virtualOption.userId_) &&
-        data.WriteUint32(virtualOption.phyWidth_) && data.WriteUint32(virtualOption.phyHeight_);
+        data.WriteUint32(virtualOption.phyWidth_) && data.WriteUint32(virtualOption.phyHeight_) &&
+        data.WriteInt32(virtualOption.screenId_);
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&
@@ -4546,10 +4548,12 @@ void OHOS::Rosen::ScreenSessionManagerProxy::UpdateDisplayHookInfo(int32_t uid, 
         !data.WriteFloat(hookInfo.density_) || !data.WriteUint32(hookInfo.rotation_) ||
         !data.WriteBool(hookInfo.enableHookRotation_) || !data.WriteUint32(hookInfo.displayOrientation_) ||
         !data.WriteBool(hookInfo.enableHookDisplayOrientation_) ||
-        !data.WriteBool(hookInfo.isFullScreenInForceSplit_)) {
-        TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
-        return;
-    }
+        !data.WriteBool(hookInfo.isFullScreenInForceSplit_) || !data.WriteInt32(hookInfo.actualRect_.posX_) ||
+        !data.WriteInt32(hookInfo.actualRect_.posY_) || !data.WriteUint32(hookInfo.actualRect_.width_) ||
+        !data.WriteUint32(hookInfo.actualRect_.height_)) {
+            TLOGE(WmsLogTag::DMS, "Write hookInfo failed");
+            return;
+        }
 
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_NOTIFY_DISPLAY_HOOK_INFO),
         data, reply, option) != ERR_NONE) {

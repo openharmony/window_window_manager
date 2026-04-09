@@ -62,6 +62,7 @@ const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
+constexpr ErrCode ERR_OSACCOUNT_NOT_FOREGROUND_USER = 4194342;
 } // namespace
 
 
@@ -292,20 +293,19 @@ ErrCode MockSessionManagerService::GetSessionManagerService(sptr<IRemoteObject>&
 }
 
 ErrCode MockSessionManagerService::GetSessionManagerServiceByUserId(int32_t userId,
-                                                                    sptr<IRemoteObject>& sessionManagerService)
+    sptr<IRemoteObject>& sessionManagerService)
 {
     int32_t clientUserId = GetUserIdByCallingUid();
+    TLOGI(WmsLogTag::WMS_MULTI_USER, "userId=%{public}d, clientUserId=%{public}d", userId, clientUserId);
     if (clientUserId <= INVALID_USER_ID) {
-        TLOGE(WmsLogTag::WMS_MULTI_USER, "userId is illegal: %{public}d", clientUserId);
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "clientUserId is illegal, clientUserId=%{public}d", clientUserId);
         return ERR_INVALID_VALUE;
     }
-    if (clientUserId == SYSTEM_USERID) {
-        std::lock_guard<std::mutex> lock(defaultWMSUserIdMutex_);
-        clientUserId = defaultWMSUserId_;
-        TLOGI(WmsLogTag::WMS_MULTI_USER,
-            "System user, use current default session mgr service, userId=%{public}d", clientUserId);
+    if (clientUserId != SYSTEM_USERID) {
+        TLOGE(WmsLogTag::WMS_MULTI_USER, "clientUserId is not system, clientUserId=%{public}d", clientUserId);
+        return ERR_WOULD_BLOCK;
     }
-    sessionManagerService = GetSessionManagerServiceInner(clientUserId);
+    sessionManagerService = GetSessionManagerServiceInner(userId);
     if (!sessionManagerService) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "sessionManagerService is null");
         return ERR_INVALID_VALUE;
@@ -1194,6 +1194,11 @@ ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userI
     ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountDisplayId(userId, displayId);
     TLOGI(WmsLogTag::WMS_RECOVER, "displayId: %{public}" PRIu64, displayId);
     if (err != ERR_OK) {
+        if (err == ERR_OSACCOUNT_NOT_FOREGROUND_USER) {
+            TLOGW(WmsLogTag::WMS_RECOVER, "User is not foreground, use default displayId");
+            displayId = DEFAULT_SCREEN_ID;
+            return ERR_OK;
+        }
         TLOGE(WmsLogTag::WMS_RECOVER,
               "get user display failed, errorCode: %{public}d, userId %{public}d", err, userId);
     }

@@ -471,6 +471,15 @@ HWTEST_F(SceneSessionImmersiveTest, HandleLayoutAvoidAreaUpdate, TestSize.Level1
         isLayoutFinished = true;
         return WSError::WS_OK;
     };
+
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    session->specificCallback_->onGetLSState_ = []() { return true; };
+    session->Session::SetRsScale(0, 0);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    session->Session::SetRsScale(1, 0);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
+    session->Session::SetRsScale(1, 1);
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM));
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
@@ -528,6 +537,56 @@ HWTEST_F(SceneSessionImmersiveTest, GetSystemAvoidArea, TestSize.Level1)
     property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
     sceneSession->SetSessionProperty(property);
     ASSERT_EQ(avoidArea.topRect_.posX_, 0);
+}
+
+/**
+ * @tc.name: GetAllAvoidAreas
+ * @tc.desc: GetAllAvoidAreas
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, GetAllAvoidAreas, TestSize.Level1)
+{
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    SessionInfo info;
+    info.abilityName_ = "GetAllAvoidAreas";
+    info.bundleName_ = "GetAllAvoidAreas";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_OK);
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->specificCallback_ = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sceneSession->specificCallback_->onGetLSState_ = []() { return true; };
+    sceneSession->Session::SetRsScale(0, 0);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
+    sceneSession->Session::SetRsScale(1, 0);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_ERROR_INVALID_PARAM);
+    sceneSession->Session::SetRsScale(1, 1);
+    EXPECT_EQ(sceneSession->GetAllAvoidAreas(avoidAreas), WSError::WS_OK);
+}
+
+/*
+ * @tc.name: NotifyClientToUpdateRectTask
+ * @tc.desc: NotifyClientToUpdateRectTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, NotifyClientToUpdateRectTask, TestSize.Level1)
+{
+    std::map<AvoidAreaType, AvoidArea> avoidAreas;
+    SessionInfo info;
+    info.abilityName_ = "NotifyClientToUpdateRectTask";
+    info.bundleName_ = "NotifyClientToUpdateRectTask";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->layoutController_ = sptr<LayoutController>::MakeSptr(session->property_);
+    session->layoutController_->reason_ = SizeChangeReason::AVOID_AREA_CHANGE;
+    session->foregroundInteractiveStatus_ = false;
+    session->NotifyClientToUpdateRectTask("OnBoundsChanged", nullptr);
+    session->foregroundInteractiveStatus_ = true;
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    session->NotifyClientToUpdateRectTask("OnBounds", nullptr);
+    session->property_->SetWindowType(WindowType::WINDOW_TYPE_STATUS_BAR);
+    session->NotifyClientToUpdateRectTask("OnBounds", nullptr);
+    session->NotifyClientToUpdateRectTask("OnBoundsChanged", nullptr);
+    EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::AVOID_AREA_CHANGE);
 }
 }
 }

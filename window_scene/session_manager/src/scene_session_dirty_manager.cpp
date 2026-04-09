@@ -839,7 +839,7 @@ void SceneSessionDirtyManager::UpdateWindowFlags(DisplayId displayId, const sptr
     windowInfo.flags = 0;
     bool isTouchable = sceneSession->GetWindowTouchableForMMI(displayId);
     if (!isTouchable) {
-        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_UNTOUCHABLE;
+        windowInfo.flags |= MMI::WindowInputPolicy::FLAG_UNTOUCHABLE;
     }
 }
 
@@ -978,11 +978,11 @@ std::pair<MMI::WindowInfo, std::shared_ptr<Media::PixelMap>> SceneSessionDirtyMa
     };
     UpdateWindowFlags(displayId, sceneSession, windowInfo);
     if (windowSessionProperty->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING)) {
-        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_HANDWRITING;
+        windowInfo.flags |= MMI::WindowInputPolicy::FLAG_HANDWRITING;
     }
     auto expandInputFlag = sceneSession->GetSessionInfoExpandInputFlag();
-    if (expandInputFlag & static_cast<uint32_t>(ExpandInputFlag::WINDOW_DISABLE_USER_ACTION)) {
-        windowInfo.flags |= MMI::WindowInfo::FLAG_BIT_DISABLE_USER_ACTION;
+    if (expandInputFlag & MMI::WindowInputPolicy::FLAG_DISABLE_USER_ACTION) {
+        windowInfo.flags |= MMI::WindowInputPolicy::FLAG_DISABLE_USER_ACTION;
     }
     if (expandInputFlag & MMI::WindowInputPolicy::FLAG_TOUCHPAD_AXIS_SCROLL_REDISPATCH) {
         windowInfo.flags |= MMI::WindowInputPolicy::FLAG_TOUCHPAD_AXIS_SCROLL_REDISPATCH;

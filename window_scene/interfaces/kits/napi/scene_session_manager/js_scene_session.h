@@ -235,11 +235,14 @@ private:
     static void BindNativeMethodForWaterfall(napi_env env, napi_value objValue, const char* moduleName);
     static napi_value SetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     static napi_value SetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
+    static napi_value AddSessionBlackList(napi_env env, napi_callback_info info);
+    static napi_value RemoveSessionBlackList(napi_env env, napi_callback_info info);
     static napi_value ToggleCompatibleMode(napi_env, napi_callback_info info);
     static napi_value SetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     static napi_value SetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     static napi_value SetBlank(napi_env env, napi_callback_info info);
     static napi_value RemoveBlank(napi_env env, napi_callback_info info);
+    static napi_value LayerPartRender(napi_env env, napi_callback_info info);
     static napi_value AddSnapshot(napi_env env, napi_callback_info info);
     static napi_value RemoveSnapshot(napi_env env, napi_callback_info info);
     static napi_value SetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
@@ -281,6 +284,7 @@ private:
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
     static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value GetSceneNodeCount(napi_env env, napi_callback_info info);
     /*
      * PC Window
      */
@@ -334,11 +338,14 @@ private:
     napi_value OnSetSkipDraw(napi_env env, napi_callback_info info);
     napi_value OnSetSkipSelfWhenShowOnVirtualScreen(napi_env env, napi_callback_info info);
     napi_value OnSetSkipEventOnCastPlus(napi_env env, napi_callback_info info);
+    napi_value OnAddSessionBlackList(napi_env env, napi_callback_info info);
+    napi_value OnRemoveSessionBlackList(napi_env env, napi_callback_info info);
     napi_value OnToggleCompatibleMode(napi_env, napi_callback_info info);
     napi_value OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info);
     napi_value OnSetUniqueDensityDpiFromSCB(napi_env env, napi_callback_info info);
     napi_value OnSetBlank(napi_env env, napi_callback_info info);
     napi_value OnRemoveBlank(napi_env env, napi_callback_info info);
+    napi_value OnLayerPartRender(napi_env env, napi_callback_info info);
     napi_value OnAddSnapshot(napi_env env, napi_callback_info info);
     napi_value OnRemoveSnapshot(napi_env env, napi_callback_info info);
     napi_value OnSetBufferAvailableCallbackEnable(napi_env env, napi_callback_info info);
@@ -382,6 +389,7 @@ private:
     napi_value OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnGetUid(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnGetSceneNodeCount(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -541,7 +549,8 @@ private:
     void OnSetWindowRectAutoSave(bool enabled, bool isSaveBySpecifiedFlag);
     void OnUpdateAppUseControl(ControlAppType type, bool isNeedControl, bool isControlRecentOnly);
     void OnWindowMoving(DisplayId displayId, int32_t pointerX, int32_t pointerY);
-    void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
+    void UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon,
+        const std::string& updatedIconPath);
     void OnKeyboardStateChange(SessionState state, const KeyboardEffectOption& effectOption,
         const uint32_t callingSessionId, const DisplayId targetDisplayId);
     void OnKeyboardEffectOptionChange(const KeyboardEffectOption& effectOption);

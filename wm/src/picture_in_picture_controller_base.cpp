@@ -192,7 +192,7 @@ WMError PictureInPictureControllerBase::StopPictureInPictureFromClient()
         return WMError::WM_ERROR_PIP_REPEAT_OPERATION;
     }
     isStoppedFromClient_ = true;
-    WMError res = window_->NotifyPrepareClosePiPWindow();
+    WMError res = window_->NotifyPrepareClosePiPWindow(isWeb_);
     if (res != WMError::WM_OK) {
         SingletonContainer::Get<PiPReporter>().ReportPiPStopWindow(static_cast<int32_t>(StopPipType::USER_STOP),
             pipOption_->GetPipTemplate(), PipConst::FAILED, "window destroy failed");

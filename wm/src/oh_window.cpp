@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <mutex>
+#include <unordered_map>
 
 #include "image/pixelmap_native.h"
 #include "pixelmap_native_impl.h"
@@ -33,6 +34,13 @@
 #include "window.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+
+struct OH_WindowManager_FrameMetrics {
+    bool firstDrawFrame;
+    uint64_t inputHandlingDuration = 0;
+    uint64_t layoutMeasureDuration = 0;
+    uint64_t vsyncTimestamp = 0;
+};
 
 using namespace OHOS::Rosen;
 
@@ -128,6 +136,46 @@ int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
     return static_cast<int32_t>(OHOS::Rosen::IsWindowShownInner(windowId, isShow));
 }
 
+int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(
+    const OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame)
+{
+    if (metrics == nullptr || isFirstDrawFrame == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *isFirstDrawFrame = metrics->firstDrawFrame;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+{
+    if (metrics == nullptr || duration == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *duration = metrics->inputHandlingDuration;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+{
+    if (metrics == nullptr || duration == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *duration = metrics->layoutMeasureDuration;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp)
+{
+    if (metrics == nullptr || timestamp == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *timestamp = metrics->vsyncTimestamp;
+    return WindowManager_ErrorCode::OK;
+}
+
 namespace {
 #define WINDOW_MANAGER_FREE_MEMORY(ptr) \
     do { \
@@ -136,6 +184,33 @@ namespace {
             (ptr) = NULL; \
         } \
     } while (0)
+
+class OHWindowFrameMetricsMeasuredListener : public IFrameMetricsChangedListener {
+public:
+    OHWindowFrameMetricsMeasuredListener(int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
+        : windowId_(windowId), measuredCallback_(callback) {}
+    ~OHWindowFrameMetricsMeasuredListener() override = default;
+
+    void OnFrameMetricsChanged(const FrameMetrics& metrics) override
+    {
+        if (measuredCallback_ == nullptr) {
+            return;
+        }
+        OH_WindowManager_FrameMetrics frameMetrics;
+        frameMetrics.firstDrawFrame = metrics.firstDrawFrame_;
+        frameMetrics.inputHandlingDuration = metrics.inputHandlingDuration_;
+        frameMetrics.layoutMeasureDuration = metrics.layoutMeasureDuration_;
+        frameMetrics.vsyncTimestamp = metrics.vsyncTimestamp_;
+        measuredCallback_(windowId_, &frameMetrics);
+    }
+
+private:
+    int32_t windowId_ = 0;
+    OH_WindowManager_FrameMetricsMeasuredCallback measuredCallback_ = nullptr;
+};
+
+std::unordered_map<int32_t,
+    std::unordered_map<uintptr_t, OHOS::sptr<OHWindowFrameMetricsMeasuredListener>>> g_frameMetricsMeasuredCbMap;
 
 /*
  * Used to map from WMError to WindowManager_ErrorCode.
@@ -160,6 +235,63 @@ const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WIND
     { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
     { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
 };
+
+bool FindFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId,
+    OHOS::sptr<OHWindowFrameMetricsMeasuredListener>& listener)
+{
+    auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+    if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
+        return false;
+    }
+    auto callbackIter = windowIter->second.find(measuredCallbackId);
+    if (callbackIter == windowIter->second.end()) {
+        return false;
+    }
+    listener = callbackIter->second;
+    return true;
+}
+
+void EraseFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId)
+{
+    auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+    if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
+        return;
+    }
+    windowIter->second.erase(measuredCallbackId);
+    if (windowIter->second.empty()) {
+        g_frameMetricsMeasuredCbMap.erase(windowIter);
+    }
+}
+
+WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
+    int32_t windowId, uintptr_t measuredCallbackId, const char* where)
+{
+    auto window = Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+        EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+
+    OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
+    if (!FindFrameMetricsMeasuredListener(windowId, measuredCallbackId, listener)) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+
+    auto ret = window->UnregisterFrameMetricsChangeListener(listener);
+    if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+        EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+        return WindowManager_ErrorCode::OK;
+    }
+    if (ret != WMError::WM_OK) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s unregister failed, windowId:%{public}d, ret:%{public}d",
+            where, windowId, static_cast<int32_t>(ret));
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+
+    EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+    return WindowManager_ErrorCode::OK;
+}
 
 void TransformedToWindowManagerRect(const Rect& rect, WindowManager_Rect& wmRect)
 {
@@ -723,6 +855,84 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList)
 {
     WINDOW_MANAGER_FREE_MEMORY(snapshotPixelMapList);
+}
+
+int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
+    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
+        auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+        if (windowIter != g_frameMetricsMeasuredCbMap.end() &&
+            windowIter->second.find(measuredCallbackId) != windowIter->second.end()) {
+            errCode = WindowManager_ErrorCode::OK;
+            return;
+        }
+        auto listener = OHOS::sptr<OHWindowFrameMetricsMeasuredListener>::MakeSptr(windowId, callback);
+        if (listener == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s create listener failed, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto ret = window->RegisterFrameMetricsChangeListener(listener);
+        if (ret == WMError::WM_OK) {
+            errCode = WindowManager_ErrorCode::OK;
+        } else if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+            errCode = WindowManager_ErrorCode::OK;
+            return;
+        } else {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s register failed, windowId:%{public}d, ret:%{public}d",
+                where, windowId, static_cast<int32_t>(ret));
+            return;
+        }
+        g_frameMetricsMeasuredCbMap[windowId][measuredCallbackId] = listener;
+    }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
+    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    }
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
+    eventHandler->PostSyncTask([windowId, measuredCallbackId, &errCode, where = __func__] {
+        errCode = UnregisterFrameMetricsMeasuredCallbackInner(windowId, measuredCallbackId, where);
+    }, __func__);
+    return errCode;
 }
 
 int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovement)

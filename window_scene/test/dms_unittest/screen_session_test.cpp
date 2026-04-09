@@ -1217,6 +1217,29 @@ HWTEST_F(ScreenSessionTest, SetHdrFormats, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddHdrFormats
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, AddHdrFormats, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AddHdrFormats start";
+    ScreenSessionConfig config = {
+        .screenId = 100,
+        .rsId = 101,
+        .name = "OpenHarmony",
+    };
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
+    ASSERT_NE(screenSession, nullptr);
+    std::vector<uint32_t> hdrFormats = { 0, 0, 0, 0 };
+    screenSession->AddHdrFormats(hdrFormats);
+    EXPECT_TRUE(std::find(screenSession->hdrFormats_.begin(), screenSession->hdrFormats_.end(), 0) !=
+        screenSession->hdrFormats_.end());
+    GTEST_LOG_(INFO) << "AddHdrFormats end";
+}
+
+/**
  * @tc.name: SetColorSpaces
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -2324,6 +2347,8 @@ HWTEST_F(ScreenSessionTest, CalcRotation, TestSize.Level1)
     session->SetScreenProperty(property);
     res = session->CalcRotation(orientation, foldDisplayMode);
     EXPECT_EQ(Rotation::ROTATION_0, res);
+    res = session->CalcRotation(Orientation::UNSPECIFIED, foldDisplayMode);
+    EXPECT_EQ(Rotation::ROTATION_0, res);
 }
 
 /**
@@ -3230,14 +3255,14 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation start";
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
     ASSERT_NE(screenSession, nullptr);
-    screenSession->UpdateDisplayNodeRotation(1);
+    screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
     ASSERT_EQ(screenSession->isExtended_, false);
 
     Rosen::RSDisplayNodeConfig rsConfig;
     rsConfig.isMirrored = true;
     rsConfig.screenId = 101;
     screenSession->CreateDisplayNode(rsConfig);
-    screenSession->UpdateDisplayNodeRotation(1);
+    screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
     ASSERT_EQ(screenSession->isExtended_, false);
     GTEST_LOG_(INFO) << "ScreenSessionTest: UpdateDisplayNodeRotation end";
 }
@@ -5192,6 +5217,44 @@ HWTEST_F(ScreenSessionTest, ProcPropertyChange, TestSize.Level1)
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
     session->ProcPropertyChange(screenProperty, eventPara);
     EXPECT_EQ(screenProperty.GetPropertyChangeReason(), eventPara.GetPropertyChangeReason());
+}
+
+/**
+ * @tc.name: SetBootingConnect
+ * @tc.desc: SetBootingConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, SetBootingConnect, TestSize.Level1)
+{
+    ScreenId screenId = 10000;
+    ScreenProperty screenProperty;
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
+    session->SetBootingConnect(true);
+    EXPECT_TRUE(session->IsBootingConnect());
+}
+
+/**
+ * @tc.name: CheckAndNotifyPropertyChange
+ * @tc.desc: CheckAndNotifyPropertyChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CheckAndNotifyPropertyChange, TestSize.Level1)
+{
+    LOG_SetCallback(MyLogCallbackWithAllLog);
+    g_errLog.clear();
+    ScreenId screenId = 10000;
+    ScreenProperty property = ScreenProperty();
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, property, screenId);
+    session->isNeedNotify = false;
+    session->CheckAndNotifyPropertyChange();
+    EXPECT_FALSE(g_errLog.find("It's need notify") != std::string::npos);
+    g_errLog.clear();
+
+    session->isNeedNotify = true;
+    session->SetPropertyNeedNotified(property);
+    session->CheckAndNotifyPropertyChange();
+    EXPECT_TRUE(g_errLog.find("It's need notify") != std::string::npos);
+    g_errLog.clear();
 }
 } // namespace
 } // namespace Rosen

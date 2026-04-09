@@ -648,6 +648,30 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnPropertyChanged03
+ * @tc.desc: OnPropertyChanged03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
+{
+    ScreenId screenId = 0;
+    ScreenProperty property;
+
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, property, 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    property.SetMirrorWidth(100);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->currentstate_ = SuperFoldStatus::KEYBOARD;
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property, reason);
+    EXPECT_NE(screenSession->GetScreenProperty().GetMirrorWidth(), 100);
+
+    screenSessionManagerClient_->currentstate_ = SuperFoldStatus::UNKNOWN;
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property, reason);
+    EXPECT_EQ(screenSession->GetScreenProperty().GetMirrorWidth(), 100);
+}
+
+/**
  * @tc.name: OnFoldPropertyChanged
  * @tc.desc: OnFoldPropertyChanged test
  * @tc.type: FUNC
@@ -2457,6 +2481,88 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPowerStateForAod01, TestSize.Level1)
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
     screenSessionManagerClient_->SetPowerStateForAod(ScreenPowerState::POWER_DOZE);
     EXPECT_TRUE(logMsg.find("screenSessionManager is null") == std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode01
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, screen session is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode01, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(100, 200);
+    EXPECT_TRUE(logMsg.find("screensession is null") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode02
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, display node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    sptr<ScreenSession> screenSession = new ScreenSession(0, 0, "test", ScreenProperty(), nullptr);
+    ASSERT_NE(screenSession, nullptr);
+    screenSessionManagerClient_->screenSessionMap_[0] = screenSession;
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(100, 200);
+    EXPECT_TRUE(logMsg.find("displaynode is null.") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode03
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, default mask bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = new ScreenSession(0, 0, "test", ScreenProperty(), node);
+    ASSERT_NE(screenSession, nullptr);
+    screenSessionManagerClient_->screenSessionMap_[0] = screenSession;
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(0, 0);
+    EXPECT_TRUE(logMsg.find("set default") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode04
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, valid bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode04, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = new ScreenSession(0, 0, "test", ScreenProperty(), node);
+    ASSERT_NE(screenSession, nullptr);
+    screenSessionManagerClient_->screenSessionMap_[0] = screenSession;
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(100, 200);
+    EXPECT_TRUE(logMsg.find("screen width") != std::string::npos);
     logMsg.clear();
     LOG_SetCallback(nullptr);
 }

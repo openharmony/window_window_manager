@@ -239,6 +239,20 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         TLOGE(WmsLogTag::DMS, "screenSession is null");
         return;
     }
+    if (reason == ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE) {
+        screenSession->NotifyListenerPropertyChange(property, reason);
+        screenSession->SetPropertyNeedNotified(property);
+        auto oldProperty = screenSession->GetScreenProperty();
+        oldProperty.SetInputOffset(property.GetInputOffsetX(), property.GetInputOffsetY());
+        if (currentstate_ != SuperFoldStatus::KEYBOARD) {
+            oldProperty.SetScreenAreaWidth(property.GetScreenAreaWidth());
+            oldProperty.SetScreenAreaHeight(property.GetScreenAreaHeight());
+            oldProperty.SetMirrorWidth(property.GetMirrorWidth());
+            oldProperty.SetMirrorHeight(property.GetMirrorHeight());
+            screenSession->SetScreenProperty(oldProperty);
+        }
+        return;
+    }
     screenSession->PropertyChange(property, reason);
 }
 
@@ -635,6 +649,36 @@ void ScreenSessionManagerClient::NotifyAodOpCompletion(AodOP operation, int32_t 
         return;
     }
     screenSessionManager_->NotifyAodOpCompletion(operation, result);
+}
+
+void ScreenSessionManagerClient::SetPhysicalVisibleMaskToDisplayNode(int32_t width, int32_t height)
+{
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        auto iter = screenSessionMap_.find(0);
+        if (iter != screenSessionMap_.end() && iter->second != nullptr) {
+            screenSession = iter->second;
+            TLOGW(WmsLogTag::DMS, "screen session has exist.");
+        }
+    }
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screensession is null");
+        return;
+    }
+    Rect MaskBounds = {0, 0, 0, 0};
+    if (width > 0 && height > 0) {
+        MaskBounds = Rect {0, 0, width, height};
+        TLOGNI(WmsLogTag::DMS, "screen width: %{public}d, heigth %{public}d", width, height);
+    } else {
+        TLOGNI(WmsLogTag::DMS, "set default");
+    }
+    auto displayNode = screenSession->GetDisplayNode();
+    if (displayNode != nullptr) {
+        displayNode->SetDisplayContentRect(MaskBounds);
+    } else {
+        TLOGW(WmsLogTag::DMS, "displaynode is null.");
+    }
 }
 
 void ScreenSessionManagerClient::SetPowerStateForAod(ScreenPowerState state)
@@ -1107,14 +1151,15 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
     screenSession->SetSupportsFocus(option.supportsFocus_);
     screenSession->SetUniqueRotationLock(option.isRotationLocked_);
     screenSession->SetUniqueRotation(option.rotation_);
+    screenSession->SetBootingConnect(option.isBooting_);
     if (screenSession->GetUniqueRotationOrientationMap().size() != ROTATION_NUM) {
         screenSession->SetUniqueRotationOrientationMap(option.rotationOrientationMap_);
     }
     TLOGD(WmsLogTag::DMS, "Set unique screen rotation property in screenSession,"
           "isUniqueRotationLocked: %{public}d, uniqueRotation: %{public}d"
-          "uniqueRotationOrientationMap: %{public}s",
+          "uniqueRotationOrientationMap: %{public}s, isBooting: %{public}d",
           screenSession->GetUniqueRotationLock(), screenSession->GetUniqueRotation(),
-          MapToString(screenSession->GetUniqueRotationOrientationMap()).c_str());
+          MapToString(screenSession->GetUniqueRotationOrientationMap()).c_str(), option.isBooting_);
 
     NotifyClientScreenConnect(screenSession);
     return true;
@@ -1534,7 +1579,7 @@ void ScreenSessionManagerClient::SetInternalClipToBounds(ScreenId screenId, bool
     auto displayNode = internalSession->GetDisplayNode();
     if (displayNode != nullptr) {
         TLOGI(WmsLogTag::DMS, "Screen %{public}" PRIu64" displayNode cliptobounds set to %{public}d",
-            screenId, clipToBounds);
+            static_cast<uint64_t>(screenId), clipToBounds);
         displayNode->SetClipToBounds(clipToBounds);
         RSTransactionAdapter::FlushImplicitTransaction(displayNode);
     }

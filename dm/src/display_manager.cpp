@@ -817,7 +817,8 @@ uint64_t DisplayManager::Impl::GetCurrentTimeTagNs()
 {
     auto now = std::chrono::system_clock::now();
     auto duration_since_epoch = now.time_since_epoch();
-    uint64_t nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(duration_since_epoch).count();
+    uint64_t nanoseconds = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(duration_since_epoch).count());
     return nanoseconds;
 }
 

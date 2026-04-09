@@ -412,6 +412,19 @@ bool IsJsPersistentIdUndefind(napi_env env, napi_value jsPersistentId, SessionIn
     return true;
 }
 
+bool IsJsMainPersistentIdUndefind(napi_env env, napi_value jsMainPersistentId, SessionInfo& sessionInfo)
+{
+    if (GetType(env, jsMainPersistentId) != napi_undefined) {
+        int32_t mainWindowPersistentId;
+        if (!ConvertFromJsValue(env, jsMainPersistentId, mainWindowPersistentId)) {
+            TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to mainWindowPersistentId");
+            return false;
+        }
+        sessionInfo.mainWindowPersistentId_ = mainWindowPersistentId;
+    }
+    return true;
+}
+
 bool IsJsCallStateUndefind(napi_env env, napi_value jsCallState, SessionInfo& sessionInfo)
 {
     if (GetType(env, jsCallState) != napi_undefined) {
@@ -755,6 +768,8 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
 {
     napi_value jsPersistentId = nullptr;
     napi_get_named_property(env, jsObject, "persistentId", &jsPersistentId);
+    napi_value jsMainPersistentId = nullptr;
+    napi_get_named_property(env, jsObject, "mainWindowPersistentId", &jsMainPersistentId);
     napi_value jsCallState = nullptr;
     napi_get_named_property(env, jsObject, "callState", &jsCallState);
     napi_value jsSessionType = nullptr;
@@ -773,6 +788,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     napi_get_named_property(env, jsObject, "isAppUseControl", &jsIsUseControlSession);
 
     if (!IsJsPersistentIdUndefind(env, jsPersistentId, sessionInfo)) {
+        return false;
+    }
+    if (!IsJsMainPersistentIdUndefind(env, jsMainPersistentId, sessionInfo)) {
         return false;
     }
     if (!IsJsCallStateUndefind(env, jsCallState, sessionInfo)) {
@@ -1076,7 +1094,8 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo
     napi_get_named_property(env, jsObject, "displayOrientation", &jsDisplayOrientation);
     napi_value jsEnableHookDisplayOrientation = nullptr;
     napi_get_named_property(env, jsObject, "enableHookDisplayOrientation", &jsEnableHookDisplayOrientation);
-
+    napi_value jsActualRect = nullptr;
+    napi_get_named_property(env, jsObject, "actualRect", &jsActualRect);
     uint32_t width = 0;
     if (jsWidth == nullptr || !ConvertFromJsValue(env, jsWidth, width)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to width");
@@ -1126,6 +1145,13 @@ bool ConvertHookInfoFromJs(napi_env env, napi_value jsObject, HookInfo& hookInfo
     } else {
         hookInfo.enableHookDisplayOrientation_ = false;
     }
+
+    Rect actualRect;
+    if (jsActualRect == nullptr || !ConvertRectFromJsValue(env, jsActualRect, actualRect)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to actualRect");
+        return false;
+    }
+    hookInfo.actualRect_ = actualRect;
     return true;
 }
 
@@ -1149,6 +1175,9 @@ bool ConvertHookWindowInfoFromJs(napi_env env, napi_value jsObject, HookWindowIn
         return false;
     }
     hookWindowInfo.widthHookRatio = static_cast<float>(widthHookRatio);
+    if (!ConvertFromJsValueProperty(env, jsObject, "notifyWindowChange", hookWindowInfo.notifyWindowChange)) {
+        return false;
+    }
     return true;
 }
 
@@ -1872,6 +1901,10 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
         napi_set_named_property(env, objValue, "needAnimation",
             CreateJsValue(env, *(sessionInfo.windowCreateParams->needAnimation)));
     }
+    bool isWindowLimitsForcible = sessionInfo.windowCreateParams ?
+        sessionInfo.windowCreateParams->isWindowLimitsForcible : false;
+    napi_set_named_property(env, objValue, "isWindowLimitsForcible",
+        CreateJsValue(env, isWindowLimitsForcible));
     napi_set_named_property(env, objValue, "atomicServiceInfo",
         CreateJsAtomicServiceInfo(env, sessionInfo.atomicServiceInfo_));
     napi_set_named_property(env, objValue, "isTargetPlugin",
@@ -2442,6 +2475,7 @@ napi_value CreateJsSessionEventParam(napi_env env, const SessionEventParam& para
     napi_set_named_property(env, objValue, "compatibleStyleMode", CreateJsValue(env, param.compatibleStyleMode));
     napi_set_named_property(env, objValue, "windowGlobalPosX", CreateJsValue(env, param.windowGlobalPosX_));
     napi_set_named_property(env, objValue, "windowGlobalPosY", CreateJsValue(env, param.windowGlobalPosY_));
+    napi_set_named_property(env, objValue, "titleButtonEventType", CreateJsValue(env, param.titleButtonEventType_));
     return objValue;
 }
 
@@ -2930,6 +2964,9 @@ napi_value CreateSupportType(napi_env env)
 
 napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& windowAnchorInfo)
 {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offsetY:%{public}d"
+        "currentLayoutMode:%{public}s", windowAnchorInfo.windowAnchor_, windowAnchorInfo.offsetX_,
+        windowAnchorInfo.offsetY_, windowAnchorInfo.attachOptions.currentLayoutMode.c_str());
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
     if (objValue == nullptr) {
@@ -2938,12 +2975,24 @@ napi_value CreateJsWindowAnchorInfo(napi_env env, const WindowAnchorInfo& window
     }
     napi_set_named_property(env, objValue, "isAnchorEnabled",
         CreateJsValue(env, windowAnchorInfo.isAnchorEnabled_));
+    napi_set_named_property(env, objValue, "isAnchoredByAttach",
+        CreateJsValue(env, windowAnchorInfo.isAnchoredByAttach_));
     napi_set_named_property(env, objValue, "windowAnchor",
         CreateJsValue(env, static_cast<uint32_t>(windowAnchorInfo.windowAnchor_)));
     napi_set_named_property(env, objValue, "offsetX",
         CreateJsValue(env, windowAnchorInfo.offsetX_));
     napi_set_named_property(env, objValue, "offsetY",
         CreateJsValue(env, windowAnchorInfo.offsetY_));
+
+    napi_value attachOptionsValue = nullptr;
+    napi_create_object(env, &attachOptionsValue);
+    if (attachOptionsValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to get attachOptionsValue");
+        return nullptr;
+    }
+    napi_set_named_property(env, attachOptionsValue, "currentLayoutMode",
+        CreateJsValue(env, windowAnchorInfo.attachOptions.currentLayoutMode));
+    napi_set_named_property(env, objValue, "attachOptions", attachOptionsValue);
     return objValue;
 }
 
@@ -3040,6 +3089,27 @@ napi_value CreateCompatibleStyleMode(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_2_3)));
     napi_set_named_property(env, objValue, "LANDSCAPE_SPLIT",
         CreateJsValue(env, static_cast<uint32_t>(CompatibleStyleMode::LANDSCAPE_SPLIT)));
+    return objValue;
+}
+
+napi_value CreateTitleButtonEventType(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "env is nullptr");
+        return nullptr;
+    }
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to create object");
+        return NapiGetUndefined(env);
+    }
+    napi_set_named_property(env, objValue, "EVENT_TYPE_UNDEFINED",
+        CreateJsValue(env, static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_UNDEFINED)));
+    napi_set_named_property(env, objValue, "EVENT_TYPE_MAXIMIZE",
+        CreateJsValue(env, static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_MAXIMIZE)));
+    napi_set_named_property(env, objValue, "EVENT_TYPE_END",
+        CreateJsValue(env, static_cast<uint32_t>(TitleButtonEventType::EVENT_TYPE_END)));
     return objValue;
 }
 

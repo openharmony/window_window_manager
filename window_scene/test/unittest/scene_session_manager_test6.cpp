@@ -28,6 +28,7 @@
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
 #include "session_info.h"
+#include "process_options.h"
 #include "session_manager.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "window_manager_agent.h"
@@ -47,7 +48,7 @@ using ConfigItem = WindowSceneConfig::ConfigItem;
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
     {
-        g_logMsg = msg;
+        g_logMsg += msg;
     }
 } // namespace
 class SceneSessionManagerTest6 : public testing::Test {
@@ -1570,6 +1571,81 @@ HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSessionVisibilityInfo03
+ * @tc.desc: SetSessionVisibilityInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, SetSessionVisibilityInfo03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
+    std::string visibilityInfo = "";
+    EXPECT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.callerPersistentId_ = 2;
+    auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    session1->persistentId_ = 1;
+    session2->persistentId_ = 2;
+
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({ 1, session1 });
+    ssm_->sceneSessionMap_.insert({ 2, session2 });
+    ssm_->SetSessionVisibilityInfo(session2, visibleState, windowVisibilityInfos, visibilityInfo);
+    EXPECT_NE(windowVisibilityInfos.size(), 0);
+    EXPECT_TRUE(g_logMsg.find("Main window id:") == std::string::npos);
+    windowVisibilityInfos.clear();
+
+    session2->SetMainWindowPersistentId(1);
+    ssm_->SetSessionVisibilityInfo(session2, visibleState, windowVisibilityInfos, visibilityInfo);
+    EXPECT_TRUE(windowVisibilityInfos[0]->GetControlAppType() == ControlAppType::CONTROL_APP_TYPE_BEGIN);
+
+    ssm_->sceneSessionMap_.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: AddOptionWindowMetaInfo
+ * @tc.desc: AddOptionWindowMetaInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, AddOptionWindowMetaInfo, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    WindowVisibilityState visibleState = WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    auto windowInfo = sptr<WindowInfo>::MakeSptr();
+    EXPECT_NE(nullptr, ssm_);
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "SceneSessionManagerTest2";
+    sessionInfo.abilityName_ = "DumpSessionWithId";
+    sessionInfo.callerPersistentId_ = 2;
+    auto session1 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    auto session2 = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    session1->persistentId_ = 1;
+    session2->persistentId_ = 2;
+
+    session2->SetMainWindowPersistentId(INVALID_SESSION_ID);
+    ssm_->AddOptionWindowMetaInfo(windowInfo, session2);
+    EXPECT_TRUE(windowInfo->windowMetaInfo.mainWindowPersistentId == INVALID_SESSION_ID);
+
+    session2->SetMainWindowPersistentId(1);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert({ 1, session1 });
+    ssm_->sceneSessionMap_.insert({ 2, session2 });
+
+    ssm_->AddOptionWindowMetaInfo(windowInfo, session2);
+    EXPECT_TRUE(windowInfo->windowMetaInfo.controlAppType == ControlAppType::CONTROL_APP_TYPE_BEGIN);
+
+    ssm_->sceneSessionMap_.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
  * @tc.name: UpdateSessionOcclusionStateListener
  * @tc.desc: update window occlusion state
  * @tc.type: FUNC
@@ -2158,11 +2234,11 @@ HWTEST_F(SceneSessionManagerTest6, SetRootSceneProcessBackEventFunc, TestSize.Le
 }
 
 /**
- * @tc.name: RequestInputMethodCloseKeyboard
- * @tc.desc: RequestInputMethodCloseKeyboard
+ * @tc.name: RequestInputMethodCloseKeyboard01
+ * @tc.desc: RequestInputMethodCloseKeyboard01
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard01, TestSize.Level1)
 {
     ASSERT_NE(nullptr, ssm_);
     SessionInfo info;
@@ -2175,6 +2251,68 @@ HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard, TestSize.Lev
     persistentId = 0;
     sptr<Session> session = sptr<Session>::MakeSptr(info);
     session->property_ = nullptr;
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+
+    bool enable = true;
+    auto result = ssm_->GetFreeMultiWindowEnableState(enable);
+    ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: RequestInputMethodCloseKeyboard02
+ * @tc.desc: RequestInputMethodCloseKeyboard02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest6, RequestInputMethodCloseKeyboard02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    std::shared_ptr<AAFwk::ProcessOptions> processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    processOptions->processMode = AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
+    processOptions->startupVisibility = AAFwk::StartupVisibility::STARTUP_HIDE;
+    info.processOptions = processOptions;
+    info.screenId_ = 0;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback = nullptr;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, specificCallback);
+    int32_t persistentId = 2;
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+
+    processOptions->processMode = AAFwk::ProcessMode::UNSPECIFIED;
+    processOptions->startupVisibility = AAFwk::StartupVisibility::STARTUP_SHOW;
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+
+    SessionInfo keyboardSessionInfo;
+    keyboardSessionInfo.screenId_ = 0;
+    keyboardSessionInfo.persistentId_ = 2105;
+    sptr<SceneSession::SpecificSessionCallback> specCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    EXPECT_NE(specCallback, nullptr);
+    sptr<KeyboardSession::KeyboardSessionCallback> keyboardCallback =
+        sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    EXPECT_NE(keyboardCallback, nullptr);
+    sptr<KeyboardSession> keyboardSession =
+        sptr<KeyboardSession>::MakeSptr(keyboardSessionInfo, specCallback, keyboardCallback);
+    EXPECT_NE(keyboardSession, nullptr);
+
+    sptr<WindowSessionProperty> keyboardProperty = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(keyboardProperty, nullptr);
+    keyboardProperty->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    int32_t callingSessionPersistentId = 2104;
+    keyboardProperty->SetCallingSessionId(callingSessionPersistentId);
+    keyboardSession->SetSessionProperty(keyboardProperty);
+    ssm_->sceneSessionMap_.insert({keyboardSessionInfo.persistentId_, keyboardSession});
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+
+    SessionInfo callingSessionInfo;
+    callingSessionInfo.screenId_ = 0;
+    callingSessionInfo.persistentId_ = callingSessionPersistentId;
+    auto callingSession = sptr<SceneSession>::MakeSptr(callingSessionInfo, nullptr);
+    ssm_->sceneSessionMap_.insert({callingSessionPersistentId, callingSession});
+    ssm_->RequestInputMethodCloseKeyboard(persistentId);
+
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    keyboardSession->SetSessionState(SessionState::STATE_FOREGROUND);
     ssm_->RequestInputMethodCloseKeyboard(persistentId);
 
     bool enable = true;

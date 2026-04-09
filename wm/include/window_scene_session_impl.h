@@ -36,7 +36,7 @@ public:
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
-        bool isModuleAbilityHookEnd = false) override;
+        bool isModuleAbilityHookEnd = false, bool isBlockSubwindow = false) override;
     WMError Show(uint32_t reason = 0, bool withAnimation = false, bool withFocus = true) override;
     WMError Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach) override;
     WMError ShowKeyboard(uint32_t callingWindowId, uint64_t tgtDisplayId, KeyboardEffectOption effectOption) override;
@@ -75,9 +75,12 @@ public:
     WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
+    WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override;
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override;
     WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
+    WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
 
     /*
      * Window Hierarchy
@@ -128,9 +131,6 @@ public:
     virtual WMError SetPrivacyMode(bool isPrivacyMode) override;
     virtual void SetSystemPrivacyMode(bool isSystemPrivacyMode) override;
     virtual WMError SetSnapshotSkip(bool isSkip) override;
-    virtual std::shared_ptr<Media::PixelMap> Snapshot() override;
-    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap) override;
-    WMError SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap>& pixelMap) override;
     WMError SetTouchHotAreas(const std::vector<Rect>& rects) override;
     WMError SetKeyboardTouchHotAreas(const KeyboardTouchHotAreas& hotAreas) override;
     virtual WmErrorCode KeepKeyboardOnFocus(bool keepKeyboardFlag) override;
@@ -157,7 +157,7 @@ public:
     WSError UpdateTitleInTargetPos(bool isShow, int32_t height) override;
     void NotifySessionForeground(uint32_t reason, bool withAnimation) override;
     void NotifySessionBackground(uint32_t reason, bool withAnimation, bool isFromInnerkits) override;
-    WMError NotifyPrepareClosePiPWindow() override;
+    WMError NotifyPrepareClosePiPWindow(const bool isWeb = false) override;
     void UpdateSubWindowState(const WindowType& type);
     WMError SetStatusBarColorForNavigation(const std::optional<uint32_t> color) override;
     WMError GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties) override;
@@ -186,7 +186,7 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
 
     /*
      * Sub Window
@@ -241,8 +241,9 @@ public:
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
-    void SetForceSplitConfigEnable(bool enableForceSplit) override;
+    void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false) override;
     void SendLogicalDeviceConfigToArkUI();
+    WMError NotifyPageEnable(const std::string& action, const std::string& message) override;
 
     /*
      * Free Multi Window
@@ -390,10 +391,50 @@ protected:
     WMError NotifyWindowSessionProperty();
     WMError NotifyWindowNeedAvoid(bool status = false);
     WMError SetLayoutFullScreenByApiVersion(bool status) override;
+
+    /**
+     * @brief Updates the window size limits.
+     *
+     * Window size limits come from multiple sources, with the following
+     * priority (highest to lowest):
+     * 1. Set via the `setWindowLimits` API.
+     * 2. Set in `StartOptions` when launching the window via `startAbility`.
+     * 3. Set in the `abilities` tag of the `module.json5` file.
+     * 4. System limits (product configuration or default values).
+     *
+     * The following are the constraint rules:
+     * 1. Default rule: all application-defined window size limits (1–3) are
+     *    constrained by system limits (4), and excess values are replaced by
+     *    system limits.
+     * 2. Exception rules (highest to lowest):
+     *    - startAbility forced mode: when launched via `startAbility` and
+     *      `startOptions.windowCreateParams.isWindowLimitsForcible = true`,
+     *      limits (1–3) are not constrained by system limits (4).
+     *    - setWindowLimits limited forced mode: when using `setWindowLimits`,
+     *      if `pixelUnit` is `PX` and `isForcible` is `true`, the minimum size
+     *      may exceed system limits and is clamped to min(system limits, 40vp);
+     *      other cases remain constrained by system limits.
+     */
     void UpdateWindowSizeLimits();
+
+    // Checker to determine whether the caller has system permission.
+    using SystemPermissionChecker = std::function<bool()>;
+
+    /**
+     * @brief Apply forcible window size limits by widening system constraints.
+     *
+     * @param sysLimitsPX System config of window size limits in physical pixels.
+     * @param sysLimitsVP System config of window size limits in virtual pixels.
+     * @param vpr Virtual pixel ratio used to convert VP limits to PX.
+     * @param systemPermChecker Checker to check if the caller has permission to break system limits.
+     */
+    void ApplyForcibleLimits(
+        WindowLimits& sysLimitsPX, WindowLimits& sysLimitsVP, float vpr, SystemPermissionChecker systemPermChecker);
+
     // First windowLimits uses px(physical pixels), second uses vp(virtual pixels)
     std::pair<WindowLimits, WindowLimits> GetSystemSizeLimits(uint32_t displayWidth,
         uint32_t displayHeight, float vpr);
+
     void GetConfigurationFromAbilityInfo();
     uint32_t GetSupportedWindowModesConfiguration(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     std::vector<AppExecFwk::SupportWindowMode> ExtractSupportWindowModeFromMetaData(
@@ -587,9 +628,8 @@ private:
     /*
      * Move Drag
      */
-    bool CalcWindowShouldMove();
     bool CheckCanMoveWindowType();
-    bool CheckCanMoveWindowTypeByDevice();
+    bool CheckCanStartMoveWindowByWindowType();
     bool CheckIsPcAppInPadFullScreenOnMobileWindowMode();
     AreaType GetDragAreaByDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);

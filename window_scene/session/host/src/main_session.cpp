@@ -28,6 +28,8 @@ namespace OHOS::Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "MainSession" };
 constexpr int32_t MAX_LABEL_SIZE = 1024;
+constexpr int32_t MAX_ACTION_LIMIT_SIZE = 64;
+constexpr int32_t MAX_MESSAGE_LIMIT_SIZE = 512;
 const uint64_t PRELAUNCH_DONE_TIME_MS = system::GetIntParameter<int>("window.prelaunchDoneTime", 6000);
 } // namespace
 
@@ -218,12 +220,11 @@ bool MainSession::IsMainWindowTopmost() const
     return GetSessionProperty()->IsMainWindowTopmost();
 }
 
-void MainSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+void MainSession::RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfMainWindow_;
     uint32_t minHeight = GetSystemConfig().miniHeightOfMainWindow_;
-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenMetrics);
 }
 
 void MainSession::SetExitSplitOnBackground(bool isExitSplitOnBackground)
@@ -453,8 +454,10 @@ WSError MainSession::SetSessionLabelAndIconInner(const std::string& label,
             return WSError::WS_ERROR_NULLPTR;
         }
         session->label_ = label;
+        session->scenePersistence_->SaveAbilityIcon(icon);
+        const std::string updatedIconPath = session->scenePersistence_->GetAbilityIconPath();
         if (session->updateSessionLabelAndIconFunc_) {
-            session->updateSessionLabelAndIconFunc_(label, icon);
+            session->updateSessionLabelAndIconFunc_(label, icon, updatedIconPath);
         }
         return WSError::WS_OK;
     }, __func__);
@@ -669,6 +672,31 @@ bool MainSession::IsFullScreenInForceSplit()
     return isFullScreenInForceSplit_.load();
 }
 
+void MainSession::RegisterPageEnableCallback(PageEnableCallback&& callback)
+{
+    pageEnableCallback_ = std::move(callback);
+}
+
+WSError MainSession::NotifyPageEnable(const std::string& action, const std::string& message)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "action:%{public}zu, message:%{public}zu", action.length(), message.length());
+    if (action.empty() || action.length() > MAX_ACTION_LIMIT_SIZE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid action length: %{public}zu", action.length());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    if (message.empty() || message.length() > MAX_MESSAGE_LIMIT_SIZE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid message length: %{public}zu", message.length());
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    const auto& windowId = GetPersistentId();
+    if (!pageEnableCallback_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "pageEnableCallback_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    pageEnableCallback_(sessionInfo_.bundleName_, windowId, action, message);
+    return WSError::WS_OK;
+}
+
 void MainSession::RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback)
 {
     compatibleModeChangeCallback_ = std::move(callback);
@@ -680,6 +708,14 @@ WSError MainSession::NotifyCompatibleModeChange(CompatibleStyleMode mode)
         compatibleModeChangeCallback_(mode);
     }
     return WSError::WS_OK;
+}
+
+WSError MainSession::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
+{
+    if (!sessionStage_) {
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->UpdateAppHookWindowInfo(hookWindowInfo);
 }
 
 bool MainSession::RestoreAspectRatio(float ratio)
@@ -705,13 +741,13 @@ WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
     return WMError::WM_OK;
 }
 
-WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated()
+WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
 {
     if (!sessionStage_) {
         TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated();
+    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
 }
 
 bool MainSession::GetSessionBoundedSystemTray(

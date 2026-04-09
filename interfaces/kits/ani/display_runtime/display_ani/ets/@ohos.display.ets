@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,10 +82,7 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH);
-        for (let i = 0; i < this.boundingRects.length; i++) {
-            this.boundingRects[i] = new RectImpl();
-        }
+        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH, () => { return new RectImpl() });
         this.waterfallDisplayAreaRects = new WaterfallDisplayAreaRectsImpl();
     }
 
@@ -122,10 +119,7 @@ export interface FoldCreaseRegion {
 
 export class FoldCreaseRegionImpl implements FoldCreaseRegion {
     constructor() {
-        this.creaseRects = new Array<Rect>(CREASE_RECTS_LENGTH);
-        for (let i = 0; i < this.creaseRects.length; i++) {
-            this.creaseRects[i] = new RectImpl();
-        }
+        this.creaseRects = new Array<Rect>(CREASE_RECTS_LENGTH, () => { return new RectImpl() });
     }
 
     readonly displayId: long;
@@ -456,10 +450,7 @@ export class DisplayImpl implements Display {
     }
 
     getRoundedCorner(): Array<RoundedCorner> {
-        let res: Array<RoundedCorner> = new Array<RoundedCorner>(ROUNDED_CORNER_LENGTH);
-        for (let i = 0; i < res.length; i++) {
-            res[i] = new RoundedCornerImpl();
-        }
+        let res: Array<RoundedCorner> = new Array<RoundedCorner>(ROUNDED_CORNER_LENGTH, () => { return new RoundedCornerImpl() });
         this.getRoundedCornerInternal(res);
         minusRoundedCornerArray(res);
         return res;
@@ -582,17 +573,17 @@ export native function isCaptured(): boolean;
 
 export function getFoldDisplayMode(): FoldDisplayMode {
     let res = getFoldDisplayModeNative();
-    return res as FoldDisplayMode;
+    return FoldDisplayMode.fromValue(res);
 }
 
 export native function getFoldDisplayModeNative(): int;
 
 export function setFoldDisplayMode(mode: FoldDisplayMode, reason: string): void {
-    setFoldDisplayModeReasonNative(mode as int, reason, displayMgrRef);
+    setFoldDisplayModeReasonNative(mode, reason, displayMgrRef);
 }
 
 export function setFoldDisplayMode(mode: FoldDisplayMode): void {
-    setFoldDisplayModeNative(mode as int, displayMgrRef);
+    setFoldDisplayModeNative(mode, displayMgrRef);
 }
 
 export native function setFoldDisplayModeReasonNative(mode: int, reason: string, nativeObj: long): void;
@@ -600,7 +591,7 @@ export native function setFoldDisplayModeNative(mode: int, nativeObj: long): voi
 
 export function getFoldStatus(): FoldStatus{
     let res = getFoldStatusNative();
-    return res as FoldStatus;
+    return FoldStatus.fromValue(res);
 }
 
 export native function getFoldStatusNative(): int;
@@ -655,10 +646,7 @@ export native function getDefaultDisplaySyncNative(obj: object): void;
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
 export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
-    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
-    for (let i = 0; i < res.length; i++) {
-        res[i] = new DisplayImpl();
-    }
+    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH, () => { return new DisplayImpl() });
     try {
         getAllDisplaysSyncNative(res);
         minusDisplayArray(res);
@@ -669,10 +657,11 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
     }
     return;
 }
+
 export function getAllDisplays(): Promise<Array<Display>> {
     return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
-            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
+            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH,  () => { return new DisplayImpl() });
             for (let i = 0; i < res.length; i++) {
                 res[i] = new DisplayImpl();
             }
@@ -794,12 +783,12 @@ export function displayEventCallBack(cb: object, cbArg: long): void {
 
 export function foldStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: FoldStatus) => void;
-    func(cbArg as FoldStatus);
+    func(FoldStatus.fromValue(cbArg));
 }
 
 export function foldDisplayModeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: FoldDisplayMode) => void;
-    func(cbArg as FoldDisplayMode);
+    func(FoldDisplayMode.fromValue(cbArg));
 }
 
 export function foldAngleChangeCallback(cb: object, cbArg: object): void {
@@ -824,10 +813,7 @@ export function getAllDisplayPhysicalResolution(): Promise<Array<DisplayPhysical
         reject: (error: BusinessError) => void ) => {
             taskpool.execute((): Array<DisplayPhysicalResolution> => {
                 let res: Array<DisplayPhysicalResolution> =
-                    new Array<DisplayPhysicalResolution>(DISPLAY_PHYSICAL_RESOLUTION_LENGTH);
-                for (let i = 0; i < res.length; i++) {
-                    res[i] = new DisplayPhysicalResolutionImpl();
-                }
+                    new Array<DisplayPhysicalResolution>(DISPLAY_PHYSICAL_RESOLUTION_LENGTH, () => { return new DisplayPhysicalResolutionImpl() });
                 getAllDisplayPhysicalResolutionNative(res, displayMgrRef);
                 minusResolutionArray(res);
                 return res;
@@ -847,7 +833,7 @@ function minusResolutionArray(resolutions: Array<DisplayPhysicalResolution>): vo
             break;
         }
         let resolution = resolutions[index] as DisplayPhysicalResolutionImpl;
-        resolution.foldDisplayMode = resolution.foldDisplayMode_ as FoldDisplayMode;
+        resolution.foldDisplayMode = FoldDisplayMode.fromValue(resolution.foldDisplayMode_);
     }
 }
 

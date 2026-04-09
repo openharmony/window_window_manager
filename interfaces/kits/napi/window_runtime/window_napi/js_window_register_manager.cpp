@@ -15,21 +15,25 @@
 
 #include "js_window_register_manager.h"
 #include "singleton_container.h"
+#include "sys_cap_util.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "js_runtime_utils.h"
+#include <cstdint>
 
 namespace OHOS {
 namespace Rosen {
 using namespace AbilityRuntime;
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsRegisterManager"};
+constexpr uint32_t API_VERSION_23 = 23;
 
 const std::map<std::string, RegisterListenerType> WINDOW_MANAGER_LISTENER_MAP {
     // white register list for window manager
     {SYSTEM_BAR_TINT_CHANGE_CB, RegisterListenerType::SYSTEM_BAR_TINT_CHANGE_CB},
     {GESTURE_NAVIGATION_ENABLED_CHANGE_CB, RegisterListenerType::GESTURE_NAVIGATION_ENABLED_CHANGE_CB},
     {WATER_MARK_FLAG_CHANGE_CB, RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB},
+    {APPLICATION_FOCUS_STATE_CHANGE_CB, RegisterListenerType::APPLICATION_FOCUS_STATE_CHANGE_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     // white register list for window
@@ -50,6 +54,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {DIALOG_DEATH_RECIPIENT_CB, RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB},
     {WINDOW_STATUS_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_CHANGE_CB},
     {WINDOW_STATUS_DID_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB},
+    {PARENT_WINDOW_SIZE_CHANGE_CB, RegisterListenerType::PARENT_WINDOW_SIZE_CHANGE_CB},
+    {PARENT_WINDOW_STATUS_CHANGE_CB, RegisterListenerType::PARENT_WINDOW_STATUS_CHANGE_CB},
     {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
     {OCCLUSION_STATE_CHANGE_CB, RegisterListenerType::OCCLUSION_STATE_CHANGE_CB},
@@ -66,6 +72,7 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {WINDOW_HIGHLIGHT_CHANGE_CB, RegisterListenerType::WINDOW_HIGHLIGHT_CHANGE_CB},
     {WINDOW_ROTATION_CHANGE_CB, RegisterListenerType::WINDOW_ROTATION_CHANGE_CB},
     {FREE_WINDOW_MODE_CHANGE_CB, RegisterListenerType::FREE_WINDOW_MODE_CHANGE_CB},
+    {PARENT_LIFECYCLE_EVENT_CB, RegisterListenerType::PARENT_LIFECYCLE_EVENT_CB},
 };
 const std::map<std::string, RegisterListenerType> WINDOW_STAGE_LISTENER_MAP {
     // white register list for window stage
@@ -310,6 +317,23 @@ WmErrorCode JsWindowRegisterManager::ProcessWaterMarkFlagChangeRegister(sptr<JsW
     }
     return ret;
 }
+
+WmErrorCode JsWindowRegisterManager::ProcessApplicationFocusChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    TLOGD(WmsLogTag::WMS_FOCUS, "called");
+    sptr<IApplicationFocusChangedListener> thisListener(listener);
+    WmErrorCode ret;
+    if (isRegister) {
+        ret = MappingWmErrorCodeSafely(
+            WindowManager::GetInstance().RegisterApplicationFocusChangedListener(thisListener));
+    } else {
+        ret = MappingWmErrorCodeSafely(
+            WindowManager::GetInstance().UnregisterApplicationFocusChangedListener(thisListener));
+    }
+    return ret;
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -617,6 +641,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                     env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WATER_MARK_FLAG_CHANGE_CB):
                 return ProcessWaterMarkFlagChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::APPLICATION_FOCUS_STATE_CHANGE_CB):
+                return ProcessApplicationFocusChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
                 WLOGFE("RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
@@ -658,6 +684,11 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowStatusChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB):
                 return ProcessWindowStatusDidChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::PARENT_WINDOW_SIZE_CHANGE_CB):
+                return ProcessParentWindowSizeChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::PARENT_WINDOW_STATUS_CHANGE_CB):
+                return ProcessParentWindowStatusChangeRegister(windowManagerListener, window, isRegister, env,
+                    parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
                 return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env,
                     parameter);
@@ -694,6 +725,8 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowRotationChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::FREE_WINDOW_MODE_CHANGE_CB):
                 return ProcessFreeWindowModeChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::PARENT_LIFECYCLE_EVENT_CB):
+                return ProcessParentLifecycleEventRegister(windowManagerListener, window, isRegister, env, parameter);
             default:
                 WLOGFE("RegisterListenerType %{public}u is not supported",
                     static_cast<uint32_t>(registerListenerType));
@@ -818,6 +851,40 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusDidChangeRegister(sptr<J
     return ret;
 }
 
+WmErrorCode JsWindowRegisterManager::ProcessParentWindowSizeChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IParentWindowSizeChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = MappingWmErrorCodeSafely(window->RegisterParentWindowSizeChangeListener(thisListener));
+    } else {
+        ret = MappingWmErrorCodeSafely(window->UnregisterParentWindowSizeChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessParentWindowStatusChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IParentWindowStatusChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = MappingWmErrorCodeSafely(window->RegisterParentWindowStatusChangeListener(thisListener));
+    } else {
+        ret = MappingWmErrorCodeSafely(window->UnregisterParentWindowStatusChangeListener(thisListener));
+    }
+    return ret;
+}
+
 WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWindowListener> listener,
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
@@ -933,7 +1000,11 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRotationChangeRegister(const s
     sptr<IWindowRotationChangeListener> thisListener(listener);
     WmErrorCode ret = WmErrorCode::WM_OK;
     if (window->IsPcWindow()) {
-        return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        uint32_t apiVersion = SysCapUtil::GetApiCompatibleVersion();
+        if (apiVersion < API_VERSION_23) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "rotationChange not support on pc, api%{public}u", apiVersion);
+            return WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+        }
     }
     if (isRegister) {
         ret = MappingWmErrorCodeSafely(window->RegisterWindowRotationChangeListener(thisListener));
@@ -955,6 +1026,22 @@ WmErrorCode JsWindowRegisterManager::ProcessFreeWindowModeChangeRegister(const s
         ret = MappingWmErrorCodeSafely(window->RegisterFreeWindowModeChangeListener(thisListener));
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterFreeWindowModeChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessParentLifecycleEventRegister(const sptr<JsWindowListener>& listener,
+    const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr || listener == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IParentLifecycleEventListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = MappingWmErrorCodeSafely(window->RegisterParentLifecycleEventListener(thisListener));
+    } else {
+        ret = MappingWmErrorCodeSafely(window->UnregisterParentLifecycleEventListener(thisListener));
     }
     return ret;
 }

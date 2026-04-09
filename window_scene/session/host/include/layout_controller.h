@@ -18,7 +18,6 @@
 
 #include <mutex>
 #include <refbase.h>
-#include <struct_multimodal.h>
 
 #include "common/include/window_session_property.h"
 #include "interfaces/include/ws_common.h"
@@ -33,11 +32,13 @@ public:
     ~LayoutController() = default;
 
     void SetSessionRect(const WSRect& rect) { winRect_ = rect; }
+    void SetLastClientParentSize(const WSRect& rect) { lastClientParentSize_ = rect; }
     bool SetSessionGlobalRect(const WSRect& rect);
     void SetClientRect(const WSRect& rect);
     WSRect GetSessionRect() const { return winRect_; }
     WSRect GetSessionGlobalRect() const;
     WSRect GetClientRect() const;
+    WSRect GetLastClientParentSize() const { return lastClientParentSize_; };
     void GetGlobalScaledRect(Rect& globalScaledRect);
     WSRect ConvertRelativeRectToGlobal(const WSRect& relativeRect, DisplayId currentDisplayId) const;
     WSRect ConvertGlobalRectToRelative(const WSRect& globalRect, DisplayId targetDisplayId) const;
@@ -48,11 +49,14 @@ public:
     void SetAspectRatio(float ratio) { aspectRatio_ = ratio; }
     float GetScaleX() const { return scaleX_; }
     float GetScaleY() const { return scaleY_; }
+    float GetRsScaleX() const { return rsScaleX_; }
+    float GetRsScaleY() const { return rsScaleY_; }
     float GetPivotX() const { return pivotX_; }
     float GetPivotY() const { return pivotY_; }
     void UpdateSizeChangeReason(SizeChangeReason reason) { reason_ = reason; }
     SizeChangeReason GetSizeChangeReason() const { return reason_; }
     void SetScale(float scaleX, float scaleY, float pivotX, float pivotY);
+    void SetRsScale(float rsScaleX, float rsScaleY);
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     bool IsTransformNeedUpdate(float scaleX, float scaleY, float pivotX, float pivotY);
     void SetSystemConfigFunc(GetSystemConfigFunc&& func);
@@ -60,12 +64,15 @@ public:
 private:
     float scaleX_ = 1.0f;
     float scaleY_ = 1.0f;
+    float rsScaleX_ = 1.0f;
+    float rsScaleY_ = 1.0f;
     float pivotX_ = 0.0f;
     float pivotY_ = 0.0f;
     float clientScaleX_ = 1.0f;
     float clientScaleY_ = 1.0f;
     float clientPivotX_ = 0.0f;
     float clientPivotY_ = 0.0f;
+    WSRect lastClientParentSize_; // save the last sessionRect.
     WSRect winRect_;
     WSRect clientRect_;     // rect saved when prelayout or notify client to update rect
     mutable std::mutex globalRectMutex_;
