@@ -301,6 +301,9 @@ bool SubSession::IsApplicationModal() const
 
 bool SubSession::IsVisibleForeground() const
 {
+    if (IsLoosenedWithFreeMultiMode()) {
+        return Session::IsVisibleForeground();
+    }
     const auto& mainOrFloatSession = GetMainOrFloatSession();
     if (mainOrFloatSession) {
         return mainOrFloatSession->IsVisibleForeground() && Session::IsVisibleForeground();

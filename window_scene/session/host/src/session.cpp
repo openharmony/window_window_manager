@@ -2901,6 +2901,24 @@ void Session::HandlePointDownDialog()
     }
 }
 
+bool Session::IsSubWindowZLevelAboveParentLoosened() const
+{
+    if (auto sessionProperty = GetSessionProperty()) {
+        return sessionProperty->IsSubWindowZLevelAboveParentLoosened();
+    }
+    return false;
+}
+ 
+bool Session::IsLoosenedWithFreeMultiMode() const
+{
+    TLOGI(WmsLogTag::WMS_EVENT,
+        "id: %{public}d, isAbover: %{public}d, IsFreeMultiWindowMode: %{public}d, ispc: %{public}d",
+        GetPersistentId(), IsSubWindowZLevelAboveParentLoosened(),
+        systemConfig_.IsFreeMultiWindowMode(), systemConfig_.IsPcWindow());
+    return IsSubWindowZLevelAboveParentLoosened() &&
+        (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
+}
+
 WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool isExecuteDelayRaise)
 {
     auto parentSession = GetParentSession();
