@@ -2103,6 +2103,53 @@ napi_value JsExtensionWindow::OnInvalidAsyncCall(napi_env env, napi_callback_inf
     return result;
 }
 
+napi_value JsExtensionWindow::OnSnapshot(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value lastParam = (argc == 0) ? nullptr :
+        ((argv[0] != nullptr && GetType(env, argv[0]) == napi_function) ? argv[0] : nullptr);
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask] {
+        auto weakWindow = weakToken.promote();
+        if (weakWindow == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window is nullptr");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: The window is not created or destroyed"));
+            return;
+        }
+
+        std::shared_ptr<Media::PixelMap> pixelMap = weakWindow->Snapshot();
+        if (pixelMap == nullptr) {
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: Get pixelMap failed"));
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window snapshot get pixelmap is null");
+            return;
+        }
+
+        auto nativePixelMap = Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+        if (nativePixelMap == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window snapshot get nativePixelMap is null");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: Create pixelMap failed"));
+            return;
+        }
+        task->Resolve(env, nativePixelMap);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Window [%{public}u, %{public}s] OnSnapshot, WxH=%{public}dx%{public}d",
+            weakWindow->GetWindowId(), weakWindow->GetWindowName().c_str(),
+            pixelMap->GetWidth(), pixelMap->GetHeight());
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSnapshot") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env,
+            JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][snapshot]msg: Internal task error"));
+    }
+    return result;
+}
+
 napi_value JsExtensionWindow::OnSnapshotSync(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
