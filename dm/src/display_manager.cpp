@@ -81,7 +81,7 @@ public:
     sptr<Display> GetDefaultDisplaySync(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
-    sptr<Display> GetDisplayById(DisplayId displayId, bool isHookRequired);
+    sptr<Display> GetDisplayById(DisplayId displayId, bool isGetActualInfo);
     sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
     DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
@@ -766,7 +766,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     return DisplayManager::Impl::GetDisplayById(displayId, true);
 }
 
-sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId, bool isHookRequired)
+sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId, bool isGetActualInfo)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "screen id is invalid");
@@ -789,7 +789,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId, bool isH
         }
     }
     sptr<DisplayInfo> displayInfo =
-        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId, isHookRequired);
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId, isGetActualInfo);
     if (displayInfo == nullptr) {
         TLOGW(WmsLogTag::DMS, "display null id : %{public}" PRIu64" ", displayId);
         return nullptr;
@@ -846,14 +846,14 @@ sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
     return GetDisplayById(displayId, true);
 }
 
-sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId, bool isHookRequired)
+sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId, bool isGetActualInfo)
 {
     if (g_dmIsDestroyed) {
         TLOGI(WmsLogTag::DMS, "DM has been destructed");
         return nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return pImpl_->GetDisplayById(displayId, isHookRequired);
+    return pImpl_->GetDisplayById(displayId, isGetActualInfo);
 }
 
 sptr<DisplayInfo> DisplayManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)

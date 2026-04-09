@@ -1088,7 +1088,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
     return GetDisplayInfo(displayId, true);
 }
 
-sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId, bool isHookRequired)
+sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId, bool isGetActualInfo)
 {
     TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64, displayId);
     if (displayId == DISPLAY_ID_INVALID) {
@@ -1098,7 +1098,7 @@ sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId, boo
     INIT_PROXY_CHECK_RETURN(nullptr);
 
     if (screenSessionManagerServiceProxy_) {
-        return screenSessionManagerServiceProxy_->GetDisplayInfoById(displayId, isHookRequired);
+        return screenSessionManagerServiceProxy_->GetDisplayInfoById(displayId, isGetActualInfo);
     }
 
     sptr<DisplayInfo> displayInfo;

@@ -250,10 +250,10 @@ public:
      * @brief Get the display object by id.
      *
      * @param displayId Id of the target display.
-     * @param isHookRequired Whether to call HookDisplayInfoByUid.
+     * @param isGetActualInfo Whether to get actual display info.
      * @return Default display object.
      */
-    sptr<Display> GetDisplayById(DisplayId displayId, bool isHookRequired);
+    sptr<Display> GetDisplayById(DisplayId displayId, bool isGetActualInfo);
 
     /**
      * @brief Get the display object by id.Only for PC.

@@ -145,7 +145,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoById, TestSize.Level1)
 
 /**
  * @tc.name: GetDisplayInfoByIdWithHookRequired
- * @tc.desc: GetDisplayInfoById with isHookRequired = true
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = true
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoByIdWithHookRequired, TestSize.Level1)
@@ -158,7 +158,7 @@ HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoByIdWithHookRequired, TestS
 
 /**
  * @tc.name: GetDisplayInfoByIdWithHookRequiredFalse
- * @tc.desc: GetDisplayInfoById with isHookRequired = false
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = false
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionManagerLiteTest, GetDisplayInfoByIdWithHookRequiredFalse, TestSize.Level1)

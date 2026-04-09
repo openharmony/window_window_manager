@@ -426,7 +426,7 @@ HWTEST_F(DisplayManagerTest, GetDisplayById, TestSize.Level1)
 
 /**
  * @tc.name: GetDisplayByIdWithHookRequired
- * @tc.desc: GetDisplayById with isHookRequired parameter
+ * @tc.desc: GetDisplayById with isGetActualInfo parameter
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerTest, GetDisplayByIdWithHookRequired, TestSize.Level1)
@@ -439,7 +439,7 @@ HWTEST_F(DisplayManagerTest, GetDisplayByIdWithHookRequired, TestSize.Level1)
 
 /**
  * @tc.name: GetDisplayByIdWithHookRequiredFalse
- * @tc.desc: GetDisplayById with isHookRequired = false
+ * @tc.desc: GetDisplayById with isGetActualInfo = false
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerTest, GetDisplayByIdWithHookRequiredFalse, TestSize.Level1)
@@ -3722,7 +3722,7 @@ HWTEST_F(DisplayManagerTest, NotifyDisplayCreateNullPtr, TestSize.Level1)
 
 /**
  * @tc.name: GetDisplayByIdWithHookIntegrationTest
- * @tc.desc: Integration test for isHookRequired parameter - inject hook info and verify hook behavior
+ * @tc.desc: Integration test for isGetActualInfo parameter - inject hook info and verify hook behavior
  * @tc.type: FUNC
  */
 HWTEST_F(DisplayManagerTest, GetDisplayByIdWithHookIntegrationTest, TestSize.Level1)

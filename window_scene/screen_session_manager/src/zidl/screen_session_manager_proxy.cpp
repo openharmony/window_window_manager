@@ -2110,7 +2110,7 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
     return GetDisplayInfoById(displayId, true);
 }
 
-sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId, bool isHookRequired)
+sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2129,8 +2129,8 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
         TLOGW(WmsLogTag::DMS, "WriteUint64 displayId failed");
         return nullptr;
     }
-    if (!data.WriteBool(isHookRequired)) {
-        TLOGW(WmsLogTag::DMS, "WriteBool isHookRequired failed");
+    if (!data.WriteBool(isGetActualInfo)) {
+        TLOGW(WmsLogTag::DMS, "WriteBool isGetActualInfo failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
