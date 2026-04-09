@@ -1258,8 +1258,7 @@ int SessionStageStub::HandleNotifyOrientationExecutionResult(MessageParcel& data
         TLOGE(WmsLogTag::WMS_ROTATION, "read result failed");
         return ERR_INVALID_VALUE;
     }
-    WSError ret = NotifyOrientationExecutionResult(
-        promiseId, static_cast<OrientationExecutionResult>(result));
+    NotifyOrientationExecutionResult(promiseId, static_cast<OrientationExecutionResult>(result));
     return ERR_NONE;
 }
 
