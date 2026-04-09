@@ -1110,7 +1110,7 @@ void WindowSessionProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowSes
 
 void WindowSessionProperty::UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
 {
-    std::lock_guard lock(touchHotAreasMutex_);
+    std::lock_guard lock(property->touchHotAreasMutex_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapePanelHotAreas_);
