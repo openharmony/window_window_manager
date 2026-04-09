@@ -219,8 +219,6 @@ void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue
     BindNativeFunction(env, objValue, "showWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "destroyWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setPreferredOrientation", moduleName, JsExtensionWindow::EmptyAsyncCall);
-    BindNativeFunction(env, objValue, "setPreferredOrientationWithResult", moduleName,
-        JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setWindowFocusable", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setExclusivelyHighlighted", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setWindowTouchable", moduleName, JsExtensionWindow::EmptyAsyncCall);
