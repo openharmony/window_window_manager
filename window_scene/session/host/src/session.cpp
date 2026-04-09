@@ -4337,6 +4337,7 @@ void Session::OnVsyncReceivedAfterModeChanged()
         } else if (session->timesToWaitForVsync_.load() == 0 && session->sessionStage_ &&
                    session->isWindowModeDirty_.compare_exchange_strong(isWindowModeDirty, false)) {
             session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+            session->NotifySubSessionParentStatusChange(session->GetWindowMode());
         } else {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, sessionStage is null or mode is not dirty",
                 funcName, session->GetPersistentId());

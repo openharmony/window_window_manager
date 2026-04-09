@@ -1126,6 +1126,7 @@ void SceneSession::ExecuteWindowStatusChangeNotification(const char* where)
         }
 
         session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+        session->NotifySubSessionParentStatusChange(session->GetWindowMode());
         TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s: Notify completed, windowId: %{public}d",
             where, session->GetPersistentId());
     }, __func__);
@@ -1141,7 +1142,6 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s event: %{public}d", where, static_cast<int32_t>(event));
         session->NotifyWindowStatusDidChangeIfNeedWhenSessionEvent(event);
-        session->NotifySubSessionParentStatusChange(session->GetWindowMode());
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
         bool proportionalScale = property->IsAdaptToProportionalScale();
@@ -8792,16 +8792,14 @@ void SceneSession::SetWindowAnchorInfoChangeFunc(NotifyWindowAnchorInfoChangeFun
     });
 }
 
-WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+WSError SceneSession::ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo,
+    const sptr<Session>& parentSession, const sptr<WindowSessionProperty>& property) const
 {
-    auto property = GetSessionProperty();
-    if(windowAnchorInfo.isAnchoredByAttach_ && !SessionPermission::IsSystemCalling()) {
+    if (windowAnchorInfo.isFromAttachOrDetach_ && !SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Not system app, no permission");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    auto parentSession = GetParentSession();
-    if (parentSession && !WindowHelper::IsMainWindow(parentSession->GetWindowType()))
-    {
+    if (parentSession && !WindowHelper::IsMainWindow(parentSession->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "parent window is not mainWindow");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
@@ -8822,19 +8820,43 @@ WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorIn
         TLOGE(WmsLogTag::WMS_SUB, "Unknown window anchor");
         return WSError::WS_ERROR_INVALID_OPERATION;
     }
-    if (!systemConfig_.supportFollowRelativePositionToParent_) {
+    if (!windowAnchorInfo.isFromAttachOrDetach_ && !systemConfig_.supportFollowRelativePositionToParent_) {
         TLOGI(WmsLogTag::WMS_SUB, "not support device");
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
-    PostTask([weakThis = wptr(this), windowAnchorInfo, where = __func__] {
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    auto property = GetSessionProperty();
+    auto parentSession = GetParentSession();
+
+    auto ret = ValidateWindowAnchorInfo(windowAnchorInfo, parentSession, property);
+    if (ret != WSError::WS_OK) {
+        return ret;
+    }
+
+    PostTask([weakThis = wptr(this), windowAnchorInfo, weakParentSession = wptr(parentSession), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s session is null", where);
             return;
         }
+        auto parentSession = weakParentSession.promote();
+        if (!parentSession) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s parentSession is null", where);
+            return;
+        }
         session->windowAnchorInfo_ = windowAnchorInfo;
         if (session->onWindowAnchorInfoChangeFunc_) {
             session->onWindowAnchorInfoChangeFunc_(windowAnchorInfo);
+            WSRect rect = parentSession->GetSessionRect();
+            Rect parentRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
+            if (session->sessionStage_) {
+                session->sessionStage_->NotifySubWindowAfterParentWindowSizeChange(parentRect);
+                session->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(parentSession->GetWindowMode());
+            }
         } else {
             TLOGI(WmsLogTag::WMS_SUB, "func is null");
         }
