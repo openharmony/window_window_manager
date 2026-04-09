@@ -1054,7 +1054,8 @@ enum class WindowAnchor : uint32_t {
  */
 struct WindowAnchorInfo : public Parcelable {
     bool isAnchorEnabled_ = false;
-    bool isAnchoredByAttach_ = false;
+    bool isAnchoredByAttach_ = false; // Distinguish between binding and unbinding
+    bool isFromAttachOrDetach_ = false; // Distinguish addatchAndDetach or setRelative interfaces
     WindowAnchor windowAnchor_ = WindowAnchor::TOP_START;
     int32_t offsetX_ = 0;
     int32_t offsetY_ = 0;
@@ -1104,7 +1105,8 @@ struct WindowAnchorInfo : public Parcelable {
 
     bool operator==(const WindowAnchorInfo& other) const
     {
-        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && isAnchoredByAttach_ == other.isAnchoredByAttach_ &&
+            isFromAttachOrDetach_ == other.isFromAttachOrDetach_ && windowAnchor_ == other.windowAnchor_ &&
             offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
     }
 
@@ -1115,8 +1117,9 @@ struct WindowAnchorInfo : public Parcelable {
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
-            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_);
+        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteBool(isAnchoredByAttach_) &&
+            parcel.WriteBool(isFromAttachOrDetach_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
+            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_) && parcel.WriteParcelable(&attachOptions);
     }
 
     static WindowAnchorInfo* Unmarshalling(Parcel& parcel)
@@ -1126,12 +1129,17 @@ struct WindowAnchorInfo : public Parcelable {
         if (windowAnchorInfo == nullptr) {
             return nullptr;
         }
-        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) || !parcel.ReadUint32(windowAnchorMode) ||
-            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_)) {
+        sptr<AttachOptions> attachOptions;
+        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) ||
+            !parcel.ReadBool(windowAnchorInfo->isAnchoredByAttach_) ||
+            !parcel.ReadBool(windowAnchorInfo->isFromAttachOrDetach_) || !parcel.ReadUint32(windowAnchorMode) ||
+            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_) ||
+            !(attachOptions = parcel.ReadParcelable<AttachOptions>())) {
             delete windowAnchorInfo;
             return nullptr;
         }
         windowAnchorInfo->windowAnchor_ = static_cast<WindowAnchor>(windowAnchorMode);
+        windowAnchorInfo->attachOptions.currentLayoutMode = attachOptions->currentLayoutMode;
         return windowAnchorInfo;
     }
 };
