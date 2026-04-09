@@ -1418,6 +1418,20 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
     return subWindowOutlineEnabled_;
 }
 
+void WindowSessionProperty::SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
+        zLevelAboveParentLoosened);
+    zLevelAboveParentLoosened_ = zLevelAboveParentLoosened;
+}
+ 
+bool WindowSessionProperty::IsSubWindowZLevelAboveParentLoosened() const
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
+        zLevelAboveParentLoosened_);
+    return zLevelAboveParentLoosened_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     auto globalDisplayRect = GetGlobalDisplayRect();
@@ -1478,6 +1492,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAbilityHook_) &&
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(isFollowScreenChange_) &&
         parcel.WriteBool(subWindowOutlineEnabled_) &&
+        parcel.WriteBool(zLevelAboveParentLoosened_) &&
         parcel.WriteUint32(windowModeSupportType_) &&
         MarshallingShadowsInfo(parcel) &&
         MarshallingWindowAnchorInfo(parcel) &&
@@ -1602,6 +1617,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    property->SetZLevelAboveParentLoosened(parcel.ReadBool());
     property->SetWindowModeSupportType(parcel.ReadUint32());
     UnmarshallingShadowsInfo(parcel, property);
     UnmarshallingWindowAnchorInfo(parcel, property);
@@ -1724,6 +1740,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     shadowsInfo_ = property->shadowsInfo_;
     windowAnchorInfo_ = property->windowAnchorInfo_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
+    zLevelAboveParentLoosened_ = property->zLevelAboveParentLoosened_;
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
     isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;

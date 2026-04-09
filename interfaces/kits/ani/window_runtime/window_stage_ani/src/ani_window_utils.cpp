@@ -2709,10 +2709,14 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
     GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
     bool outlineEnabled = false;
     GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
+    bool zLevelAboveParentLoosened = false;
+    GetPropertyBoolObject(env, "zLevelAboveParentLoosened", aniObject, zLevelAboveParentLoosened);
+
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
     windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
+    windowOption->SetZLevelAboveParentLoosened(zLevelAboveParentLoosened);
     if (!ParseRectParam(env, aniObject, windowOption)) {
         return false;
     }
