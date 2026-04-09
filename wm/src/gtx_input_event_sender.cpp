@@ -124,7 +124,7 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }
 
-void GtxInputEventSender::NapiAVSessionInputRedistributeCallback::SetTouchEventScale(int offsetX, 
+void GtxInputEventSender::NapiAVSessionInputRedistributeCallback::SetTouchEventScale(int offsetX,
     int offsetY, float scaleX, float scaleY)
 {
     mOffsetX = offsetX;
