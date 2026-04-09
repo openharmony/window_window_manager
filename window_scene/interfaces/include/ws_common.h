@@ -1358,8 +1358,6 @@ enum class LifeCycleChangeReason {
 
     GAME_PRELAUNCH_BACKGROUND,
 
-    SCREEN_ROTATION,
-
     REASON_END,
 };
 
