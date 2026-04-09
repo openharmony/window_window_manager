@@ -9307,7 +9307,7 @@ napi_value JsSceneSession::OnNotifyPreCalcWindowProperty(napi_env env, napi_call
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: height");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_ROTATION, "OnNotifyPreCalcWindowProperty: [%{public}u, %{public}u, %{public}u]", 
+    TLOGI(WmsLogTag::WMS_ROTATION, "OnNotifyPreCalcWindowProperty: [%{public}u, %{public}u, %{public}u] ", 
         rotation, width, height);
     auto session = weakSession_.promote();
     if (session == nullptr) {
