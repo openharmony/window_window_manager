@@ -11107,7 +11107,7 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     TLOGNFI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
     // Update display orientation when boot animation
     if (IsOnBootAnimation()) {
-        UpdateDisplayOrientationWhenBootAnimation(screenId);
+        UpdateDisplayOrientationWhenBootAnimation(screenId, newProperty);
     }
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
@@ -11122,18 +11122,25 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     clientProxy->OnPropertyChanged(screenId, newProperty, reason);
 }
 
-void ScreenSessionManager::UpdateDisplayOrientationWhenBootAnimation(ScreenId screenId)
+void ScreenSessionManager::UpdateDisplayOrientationWhenBootAnimation(ScreenId screenId,
+    const ScreenProperty& screenProperty)
 {
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGNFE(WmsLogTag::DMS, "Get screen session failed, screenId: %{public}" PRIu64, screenId);
         return;
     }
+    auto displayOrientation = screenSession->CalcDisplayOrientation(screenProperty.GetScreenRotation(),
+        screenProperty.GetDisplayMode());
+    auto deviceOrientation = screenSession->CalcDeviceOrientationWithBounds(screenProperty.GetDeviceRotation(),
+        screenProperty.GetDisplayMode(), screenProperty.GetBounds());
     auto currProperty = screenSession->GetScreenProperty();
-    currProperty.CalcDefaultDisplayOrientation();
+    currProperty.SetDisplayOrientation(displayOrientation);
+    currProperty.SetDeviceOrientation(deviceOrientation);
     screenSession->SetScreenProperty(currProperty);
-    TLOGNFI(WmsLogTag::DMS, "DisplayOrientation is: %{public}d",
-        screenSession->GetScreenProperty().GetDisplayOrientation());
+    TLOGNFI(WmsLogTag::DMS, "DisplayOrientation is: %{public}d, deviceOrientation is: %{public}d",
+        screenSession->GetScreenProperty().GetDisplayOrientation(),
+        screenSession->GetScreenProperty().GetDeviceOrientation());
 }
 
 void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& newProperty,
