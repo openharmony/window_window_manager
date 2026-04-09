@@ -14,8 +14,12 @@
  */
 
 #include "gtx_input_event_sender.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
+using Rosen::g_domainContents;
+using Rosen::HILOG_DOMAIN_WINDOW;
+using Rosen::WmsLogTag;
 
 GtxInputEventSender& GtxInputEventSender::GetInstance()
 {
@@ -29,8 +33,7 @@ void GtxInputEventSender::GetTouchEvent(GtxTouchEventInfo& touchEvent)
     touchEvent = mEvent;
 }
 
-void GtxInputEventSender::SetTouchEvent(Rosen::Rect rect,
-    std::shared_ptr<MMI::PointerEvent> pointerEvent)
+void GtxInputEventSender::SetTouchEvent(Rosen::Rect rect, std::shared_ptr<MMI::PointerEvent> pointerEvent)
 {
     if (!mIsEnable.load()) {
         return;
@@ -63,6 +66,107 @@ void GtxInputEventSender::SetTouchEvent(Rosen::Rect rect,
     }
 }
 
+Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRedistributeCallback::OnInputEvent(
+    const std::shared_ptr<MNI::KeyEvent>& keyEvent)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "TouchManager OnInputEvent KeyEvent");
+    if (keyEvent == nullptr) {
+        return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
+    }
+    return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
+}
+
+Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRedistributeCallback::OnInputEvent(
+    const std::shared_ptr<MNI::PointerEvent>& pointerEvent)
+{
+    if (pointerEvent == nullptr) {
+        return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
+    }
+    TLOGI(WmsLogTag::WMS_EVENT,
+          "TouchManager OnInputEvent PointerEvent, %{public}lu",
+          pointerEvent->GetAllPointerItems().size());
+    for (auto& item : pointerEvent->GetAllPointerItems()) {
+        TLOGI(WmsLogTag::WMS_EVENT,
+              "pointerItem before, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, "
+              "displayYPos:%{public}f, windowPosY:%{public}f, windowY:%{public}d",
+              item.GetHeight(),
+              item.GetGlobalY(),
+              item.GetDisplayXPos(),
+              item.GetWindowYPos(),
+              item.GetWindowY());
+
+        int32_t displayX = item.GetDisplayX();
+        int32_t WindowX = item.GetWindowX();
+        double DisplayXPos = item.GetDisplayXPos();
+        double WindowXPos = item.GetWindowXPos();
+        double globalX = item.GetGlobalX();
+
+        int32_t displayY = item.GetDisplayY();
+        int32_t WindowY = item.GetWindowY();
+        double DisplayYPos = item.GetDisplayYPos();
+        double WindowYPos = item.GetWindowYPos();
+        double globalY = item.GetGlobalY();
+
+        item.SetDisplayX(displayX * mScaleX + mOffsetX);
+        item.SetWindowX(WindowX * mScaleX + mOffsetX);
+        item.SetDisplayXPos(DisplayXPos * mScaleX + mOffsetX);
+        item.SetWindowXPos(WindowXPos * mScaleX + mOffsetX);
+        item.SetGlobalX(globalX * mScaleX + mOffsetX);
+
+        item.SetDisplayY(displayY * mScaleY + mOffsetY);
+        item.SetWindowY(WindowY * mScaleY + mOffsetY);
+        item.SetDisplayYPos(DisplayYPos * mScaleY + mOffsetY);
+        item.SetWindowYPos(WindowYPos * mScaleY + mOffsetY);
+        item.SetGlobalY(globalY * mScaleY + mOffsetY);
+
+        TLOGI(
+            WmsLogTag::WMS_EVENT,
+            "pointerItem after, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, displayYPos:%{public}f, "
+            "windowPosY:%{public}f, windowY:%{public}d",
+            item.GetHeight(),
+            item.GetGlobalY(),
+            item.GetDisplayXPos(),
+            item.GetWindowYPos(),
+            item.GetWindowY());
+    }
+    return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
+}
+
+void GtxInputEventSender::NapiAVSessionInputRedistributeCallback::SetTouchEventScale(int offsetX,
+                                                                                     int offsetY,
+                                                                                     float scaleX,
+                                                                                     float scaleY)
+{
+    mOffsetX = offsetX;
+    mOffsetY = offsetY;
+    mScaleX = scaleX;
+    mScaleY = scaleY;
+}
+
+void GtxInputEventSender::SetTouchEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
+{
+    mOffsetX = offsetX;
+    mOffsetY = offsetY;
+    mScaleX = scaleX;
+    mScaleY = scaleY;
+}
+
+void GtxInputEventSender::RegisterInputEventScale()
+{
+    mCallbackInstance = std::make_shared<NapiAVSessionInputRedistributeCallback>(mOffsetX, mOffsetY, mScaleX, mScaleY);
+    mRecipientInfo.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
+    mRecipientInfo.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_BEFORE_SEND_TO_COMPONENT;
+    mRecipientInfo.type = Rosen::InputEventType::POINTER_EVENT;
+    mRecipientInfo.priority = Rosen::DEFAULT_REDISTRIBUTE_PRIORITY;
+    mRecipientInfo.recipient = mCallbackInstance;
+    Rosen::WindowInputRedistributeClient::RegisterInputEventRedistribute(mRecipientInfo);
+}
+
+void GtxInputEventSender::UnRegisterInputEventScale()
+{
+    Rosen::WindowInputRedistributeClient::UnRegisterInputEventRedistribute();
+}
+
 extern "C" {
 __attribute__((visibility("default"))) void SetGtxTouchEventStatus(bool isEnable)
 {
@@ -72,6 +176,21 @@ __attribute__((visibility("default"))) void SetGtxTouchEventStatus(bool isEnable
 __attribute__((visibility("default"))) void GetGtxTouchEvent(OHOS::GtxTouchEventInfo& touchEvent)
 {
     OHOS::GtxInputEventSender::GetInstance().GetTouchEvent(touchEvent);
+}
+
+__attribute__((visibility("default"))) void SetTouchEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
+{
+    OHOS::GtxInputEventSender::GetInstance().SetTouchEventScale(offsetX, offsetY, scaleX, scaleY);
+}
+
+__attribute__((visibility("default"))) void RegisterInputEventScale()
+{
+    OHOS::GtxInputEventSender::GetInstance().RegisterInputEventScale();
+}
+
+__attribute__((visibility("default"))) void UnRegisterInputEventScale()
+{
+    OHOS::GtxInputEventSender::GetInstance().UnRegisterInputEventScale();
 }
 }
 
