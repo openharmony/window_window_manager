@@ -154,6 +154,7 @@ public:
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+    std::shared_ptr<RSRenderInterface> GetRSRenderInterface();
 
 private:
     void RegisterInputEventListener();

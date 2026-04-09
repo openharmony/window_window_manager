@@ -52,7 +52,7 @@ SCBSystemSession::SCBSystemSession(const SessionInfo& info, const sptr<SpecificS
                 break;
             }
         }
-        surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE);
+        surfaceNode_ = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::APP_WINDOW_NODE, true, false, GetRSUIContext());
         shadowSurfaceNode_ = RSAdapterUtil::IsClientMultiInstanceEnabled() && surfaceNode_ ?
             surfaceNode_->CreateShadowSurfaceNode() : nullptr;
         RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
