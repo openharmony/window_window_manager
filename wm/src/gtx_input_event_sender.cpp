@@ -67,7 +67,7 @@ void GtxInputEventSender::SetTouchEvent(Rosen::Rect rect, std::shared_ptr<MMI::P
 }
 
 Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRedistributeCallback::OnInputEvent(
-    const std::shared_ptr<MNI::KeyEvent>& keyEvent)
+    const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     TLOGI(WmsLogTag::WMS_EVENT, "TouchManager OnInputEvent KeyEvent");
     if (keyEvent == nullptr) {
@@ -77,7 +77,7 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
 }
 
 Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRedistributeCallback::OnInputEvent(
-    const std::shared_ptr<MNI::PointerEvent>& pointerEvent)
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (pointerEvent == nullptr) {
         return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
@@ -89,7 +89,7 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
         TLOGI(WmsLogTag::WMS_EVENT,
               "pointerItem before, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, "
               "displayYPos:%{public}f, windowPosY:%{public}f, windowY:%{public}d",
-              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetWindowYPos(), item.GetWindowY());
+              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
 
         int32_t displayX = item.GetDisplayX();
         int32_t WindowX = item.GetWindowX();
@@ -119,7 +119,7 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
             WmsLogTag::WMS_EVENT,
             "pointerItem after, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, displayYPos:%{public}f, "
             "windowPosY:%{public}f, windowY:%{public}d",
-            item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetWindowYPos(), item.GetWindowY());
+            item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(), item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
     }
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }
@@ -154,7 +154,7 @@ void GtxInputEventSender::RegisterInputEventScale()
 
 void GtxInputEventSender::UnRegisterInputEventScale()
 {
-    Rosen::WindowInputRedistributeClient::UnRegisterInputEventRedistribute();
+    Rosen::WindowInputRedistributeClient::UnRegisterInputEventRedistribute(mRecipientInfo);
 }
 
 extern "C" {
