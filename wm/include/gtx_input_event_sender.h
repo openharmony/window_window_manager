@@ -16,10 +16,13 @@
 #ifndef GTX_INPUT_EVENT_SENDER_H
 #define GTX_INPUT_EVENT_SENDER_H
 
+#include <mutex> 
+#include <atomic>
 #include <algorithm>
 
 #include "window.h"
 #include "window_input_channel.h"
+#include "pointer_event.h"
 #include "window_input_redistribute_client.h"
 
 namespace OHOS {
