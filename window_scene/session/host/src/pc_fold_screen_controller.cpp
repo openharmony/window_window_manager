@@ -109,7 +109,19 @@ void PcFoldScreenController::OnConnect()
 
 bool PcFoldScreenController::IsSupportEnterWaterfallMode(SuperFoldStatus status, bool hasSystemKeyboard) const
 {
-    return status == SuperFoldStatus::HALF_FOLDED && !hasSystemKeyboard && !isFullScreenWaterfallMode_;
+    auto sceneSession = weakSceneSession_.promote();
+    bool isCollaboration = false;
+    if (sceneSession && WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        for (const auto& subSession : sceneSession->GetSubSession()) {
+            if (subSession) {
+                WindowAnchorInfo windowAnchorInfo = subSession->GetWindowAnchorInfo();
+                isCollaboration = isCollaboration || (windowAnchorInfo.isAnchoredByAttach_ &&
+                    strcmp(windowAnchorInfo.attachOptions.currentLayoutMode.c_str(), "subwindow") == 0);
+            }
+        }
+    }
+    return status == SuperFoldStatus::HALF_FOLDED && !hasSystemKeyboard && !isFullScreenWaterfallMode_ &&
+        !isCollaboration;
 }
 
 void PcFoldScreenController::FoldStatusChangeForSupportEnterWaterfallMode(
