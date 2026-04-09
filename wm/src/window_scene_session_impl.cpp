@@ -7939,7 +7939,10 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
         windowPropertyInfo.globalDisplayRect.ToString().c_str());
     HookWindowSizeByHookWindowInfo(windowPropertyInfo.windowRect);
     HookWindowSizeByHookWindowInfo(windowPropertyInfo.globalDisplayRect);
-    HookWindowSizeByHookWindowInfo(windowPropertyInfo.drawableRect, true);
+    auto hookWindowInfo = GetAppHookWindowInfo();
+    if (hookWindowInfo.drawableRectHook) {
+        HookWindowSizeByHookWindowInfo(windowPropertyInfo.drawableRect);
+    }
     return WMError::WM_OK;
 }
 

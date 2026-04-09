@@ -2543,16 +2543,12 @@ HookWindowInfo WindowSessionImpl::GetAppHookWindowInfo()
     return hookWindowInfo_;
 }
 
-void WindowSessionImpl::HookWindowSizeByHookWindowInfo(Rect& rect, bool isDrawableRect)
+void WindowSessionImpl::HookWindowSizeByHookWindowInfo(Rect& rect)
 {
     auto hookWindowInfo = GetAppHookWindowInfo();
     if (!hookWindowInfo.enableHookWindow || !WindowHelper::IsMainWindow(GetType()) ||
         isFullScreenInForceSplit_.load()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, do not need hook window info.", GetWindowId());
-        return;
-    }
-    if (isDrawableRect && !hookWindowInfo.drawableRectHook) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, drawableRect hook not enabled.", GetWindowId());
         return;
     }
     if (!MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
