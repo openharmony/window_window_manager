@@ -2,7 +2,8 @@
   "files": [
     "./src/common.d.ts",
     "./src/WindowSizeEnv.ts",
-    "./src/WindowAvoidAreaEnv.ts"
+    "./src/WindowAvoidAreaEnv.ts",
+    "./src/WindowFocusEnv.ts"
   ],
   "compilerOptions": {
     "module": "ESNext",
