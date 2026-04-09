@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../windowmanager_aafwk.gni")
 
 module_out_path = "window_manager/window_manager/extension"
 
