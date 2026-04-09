@@ -57,6 +57,7 @@ enum class ListenerFunctionType : uint32_t {
     SET_SPECIFIC_SESSION_ZINDEX_CB,
     NOTIFY_SUPPORT_ROTATION_REGISTERED_CB,
     MINIMIZE_ALL_CB,
+    MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB,
     NOTIFY_PAGE_ENABLE_REGISTERED_CB,
 };
 
@@ -438,6 +439,9 @@ private:
      */
     void RegisterSetSpecificWindowZIndexCallback();
     void OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, SetSpecificZIndexReason reason);
+    void RegisterMoveMainWindowToTargetDisplayCallback();
+    void OnMoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId,
+        bool isFromScreenVirtual, bool isToScreenVirtual);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

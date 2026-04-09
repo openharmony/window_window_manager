@@ -178,6 +178,7 @@ public:
         TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX,
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
         TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN,
+        TRANS_ID_MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY,
         TRANS_ID_SNAPSHOT_BY_WINDOW_ID,
         TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO,
     };
@@ -394,6 +395,7 @@ public:
     }
     WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override { return WSError::WS_OK; }
     WSError ResetSpecificWindowZIndex(int32_t pid) override { return WSError::WS_OK; }
+    WSError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId) override { return WSError::WS_OK; }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, const sptr<IRemoteObject>& token,
         uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp, bool isConstrainedModal) override {}
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,
