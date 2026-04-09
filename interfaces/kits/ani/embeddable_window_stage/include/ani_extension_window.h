@@ -47,6 +47,9 @@ public:
     WmErrorCode RegisterListener(ani_env* env, ani_string type,  ani_object fn);
     WmErrorCode UnregisterListener(ani_env* env, ani_string type, ani_object fn);
     WmErrorCode OnHideNonSecureWindows(ani_env* env, ani_boolean shouldHide);
+    ani_object Snapshot(ani_env* env);
+    ani_object SnapshotSync(ani_env* env);
+    ani_object SnapshotIgnorePrivacy(ani_env* env);
     void OnOccupyEvents(ani_env* env, ani_int eventFlags);
     ani_object OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object subWindowOptions,
         ani_boolean followCreatorLifecycle);

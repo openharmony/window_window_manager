@@ -14,6 +14,7 @@
  */
 
 #include "../../interfaces/include/ws_common.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS::Rosen {
 
@@ -30,4 +31,14 @@ const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
     { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED },
     { WSError::WS_ERROR_INVALID_WINDOW,  WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
 };
+
+bool CheckCollaboratorType(int32_t type)
+{
+    if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE &&
+        type != CollaboratorType::REDIRECT_TYPE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "collaborator type is invalid");
+        return false;
+    }
+    return true;
+}
 }

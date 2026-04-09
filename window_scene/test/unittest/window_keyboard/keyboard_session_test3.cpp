@@ -16,6 +16,7 @@
 #include "display_manager.h"
 #include "session/host/include/keyboard_session.h"
 #include <gtest/gtest.h>
+#include <parameters.h>
 #include <ui/rs_surface_node.h>
 
 #include "interfaces/include/ws_common.h"
@@ -883,6 +884,94 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
 }
 
 /**
+ * @tc.name: SetSessionBlackListWhenShowAdd
+ * @tc.desc: check func SetSessionBlackListWhenShow add branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, SetSessionBlackListWhenShowAdd, Function | SmallTest | Level0)
+{
+    SessionInfo keyboardInfo;
+    keyboardInfo.abilityName_ = "SetSessionBlackListWhenShowAdd";
+    keyboardInfo.bundleName_ = "SetSessionBlackListWhenShowAdd";
+    auto keyboardSpecificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardSpecificCb, nullptr);
+    auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardCb, nullptr);
+    auto keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, keyboardSpecificCb, keyboardCb);
+    ASSERT_NE(keyboardSession, nullptr);
+
+    SessionInfo panelInfo;
+    panelInfo.abilityName_ = "SetSessionBlackListWhenShowAddPanel";
+    panelInfo.bundleName_ = "SetSessionBlackListWhenShowAddPanel";
+    auto panelSpecificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(panelSpecificCb, nullptr);
+    auto panelSession = sptr<SceneSession>::MakeSptr(panelInfo, panelSpecificCb);
+    ASSERT_NE(panelSession, nullptr);
+
+    std::unordered_set<std::string> expectedTags = { "SCB_KEYBOARD_FLOATING" };
+    bool keyboardAddCalled = false;
+    bool panelAddCalled = false;
+    keyboardSpecificCb->onAddSessionBlackList_ = [&keyboardAddCalled, keyboardSession, expectedTags](int32_t id,
+        const std::unordered_set<std::string>& tags) {
+        keyboardAddCalled = (id == keyboardSession->GetPersistentId()) && (tags == expectedTags);
+        return WMError::WM_OK;
+    };
+    panelSpecificCb->onAddSessionBlackList_ = [&panelAddCalled, panelSession, expectedTags](int32_t id,
+        const std::unordered_set<std::string>& tags) {
+        panelAddCalled = (id == panelSession->GetPersistentId()) && (tags == expectedTags);
+        return WMError::WM_OK;
+    };
+
+    keyboardSession->SetSessionBlackListWhenShow(true, panelSession);
+    EXPECT_TRUE(keyboardAddCalled);
+    EXPECT_TRUE(panelAddCalled);
+}
+
+/**
+ * @tc.name: SetSessionBlackListWhenShowRemove
+ * @tc.desc: check func SetSessionBlackListWhenShow remove branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, SetSessionBlackListWhenShowRemove, Function | SmallTest | Level0)
+{
+    SessionInfo keyboardInfo;
+    keyboardInfo.abilityName_ = "SetSessionBlackListWhenShowRemove";
+    keyboardInfo.bundleName_ = "SetSessionBlackListWhenShowRemove";
+    auto keyboardSpecificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardSpecificCb, nullptr);
+    auto keyboardCb = sptr<KeyboardSession::KeyboardSessionCallback>::MakeSptr();
+    ASSERT_NE(keyboardCb, nullptr);
+    auto keyboardSession = sptr<KeyboardSession>::MakeSptr(keyboardInfo, keyboardSpecificCb, keyboardCb);
+    ASSERT_NE(keyboardSession, nullptr);
+
+    SessionInfo panelInfo;
+    panelInfo.abilityName_ = "SetSessionBlackListWhenShowRemovePanel";
+    panelInfo.bundleName_ = "SetSessionBlackListWhenShowRemovePanel";
+    auto panelSpecificCb = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    ASSERT_NE(panelSpecificCb, nullptr);
+    auto panelSession = sptr<SceneSession>::MakeSptr(panelInfo, panelSpecificCb);
+    ASSERT_NE(panelSession, nullptr);
+
+    std::unordered_set<std::string> expectedTags = { "SCB_KEYBOARD_FLOATING" };
+    bool keyboardRemoveCalled = false;
+    bool panelRemoveCalled = false;
+    keyboardSpecificCb->onRemoveSessionBlackList_ = [&keyboardRemoveCalled, keyboardSession, expectedTags](int32_t id,
+        const std::unordered_set<std::string>& tags) {
+        keyboardRemoveCalled = (id == keyboardSession->GetPersistentId()) && (tags == expectedTags);
+        return WMError::WM_OK;
+    };
+    panelSpecificCb->onRemoveSessionBlackList_ = [&panelRemoveCalled, panelSession, expectedTags](int32_t id,
+        const std::unordered_set<std::string>& tags) {
+        panelRemoveCalled = (id == panelSession->GetPersistentId()) && (tags == expectedTags);
+        return WMError::WM_OK;
+    };
+
+    keyboardSession->SetSessionBlackListWhenShow(false, panelSession);
+    EXPECT_TRUE(keyboardRemoveCalled);
+    EXPECT_TRUE(panelRemoveCalled);
+}
+
+/**
  * @tc.name: NotifyOccupiedAreaChanged
  * @tc.desc: check func NotifyOccupiedAreaChanged
  * @tc.type: FUNC
@@ -964,6 +1053,25 @@ HWTEST_F(KeyboardSessionTest3, ForceNotifyKeyboardOccupiedArea, Function | Small
     sceneSession->RegisterNotifyOccupiedAreaChangeCallback([&](DisplayId displayId) { result = true; });
     sceneSession->ForceNotifyKeyboardOccupiedArea();
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PostKeyboardAnimationSyncTimeoutTask_HandlerNull
+ * @tc.desc: test PostKeyboardAnimationSyncTimeoutTask with handler is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask_HandlerNull, Function | SmallTest | Level0)
+{
+    auto keyboardSession = GetKeyboardSession(
+        "PostKeyboardAnimationSyncTimeoutTask_HandlerNull", "PostKeyboardAnimationSyncTimeoutTask_HandlerNull");
+    ASSERT_NE(keyboardSession, nullptr);
+
+    keyboardSession->SetEventHandler(nullptr, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
+    EXPECT_TRUE(g_logMsg.find("handler is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 } // namespace

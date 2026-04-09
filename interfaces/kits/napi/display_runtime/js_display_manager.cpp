@@ -2111,6 +2111,8 @@ napi_value InitHDRFormat(napi_env env)
         CreateJsValue(env, static_cast<uint32_t>(HDRFormat::IMAGE_HDR_ISO_DUAL)));
     napi_set_named_property(env, objValue, "IMAGE_HDR_ISO_SINGLE",
         CreateJsValue(env, static_cast<uint32_t>(HDRFormat::IMAGE_HDR_ISO_SINGLE)));
+    napi_set_named_property(env, objValue, "VIDEO_AIHDR",
+        CreateJsValue(env, static_cast<uint32_t>(HDRFormat::VIDEO_AIHDR)));
     return objValue;
 }
 

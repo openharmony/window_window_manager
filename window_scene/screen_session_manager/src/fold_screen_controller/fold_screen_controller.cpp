@@ -17,12 +17,10 @@
 #include "fold_screen_controller/single_display_fold_policy.h"
 #include "fold_screen_controller/secondary_display_fold_policy.h"
 #include "fold_screen_controller/single_display_pocket_fold_policy.h"
-#include "fold_screen_controller/single_display_super_fold_policy.h"
 #include "fold_screen_controller/dual_display_fold_policy.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_pocket_fold_state_manager.h"
-#include "fold_screen_controller/sensor_fold_state_manager/single_display_sensor_super_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/secondary_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/secondary_fold_sensor_manager.h"
@@ -132,10 +130,6 @@ sptr<FoldScreenPolicy> FoldScreenController::GetFoldScreenPolicy(DisplayDeviceTy
         }
         case DisplayDeviceType::SECONDARY_DISPLAY_DEVICE:{
             tempPolicy = new SecondaryDisplayFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
-            break;
-        }
-        case DisplayDeviceType::SINGLE_DISPLAY_SUPER_DEVICE:{
-            tempPolicy = new SingleDisplaySuperFoldPolicy(displayInfoMutex_, screenPowerTaskScheduler_);
             break;
         }
         default: {
@@ -445,5 +439,14 @@ void FoldScreenController::SetIsClearingBootAnimation(bool isClearingBootAnimati
 float FoldScreenController::GetSpecialVirtualPixelRatio()
 {
     return foldScreenPolicy_->GetSpecialVirtualPixelRatio();
+}
+
+FoldDisplayMode FoldScreenController::GetCurrentDisplayMode() const
+{
+    if (foldScreenPolicy_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "foldScreenPolicy is null");
+        return FoldDisplayMode::UNKNOWN;
+    }
+    return foldScreenPolicy_->GetCurrentDisplayMode();
 }
 } // namespace OHOS::Rosen

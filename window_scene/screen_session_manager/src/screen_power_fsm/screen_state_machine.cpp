@@ -262,6 +262,8 @@ void ScreenStateMachine::InitStateMachineTbl()
         ScreenTransitionState::SCREEN_OFF, &ScreenStateMachine::DoRecordTransNormal};
     stateMachine_[{ScreenTransitionState::SCREEN_OFF, ScreenPowerEvent::FOLD_SCREEN_SET_POWER}] = {
         ScreenTransitionState::SCREEN_OFF, &ScreenStateMachine::DoSetScreenFoldPowerFunc};
+    stateMachine_[{ScreenTransitionState::SCREEN_OFF, ScreenPowerEvent::SET_SCREEN_POWER_FOR_ALL_FORCE_POWER_OFF}] = {
+        ScreenTransitionState::SCREEN_OFF, &ScreenStateMachine::DoSetScreenPowerForAll};
 
     stateMachine_[{ScreenTransitionState::WAIT_SCREEN_ON_READY, ScreenPowerEvent::SET_DISPLAY_STATE}] = {
         ScreenTransitionState::WAIT_SCREEN_ON_READY, &ScreenStateMachine::DoSetDisplayState};

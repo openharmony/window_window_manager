@@ -95,6 +95,7 @@ typedef enum : uint32_t {
     IMAGE_HDR_VIVID_SINGLE,
     IMAGE_HDR_ISO_DUAL,
     IMAGE_HDR_ISO_SINGLE,
+    VIDEO_AIHDR,
 } ScreenHDRFormat;
 
 const std::map<GraphicCM_ColorSpaceType, DmsColorSpace> NATIVE_TO_JS_COLOR_SPACE_TYPE_MAP {
@@ -140,6 +141,7 @@ const std::map<ScreenHDRFormat, HDRFormat> NATIVE_TO_JS_HDR_FORMAT_TYPE_MAP {
     { ScreenHDRFormat::IMAGE_HDR_VIVID_SINGLE,      HDRFormat::IMAGE_HDR_VIVID_SINGLE },
     { ScreenHDRFormat::IMAGE_HDR_ISO_DUAL,          HDRFormat::IMAGE_HDR_ISO_DUAL },
     { ScreenHDRFormat::IMAGE_HDR_ISO_SINGLE,        HDRFormat::IMAGE_HDR_ISO_SINGLE },
+    { ScreenHDRFormat::VIDEO_AIHDR,                 HDRFormat::VIDEO_AIHDR },
 };
 }
 

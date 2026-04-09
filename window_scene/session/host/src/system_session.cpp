@@ -26,8 +26,8 @@ namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "SystemSession" };
 } // namespace
 
-constexpr uint32_t MIN_SYSTEM_WINDOW_WIDTH = 5;
-constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 5;
+constexpr uint32_t MIN_SYSTEM_WINDOW_WIDTH = 1;
+constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 1;
 constexpr uint8_t MAX_FB_CLICK_COUNT = 8;
 const std::string FB_CLICK_EVENT = "click";
 
@@ -332,12 +332,11 @@ void SystemSession::UpdatePointerArea(const WSRect& rect)
     Session::UpdatePointerArea(rect);
 }
 
-void SystemSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+void SystemSession::RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics)
 {
     uint32_t minWidth = MIN_SYSTEM_WINDOW_WIDTH;
     uint32_t minHeight = MIN_SYSTEM_WINDOW_HEIGHT;
-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenMetrics);
 }
 
 WSError SystemSession::SetDialogSessionBackGestureEnabled(bool isEnabled)
@@ -501,8 +500,10 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
         TLOGNE(WmsLogTag::WMS_SYSTEM, "Check floating ball permission failed");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    bool canAutoRestore =
+        SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_FLOATING_BALL_AUTO_RESTORE);
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    return PostSyncTask([weakThis = wptr(this), &want, callingPid, where = __func__]() {
+    return PostSyncTask([weakThis = wptr(this), &want, callingPid, canAutoRestore, where = __func__]() {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
@@ -519,11 +520,11 @@ WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& w
         }
         {
             std::lock_guard<std::mutex> lock(session->fbClickMutex_);
-            if (session->fbClickCnt_ == 0) {
-                TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s not click, deny", where);
+            if (session->fbClickCnt_ == 0 && !canAutoRestore) {
+                TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s not click or cannot auto restore, deny", where);
                 return WMError::WM_ERROR_FB_RESTORE_MAIN_WINDOW_FAILED;
             }
-            session->fbClickCnt_--;
+            session->fbClickCnt_ = 0;
         }
         TLOGNI(WmsLogTag::WMS_SYSTEM,
             "%{public}s restore window, bundle %{public}s, ability %{public}s, session bundle %{public}s",

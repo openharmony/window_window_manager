@@ -650,11 +650,25 @@ HWTEST_F(WindowManagerServiceTest, RequestFocus, TestSize.Level1)
 {
     uint32_t windowId = 1;
     WMError res = wms->RequestFocus(windowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: RequestFocus01
+ * @tc.desc: RequestFocus with valid permission test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, RequestFocus01, TestSize.Level1)
+{
+    uint32_t windowId = 1;
+    wms->accessTokenIdMaps_.insert(windowId, IPCSkeleton::GetCallingTokenID());
+    WMError res = wms->RequestFocus(windowId);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_NE(res, WMError::WM_OK);
+        EXPECT_NE(res, WMError::WM_OK);
     } else {
-        ASSERT_EQ(res, WMError::WM_OK);
+        EXPECT_EQ(res, WMError::WM_OK);
     }
+    wms->accessTokenIdMaps_.clear();
 }
 
 /**
@@ -839,11 +853,25 @@ HWTEST_F(WindowManagerServiceTest, RaiseToAppTop, TestSize.Level1)
 {
     uint32_t windowId = 1;
     WMError res = wms->RaiseToAppTop(windowId);
+    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: RaiseToAppTop01
+ * @tc.desc: RaiseToAppTop with valid permission test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerServiceTest, RaiseToAppTop01, TestSize.Level1)
+{
+    uint32_t windowId = 1;
+    wms->accessTokenIdMaps_.insert(windowId, IPCSkeleton::GetCallingTokenID());
+    WMError res = wms->RaiseToAppTop(windowId);
     if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_OK, res);
+        EXPECT_EQ(WMError::WM_OK, res);
     } else {
-        ASSERT_NE(WMError::WM_DO_NOTHING, res);
+        EXPECT_NE(WMError::WM_DO_NOTHING, res);
     }
+    wms->accessTokenIdMaps_.clear();
 }
 
 /**

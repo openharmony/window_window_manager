@@ -61,22 +61,8 @@ constexpr int32_t DEFAULT_CUSTOM_LOGIC_DIRECTION = 0;
 }
 constexpr uint32_t DISPLAY_A_WIDTH = 2472;
 constexpr float DEFAULT_SNAPSHOT_SCALE = 1.0f;
-
-/**
- * @struct HookInfo.
- *
- * @brief hook diaplayinfo deepending on the window size.
- */
-struct DMHookInfo {
-    uint32_t width_;
-    uint32_t height_;
-    float_t density_;
-    uint32_t rotation_;
-    bool enableHookRotation_;
-    uint32_t displayOrientation_;
-    bool enableHookDisplayOrientation_;
-    bool isFullScreenInForceSplit_;
-};
+constexpr uint64_t PC_WATCH_DOG_TIME_INTERVAL = 10 * 1000;
+constexpr uint64_t NON_PC_WATCH_DOG_TIME_INTERVAL = 5 * 1000;
 
 /**
  * @brief Power state change reason.
@@ -127,7 +113,10 @@ enum class PowerStateChangeReason : uint32_t {
     STATE_CHANGE_REASON_AOD_SET_DOZE = 53,
     STATE_CHANGE_REASON_AOD_SET_DOZE_SUSPEND = 54,
     STATE_CHANGE_REASON_AOD_SET_OFF = 55,
+    STATE_CHANGE_REASON_AOD_SET_FORCE_OFF = 56,
+    STATE_CHANGE_REASON_FOR_ONE_SCREEN_OFF = 57,
     STATE_CHANGE_REASON_REMOTE = 100,
+    STATE_CHANGE_REASON_PEOPLE_LEAVING = 101,
     STATE_CHANGE_REASON_UNKNOWN = 1000,
 };
 
@@ -686,6 +675,23 @@ struct DMRect {
     }
 };
 
+/**
+ * @struct HookInfo.
+ *
+ * @brief hook diaplayinfo deepending on the window size.
+ */
+struct DMHookInfo {
+    uint32_t width_;
+    uint32_t height_;
+    float_t density_;
+    uint32_t rotation_;
+    bool enableHookRotation_;
+    uint32_t displayOrientation_;
+    bool enableHookDisplayOrientation_;
+    DMRect actualRect_ = { 0, 0, 0, 0};
+    bool isFullScreenInForceSplit_;
+};
+
 struct CaptureOption {
     DisplayId displayId_ = DISPLAY_ID_INVALID;
     bool isNeedNotify_ = true;
@@ -810,6 +816,7 @@ struct SessionOption {
     bool isRotationLocked_;
     int32_t rotation_;
     std::map<int32_t, int32_t> rotationOrientationMap_;
+    bool isBooting_ { false };
 };
 
 /**

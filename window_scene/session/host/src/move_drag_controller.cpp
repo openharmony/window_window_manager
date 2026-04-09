@@ -58,6 +58,9 @@ namespace {
 constexpr const char* MOVE_RESAMPLE_ENABLE_PARAM_KEY = "persist.windowlayout.moveresample.enable";
 constexpr const char* MOVE_RESAMPLE_MIN_FPS_PARAM_KEY = "persist.windowlayout.moveresample.minfps";
 constexpr const char* MOVE_RESAMPLE_MAX_FPS_PARAM_KEY = "persist.windowlayout.moveresample.maxfps";
+
+// The system parameter key for moving event throttle interval configuration.
+constexpr const char* MOVING_EVENT_THROTTLE_INTERVAL_PARAM_KEY = "persist.windowlayout.movingevent.throttleinterval";
 }
 
 const std::map<DragType, uint32_t> STYLEID_MAP = {
@@ -173,7 +176,11 @@ MoveDragController::MoveDragController(wptr<SceneSession> sceneSession) : sceneS
     }
 
     // Move Resampling System Config
-    std::tie(enableMoveResample_, resampleMinFps_, resampleMaxFps_) = MoveDragController::GetMoveResampleSystemConfig();
+    std::tie(enableMoveResample_, resampleMinFps_, resampleMaxFps_) =
+        MoveDragController::LoadMoveResampleSystemConfig();
+
+    // Moving Event Throttle System Config
+    movingEventThrottleIntervalUs_ = MoveDragController::LoadMovingEventThrottleSystemConfig();
 }
 
 bool MoveDragController::IsWindowCrossScreenOnDragEnd() const
@@ -181,6 +188,15 @@ bool MoveDragController::IsWindowCrossScreenOnDragEnd() const
     return moveDragEndDisplayId_ != DISPLAY_ID_INVALID &&
            moveDragStartDisplayId_ != DISPLAY_ID_INVALID &&
            moveDragEndDisplayId_ != moveDragStartDisplayId_;
+}
+
+bool MoveDragController::ShouldFlushOnDragEnd() const
+{
+    if (moveDragStartDisplayId_ == DISPLAY_ID_INVALID ||
+        moveDragEndDisplayId_ == DISPLAY_ID_INVALID) {
+        return false;
+    }
+    return moveDragEndDisplayId_ == moveDragStartDisplayId_;
 }
 
 void MoveDragController::OnConnect(ScreenId id)
@@ -494,12 +510,34 @@ void MoveDragController::ProcessMoveRectUpdate(const std::shared_ptr<MMI::Pointe
     OnMoveDragCallback(reason, mode);
 }
 
+bool MoveDragController::ShouldThrottleMovingEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    if (movingEventThrottleIntervalUs_ == 0) {
+        return false;
+    }
+
+    const int64_t curActionTimeUs = pointerEvent->GetActionTime();
+    const int64_t eventIntervalUs = curActionTimeUs - lastMovingEventActionTimeUs_;
+    if (eventIntervalUs < static_cast<int64_t>(movingEventThrottleIntervalUs_)) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Throttle moving event, intervalUs: %{public}" PRId64, eventIntervalUs);
+        return true;
+    }
+    lastMovingEventActionTimeUs_ = curActionTimeUs;
+    return false;
+}
+
 bool MoveDragController::HandleMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     if (moveDragIsInterrupted_) {
         MoveDragInterrupted();
         return true;
     }
+
+    // Throttle moving events based on time interval
+    if (ShouldThrottleMovingEvent(pointerEvent)) {
+        return true;
+    }
+
     uint32_t oldWindowDragHotAreaType = windowDragHotAreaType_;
     moveDragEndDisplayId_ = static_cast<DisplayId>(pointerEvent->GetTargetDisplayId());
     DisplayId lastHotAreaDisplayId = hotAreaDisplayId_;
@@ -591,8 +629,12 @@ void MoveDragController::ModifyWindowCoordinates(const std::shared_ptr<MMI::Poin
 void MoveDragController::ProcessWindowDragHotAreaFunc(uint32_t lastWindowDragHotAreaType,
     DisplayId lastHotAreaDisplayId, SizeChangeReason reason)
 {
-    bool isSendHotAreaMessage = lastWindowDragHotAreaType != windowDragHotAreaType_
-        || lastHotAreaDisplayId != hotAreaDisplayId_;
+    bool isSendHotAreaMessage = lastWindowDragHotAreaType != windowDragHotAreaType_ ||
+        lastHotAreaDisplayId != hotAreaDisplayId_;
+    TLOGD(WmsLogTag::WMS_LAYOUT, "start, isSendHotAreaMessage: %{public}u, reason: %{public}d,"
+        "[lastWindowDragHotAreaType: %{public}d, windowDragHotAreaType_: %{public}d, lastHotAreaDisplayId: %{public}"
+        PRIu64 ",hotAreaDisplayId_: %{public}" PRIu64 "]", isSendHotAreaMessage, reason, lastWindowDragHotAreaType,
+        windowDragHotAreaType_, lastHotAreaDisplayId, hotAreaDisplayId_);
     if (isSendHotAreaMessage) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "start, isSendHotAreaMessage:%{public}u, reason:%{public}d",
             isSendHotAreaMessage, reason);
@@ -1823,7 +1865,23 @@ void MoveDragController::OnMoveDragCallback(SizeChangeReason reason, TargetRectU
     CallSceneSessionVoid(&SceneSession::OnMoveDragCallback, reason, mode);
 }
 
-void MoveDragController::SetMoveResampleSystemConfig(
+template<typename T>
+std::optional<T> GetOptionalNumericParameter(const char* key)
+{
+    std::string valueStr = system::GetParameter(key, "");
+    if (valueStr.empty()) {
+        return std::nullopt;
+    }
+
+    T value{};
+    auto [_, ec] = std::from_chars(valueStr.data(), valueStr.data() + valueStr.size(), value);
+    if (ec != std::errc{}) {
+        return std::nullopt;
+    }
+    return value;
+}
+
+void MoveDragController::SaveMoveResampleSystemConfig(
     bool enable, std::optional<uint32_t> minFps, std::optional<uint32_t> maxFps)
 {
     system::SetParameter(MOVE_RESAMPLE_ENABLE_PARAM_KEY, enable ? "true" : "false");
@@ -1835,33 +1893,33 @@ void MoveDragController::SetMoveResampleSystemConfig(
           enable, minFpsStr.c_str(), maxFpsStr.c_str());
 }
 
-std::tuple<bool, std::optional<uint32_t>, std::optional<uint32_t>> MoveDragController::GetMoveResampleSystemConfig()
+std::tuple<bool, std::optional<uint32_t>, std::optional<uint32_t>> MoveDragController::LoadMoveResampleSystemConfig()
 {
     bool enable = system::GetBoolParameter(MOVE_RESAMPLE_ENABLE_PARAM_KEY, false);
-    std::optional<uint32_t> minFps;
-    std::optional<uint32_t> maxFps;
-    std::string minFpsStr = system::GetParameter(MOVE_RESAMPLE_MIN_FPS_PARAM_KEY, "");
-    std::string maxFpsStr = system::GetParameter(MOVE_RESAMPLE_MAX_FPS_PARAM_KEY, "");
+    auto minFps = GetOptionalNumericParameter<uint32_t>(MOVE_RESAMPLE_MIN_FPS_PARAM_KEY);
+    auto maxFps = GetOptionalNumericParameter<uint32_t>(MOVE_RESAMPLE_MAX_FPS_PARAM_KEY);
 
-    auto parseOptionalUint32 = [](const std::string& str) -> std::optional<uint32_t> {
-        if (str.empty()) {
-            return std::nullopt;
-        }
-        uint32_t value = 0;
-        auto [_, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-        if (ec != std::errc{}) {
-            return std::nullopt;
-        }
-        return value;
-    };
-    minFps = parseOptionalUint32(minFpsStr);
-    maxFps = parseOptionalUint32(maxFpsStr);
     TLOGD(WmsLogTag::WMS_LAYOUT,
           "enable: %{public}d, minFps: %{public}s, maxFps: %{public}s",
           enable,
           minFps ? std::to_string(*minFps).c_str() : "unlimited",
           maxFps ? std::to_string(*maxFps).c_str() : "unlimited");
+
     return { enable, minFps, maxFps };
+}
+
+void MoveDragController::SaveMovingEventThrottleSystemConfig(uint32_t throttleIntervalUs)
+{
+    system::SetParameter(MOVING_EVENT_THROTTLE_INTERVAL_PARAM_KEY, std::to_string(throttleIntervalUs));
+    TLOGI(WmsLogTag::WMS_LAYOUT, "throttleIntervalUs: %{public}u", throttleIntervalUs);
+}
+
+uint32_t MoveDragController::LoadMovingEventThrottleSystemConfig()
+{
+    uint32_t throttleIntervalUs =
+        GetOptionalNumericParameter<uint32_t>(MOVING_EVENT_THROTTLE_INTERVAL_PARAM_KEY).value_or(0);
+    TLOGD(WmsLogTag::WMS_LAYOUT, "throttleIntervalUs: %{public}u", throttleIntervalUs);
+    return throttleIntervalUs;
 }
 
 bool MoveDragController::IsInvalidMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
