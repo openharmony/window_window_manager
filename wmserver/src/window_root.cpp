@@ -437,10 +437,8 @@ void WindowRoot::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>
         if (node == nullptr) {
             continue;
         }
-        auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(node->GetWindowId(), node->GetCallingPid(),
-            node->GetCallingUid(), node->GetVisibilityState(), node->GetWindowType());
-        windowVisibilityInfo->SetModuleName(node->abilityInfo_.moduleName);
-        infos.emplace_back(windowVisibilityInfo);
+        infos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), node->GetVisibilityState(), node->GetWindowType()));
     }
 }
 
@@ -504,10 +502,8 @@ void WindowRoot::NotifyWindowVisibilityChange(std::shared_ptr<RSOcclusionData> o
             continue;
         }
         node->SetVisibilityState(visibilityState);
-        auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(node->GetWindowId(), node->GetCallingPid(),
-            node->GetCallingUid(), visibilityState, node->GetWindowType());
-        windowVisibilityInfo->SetModuleName(node->abilityInfo_.moduleName);
-        windowVisibilityInfos.emplace_back(windowVisibilityInfo);
+        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), visibilityState, node->GetWindowType()));
 #ifdef MEMMGR_WINDOW_ENABLE
         memMgrWindowInfos.emplace_back(new Memory::MemMgrWindowInfo(node->GetWindowId(), node->GetCallingPid(),
             node->GetCallingUid(), isVisible));
@@ -1160,10 +1156,8 @@ WMError WindowRoot::DestroyWindowInner(sptr<WindowNode>& node)
     if (node->GetVisibilityState() < WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION) {
         std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
         node->SetVisibilityState(WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
-        auto windowVisibilityInfo = sptr<WindowVisibilityInfo>::MakeSptr(node->GetWindowId(), node->GetCallingPid(),
-            node->GetCallingUid(), node->GetVisibilityState(), node->GetWindowType());
-        windowVisibilityInfo->SetModuleName(node->abilityInfo_.moduleName);
-        windowVisibilityInfos.emplace_back(windowVisibilityInfo);
+        windowVisibilityInfos.emplace_back(new WindowVisibilityInfo(node->GetWindowId(), node->GetCallingPid(),
+            node->GetCallingUid(), node->GetVisibilityState(), node->GetWindowType()));
         WLOGFD("NotifyWindowVisibilityChange: covered status changed window:%{public}u, visibilityState:%{public}d",
             node->GetWindowId(), node->GetVisibilityState());
         WindowManagerAgentController::GetInstance().UpdateWindowVisibilityInfo(windowVisibilityInfos);
