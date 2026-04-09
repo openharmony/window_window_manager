@@ -26,7 +26,6 @@
 #include <unordered_set>
 
 #include "display_manager.h"
-#include "proxy/include/window_info.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/pc_fold_screen_controller.h"
 #include "session/host/include/session.h"
@@ -35,6 +34,11 @@
 
 namespace OHOS::PowerMgr {
 class RunningLock;
+}
+
+namespace OHOS::MMI {
+struct WindowInfo;
+struct UIExtensionInfo;
 }
 
 namespace OHOS::Rosen {
