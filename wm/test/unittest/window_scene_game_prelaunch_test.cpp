@@ -136,7 +136,7 @@ HWTEST_F(WindowSceneGamePrelaunchTest, WindowSceneGoForegroundWithGamePrelaunch0
     auto mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
     mainWindow->RegisterLifeCycleListener(mockListener);
     
-    WindowScene::windowScene;
+    WindowScene windowScene;
     windowScene.mainWindow_ = mainWindow;
     windowScene.mainWindowId_ = mainWindow->GetWindowId();
     
