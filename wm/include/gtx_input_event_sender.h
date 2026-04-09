@@ -77,9 +77,9 @@ public:
     public:
         NapiAVSessionInputRedistributeCallback(int offsetX, int offsetY, float scaleX, float scaleY)
             : mOffsetX(offsetX), mOffsetY(offsetY), mScaleX(scaleX), mScaleY(scaleY) {}
-        Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MNI::KeyEvent>& KeyEvent) override;
+        Rosen::InputAfterRedistributeBehavior OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& KeyEvent) override;
         Rosen::InputAfterRedistributeBehavior
-            OnInputEvent(const std::shared_ptr<MNI::PointerEvent>& PointerEvent) override;
+            OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& PointerEvent) override;
         void SetTouchEventScale(int offsetX, int offsetY, float scaleX, float scaleY);
 
     private:
