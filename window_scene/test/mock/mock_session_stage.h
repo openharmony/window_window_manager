@@ -52,7 +52,8 @@ public:
     MOCK_METHOD1(GetTopNavDestinationName, WSError(std::string& topNavDestName));
     MOCK_METHOD1(NotifyLayoutFinishAfterWindowModeChange, WSError(WindowMode mode));
     MOCK_METHOD1(NotifySubWindowAfterParentWindowSizeChange, WSError(Rect rect));
-    MOCK_METHOD1(NotifySubWindowAfterParentWindowStatusChange, WSError(WindowMode mode));
+    MOCK_METHOD3(NotifySubWindowAfterParentWindowStatusChange, WSError(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
     MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));

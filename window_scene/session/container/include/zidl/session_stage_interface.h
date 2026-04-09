@@ -137,7 +137,8 @@ public:
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
     virtual WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) = 0;
-    virtual WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) = 0;
+    virtual WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen) = 0;
     virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; };
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyLifecyclePausedStatus() = 0;
