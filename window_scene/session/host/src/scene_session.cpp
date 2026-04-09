@@ -646,7 +646,8 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
             return ret;
         }
         session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
-        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
+        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot &&
+            reason != LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND) {
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true, true, nullptr, false, reason);
         }
