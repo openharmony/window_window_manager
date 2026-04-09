@@ -715,7 +715,7 @@ public:
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, AppForceLandscapeConfig& config);
     WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape,
-        bool needUpdateViewport = false);
+        bool needUpdateViewport, SelectMode selectMode);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
     bool GetAppForceLandscapeConfigEnable(const std::string& bundleName);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
@@ -951,6 +951,9 @@ public:
      * Compatible Mode
      */
     void RegisterPageEnableFunc(PageEnableFunc&& func);
+
+    void SetSelectMode(SelectMode selectMode);
+    SelectMode GetSelectMode() const;
 
 protected:
     SceneSessionManager();
@@ -2031,6 +2034,8 @@ private:
     PageEnableFunc pageEnableFunc_;
     WSError NotifyPageEnableFunc(const std::string& bundleName, int32_t windowId,
         const std::string& action, const std::string& message);
+
+    std::atomic<SelectMode> selectMode_{SelectMode::INVALID_MODE};
 };
 } // namespace OHOS::Rosen
 

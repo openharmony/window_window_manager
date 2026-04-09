@@ -257,6 +257,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAppForceLandscapeConfigEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO):
             return HandleGetAppHookWindowInfoFromServer(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_SELECT_MODE):
+            return HandleGetSelectMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_STATUS_AFTER_SHOW_WINDOW):
             return HandleNotifyWindowStatusDidChangeAfterShowWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
@@ -349,6 +351,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetFrameRectForPartialZoomIn(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT):
             return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SPLIT_RATIO_CHANGED):
+            return HandleNotifySplitRatioChanged(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE):
             return HandleNotifyCompatibleModeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PAGE_ENABLE):
@@ -2023,6 +2027,22 @@ int SessionStub::HandleGetAppHookWindowInfoFromServer(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStub::HandleGetSelectMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    SelectMode selectMode = SelectMode::INVALID_MODE;
+    WMError ret = GetSelectMode(selectMode);
+    if (!reply.WriteUint32(static_cast<uint32_t>(selectMode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write selectMode failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleNotifyWindowStatusDidChangeAfterShowWindow(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -2688,6 +2708,21 @@ int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifySplitRatioChanged(MessageParcel& data, MessageParcel& reply)
+{
+    float newRatio = 0.0f;
+    if (!data.ReadFloat(newRatio)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read newRatio failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = NotifySplitRatioChanged(newRatio);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply)
 {
     int32_t mode = 0;
@@ -2732,7 +2767,12 @@ int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel&
         TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
         return ERR_INVALID_DATA;
     }
-    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
+    uint32_t selectModeValue = 0;
+    if (!data.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read selectModeValue failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, static_cast<SelectMode>(selectModeValue));
     return ERR_NONE;
 }
 

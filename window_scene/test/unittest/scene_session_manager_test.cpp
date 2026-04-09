@@ -2271,6 +2271,23 @@ HWTEST_F(SceneSessionManagerTest, NotifySupportRotationRegistered, TestSize.Leve
     ret = ssm_->NotifySupportRotationRegistered();
     EXPECT_EQ(ret, WMError::WM_OK);
 }
+
+/**
+ * @tc.name: SetSelectMode
+ * @tc.desc: SetSelectMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSelectMode, TestSize.Level1)
+{
+    ssm_->SetSelectMode(SelectMode::WIDE_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::WIDE_MODE);
+
+    ssm_->SetSelectMode(SelectMode::SQUARE_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::SQUARE_MODE);
+
+    ssm_->SetSelectMode(SelectMode::INVALID_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::INVALID_MODE);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
