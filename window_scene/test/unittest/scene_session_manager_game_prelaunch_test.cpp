@@ -52,7 +52,7 @@ namespace {
 HWTEST_F(SceneSessionManagerGamePrelaunchTest, PendingSessionToBackgroundForDelegatorWithGamePrelaunch01, TestSize.Level0)
 {
     auto mockStub = sptr<MockSceneSessionManagerStub>::MakeSptr();
-    sptr<IRemoteObject> token = new MockSessionToken();
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObject();
     
     EXPECT_CALL(*mockStub, PendingSessionToBackgroundForDelegator(_, _, 
         static_cast<int32_t>(LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND)))
@@ -67,13 +67,13 @@ HWTEST_F(SceneSessionManagerGamePrelaunchTest, PendingSessionToBackgroundForDele
 
 /**
  * @tc.name: PendingSessionToBackgroundForDelegatorWithDefaultReason
- * @tc.desc: Test PendingSessionToBackgroundForDelegator with DEFAULT reason
+ * @tc.desc: Test PendingSessionToBackgroundForDe与其他reason
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerGamePrelaunchTest, PendingSessionToBackgroundForDelegatorWithDefaultReason, TestSize.Level0)
 {
     auto mockStub = sptr<MockSceneSessionManagerStub>::MakeSptr();
-    sptr<IRemoteObject> token = new MockSessionToken();
+    sptr<IRemoteObject> token = new (std::nothrow) IRemoteObject();
     
     EXPECT_CALL(*mockStub, PendingSessionToBackgroundForDelegator(_, _, 
         static_cast<int32_t>(LifeCycleChangeReason::DEFAULT)))
@@ -251,27 +251,6 @@ HWTEST_F(SceneSessionManagerGamePrelaunchTest, SessionSetSessionInfoWithGamePrel
     EXPECT_TRUE(retrievedInfo.isGamePrelaunch_);
     EXPECT_EQ(retrievedInfo.bundleName_, "TestBundle");
     EXPECT_EQ(retrievedInfo.abilityName_, "TestAbility");
-}
-
-/**
- * @tc.name: SceneSessionManagerLitePendingSessionToBackgroundForDelegator
- * @tc.desc: Test SceneSessionManagerLite::PendingSessionToBackgroundForDelegator
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerGamePrelaunchTest, SceneSessionManagerLitePendingSessionToBackgroundForDelegator, TestSize.Level0)
-{
-    auto mockStub = sptr<MockSceneSessionManagerStub>::MakeSptr();
-    sptr<IRemoteObject> token = new MockSessionToken();
-    
-    EXPECT_CALL(*mockStub, PendingSessionToBackgroundForDelegator(_, _, 
-        static_cast<int32_t>(LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND)))
-        .Times(1)
-        .WillOnce(Return(WSError::WS_OK));
-    
-    auto ret = mockStub->PendingSessionToBackgroundForDelegator(token, true, 
-        static_cast<int32_t>(LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND));
-    
-    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**

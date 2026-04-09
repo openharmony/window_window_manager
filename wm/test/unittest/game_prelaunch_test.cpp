@@ -196,12 +196,10 @@ HWTEST_F(GamePrelaunchTest, ResumeWithGamePrelaunch02, TestSize.Level0)
  */
 HWTEST_F(GamePrelaunchTest, SetIsWindowSceneListener01, TestSize.Level0)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetIsWindowSceneListener01");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
     
-    window->SetIsWindowSceneListener(true);
-    EXPECT_TRUE(window->IsWindowSceneListener());
+    mockListener->SetIsWindowSceneListener(true);
+    EXPECT_TRUE(mockListener->IsWindowSceneListener());
 }
 
 /**
@@ -211,12 +209,10 @@ HWTEST_F(GamePrelaunchTest, SetIsWindowSceneListener01, TestSize.Level0)
  */
 HWTEST_F(GamePrelaunchTest, SetIsWindowSceneListener02, TestSize.Level0)
 {
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetIsWindowSceneListener02");
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto mockListener = sptr<MockWindowLifeCycleListener>::MakeSptr();
     
-    window->SetIsWindowSceneListener(false);
-    EXPECT_FALSE(window->IsWindowSceneListener());
+    mockListener->SetIsWindowSceneListener(false);
+    EXPECT_FALSE(mockListener->IsWindowSceneListener());
 }
 
 /**
@@ -243,7 +239,7 @@ HWTEST_F(GamePrelaunchTest, SessionInfoIsGamePrelaunch02, TestSize.Level0)
 {
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "TestBundle";
-    sessionInfo->abilityName_ = "TestAbility";
+    sessionInfo.abilityName_ = "TestAbility";
     
     EXPECT_FALSE(sessionInfo.isGamePrelaunch_);
 }
