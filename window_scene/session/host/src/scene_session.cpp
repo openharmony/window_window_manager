@@ -8599,6 +8599,15 @@ void SceneSession::RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func)
     getHookWindowInfoFunc_ = std::move(func);
 }
 
+void SceneSession::RegisterSelectModeFunc(GetSelectModeFunc&& func)
+{
+    if (!func) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", GetPersistentId());
+        return;
+    }
+    getSelectModeFunc_ = std::move(func);
+}
+
 void SceneSession::RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback)
 {
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
@@ -8677,6 +8686,23 @@ WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowI
             return WMError::WM_ERROR_NULLPTR;
         }
         hookWindowInfo = session->getHookWindowInfoFunc_(session->GetSessionInfo().bundleName_);
+        return WMError::WM_OK;
+    }, __func__);
+}
+
+WMError SceneSession::GetSelectMode(SelectMode& selectMode)
+{
+    return PostSyncTask([weakThis = wptr(this), &selectMode, where = __func__]() -> WMError {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
+            return WMError::WM_ERROR_INVALID_SESSION;
+        }
+        if (!session->getSelectModeFunc_) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", session->GetPersistentId());
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        selectMode = session->getSelectModeFunc_();
         return WMError::WM_OK;
     }, __func__);
 }

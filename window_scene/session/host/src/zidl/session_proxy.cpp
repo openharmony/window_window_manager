@@ -2871,6 +2871,39 @@ WMError SessionProxy::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowI
     return static_cast<WMError>(ret);
 }
 
+WMError SessionProxy::GetSelectMode(SelectMode& selectMode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t requestCode = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_SELECT_MODE);
+    if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t selectModeValue = 0;
+    if (!reply.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read selectMode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    selectMode = static_cast<SelectMode>(selectModeValue);
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 void SessionProxy::NotifyWindowStatusDidChangeAfterShowWindow()
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -4253,6 +4286,37 @@ WSError SessionProxy::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
     return static_cast<WSError>(ret);
 }
 
+WMError SessionProxy::NotifySplitRatioChanged(float newRatio)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(newRatio)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write newRatio failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SPLIT_RATIO_CHANGED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+        }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
 {
     MessageParcel data;
@@ -4279,7 +4343,7 @@ WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
+WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4290,6 +4354,10 @@ WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdate
     }
     if (!data.WriteBool(needUpdateViewport)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Write needUpdateViewport failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(selectMode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write selectMode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
