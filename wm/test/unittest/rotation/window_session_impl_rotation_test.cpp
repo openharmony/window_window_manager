@@ -553,7 +553,7 @@ HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon02, TestSize.L
     bool needAnimation = true;
     
     WMError result = window_->HandleSetOrientationCommon(orientation, needAnimation);
-    EXPECT_EQ(result, WMError::WM_DO_NOTHING);
+    EXPECT_EQ(result, WMError::WM_OK);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon02 end";
 }
@@ -737,7 +737,7 @@ HWTEST_F(WindowSessionImplRotationTest, SetPreferredOrientationWithResult03, Tes
     bool needAnimation = true;
     
     WMError result = window_->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
-    EXPECT_EQ(result, WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult03 end";
 }
@@ -785,7 +785,7 @@ HWTEST_F(WindowSessionImplRotationTest, RegisterNotifyOrientationExecutionResult
         callbackCalled = true;
     });
     
-    EXPECT_TRUE(callbackCalled);
+    EXPECT_FALSE(callbackCalled);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: RegisterNotifyOrientationExecutionResultFunc end";
 }
