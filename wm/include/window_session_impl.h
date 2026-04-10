@@ -719,7 +719,6 @@ protected:
         isHiddenFollowingUIExtension_ = isHiddenFollowingUIExtension;
     }
     bool IsHiddenFollowingUIExtension() { return isHiddenFollowingUIExtension_; }
-    void RecoverExtension();
 
     /*
      * Sub Window
