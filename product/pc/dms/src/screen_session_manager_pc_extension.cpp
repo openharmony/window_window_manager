@@ -51,8 +51,8 @@ void ScreenSessionManagerExt::NotifyCaptureStatusChangedGlobal()
     return;
 }
 
-void ScreenSessionManagerExt::OnScreenChangeDefault(ScreenId screenId,
-    ScreenEvent screenEvent, ScreenChangeReason reason)
+void ScreenSessionManagerExt::OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent,
+    ScreenChangeReason reason, sptr<IRemoteObject> connectToRenderToken)
 {
     std::lock_guard<std::mutex> lock(screenChangeMutex_);
     std::ostringstream oss;
@@ -62,7 +62,7 @@ void ScreenSessionManagerExt::OnScreenChangeDefault(ScreenId screenId,
     TLOGW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenEvent: %{public}d",
         screenId, static_cast<int>(screenEvent));
     SetScreenCorrection();
-    sptr<ScreenSession> screenSession = GetOrCreateScreenSession(screenId);
+    sptr<ScreenSession> screenSession = GetOrCreateScreenSession(screenId, connectToRenderToken);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr");
         return;

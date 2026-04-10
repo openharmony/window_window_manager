@@ -16,6 +16,7 @@
 #include "zidl/screen_session_manager_client_stub.h"
 
 #include "window_manager_hilog.h"
+#include <transaction/rs_interfaces.h>
 
 namespace OHOS::Rosen {
 
@@ -231,6 +232,14 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
         return ERR_INVALID_DATA;
     }
 
+    bool hasRemoteObj = false;
+    sptr<IRemoteObject> connectToRenderToken;
+    if (data.ReadBool(hasRemoteObj)) {
+        if (hasRemoteObj) {
+            connectToRenderToken = data.ReadRemoteObject();
+        } 
+    }
+
     SessionOption option = {
         .rsId_ = rsId,
         .name_ = name,
@@ -242,7 +251,8 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
         .isRotationLocked_ = rotationOptions.isRotationLocked_,
         .rotation_ = rotationOptions.rotation_,
         .rotationOrientationMap_ = rotationOrientationMap,
-        .isBooting_ = isBooting
+        .isBooting_ = isBooting,
+        .connectToRenderToken_ = connectToRenderToken,
     };
     TLOGD(WmsLogTag::DMS,
         "ClientStub received callback parameters, isRotationLocked: %{public}d, rotation: %{public}d, "
@@ -584,8 +594,9 @@ int ScreenSessionManagerClientStub::HandleOnCreateScreenSessionOnly(MessageParce
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto rsId = static_cast<ScreenId>(data.ReadUint64());
     auto name = data.ReadString();
+    sptr<IRemoteObject> renderSession = data.ReadRemoteObject();
     bool isExtend = data.ReadBool();
-    bool refreshStatus = OnCreateScreenSessionOnly(screenId, rsId, name, isExtend);
+    bool refreshStatus = OnCreateScreenSessionOnly(screenId, rsId, name, renderSession, isExtend);
     reply.WriteBool(refreshStatus);
     return ERR_NONE;
 }
