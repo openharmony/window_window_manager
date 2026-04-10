@@ -2129,6 +2129,70 @@ HWTEST_F(WindowSessionPropertyTest, SetAppBufferReady, TestSize.Level1)
     auto result = property->IsAppBufferReady();
     ASSERT_EQ(result, appBufferReady);
 }
+
+/**
+ * @tc.name: SetZLevelAboveParentLoosened
+ * @tc.desc: test SetZLevelAboveParentLoosened and IsSubWindowZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetZLevelAboveParentLoosened, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetZLevelAboveParentLoosened(true);
+    ASSERT_EQ(true, property->IsSubWindowZLevelAboveParentLoosened());
+    property->SetZLevelAboveParentLoosened(false);
+    ASSERT_EQ(false, property->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: SetZLevelAboveParentLoosenedDefault
+ * @tc.desc: test default value of ZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetZLevelAboveParentLoosenedDefault, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    ASSERT_EQ(false, property->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: CopyFromZLevelAboveParentLoosened
+ * @tc.desc: test CopyFrom with ZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, CopyFromZLevelAboveParentLoosened, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetZLevelAboveParentLoosened(true);
+
+    WindowSessionProperty targetProperty;
+    targetProperty.CopyFrom(property);
+    ASSERT_EQ(true, targetProperty.IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: MarshallingUnmarshallingZLevelAboveParentLoosened
+ * @tc.desc: test Marshalling and Unmarshalling with ZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingUnmarshallingZLevelAboveParentLoosened, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetZLevelAboveParentLoosened(true);
+    property->SetPersistentId(100);
+
+    Parcel parcel;
+    bool ret = property->Marshalling(parcel);
+    ASSERT_EQ(true, ret);
+
+    sptr<WindowSessionProperty> targetProperty = property->Unmarshalling(parcel);
+    ASSERT_NE(targetProperty, nullptr);
+    ASSERT_EQ(true, targetProperty->IsSubWindowZLevelAboveParentLoosened());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -2933,20 +2933,24 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN || isHoverDown;
     bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
+    bool isLoosenedWithFreeMultiMode = IsLoosenedWithFreeMultiMode();
     if (isExecuteDelayRaise) {
         if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
             RaiseToAppTopForPointDown();
         }
-        if (!raiseEnabled && parentSession && !isPointMove) {
+        if (!raiseEnabled && parentSession && !isPointMove && !isLoosenedWithFreeMultiMode) {
             parentSession->NotifyClick(!IsScbCoreEnabled());
         }
         return WSError::WS_OK;
     }
     bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
-    TLOGD(WmsLogTag::WMS_EVENT,
-          "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
-          GetPersistentId(), raiseEnabled, isPointDown, isModal);
-    if (raiseEnabled && isPointDown) {
+    TLOGD(WmsLogTag::WMS_EVENT, "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, " +
+        "isModal: %{public}d, isLoosenedWithFreeMultiMode: %{public}d",
+        GetPersistentId(), raiseEnabled, isPointDown, isModal, isLoosenedWithFreeMultiMode);
+    if (!isPointDown) {
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled) {
         if (!isModal) {
             RaiseToAppTopForPointDown();
             return WSError::WS_OK;
@@ -2954,7 +2958,9 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
         if (auto mainSession = GetMainSession()) {
             mainSession->NotifyClick(false);
         }
-    } else if (parentSession && isPointDown) {
+        return WSError::WS_OK;
+    }
+    if (parentSession && !isLoosenedWithFreeMultiMode) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
