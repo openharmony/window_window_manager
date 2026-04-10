@@ -123,6 +123,7 @@ const std::string CALLING_SESSION_ID_CHANGE_CB = "callingWindowIdChange";
 const std::string SNAPSHOT_SKIP_CHANGE_CB = "snapshotSkipChange";
 const std::string COMPATIBLE_MODE_CHANGE_CB = "compatibleModeChange";
 const std::string RECOVER_WINDOW_EFFECT_CB = "recoverWindowEffect";
+const std::string PRE_CALC_WINDOW_PROPERTY_CB = "preCalcWindowProperty";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -238,6 +239,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {SNAPSHOT_SKIP_CHANGE_CB,               ListenerFuncType::SNAPSHOT_SKIP_CHANGE_CB},
     {COMPATIBLE_MODE_CHANGE_CB,             ListenerFuncType::COMPATIBLE_MODE_CHANGE_CB},
     {RECOVER_WINDOW_EFFECT_CB,              ListenerFuncType::RECOVER_WINDOW_EFFECT_CB},
+    {PRE_CALC_WINDOW_PROPERTY_CB,           ListenerFuncType::PRE_CALC_WINDOW_PROPERTY_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -612,6 +614,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::SetMobileAppInPadLayoutFullScreen);
     BindNativeFunction(env, objValue, "getSceneNodeCount", moduleName,
         JsSceneSession::GetSceneNodeCount);
+    BindNativeFunction(env, objValue, "notifyPreCalcWindowProperty", moduleName,
+        JsSceneSession::NotifyPreCalcWindowProperty);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -3446,6 +3450,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::RECOVER_WINDOW_EFFECT_CB):
             ProcessRecoverWindowEffectRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::PRE_CALC_WINDOW_PROPERTY_CB):
+            ProcessPreCalcWindowPropertyRegister();
             break;
         default:
             break;
@@ -9228,4 +9235,87 @@ void JsSceneSession::OnCompatibleModeChange(CompatibleStyleMode mode)
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }
+
+void JsSceneSession::ProcessPreCalcWindowPropertyRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    const char* const where = __func__;
+    session->SetPreCalcWindowPropertyCallback([weakThis = wptr(this), where]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s jsSceneSession is null", where);
+            return;
+        }
+        jsSceneSession->OnPreCalcWindowProperty();
+    });
+}
+
+void JsSceneSession::OnPreCalcWindowProperty()
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(PRE_CALC_WINDOW_PROPERTY_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        TLOGNI(WmsLogTag::WMS_ROTATION, "OnPreCalcWindowProperty success");
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnPreCalcWindowProperty");
+}
+
+napi_value JsSceneSession::NotifyPreCalcWindowProperty(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "start");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnNotifyPreCalcWindowProperty(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::OnNotifyPreCalcWindowProperty(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_THREE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Argc count is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input Parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    uint32_t rotation = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    if (!ConvertFromJsValue(env, argv[0], rotation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: rotation");
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[ARGC_ONE], width)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: width");
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[ARGC_TWO], height)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: height");
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "[%{public}u, %{public}u, %{public}u]",
+        rotation, width, height);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->preWindowPropertyFuture_.SetValue(PreWindowProperty(rotation, width, height));
+    return NapiGetUndefined(env);
+}
+
 } // namespace OHOS::Rosen
