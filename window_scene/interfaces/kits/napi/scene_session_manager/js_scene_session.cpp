@@ -9276,7 +9276,7 @@ void JsSceneSession::OnPreCalcWindowProperty()
 
 napi_value JsSceneSession::NotifyPreCalcWindowProperty(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_ROTATION, "NotifyPreCalcWindowProperty in");
+    TLOGD(WmsLogTag::WMS_ROTATION, "start");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnNotifyPreCalcWindowProperty(env, info) : nullptr;
 }
@@ -9307,7 +9307,7 @@ napi_value JsSceneSession::OnNotifyPreCalcWindowProperty(napi_env env, napi_call
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: height");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_ROTATION, "OnNotifyPreCalcWindowProperty: [%{public}u, %{public}u, %{public}u] ",
+    TLOGI(WmsLogTag::WMS_ROTATION, "[%{public}u, %{public}u, %{public}u]",
         rotation, width, height);
     auto session = weakSession_.promote();
     if (session == nullptr) {
