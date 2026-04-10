@@ -513,6 +513,334 @@ HWTEST_F(WindowSessionImplRotationTest, NotifyRotationChange, Function | SmallTe
     res = windowSessionImpl->NotifyRotationChange(info);
     EXPECT_EQ(RectType::RELATIVE_TO_SCREEN, res.rectType_);
 }
+
+/**
+ * @tc.name: HandleSetOrientationCommon01
+ * @tc.desc: 测试窗口无效场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HandleSetOrientationCommon01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    
+    window->hostSession_ = nullptr;
+    Orientation orientation = Orientation::VERTICAL;
+    bool needAnimation = true;
+    
+    WMError result = window->HandleSetOrientationCommon(orientation, needAnimation);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon01 end";
+}
+
+/**
+ * @tc.name: HandleSetOrientationCommon02
+ * @tc.desc: 测试无需强制设置方向且需要动画场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon02 start";
+    window_ = GetTestWindowImpl("HandleSetOrientationCommon02");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    Orientation orientation = Orientation::VERTICAL;
+    bool needAnimation = true;
+    
+    WMError result = window_->HandleSetOrientationCommon(orientation, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon02 end";
+}
+
+/**
+ * @tc.name: HandleSetOrientationCommon03
+ * @tc.desc: 测试支持旋转全屏场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon03, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon03 start";
+    window_ = GetTestWindowImpl("HandleSetOrientationCommon03");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    Orientation orientation = Orientation::USER_ROTATION_PORTRAIT;
+    bool needAnimation = true;
+    
+    WMError result = window_->HandleSetOrientationCommon(orientation, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon03 end";
+}
+
+/**
+ * @tc.name: HandleSetOrientationCommon04
+ * @tc.desc: 测试需要动画场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon04, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon04 start";
+    window_ = GetTestWindowImpl("HandleSetOrientationCommon04");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    Orientation orientation = Orientation::USER_ROTATION_PORTRAIT;
+    bool needAnimation = true;
+    
+    WMError result = window_->HandleSetOrientationCommon(orientation, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon04 end";
+}
+
+/**
+ * @tc.name: HandleSetOrientationCommon05
+ * @tc.desc: 测试无效方向场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon05, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon05 start";
+    window_ = GetTestWindowImpl("HandleSetOrientationCommon05");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    Orientation orientation = Orientation::INVALID;
+    bool needAnimation = false;
+    
+    WMError result = window_->HandleSetOrientationCommon(orientation, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon05 end";
+}
+
+/**
+ * @tc.name: HandleSetOrientationCommon06
+ * @tc.desc: 测试有效方向，需要动画场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon06, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon06 start";
+    window_ = GetTestWindowImpl("HandleSetOrientationCommon06");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    Orientation orientation = Orientation::USER_ROTATION_PORTRAIT;
+    bool needAnimation = true;
+    
+    WMError result = window_->HandleSetOrientationCommon(orientation, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon06 end";
+}
+
+/**
+ * @tc.name: HandleSetOrientationCommon07
+ * @tc.desc: 测试有效方向，无需动画场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, HandleSetOrientationCommon07, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon07 start";
+    window_ = GetTestWindowImpl("HandleSetOrientationCommon07");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    Orientation orientation = Orientation::VERTICAL;
+    bool needAnimation = false;
+    
+    WMError result = window_->HandleSetOrientationCommon(orientation, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: HandleSetOrientationCommon07 end";
+}
+
+/**
+ * @tc.name: SetPreferredOrientationWithResult01
+ * @tc.desc: 测试 HandleSetOrientationCommon 返回 WM_ERROR_INVALID_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, SetPreferredOrientationWithResult01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetPreferredOrientationWithResult01");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    
+    window->property_->SetPersistentId(INVALID_SESSION_ID);
+    window->state_ = WindowState::STATE_DESTROYED;
+    
+    Orientation orientation = Orientation::VERTICAL;
+    uint32_t promiseId = 123;
+    bool needAnimation = true;
+    
+    WMError result = window->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult01 end";
+}
+
+/**
+ * @tc.name: SetPreferredOrientationWithResult02
+ * @tc.desc: 测试 HandleSetOrientationCommon 返回 WM_DO_NOTHING
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, SetPreferredOrientationWithResult02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult02 start";
+    window_ = GetTestWindowImpl("SetPreferredOrientationWithResult02");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    window_->property_->SetRequestedOrientation(Orientation::VERTICAL, false);
+    
+    Orientation orientation = Orientation::VERTICAL;
+    uint32_t promiseId = 123;
+    bool needAnimation = true;
+    
+    WMError result = window_->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult02 end";
+}
+
+/**
+ * @tc.name: SetPreferredOrientationWithResult03
+ * @tc.desc: 测试 hostSession 为空
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, SetPreferredOrientationWithResult03, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult03 start";
+    window_ = GetTestWindowImpl("SetPreferredOrientationWithResult03");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    window_->hostSession_ = nullptr;
+    
+    Orientation orientation = Orientation::USER_ROTATION_PORTRAIT;
+    uint32_t promiseId = 123;
+    bool needAnimation = true;
+    
+    WMError result = window_->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult03 end";
+}
+
+/**
+ * @tc.name: SetPreferredOrientationWithResult04
+ * @tc.desc: 测试正常流程，HandleSetOrientationCommon 返回 WM_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, SetPreferredOrientationWithResult04, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult04 start";
+    window_ = GetTestWindowImpl("SetPreferredOrientationWithResult04");
+    ASSERT_NE(window_, nullptr);
+    window_->property_->SetPersistentId(1);
+    window_->state_ = WindowState::STATE_CREATED;
+    
+    SessionInfo sessionInfo = { "SetPreferredOrientationWithResult04", "bundle", "ability" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window_->hostSession_ = session;
+    
+    Orientation orientation = Orientation::USER_ROTATION_PORTRAIT;
+    uint32_t promiseId = 123;
+    bool needAnimation = true;
+    
+    WMError result = window_->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetPreferredOrientationWithResult04 end";
+}
+
+/**
+ * @tc.name: RegisterNotifyOrientationExecutionResultFunc
+ * @tc.desc: 测试注册回调
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, RegisterNotifyOrientationExecutionResultFunc, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: RegisterNotifyOrientationExecutionResultFunc start";
+    window_ = GetTestWindowImpl("RegisterNotifyOrientationExecutionResultFunc");
+    ASSERT_NE(window_, nullptr);
+    
+    bool callbackCalled = false;
+    window_->RegisterNotifyOrientationExecutionResultFunc([&callbackCalled](uint32_t, OrientationExecutionResult) {
+        callbackCalled = true;
+    });
+    
+    EXPECT_FALSE(callbackCalled);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: RegisterNotifyOrientationExecutionResultFunc end";
+}
+
+/**
+ * @tc.name: NotifyOrientationExecutionResult01
+ * @tc.desc: 测试正常回调执行
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, NotifyOrientationExecutionResult01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult01 start";
+    window_ = GetTestWindowImpl("NotifyOrientationExecutionResult01");
+    ASSERT_NE(window_, nullptr);
+    
+    bool callbackCalled = false;
+    uint32_t receivedPromiseId = 0;
+    OrientationExecutionResult receivedResult = OrientationExecutionResult::ORIENTATION_IGNORED;
+    
+    window_->RegisterNotifyOrientationExecutionResultFunc([&callbackCalled, &receivedPromiseId, &receivedResult](
+        uint32_t promiseId, OrientationExecutionResult result) {
+        callbackCalled = true;
+        receivedPromiseId = promiseId;
+        receivedResult = result;
+    });
+    
+    uint32_t promiseId = 123;
+    OrientationExecutionResult result = OrientationExecutionResult::ORIENTATION_APPLIED;
+    
+    WSError ret = window_->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(receivedPromiseId, 123);
+    EXPECT_EQ(receivedResult, OrientationExecutionResult::ORIENTATION_APPLIED);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult01 end";
+}
+
+/**
+ * @tc.name: NotifyOrientationExecutionResult02
+ * @tc.desc: 测试回调为空场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, NotifyOrientationExecutionResult02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult02 start";
+    window_ = GetTestWindowImpl("NotifyOrientationExecutionResult02");
+    ASSERT_NE(window_, nullptr);
+    
+    WSError ret = window_->NotifyOrientationExecutionResult(123, OrientationExecutionResult::ORIENTATION_APPLIED);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult02 end";
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

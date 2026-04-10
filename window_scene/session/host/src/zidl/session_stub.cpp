@@ -153,6 +153,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetTargetOrientationConfigInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION):
             return HandleConvertOrientationAndRotation(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_PREFERRED_ORIENTATION_WITH_RESULT):
+            return HandleSetPreferredOrientationWithResult(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO):
@@ -1468,6 +1470,25 @@ int SessionStub::HandleConvertOrientationAndRotation(MessageParcel& data, Messag
         TLOGE(WmsLogTag::WMS_ROTATION, "Write failed");
         return ERR_INVALID_DATA;
     }
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetPreferredOrientationWithResult(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t orientation;
+    uint32_t promiseId;
+    bool needAnimation;
+    if (!data.ReadUint32(orientation) || !data.ReadUint32(promiseId) || !data.ReadBool(needAnimation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read value failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode =
+        SetPreferredOrientationWithResult(static_cast<Orientation>(orientation), promiseId, needAnimation);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "write errCode fail.");
         return ERR_INVALID_DATA;

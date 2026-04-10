@@ -3391,17 +3391,66 @@ float WindowSessionImpl::GetBrightness() const
     return property_->GetBrightness();
 }
 
+void WindowSessionImpl::RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func)
+{
+    onNotifyOrientationExecutionResult_ = std::move(func);
+}
+
+WSError WindowSessionImpl::NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "winId: %{public}d promiseId: %{public}u, result: %{public}u",
+        GetPersistentId(), promiseId, result);
+    if (!onNotifyOrientationExecutionResult_) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "winId: %{public}d NotifyOrientationExecutionResult is null", GetPersistentId());
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    onNotifyOrientationExecutionResult_(promiseId, result);
+    return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::SetPreferredOrientationWithResult(
+    Orientation orientation, uint32_t promiseId, bool needAnimation)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetPreferredOrientationWithResult");
+    WMError error = HandleSetOrientationCommon(orientation, needAnimation);
+    if (error == WMError::WM_ERROR_INVALID_WINDOW) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
+        return error;
+    }
+    if (error == WMError::WM_DO_NOTHING) {
+        NotifyOrientationExecutionResult(promiseId, OrientationExecutionResult::ORIENTATION_IGNORED);
+        return WMError::WM_OK;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+}
+
 void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool needAnimation)
 {
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::SetRequestedOrientation");
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "windowSession is invalid");
+    WMError error = HandleSetOrientationCommon(orientation, needAnimation);
+    if (error == WMError::WM_ERROR_INVALID_WINDOW) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "windowSession is invalid");
         return;
     }
-    TLOGI(WmsLogTag::WMS_MAIN, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
-        GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
-    if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+    if (error == WMError::WM_DO_NOTHING) {
         return;
+    }
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+}
+
+WMError WindowSessionImpl::HandleSetOrientationCommon(Orientation orientation, bool needAnimation)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_ROTATION, "id:%{public}u lastReqOrientation:%{public}u target:%{public}u state:%{public}u",
+          GetPersistentId(), property_->GetRequestedOrientation(), orientation, state_);
+    if (!isNeededForciblySetOrientation(orientation) && needAnimation) {
+        TLOGW(WmsLogTag::WMS_ROTATION, "winId: %{public}d policy has taken effect", GetPersistentId());
+        return WMError::WM_DO_NOTHING;
     }
     if (property_->IsSupportRotateFullScreen()) {
         TLOGI(WmsLogTag::WMS_COMPAT, "compatible request orientation %{public}u", orientation);
@@ -3418,7 +3467,7 @@ void WindowSessionImpl::SetRequestedOrientation(Orientation orientation, bool ne
         property_->SetRequestedOrientation(orientation, needAnimation);
         property_->SetIsSpecificSessionRequestOrientation(true);
     }
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_ORIENTATION);
+    return WMError::WM_OK;
 }
 
 Orientation WindowSessionImpl::GetRequestedOrientation()
