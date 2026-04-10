@@ -216,7 +216,7 @@ export namespace PiPWindow {
 
   export function runOnStateChangeEvent(cb: Object, state: int, reason: string): void {
     const func = cb as (state: PiPState, reason: string) => void;
-    func(state as PiPState, reason as string);
+    func(PiPState.fromValue(state), reason as string);
   }
 
   export function runOnControlPanelActionEvent(cb: Object, action: string, status: int): void {
