@@ -1277,6 +1277,31 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid03, TestSize.Level1)
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
+
+/**
+ * @tc.name: OnTransRSEvent
+ * @tc.desc: OnTransRSEvent all branches test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnTransRSEvent, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+
+    ssm_->OnTransRSEvent(nullptr);
+
+    auto unknownData = std::make_shared<RSExposedEventDataBase>();
+    unknownData->type_ = static_cast<RSExposedEventType>(999);
+    ssm_->OnTransRSEvent(unknownData);
+
+    auto validData = std::make_shared<RSExposedEventDataBase>();
+    validData->type_ = RSExposedEventType::EXT_SCREEN_UNSUPPORT;
+    auto originalProxy = ssm_->clientProxy_;
+    ssm_->clientProxy_ = nullptr;
+    ssm_->OnTransRSEvent(validData);
+
+    ssm_->clientProxy_ = originalProxy;
+    ssm_->OnTransRSEvent(validData);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
