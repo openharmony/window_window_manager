@@ -26,6 +26,7 @@
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
+#include <transaction/rs_interfaces.h>
 #include "display_manager.h"
 #include "singleton_container.h"
 
