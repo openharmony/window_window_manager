@@ -83,14 +83,13 @@ bool Permission::CheckCallingPermission(const std::string& permission)
 
 bool Permission::CheckSelfPermission(const std::string& permission)
 {
-    WLOGFD("permission:%{public}s", permission.c_str());
-
+    TLOGI(WmsLogTag::DEFAULT, "permission: %{public}s", permission.c_str());
+ 
     if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(IPCSkeleton::GetSelfTokenID(), permission) !=
         AppExecFwk::Constants::PERMISSION_GRANTED) {
-        TLOGD(WmsLogTag::DEFAULT, "Permission denied!");
+        TLOGE(WmsLogTag::DEFAULT, "Permission denied!");
         return false;
     }
-    WLOGFD("permission ok!");
     return true;
 }
 
