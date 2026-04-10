@@ -9113,17 +9113,5 @@ void WindowSessionImpl::HandleNavigateCallbackForPageCompatibleMode(
     property_->SetPageCompatibleMode(mode);
     hostSession->NotifyCompatibleModeChange(mode);
 }
-
-void WindowSessionImpl::RecoverExtension()
-{
-    auto uiContent = GetUIContentSharedPtr();
-    CHECK_UI_CONTENT_RETURN_IF_NULL(uiContent);
-    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId: %{public}d", GetPersistentId());
-    AAFwk::Want want;
-    Ace::UIExtOptions uiExtOptions;
-    uiExtOptions.isSendBackground = true;
-    uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::RECOVER_EXTENSION), want,
-        static_cast<uint8_t>(SubSystemId::WM_UIEXT), uiExtOptions);
-}
 } // namespace Rosen
 } // namespace OHOS
