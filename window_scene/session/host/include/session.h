@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <event_handler.h>
+#include <transaction/rs_interfaces.h>
 
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
