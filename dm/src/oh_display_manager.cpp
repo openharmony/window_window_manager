@@ -84,6 +84,7 @@ const std::map<DM_ScreenHDRFormat, DM_HDRFormat> DM_NATIVE_TO_NDK_HDR_FORMAT_TYP
     { DM_ScreenHDRFormat::IMAGE_HDR_VIVID_SINGLE, DM_HDRFormat::IMAGE_HDR_VIVID_SINGLE },
     { DM_ScreenHDRFormat::IMAGE_HDR_ISO_DUAL,     DM_HDRFormat::IMAGE_HDR_ISO_DUAL },
     { DM_ScreenHDRFormat::IMAGE_HDR_ISO_SINGLE,   DM_HDRFormat::IMAGE_HDR_ISO_SINGLE },
+    { DM_ScreenHDRFormat::VIDEO_AIHDR,            DM_HDRFormat::VIDEO_AIHDR },
 };
 
 class AvailableAreaChangeListener : public DisplayManager::IAvailableAreaListener {

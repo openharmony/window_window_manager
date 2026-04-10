@@ -424,6 +424,7 @@ public:
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) { return WMError::WM_OK; }
     virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
+    virtual WMError GetSelectMode(SelectMode& selectMode) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
     virtual void NotifyExtensionDetachToDisplay() {}
@@ -681,6 +682,18 @@ public:
     }
 
     /**
+     * @brief notify split ratio changed
+     *
+     * @param selectMode WIDE_MODE/SQUARE_MODE
+     * @param newRatio new ratio
+     * @return WSError::WS_OK means notify success, otherwise failed.
+     */
+    virtual WMError NotifySplitRatioChanged(float newRatio)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
      * @brief notify session when compatible mode change
      *
      * @param mode compatible mode.
@@ -696,7 +709,12 @@ public:
         return WSError::WS_OK;
     }
     
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated()
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
+    {
+        return WSError::WS_OK;
+    }
+
+    virtual WSError NotifyPageEnable(const std::string& action, const std::string& message)
     {
         return WSError::WS_OK;
     }

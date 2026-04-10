@@ -40,6 +40,7 @@
             OHOS::Rosen::SceneSession::RemoveSubSession*;
             OHOS::Rosen::SceneSession::SendKeyEventToUI*;
             OHOS::Rosen::SceneSession::SetIsStartMoving*;
+            OHOS::Rosen::SceneSession::NotifyParentLifecycleEvent*;
             OHOS::Rosen::SceneSession::SetUIFirstSwitch*;
             OHOS::Rosen::SceneSession::IsSameMainSession*;
             OHOS::Rosen::SceneSession::NotifyDisplayMove*;
@@ -153,6 +154,7 @@
             OHOS::Rosen::SceneSession::UpdatePrivacyModeControlInfo*;
             OHOS::Rosen::SceneSession::MaskSupportEnterWaterfallMode*;
             OHOS::Rosen::SceneSession::RegisterAppHookWindowInfoFunc*;
+            OHOS::Rosen::SceneSession::RegisterSelectModeFunc*;
             OHOS::Rosen::SceneSession::RegisterGetIsDockAutoHideFunc*;
             OHOS::Rosen::SceneSession::RemoveFingerPointerDownStatus*;
             OHOS::Rosen::SceneSession::SetGetAllAppUseControlMapFunc*;
@@ -224,6 +226,7 @@
             OHOS::Rosen::SceneSession::SetSessionChangeByActionNotifyManagerListener*;
             OHOS::Rosen::SceneSession::SetSessionGetTargetOrientationConfigInfoCallback*;
             OHOS::Rosen::SceneSession::HasExtensionTokenInfoWithTokenID*;
+            OHOS::Rosen::SceneSession::GetSceneNodeCount*;
             OHOS::Rosen::SceneSession::AnimateTo*;
             OHOS::Rosen::SceneSession::SceneSession*;
             OHOS::Rosen::SceneSession::RegisterGetAppUseControlDisplayMapFunc*;
@@ -246,6 +249,7 @@
             OHOS::Rosen::ScenePersistence::CreateSnapshotDir*;
             OHOS::Rosen::ScenePersistence::GetSnapshotFilePath*;
             OHOS::Rosen::ScenePersistence::CreateUpdatedIconDir*;
+            OHOS::Rosen::ScenePersistence::CreateAbilityIconDir*;
             OHOS::Rosen::SessionStageStub::OnRemoteRequest*;
             OHOS::Rosen::WSSnapshotHelper::GetInstance*;
             OHOS::Rosen::WSSnapshotHelper::SetWindowScreenStatus*;
@@ -350,7 +354,10 @@
             OHOS::Rosen::SceneSession::SetIsUserRequestedExit*;
             OHOS::Rosen::SceneSession::RegisterNotifyOccupiedAreaChangeCallback*;
             OHOS::Rosen::SceneSession::RegisterRecoverWindowEffectCallback*;
-            OHOS::Rosen::MoveDragController::SetMoveResampleSystemConfig*;
+            OHOS::Rosen::SceneSession::AddSessionBlackList*;
+            OHOS::Rosen::SceneSession::RemoveSessionBlackList*;
+            OHOS::Rosen::MoveDragController::SaveMoveResampleSystemConfig*;
+            OHOS::Rosen::MoveDragController::SaveMovingEventThrottleSystemConfig*;
             OHOS::Rosen::SessionStub::OnRemoteRequest*;
             OHOS::Rosen::Session::*;
             OHOS::Rosen::ExtensionSession::*;

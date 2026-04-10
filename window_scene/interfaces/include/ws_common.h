@@ -48,6 +48,7 @@ using ScreenId = uint64_t;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int64_t INVALID_TIME_STAMP = 0;
+constexpr float INVALID_SCALE = 0;
 constexpr int32_t MIN_REQUEST_ID_FROM_ABILITY = 1;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
@@ -56,6 +57,7 @@ constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 extern const std::string WINDOW_SCREEN_LOCK_PREFIX;
 extern const std::string VIEW_SCREEN_LOCK_PREFIX;
+constexpr const char* BOUNDS_CHANGED = "OnBoundsChanged";
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 
@@ -129,6 +131,8 @@ enum class WSErrorCode : int32_t {
 };
 
 extern const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP;
+
+bool CheckCollaboratorType(int32_t type);
 
 enum class SessionState : uint32_t {
     STATE_DISCONNECT = 0,
@@ -496,6 +500,8 @@ struct SessionInfo {
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
     bool hasPrivacyModeControl = false;
+    // The Field has a value in useControlsession
+    int32_t mainWindowPersistentId_ = INVALID_SESSION_ID;
 
     /*
      * UIExtension
@@ -610,6 +616,7 @@ enum class SizeChangeReason : uint32_t {
     SNAPSHOT_ROTATION = 37,
     SCENE_WITH_ANIMATION,
     LS_STATE_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
@@ -1074,13 +1081,16 @@ struct SingleHandBackgroundTextConfig {
     int32_t height = -1;
     int32_t fontSize = 0;
     int32_t minFontSize = 0;
-    int32_t maxLines = 0;
+    int32_t maxLines = -1;
+    int32_t textAlign = 1;
     std::string maxFontScale = "";
 };
 
 struct SingleHandBackgroundLayoutConfig {
     bool isCustomLayout = false;
     WSRect settingButtonRect = {0, 0, 0, 0};
+    bool isSettingButtonMirror = false;
+    int32_t textContainerWidth = 0;
     SingleHandBackgroundTextConfig title;
     SingleHandBackgroundTextConfig content;
     SingleHandBackgroundTextConfig issueText;
@@ -1181,6 +1191,7 @@ struct SessionEventParam {
     uint32_t compatibleStyleMode = 0;
     int32_t windowGlobalPosX_ = 0;
     int32_t windowGlobalPosY_ = 0;
+    uint32_t titleButtonEventType_ = 0;
 };
 
 struct BackgroundParams {
@@ -1212,14 +1223,6 @@ enum class TerminateType : uint32_t {
     CLOSE_AND_CLEAR_MULTITASK,
     CLOSE_AND_START_CALLER,
     CLOSE_BY_EXCEPTION,
-};
-
-/**
- * @brief window expand flag.
- */
-enum class ExpandInputFlag : uint32_t {
-    EXPAND_INPUT_FLAG_DEFAULT = 0,
-    WINDOW_DISABLE_USER_ACTION = 1 << 2,
 };
 
 /**
@@ -1259,6 +1262,8 @@ struct SessionUIParam {
     WSRect rect_;
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
+    float rsScaleX_ { 1.0f };
+    float rsScaleY_ { 1.0f };
     float pivotX_ { 1.0f };
     float pivotY_ { 1.0f };
     float transX_ { 0.0f }; // global translateX
@@ -1350,6 +1355,16 @@ enum class LifeCycleChangeReason {
     SCREEN_ROTATION,
 
     REASON_END,
+};
+
+enum class ParentLifeCycleEvent : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+    DESTROYED,
 };
 
 enum class AsyncTraceTaskId: int32_t {

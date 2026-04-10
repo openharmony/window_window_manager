@@ -224,6 +224,19 @@ public:
      */
     bool IsWindowCrossScreenOnDragEnd() const;
 
+    /**
+     * @brief Decide whether RS commands should be flushed to RS process on drag end.
+     *
+     * - Cross-screen: no flush. RS commands will be submitted together with the
+     *   ArkUI relayout on the next vsync.
+     * - Not cross-screen: flush immediately to ensure pending RS commands are
+     *   committed, avoiding impact on subsequent drag operations.
+     * - Invalid display IDs: return false.
+     *
+     * @return true if RS commands need to be flushed; false otherwise.
+     */
+    bool ShouldFlushOnDragEnd() const;
+
     /*
      * Monitor screen connection status
      */
@@ -249,13 +262,13 @@ public:
     WSRect GetLastDragEndRect() const { return lastDragEndRect_; }
 
     /**
-     * @brief Set the move resampling configuration.
+     * @brief Save the move resampling configuration.
      *
-     * The configuration is stored in system parameters to allow easy inspection
+     * The configuration is persisted in system parameters to allow easy inspection
      * and quick adjustment at runtime (e.g. for debugging or performance tuning),
      * without requiring a rebuild or restart.
      *
-     * Note that this function only updates persisted configuration values;
+     * Note that this function only updates the persisted configuration values;
      * the actual resampling behavior is determined by ShouldOpenMoveResample
      * and UpdateResampleActivationByFps at runtime based on these parameters.
      *
@@ -265,19 +278,48 @@ public:
      * @param maxFps  Optional maximum FPS threshold to enable resampling;
      *                std::nullopt means no maximum limit.
      */
-    static void SetMoveResampleSystemConfig(
+    static void SaveMoveResampleSystemConfig(
         bool enable, std::optional<uint32_t> minFps, std::optional<uint32_t> maxFps);
 
     /**
-     * @brief Get the current move resampling configuration.
+     * @brief Load the current move resampling configuration.
      *
-     * Reads the persisted parameters to get the configuration setting; actual
+     * Loads the persisted parameters to obtain the configuration setting; actual
      * behavior during move operations is determined by ShouldOpenMoveResample
      * and UpdateResampleActivationByFps.
      *
      * @return A tuple of (enabled, minFps, maxFps).
      */
-    static std::tuple<bool, std::optional<uint32_t>, std::optional<uint32_t>> GetMoveResampleSystemConfig();
+    static std::tuple<bool, std::optional<uint32_t>, std::optional<uint32_t>> LoadMoveResampleSystemConfig();
+
+    /**
+     * @brief Save the moving event throttle configuration.
+     *
+     * The throttle interval is persisted in system parameters to allow convenient
+     * inspection and dynamic adjustment at runtime (e.g. for debugging or
+     * performance tuning), without requiring a rebuild or restart.
+     *
+     * Note that this function only updates the persisted configuration value;
+     * the actual throttling behavior is applied during the moving phase when
+     * processing pointer events based on this parameter.
+     *
+     * @param throttleIntervalUs Throttle interval for pointer events in the moving
+     *                           phase, in microseconds.
+     */
+    static void SaveMovingEventThrottleSystemConfig(uint32_t throttleIntervalUs);
+
+    /**
+     * @brief Load the current moving event throttle configuration.
+     *
+     * Loads the persisted system parameter to obtain the throttle interval used
+     * for limiting the processing frequency of pointer events during the moving
+     * phase.
+     *
+     * @return Throttle interval for pointer events in the moving phase, in
+     *         microseconds. Returns a default value (0) if the system parameter
+     *         is missing or invalid.
+     */
+    static uint32_t LoadMovingEventThrottleSystemConfig();
 
 private:
     struct MoveDragProperty {
@@ -497,6 +539,17 @@ private:
      * @param reason       The reason for the size or position change.
      */
     void ProcessMoveRectUpdate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SizeChangeReason reason);
+
+    /**
+     * @brief Determine whether the current moving event should be throttled.
+     *
+     * Compares the timestamp of the current pointer event with that of the last
+     * processed moving event according to the configured throttle interval.
+     *
+     * @param pointerEvent The pointer event to evaluate.
+     * @return true if the event should be throttled; false otherwise.
+     */
+    bool ShouldThrottleMovingEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /**
      * @brief Handles the moving event (pointer move).
@@ -815,6 +868,30 @@ private:
      * than or equal to this value. std::nullopt means no maximum FPS limit.
      */
     std::optional<uint32_t> resampleMaxFps_ = std::nullopt;
+
+    /**
+     * @brief Throttle interval for pointer events in the moving phase (us).
+     *
+     * Defines the minimum time interval between consecutive handling of pointer
+     * events during the moving phase of a drag operation. This is necessary when
+     * the input device reports events at a very high frequency (e.g., gaming
+     * mice at 1000 Hz), to prevent excessively frequent window position updates,
+     * reduce system load, and maintain smooth dragging behavior.
+     *
+     * An empirical value around 1500 us is usually sufficient. A value of 0
+     * disables throttling.
+     */
+    uint32_t movingEventThrottleIntervalUs_ = 0;
+
+    /**
+     * @brief Timestamp of the last processed pointer event in the moving phase (us).
+     *
+     * Records the action time of the most recently handled pointer event during
+     * the moving phase of a drag operation. This is used in combination with
+     * `movingEventThrottleIntervalUs_` to determine whether a new event should
+     * be processed or skipped for throttling purposes.
+     */
+    int64_t lastMovingEventActionTimeUs_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

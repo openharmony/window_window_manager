@@ -85,8 +85,15 @@ void ScreenManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_ref
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
+    ani_vm* vm = nullptr;
+    ani_status aniRet = env->GetVM(&vm);
+    if (aniRet != ANI_OK || vm == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Get vm failed, aniRet: %{public}u", aniRet);
+        env->GlobalReference_Delete(cbRef);
+        return;
+    }
     TLOGI(WmsLogTag::DMS, "create listener");
-    sptr<ScreenAniListener> screenAniListener = new (std::nothrow) ScreenAniListener(env);
+    sptr<ScreenAniListener> screenAniListener = new (std::nothrow) ScreenAniListener(env, vm);
     if (screenAniListener == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] screenListener is nullptr");
         env->GlobalReference_Delete(cbRef);

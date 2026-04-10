@@ -47,6 +47,7 @@ private:
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWindowStatesByPid(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSessionInfoWithDisplay(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionContinueState(MessageParcel& data, MessageParcel& reply);
     int HandleTerminateSessionNew(MessageParcel& data, MessageParcel& reply);
@@ -101,6 +102,7 @@ private:
     int HandleHasFloatingWindowForeground(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterSessionLifecycleListenerByIds(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterSessionLifecycleListenerByBundles(MessageParcel& data, MessageParcel& reply);
+    int HandleRegisterSessionLifecycleListenerByAppInstance(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterSessionLifecycleListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetRecentMainSessionInfoList(MessageParcel& data, MessageParcel& reply);
     int HandlePendingSessionToBackgroundByPersistentId(MessageParcel& data, MessageParcel& reply);

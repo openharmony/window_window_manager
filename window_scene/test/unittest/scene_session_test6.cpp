@@ -284,6 +284,7 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo01, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     sceneSession->property_ = property;
+
     property->subWindowLevel_ = 100;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
@@ -326,8 +327,11 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo02, TestSize.Level1)
     // test set isAnchorEnabled_
     sceneSession->windowAnchorInfo_.isAnchorEnabled_ = false;
     WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->parentSession_ = parentSession;
     sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_TRUE(sceneSession->windowAnchorInfo_.isAnchorEnabled_);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
 
     //test after set flag, call func
     std::shared_ptr<bool> isCall = std::make_shared<bool>(false);
@@ -338,6 +342,28 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo02, TestSize.Level1)
     EXPECT_NE(nullptr, sceneSession->onWindowAnchorInfoChangeFunc_);
     sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_TRUE(*isCall);
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo03, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_ = property;
+
+    // create windowAnchorInfo
+    WindowAnchorInfo windowAnchorInfo;
+    windowAnchorInfo.isFromAttachOrDetach_ = false;
+    sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = false;
+    WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 /**
@@ -390,6 +416,8 @@ HWTEST_F(SceneSessionTest6, CalcSubWindowRectByAnchor02, TestSize.Level1)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
     sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->parentSession_ = parentSession;
 
     WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
     WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
@@ -433,6 +461,8 @@ HWTEST_F(SceneSessionTest6, CalcSubWindowRectByAnchor03, TestSize.Level1)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
     sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->parentSession_ = parentSession;
 
     WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::CENTER, 0, 0 };
     WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
