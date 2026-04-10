@@ -35,6 +35,9 @@ constexpr WSRectF ZERO_RECTF = { 0.0f, 0.0f, 0.0f, 0.0f };
 // arrange rule
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
+
+const std::string SUBWINDOW_COLLABORATION = "subwindow";
+const std::string MINIBAR_COLLABORATION = "minibar";
 } // namespace
 
 PcFoldScreenController::PcFoldScreenController(wptr<SceneSession> weakSession, int32_t persistentId)
@@ -115,8 +118,13 @@ bool PcFoldScreenController::IsSupportEnterWaterfallMode(SuperFoldStatus status,
         for (const auto& subSession : sceneSession->GetSubSession()) {
             if (subSession) {
                 WindowAnchorInfo windowAnchorInfo = subSession->GetWindowAnchorInfo();
-                isCollaboration = isCollaboration || (windowAnchorInfo.isAnchoredByAttach_ &&
-                    strcmp(windowAnchorInfo.attachOptions.currentLayoutMode.c_str(), "subwindow") == 0);
+                auto currentLayoutMode = windowAnchorInfo.attachOptions.currentLayoutMode;
+                isCollaboration = isCollaboration || (windowAnchorInfo.isAnchoredByAttach_ && (
+                    strcmp(currentLayoutMode.c_str(), SUBWINDOW_COLLABORATION.c_str()) == 0 ||
+                    strcmp(currentLayoutMode.c_str(), MINIBAR_COLLABORATION.c_str()) == 0));
+            }
+            if (isCollaboration) {
+                break;
             }
         }
     }
