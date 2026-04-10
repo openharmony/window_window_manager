@@ -4670,7 +4670,7 @@ WMError WindowSessionImpl::RegisterWindowTitleChangeListener(const sptr<IWindowT
 WMError WindowSessionImpl::UnregisterWindowTitleChangeListener(const sptr<IWindowTitleChangeListener>& listener)
 {
     std::lock_guard<std::mutex> lockListener(windowTitleChangeListenerMutex_);
-    return UnregisterListenerInMap(windowTitleChangeListeners_, GetPersistentId(), listener);
+    WMError ret = UnregisterListenerInMap(windowTitleChangeListeners_, GetPersistentId(), listener);
     TLOGI(WmsLogTag::WMS_DECOR, "UnregisterWindowTitleChangeListener");
     return ret;
 }
@@ -4697,7 +4697,7 @@ WMError WindowSessionImpl::RegisterWindowTitleOrHotAreasListener(const sptr<IWin
 WMError WindowSessionImpl::UnregisterWindowTitleOrHotAreasListener(const sptr<IWindowTitleOrHotAreasListener>& listener)
 {
     std::lock_guard<std::mutex> lockListener(windowTitleOrHotAreasListenerMutex_);
-    return UnregisterListenerInMap(windowTitleOrHotAreasListeners_, GetPersistentId(), listener);
+    WMError ret = UnregisterListenerInMap(windowTitleOrHotAreasListeners_, GetPersistentId(), listener);
     TLOGI(WmsLogTag::WMS_DECOR, "UnregisterWindowTitleOrHotAreasListener");
     return ret;
 }
@@ -9284,7 +9284,6 @@ WMError WindowSessionImpl::SetIntentParam(const std::string& intentParam,
     const std::function<void()>& loadPageCallback, bool isColdStart)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
-    const std::string* ptr = &intentParam;
     intentParam_ = intentParam;
     loadPageCallback_ = loadPageCallback;
     isIntentColdStart_ = isColdStart;
