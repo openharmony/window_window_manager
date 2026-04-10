@@ -143,7 +143,7 @@ HWTEST_F(OHWindowTest, GetDensityInfoCopy_InvalidParam, TestSize.Level0)
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     auto ret = OH_WindowManager_GetDensityInfoCopy(scene_->GetMainWindow()->GetWindowId(), nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
 }
 
 /**
@@ -156,7 +156,7 @@ HWTEST_F(OHWindowTest, RegisterDensityInfoChangeCallback_NullCallback, TestSize.
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     auto ret = OH_WindowManager_RegisterDensityInfoChangeCallback(scene_->GetMainWindow()->GetWindowId(), nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
 }
 
 /**
@@ -169,7 +169,7 @@ HWTEST_F(OHWindowTest, UnregisterDensityInfoChangeCallback_NullCallback, TestSiz
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     auto ret = OH_WindowManager_UnregisterDensityInfoChangeCallback(scene_->GetMainWindow()->GetWindowId(), nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
 }
 
 /**

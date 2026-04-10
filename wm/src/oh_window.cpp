@@ -867,49 +867,49 @@ int32_t OH_WindowManager_GetWindowProperties(
 }
 
 int32_t OH_WindowManager_DensityInfo_GetDefaultDensity(
-    const OH_WindowManager_DensityInfo* densityInfo, float* defaultDensity)
+    const OH_WindowManager_DensityInfo* info, float* density)
 {
-    if (densityInfo == nullptr || defaultDensity == nullptr) {
+    if (info == nullptr || density == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
-    *defaultDensity = densityInfo->defaultDensity;
+    *density = info->defaultDensity;
     return WindowManager_ErrorCode::OK;
 }
 
 int32_t OH_WindowManager_DensityInfo_GetSystemDensity(
-    const OH_WindowManager_DensityInfo* densityInfo, float* systemDensity)
+    const OH_WindowManager_DensityInfo* info, float* density)
 {
-    if (densityInfo == nullptr || systemDensity == nullptr) {
+    if (info == nullptr || density == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
-    *systemDensity = densityInfo->systemDensity;
+    *density = info->systemDensity;
     return WindowManager_ErrorCode::OK;
 }
 
 int32_t OH_WindowManager_DensityInfo_GetCustomDensity(
-    const OH_WindowManager_DensityInfo* densityInfo, float* customDensity)
+    const OH_WindowManager_DensityInfo* info, float* density)
 {
-    if (densityInfo == nullptr || customDensity == nullptr) {
+    if (info == nullptr || density == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
-    *customDensity = densityInfo->customDensity;
+    *density = info->customDensity;
     return WindowManager_ErrorCode::OK;
 }
 
-int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_DensityInfo** const densityInfo)
+int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowManager_DensityInfo** info)
 {
-    if (densityInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "densityInfo is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "info is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
-    *densityInfo = nullptr;
+    *info = nullptr;
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
-    eventHandler->PostSyncTask([windowId, densityInfo, &errCode, where = __func__] {
+    eventHandler->PostSyncTask([windowId, info, &errCode, where = __func__] {
         auto densityInfoInner = static_cast<OH_WindowManager_DensityInfo*>(
             malloc(sizeof(OH_WindowManager_DensityInfo)));
         if (densityInfoInner == nullptr) {
@@ -923,17 +923,17 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_D
             WINDOW_MANAGER_FREE_MEMORY(densityInfoInner);
             return;
         }
-        *densityInfo = densityInfoInner;
+        *info = densityInfoInner;
         }, __func__);
     return errCode;
 }
 
-int32_t OH_WindowManager_DensityInfo_Release(OH_WindowManager_DensityInfo* const densityInfo)
+int32_t OH_WindowManager_DensityInfo_Release(const OH_WindowManager_DensityInfo* info)
 {
-    if (densityInfo == nullptr) {
+    if (info == nullptr) {
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
-    WINDOW_MANAGER_FREE_MEMORY(densityInfo);
+    WINDOW_MANAGER_FREE_MEMORY(info);
     return WindowManager_ErrorCode::OK;
 }
 
@@ -942,7 +942,7 @@ int32_t OH_WindowManager_RegisterDensityInfoChangeCallback(
 {
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -962,7 +962,7 @@ int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
 {
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
