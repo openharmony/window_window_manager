@@ -3248,6 +3248,11 @@ sptr<SceneSession> SceneSessionManager::GetSceneSessionBySessionInfo(const Sessi
         auto sceneSession = GetSceneSessionByIdentityInfo(identityInfo);
         bool isSingleStart = sceneSession && sceneSession->GetAbilityInfo() &&
             sceneSession->GetAbilityInfo()->launchMode == AppExecFwk::LaunchMode::SINGLETON;
+        if (sceneSession && sceneSession->GetSessionInfo().reuseSessionInGamePreLaunch_) {
+            TLOGI(WmsLogTag::WMS_LIFE, "request new session with persistentId: %{public}d",
+                sessionInfo.persistentId_);
+            return nullptr;
+        }
         if (isSingleStart) {
             TLOGI(WmsLogTag::WMS_LIFE, "get exist singleton session persistentId: %{public}d",
                 sessionInfo.persistentId_);
