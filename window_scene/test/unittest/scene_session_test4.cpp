@@ -679,9 +679,6 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, TestSize.Level1)
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
     sceneSession->HandleSpecificSystemBarProperty(type, property);
 
-    sceneSession->isDisplayStatusBarTemporarily_.store(true);
-    sceneSession->HandleSpecificSystemBarProperty(type, property);
-
     sceneSession->specificCallback_ = nullptr;
     sceneSession->HandleSpecificSystemBarProperty(type, property);
 

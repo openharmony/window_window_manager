@@ -2249,9 +2249,6 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onDestroy_ = [this](const int32_t persistentId) {
         return this->DestroyAndDisconnectSpecificSessionInner(persistentId);
     };
-    specificCb->onClearDisplayStatusBarTemporarilyFlags_ = [this] {
-        this->ClearDisplayStatusBarTemporarilyFlags();
-    };
     specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
         this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     };
@@ -13494,17 +13491,6 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
         TLOGNE(WmsLogTag::WMS_LIFE, "fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     }, __func__);
-}
-
-void SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags()
-{
-    for (auto persistentId : avoidAreaListenerSessionSet_) {
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            continue;
-        }
-        sceneSession->SetIsDisplayStatusBarTemporarily(false);
-    }
 }
 
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId)

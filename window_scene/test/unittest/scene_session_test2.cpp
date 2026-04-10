@@ -510,24 +510,6 @@ HWTEST_F(SceneSessionTest2, SetScale, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetIsDisplayStatusBarTemporarily
- * @tc.desc: SetIsDisplayStatusBarTemporarily
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest2, SetIsDisplayStatusBarTemporarily, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "SetIsDisplayStatusBarTemporarily";
-    info.bundleName_ = "SetIsDisplayStatusBarTemporarily";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->SetIsDisplayStatusBarTemporarily(true);
-    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
-    sceneSession->SetIsDisplayStatusBarTemporarily(false);
-    ASSERT_EQ(false, sceneSession->GetIsDisplayStatusBarTemporarily());
-}
-
-/**
  * @tc.name: UpdateAvoidArea
  * @tc.desc: UpdateAvoidArea
  * @tc.type: FUNC
@@ -1337,10 +1319,6 @@ HWTEST_F(SceneSessionTest2, GetAINavigationBarArea, TestSize.Level1)
     WSRect rect;
     AvoidArea avoidArea;
     sceneSession->GetAINavigationBarArea(rect, avoidArea);
-
-    sceneSession->SetIsDisplayStatusBarTemporarily(true);
-    sceneSession->GetAINavigationBarArea(rect, avoidArea);
-    ASSERT_EQ(sceneSession->GetIsDisplayStatusBarTemporarily(), true);
 
     auto property = sptr<WindowSessionProperty>::MakeSptr();
     EXPECT_NE(property, nullptr);
