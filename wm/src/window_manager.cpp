@@ -2304,6 +2304,15 @@ WMError WindowManager::SetSpecificSystemWindowZIndex(WindowType windowType, int3
     return ret;
 }
 
+WMError WindowManager::MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId)
+{
+    WMError ret = WindowAdapter::GetInstance(userId_).MoveMainWindowToTargetDisplay(displayId, windowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed, windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
+    }
+    return ret;
+}
+
 WMError WindowManager::RegisterVisibleWindowNumChangedListener(const sptr<IVisibleWindowNumChangedListener>& listener)
 {
     if (listener == nullptr) {

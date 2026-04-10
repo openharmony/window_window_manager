@@ -2444,7 +2444,7 @@ WSError SessionStageProxy::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
+WSError SessionStageProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2455,6 +2455,10 @@ WSError SessionStageProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needU
     }
     if (!data.WriteBool(needUpdateViewport)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Write needUpdateViewport failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(selectMode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write selectMode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     

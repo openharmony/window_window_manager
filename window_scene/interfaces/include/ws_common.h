@@ -615,6 +615,7 @@ enum class SizeChangeReason : uint32_t {
     SNAPSHOT_ROTATION = 37,
     SCENE_WITH_ANIMATION,
     LS_STATE_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
@@ -1428,5 +1429,21 @@ enum class SidebarBlurType : uint32_t {
     DEFAULT_MAXIMIZE,
     END,
 };
+
+struct PreWindowProperty {
+    uint32_t rotation = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    PreWindowProperty() {}
+
+    PreWindowProperty(uint32_t rotation, uint32_t width, uint32_t height)
+    {
+        this->rotation = rotation;
+        this->width = width;
+        this->height = height;
+    }
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

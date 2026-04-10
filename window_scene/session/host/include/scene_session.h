@@ -93,7 +93,6 @@ using ClearCallbackMapFunc = std::function<void(bool needRemove)>;
 using NotifyPrepareClosePiPSessionFunc = std::function<void()>;
 using OnOutsideDownEvent = std::function<void(int32_t x, int32_t y)>;
 using HandleSecureSessionShouldHideCallback = std::function<WSError(const sptr<SceneSession>& sceneSession)>;
-using ClearDisplayStatusBarTemporarilyFlags = std::function<void()>;
 using CameraSessionChangeCallback = std::function<void(uint32_t accessTokenId, bool isShowing)>;
 using NotifyLandscapeMultiWindowSessionFunc = std::function<void(bool isLandscapeMultiWindow)>;
 using NotifyKeyboarEffectOptionChangeFunc = std::function<void(const KeyboardEffectOption& mode)>;
@@ -113,6 +112,7 @@ using NotifyForceSplitEnableFunc = std::function<bool(const std::string& bundleN
 using PageEnableCallback = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
 using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
+using GetSelectModeFunc = std::function<SelectMode()>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
@@ -174,6 +174,7 @@ using ForceNotifyOccupiedAreaChangeCallback = std::function<void(DisplayId displ
 using NotifyRecoverWindowEffectFunc = std::function<void(bool recoverCorner, bool recoverShadow)>;
 using NotifySessionBlackListFunc = std::function<WMError(int32_t persistentId,
     const std::unordered_set<std::string>& privacyWindowTags)>;
+using NotifyPreCalcWindowPropertyFunc = std::function<void()>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -196,7 +197,6 @@ public:
     struct SpecificSessionCallback : public RefBase {
         SpecificSessionCreateCallback onCreate_;
         SpecificSessionDestroyCallback onDestroy_;
-        ClearDisplayStatusBarTemporarilyFlags onClearDisplayStatusBarTemporarilyFlags_;
         CameraFloatSessionChangeCallback onCameraFloatSessionChange_;
         GetSceneSessionVectorByTypeAndDisplayIdCallback onGetSceneSessionVectorByTypeAndDisplayId_;
         GetSceneSessionVectorByTypeCallback onGetSceneSessionVectorByType_;
@@ -557,8 +557,6 @@ public:
     bool CheckGetSubWindowAvoidAreaAvailable(WindowMode winMode, AvoidAreaType type);
     bool CheckGetMainWindowAvoidAreaAvailable(WindowMode winMode, AvoidAreaType type);
     bool CheckGetSystemWindowAvoidAreaAvailable();
-    bool GetIsDisplayStatusBarTemporarily() const;
-    void SetIsDisplayStatusBarTemporarily(bool isTemporary);
     void SetIsLastFrameLayoutFinishedFunc(IsLastFrameLayoutFinishedFunc&& func);
     void SetIsAINavigationBarAvoidAreaValidFunc(IsAINavigationBarAvoidAreaValidFunc&& func);
     void RetrieveStatusBarDefaultVisibility();
@@ -688,6 +686,11 @@ public:
     void RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFunc&& callback);
     WSError UpdateFollowScreenChange(bool isFollowScreenChange);
     void RegisterRotationLockChangeCallback(NotifyRotationLockChangeFunc&& callback);
+    PreWindowProperty PreCalcWindowProperty() override;
+    WSError NotifyPreCalcWindowProperty(uint32_t rotation, uint32_t width, uint32_t height);
+    void SetPreCalcWindowPropertyCallback(const  NotifyPreCalcWindowPropertyFunc& func);
+    NotifyPreCalcWindowPropertyFunc preCalcWindowPropertyFunc_{};
+    RunnableFuture<PreWindowProperty> preWindowPropertyFuture_{};
 
     /*
      * Window Animation
@@ -954,6 +957,8 @@ public:
     void NotifiedDragEventOnNextVsync();
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    void RegisterSelectModeFunc(GetSelectModeFunc&& func);
+    WMError GetSelectMode(SelectMode& selectMode) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
@@ -1506,6 +1511,7 @@ private:
      * Window Layout
      */
     GetHookWindowInfoFunc getHookWindowInfoFunc_ = nullptr;
+    GetSelectModeFunc getSelectModeFunc_ = nullptr;
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
@@ -1669,7 +1675,6 @@ private:
      */
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetSystemBarProperty_;
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentSystemBarProperty_;
-    std::atomic_bool isDisplayStatusBarTemporarily_ { false };
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;
     std::unordered_map<AvoidAreaType, std::tuple<DisplayId, WSRect, WSRect>> lastAvoidAreaInputParamtersMap_;

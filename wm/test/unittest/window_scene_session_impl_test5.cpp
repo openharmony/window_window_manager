@@ -3166,7 +3166,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 }
 
@@ -3188,7 +3188,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated
     window->hostSession_ = session;
     
     // GetAppForceLandscapeConfigEnable will fail if listener is not registered
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 }
 }

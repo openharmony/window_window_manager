@@ -186,7 +186,8 @@ public:
     WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) override;
 
     /*
      * Sub Window
@@ -241,9 +242,11 @@ public:
     void HookDecorButtonStyleInCompatibleMode(uint32_t contentColor);
     WSError PcAppInPadNormalClose() override;
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
-    void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false) override;
+    void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false,
+        SelectMode selectMode = SelectMode::INVALID_MODE) override;
     void SendLogicalDeviceConfigToArkUI();
     WMError NotifyPageEnable(const std::string& action, const std::string& message) override;
+    WMError NotifySplitRatioChanged(float newRatio) override;
 
     /*
      * Free Multi Window
@@ -504,6 +507,7 @@ private:
     void OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state);
     void UpdateStartRecoverProperty(bool isSpecificSession);
     void UpdateFinishRecoverProperty(bool isSpecificSession);
+    void RecoverExtension();
     NotifyWindowRecoverStateChangeFunc windowRecoverStateChangeFunc_;
 
     /*
@@ -512,6 +516,7 @@ private:
     void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    WMError GetSelectMode(SelectMode& selectMode) override;
     bool ShouldSkipSupportWindowModeCheck(uint32_t windowModeSupportType, WindowMode mode);
     uint32_t UpdateConfigVal(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);
     uint32_t UpdateConfigValInVP(uint32_t minVal, uint32_t maxVal, uint32_t configVal, uint32_t defaultVal, float vpr);

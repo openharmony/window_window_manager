@@ -569,6 +569,7 @@ enum class WindowSizeChangeReason : uint32_t {
     LS_STATE_CHANGE,
     FULL_SCREEN_IN_FORCE_SPLIT,
     HOOK_INFO_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
@@ -607,6 +608,15 @@ enum class DragResizeType : uint32_t {
     RESIZE_KEY_FRAME = 3,
     RESIZE_SCALE = 4,
     RESIZE_MAX_VALUE,  // invalid value begin, add new value above
+};
+
+/**
+ * @brief Enumerates select mode.
+ */
+enum class SelectMode : uint32_t {
+    WIDE_MODE = 0,
+    SQUARE_MODE = 1,
+    INVALID_MODE = 2,
 };
 
 /**
@@ -1282,7 +1292,7 @@ struct HookInfo {
     uint32_t displayOrientation_;
     bool enableHookDisplayOrientation_;
     Rect actualRect_ = { 0, 0, 0, 0};
-    
+
     std::string ToString() const
     {
         std::ostringstream oss;
