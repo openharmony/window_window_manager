@@ -4205,6 +4205,12 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
             sceneSession->EditSessionInfo().callingTokenId_ = 0;
         }
 
+        if (sceneSession->GetSessionInfo().isGamePrelaunch_) {
+            TLOGNI(WmsLogTag::WMS_LIFE, "Reset scene session isGamePrelaunch_ to false, id: %{public}d",
+                sceneSession->GetPersistentId());
+            sceneSession->EditSessionInfo().isGamePrelaunch_ = false;
+        }
+
         sceneSession->BackgroundTask(isSaveSnapshot, reason);
         listenerController_->NotifySessionLifecycleEvent(
             ISessionLifecycleListener::SessionLifecycleEvent::BACKGROUND, sceneSession->GetSessionInfo(), reason);
@@ -13482,11 +13488,12 @@ WSError SceneSessionManager::PendingSessionToBackground(const sptr<IRemoteObject
 }
 
 WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-    bool shouldBackToCaller)
+    bool shouldBackToCaller, int32_t reason)
 {
-    return taskScheduler_->PostSyncTask([this, &token, shouldBackToCaller] {
+    return taskScheduler_->PostSyncTask([this, &token, shouldBackToCaller, reason] {
         if (auto session = FindSessionByToken(token)) {
-            return session->PendingSessionToBackgroundForDelegator(shouldBackToCaller);
+            return session->PendingSessionToBackgroundForDelegator(shouldBackToCaller,
+                static_cast<LifeCycleChangeReason>(reason));
         }
         TLOGNE(WmsLogTag::WMS_LIFE, "fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;

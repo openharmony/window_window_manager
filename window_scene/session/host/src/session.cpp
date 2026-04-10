@@ -475,6 +475,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.processOptions = info.processOptions;
     sessionInfo_.disableDelegator = info.disableDelegator;
     sessionInfo_.reuseDelegatorWindow = info.reuseDelegatorWindow;
+    sessionInfo_.isGamePrelaunch_ = info.isGamePrelaunch_;
 }
 
 void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)
@@ -2635,12 +2636,12 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
     }, __func__);
 }
 
-WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
+WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller, LifeCycleChangeReason reason)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
-        GetPersistentId(), shouldBackToCaller);
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d, reason: %{public}d",
+        GetPersistentId(), shouldBackToCaller, reason);
     if (pendingSessionToBackgroundForDelegatorFunc_) {
-        pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller);
+        pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller, reason);
     }
     return WSError::WS_OK;
 }

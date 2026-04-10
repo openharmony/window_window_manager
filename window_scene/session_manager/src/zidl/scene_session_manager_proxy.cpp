@@ -1252,7 +1252,7 @@ WSError SceneSessionManagerProxy::PendingSessionToForeground(const sptr<IRemoteO
 }
 
 WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-    bool shouldBackToCaller)
+    bool shouldBackToCaller, int32_t reason)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "run");
     MessageParcel data;
@@ -1270,6 +1270,11 @@ WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const s
 
     if (!data.WriteBool(shouldBackToCaller)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write shouldBackToCaller failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write reason failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 

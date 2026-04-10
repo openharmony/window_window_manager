@@ -1917,6 +1917,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
         CreateJsValue(env, sessionInfo.hostAppInstanceKey));
     napi_set_named_property(env, objValue, "hostAbilityName",
         CreateJsValue(env, sessionInfo.hostAbilityName));
+    napi_set_named_property(env, objValue, "isGamePreLaunch",
+        CreateJsValue(env, sessionInfo.isGamePrelaunch_));
     return objValue;
 }
 
