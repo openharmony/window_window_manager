@@ -169,6 +169,7 @@ using ForceNotifyOccupiedAreaChangeCallback = std::function<void(DisplayId displ
 using NotifyRecoverWindowEffectFunc = std::function<void(bool recoverCorner, bool recoverShadow)>;
 using NotifySessionBlackListFunc = std::function<WMError(int32_t persistentId,
     const std::unordered_set<std::string>& privacyWindowTags)>;
+using NotifyPreCalcWindowPropertyFunc = std::function<void()>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -673,6 +674,11 @@ public:
     void RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFunc&& callback);
     WSError UpdateFollowScreenChange(bool isFollowScreenChange);
     void RegisterRotationLockChangeCallback(NotifyRotationLockChangeFunc&& callback);
+    PreWindowProperty PreCalcWindowProperty() override;
+    WSError NotifyPreCalcWindowProperty(uint32_t rotation, uint32_t width, uint32_t height);
+    void SetPreCalcWindowPropertyCallback(const  NotifyPreCalcWindowPropertyFunc& func);
+    NotifyPreCalcWindowPropertyFunc preCalcWindowPropertyFunc_{};
+    RunnableFuture<PreWindowProperty> preWindowPropertyFuture_{};
 
     /*
      * Window Animation

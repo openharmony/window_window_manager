@@ -335,6 +335,7 @@
             OHOS::Rosen::SceneSession::GetSessionTargetRectByDisplayId*;
             OHOS::Rosen::SceneSession::GetOriPosYBeforeRaisedByKeyboard*;
             OHOS::Rosen::SceneSession::GetUIExtPersistentIdBySurfaceNodeId*;
+            OHOS::Rosen::SceneSession::SetPreCalcWindowPropertyCallback*;
             OHOS::Rosen::ScenePersistence::HasSnapshot*;
             OHOS::Rosen::ScenePersistence::HasSnapshot*;
             OHOS::Rosen::ScenePersistence::GetSnapshotSize*;

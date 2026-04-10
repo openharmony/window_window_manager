@@ -122,6 +122,7 @@ enum class ListenerFuncType : uint32_t {
     SNAPSHOT_SKIP_CHANGE_CB,
     COMPATIBLE_MODE_CHANGE_CB,
     RECOVER_WINDOW_EFFECT_CB,
+    PRE_CALC_WINDOW_PROPERTY_CB,
 };
 
 class SceneSession;
@@ -285,6 +286,7 @@ private:
     static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value GetSceneNodeCount(napi_env env, napi_callback_info info);
+    static napi_value NotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
     /*
      * PC Window
      */
@@ -390,6 +392,7 @@ private:
     napi_value OnGetUid(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnGetSceneNodeCount(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -477,6 +480,7 @@ private:
     void ProcessRotationLockChangeRegister();
     void ProcessSnapshotSkipChangeRegister();
     void ProcessRecoverWindowEffectRegister();
+    void ProcessPreCalcWindowPropertyRegister();
 
     /*
      * PC Window Layout
@@ -569,6 +573,7 @@ private:
     void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
     void OnRestartApp(const SessionInfo& info, int32_t callingPid);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
+    void OnPreCalcWindowProperty();
 
     /*
      * Window Property

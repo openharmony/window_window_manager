@@ -121,6 +121,7 @@ constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr uint8_t MAX_DOWN_TIMES = 100;
+constexpr const long PRE_CALC_WINDOW_PROPERTY_TIMEOUT = 1000;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -10048,6 +10049,31 @@ WSError SceneSession::ConvertRotationToOrientation(uint32_t rotation,
         "rotation: %{public}d, width: %{public}d, height: %{public}d, orientation: %{public}d",
         rotation, width, height, orientation);
     return WSError::WS_OK;
+}
+
+void SceneSession::SetPreCalcWindowPropertyCallback(const NotifyPreCalcWindowPropertyFunc& func)
+{
+    PostTask(
+        [weakThis = wptr(this), func, where = __func__] {
+            auto session = weakThis.promote();
+            if (!session) {
+                TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s session is null", where);
+                return;
+            }
+            session->preCalcWindowPropertyFunc_ = func;
+        }, __func__);
+}
+
+PreWindowProperty SceneSession::PreCalcWindowProperty()
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "start");
+    if (!preCalcWindowPropertyFunc_) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "preCalcWindowPropertyFunc_ is null");
+        return PreWindowProperty();
+    }
+    preWindowPropertyFuture_.ResetLock({});
+    preCalcWindowPropertyFunc_();
+    return preWindowPropertyFuture_.GetResult(PRE_CALC_WINDOW_PROPERTY_TIMEOUT);
 }
 
 void SceneSession::SetSystemBarPropertyForRotation(
