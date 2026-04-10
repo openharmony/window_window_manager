@@ -896,7 +896,7 @@ int32_t OH_WindowManager_DensityInfo_GetCustomDensity(
     return WindowManager_ErrorCode::OK;
 }
 
-int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_DensityInfo** densityInfo)
+int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_DensityInfo** const densityInfo)
 {
     if (densityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "densityInfo is null, windowId:%{public}d", windowId);
@@ -928,9 +928,13 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_D
     return errCode;
 }
 
-void OH_WindowManager_DensityInfo_Release(OH_WindowManager_DensityInfo* densityInfo)
+int32_t OH_WindowManager_DensityInfo_Release(OH_WindowManager_DensityInfo* const densityInfo)
 {
+    if (densityInfo == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
     WINDOW_MANAGER_FREE_MEMORY(densityInfo);
+    return WindowManager_ErrorCode::OK;
 }
 
 int32_t OH_WindowManager_RegisterDensityInfoChangeCallback(

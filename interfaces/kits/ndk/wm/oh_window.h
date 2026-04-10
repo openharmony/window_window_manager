@@ -433,7 +433,7 @@ int32_t OH_WindowManager_DensityInfo_GetCustomDensity(
  *         {@link WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL} the window manager service works abnormal.
  * @since 26.0.0
  */
-int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_DensityInfo** densityInfo);
+int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, OH_WindowManager_DensityInfo** const densityInfo);
 
 /**
  * @brief Subscribe to the listening event for density information changes of the specified window.
@@ -471,9 +471,13 @@ int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
  * @brief Release the density information object returned by OH_WindowManager_GetDensityInfoCopy.
  *
  * @param densityInfo Density information object returned by OH_WindowManager_GetDensityInfoCopy.
+ * @return Returns the status code of the execution.
+ *         {@link OK} the function call is successful.
+ *         {@link WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM} Parameter error. Possible cause:
+ *             1. Invalid parameter range.
  * @since 26.0.0
  */
-void OH_WindowManager_DensityInfo_Release(OH_WindowManager_DensityInfo* densityInfo);
+int32_t OH_WindowManager_DensityInfo_Release(OH_WindowManager_DensityInfo* const densityInfo);
 
 /**
  * @brief Check whether the current frame is the first frame.
