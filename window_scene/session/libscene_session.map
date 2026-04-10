@@ -154,6 +154,7 @@
             OHOS::Rosen::SceneSession::UpdatePrivacyModeControlInfo*;
             OHOS::Rosen::SceneSession::MaskSupportEnterWaterfallMode*;
             OHOS::Rosen::SceneSession::RegisterAppHookWindowInfoFunc*;
+            OHOS::Rosen::SceneSession::RegisterSelectModeFunc*;
             OHOS::Rosen::SceneSession::RegisterGetIsDockAutoHideFunc*;
             OHOS::Rosen::SceneSession::RemoveFingerPointerDownStatus*;
             OHOS::Rosen::SceneSession::SetGetAllAppUseControlMapFunc*;
@@ -178,7 +179,6 @@
             OHOS::Rosen::SceneSession::RegisterGetStartWindowConfigFunc*;
             OHOS::Rosen::SceneSession::RegisterRaiseAboveTargetCallback*;
             OHOS::Rosen::SceneSession::SetBufferAvailableCallbackEnable*;
-            OHOS::Rosen::SceneSession::SetIsDisplayStatusBarTemporarily*;
             OHOS::Rosen::SceneSession::SetIsLastFrameLayoutFinishedFunc*;
             OHOS::Rosen::SceneSession::SetUpdatePiPTemplateInfoCallback*;
             OHOS::Rosen::SceneSession::NotifySessionExceptionWithOptions*;
@@ -333,10 +333,10 @@
             OHOS::Rosen::SceneSession::GetFingerPointerDownStatusList*;
             OHOS::Rosen::SceneSession::GetMousePointerDownEventStatus*;
             OHOS::Rosen::SceneSession::GetSessionTargetRectByDisplayId*;
-            OHOS::Rosen::SceneSession::GetIsDisplayStatusBarTemporarily*;
             OHOS::Rosen::SceneSession::GetOriPosYBeforeRaisedByKeyboard*;
-            OHOS::Rosen::SceneSession::GetUIExtPersistentIdBySurfaceNodeId*;
             OHOS::Rosen::SceneSession::GetAllUIExtensionTokenInfo*;
+            OHOS::Rosen::SceneSession::GetUIExtPersistentIdBySurfaceNodeId*;
+            OHOS::Rosen::SceneSession::SetPreCalcWindowPropertyCallback*;
             OHOS::Rosen::ScenePersistence::HasSnapshot*;
             OHOS::Rosen::ScenePersistence::HasSnapshot*;
             OHOS::Rosen::ScenePersistence::GetSnapshotSize*;

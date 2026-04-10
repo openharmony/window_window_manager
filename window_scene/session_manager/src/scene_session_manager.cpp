@@ -2249,9 +2249,6 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
     specificCb->onDestroy_ = [this](const int32_t persistentId) {
         return this->DestroyAndDisconnectSpecificSessionInner(persistentId);
     };
-    specificCb->onClearDisplayStatusBarTemporarilyFlags_ = [this] {
-        this->ClearDisplayStatusBarTemporarilyFlags();
-    };
     specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
         this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     };
@@ -2954,6 +2951,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
             return this->GetAppHookWindowInfo(bundleName);
+        });
+        sceneSession->RegisterSelectModeFunc([this]() {
+            return this->GetSelectMode();
         });
         sceneSession->SetUpdatePrivateStateAndNotifyFunc([this](int32_t persistentId) {
             this->UpdatePrivateStateAndNotify(persistentId);
@@ -5407,6 +5407,12 @@ void SceneSessionManager::SetCreateSystemSessionListener(const NotifyCreateSyste
 void SceneSessionManager::SetSpecificWindowZIndexListener(const NotifySetSpecificWindowZIndexFunc& func)
 {
     setSpecificWindowZIndexFunc_ = func;
+}
+
+/** @note @window.life */
+void SceneSessionManager::SetMoveMainWindowToTargetDisplayListener(NotifyMoveMainWindowToTargetDisplayFunc&& func)
+{
+    moveMainWindowToTargetDisplayFunc_ = std::move(func);
 }
 
 void SceneSessionManager::SetCreateKeyboardSessionListener(const NotifyCreateKeyboardSessionFunc& func)
@@ -10287,8 +10293,10 @@ bool SceneSessionManager::IsInDefaultScreen(const sptr<SceneSession>& sceneSessi
 
 bool SceneSessionManager::IsNeedSkipWindowModeTypeCheck(const sptr<SceneSession>& sceneSession, bool isSmallFold)
 {
-    if (sceneSession == nullptr ||
-        !WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
+    if (sceneSession == nullptr) {
+        return true;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType()) ||
         !sceneSession->GetRSVisible() ||
         !sceneSession->IsSessionForeground()) {
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], isVisible=%{public}d, state=%{public}u",
@@ -13485,17 +13493,6 @@ WSError SceneSessionManager::PendingSessionToBackgroundForDelegator(const sptr<I
     }, __func__);
 }
 
-void SceneSessionManager::ClearDisplayStatusBarTemporarilyFlags()
-{
-    for (auto persistentId : avoidAreaListenerSessionSet_) {
-        auto sceneSession = GetSceneSession(persistentId);
-        if (sceneSession == nullptr) {
-            continue;
-        }
-        sceneSession->SetIsDisplayStatusBarTemporarily(false);
-    }
-}
-
 WSError SceneSessionManager::GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId)
 {
     if (!SessionPermission::IsSACalling()) {
@@ -15546,6 +15543,48 @@ WSError SceneSessionManager::SetSpecificWindowZIndex(WindowType windowType, int3
         }
         return WSError::WS_OK;
     }, __func__);
+}
+
+/** @note @window.life */
+WSError SceneSessionManager::MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId)
+{
+    if (!SessionPermission::IsSystemAppCall()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "permission denied");
+        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+    }
+    auto sceneSession = GetSceneSession(windowId);
+    if (sceneSession == nullptr || sceneSession->IsTerminated()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is null or destroying, windowId: %{public}d", windowId);
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    if (!WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "window is not main window, windowId: %{public}d", windowId);
+        return WSError::WS_ERROR_INVALID_CALLING;
+    }
+    auto fromScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(sceneSession->GetDisplayId());
+    if (fromScreenSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid displayId of window, id: %{public}d", windowId);
+        return WSError::WS_ERROR_INVALID_WINDOW;
+    }
+    auto toScreenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    if (toScreenSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "invalid displayId: %{public}" PRIu64, displayId);
+        return WSError::WS_ERROR_INVALID_DISPLAY;
+    }
+    bool isFromScreenVirtual = fromScreenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL;
+    bool isToScreenVirtual = toScreenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL;
+    TLOGI(WmsLogTag::WMS_LIFE, "windowId: %{public}d, displayId: %{public}" PRIu64
+        ", isFromScreenVirtual: %{public}d, isToScreenVirtual: %{public}d",
+        windowId, displayId, isFromScreenVirtual, isToScreenVirtual);
+    const char* const where = __func__;
+    taskScheduler_->PostAsyncTask([this, windowId, displayId, isFromScreenVirtual, isToScreenVirtual, where] {
+        if (moveMainWindowToTargetDisplayFunc_) {
+            moveMainWindowToTargetDisplayFunc_(displayId, windowId, isFromScreenVirtual, isToScreenVirtual);
+        } else {
+            TLOGNE(WmsLogTag::WMS_LIFE, "moveMainWindowToTargetDisplayFunc_ is nullptr");
+        }
+    }, __func__);
+    return WSError::WS_OK;
 }
 
 /** @note @window.hierarchy */
@@ -17964,12 +18003,15 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
 }
 
 WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string& bundleName,
-    const bool enableForceSplit, bool needUpdateViewport)
+    const bool enableForceSplit, bool needUpdateViewport, SelectMode selectMode)
 {
     if (bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_COMPAT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
+
+    // update selectMode
+    SetSelectMode(selectMode);
 
     AppForceLandscapeConfig config;
     {
@@ -17991,11 +18033,12 @@ WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string&
         auto& session = iter.second;
         if (session && session->GetSessionInfo().bundleName_ == bundleName &&
             SessionHelper::IsMainWindow(session->GetWindowType())) {
-            session->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
+            session->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, selectMode);
         }
     }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d, needUpdateViewport:%{public}d",
-        bundleName.c_str(), enableForceSplit, needUpdateViewport);
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d, needUpdateViewport:%{public}d, "
+        "selectMode: %{public}d", bundleName.c_str(), enableForceSplit, needUpdateViewport,
+        static_cast<uint32_t>(selectMode));
     return WSError::WS_OK;
 }
 
@@ -20559,6 +20602,18 @@ void SceneSessionManager::NotifyRotationBegin()
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "in");
     SceneInputManager::GetInstance().SetIsRotationBegin(true);
+}
+
+void SceneSessionManager::SetSelectMode(SelectMode selectMode)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "set SelectMode from %{public}u to %{public}u",
+        static_cast<uint32_t>(GetSelectMode()), static_cast<uint32_t>(selectMode));
+    selectMode_.store(selectMode);
+}
+
+SelectMode SceneSessionManager::GetSelectMode() const
+{
+    return selectMode_.load();
 }
 
 } // namespace OHOS::Rosen

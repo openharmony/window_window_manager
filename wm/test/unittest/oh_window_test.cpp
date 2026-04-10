@@ -252,7 +252,7 @@ HWTEST_F(OHWindowTest, RegisterFrameMetricsMeasuredCallback_NullCallback, TestSi
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
     auto ret = OH_WindowManager_RegisterFrameMetricsMeasuredCallback(windowId, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
 }
 
 /**
@@ -266,7 +266,7 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_NullCallback, Test
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     int32_t windowId = scene_->GetMainWindow()->GetWindowId();
     auto ret = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, nullptr);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
 }
 
 /**
@@ -339,7 +339,7 @@ HWTEST_F(OHWindowTest, RegisterUnregisterFrameMetricsMeasuredCallback_MultiCallb
     auto ret4 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback2);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret4);
     auto ret5 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret5);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret5);
 }
 
 /**
@@ -403,7 +403,7 @@ HWTEST_F(OHWindowTest, UnregisterFrameMetricsMeasuredCallback_CallbackNotRegiste
     }
 
     auto ret2 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback2);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM), ret2);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret2);
     auto ret3 = OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(windowId, FrameMetricsMeasuredCallback);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::OK), ret3);
 }

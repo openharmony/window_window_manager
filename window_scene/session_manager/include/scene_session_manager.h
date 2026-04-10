@@ -179,6 +179,8 @@ using NotifyAppProcessDiedFunc = std::function<void(const AppExecFwk::ProcessDat
 using NotifyVirtualPixelChangeFunc = std::function<void(float density, DisplayId displayId)>;
 using NotifySetSpecificWindowZIndexFunc = std::function<void(WindowType windowType, int32_t zIndex,
     SetSpecificZIndexReason reason)>;
+using NotifyMoveMainWindowToTargetDisplayFunc = std::function<void(DisplayId displayId, int32_t windowId,
+    bool isFromScreenVirtual, bool isToScreenVirtual)>;
 using MinimizeAllFunc = std::function<void(DisplayId displayId, int32_t excludeWindlowId)>;
 using PageEnableFunc = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
@@ -359,7 +361,9 @@ public:
      */
     WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override;
     WSError ResetSpecificWindowZIndex(int32_t pid) override;
+    WSError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId) override;
     void SetSpecificWindowZIndexListener(const NotifySetSpecificWindowZIndexFunc& func);
+    void SetMoveMainWindowToTargetDisplayListener(NotifyMoveMainWindowToTargetDisplayFunc&& func);
 
     WSError UpdateWindowMode(int32_t persistentId, int32_t windowMode);
     WSError SendTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, uint32_t zIndex);
@@ -523,7 +527,6 @@ public:
     WSError GetNextAvoidRectInfo(DisplayId displayId, AvoidAreaType type,
         std::pair<WSRect, WSRect>& nextSystemBarAvoidAreaRectInfo);
     WSRect GetAINavigationBarArea(uint64_t displayId, bool ignoreVisibility = false);
-    void ClearDisplayStatusBarTemporarilyFlags();
     AvoidArea GetRootSessionAvoidAreaByType(AvoidAreaType type, bool ignoreVisibility = false);
     uint32_t GetRootSceneStatusBarHeight() const;
     void SetOnFlushUIParamsFunc(OnFlushUIParamsFunc&& func);
@@ -711,7 +714,7 @@ public:
     void UpdateConstrainedModalUIExtInfo(std::shared_ptr<RSUIExtensionData> constrainedModalUIExtData, uint64_t userId);
     WSError SetAppForceLandscapeConfig(const std::string& bundleName, AppForceLandscapeConfig& config);
     WSError SetAppForceLandscapeConfigEnable(const std::string& bundleName, bool enableForceLandscape,
-        bool needUpdateViewport = false);
+        bool needUpdateViewport, SelectMode selectMode);
     AppForceLandscapeConfig GetAppForceLandscapeConfig(const std::string& bundleName);
     bool GetAppForceLandscapeConfigEnable(const std::string& bundleName);
     WMError GetWindowStyleType(WindowStyleType& windowStyletype) override;
@@ -947,6 +950,9 @@ public:
      * Compatible Mode
      */
     void RegisterPageEnableFunc(PageEnableFunc&& func);
+
+    void SetSelectMode(SelectMode selectMode);
+    SelectMode GetSelectMode() const;
 
 protected:
     SceneSessionManager();
@@ -1497,6 +1503,7 @@ private:
      * Window Hierarchy
      */
     NotifySetSpecificWindowZIndexFunc setSpecificWindowZIndexFunc_;
+    NotifyMoveMainWindowToTargetDisplayFunc moveMainWindowToTargetDisplayFunc_;
     std::unordered_map<WindowType, int32_t> specificZIndexByPidMap_;
     std::mutex specificZIndexByPidMapMutex_;
 
@@ -2026,6 +2033,8 @@ private:
     PageEnableFunc pageEnableFunc_;
     WSError NotifyPageEnableFunc(const std::string& bundleName, int32_t windowId,
         const std::string& action, const std::string& message);
+
+    std::atomic<SelectMode> selectMode_{SelectMode::INVALID_MODE};
 };
 } // namespace OHOS::Rosen
 

@@ -110,10 +110,10 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         auto panelSession = session->GetKeyboardPanelSession();
         if (const auto callingSession = session->GetSceneSession(
                 session->GetSessionProperty()->GetCallingSessionId())) {
-            session->SetSessionBlackListWhenShow(
-                callingSession->isSkipSelfWhenShowOnVirtualScreen_.load(), panelSession);
-            session->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
-            panelSession->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
+            bool isCallingSessionSkip = session->GetSkipFlagForCallingSession(callingSession);
+            session->SetSessionBlackListWhenShow(isCallingSessionSkip, panelSession);
+            session->SetSkipEventOnCastPlus(isCallingSessionSkip);
+            panelSession->SetSkipEventOnCastPlus(isCallingSessionSkip);
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
@@ -136,6 +136,18 @@ void KeyboardSession::SetSessionBlackListWhenShow(bool isCallingSessionSkip, con
         RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
         panelSession->RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
     }
+}
+
+bool KeyboardSession::GetSkipFlagForCallingSession(const sptr<SceneSession>& callingSession) const
+{
+    if (!callingSession) {
+        return false;
+    }
+    auto mainSession = callingSession->GetMainSession();
+    if (!mainSession) {
+        return false;
+    }
+    return mainSession->isSkipSelfWhenShowOnVirtualScreen_.load();
 }
 
 WSError KeyboardSession::Hide()
