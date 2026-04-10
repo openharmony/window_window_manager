@@ -1151,8 +1151,8 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
         if (event == SessionEvent::EVENT_CLEAR_GAME_PRELAUNCH_FLAG) {
             if (session->GetSessionInfo().reuseSessionInGamePreLaunch_) {
                 TLOGNI(WmsLogTag::WMS_LIFE, "Reset scene session reuseSessionInGamePreLaunch_ to false, id: %{public}d",
-                    sceneSession->GetPersistentId());
-                sceneSession->EditSessionInfo().reuseSessionInGamePreLaunch_ = false;
+                    session->GetPersistentId());
+                session->EditSessionInfo().reuseSessionInGamePreLaunch_ = false;
             }
         }
         if (event == SessionEvent::EVENT_START_MOVE) {
