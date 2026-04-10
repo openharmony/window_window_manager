@@ -527,11 +527,11 @@ void SecondaryDisplayFoldPolicy::ChangeSuperScreenDisplayMode(sptr<ScreenSession
 void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> screenSession, ScreenId screenId,
     ScreenPropertyChangeReason reason, FoldDisplayMode displayMode)
 {
-    if (displayMode == FoldDisplayMode::COORDINATION && currentFoldStatus_ == FoldDisplayMode::FULL) {
+    if (displayMode == FoldDisplayMode::COORDINATION && currentDisplayMode_ == FoldDisplayMode::FULL) {
         ChangeScreenDisplayModeToCoordination();
     }
     bool res = displayMode != FoldDisplayMode::COORDINATION && displayMode != FoldDisplayMode::UNKNOWN;
-    if (res &&currentFoldStatus_ == FoldDisplayMode::COORDINATION) {
+    if (res && currentDisplayMode_ == FoldDisplayMode::COORDINATION) {
         CloseCoordinationScreen();
     }
     std::lock_guard<std::recursive_mutex> lock_info(displayInfoMutex_);
