@@ -50,6 +50,8 @@ public:
 
     static void SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace);
     static void SetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj, ani_int orientation);
+    static void SetPreferredOrientationWithResult(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_int orientation, ani_int promiseId);
     static ani_int GetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_int ConvertOrientationAndRotation(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_int from, ani_int to, ani_int value);
@@ -250,6 +252,8 @@ private:
     void OnHide(ani_env* env);
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
+    void NotifyOrientationExecutionResultResult(uint32_t promiseId, uint32_t result);
+    void OnSetPreferredOrientationWithResult(ani_env* env, ani_int orientation, ani_int promiseId);
     ani_int OnGetPreferredOrientation(ani_env* env);
     ani_int OnConvertOrientationAndRotation(ani_env* env, ani_int from, ani_int to, ani_int value);
     void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
@@ -372,6 +376,7 @@ private:
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
+    ani_env* env_;
     ani_ref aniRef_ = nullptr;
     ani_object aniTransControllerObj_ = nullptr;
 };
