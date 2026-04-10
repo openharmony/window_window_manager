@@ -37,7 +37,8 @@ struct OH_PixelmapNative;
 typedef struct OH_WindowManager_FrameMetrics OH_WindowManager_FrameMetrics;
 
 /**
- * @brief Density information object.
+ * @brief Window density information, including the system display size scaling factor, system default display size
+ *     scaling factor, and custom display size scaling factor of the screen where the window is located.
  *
  * @since 26.0.0
  */
@@ -51,15 +52,13 @@ typedef struct OH_WindowManager_DensityInfo OH_WindowManager_DensityInfo;
 typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(int32_t windowId, OH_WindowManager_FrameMetrics* metrics);
 
 /**
- * @brief Density information change callback type.
+ * @brief Density info callback type.
  *
  * @param windowId WindowId when window is created.
- * @param densityInfo Density information object. The object is managed by the framework and is valid only during
- *                    the current callback. If a persistent copy is required, call
- *                    OH_WindowManager_GetDensityInfoCopy.
+ * @param info Display size scaling factor information for the current window.
  * @since 26.0.0
  */
-typedef void (*OH_WindowManager_DensityInfoCallback)(int32_t windowId, const OH_WindowManager_DensityInfo* densityInfo);
+typedef void (*OH_WindowManager_DensityInfoCallback)(int32_t windowId, const OH_WindowManager_DensityInfo* info);
 
 /**
  * @brief Enumerates the result types of the wm interface
