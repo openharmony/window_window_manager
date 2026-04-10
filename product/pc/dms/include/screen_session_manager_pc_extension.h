@@ -31,7 +31,8 @@ public:
         ScreenId defScreenId, ScreenProperty property) override;
     void NotifyCaptureStatusChangedGlobal() override;
     void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession) override;
-    void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason) override;
+    void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason,
+        sptr<IRemoteObject> connectToRenderToken) override;
     void ScreenConnectionChanged(sptr<ScreenSession>& screenSession,
         ScreenId screenId, ScreenEvent screenEvent, bool phyMirrorEnable) override;
     bool IsNeedAddInputServiceAbility() override;

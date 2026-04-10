@@ -54,9 +54,9 @@ void ScreenSessionManagerExt::GetAndMergeEdidInfo(sptr<ScreenSession> screenSess
 }
 
 void ScreenSessionManagerExt::OnScreenChangeDefault(ScreenId screenId,
-    ScreenEvent screenEvent, ScreenChangeReason reason)
+    ScreenEvent screenEvent, ScreenChangeReason reason, sptr<IRemoteObject> connectToRenderToken)
 {
-    COMBINE_FUNC(OnScreenChangeDefault(screenId, screenEvent, reason));
+    COMBINE_FUNC(OnScreenChangeDefault(screenId, screenEvent, reason, connectToRenderToken));
 }
 
 void ScreenSessionManagerExt::ScreenConnectionChanged(sptr<ScreenSession>& screenSession,
