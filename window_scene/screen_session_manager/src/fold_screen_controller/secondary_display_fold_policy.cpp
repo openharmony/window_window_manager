@@ -530,7 +530,7 @@ void SecondaryDisplayFoldPolicy::SendPropertyChangeResult(sptr<ScreenSession> sc
     if (displayMode == FoldDisplayMode::COORDINATION && currentFoldStatus_ == FoldDisplayMode::FULL) {
         ChangeScreenDisplayModeToCoordination();
     }
-    bool res = displayMode !=  FoldDisplayMode::COORDINATION || displayMode != FoldDisplayMode:: UNKNOWN;
+    bool res = displayMode !=  FoldDisplayMode::COORDINATION && displayMode != FoldDisplayMode:: UNKNOWN;
     if (res &&currentFoldStatus_ == FoldDisplayMode::COORDINATION) {
         CloseCoordinationScreen();
     }
