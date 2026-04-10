@@ -2805,9 +2805,6 @@ WSError SceneSession::SetSystemBarProperty(WindowType type, SystemBarProperty sy
         systemBarProperty.enableAnimation_, systemBarProperty.settingFlag_);
     auto property = GetSessionProperty();
     property->SetSystemBarProperty(type, systemBarProperty);
-    if (type == WindowType::WINDOW_TYPE_STATUS_BAR && systemBarProperty.enable_) {
-        SetIsDisplayStatusBarTemporarily(false);
-    }
     if (onSystemBarPropertyChange_) {
         onSystemBarPropertyChange_(property->GetSystemBarProperty());
         if (specificCallback_ != nullptr && specificCallback_->onNotifyWindowSystemBarPropertyChangeFunc_ != nullptr) {
@@ -8307,16 +8304,6 @@ void SceneSession::SetForceHideState(ForceHideState forceHideState)
 ForceHideState SceneSession::GetForceHideState() const
 {
     return forceHideState_;
-}
-
-void SceneSession::SetIsDisplayStatusBarTemporarily(bool isTemporary)
-{
-    isDisplayStatusBarTemporarily_.store(isTemporary);
-}
-
-bool SceneSession::GetIsDisplayStatusBarTemporarily() const
-{
-    return isDisplayStatusBarTemporarily_.load();
 }
 
 void SceneSession::RetrieveStatusBarDefaultVisibility()
