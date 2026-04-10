@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_ROOT_SCENE_H
 
 #include <mutex>
+#include <transaction/rs_interfaces.h>
 
 #include "vsync_station.h"
 #include "window.h"

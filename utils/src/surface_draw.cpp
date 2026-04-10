@@ -19,6 +19,7 @@
 #include "surface_draw.h"
 #include <transaction/rs_interfaces.h>
 #include <ui/rs_surface_extractor.h>
+#include <ui/rs_ui_context.h>
 
 #include "image/bitmap.h"
 #include "image_source.h"
