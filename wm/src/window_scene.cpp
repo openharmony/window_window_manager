@@ -78,7 +78,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         mainWindow_ = mainWindow;
     }
     mainWindowId_ = mainWindow->GetWindowId();
-    listener->SetIsWindowSceneListener(true);
+    if (listener != nullptr) {
+        listener->SetIsWindowSceneListener(true);
+    }
     mainWindow->RegisterLifeCycleListener(listener);
 
     // report when application startup request window
@@ -116,7 +118,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         mainWindow_ = mainWindow;
     }
     mainWindowId_ = mainWindow->GetWindowId();
-    listener->SetIsWindowSceneListener(true);
+    if (listener != nullptr) {
+        listener->SetIsWindowSceneListener(true);
+    }
     mainWindow->RegisterLifeCycleListener(listener);
 
     // report when application startup request window
