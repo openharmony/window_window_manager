@@ -2911,7 +2911,7 @@ bool Session::IsSubWindowZLevelAboveParentLoosened() const
  
 bool Session::IsLoosenedWithFreeMultiMode() const
 {
-    TLOGI(WmsLogTag::WMS_EVENT,
+    TLOGD(WmsLogTag::WMS_SUB,
         "id: %{public}d, isAbover: %{public}d, IsFreeMultiWindowMode: %{public}d, ispc: %{public}d",
         GetPersistentId(), IsSubWindowZLevelAboveParentLoosened(),
         systemConfig_.IsFreeMultiWindowMode(), systemConfig_.IsPcWindow());

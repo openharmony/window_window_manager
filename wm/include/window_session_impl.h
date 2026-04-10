@@ -699,8 +699,8 @@ protected:
         return WMError::WM_OK;
     }
  
-    template<typename T> 
-    WMError UnregisterListenerInMap(std::map<int32_t, std::vector<sptr<T>>>& listenerMap,  
+    template<typename T>
+    WMError UnregisterListenerInMap(std::map<int32_t, std::vector<sptr<T>>>& listenerMap,
         int32_t persistentId, const sptr<T>& listener)
     {
         auto it = listenerMap.find(persistentId);
@@ -710,8 +710,8 @@ protected:
         return UnregisterListener(listenerMap[persistentId], listener);
     }
  
-    template<typename T> 
-    WMError UnregisterListenerInMap(std::unordered_map<int32_t, std::vector<sptr<T>>>& listenerMap,  
+    template<typename T>
+    WMError UnregisterListenerInMap(std::unordered_map<int32_t, std::vector<sptr<T>>>& listenerMap,
         int32_t persistentId, const sptr<T>& listener)
     {
         auto it = listenerMap.find(persistentId);
