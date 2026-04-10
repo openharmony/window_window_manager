@@ -535,6 +535,11 @@ struct SessionInfo {
     std::string pageConfig = "";
     std::string logicalDeviceConfig = "";
 
+    /**
+     * Game PreLaunch
+     */
+    bool isGamePrelaunch_ = false;
+
     AAFwk::Want GetWantSafely() const
     {
         std::lock_guard<std::mutex> lock(*wantMutex_);
@@ -1350,6 +1355,8 @@ enum class LifeCycleChangeReason {
      * Drive batch of windows go background quickly
      */
     QUICK_BATCH_BACKGROUND,
+
+    GAME_PRELAUNCH_BACKGROUND,
 
     SCREEN_ROTATION,
 

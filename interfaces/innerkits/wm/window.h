@@ -174,6 +174,16 @@ public:
      * @brief Notify caller that window is already background.
      */
     virtual void AfterDidBackground() {}
+
+    void SetIsWindowSceneListener(bool isWindowSceneListener) {
+        isWindowSceneListener_ = isWindowSceneListener;
+    }
+
+    bool IsWindowSceneListener() {
+        return isWindowSceneListener_;
+    }
+protected:
+    bool isWindowSceneListener_ = false;
 };
 
 /**
@@ -1628,7 +1638,7 @@ public:
     /**
      * @brief Resume window
      */
-    virtual void Resume() {}
+    virtual void Resume(bool isGamePreLaunch = false) {}
 
     /**
      * @brief Pause window
@@ -4043,6 +4053,16 @@ public:
      * @return WM_OK means set success, others means failed.
      */
     virtual WMError ClearWindowMask()
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    virtual WMError SetIsGamePreLaunch(bool isGamePreLaunch)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    virtual WMError ClearIsGamePreLaunch()
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

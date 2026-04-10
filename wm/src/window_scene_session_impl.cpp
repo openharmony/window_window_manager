@@ -2051,13 +2051,13 @@ void WindowSceneSessionImpl::NotifyFreeMultiWindowModeResume()
     }
 }
 
-void WindowSceneSessionImpl::Resume()
+void WindowSceneSessionImpl::Resume(bool isGamePreLaunch)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d, isDidForeground: %{public}d",
-        isColdStart_, isDidForeground_);
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d, isDidForeground: %{public}d, isGamePreLaunch:%{public}d",
+        isColdStart_, isDidForeground_, isGamePreLaunch);
     isDidForeground_ = true;
     isColdStart_ = false;
-    NotifyAfterLifecycleResumed();
+    NotifyAfterLifecycleResumed(isGamePreLaunch);
 }
 
 void WindowSceneSessionImpl::Pause()
@@ -6912,6 +6912,18 @@ WMError WindowSceneSessionImpl::ClearWindowMask()
         TLOGE(WmsLogTag::WMS_PC, "UpdateProperty failed, id:%{public}u", GetWindowId());
     }
     return ret;
+}
+
+WMError WindowSceneSessionImpl::SetIsGamePreLaunch(bool isGamePreLaunch)
+{
+    isGamePreLaunch_ = isGamePreLaunch;
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::ClearIsGamePreLaunch()
+{
+    isGamePreLaunch_ = false;
+    return WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetFollowParentMultiScreenPolicy(bool enabled)
