@@ -285,6 +285,7 @@ private:
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
     static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value NotifyOrientationExecutionResult(napi_env env, napi_callback_info info);
     static napi_value GetSceneNodeCount(napi_env env, napi_callback_info info);
     static napi_value NotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
     /*
@@ -391,6 +392,7 @@ private:
     napi_value OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnGetUid(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnNotifyOrientationExecutionResult(napi_env env, napi_callback_info info);
     napi_value OnGetSceneNodeCount(napi_env env, napi_callback_info info);
     napi_value OnNotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
 
@@ -532,7 +534,8 @@ private:
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
-    void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true);
+    void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true, uint32_t promiseId = 0);
+    void ProcessRequestedOrientationResult(uint32_t promiseId);
     void OnForceHideChange(bool hide);
     void OnWindowDragHotArea(uint32_t type, SizeChangeReason reason, DisplayId displayId);
     void OnTouchOutside();
@@ -615,6 +618,7 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
+    std::atomic<bool> executionResultFinish_ = true;
 };
 } // namespace OHOS::Rosen
 

@@ -80,7 +80,8 @@ using NotifySystemBarPropertyChangeFunc = std::function<void(
     const std::unordered_map<WindowType, SystemBarProperty>& propertyMap)>;
 using NotifyNeedAvoidFunc = std::function<void(bool status)>;
 using NotifyShowWhenLockedFunc = std::function<void(bool showWhenLocked)>;
-using NotifyReqOrientationChangeFunc = std::function<void(uint32_t orientation, bool needAnimation)>;
+using NotifyReqOrientationChangeFunc =
+    std::function<void(uint32_t orientation, bool needAnimation, uint32_t promiseId)>;
 using NotifyRaiseAboveTargetFunc = std::function<void(int32_t subWindowId)>;
 using NotifyForceHideChangeFunc = std::function<void(bool hide)>;
 using NotifyTouchOutsideFunc = std::function<void()>;
@@ -655,11 +656,14 @@ public:
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     WSError SetCurrentRotation(int32_t currentRotation);
     WSError GetSceneNodeCount(uint32_t& nodeCount);
+    WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result);
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     WSError NotifyPageRotationIsIgnored();
     WSError ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation);
     WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to,
         const int32_t value, int32_t& convertedValue) override;
+    WMError SetPreferredOrientationWithResult(
+        Orientation orientation, uint32_t promiseId, bool needAnimation = true) override;
     WSError ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue);
     WSError ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue);
     WSError ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation);

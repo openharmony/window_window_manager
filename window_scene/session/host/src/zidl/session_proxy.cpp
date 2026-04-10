@@ -1727,6 +1727,46 @@ WSError SessionProxy::ConvertOrientationAndRotation(const RotationInfoType from,
     return static_cast<WSError>(ret);
 }
 
+WMError SessionProxy::SetPreferredOrientationWithResult(
+    Orientation orientation, uint32_t promiseId, bool needAnimation)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(orientation))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write orientation error");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(promiseId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write promiseId error");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(needAnimation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write needAnimation error");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_PREFERRED_ORIENTATION_WITH_RESULT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 WSError SessionProxy::RequestSessionBack(bool needMoveToBackground)
 {
     MessageParcel data;

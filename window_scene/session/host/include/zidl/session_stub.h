@@ -58,6 +58,7 @@ private:
     int HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply);
     int HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply);
     int HandleConvertOrientationAndRotation(MessageParcel& data, MessageParcel& reply);
+    int HandleSetPreferredOrientationWithResult(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetContentAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
