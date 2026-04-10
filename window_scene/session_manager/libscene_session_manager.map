@@ -153,6 +153,8 @@
             OHOS::Rosen::SceneSessionManager::SetAppDragResizeTypeInner*;
             OHOS::Rosen::SceneSessionManager::SetAppForceLandscapeConfig*;
             OHOS::Rosen::SceneSessionManager::SetAppForceLandscapeConfigEnable*;
+            OHOS::Rosen::SceneSessionManager::SetSelectMode*;
+            OHOS::Rosen::SceneSessionManager::GetSelectMode*;
             OHOS::Rosen::SceneSessionManager::SetBehindWindowFilterEnabled*;
             OHOS::Rosen::SceneSessionManager::SetCloseTargetFloatWindowFunc*;
             OHOS::Rosen::SceneSessionManager::SetCreateKeyboardSessionListener*;
@@ -168,6 +170,7 @@
             OHOS::Rosen::SceneSessionManager::SetIsRootSceneLastFrameLayoutFinishedFunc*;
             OHOS::Rosen::SceneSessionManager::SetIsWindowRectAutoSave*;
             OHOS::Rosen::SceneSessionManager::SetMaximizeFullScreen*;
+            OHOS::Rosen::SceneSessionManager::SetMoveMainWindowToTargetDisplayListener*;
             OHOS::Rosen::SceneSessionManager::SetOnFlushUIParamsFunc*;
             OHOS::Rosen::SceneSessionManager::SetOutsideDownEventListener*;
             OHOS::Rosen::SceneSessionManager::SetPiPSettingSwitchStatus*;

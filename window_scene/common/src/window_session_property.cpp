@@ -1494,7 +1494,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isRotationLock_) &&
         parcel.WriteInt32(frameNum_) &&
         parcel.WriteBool(isPrelaunch_) &&
-        parcel.WriteBool(isAppBufferReady_);
+        parcel.WriteBool(isAppBufferReady_) &&
+        parcel.WriteBool(isCrossProcessWindow_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1618,6 +1619,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFrameNum(parcel.ReadInt32());
     property->SetPrelaunch(parcel.ReadBool());
     property->SetAppBufferReady(parcel.ReadBool());
+    property->SetIsCrossProcessWindow(parcel.ReadBool());
     return property;
 }
 
@@ -1736,6 +1738,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isRotationLock_ = property->isRotationLock_;
     statusBarHeightInImmersive_ = property->statusBarHeightInImmersive_;
     pageCompatibleMode_ = property->pageCompatibleMode_;
+    isCrossProcessWindow_ = property->isCrossProcessWindow_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)

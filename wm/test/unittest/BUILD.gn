@@ -59,12 +59,7 @@ group("unittest") {
       ":wm_window_adapter_lite_test",
       ":wm_window_adapter_test",
       ":wm_window_agent_test",
-      ":wm_window_effect_test",
       ":wm_window_event_subscriber_test",
-      ":wm_window_impl_test",
-      ":wm_window_impl_test2",
-      ":wm_window_impl_test3",
-      ":wm_window_impl_test5",
       ":wm_window_input_channel_test",
       ":wm_window_input_intercept_test",
       ":wm_window_manager_agent_proxy_test",
@@ -92,7 +87,6 @@ group("unittest") {
       "attribute:wm_window_manager_attribute_test",
       "event_distribution:wm_oh_window_event_test",
       "event_distribution:wm_window_event_test",
-      "event_distribution:wm_window_impl_event_test",
       "event_distribution:wm_window_scene_session_impl_event_test",
       "event_distribution:wm_window_session_impl_event_test",
       "immersive:wm_immersive_test",
@@ -101,6 +95,7 @@ group("unittest") {
       "special_window:window_scene_session_impl_special_window_test",
       "ui_extension:wm_extension_window_impl_test",
       "ui_extension:wm_window_extension_session_impl_test",
+      "ui_extension:wm_window_scene_session_impl_uiextension_test",
       ":wm_input_transfer_station_new_test",
     ]
   }
@@ -110,7 +105,7 @@ ohos_unittest("wm_window_manager_test") {
   module_out_path = module_out_path
 
   include_dirs = [ "${window_base_path}/wm/src" ]
-  sources = [ "window_manager_test.cpp" ]
+  sources = [ "window_manager_test.cpp", "window_manager_test2.cpp" ]
 
   deps = [
     ":wm_unittest_common",

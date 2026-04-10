@@ -919,6 +919,35 @@ SessionState Session::GetSessionState() const
     return state_;
 }
 
+SessionState Session::GetRealSessionState()
+{
+    auto state = GetSessionState();
+    auto winType = GetWindowType();
+    if (!IsSessionForeground()) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType));
+        return state;
+    }
+    if (auto parent = GetParentSession()) {
+        state = parent->GetSessionState();
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d, parentId=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType), parent->GetWindowId());
+    }
+    if (WindowHelper::IsSubWindow(winType)) {
+        int32_t mainWinId = INVALID_SESSION_ID;
+        auto mainSession = GetMainSession();
+        if (mainSession != nullptr) {
+            state = mainSession->GetSessionState();
+            mainWinId = mainSession->GetWindowId();
+        }
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d, mainWinId=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType), mainWinId);
+    }
+    return state;
+}
+
 void Session::SetSessionState(SessionState state)
 {
     if (state < SessionState::STATE_DISCONNECT || state > SessionState::STATE_END) {
@@ -1826,6 +1855,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
+    NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
     UpdateSessionState(SessionState::STATE_FOREGROUND);
     if (!isActive_ || GetSessionInfo().reuseDelegatorWindow) {
         SetActive(true);
@@ -2029,13 +2059,11 @@ WSError Session::SetActive(bool active)
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
         isActive_ = active;
-        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::ACTIVE);
     }
     if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
         sessionStage_->SetActive(false);
         UpdateSessionState(SessionState::STATE_INACTIVE);
         isActive_ = active;
-        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::INACTIVE);
     }
     return WSError::WS_OK;
 }
@@ -4079,6 +4107,7 @@ WSError Session::NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo,
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
+    NotifyCrossProcessChildrenLifecycle(isFocused ? ParentLifeCycleEvent::ACTIVE : ParentLifeCycleEvent::INACTIVE);
     sessionStage_->UpdateFocus(focusNotifyInfo, isFocused);
 
     return WSError::WS_OK;
@@ -4308,6 +4337,7 @@ void Session::OnVsyncReceivedAfterModeChanged()
         } else if (session->timesToWaitForVsync_.load() == 0 && session->sessionStage_ &&
                    session->isWindowModeDirty_.compare_exchange_strong(isWindowModeDirty, false)) {
             session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+            session->NotifySubSessionParentStatusChange(session->GetWindowMode());
         } else {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, sessionStage is null or mode is not dirty",
                 funcName, session->GetPersistentId());
@@ -4421,18 +4451,44 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
 }
 
 /** @note @window.layout */
-void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
-    uint32_t minHeight, uint32_t maxFloatingWindowSize)
+void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
+    uint32_t minHeight, const ScreenMetrics& screenMetrics)
 {
-    constexpr uint32_t marginOfError = 2; // The max vp bias for preventing giant logs.
-    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
-        curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
+    constexpr uint32_t MARGIN_OF_ERROR = 2; // The max vp bias for preventing giant logs.
+    constexpr float DEFAULT_DENSITY = 1.0f;
+
+    const auto& systemConfig = GetSystemConfig();
+    const uint32_t maxFloatingWindowSize = systemConfig.maxFloatingWindowSize_;
+
+    const bool isSizeBelowMin = (curWidth + MARGIN_OF_ERROR < minWidth) ||
+                                (curHeight + MARGIN_OF_ERROR < minHeight);
+    const bool isSizeAboveMax = (curWidth > maxFloatingWindowSize + MARGIN_OF_ERROR) ||
+                                (curHeight > maxFloatingWindowSize + MARGIN_OF_ERROR);
+
+    const WindowType winType = GetWindowType();
+    const bool isSystemWindowButNotDialog = WindowHelper::IsSystemWindowButNotDialog(winType);
+
+    const uint32_t screenWidth = screenMetrics.widthPx;
+    const uint32_t screenHeight = screenMetrics.heightPx;
+    const float density = screenMetrics.density;
+
+    const float safeDensity = (!NearZero(density)) ? density : DEFAULT_DENSITY;
+    const float screenWidthVp = screenWidth / safeDensity;
+    const float screenHeightVp = screenHeight / safeDensity;
+
+    const bool isSizeBelowScreen = (curWidth + MARGIN_OF_ERROR < screenWidthVp) ||
+                                   (curHeight + MARGIN_OF_ERROR < screenHeightVp);
+
+    const bool needReportException = isSizeAboveMax ||
+                                     (!isSystemWindowButNotDialog && isSizeBelowMin && isSizeBelowScreen);
+
+    if (needReportException) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
         std::ostringstream oss;
         oss << " RectCheck err size ";
         oss << " cur persistentId: " << GetPersistentId() << ",";
-        oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
+        oss << " windowType: " << static_cast<uint32_t>(winType) << ",";
         auto property = GetSessionProperty();
         if (property) {
             oss << " windowName: " << property->GetWindowName() << ",";
@@ -4442,10 +4498,11 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " curHeight: " << curHeight << ",";
         oss << " minWidth: " << minWidth << ",";
         oss << " minHeight: " << minHeight << ",";
+        oss << " screenWidth: " << screenWidth << ",";
+        oss << " screenHeight: " << screenHeight << ",";
         oss << " maxFloatingWindowSize: " << maxFloatingWindowSize << ",";
         oss << " sessionRect: " << GetSessionRect().ToString() << ";";
-        WindowInfoReporter::GetInstance().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
+        WindowInfoReporter::GetInstance().ReportWindowFrozen(WindowDFXHelperType::WINDOW_RECT_CHECK, oss.str());
     }
 }
 
@@ -4468,6 +4525,10 @@ void Session::RectCheckProcess()
     }
     auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
+    ScreenMetrics screenMetrics{
+        .widthPx = static_cast<uint32_t>(screenProperty.GetBounds().rect_.width_),
+        .heightPx = static_cast<uint32_t>(screenProperty.GetBounds().rect_.height_),
+        .density = screenProperty.GetDensity()};
     if (!NearZero(density) && !NearZero(GetSessionRect().height_)) {
         float curWidth = GetSessionRect().width_ / density;
         float curHeight = GetSessionRect().height_ / density;
@@ -4488,7 +4549,7 @@ void Session::RectCheckProcess()
             WindowInfoReporter::GetInstance().ReportWindowException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
         }
-        RectCheck(curWidth, curHeight);
+        RectCheck(curWidth, curHeight, screenMetrics);
     }
 }
 

@@ -179,6 +179,12 @@ struct ControlInfo {
     bool isControlRecentOnly;
 };
 
+struct ScreenMetrics {
+    uint32_t widthPx;
+    uint32_t heightPx;
+    float density;
+};
+
 extern const std::string ATTACH_EVENT_NAME;
 extern const std::string DETACH_EVENT_NAME;
 
@@ -249,6 +255,8 @@ public:
      */
     virtual bool GetIsUseControlSession() const { return false; }
     virtual void SetIsUseControlSession(bool isUseControlSession) {}
+    virtual int32_t GetMainWindowPersistentId() const { return INVALID_SESSION_ID; }
+    virtual void SetMainWindowPersistentId(int32_t mainWindowPersistentId) {}
     virtual void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) {}
 
     /*
@@ -392,6 +400,10 @@ public:
     {
         controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
         return false;
+    };
+    virtual ControlAppType GetControlAppType() const
+    {
+        return ControlAppType::CONTROL_APP_TYPE_BEGIN;
     };
     bool GetAppLockControl() const { return isAppLockControl_.load(); };
     void SetAppLockControl(bool control) { isAppLockControl_.store(control); };
@@ -763,9 +775,9 @@ public:
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
-    virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
-    void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
-        uint32_t minHeight, uint32_t maxFloatingWindowSize);
+    virtual void RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics) {};
+    void RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
+        uint32_t minHeight, const ScreenMetrics& screenMetrics);
     DetectTaskInfo GetDetectTaskInfo() const;
     void SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo);
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
@@ -887,6 +899,9 @@ public:
     void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
     WSError UpdateBrightness(float brightness);
+    SessionState GetRealSessionState();
+
+    std::atomic<bool> isSkipSelfWhenShowOnVirtualScreen_ { false };
 
     /*
      * Window Pattern

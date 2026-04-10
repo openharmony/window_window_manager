@@ -548,6 +548,16 @@ WSError SceneSessionManagerLiteProxy::GetParcelableInfos(MessageParcel& reply, s
     return WSError::WS_OK;
 }
 
+bool SceneSessionManagerLiteProxy::CheckCollaborator(int32_t type)
+{
+    if (type != CollaboratorType::RESERVE_TYPE && type != CollaboratorType::OTHERS_TYPE &&
+        type != CollaboratorType::REDIRECT_TYPE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "collaborator type is invalid");
+        return false;
+    }
+    return true;
+}
+
 WSError SceneSessionManagerLiteProxy::TerminateSessionNew(const sptr<AAFwk::SessionInfo> abilitySessionInfo,
     bool needStartCaller, bool isFromBroker)
 {
@@ -1537,7 +1547,7 @@ WSError SceneSessionManagerLiteProxy::UnregisterIAbilityManagerCollaborator(int3
         TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!CheckCollaboratorType(type)) {
+    if (!CheckCollaborator(type)) {
         TLOGE(WmsLogTag::WMS_MAIN, "type is invalid.");
         return WSError::WS_ERROR_IPC_FAILED;
     }
@@ -2172,6 +2182,58 @@ WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByBundles(
     return static_cast<WMError>(ret);
 }
 
+WMError SceneSessionManagerLiteProxy::RegisterSessionLifecycleListenerByAppInstance(
+    const sptr<ISessionLifecycleListener>& listener, const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (listener == nullptr || listener->AsObject() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write lifecycle listener failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write bundleName failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write appIndex failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(appInstanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write appInstanceKey failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_APP_INSTANCE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read ret failed.");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 WMError SceneSessionManagerLiteProxy::UnregisterSessionLifecycleListener(
     const sptr<ISessionLifecycleListener>& listener)
 {
@@ -2197,7 +2259,8 @@ WMError SceneSessionManagerLiteProxy::UnregisterSessionLifecycleListener(
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(
-        static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER),
+        static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed.");
         return WMError::WM_ERROR_IPC_FAILED;

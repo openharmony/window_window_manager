@@ -4713,7 +4713,7 @@ public:
      * @param windowAnchorInfo the windowAnchorInfo of subWindow.
      * @return WM_OK means set success.
      */
-    virtual WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo, bool isAttach = false)
+    virtual WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -5330,6 +5330,16 @@ public:
     virtual WMError NotifyPageEnable(const std::string& action, const std::string& message)
     {
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
+    }
+
+    /**
+     * @brief notify split ratio changed
+     *
+     * @param newRatio new ratio
+     */
+    virtual WMError NotifySplitRatioChanged(float newRatio)
+    {
+        return WMError::WM_OK;
     }
 };
 }

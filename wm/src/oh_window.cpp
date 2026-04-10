@@ -504,10 +504,14 @@ WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
 
     OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
     if (!FindFrameMetricsMeasuredListener(windowId, measuredCallbackId, listener)) {
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
 
     auto ret = window->UnregisterFrameMetricsChangeListener(listener);
+    if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+        EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+        return WindowManager_ErrorCode::OK;
+    }
     if (ret != WMError::WM_OK) {
         TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s unregister failed, windowId:%{public}d, ret:%{public}d",
             where, windowId, static_cast<int32_t>(ret));
@@ -1198,11 +1202,11 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
 {
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -1231,9 +1235,13 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
             return;
         }
         auto ret = window->RegisterFrameMetricsChangeListener(listener);
-        errCode = ret == WMError::WM_OK ? WindowManager_ErrorCode::OK :
-            WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
-        if (ret != WMError::WM_OK) {
+        if (ret == WMError::WM_OK) {
+            errCode = WindowManager_ErrorCode::OK;
+        } else if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+            errCode = WindowManager_ErrorCode::OK;
+            return;
+        } else {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s register failed, windowId:%{public}d, ret:%{public}d",
                 where, windowId, static_cast<int32_t>(ret));
             return;
@@ -1248,11 +1256,11 @@ int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
 {
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {

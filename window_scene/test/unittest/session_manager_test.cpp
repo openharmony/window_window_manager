@@ -374,6 +374,19 @@ HWTEST_F(SessionManagerTest, SMSRecoverListener3, TestSize.Level1)
     listener->OnRemoteRequest(code, data, reply, option);
     ASSERT_NE(nullptr, listener);
 }
+
+/**
+ * @tc.name: GetMockSessionManagerServiceProxy
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionManagerTest, GetMockSessionManagerServiceProxy, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, sm_);
+    sm_->GetMockSessionManagerServiceProxy();
+    sm_->GetMockSessionManagerServiceProxy();
+    ASSERT_NE(sm_->mockFoundationDeathRecipient_, nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
