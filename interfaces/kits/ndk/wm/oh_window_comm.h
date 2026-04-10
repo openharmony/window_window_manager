@@ -49,7 +49,8 @@ typedef struct OH_WindowManager_DensityInfo OH_WindowManager_DensityInfo;
  *
  * @since 26.0.0
  */
-typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(int32_t windowId, OH_WindowManager_FrameMetrics* metrics);
+typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(
+    int32_t windowId, const OH_WindowManager_FrameMetrics* metrics);
 
 /**
  * @brief Density info callback type.

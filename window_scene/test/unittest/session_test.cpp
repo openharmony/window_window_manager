@@ -405,7 +405,7 @@ HWTEST_F(WindowSessionTest, SetLastClientParentSize, TestSize.Level1)
     ASSERT_NE(session_, nullptr);
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     session_->SetLastClientParentSize(rect);
-    ASSERT_EQ(rect, session_->GetSessionRect());
+    ASSERT_EQ(rect, session_->GetLastClientParentSize());
 }
 
 /**
@@ -2004,6 +2004,37 @@ HWTEST_F(WindowSessionTest, IsCompatibilityModeSubWin05, TestSize.Level1)
     childSession->SetParentSession(parentSession);
     // Different pid, should return false
     EXPECT_EQ(childSession->IsCompatibilityModeSubWin(), false);
+}
+
+/**
+ * @tc.name: GetRealSessionState
+ * @tc.desc: test get the real session state
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetRealSessionState, TestSize.Level1)
+{
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->SetSessionState(SessionState::STATE_ACTIVE);
+
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+
+    childSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    EXPECT_EQ(childSession->GetRealSessionState(), SessionState::STATE_BACKGROUND);
+
+    childSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(childSession->GetRealSessionState(), SessionState::STATE_ACTIVE);
 }
 
 /**

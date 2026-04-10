@@ -499,6 +499,8 @@ struct SessionInfo {
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
     bool hasPrivacyModeControl = false;
+    // The Field has a value in useControlsession
+    int32_t mainWindowPersistentId_ = INVALID_SESSION_ID;
 
     /*
      * UIExtension
@@ -613,6 +615,7 @@ enum class SizeChangeReason : uint32_t {
     SNAPSHOT_ROTATION = 37,
     SCENE_WITH_ANIMATION,
     LS_STATE_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 

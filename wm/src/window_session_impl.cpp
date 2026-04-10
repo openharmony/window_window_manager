@@ -1420,8 +1420,9 @@ void WindowSessionImpl::UpdateRectForOtherReasonTask(const Rect& wmRect, const R
     WindowSizeChangeReason wmReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
+    bool exceptedTrue = true;
     if ((wmRect != preRect) || (wmReason != lastSizeChangeReason_) || !postTaskDone_ ||
-        notifySizeChangeFlag_ || notifySizeChangeInCompatibleMode_.compare_exchange_strong(except_true_, false)) {
+        notifySizeChangeFlag_ || notifySizeChangeInCompatibleMode_.compare_exchange_strong(exceptedTrue, false)) {
         NotifySizeChange(wmRect, wmReason);
         SetNotifySizeChangeFlag(false);
         lastSizeChangeReason_ = wmReason;
@@ -2617,7 +2618,16 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
         bool enableForceSplit = false;
         if ((config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) &&
             GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-                SetForceSplitConfigEnable(enableForceSplit);
+            // try to fetch selectMode
+            SelectMode finalSelectMode = SelectMode::INVALID_MODE;
+            if (GetSelectMode(finalSelectMode) != WMError::WM_OK) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "get selectMode fail, id:%{public}d", GetPersistentId());
+                finalSelectMode = SelectMode::INVALID_MODE;
+            } else {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "get selectMode success, id:%{public}d, selectMode: %{public}u",
+                    GetPersistentId(), static_cast<uint32_t>(finalSelectMode));
+            }
+            SetForceSplitConfigEnable(enableForceSplit, false, finalSelectMode);
         } else {
             SetForceSplitConfigEnable(false);
         }
@@ -2897,9 +2907,10 @@ WSError WindowSessionImpl::UpdateGlobalDisplayRectFromServer(const WSRect& rect,
         reason = SizeChangeReason::DRAG_MOVE;
     }
 
+    bool exceptedTrue = true;
     Rect newRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
     if (newRect == GetGlobalDisplayRect() && reason == globalDisplayRectSizeChangeReason_) {
-        if (notifyRectChangeInCompatibleMode_.compare_exchange_strong(except_true_, false)) {
+        if (notifyRectChangeInCompatibleMode_.compare_exchange_strong(exceptedTrue, false)) {
             NotifyGlobalDisplayRectChange(newRect, static_cast<WindowSizeChangeReason>(reason));
         }
         TLOGD(WmsLogTag::WMS_LAYOUT,
@@ -5508,8 +5519,9 @@ WMError WindowSessionImpl::SetWindowContainerModalColor(const std::string& activ
     if (!windowSystemConfig_.IsPcWindow()) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (!SessionPermission::IsSystemCalling()) {
-        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    if (!SessionPermission::IsSystemCalling() &&
+        !SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_SET_WINDOW_ALPHA)) {
+        return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -8696,7 +8708,7 @@ WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
+WSError WindowSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
 {
     return WSError::WS_DO_NOTHING;
 }
@@ -9241,12 +9253,19 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
 
 WSError WindowSessionImpl::GetSceneNodeCount(uint32_t& nodeCount)
 {
-    if (rsUIDirector_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "rsUIDirector_ is nullptr");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    nodeCount = static_cast<uint32_t>(rsUIDirector_->GetUIDescendantCount());
-    TLOGI(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount success, count: %{public}u", nodeCount);
+    handler_->PostSyncTask([weakWindow = wptr(this), &nodeCount, where = __func__] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: window is null", where);
+            return;
+        }
+        if (window->rsUIDirector_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s rsUIDirector is nullptr", where);
+            return;
+        }
+        nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s success, count: %{public}u", where, nodeCount);
+    }, __func__);
     return WSError::WS_OK;
 }
 

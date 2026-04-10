@@ -115,7 +115,8 @@ public:
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError GetSceneNodeCount(uint32_t& nodeCount) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
     WSError CloseSpecificScene() override;

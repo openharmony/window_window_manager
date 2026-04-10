@@ -564,7 +564,8 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     if (WindowHelper::IsSubWindow(type) && !property_->GetIsUIExtFirstSubWindow()) { // sub window
         TLOGD(WmsLogTag::WMS_RECOVER, "SubWindow");
         auto parentSession = FindParentSessionByParentId(property_->GetParentId());
-        if (parentSession == nullptr || parentSession->GetHostSession() == nullptr) {
+        if ((parentSession == nullptr || parentSession->GetHostSession() == nullptr) &&
+            !property_->GetIsCrossProcessWindow()) {
             TLOGE(WmsLogTag::WMS_RECOVER, "parentSession is null");
             return WMError::WM_ERROR_NULLPTR;
         }
@@ -1134,6 +1135,18 @@ void WindowSceneSessionImpl::RegisterWindowRecoverStateChangeListener()
     };
 }
 
+void WindowSceneSessionImpl::RecoverExtension()
+{
+    TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowId: %{public}d", GetPersistentId());
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        Ace::UIExtOptions uiExtOptions;
+        uiExtOptions.isSendBackground = true;
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::RECOVER_EXTENSION), want,
+            static_cast<uint8_t>(SubSystemId::WM_UIEXT), uiExtOptions);
+    }
+}
+
 void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, const WindowRecoverState& state)
 {
     TLOGI(WmsLogTag::WMS_RECOVER, "id: %{public}d, state:%{public}u", GetPersistentId(), state);
@@ -1146,6 +1159,7 @@ void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, 
             UpdateFinishRecoverProperty(isSpecificSession);
             RecoverSessionListener();
             RecoverSessionProperty();
+            RecoverExtension();
             break;
         default:
             break;
@@ -3590,12 +3604,15 @@ WMError WindowSceneSessionImpl::UpdateSystemBarProperties(
 WMError WindowSceneSessionImpl::UpdateSystemBarPropertyForPage(WindowType type,
     const SystemBarProperty& systemBarProperty, const SystemBarPropertyFlag& systemBarPropertyFlag)
 {
+    bool hasEnableSetting = static_cast<uint32_t>(systemBarProperty.settingFlag_) &
+        static_cast<uint32_t>(SystemBarSettingFlag::ENABLE_SETTING);
     PartialSystemBarProperty prop = {
         .enable_ = systemBarProperty.enable_,
         .backgroundColor_ = systemBarProperty.backgroundColor_,
         .contentColor_ = systemBarProperty.contentColor_,
         .enableAnimation_ = systemBarProperty.enableAnimation_,
-        .flag_ = systemBarPropertyFlag
+        .flag_ = systemBarPropertyFlag,
+        .isolate_ = systemBarPropertyFlag.enableFlag && !hasEnableSetting
     };
     auto ret = SetOwnSystemBarProperty(type, prop, SystemBarPropertyOwner::APPLICATION);
     if (ret == WMError::WM_OK) {
@@ -3754,10 +3771,10 @@ WMError WindowSceneSessionImpl::SetOwnSystemBarProperty(WindowType type, const P
         }
         ownPropList.insert(insertIt, insertPair);
         TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}u %{public}s] type %{public}u owner %{public}u "
-            "prop [%{public}u %{public}x %{public}x %{public}u] "
+            "prop [%{public}u %{public}x %{public}x %{public}u, %{public}u] "
             "flag [%{public}u%{public}u%{public}u%{public}u] size %{public}u",
             GetWindowId(), GetWindowName().c_str(), static_cast<uint32_t>(type), static_cast<uint32_t>(owner),
-            prop.enable_, prop.backgroundColor_, prop.contentColor_, prop.enableAnimation_,
+            prop.enable_, prop.backgroundColor_, prop.contentColor_, prop.enableAnimation_, prop.isolate_,
             prop.flag_.enableFlag, prop.flag_.backgroundColorFlag,
             prop.flag_.contentColorFlag, prop.flag_.enableAnimationFlag, static_cast<uint32_t>(ownPropList.size()));
     }
@@ -3823,7 +3840,8 @@ SystemBarProperty WindowSceneSessionImpl::GetCurrentActiveSystemBarProperty(Wind
             if (!flag.enableFlag && pair.second.flag_.enableFlag) {
                 prop.enable_ = pair.second.enable_;
                 flag.enableFlag = true;
-                prop.settingFlag_ |= SystemBarSettingFlag::ENABLE_SETTING;
+                prop.settingFlag_ = pair.second.isolate_ ?
+                    prop.settingFlag_ : (prop.settingFlag_ | SystemBarSettingFlag::ENABLE_SETTING);
             }
             if (!flag.enableAnimationFlag && pair.second.flag_.enableAnimationFlag) {
                 prop.enableAnimation_= pair.second.enableAnimation_;
@@ -4082,6 +4100,11 @@ void WindowSceneSessionImpl::ApplyMaximizePresentation(MaximizePresentation pres
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, WaterfallResidentState state)
 {
+    if (property_->GetWindowAnchorInfo().isFromAttachOrDetach_ &&
+        property_->GetWindowAnchorInfo().isAnchoredByAttach_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Cannot maximize due to in ancor enabled mode.");
+        return WMError::WM_OK;
+    }
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
@@ -5332,7 +5355,10 @@ WMError WindowSceneSessionImpl::GetAndVerifyWindowTypeForArkUI(uint32_t parentId
 
 void WindowSceneSessionImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
-    enableDefaultAnimation_= needDefaultAnimation;
+    {
+        std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+        enableDefaultAnimation_ = needDefaultAnimation;
+    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->UpdateWindowAnimationFlag(needDefaultAnimation);
@@ -5842,10 +5868,17 @@ void WindowSceneSessionImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && !animationTransitionControllers_.empty()) {
+    bool hasTransitionController = false;
+    bool enableDefaultAnimation = false;
+    {
+        std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+        hasTransitionController = !animationTransitionControllers_.empty();
+        enableDefaultAnimation = enableDefaultAnimation_;
+    }
+    if (withAnimation && !isAppWindow && hasTransitionController) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if ((isAppWindow && enableDefaultAnimation_) || (withAnimation && animationTransitionControllers_.empty())) {
+    } else if ((isAppWindow && enableDefaultAnimation) || (withAnimation && !hasTransitionController)) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else {
@@ -6410,6 +6443,11 @@ void WindowSceneSessionImpl::NotifyIsFullScreenInForceSplitMode(bool isFullScree
     } else {
         TLOGW(WmsLogTag::WMS_COMPAT, "hostSession is nullptr");
     }
+}
+
+WMError WindowSceneSessionImpl::NotifySplitRatioChanged(float newRatio)
+{
+    return WMError::WM_OK;
 }
 
 WSError WindowSceneSessionImpl::NotifyCompatibleModePropertyChange(const sptr<CompatibleModeProperty> property)
@@ -7140,6 +7178,10 @@ bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
             displayWidth = defaultDisplayInfo->GetWidth();
             displayHeight = defaultDisplayInfo->GetHeight();
         }
+        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetPersistentId(),
+            KeyboardLifeCycleException::HOT_AREA_EXCEPTION,
+            "IsLandscape: use default display, displayWidth=" + std::to_string(displayWidth) +
+            ", displayHeight=" + std::to_string(displayHeight));
     }
     bool isLandscape = displayWidth > displayHeight;
     if (displayWidth == displayHeight && display != nullptr) {
@@ -7676,17 +7718,22 @@ float WindowSceneSessionImpl::GetCustomDensity() const
     return customDensity_;
 }
 
-WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo, bool isAttach)
+WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
 {
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     const auto& property = GetProperty();
-    if (isAttach && (!(windowSystemConfig_.IsPcWindow() || windowSystemConfig_.freeMultiWindowSupport_) ||
-        property_->IsAdaptToCompatibleDevice())) {
-            return WMError::WM_OK;
+    if (windowAnchorInfo.isFromAttachOrDetach_ && (!(windowSystemConfig_.IsPcWindow() ||
+        windowSystemConfig_.freeMultiWindowSupport_) || property_->IsAdaptToCompatibleDevice())) {
+            TLOGE(WmsLogTag::WMS_LAYOUT,
+                "isPcWindow: %{public}d , freeMultiWindowSupport: %{public}d, IsAdaptToCompatibleDevice: %{public}d",
+                windowSystemConfig_.IsPcWindow(), windowSystemConfig_.freeMultiWindowSupport_,
+                property_->IsAdaptToCompatibleDevice());
+        return WMError::WM_OK;
     }
-    if (!windowAnchorInfo.isAnchoredByAttach_ && !property->GetWindowAnchorInfo().isAnchoredByAttach_) {
+    if (windowAnchorInfo.isFromAttachOrDetach_ && (!windowAnchorInfo.isAnchoredByAttach_ &&
+            !property->GetWindowAnchorInfo().isAnchoredByAttach_)) {
         TLOGE(WmsLogTag::WMS_SUB, "Repeated invoking");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -7702,7 +7749,7 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!isAttach && !windowSystemConfig_.supportFollowRelativePositionToParent_) {
+    if (!windowAnchorInfo.isFromAttachOrDetach_ && !windowSystemConfig_.supportFollowRelativePositionToParent_) {
         TLOGI(WmsLogTag::WMS_SUB, "not support device");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -8058,20 +8105,22 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
+WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+    SelectMode selectMode)
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
     WindowType winType = GetType();
     bool enableForceSplit = false;
     if (WindowHelper::IsMainWindow(winType) &&
         GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport);
+        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport, selectMode);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
 }
 
-void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport)
+void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport,
+    SelectMode selectMode)
 {
     WindowType winType = GetType();
     if (!WindowHelper::IsMainWindow(winType)) {
@@ -8082,9 +8131,18 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bo
         TLOGE(WmsLogTag::WMS_COMPAT, "uiContent is null!");
         return;
     }
-    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u",
-        enableForceSplit, needUpdateViewport);
-    uiContent->SetForceSplitEnable(enableForceSplit, needUpdateViewport);
+    ForceSplitMode splitMode = ForceSplitMode::NOT_SPLIT;
+    if (enableForceSplit) {
+        if (selectMode == SelectMode::WIDE_MODE) {
+            splitMode = ForceSplitMode::WIDE_SPLIT;
+        } else if (selectMode == SelectMode::SQUARE_MODE) {
+            splitMode = ForceSplitMode::SQUARE_SPLIT;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "SetForceSplitEnable, enableForceSplit: %{public}u, needUpdateViewport: %{public}u, "
+        "selectMode: %{public}u, splitMode: %{public}u", enableForceSplit, needUpdateViewport,
+        static_cast<uint32_t>(selectMode), static_cast<uint32_t>(splitMode));
+    uiContent->SetForceSplitEnable(enableForceSplit, splitMode, needUpdateViewport);
 }
 
 void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()
@@ -8111,6 +8169,13 @@ WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& h
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
+}
+
+WMError WindowSceneSessionImpl::GetSelectMode(SelectMode& selectMode)
+{
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    return hostSession->GetSelectMode(selectMode);
 }
 
 WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()

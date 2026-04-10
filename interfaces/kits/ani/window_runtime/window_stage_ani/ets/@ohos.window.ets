@@ -960,7 +960,7 @@ export interface WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
   globalRect?: Rect;
-  displayId?: int;
+  displayId?: long;
   bundleName: string;
   abilityName: string;
   windowId: int;
@@ -972,7 +972,7 @@ export class WindowInfoInternal implements WindowInfo {
   rect: Rect;
   globalDisplayRect?: Rect;
   globalRect?: Rect;
-  displayId?: int;
+  displayId?: long;
   bundleName: string;
   abilityName: string;
   windowId: int;
@@ -5560,7 +5560,7 @@ native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<
 native function getSnapshot(nativeObj: long, windowId: int): image.PixelMap;
 native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
 native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
-native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean): void;
+native function setWaterMarkImage(nativeObj: long, pixelMap: image.PixelMap, enabled: boolean, priority: int): void;
 native function getWindowsByCoordinate(nativeObj: long, param: GetWindowsByCoordinateParam): Array<Window>;
 native function shiftAppWindowFocusSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
 native function shiftAppWindowPointerEventSync(nativeObj: long, sourceWindowId: int, targetWindowId: int): void;
@@ -5577,6 +5577,7 @@ native function toggleShownStateForAllAppWindowsSync(nativeObj: long): void;
 native function setSpecificSystemWindowZIndexSync(nativeObj: long, windowType: WindowType, zIndex: int): void;
 native function createSubWindowAndBindParentSync(nativeObj: long, name: string,
   parentId: int, ctx: BaseContext, parentWindowEventListener: WindowEventListener): Window;
+native function moveMainWindowToTargetDisplaySync(nativeObj: long, displayId: long, windowId: int): void;
 
 export function createSubWindowAndBindParent(name: string, parentId: int, ctx: BaseContext,
   parentWindowEventListener: WindowEventListener): Promise<Window> {
@@ -5837,7 +5838,7 @@ export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean): P
   return new Promise<void>((
     resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute((): void => {
-          return setWaterMarkImage(nativeObj, pixelMap, enabled);
+          return setWaterMarkImage(nativeObj, pixelMap, enabled, 0);
       }).then((ret: Any) => {
           resolve(undefined);
       }).catch((err: Any) => {
@@ -5848,12 +5849,25 @@ export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean): P
 
 export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean, callback: AsyncCallback<void>): void {
     taskpool.execute((): void => {
-        setWaterMarkImage(nativeObj, pixelMap, enabled);
+        setWaterMarkImage(nativeObj, pixelMap, enabled, 0);
     }).then((ret: Any) => {
         callback(new BusinessError(), undefined);
     }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
     });
+}
+
+export function setWaterMarkImage(pixelMap: image.PixelMap, enabled: boolean, priority: int): Promise<void> {
+  return new Promise<void>((
+    resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return setWaterMarkImage(nativeObj, pixelMap, enabled, priority);
+      }).then((ret: Any) => {
+          resolve(undefined);
+      }).catch((err: Any) => {
+          reject(err as BusinessError);
+      });
+  });
 }
 
 export function getWindowsByCoordinate(displayId: long, windowNumber?: int,
@@ -6009,6 +6023,18 @@ export function getMainWindowSnapshot(windowId: Array<number>, config: WindowSna
     }).catch((err: Any) => {
         reject(err as BusinessError);
     });
+  });
+}
+
+export function moveMainWindowToTargetDisplay(displayId: long, windowId: int): Promise<void> {
+  return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          return moveMainWindowToTargetDisplaySync(nativeObj, displayId, windowId);
+      }).then((ret: Any) => {
+          resolve(undefined);
+      }).catch((err: Any) => {
+          reject(err as BusinessError);
+      });
   });
 }
 

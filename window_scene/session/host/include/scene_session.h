@@ -23,6 +23,7 @@
 #include <modifier/rs_property.h>
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <chrono>
+#include <unordered_set>
 
 #include "display_manager.h"
 #include "session/host/include/session.h"
@@ -107,6 +108,7 @@ using NotifyForceSplitEnableFunc = std::function<bool(const std::string& bundleN
 using PageEnableCallback = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
 using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
+using GetSelectModeFunc = std::function<SelectMode()>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
@@ -166,6 +168,8 @@ using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 using GetIsRecentStateFunc = std::function<bool()>;
 using ForceNotifyOccupiedAreaChangeCallback = std::function<void(DisplayId displayId)>;
 using NotifyRecoverWindowEffectFunc = std::function<void(bool recoverCorner, bool recoverShadow)>;
+using NotifySessionBlackListFunc = std::function<WMError(int32_t persistentId,
+    const std::unordered_set<std::string>& privacyWindowTags)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -199,6 +203,8 @@ public:
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         SetSkipEventOnCastPlusCallback onSetSkipEventOnCastPlus_;
+        NotifySessionBlackListFunc onAddSessionBlackList_;
+        NotifySessionBlackListFunc onRemoveSessionBlackList_;
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
@@ -563,6 +569,8 @@ public:
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     virtual void SetSkipEventOnCastPlus(bool isSkip);
+    WMError AddSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags);
+    WMError RemoveSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
     WMError UpdateAnimationSpeed(float speed);
 
@@ -934,6 +942,8 @@ public:
     void NotifiedDragEventOnNextVsync();
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    void RegisterSelectModeFunc(GetSelectModeFunc&& func);
+    WMError GetSelectMode(SelectMode& selectMode) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
@@ -1046,6 +1056,17 @@ public:
         }
         controlInfo = it->second;
         return true;
+    };
+
+    ControlAppType GetControlAppType() const override
+    {
+        std::lock_guard lock(appUseControlMapMutex_);
+        for (const auto& type : CONTROL_APP_TYPE_ENUM_LIST) {
+            if (appUseControlMap_.find(type) != appUseControlMap_.end()) {
+                return type;
+            }
+        }
+        return ControlAppType::CONTROL_APP_TYPE_BEGIN;
     };
 
     /**
@@ -1238,6 +1259,8 @@ protected:
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
+    WSError ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo,
+        const sptr<Session>& parentSession, const sptr<WindowSessionProperty>& property) const;
 
     /*
      * Window Immersive
@@ -1301,7 +1324,7 @@ private:
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);
-
+    bool IsAncoInFullScreen();
     /**
      * @brief Get the current FPS for this session.
      *
@@ -1473,6 +1496,7 @@ private:
      * Window Layout
      */
     GetHookWindowInfoFunc getHookWindowInfoFunc_ = nullptr;
+    GetSelectModeFunc getSelectModeFunc_ = nullptr;
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);

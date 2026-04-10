@@ -3085,6 +3085,133 @@ HWTEST_F(SceneSessionTest5, SetSkipEventOnCastPlus, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AddRemoveSessionBlackListCallbackNull
+ * @tc.desc: AddRemoveSessionBlackList callback null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, AddRemoveSessionBlackListCallbackNull, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddRemoveSessionBlackListCallbackNull";
+    info.bundleName_ = "AddRemoveSessionBlackListCallbackNull";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    std::unordered_set<std::string> privacyWindowTags = { "tagA" };
+    EXPECT_EQ(sceneSession->AddSessionBlackList(privacyWindowTags), WMError::WM_ERROR_NULLPTR);
+    EXPECT_EQ(sceneSession->RemoveSessionBlackList(privacyWindowTags), WMError::WM_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: AddRemoveSessionBlackListCallbackSuccess
+ * @tc.desc: AddRemoveSessionBlackList callback success
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, AddRemoveSessionBlackListCallbackSuccess, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddRemoveSessionBlackListCallbackSuccess";
+    info.bundleName_ = "AddRemoveSessionBlackListCallbackSuccess";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    bool addCalled = false;
+    bool removeCalled = false;
+    sptr<SceneSession::SpecificSessionCallback> specificCallBack =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallBack->onAddSessionBlackList_ = [&addCalled, sceneSession](int32_t persistentId,
+        const std::unordered_set<std::string>& privacyWindowTags) {
+            addCalled = true;
+            EXPECT_EQ(persistentId, sceneSession->GetPersistentId());
+            EXPECT_EQ(privacyWindowTags.size(), 2);
+            return WMError::WM_OK;
+        };
+    specificCallBack->onRemoveSessionBlackList_ = [&removeCalled, sceneSession](int32_t persistentId,
+        const std::unordered_set<std::string>& privacyWindowTags) {
+            removeCalled = true;
+            EXPECT_EQ(persistentId, sceneSession->GetPersistentId());
+            EXPECT_EQ(privacyWindowTags.size(), 2);
+            return WMError::WM_OK;
+        };
+    sceneSession->specificCallback_ = specificCallBack;
+
+    std::unordered_set<std::string> privacyWindowTags = { "tagA", "tagB" };
+    EXPECT_EQ(sceneSession->AddSessionBlackList(privacyWindowTags), WMError::WM_OK);
+    EXPECT_EQ(sceneSession->RemoveSessionBlackList(privacyWindowTags), WMError::WM_OK);
+    EXPECT_TRUE(addCalled);
+    EXPECT_TRUE(removeCalled);
+}
+
+/**
+ * @tc.name: AddRemoveSessionBlackListCallbackFail
+ * @tc.desc: AddRemoveSessionBlackList callback fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, AddRemoveSessionBlackListCallbackFail, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddRemoveSessionBlackListCallbackFail";
+    info.bundleName_ = "AddRemoveSessionBlackListCallbackFail";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    sptr<SceneSession::SpecificSessionCallback> specificCallBack =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallBack->onAddSessionBlackList_ = [](int32_t,
+        const std::unordered_set<std::string>&) {
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        };
+    specificCallBack->onRemoveSessionBlackList_ = [](int32_t,
+        const std::unordered_set<std::string>&) {
+            return WMError::WM_ERROR_INVALID_PERMISSION;
+        };
+    sceneSession->specificCallback_ = specificCallBack;
+
+    std::unordered_set<std::string> privacyWindowTags = { "tagA" };
+    EXPECT_EQ(sceneSession->AddSessionBlackList(privacyWindowTags), WMError::WM_ERROR_INVALID_PERMISSION);
+    EXPECT_EQ(sceneSession->RemoveSessionBlackList(privacyWindowTags),
+        WMError::WM_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: AddRemoveSessionBlackListEmptyInput
+ * @tc.desc: AddRemoveSessionBlackList empty input
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest5, AddRemoveSessionBlackListEmptyInput, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "AddRemoveSessionBlackListEmptyInput";
+    info.bundleName_ = "AddRemoveSessionBlackListEmptyInput";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    bool addCalled = false;
+    bool removeCalled = false;
+    sptr<SceneSession::SpecificSessionCallback> specificCallBack =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    specificCallBack->onAddSessionBlackList_ = [&addCalled](int32_t,
+        const std::unordered_set<std::string>& privacyWindowTags) {
+            addCalled = true;
+            EXPECT_TRUE(privacyWindowTags.empty());
+            return WMError::WM_OK;
+        };
+    specificCallBack->onRemoveSessionBlackList_ = [&removeCalled](int32_t,
+        const std::unordered_set<std::string>& privacyWindowTags) {
+            removeCalled = true;
+            EXPECT_TRUE(privacyWindowTags.empty());
+            return WMError::WM_OK;
+        };
+    sceneSession->specificCallback_ = specificCallBack;
+
+    std::unordered_set<std::string> privacyWindowTags;
+    EXPECT_EQ(sceneSession->AddSessionBlackList(privacyWindowTags), WMError::WM_OK);
+    EXPECT_EQ(sceneSession->RemoveSessionBlackList(privacyWindowTags), WMError::WM_OK);
+    EXPECT_TRUE(addCalled);
+    EXPECT_TRUE(removeCalled);
+}
+
+/**
  * @tc.name: UpdateCrossAxisOfLayout_CompatibilityMode01
  * @tc.desc: UpdateCrossAxisOfLayout Test - compatibility mode sub window inherits parent's cross axis state
  * @tc.type: FUNC

@@ -547,6 +547,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "setSkipSelfWhenShowOnVirtualScreen", moduleName,
         JsSceneSession::SetSkipSelfWhenShowOnVirtualScreen);
     BindNativeFunction(env, objValue, "setSkipEventOnCastPlus", moduleName, JsSceneSession::SetSkipEventOnCastPlus);
+    BindNativeFunction(env, objValue, "addSessionBlackList", moduleName, JsSceneSession::AddSessionBlackList);
+    BindNativeFunction(env, objValue, "removeSessionBlackList", moduleName, JsSceneSession::RemoveSessionBlackList);
     BindNativeFunction(env, objValue, "setUniqueDensityDpiFromSCB", moduleName,
         JsSceneSession::SetUniqueDensityDpiFromSCB);
     BindNativeFunction(env, objValue, "setBlank", moduleName, JsSceneSession::SetBlank);
@@ -2484,6 +2486,20 @@ napi_value JsSceneSession::SetSkipEventOnCastPlus(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetSkipEventOnCastPlus(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::AddSessionBlackList(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnAddSessionBlackList(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::RemoveSessionBlackList(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnRemoveSessionBlackList(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info)
@@ -6759,6 +6775,80 @@ napi_value JsSceneSession::OnSetSkipEventOnCastPlus(napi_env env, napi_callback_
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnAddSessionBlackList(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::vector<std::string> privacyWindowTagVec;
+    if (!ParseArrayStringValue(env, argv[ARG_INDEX_0], privacyWindowTagVec)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to parse tags");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "Session is nullptr"));
+        return NapiGetUndefined(env);
+    }
+    std::unordered_set<std::string> privacyWindowTags(privacyWindowTagVec.begin(), privacyWindowTagVec.end());
+    WMError ret = session->AddSessionBlackList(privacyWindowTags);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "AddSessionBlackList failed, ret: %{public}d", ret);
+        auto errCode = (ret == WMError::WM_ERROR_INVALID_PERMISSION) ?
+            WSErrorCode::WS_ERROR_NO_PERMISSION : WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY;
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), "Add session blacklist failed"));
+        return NapiGetUndefined(env);
+    }
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnRemoveSessionBlackList(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    std::vector<std::string> privacyWindowTagVec;
+    if (!ParseArrayStringValue(env, argv[ARG_INDEX_0], privacyWindowTagVec)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to parse tags");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is nullptr, id:%{public}d", persistentId_);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
+            "Session is nullptr"));
+        return NapiGetUndefined(env);
+    }
+    std::unordered_set<std::string> privacyWindowTags(privacyWindowTagVec.begin(), privacyWindowTagVec.end());
+    WMError ret = session->RemoveSessionBlackList(privacyWindowTags);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "RemoveSessionBlackList failed, ret: %{public}d", ret);
+        auto errCode = (ret == WMError::WM_ERROR_INVALID_PERMISSION) ?
+            WSErrorCode::WS_ERROR_NO_PERMISSION : WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY;
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), "Remove session blacklist failed"));
+        return NapiGetUndefined(env);
+    }
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSession::OnSetAppSupportPhoneInPc(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_FOUR;
@@ -8081,13 +8171,14 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
         napi_value return_val;
         auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv),
             argv, &return_val);
-        napi_close_handle_scope(env, scope);
         if (ret != napi_ok) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_call_function result is error", where);
+            napi_close_handle_scope(env, scope);
             return;
         }
         int32_t result;
         ret = napi_get_value_int32(env, return_val, &result);
+        napi_close_handle_scope(env, scope);
         if (ret != napi_ok) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_get_value_int32 result is error", where);
             return;

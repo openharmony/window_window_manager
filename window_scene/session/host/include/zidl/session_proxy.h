@@ -198,6 +198,7 @@ public:
         std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    WMError GetSelectMode(SelectMode& selectMode) override;
     void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
     /**
@@ -233,8 +234,10 @@ public:
      */
     WSError NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) override;
     WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
+    WMError NotifySplitRatioChanged(float newRatio) override;
 
     /**
      * Restart app
