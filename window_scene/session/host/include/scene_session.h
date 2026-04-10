@@ -23,6 +23,7 @@
 #include <modifier/rs_property.h>
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <chrono>
+#include <unordered_set>
 
 #include "display_manager.h"
 #include "session/host/include/session.h"
@@ -104,7 +105,10 @@ using SetSkipSelfWhenShowOnVirtualScreenCallback = std::function<void(uint64_t s
 using SetSkipEventOnCastPlusCallback = std::function<void(int32_t persistentId, bool isSkip)>;
 using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::string& bundleName)>;
 using NotifyForceSplitEnableFunc = std::function<bool(const std::string& bundleName)>;
+using PageEnableCallback = std::function<void(const std::string& bundleName, int32_t windowId,
+    const std::string& action, const std::string& message)>;
 using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
+using GetSelectModeFunc = std::function<SelectMode()>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
 using PiPStateChangeCallback = std::function<void(const std::string& bundleName, bool isForeground)>;
@@ -164,6 +168,8 @@ using NotifySnapshotSkipChangeFunc = std::function<void(bool isSkip)>;
 using GetIsRecentStateFunc = std::function<bool()>;
 using ForceNotifyOccupiedAreaChangeCallback = std::function<void(DisplayId displayId)>;
 using NotifyRecoverWindowEffectFunc = std::function<void(bool recoverCorner, bool recoverShadow)>;
+using NotifySessionBlackListFunc = std::function<WMError(int32_t persistentId,
+    const std::unordered_set<std::string>& privacyWindowTags)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -197,6 +203,8 @@ public:
         CameraSessionChangeCallback onCameraSessionChange_;
         SetSkipSelfWhenShowOnVirtualScreenCallback onSetSkipSelfWhenShowOnVirtualScreen_;
         SetSkipEventOnCastPlusCallback onSetSkipEventOnCastPlus_;
+        NotifySessionBlackListFunc onAddSessionBlackList_;
+        NotifySessionBlackListFunc onRemoveSessionBlackList_;
         PiPStateChangeCallback onPiPStateChange_;
         UpdateGestureBackEnabledCallback onUpdateGestureBackEnabled_;
         NotifyAvoidAreaChangeCallback onNotifyAvoidAreaChange_;
@@ -344,7 +352,8 @@ public:
     WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
     std::shared_ptr<Rosen::RSNode> GetWindowDragMoveMountedNode(DisplayId displayId, uint32_t targetZOrder);
     virtual void RegisterGetIsRecentStateFunc(GetIsRecentStateFunc&& callback) {};
-
+    void NotifySubSessionParentSizeChange(Rect rect) override;
+    void NotifySubSessionParentStatusChange(WindowMode mode) override;
     /*
      * PiP Window
      */
@@ -453,6 +462,7 @@ public:
     virtual bool IsFullScreenInForceSplit() { return false; }
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
     virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
+    virtual void RegisterPageEnableCallback(PageEnableCallback&& callback) {}
 
     /*
      * PC Window
@@ -514,6 +524,7 @@ public:
      * Window Immersive
      */
     bool IsInLSState() const override;
+    WSError GetScaleInLSState(float& scaleX, float& scaleY) const override;
     WSError OnNeedAvoid(bool status) override;
     AvoidArea GetAvoidAreaByType(AvoidAreaType type, const WSRect& rect = WSRect::EMPTY_RECT,
         int32_t apiVersion = API_VERSION_INVALID) override;
@@ -558,6 +569,8 @@ public:
     void SetSkipDraw(bool skip);
     virtual void SetSkipSelfWhenShowOnVirtualScreen(bool isSkip);
     virtual void SetSkipEventOnCastPlus(bool isSkip);
+    WMError AddSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags);
+    WMError RemoveSessionBlackList(const std::unordered_set<std::string>& privacyWindowTags);
     WMError SetUniqueDensityDpi(bool useUnique, float dpi);
     WMError UpdateAnimationSpeed(float speed);
 
@@ -644,6 +657,7 @@ public:
      */
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     WSError SetCurrentRotation(int32_t currentRotation);
+    WSError GetSceneNodeCount(uint32_t& nodeCount);
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     WSError NotifyPageRotationIsIgnored();
     WSError ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation);
@@ -715,6 +729,8 @@ public:
     void CalculateStartWindowType(SessionInfo& sessionInfo, bool hideStartWindow);
     void NotifyPendingSessionActivation(SessionInfo& info);
     bool isRemoving_ = false;
+    void NotifyParentLifecycleEvent(ParentLifeCycleEvent event);
+    void NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent event) override;
 
     void SendPointerEventToUI(std::shared_ptr<MMI::PointerEvent> pointerEvent);
     bool SendKeyEventToUI(std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent = false);
@@ -855,6 +871,7 @@ public:
     bool IsDirtyDragWindow();
     void ResetDirtyDragFlags();
     void ResetSizeChangeReasonIfDirty();
+    bool IsCrossAxisOfLayout() const override { return isCrossAxisOfLayout_; }
 
     /**
      * @brief Set the VsyncStation used by the session.
@@ -925,6 +942,8 @@ public:
     void NotifiedDragEventOnNextVsync();
     void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
+    void RegisterSelectModeFunc(GetSelectModeFunc&& func);
+    WMError GetSelectMode(SelectMode& selectMode) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
     void NotifyWindowStatusDidChangeAfterShowWindow() override;
 
@@ -1039,6 +1058,17 @@ public:
         return true;
     };
 
+    ControlAppType GetControlAppType() const override
+    {
+        std::lock_guard lock(appUseControlMapMutex_);
+        for (const auto& type : CONTROL_APP_TYPE_ENUM_LIST) {
+            if (appUseControlMap_.find(type) != appUseControlMap_.end()) {
+                return type;
+            }
+        }
+        return ControlAppType::CONTROL_APP_TYPE_BEGIN;
+    };
+
     /**
      * Window Transition Animation For PC
      */
@@ -1067,7 +1097,7 @@ protected:
     bool PipelineNeedNotifyClientToUpdateRect() const;
     bool UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReason reason);
     bool NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeChangeReason reason);
-    bool UpdateScaleInner(float scaleX, float scaleY, float pivotX, float pivotY);
+    bool UpdateScaleInner(float scaleX, float scaleY, float rsScaleX, float rsScaleY, float pivotX, float pivotY);
     bool UpdateZOrderInner(uint32_t zOrder);
 
     /*
@@ -1229,6 +1259,8 @@ protected:
 private:
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
+    WSError ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo,
+        const sptr<Session>& parentSession, const sptr<WindowSessionProperty>& property) const;
 
     /*
      * Window Immersive
@@ -1254,7 +1286,6 @@ private:
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
     template<typename T>
     Rect CalculateAvoidAreaByScale(WSRectT<T>& avoidAreaRect) const;
-    WSError GetScaleInLSState(float& scaleX, float& scaleY)  const;
 
     /*
      * Window Lifecycle
@@ -1293,7 +1324,7 @@ private:
     NotifySessionEventFunc onSessionEvent_;
     void ProcessWindowMoving(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void HandleSubSessionCrossNode(SizeChangeReason reason);
-
+    bool IsAncoInFullScreen();
     /**
      * @brief Get the current FPS for this session.
      *
@@ -1465,6 +1496,7 @@ private:
      * Window Layout
      */
     GetHookWindowInfoFunc getHookWindowInfoFunc_ = nullptr;
+    GetSelectModeFunc getSelectModeFunc_ = nullptr;
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
     void UpdateSessionRectPosYFromClient(SizeChangeReason reason, DisplayId& configDisplayId, WSRect& rect);
@@ -1480,6 +1512,27 @@ private:
     WindowLimits GetWindowLimits() const;
     bool ShouldSkipUpdateRect(const WSRect& rect);
     bool ShouldSkipUpdateRectNotify(const WSRect& rect);
+
+    /**
+     * @brief Set surface bounds via the original surface node.
+     *
+     * This method is used for normal transaction commit together with ArkUI relayout.
+     *
+     * @param rect     Window bounds to be applied.
+     * @param isGlobal Indicates whether global positioning is enabled.
+     */
+    void SetSurfaceBoundsWithOriginalNode(const WSRect& rect, bool isGlobal);
+
+    /**
+     * @brief Set surface bounds via the shadow surface node.
+     *
+     * This method is used for immediate RS commit to avoid flushing other pending
+     * SurfaceNode updates in the current transaction.
+     *
+     * @param rect     Window bounds to be applied.
+     * @param isGlobal Indicates whether global positioning is enabled.
+     */
+    void SetSurfaceBoundsWithShadowNode(const WSRect& rect, bool isGlobal);
 
     /*
      * Window Decor

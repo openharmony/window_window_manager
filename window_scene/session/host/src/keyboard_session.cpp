@@ -107,6 +107,14 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         sessionProperty->SetKeyboardEffectOption(property->GetKeyboardEffectOption());
         sessionProperty->SetDisplayId(targetDisplayId);
         session->UseFocusIdIfCallingSessionIdInvalid(property->GetCallingSessionId());
+        auto panelSession = session->GetKeyboardPanelSession();
+        if (const auto callingSession = session->GetSceneSession(
+                session->GetSessionProperty()->GetCallingSessionId())) {
+            bool isCallingSessionSkip = session->GetSkipFlagForCallingSession(callingSession);
+            session->SetSessionBlackListWhenShow(isCallingSessionSkip, panelSession);
+            session->SetSkipEventOnCastPlus(isCallingSessionSkip);
+            panelSession->SetSkipEventOnCastPlus(isCallingSessionSkip);
+        }
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
             "effectOption: %{public}s",
@@ -117,6 +125,29 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         return session->SceneSession::Foreground(property);
     }, "Show");
     return WSError::WS_OK;
+}
+
+void KeyboardSession::SetSessionBlackListWhenShow(bool isCallingSessionSkip, const sptr<SceneSession>& panelSession)
+{
+    if (isCallingSessionSkip) {
+        AddSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+        panelSession->AddSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+    } else {
+        RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+        panelSession->RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
+    }
+}
+
+bool KeyboardSession::GetSkipFlagForCallingSession(const sptr<SceneSession>& callingSession) const
+{
+    if (!callingSession) {
+        return false;
+    }
+    auto mainSession = callingSession->GetMainSession();
+    if (!mainSession) {
+        return false;
+    }
+    return mainSession->isSkipSelfWhenShowOnVirtualScreen_.load();
 }
 
 WSError KeyboardSession::Hide()
@@ -677,6 +708,10 @@ void KeyboardSession::HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeRe
         bool ret = session->GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
         if (!ret) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
+            WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(session->GetPersistentId(),
+                KeyboardLifeCycleException::MOVE_DRAG_EXCEPTION,
+                "HandleKeyboardMoveDragEnd: GetScreenWidthAndHeightFromClient failed"
+                "screenWidth=" + std::to_string(screenWidth) + ", screenHeight=" + std::to_string(screenHeight));
             return;
         }
         bool isLand = screenWidth > screenHeight;
@@ -721,6 +756,10 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessio
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId);
         GetSessionProperty()->SetCallingSessionId(focusedSessionId);
     }
+    WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetFocusedSessionId(),
+        KeyboardLifeCycleException::SHOW_EXCEPTION,
+        "callingSessionId invalid, use focusedId: " + std::to_string(focusedSessionId) +
+        ", callingSessionId:" + std::to_string(GetSessionProperty()->GetCallingSessionId()));
 }
 
 void KeyboardSession::EnableCallingSessionAvoidArea()
@@ -773,6 +812,8 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
 void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRect, bool isKeyboardShow,
     const WindowAnimationInfo& animationInfo, const CallingWindowInfoData& callingWindowInfoData)
 {
+    // When true, inject a 6000 delay fault that causes the keyboard frozen.
+    int32_t delayTime = WindowInfoReporter::GetInstance().IsKeyboardFrozenEnabled() ? 6000 : 0;
     PostTask([weakThis = wptr(this), keyboardPanelRect, isKeyboardShow, animationInfo, callingWindowInfoData]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -827,7 +868,8 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
             session->CloseRSTransaction();
         }
         return WSError::WS_OK;
-    }, "CloseKeyboardSyncTransaction");
+    },
+        "CloseKeyboardSyncTransaction", delayTime);
 }
 
 void KeyboardSession::CloseRSTransaction()
@@ -908,6 +950,10 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     bool result = GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
     if (!result) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Get screen width and height failed");
+        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetPersistentId(),
+            KeyboardLifeCycleException::PANEL_AVOID_HEIGHT_EXCEPTION,
+            "RecalculatePanelRectForAvoidArea: GetScreenWidthAndHeightFromClient failed, "
+            "screenWidth=" + std::to_string(screenWidth) + ", screenHeight=" + std::to_string(screenHeight));
         return;
     }
     bool isLandscape = screenHeight < screenWidth;
@@ -1073,8 +1119,8 @@ void KeyboardSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool n
     // relayout triggered on the next vsync, so no explicit flush is required here.
     // If the window is NOT crossing screens, the changes should be flushed
     // immediately to avoid affecting the next drag operation.
-    if (!needFlush) {
-        needFlush = moveDragController_ && !moveDragController_->IsWindowCrossScreenOnDragEnd();
+    if (!needFlush && moveDragController_) {
+        needFlush = moveDragController_->ShouldFlushOnDragEnd();
         TLOGD(WmsLogTag::WMS_KEYBOARD, "On drag end, needFlush: %{public}d", needFlush);
     }
 
@@ -1129,6 +1175,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
         if (session->specificCallback_ != nullptr
             && session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_ != nullptr) {
             session->specificCallback_->onSetSkipSelfWhenShowOnVirtualScreen_(surfaceNode->GetId(), isSkip);
+            session->isSkipSelfWhenShowOnVirtualScreen_ = isSkip;
         }
     }, __func__);
 }
@@ -1136,7 +1183,7 @@ void KeyboardSession::SetSkipSelfWhenShowOnVirtualScreen(bool isSkip)
 void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
 {
     // anim_sync_exception
-    int32_t const THRESHOLD = 1000;
+    int32_t const THRESHOLD = 5000;
     auto task = [weakThis = wptr(this)]() {
         auto session = weakThis.promote();
         if (!session) {
@@ -1147,11 +1194,11 @@ void KeyboardSession::PostKeyboardAnimationSyncTimeoutTask()
             TLOGND(WmsLogTag::WMS_KEYBOARD, "closed anim_sync in time");
             return;
         }
-        std::string msg("close anim_sync timeout");
-        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(
-            session->GetPersistentId(),
-            KeyboardLifeCycleException::ANIM_SYNC_EXCEPTION,
-            msg);
+        TLOGNW(WmsLogTag::WMS_KEYBOARD, "Window keyboard anim timeout check, persistentId=%{public}d",
+            session->GetPersistentId());
+        std::string msg("windowId: " + std::to_string(session->GetPersistentId()) + ", close anim_sync timeout");
+        WindowInfoReporter::GetInstance().ReportWindowFrozen(
+            WindowDFXHelperType::WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK, msg);
     };
     auto handler = GetEventHandler();
     if (!handler) {
@@ -1260,6 +1307,10 @@ WMError KeyboardSession::IsLandscape(uint64_t displayId, bool& isLandscape)
         ScreenId screenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Use default screenId: %{public}" PRIu64
             ", invalid displayId: %{public}" PRIu64"", screenId, displayId);
+        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetPersistentId(),
+            KeyboardLifeCycleException::HOT_AREA_EXCEPTION,
+            "IsLandscape: invalid displayId=" + std::to_string(displayId) +
+            ", use default screenId=" + std::to_string(screenId));
         if (screensProperties.find(screenId) != screensProperties.end()) {
             screenProperty = screensProperties[screenId];
             displayId = screenId;

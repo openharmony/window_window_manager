@@ -47,6 +47,7 @@ struct VirtualScreenOption {
     uint32_t phyWidth_ { 0 };
     uint32_t phyHeight_ { 0 };
     int32_t userId_ {INVALID_USERID};
+    int32_t screenId_ {-1};
 };
 
 class Screen : public RefBase {

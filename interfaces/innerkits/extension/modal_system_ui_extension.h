@@ -29,6 +29,7 @@ public:
     ~ModalSystemUiExtension();
 
     bool CreateModalUIExtension(const AAFwk::Want& want);
+    bool CreateModalUIExtension(const AAFwk::Want& want, const int32_t userId);
     static std::string ToString(const AAFwk::WantParams& wantParams);
 
 private:

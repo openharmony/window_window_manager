@@ -312,7 +312,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigMoveResampleFpsRangeFallback, TestSize.
 
         EXPECT_TRUE(ssm_->ConfigMoveResample(moveResample));
 
-        auto [enable, minFps, maxFps] = MoveDragController::GetMoveResampleSystemConfig();
+        auto [enable, minFps, maxFps] = MoveDragController::LoadMoveResampleSystemConfig();
         EXPECT_TRUE(enable);
         EXPECT_FALSE(minFps.has_value());
         EXPECT_FALSE(maxFps.has_value());
@@ -329,7 +329,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigMoveResampleFpsRangeFallback, TestSize.
 
         EXPECT_TRUE(ssm_->ConfigMoveResample(moveResample));
 
-        auto [enable, minFps, maxFps] = MoveDragController::GetMoveResampleSystemConfig();
+        auto [enable, minFps, maxFps] = MoveDragController::LoadMoveResampleSystemConfig();
         EXPECT_TRUE(enable);
         EXPECT_FALSE(minFps.has_value());
         EXPECT_FALSE(maxFps.has_value());
@@ -356,12 +356,103 @@ HWTEST_F(SceneSessionManagerTest2, ConfigMoveResampleFpsRangeValid, TestSize.Lev
 
     EXPECT_TRUE(ssm_->ConfigMoveResample(moveResample));
 
-    auto [enable, minFps, maxFps] = MoveDragController::GetMoveResampleSystemConfig();
+    auto [enable, minFps, maxFps] = MoveDragController::LoadMoveResampleSystemConfig();
     EXPECT_TRUE(enable);
     ASSERT_TRUE(minFps.has_value());
     ASSERT_TRUE(maxFps.has_value());
     EXPECT_EQ(*minFps, 60);
     EXPECT_EQ(*maxFps, 120);
+}
+
+/**
+ * @tc.name: ConfigMovingEventInvalidType
+ * @tc.desc: Verify ConfigMovingEvent returns false when config is not a map
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventInvalidType, TestSize.Level1)
+{
+    ConfigItem movingEvent;
+    movingEvent.SetValue(123); // not a map
+
+    EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+}
+
+/**
+ * @tc.name: ConfigMovingEventInvalidThrottleIntervalType
+ * @tc.desc: Verify ConfigMovingEvent returns false when throttleInterval is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventInvalidThrottleIntervalType, TestSize.Level1)
+{
+    // Case 1: throttleInterval missing
+    {
+        ConfigItem movingEvent;
+        movingEvent.SetValue(std::map<std::string, ConfigItem>{});
+
+        EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+    }
+
+    // Case 2: throttleInterval not int array
+    {
+        ConfigItem throttle;
+        throttle.SetValue(std::string("not int"));
+
+        ConfigItem movingEvent;
+        movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+        EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+    }
+}
+
+/**
+ * @tc.name: ConfigMovingEventInvalidThrottleIntervalSize
+ * @tc.desc: Verify ConfigMovingEvent returns false when throttleInterval size is not 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventInvalidThrottleIntervalSize, TestSize.Level1)
+{
+    ConfigItem throttle;
+    throttle.SetValue(std::vector<int>{10, 20}); // size != 1
+
+    ConfigItem movingEvent;
+    movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+    EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+}
+
+/**
+ * @tc.name: ConfigMovingEventNegativeThrottleInterval
+ * @tc.desc: Verify ConfigMovingEvent returns false when throttleInterval < 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventNegativeThrottleInterval, TestSize.Level1)
+{
+    ConfigItem throttle;
+    throttle.SetValue(std::vector<int>{-1});
+
+    ConfigItem movingEvent;
+    movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+    EXPECT_FALSE(ssm_->ConfigMovingEvent(movingEvent));
+}
+
+/**
+ * @tc.name: ConfigMovingEventValid
+ * @tc.desc: Verify valid throttleInterval is applied correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventValid, TestSize.Level1)
+{
+    ConfigItem throttle;
+    throttle.SetValue(std::vector<int>{16});
+
+    ConfigItem movingEvent;
+    movingEvent.SetValue({ { "throttleInterval", throttle } });
+
+    EXPECT_TRUE(ssm_->ConfigMovingEvent(movingEvent));
+
+    uint32_t interval = MoveDragController::LoadMovingEventThrottleSystemConfig();
+    EXPECT_EQ(interval, 16u);
 }
 
 /**
@@ -1805,6 +1896,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
                     "<width>20</width>"
                     "<height>20</height>"
                 "</singleHandBackgroundSettingButton>"
+                "<isSettingButtonMirror enable=\"true\"/>"
+                "<textContainerWidth>90</textContainerWidth>"
                 "<singleHandBackgroundTitle>"
                     "<posX>0</posX>"
                     "<posY>29</posY>"
@@ -1813,6 +1906,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
                     "<fontSize>16</fontSize>"
                     "<minFontSize>12</minFontSize>"
                     "<maxLines>1</maxLines>"
+                    "<textAlign>0</textAlign>"
                     "<maxFontScale>default:1.15,fr:1.0</maxFontScale>"
                 "</singleHandBackgroundTitle>"
                 "<singleHandBackgroundContent>"
@@ -1823,6 +1917,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
                     "<fontSize>16</fontSize>"
                     "<minFontSize>12</minFontSize>"
                     "<maxLines>2</maxLines>"
+                    "<textAlign>0</textAlign>"
                     "<maxFontScale>default:1.15,es:1.0</maxFontScale>"
                 "</singleHandBackgroundContent>"
                 "<singleHandBackgroundIssueText>"
@@ -1833,6 +1928,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
                     "<fontSize>16</fontSize>"
                     "<minFontSize>12</minFontSize>"
                     "<maxLines>1</maxLines>"
+                    "<textAlign>0</textAlign>"
                     "<maxFontScale>default:1.0,zh-Hans:1.45</maxFontScale>"
                 "</singleHandBackgroundIssueText>"
             "</singleHandBackgroundLayout>"
@@ -1844,6 +1940,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.settingButtonRect.posY_, 35);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.settingButtonRect.width_, 20);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.settingButtonRect.height_, 20);
+    ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.isSettingButtonMirror, true);
+    ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.textContainerWidth, 90);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.posX, 0);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.posY, 29);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.width, 200);
@@ -1851,6 +1949,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.fontSize, 16);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.minFontSize, 12);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.maxLines, 1);
+    ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.textAlign, 0);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.title.maxFontScale, "default:1.15,fr:1.0");
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.content.posX, 0);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.content.posY, 39);
@@ -1859,6 +1958,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.content.fontSize, 16);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.content.minFontSize, 12);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.content.maxLines, 2);
+    ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.content.textAlign, 0);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.content.maxFontScale, "default:1.15,es:1.0");
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.posX, 0);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.posY, 31);
@@ -1867,6 +1967,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout01, TestSize.
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.fontSize, 16);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.minFontSize, 12);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.maxLines, 1);
+    ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.textAlign, 0);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.maxFontScale, "default:1.0,zh-Hans:1.45");
 }
 
@@ -1886,6 +1987,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout02, TestSize.
                     "<width>20.1</width>"
                     "<height>20.1</height>"
                 "</singleHandBackgroundSettingButton>"
+                "<isSettingButtonMirror enable=\"false\"/>"
+                "<textContainerWidth>90.1</textContainerWidth>"
                 "<singleHandBackgroundTitle>20</singleHandBackgroundTitle>"
                 "<singleHandBackgroundContent>"
                     "<posX>1.2</posX>"
@@ -1895,6 +1998,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout02, TestSize.
                     "<fontSize>16.5</fontSize>"
                     "<minFontSize>12.3</minFontSize>"
                     "<maxLines>2.6</maxLines>"
+                    "<textAlign>2.5</textAlign>"
                 "</singleHandBackgroundContent>"
                 "<singleHandBackgroundIssueText>"
                     "<posX>5 5</posX>"
@@ -1904,6 +2008,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout02, TestSize.
                     "<fontSize>20 20</fontSize>"
                     "<minFontSize>15 15</minFontSize>"
                     "<maxLines>3 3</maxLines>"
+                    "<textAlign>2 2</textAlign>"
                     "<maxFontScale>default:1.0,zh-Hans:1.45</maxFontScale>"
                 "</singleHandBackgroundIssueText>"
             "</singleHandBackgroundLayout>"
@@ -1915,6 +2020,8 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout02, TestSize.
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.settingButtonRect.posY_, 35.1);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.settingButtonRect.width_, 20.1);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.settingButtonRect.height_, 20.1);
+    ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.isSettingButtonMirror, false);
+    ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.textContainerWidth, 90.1);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.posX, 1.2);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.posY, 39.9);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.width, 300.2);
@@ -1922,6 +2029,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout02, TestSize.
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.fontSize, 16.5);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.minFontSize, 12.3);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.maxLines, 2.6);
+    ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.textAlign, 2.5);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.content.maxFontScale, "1");
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.issueText.posX, 5);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.issueText.posY, 35);
@@ -1930,6 +2038,7 @@ HWTEST_F(SceneSessionManagerTest2, ConfigSingleHandBackgroundLayout02, TestSize.
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.issueText.fontSize, 20);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.issueText.minFontSize, 15);
     ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.issueText.maxLines, 3);
+    ASSERT_NE(ssm_->singleHandBackgroundLayoutConfig_.issueText.textAlign, 2);
     ASSERT_EQ(ssm_->singleHandBackgroundLayoutConfig_.issueText.maxFontScale, "default:1.0,zh-Hans:1.45");
 }
 

@@ -69,6 +69,7 @@ public:
         TRANS_ID_UNREGISTER_SESSION_LISTENER,
         TRANS_ID_GET_MISSION_INFOS,
         TRANS_ID_GET_MISSION_INFO_BY_ID,
+        TRANS_ID_GET_SESSION_INFO_WITH_DISPLAY,
         TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID,
         TRANS_ID_DUMP_SESSION_ALL,
         TRANS_ID_DUMP_SESSION_WITH_ID,
@@ -108,6 +109,9 @@ public:
         TRANS_ID_SET_WINDOW_SNAPSHOT_SKIP,
         TRANS_ID_GET_GLOBAL_WINDOW_MODE,
         TRANS_ID_GET_TOP_NAV_DEST_NAME,
+        TRANS_ID_SET_SCREEN_WATERMARK_IMAGE,
+        TRANS_ID_CLEAN_SCREEN_WATERMARK_IMAGE,
+        TRANS_ID_RECOVER_SCREEN_WATERMARK_IMAGE,
         TRANS_ID_SET_APP_WATERMARK_IMAGE,
         TRANS_ID_RECOVER_APP_WATERMARK_IMAGE,
         TRANS_ID_GET_VISIBILITY_WINDOW_INFO_ID,
@@ -174,6 +178,9 @@ public:
         TRANS_ID_RESET_SPECIFIC_WINDOW_ZINDEX,
         TRANS_ID_SUPPORT_ROTATION_REGISTERED,
         TRANS_ID_GET_FOCUS_SESSION_INFO_BY_ABILITY_TOKEN,
+        TRANS_ID_MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY,
+        TRANS_ID_SNAPSHOT_BY_WINDOW_ID,
+        TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -192,6 +199,8 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo,
+        AAFwk::DisplayInfo& displayInfo) = 0;
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
     virtual WSError DumpSessionAll(std::vector<std::string>& infos) override { return WSError::WS_OK; }
@@ -310,6 +319,10 @@ public:
     {
         return WMError::WM_OK;
     }
+    WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo) override
+    {
+        return WMError::WM_OK;
+    }
     WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos) override
     {
         return WMError::WM_OK;
@@ -321,6 +334,11 @@ public:
     WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override { return WMError::WM_OK; }
+    WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+        int32_t persistentId, const SnapshotConfig& config) override
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     WMError GetGlobalWindowMode(DisplayId displayId,
         GlobalWindowMode& globalWinMode) override { return WMError::WM_OK; }
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override { return WMError::WM_OK; }
@@ -377,6 +395,7 @@ public:
     }
     WSError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex) override { return WSError::WS_OK; }
     WSError ResetSpecificWindowZIndex(int32_t pid) override { return WSError::WS_OK; }
+    WSError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId) override { return WSError::WS_OK; }
     void AddExtensionWindowStageToSCB(const sptr<ISessionStage>& sessionStage, const sptr<IRemoteObject>& token,
         uint64_t surfaceNodeId, int64_t startModalExtensionTimeStamp, bool isConstrainedModal) override {}
     void RemoveExtensionWindowStageFromSCB(const sptr<ISessionStage>& sessionStage,

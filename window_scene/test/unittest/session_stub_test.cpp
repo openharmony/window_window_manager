@@ -2409,8 +2409,10 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs, TestSize.Level1
         MessageParcel reply;
         uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE);
         uint32_t waterfallResidentState = 0;
+        uint32_t titleButtonEventType = 0;
         data.WriteUint32(eventId);
         data.WriteUint32(waterfallResidentState);
+        data.WriteUint32(titleButtonEventType);
 
         EXPECT_CALL(*session, OnSessionEvent(_, _))
             .Times(1)
@@ -2472,6 +2474,56 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs02, TestSize.Leve
         uint32_t errCode = reply.ReadUint32();
         EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
     }
+}
+
+/**
+ * @tc.name: HandleNotifyPageEnable
+ * @tc.desc: Test HandleNotifyPageEnable with valid parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyPageEnable, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("enter");
+    data.WriteString("HomePage");
+
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    int32_t errCode;
+    reply.ReadInt32(errCode);
+    EXPECT_EQ(errCode, static_cast<int32_t>(WSError::WS_OK));
+}
+
+/**
+ * @tc.name: HandleNotifyPageEnable01
+ * @tc.desc: Test HandleNotifyPageEnable when ReadString fails for action
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyPageEnable01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleNotifyPageEnable02
+ * @tc.desc: Test HandleNotifyPageEnable when ReadString fails for message
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleNotifyPageEnable02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteString("enter");
+
+    auto result = session_->HandleNotifyPageEnable(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 } // namespace
 } // namespace Rosen

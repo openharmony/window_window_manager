@@ -43,6 +43,7 @@ ohos_source_set("ui_effect_controller_common") {
     integer_overflow = true
     ubsan = true
     boundary_sanitize = true
+    cfi_policy = "adaptive"
   }
 
   sources = [
@@ -53,15 +54,15 @@ ohos_source_set("ui_effect_controller_common") {
     ":libwmutil_public_config",
   ]
 
-  public_deps = [
+  deps = [
     ":libwmutil_base",
   ]
 
-  public_external_deps = [
+  external_deps = [
+    "ability_runtime:runtime",
     "c_utils:utils",
     "graphic_2d:librender_service_client",
     "hilog:libhilog",
-    "ability_runtime:runtime",
     "napi:ace_napi",
   ]
   part_name = "window_manager"
@@ -108,7 +109,6 @@ ohos_static_library("libwmutil_static") {
     "src/window_drawing_content_info.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_property.cpp",
-    "src/window_system_timer.cpp",
     "src/window_transition_info.cpp",
     "src/window_visibility_info.cpp",
     "src/wm_math.cpp",
@@ -145,7 +145,6 @@ ohos_static_library("libwmutil_static") {
     "ipc:ipc_single",
     "preferences:native_preferences",
     "samgr:samgr_proxy",
-    "time_service:time_client",
     "ability_runtime:wantagent_innerkits",
   ]
 
@@ -165,6 +164,7 @@ ohos_shared_library("libwmutil_base") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "src/accessibility_window_info.cpp",
@@ -233,7 +233,6 @@ ohos_shared_library("libwmutil") {
     "src/vsync_station.cpp",
     "src/window_frame_trace_impl.cpp",
     "src/window_property.cpp",
-    "src/window_system_timer.cpp",
     "src/window_transition_info.cpp",
     "src/ffrt_queue_helper.cpp",
     "src/ffrt_serial_queue_helper.cpp",
@@ -271,7 +270,6 @@ ohos_shared_library("libwmutil") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
-    "time_service:time_client",
     "ability_runtime:wantagent_innerkits",
   ]
   if (!(host_os == "linux" && host_cpu == "arm64")) {

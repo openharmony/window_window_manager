@@ -1090,23 +1090,6 @@ HWTEST_F(SceneSessionManagerTest3, PreHandleCollaborator, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckCollaboratorType
- * @tc.desc: SceneSesionManager check collborator type
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, CheckCollaboratorType, TestSize.Level1)
-{
-    int32_t type = CollaboratorType::RESERVE_TYPE;
-    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
-    type = CollaboratorType::OTHERS_TYPE;
-    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
-    type = CollaboratorType::REDIRECT_TYPE;
-    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
-    type = CollaboratorType::DEFAULT_TYPE;
-    ASSERT_FALSE(ssm_->CheckCollaboratorType(type));
-}
-
-/**
  * @tc.name: NotifyUpdateSessionInfo
  * @tc.desc: SceneSesionManager notify update session info
  * @tc.type: FUNC
@@ -2007,13 +1990,11 @@ HWTEST_F(SceneSessionManagerTest3, StartOrMinimizePcAppInPadUIAbilityBySCB, Test
  */
 HWTEST_F(SceneSessionManagerTest3, NotifyRotationBegin, TestSize.Level1)
 {
-    bool isStopDrag = false;
-    ssm_->NotifyRotationBegin(isStopDrag);
-    EXPECT_FALSE(isStopDrag);
-
-    isStopDrag = true;
-    ssm_->NotifyRotationBegin(isStopDrag);
-    EXPECT_TRUE(isStopDrag);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->NotifyRotationBegin();
+    EXPECT_TRUE(g_logMsg.find("NotifyRotationBegin") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 } // namespace
 } // namespace Rosen

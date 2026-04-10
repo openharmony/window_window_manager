@@ -545,6 +545,7 @@ void ScreenSession::SetIsFakeSession(bool isFakeSession)
 
 void ScreenSession::SetPhyWidthAndHeight(uint32_t phyWidth, uint32_t phyHeight)
 {
+    TLOGNFI(WmsLogTag::DMS, "phyWidth=%{public}u, phyHeight=%{public}u", phyWidth, phyHeight);
     property_.SetPhyWidth(phyWidth);
     property_.SetPhyHeight(phyHeight);
     property_.CalculateXYDpi(phyWidth, phyHeight);
@@ -804,24 +805,43 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
     property_.SetBounds(screenBounds);
 }
 
-void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
+ScreenProperty ScreenSession::GetPropertyByResolution(const DMRect& rect)
 {
-    auto screenBounds = property_.GetBounds();
+    auto newProperty = property_;
+    auto screenBounds = newProperty.GetBounds();
     screenBounds.rect_.left_ = rect.posX_;
     screenBounds.rect_.top_ = rect.posY_;
     screenBounds.rect_.width_ = rect.width_;
     screenBounds.rect_.height_ = rect.height_;
-    property_.SetBounds(screenBounds);
+    newProperty.SetBounds(screenBounds);
     // Determine whether the touch is in a valid area.
-    property_.SetValidWidth(rect.width_);
-    property_.SetValidHeight(rect.height_);
-    property_.SetInputOffset(rect.posX_, rect.posY_);
+    newProperty.SetValidWidth(rect.width_);
+    newProperty.SetValidHeight(rect.height_);
+    newProperty.SetInputOffset(rect.posX_, rect.posY_);
     // It is used to calculate the original screen size
-    property_.SetScreenAreaWidth(rect.width_);
-    property_.SetScreenAreaHeight(rect.height_);
+    newProperty.SetScreenAreaWidth(rect.width_);
+    newProperty.SetScreenAreaHeight(rect.height_);
     // It is used to calculate the effective area of the inner screen for cursor
-    property_.SetMirrorWidth(rect.width_);
-    property_.SetMirrorHeight(rect.height_);
+    newProperty.SetMirrorWidth(rect.width_);
+    newProperty.SetMirrorHeight(rect.height_);
+    return newProperty;
+}
+
+void ScreenSession::CheckAndNotifyPropertyChange()
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    if (isNeedNotify) {
+        TLOGI(WmsLogTag::DMS, "It's need notify RESOLUTION_EFFECT_CHANGE");
+        NotifyListenerPropertyChange(propertyNeedNotified_, ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
+        isNeedNotify = false;
+    }
+}
+
+void ScreenSession::SetPropertyNeedNotified(const ScreenProperty& property)
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    propertyNeedNotified_ = property;
+    isNeedNotify = true;
 }
 
 void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty,
@@ -1640,6 +1660,11 @@ Rotation ScreenSession::CalcRotationSystemInner(Orientation orientation, FoldDis
  
 Rotation ScreenSession::CalcRotation(Orientation orientation, FoldDisplayMode foldDisplayMode)
 {
+    if (orientation == Orientation::UNSPECIFIED) {
+        Rotation rotation = Rotation::ROTATION_0;
+        AddRotationCorrection(rotation, foldDisplayMode);
+        return rotation;
+    }
     RRect boundsInRotationZero = CalcBoundsInRotationZero(foldDisplayMode);
     DisplayOrientation displayOrientation = CalcOrientationToDisplayOrientation(orientation);
     return CalcRotationByDeviceOrientation(displayOrientation, foldDisplayMode, boundsInRotationZero);
@@ -2546,6 +2571,11 @@ void ScreenSession::SetExtendProperty(RRect bounds, bool isCurrentOffScreenRende
     property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
 }
 
+void ScreenSession::SetPhyBounds(const RectF& rect)
+{
+    property_.SetPhyBounds(RRect(rect, 0.0f, 0.0f));
+}
+
 void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync)
 {
     if (isFreshBoundsSync) {
@@ -2624,6 +2654,16 @@ void ScreenSession::SetHdrFormats(std::vector<uint32_t>&& hdrFormats)
 {
     std::unique_lock<std::shared_mutex> lock(hdrFormatsMutex_);
     hdrFormats_ = std::move(hdrFormats);
+}
+
+void ScreenSession::AddHdrFormats(const std::vector<uint32_t>& hdrFormats)
+{
+    std::unique_lock<std::shared_mutex> lock(hdrFormatsMutex_);
+    for (uint32_t format : hdrFormats) {
+        if (std::find(hdrFormats_.begin(), hdrFormats_.end(), format) == hdrFormats_.end()) {
+            hdrFormats_.push_back(format);
+        }
+    }
 }
 
 void ScreenSession::SetColorSpaces(std::vector<uint32_t>&& colorSpaces)
@@ -3341,6 +3381,8 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
         screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
         screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
+        screenProperty.SetScreenRealWidth(eventPara.GetScreenRealWidth());
+        screenProperty.SetScreenRealHeight(eventPara.GetScreenRealHeight());
         TLOGI(WmsLogTag::DMS, "ProcPropertyChange : Orientation= %{public}u", deviceOrientation);
     }
     screenProperty.SetPhysicalTouchBounds(GetRotationCorrection(eventPara.GetDisplayMode()));
@@ -3397,6 +3439,8 @@ void ScreenSession::UpdateScbScreenPropertyToServer(const ScreenProperty& screen
 
     property_.SetRotation(screenProperty.GetRotation());
     property_.SetBounds(screenProperty.GetBounds());
+    property_.UpdateScreenRotation(screenProperty.GetScreenRotation());
+    property_.UpdateDeviceRotation(screenProperty.GetDeviceRotation());
     property_.SetDpiPhyBounds(screenProperty.GetPhyWidth(), screenProperty.GetPhyHeight());
     property_.SetPhyBounds(screenProperty.GetPhyBounds());
 

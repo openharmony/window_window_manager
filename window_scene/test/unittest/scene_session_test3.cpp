@@ -377,25 +377,25 @@ HWTEST_F(SceneSessionTest3, UpdateScaleInner, TestSize.Level1)
 
     sceneSession->sessionStage_ = nullptr;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 10.0f);
+    bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 9.0f, 10.0f, 10.0f);
     EXPECT_EQ(true, res);
 
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 10.0f);
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 10.0f);
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 10.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 9.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(true, res);
 
     sceneSession->state_ = SessionState::STATE_BACKGROUND;
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(false, res);
 
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     sceneSession->sessionStage_ = mockSessionStage;
-    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 10.0f, 9.0f, 3.0f, 4.0f);
     EXPECT_EQ(true, res);
-    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 10.0f, 9.0f, 3.0f, 4.0f);
     EXPECT_EQ(false, res);
 }
 
@@ -753,23 +753,6 @@ HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, TestSize.Level1)
 
     sceneSession->SetIsStatusBarVisible(isVisible);
     EXPECT_NE(sceneSession, nullptr);
-}
-
-/**
- * @tc.name: GetAllAvoidAreas
- * @tc.desc: GetAllAvoidAreas
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, TestSize.Level1)
-{
-    std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    SessionInfo info;
-    info.abilityName_ = "GetAllAvoidAreas";
-    info.bundleName_ = "GetAllAvoidAreas";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    auto res = sceneSession->GetAllAvoidAreas(avoidAreas);
-    EXPECT_EQ(res, WSError::WS_OK);
 }
 
 /**

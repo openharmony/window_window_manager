@@ -19,6 +19,7 @@ group("unittest") {
   testonly = true
 
   deps = [
+    "screen_session_manager_test:unittest",
     ":ws_screen_cutout_controller_test",
     ":ws_screen_edid_test",
     ":ws_screen_edid_parse_test",
@@ -83,10 +84,8 @@ group("unittest") {
       ":ws_sensor_fold_state_manager_test",
       ":ws_single_display_fold_policy_test",
       ":ws_single_display_pocket_fold_policy_test",
-      ":ws_single_display_super_fold_policy_test",
       ":ws_single_display_sensor_fold_state_manager_test",
       ":ws_single_display_sensor_pocket_fold_state_manager_test",
-      ":ws_single_display_sensor_super_fold_state_manager_test",
       ":ws_super_fold_sensor_manager_test",
       ":ws_super_fold_state_manager_test",
       ":ws_screen_sensor_mgr_test",
@@ -201,7 +200,7 @@ ohos_unittest("ws_screen_session_manager_lite_test") {
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/dm_lite:libdm_lite",
-    "${window_base_path}/wmserver:sms",
+    "${window_base_path}/wmserver:sms_static",
   ]
 
   external_deps = test_external_deps
@@ -288,7 +287,7 @@ ohos_unittest("ws_screen_session_test") {
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session:screen_session_static",
   ]
 
   external_deps = test_external_deps
@@ -347,7 +346,7 @@ ohos_unittest("ws_screen_session_ability_connection_test") {
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session:screen_session_static",
   ]
 
   external_deps = test_external_deps
@@ -369,7 +368,7 @@ ohos_unittest("ws_screen_session_ability_connection_ut_test") {
   deps = [
     ":ws_unittest_common",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session:screen_session_static",
   ]
 
   external_deps = test_external_deps
@@ -391,7 +390,7 @@ ohos_unittest("ws_screen_snapshot_picker_connection_test") {
 
   deps = [
     ":ws_unittest_common",
-    "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session:screen_session_static",
   ]
 
   external_deps = test_external_deps
@@ -406,7 +405,7 @@ ohos_unittest("ws_screen_property_test") {
 
   deps = [
     ":ws_unittest_common",
-    "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session:screen_session_static",
   ]
 
   external_deps = test_external_deps
@@ -536,7 +535,7 @@ ohos_unittest("ws_screen_session_manager_lite_stub_test") {
 
   deps = [
     ":ws_unittest_common",
-    "${window_base_path}/wmserver:sms",
+    "${window_base_path}/wmserver:sms_static",
   ]
   external_deps = test_external_deps
 }
@@ -1231,17 +1230,6 @@ if (window_manager_fold_ability) {
     ]
   }
 
-  ohos_unittest("ws_single_display_super_fold_policy_test") {
-    module_out_path = module_out_path
-
-    sources = [ "single_display_super_fold_policy_test.cpp" ]
-
-    deps = [ ":ws_unittest_common" ]
-
-    external_deps = test_external_deps
-    external_deps += [ "init:libbegetutil" ]
-  }
-
   ohos_unittest("ws_sensor_fold_state_manager_test") {
     module_out_path = module_out_path
 
@@ -1370,20 +1358,6 @@ if (window_manager_fold_ability) {
     sources = [ "single_display_sensor_pocket_fold_state_manager_test.cpp" ]
 
     deps = [ ":ws_unittest_common" ]
-
-    external_deps = test_external_deps
-    external_deps += [ "init:libbegetutil" ]
-  }
-
-  ohos_unittest("ws_single_display_sensor_super_fold_state_manager_test") {
-    module_out_path = module_out_path
-
-    sources = [ "single_display_sensor_super_fold_state_manager_test.cpp" ]
-
-    deps = [
-      ":ws_unittest_common",
-      "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
-    ]
 
     external_deps = test_external_deps
     external_deps += [ "init:libbegetutil" ]
@@ -1614,6 +1588,7 @@ config("ws_unittest_common_public_config") {
     "${window_base_path}/window_scene/screen_session_manager_client/include",
     "${window_base_path}/window_scene/screen_session_manager/infra/include/fold_screen",
     "${window_base_path}/window_scene/screen_session_manager/infra/include/common",
+    "${window_base_path}/window_scene/screen_session_manager/infra/include/ffrt",
     "${window_base_path}/window_scene/screen_session_manager/include",
     "${window_base_path}/window_scene/session_manager/include",
     "${window_base_path}/window_scene/session_manager_service/include",
@@ -1656,6 +1631,7 @@ ohos_static_library("ws_unittest_common") {
   ]
 
   deps = [
+    "../../../test/common/utils:libtestutil",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
@@ -1664,23 +1640,16 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/window_scene/screen_session_manager:screen_session_manager",
     "${window_base_path}/window_scene/screen_session_manager_client:screen_session_manager_client",
     "${window_base_path}/window_scene/session:scene_session_static",
-    "${window_base_path}/window_scene/session:screen_session",
+    "${window_base_path}/window_scene/session:screen_session_static",
     "${window_base_path}/window_scene/session_manager:scene_session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager",
     "${window_base_path}/window_scene/session_manager:session_manager_lite",
     "${window_base_path}/wm:libwm",
   ]
 
-  public_deps = [
-    "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/utils:libwmutil_base",
-    "${window_base_path}/window_scene/session:screen_session",
-    "../../../test/common/utils:libtestutil",
-  ]
-
   external_deps = test_external_deps
 
-  public_external_deps = [
+  external_deps += [
     "ability_base:session_info",
     "ability_base:want",
   ]

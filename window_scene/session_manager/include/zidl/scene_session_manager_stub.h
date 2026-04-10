@@ -64,6 +64,7 @@ private:
     int HandleUnRegisterSessionListener(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfos(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSessionInfoWithDisplay(MessageParcel& data, MessageParcel& reply);
     int HandleGetSessionInfoByContinueSessionId(MessageParcel& data, MessageParcel& reply);
 
     /*
@@ -107,9 +108,13 @@ private:
     int HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetAllMainWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetMainWindowSnapshot(MessageParcel& data, MessageParcel& reply);
+    int HandleSnapshotByWindowId(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowSnapshotSkip(MessageParcel& data, MessageParcel& reply);
     int HandleGetGlobalWindowMode(MessageParcel& data, MessageParcel& reply);
     int HandleGetTopNavDestinationName(MessageParcel& data, MessageParcel& reply);
+    int HandleSetScreenWatermarkImage(MessageParcel& data, MessageParcel& reply);
+    int HandleCleanScreenWatermarkImage(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverScreenWatermarkImage(MessageParcel& data, MessageParcel& reply);
     int HandleSetWatermarkImageForApp(MessageParcel& data, MessageParcel& reply);
     int HandleRecoverWatermarkImageForApp(MessageParcel& data, MessageParcel& reply);
     int HandleGetVisibilityWindowInfo(MessageParcel& data, MessageParcel& reply);
@@ -166,7 +171,9 @@ private:
     int HandleUpdateOutline(MessageParcel& data, MessageParcel& reply);
     int HandleSetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
     int HandleResetSpecificWindowZIndex(MessageParcel& data, MessageParcel& reply);
+    int HandleMoveMainWindowToTargetDisplay(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySupportRotationRegistered(MessageParcel& data, MessageParcel& reply);
+    int HandleGetCrossProcessWindowInfo(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_STUB_H

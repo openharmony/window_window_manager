@@ -64,6 +64,14 @@ declare namespace window {
     area: AvoidArea;
   }
 
+  enum WindowEventType {
+    WINDOW_SHOWN = 1,
+    WINDOW_ACTIVE = 2,
+    WINDOW_INACTIVE = 3,
+    WINDOW_HIDDEN = 4,
+    WINDOW_DESTROYED = 7
+  }
+
   interface Window {
     getWindowProperties(): { windowRect: Size };
     getWindowAvoidArea(type: number): AvoidArea;
@@ -71,6 +79,10 @@ declare namespace window {
     off(type: 'windowSizeChange', callback?: Callback<Size>): void;
     on(type: 'avoidAreaChange', callback: Callback<AvoidAreaOptions>): void;
     off(type: 'avoidAreaChange', callback?: Callback<AvoidAreaOptions>): void;
+    on(type: 'windowEvent', callback: Callback<WindowEventType>): void;
+    off(type: 'windowEvent', callback?: Callback<WindowEventType>): void;
+    on(type: 'windowHighlightChange', callback: Callback<boolean>): void;
+    off(type: 'windowHighlightChange', callback?: Callback<boolean>): void;
   }
 }
 

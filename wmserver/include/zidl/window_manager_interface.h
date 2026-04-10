@@ -161,6 +161,16 @@ public:
     }
     virtual WMError GetTopNavDestinationName(int32_t windowId,
         std::string& topNavDestName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+    virtual WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority,
+        std::string& bundleName) { return WMError::WM_DO_NOTHING; }
+    virtual WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+    {
+        return WMError::WM_DO_NOTHING;
+    }
+    virtual WMError RecoverScreenWatermarkImage(const std::string& bundleName, uint32_t priority)
+    {
+        return WMError::WM_DO_NOTHING;
+    }
     virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::string& watermarkName) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError RecoverWatermarkImageForApp(const std::string& watermarkName)
@@ -244,6 +254,10 @@ public:
     {
         return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
     }
+    virtual WSError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId)
+    {
+        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WSError CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -271,6 +285,10 @@ public:
     {
         return WSError::WS_OK;
     }
+    virtual WMError GetCrossProcessWindowInfo(CrossProcessWindowInfo& crossProcessWindowInfo)
+    {
+        return WMError::WM_OK;
+    }
     virtual WMError RequestFocusStatus(int32_t persistentId, bool isFocused, bool byForeground = true,
         FocusChangeReason reason = FocusChangeReason::DEFAULT)
     {
@@ -278,6 +296,11 @@ public:
     }
     virtual WMError RequestFocusStatusBySA(int32_t persistentId, bool isFocused = true,
         bool byForeground = true, FocusChangeReason reason = FocusChangeReason::SA_REQUEST)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    virtual WMError Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap,
+        int32_t persistentId, const SnapshotConfig& config)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

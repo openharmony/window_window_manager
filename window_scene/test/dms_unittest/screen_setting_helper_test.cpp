@@ -1830,6 +1830,65 @@ HWTEST_F(ScreenSettingHelperTest, ParseJsonObjectToEnumMap, Function | SmallTest
             g_errLog.find("failed, ret=") == std::string::npos);
         LOG_SetCallback(nullptr);
     }
+
+    /**
+     * @tc.name: RegisterSettingOsSwitchStatusObserver
+     * @tc.desc: RegisterSettingOsSwitchStatusObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, RegisterSettingOsSwitchStatusObserver, TestSize.Level1)
+    {
+        bool flag = false;
+        auto func = [&flag] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag = true;
+        };
+        ScreenSettingHelper::RegisterSettingOsSwitchStatusObserver(func);
+        ASSERT_EQ(ScreenSettingHelper::osSwitchStatusObserver_, nullptr);
+
+        g_errLog.clear();
+        LOG_SetCallback(MyLogCallback);
+        bool flag1 = false;
+        auto func1 = [&flag1] (const std::string&) {
+            TLOGI(WmsLogTag::DMS, "UT test");
+            flag1 = true;
+        };
+        ScreenSettingHelper::RegisterSettingOsSwitchStatusObserver(func1);
+        EXPECT_TRUE(g_errLog.find("setting observer is registered") == std::string::npos ||
+            g_errLog.find("create observer failed") == std::string::npos ||
+            g_errLog.find("failed, ret=") == std::string::npos);
+        LOG_SetCallback(nullptr);
+        ScreenSettingHelper::osSwitchStatusObserver_ = nullptr;
+    }
+
+    /**
+     * @tc.name: UnregisterSettingOsSwitchStatusObserver
+     * @tc.desc: UnregisterSettingOsSwitchStatusObserver
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingOsSwitchStatusObserver, TestSize.Level1)
+    {
+        ScreenSettingHelper::osSwitchStatusObserver_ = new SettingObserver;
+        ScreenSettingHelper::UnregisterSettingOsSwitchStatusObserver();
+        ASSERT_EQ(ScreenSettingHelper::osSwitchStatusObserver_, nullptr);
+
+        ScreenSettingHelper::osSwitchStatusObserver_ = nullptr;
+        ScreenSettingHelper::UnregisterSettingOsSwitchStatusObserver();
+        ASSERT_EQ(ScreenSettingHelper::osSwitchStatusObserver_, nullptr);
+    }
+
+    /**
+     * @tc.name: GetOsSwitchStatus
+     * @tc.desc: Test GetOsSwitchStatus func
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetOsSwitchStatus, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        std::string value = "";
+        auto ret = screenSettingHelper.GetOsSwitchStatus(value);
+        ASSERT_EQ(value == "", !ret);
+    }
 }
 } // namespace Rosen
 } // namespace OHOS
