@@ -14,9 +14,6 @@
  */
 
 #include <algorithm>
-#include <chrono>
-#include <future>
-#include <thread>
 #include <gtest/gtest.h>
 #include <pointer_event.h>
 #include <transaction/rs_transaction.h>

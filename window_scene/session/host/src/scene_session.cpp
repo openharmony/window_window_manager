@@ -10053,14 +10053,14 @@ void SceneSession::SetPreCalcWindowPropertyCallback(const NotifyPreCalcWindowPro
 
 PreWindowProperty SceneSession::PreCalcWindowProperty()
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "PreCalcWindowProperty start");
-    if (preCalcWindowPropertyFunc_) {
-        preWindowPropertyFuture_.ResetLock({});
-        preCalcWindowPropertyFunc_();
-        return preWindowPropertyFuture_.GetResult(PRE_CALC_WINDOW_PROPERTY_TIMEOUT);
+    TLOGI(WmsLogTag::WMS_ROTATION, "start");
+    if (!preCalcWindowPropertyFunc_) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "preCalcWindowPropertyFunc_ is null");
+        return PreWindowProperty();
     }
-    TLOGNE(WmsLogTag::WMS_ROTATION, "PreCalcWindowProperty preCalcWindowPropertyFunc_ is null");
-    return PreWindowProperty();
+    preWindowPropertyFuture_.ResetLock({});
+    preCalcWindowPropertyFunc_();
+    return preWindowPropertyFuture_.GetResult(PRE_CALC_WINDOW_PROPERTY_TIMEOUT);
 }
 
 void SceneSession::SetSystemBarPropertyForRotation(
