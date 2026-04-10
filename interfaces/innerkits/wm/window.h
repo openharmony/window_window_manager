@@ -175,10 +175,18 @@ public:
      */
     virtual void AfterDidBackground() {}
 
+    /**
+     * @brief Set is window scene listener.
+     *
+     * @param isWindowSceneListener Whether is window listener.
+     */
     void SetIsWindowSceneListener(bool isWindowSceneListener) {
         isWindowSceneListener_ = isWindowSceneListener;
     }
 
+    /**
+     * @brief Whether is window listener.
+     */
     bool IsWindowSceneListener() {
         return isWindowSceneListener_;
     }
@@ -4057,11 +4065,22 @@ public:
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
+    /**
+     * @brief Set is game prelaunch.
+     *
+     * @param isGamePreLaunch is game prelaunch.
+     * @return WM_OK means set success, others means failed.
+     */
     virtual WMError SetIsGamePreLaunch(bool isGamePreLaunch)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
 
+    /**
+     * @brief Clear is game prelaunch.
+     *
+     * @return WM_OK means set success, others means failed.
+     */
     virtual WMError ClearIsGamePreLaunch()
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
