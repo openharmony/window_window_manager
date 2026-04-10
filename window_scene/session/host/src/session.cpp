@@ -476,6 +476,7 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.disableDelegator = info.disableDelegator;
     sessionInfo_.reuseDelegatorWindow = info.reuseDelegatorWindow;
     sessionInfo_.isGamePrelaunch_ = info.isGamePrelaunch_;
+    sessionInfo_.reuseSessionInGamePreLaunch_ = info.reuseSessionInGamePreLaunch_;
 }
 
 void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)

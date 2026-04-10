@@ -539,6 +539,7 @@ struct SessionInfo {
      * Game PreLaunch
      */
     bool isGamePrelaunch_ = false;
+    bool reuseSessionInGamePreLaunch_ = false;
 
     AAFwk::Want GetWantSafely() const
     {
@@ -651,6 +652,7 @@ enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE_FULLSCREEN,
     EVENT_SWITCH_COMPATIBLE_MODE = 200,
     EVENT_NOTIFY_WINDOW_STAGE_CREATE_FINISHED,
+    EVENT_CLEAR_GAME_PRELAUNCH_FLAG,
     EVENT_END
 };
 

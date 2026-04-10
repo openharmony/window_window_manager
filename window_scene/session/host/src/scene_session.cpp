@@ -1148,6 +1148,13 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
         bool proportionalScale = property->IsAdaptToProportionalScale();
+        if (event == SessionEvent::EVENT_CLEAR_GAME_PRELAUNCH_FLAG) {
+            if (session->GetSessionInfo().reuseSessionInGamePreLaunch_) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "Reset scene session reuseSessionInGamePreLaunch_ to false, id: %{public}d",
+                    sceneSession->GetPersistentId());
+                sceneSession->EditSessionInfo().reuseSessionInGamePreLaunch_ = false;
+            }
+        }
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
@@ -6367,7 +6374,9 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     }
 
     if (abilitySessionInfo->want.HasParameter(WANT_PARAM_GAME_PRELAUNCH)) {
-        info.isGamePrelaunch_ = abilitySessionInfo->want.GetBoolParam(WANT_PARAM_GAME_PRELAUNCH, false);
+        bool isGamePreLaunch = abilitySessionInfo->want.GetBoolParam(WANT_PARAM_GAME_PRELAUNCH, false);
+        info.isGamePrelaunch_ = isGamePreLaunch;
+        info.reuseSessionInGamePreLaunch_ = isGamePreLaunch;
     }
 
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s,"
