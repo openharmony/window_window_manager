@@ -3740,7 +3740,7 @@ HWTEST_F(SceneSessionManagerTest12, RecordLifeCycleExceptionEvent, TestSize.Leve
     ASSERT_NE(sceneSession, nullptr);
 
     ssm_->RecordLifeCycleExceptionEvent(sceneSession, ERR_OK,
-        WSErrorReason::WS_REASON_WINDOW_AMS_START_ERR, "test reason");
+        WSErrorReason::WS_REASON_WINDOW_START_ERR, "test reason");
 }
 } // namespace
 } // namespace Rosen
