@@ -366,6 +366,25 @@ enum class WMError : int32_t {
 };
 
 /**
+ * @brief Enumerates error code of window only used for dfx.
+ */
+enum class WMErrorReason : int32_t {
+    WM_REASON = 0,
+    WM_REASON_WINDOW_CREATE_ERR,
+    WM_REASON_WINDOW_SHOW_ERR,
+    WM_REASON_WINDOW_HIDE_ERR,
+    WM_REASON_WINDOW_DESTROY_ERR,
+
+    WM_REASON_SUB_WINDOW = 100,
+    WM_REASON_SUB_WINDOW_IPC_ERR,
+    WM_REASON_SUB_WINDOW_IPC_CREATE_ERR,
+    WM_REASON_SUB_WINDOW_IPC_RECOVER_ERR,
+    WM_REASON_SUB_WINDOW_IPC_DESTROY_ERR,
+    WM_REASON_SUB_WINDOW_IPC_BIND_DIALOG_TARGET_ERR,
+};
+
+
+/**
  * @brief Enumerates error code of window only used for js api.
  */
 enum class WmErrorCode : int32_t {
