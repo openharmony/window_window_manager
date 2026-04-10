@@ -364,6 +364,7 @@ void WindowSessionImpl::InitPropertyFromOption(const sptr<WindowOption>& option)
     property_->SetIsSystemKeyboard(option->IsSystemKeyboard());
     property_->SetConstrainedModal(option->IsConstrainedModal());
     property_->SetSubWindowOutlineEnabled(option->IsSubWindowOutlineEnabled());
+    property_->SetZLevelAboveParentLoosened(option->IsSubWindowZLevelAboveParentLoosened());
     property_->SetIsCrossProcessWindow(option->IsCrossProcessWindow());
     layoutCallback_ = sptr<FutureCallback>::MakeSptr();
     getTargetInfoCallback_ = sptr<FutureCallback>::MakeSptr();

@@ -304,7 +304,7 @@ bool SubSession::IsVisibleForeground() const
     if (IsLoosenedWithFreeMultiMode()) {
         bool isVisibleForeground = Session::IsVisibleForeground();
         TLOGD(WmsLogTag::WMS_SUB,
-            "id: %{public}d, IsVisibleForeground: %{public}d, IsVisibleForeground: %{public}d",
+            "id: %{public}d, IsVisibleForeground: %{public}d",
             GetPersistentId(), isVisibleForeground);
         return isVisibleForeground;
     }

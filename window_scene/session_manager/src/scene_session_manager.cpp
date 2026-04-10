@@ -7050,6 +7050,10 @@ static void GetTopWindowByTraverseSessionTree(const sptr<SceneSession>& session,
             TLOGW(WmsLogTag::WMS_SUB, "Failed");
             continue;
         }
+        if (subSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGD(WmsLogTag::WMS_SUB, "id: %{public}d is loosened", subSession->GetPersistentId());
+            continue;
+        }
         if ((subSession->GetSessionState() == SessionState::STATE_FOREGROUND ||
              subSession->GetSessionState() == SessionState::STATE_ACTIVE) &&
             subSession->GetZOrder() > zOrder) {
@@ -8675,6 +8679,7 @@ WSError SceneSessionManager::RequestSessionFocusCheck(const sptr<SceneSession>& 
     // subwindow/dialog state block
     if ((WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
         sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_DIALOG) &&
+        !sceneSession->IsLoosenedWithFreeMultiMode() &&
         GetSceneSession(sceneSession->GetParentPersistentId()) &&
         !IsSessionVisibleForeground(GetSceneSession(sceneSession->GetParentPersistentId()))) {
             TLOGD(WmsLogTag::WMS_FOCUS, "parent session id: %{public}d is not visible!",
@@ -10390,6 +10395,10 @@ void SceneSessionManager::ProcessSubSessionForeground(sptr<SceneSession>& sceneS
             TLOGD(WmsLogTag::WMS_SUB, "sub session is topmost modal sub window");
             continue;
         }
+        if (subSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGE(WmsLogTag::WMS_SUB, "sub window id: %{public}d is loosened ", subSession->GetPersistentId());
+            continue;
+        }
         const auto& state = subSession->GetSessionState();
         if (state != SessionState::STATE_FOREGROUND && state != SessionState::STATE_ACTIVE) {
             TLOGD(WmsLogTag::WMS_SUB, "sub session is not active");
@@ -10480,6 +10489,10 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmediately(const sp
         if (topmostSession == nullptr) {
             continue;
         }
+        if (topmostSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGD(WmsLogTag::WMS_SUB, "sub window id: %{public}d is loosened ", topmostSession->GetPersistentId());
+            continue;
+        }
         // no need to consider order, since rule of zOrder
         if (RequestSessionFocusImmediately(topmostSession->GetPersistentId(), false) == WSError::WS_OK) {
             ret = WSError::WS_OK;
@@ -10512,6 +10525,10 @@ WSError SceneSessionManager::ProcessSubWindowRequestFocusImmediately(const sptr<
     for (auto session : subSessionVec) {
         if (session == nullptr) {
             TLOGD(WmsLogTag::WMS_SUB, "sub session is nullptr");
+            continue;
+        }
+        if (session->IsLoosenedWithFreeMultiMode()) {
+            TLOGD(WmsLogTag::WMS_SUB, "sub window id: %{public}d is loosened ", session->GetPersistentId());
             continue;
         }
         if (!IsSessionVisibleForeground(session)) {
@@ -10551,6 +10568,10 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmediately(const sptr<Sce
     WSError ret = WSError::WS_DO_NOTHING;
     for (auto dialog : dialogVec) {
         if (dialog == nullptr) {
+            continue;
+        }
+        if (dialog->IsLoosenedWithFreeMultiMode()) {
+            TLOGD(WmsLogTag::WMS_SUB, "sub window id: %{public}d is loosened ", dialog->GetPersistentId());
             continue;
         }
         // no need to consider order, since rule of zOrder
@@ -15498,6 +15519,10 @@ WSError SceneSessionManager::ShiftAppWindowFocus(int32_t sourcePersistentId, int
     ret = GetAppMainSceneSession(targetPersistentId, targetSession);
     if (ret != WSError::WS_OK) {
         return ret;
+    }
+    if (sourceSession->IsLoosenedWithFreeMultiMode() || targetSession->IsLoosenedWithFreeMultiMode()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "source session or target session is loosened");
+        return WSError::WS_OK;
     }
     if (sourceSession->GetSessionInfo().bundleName_ != targetSession->GetSessionInfo().bundleName_) {
         TLOGE(WmsLogTag::WMS_FOCUS, "verify bundle failed, source name is %{public}s but target name is %{public}s)",
