@@ -4427,8 +4427,7 @@ WMError WindowSessionImpl::UnregisterWindowRectChangeListener(const sptr<IWindow
     WMError ret = WMError::WM_DO_NOTHING;
     {
         std::lock_guard<std::mutex> lockListener(windowRectChangeListenerMutex_);
-           ret = UnregisterListenerInMap(windowRectChangeListeners_, GetPersistentId(), listener);
-        }
+        ret = UnregisterListenerInMap(windowRectChangeListeners_, GetPersistentId(), listener);
     }
     if (ret == WMError::WM_OK) {
         UpdateRectChangeListenerRegisterStatus();
@@ -6956,7 +6955,7 @@ WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
     }
     if (ret != WMError::WM_OK) {
         std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
-        UnregisterListenerInMap(acrossDisplaysChangeListeners_, persistentId, listener);;
+        UnregisterListenerInMap(acrossDisplaysChangeListeners_, persistentId, listener);
     }
     return ret;
 }
@@ -9286,11 +9285,6 @@ WMError WindowSessionImpl::SetIntentParam(const std::string& intentParam,
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     const std::string* ptr = &intentParam;
-    if (ptr == nullptr || reinterpret_cast<uintptr_t>(ptr) < 0x1000) {
-        // 捕获到非法调用！记录日志或抛出异常
-        TLOGI(WmsLogTag::WMS_SCB, "intentParam is nullptr");
-        return WMError::WM_ERROR_NULLPTR;
-    }
     intentParam_ = intentParam;
     loadPageCallback_ = loadPageCallback;
     isIntentColdStart_ = isColdStart;
