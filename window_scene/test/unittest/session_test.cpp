@@ -2198,7 +2198,7 @@ HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_EnabledPc, TestSize.Leve
     ASSERT_NE(session, nullptr);
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
     session->property_->SetZLevelAboveParentLoosened(true);
-    session->systemConfig_.SetPcWindow(true);
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(true, session->IsLoosenedWithFreeMultiMode());
 }
 
@@ -2216,7 +2216,8 @@ HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_EnabledFreeMulti, TestSi
     ASSERT_NE(session, nullptr);
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
     session->property_->SetZLevelAboveParentLoosened(true);
-    session->systemConfig_.SetFreeMultiWindowMode(true);
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
     ASSERT_EQ(true, session->IsLoosenedWithFreeMultiMode());
 }
 
@@ -2234,7 +2235,7 @@ HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_NotEnabled, TestSize.Lev
     ASSERT_NE(session, nullptr);
     session->property_ = sptr<WindowSessionProperty>::MakeSptr();
     session->property_->SetZLevelAboveParentLoosened(false);
-    session->systemConfig_.SetPcWindow(true);
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(false, session->IsLoosenedWithFreeMultiMode());
 }
 } // namespace

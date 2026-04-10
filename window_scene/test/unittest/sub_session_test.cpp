@@ -851,7 +851,7 @@ HWTEST_F(SubSessionTest, IsVisibleForeground_LoosenedWithFreeMultiMode, TestSize
 
     // Enable ZLevelAboveParentLoosened and PC mode
     subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(true);
-    subSession->systemConfig_.SetPcWindow(true);
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
 
     // Set session to foreground state
     subSession->SetSessionState(SessionState::STATE_FOREGROUND);
@@ -901,7 +901,8 @@ HWTEST_F(SubSessionTest, IsVisibleForeground_LoosenedWithFreeMultiMode_False, Te
 
     // Enable ZLevelAboveParentLoosened and FreeMulti mode
     subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(true);
-    subSession->systemConfig_.SetFreeMultiWindowMode(true);
+    subSession->systemConfig_.freeMultiWindowEnable_ = true;
+    subSession->systemConfig_.freeMultiWindowSupport_ = true;
 
     // Set session to background state
     subSession->SetSessionState(SessionState::STATE_BACKGROUND);
@@ -954,12 +955,13 @@ HWTEST_F(SubSessionTest, IsLoosenedWithFreeMultiMode_SubSession, TestSize.Level1
 
     // Test with PC mode enabled
     subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(true);
-    subSession->systemConfig_.SetPcWindow(true);
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ASSERT_EQ(true, subSession->IsLoosenedWithFreeMultiMode());
 
     // Test with FreeMulti mode enabled
-    subSession->systemConfig_.SetPcWindow(false);
-    subSession->systemConfig_.SetFreeMultiWindowMode(true);
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    subSession->systemConfig_.freeMultiWindowEnable_ = true;
+    subSession->systemConfig_.freeMultiWindowSupport_ = true;
     ASSERT_EQ(true, subSession->IsLoosenedWithFreeMultiMode());
 
     // Test with zLevel not loosened
