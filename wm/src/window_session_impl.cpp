@@ -3412,7 +3412,7 @@ WSError WindowSessionImpl::NotifyOrientationExecutionResult(uint32_t promiseId, 
             return;
         }
         window->onNotifyOrientationExecutionResult_(promiseId, result);
-    }, __func__);
+        }, __func__);
     return WSError::WS_OK;
 }
 
