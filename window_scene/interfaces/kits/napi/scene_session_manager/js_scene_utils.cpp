@@ -799,6 +799,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!IsJsIsUseControlSessionUndefined(env, jsIsUseControlSession, sessionInfo)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "isSkipAncoNotifyPreStart", sessionInfo.isSkipAncoNotifyPreStart)) {
+        return false;
+    }
     if (!ConvertFromJsValueProperty(env, jsObject, "hasPrivacyModeControl", sessionInfo.hasPrivacyModeControl)) {
         return false;
     }
