@@ -680,8 +680,12 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
 }
 
 void WindowSessionImpl::RecordLifeCycleExceptionEvent(WMError retCode,
-            WMErrorReason errCode, const std::string& reason) const
+                                                      WMErrorReason errCode,
+                                                      const std::string& reason) const
 {
+    if (retCode == WMError::WM_OK) {
+        return;
+    }
     std::ostringstream oss;
     oss << "life cycle is abnormal: " << "bundleName: " << GetBundleName().c_str()
         << ", windowName: " << GetWindowName().c_str()

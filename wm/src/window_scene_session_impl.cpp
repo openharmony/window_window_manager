@@ -804,10 +804,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetDefaultDensityEnabledValue(IsStageDefaultDensityEnabled());
         RegisterListenerForKeyboard();
         RecordWindowLifecycleChange("create");
-    } else {
-        RecordLifeCycleExceptionEvent(ret,
-            WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "window create fail");
     }
+    RecordLifeCycleExceptionEvent(ret,
+            WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "window create fail");
     UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
