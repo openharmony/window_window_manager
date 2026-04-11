@@ -3090,13 +3090,18 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(bool runInFfrt, float scalePa
         .useCurWindow = useCurWindow,
         .backGroundColor = GetBackgroundColor(),
     };
+    auto rsUICtx = surfaceNode->GetRSUIContext();
+    if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "rsUIContext is null");
+        return nullptr;
+    }
     bool ret = false;
     if (needBlurSnapshot) {
         config.backGroundColor = blurBackgroundColor_ == std::numeric_limits<uint32_t>::max() ?
             GetBackgroundColor() : blurBackgroundColor_;
-        ret = RSInterfaces::GetInstance().TakeSurfaceCaptureWithBlur(surfaceNode, callback, config, blurRadius_);
+        ret = rsUICtx->GetRSRenderInterface()->TakeSurfaceCaptureWithBlur(surfaceNode, callback, config, blurRadius_);
     } else {
-        ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
+        ret = rsUICtx->GetRSRenderInterface()->TakeSurfaceCapture(surfaceNode, callback, config);
     }
     if (!ret) {
         TLOGE(WmsLogTag::WMS_PATTERN, "TakeSurfaceCapture failed %{public}d", persistentId_);
@@ -5622,7 +5627,13 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
         .isHdrCapture = true,
         .needF16WindowCaptureForScRGB = isNeedF16WindowShot,
     };
-    bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config, blur);
+    auto rsUICtx = surfaceNode->GetRSUIContext();
+    if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "rsUIContext is null");
+        return nullptr;
+    }
+    bool ret = rsUICtx->GetRSRenderInterface()->SetWindowFreezeImmediately(
+        surfaceNode, isFreeze, callback, config, blur);
     if (!ret) {
         TLOGE(WmsLogTag::WMS_PATTERN, "failed");
         return nullptr;
@@ -5935,6 +5946,17 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
             caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     }
     return rsUIContext_;
+}
+
+std::shared_ptr<RSRenderInterface> Session::GetRSRenderInterface(const char* caller)
+{
+    auto rsUICtx = GetRSUIContext(caller);
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], caller=%{public}s",
+            GetPersistentId(), GetWindowName().c_str(), caller);
+        return nullptr;
+    }
+    return rsUICtx->GetRSRenderInterface();
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSShadowContext()

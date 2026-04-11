@@ -26,6 +26,7 @@
 #include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
+#include <transaction/rs_interfaces.h>
 #include "display_manager.h"
 #include "singleton_container.h"
 
@@ -91,7 +92,7 @@ using IKBWillHideListener = IKeyboardWillHideListener;
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option,
-        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr, sptr<IRemoteObject> renderSession = nullptr);
     ~WindowSessionImpl();
 
     static sptr<Window> Find(const std::string& name);
@@ -641,6 +642,7 @@ public:
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;
+    std::shared_ptr<RSRenderInterface> GetRSRenderInterface();
 
     /*
      * Window LifeCycle
@@ -666,6 +668,7 @@ public:
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
 
 protected:
+    RSSurfaceNodeType GetRSSurfaceNodeType(WindowType type);
     WMError Connect();
     bool IsWindowSessionInvalid() const;
     void NotifyWindowAfterUnfocused();
@@ -961,6 +964,17 @@ protected:
      */
     bool grayOutMaximizeButton_ = false;
     void NotifyTitleChange(bool isShow, int32_t height);
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
+    std::shared_ptr<RSUIContext> rsUIContext_;
+
+    /**
+     * RS Multi Process
+     */
+    sptr<IRemoteObject> renderSession_;
     
 private:
     void InitPropertyFromOption(const sptr<WindowOption>& option);
@@ -1299,11 +1313,6 @@ private:
     void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
     void NotifyRotationChangeResultInner(const RotationChangeInfo& rotationChangeInfo);
     DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
-
-    /*
-     * RS Client Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS
