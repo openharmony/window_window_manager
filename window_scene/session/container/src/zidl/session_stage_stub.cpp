@@ -276,6 +276,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyParentLifecycleEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO):
             return HandleUpdateAppHookWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FORCE_SPLIT_ENABLE):
+            return HandleSetForceSplitEnable(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1444,6 +1446,28 @@ int SessionStageStub::HandleUpdateAppHookWindowInfo(MessageParcel& data, Message
         return ERR_INVALID_DATA;
     }
     UpdateAppHookWindowInfo(*hookInfo);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetForceSplitEnable(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    bool isForceSplitEnabled = false;
+    if (!data.ReadBool(isForceSplitEnabled)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read isForceSplitEnabled failed");
+        return ERR_INVALID_DATA;
+    }
+    bool needUpdateViewport = false;
+    if (!data.ReadBool(needUpdateViewport)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t selectModeValue = 0;
+    if (!data.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read selectMode failed");
+        return ERR_INVALID_DATA;
+    }
+    SetForceSplitEnable(isForceSplitEnabled, needUpdateViewport, static_cast<SelectMode>(selectModeValue));
     return ERR_NONE;
 }
 

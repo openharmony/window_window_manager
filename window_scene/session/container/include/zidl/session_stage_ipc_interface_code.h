@@ -121,6 +121,7 @@ enum class SessionStageInterfaceCode {
     TRANS_ID_UPDATE_PROPERTY_WHEN_TRIGGER_MODE,
     TRANS_ID_NOTIFY_PARENT_LIFECYCLE_EVENT,
     TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO,
+    TRANS_ID_SET_FORCE_SPLIT_ENABLE
 };
 }   // namespace Rosen
 }   // namespace OHOS

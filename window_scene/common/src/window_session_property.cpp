@@ -1488,6 +1488,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteString(ancoRealBundleName_) &&
         parcel.WriteBool(isShowDecorInFreeMultiWindow_) &&
         parcel.WriteBool(isMobileAppInPadLayoutFullScreen_) &&
+        parcel.WriteBool(isForceSplitEnabled_) &&
+        MarshallingHookWindowInfo(parcel) &&
         parcel.WriteBool(isFullScreenInForceSplitMode_) &&
         parcel.WriteInt32(static_cast<int32_t>(pageCompatibleMode_)) &&
         parcel.WriteFloat(aspectRatio_) &&
@@ -1612,6 +1614,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAncoRealBundleName(parcel.ReadString());
     property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
+    property->SetForceSplitEnabled(parcel.ReadBool());
+    UnmarshallingHookWindowInfo(parcel, property);
     property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
     property->SetPageCompatibleMode(static_cast<CompatibleStyleMode>(parcel.ReadInt32()));
     property->SetAspectRatio(parcel.ReadFloat());
@@ -2550,6 +2554,26 @@ void WindowSessionProperty::SetMobileAppInPadLayoutFullScreen(bool isMobileAppIn
     isMobileAppInPadLayoutFullScreen_ = isMobileAppInPadLayoutFullScreen;
 }
 
+void WindowSessionProperty::SetForceSplitEnable(bool isForceSplitEnabled)
+{
+    isForceSplitEnabled_ = isForceSplitEnabled;
+}
+
+bool WindowSessionProperty::GetForceSplitEnable() const
+{
+    return isForceSplitEnabled_;
+}
+
+void WindowSessionProperty::SetHookWindowInfo(const HookWindowInfo& hookWindowInfo)
+{
+    hookWindowInfo_ = hookWindowInfo;
+}
+
+const HookWindowInfo& WindowSessionProperty::GetHookWindowInfo() const
+{
+    return hookWindowInfo_;
+}
+
 bool WindowSessionProperty::GetPcAppInpadCompatibleMode() const
 {
     return isPcAppInpadCompatibleMode_;
@@ -2814,6 +2838,21 @@ void WindowSessionProperty::UnmarshallingWindowAnchorInfo(Parcel& parcel, Window
         return;
     }
     property->SetWindowAnchorInfo(*windowAnchorInfo);
+}
+
+bool WindowSessionProperty::MarshallingHookWindowInfo(Parcel& parcel) const
+{
+    return parcel.WriteParcelable(&hookWindowInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingHookWindowInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    sptr<HookWindowInfo> hookWindowInfo = parcel.ReadParcelable<HookWindowInfo>();
+    if (hookWindowInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "hookWindowInfo is nullptr!");
+        return;
+    }
+    property->SetHookWindowInfo(*hookWindowInfo);
 }
 
 void WindowSessionProperty::SetMissionInfo(const MissionInfo& missionInfo)

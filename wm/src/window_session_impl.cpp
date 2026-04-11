@@ -2607,9 +2607,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.supportSplit_ > 0) {
         SetForceSplitConfig(config);
-        bool enableForceSplit = false;
-        if ((config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) &&
-            GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
+        if ((config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE)) {
             // try to fetch selectMode
             SelectMode finalSelectMode = SelectMode::INVALID_MODE;
             if (GetSelectMode(finalSelectMode) != WMError::WM_OK) {
@@ -2619,7 +2617,7 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
                 TLOGI(WmsLogTag::WMS_LAYOUT, "get selectMode success, id:%{public}d, selectMode: %{public}u",
                     GetPersistentId(), static_cast<uint32_t>(finalSelectMode));
             }
-            SetForceSplitConfigEnable(enableForceSplit, false, finalSelectMode);
+            SetForceSplitConfigEnable(property_->GetForceSplitEnable(), false, finalSelectMode);
         } else {
             SetForceSplitConfigEnable(false);
         }

@@ -2953,9 +2953,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
         });
-        sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
-            return this->GetAppHookWindowInfo(bundleName);
-        });
+        // sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
+        //     return this->GetAppHookWindowInfo(bundleName);
+        // });
         sceneSession->RegisterSelectModeFunc([this]() {
             return this->GetSelectMode();
         });
@@ -3021,9 +3021,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
 
         if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
-                return this->GetAppForceLandscapeConfigEnable(bundleName);
-            });
+            // sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
+            //     return this->GetAppForceLandscapeConfigEnable(bundleName);
+            // });
             sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
                 const std::string& action, const std::string& message) {
                 return this->NotifyPageEnableFunc(bundleName, windowId, action, message);

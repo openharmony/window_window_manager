@@ -208,6 +208,8 @@ public:
     static void UnmarshallingShadowsInfo(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingWindowAnchorInfo(Parcel& parcel) const;
     static void UnmarshallingWindowAnchorInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingHookWindowInfo(Parcel& parcel) const;
+    static void UnmarshallingHookWindowInfo(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
@@ -275,6 +277,10 @@ public:
     bool GetPcAppInpadOrientationLandscape() const;
     void SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
     bool GetMobileAppInPadLayoutFullScreen() const;
+    void SetForceSplitEnable(bool isForceSplitEnabled);
+    bool GetForceSplitEnable() const;
+    void SetHookWindowInfo(const HookWindowInfo& hookWindowInfo);
+    const HookWindowInfo& GetHookWindowInfo() const;
     void SetRotationLocked(bool locked);
     bool GetRotationLocked() const;
 
@@ -654,10 +660,12 @@ private:
     mutable std::mutex shadowsInfoMutex_;
     mutable std::mutex globalDisplayRectMutex_;
     Rect globalDisplayRect_ { 0, 0, 0, 0 };
+    HookWindowInfo hookWindowInfo_;
     bool isPcAppInpadCompatibleMode_ = false;
     bool isPcAppInpadSpecificSystemBarInvisible_ = false;
     bool isPcAppInpadOrientationLandscape_ = false;
     bool isMobileAppInPadLayoutFullScreen_ = false;
+    bool isForceSplitEnabled_ = false;
     bool isRotationLock_ = false;
 
     /*

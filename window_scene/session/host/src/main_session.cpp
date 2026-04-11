@@ -723,6 +723,56 @@ WSError MainSession::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInf
     return sessionStage_->UpdateAppHookWindowInfo(hookWindowInfo);
 }
 
+WSError MainSession::UpdateHookWindowInfo(const HookWindowInfo& hookWindowInfo)
+{
+    if (hookWindowInfo.widthHookRatio < 0.0f) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid hook window parameters: widthHookRatio:%{public}f"
+            hookWindowInfo.widthHookRatio);
+        return WSError::WS_ERROR_INVALID_PARAM;
+    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "hookWindowInfo:[%{public}s]", hookWindowInfo.ToString().c_str());
+
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    HookWindowInfo preInfo = property->GetHookWindowInfo();
+    HookWindowInfo newInfo = {};
+    newInfo.enableHookWindow = hookWindowInfo.enableHookWindow;
+    newInfo.widthHookRatio = hookWindowInfo.widthHookRatio;
+    newInfo.notifyWindowChange = false;
+    property->SetHookWindowInfo(newInfo);
+    if (preInfo.enableHookWindow != hookWindowInfo.enableHookWindow ||
+        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio)) {
+        // Notify the client of the info change
+        UpdateAppHookWindowInfo(hookWindowInfo);
+    }
+    return WSError::WS_OK;
+}
+
+WSError MainSession::SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "isForceSplitEnabled:%{public}d, needUpdateViewport:%{public}d, selectMode:%{public}u",
+        isForceSplitEnabled, needUpdateViewport, selectMode);
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    property->SetForceSplitEnable(isForceSplitEnabled);
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is nullptr!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto ret = sessionStage_->SetForceSplitEnable(isForceSplitEnabled, needUpdateViewport, selectMode);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage SetForceSplitEnable failed, ret: %{public}d", ret);
+        return ret;
+    }
+    return WSError::WS_OK;
+}
+
 bool MainSession::RestoreAspectRatio(float ratio)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "windowId: %{public}d, ratio: %{public}f", GetPersistentId(), ratio);

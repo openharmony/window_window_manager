@@ -120,6 +120,7 @@ public:
         SelectMode selectMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) override;
     WSError CloseSpecificScene() override;
     void NotifyLifecyclePausedStatus() override;
     void NotifyAppUseControlStatus(bool isUseControl) override;
