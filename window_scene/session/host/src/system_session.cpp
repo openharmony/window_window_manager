@@ -467,6 +467,7 @@ WSError SystemSession::StopFloatingBall()
     return WSError::WS_OK;
 }
 
+
 WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "session GetFloatingBallWindowId");
@@ -474,7 +475,7 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
         return WMError::WM_DO_NOTHING;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-
+ 
     return PostSyncTask([weakThis = wptr(this), callingPid, &windowId, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
@@ -486,6 +487,16 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
             return WMError::WM_ERROR_INVALID_CALLING;
         }
         windowId = session->GetFbWindowId();
+        // Wait FB_PANEL to be created
+        constexpr int32_t WAIT_MILLISECONDS = 20;
+        constexpr int32_t MAX_WAIT_TIMES = 10;
+        int32_t waitTimes = 0;
+        while (windowId == 0 && waitTimes <= MAX_WAIT_TIMES) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MILLISECONDS));
+            std::this_thread::yield();
+            waitTimes++;
+            windowId = session->GetFbWindowId();
+        }
         TLOGND(WmsLogTag::WMS_SYSTEM, "%{public}s mode: %{public}u", where, windowId);
         return WMError::WM_OK;
     }, __func__);
