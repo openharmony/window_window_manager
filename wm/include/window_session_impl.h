@@ -982,7 +982,6 @@ protected:
     bool grayOutMaximizeButton_ = false;
     void NotifyTitleChange(bool isShow, int32_t height);
 
-
     /**
      * Game Prelaunch flag
      */
