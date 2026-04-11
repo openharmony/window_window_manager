@@ -16137,10 +16137,11 @@ void SceneSessionManager::FlushWindowInfoToMMI(const bool forceFlush)
         }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SceneSessionManager::FlushWindowInfoToMMI");
         SceneInputManager::GetInstance().ResetSessionDirty();
-        auto [windowInfoList, pixelMapList] = SceneInputManager::GetInstance().GetFullWindowInfoList();
-        TLOGND(WmsLogTag::WMS_EVENT, "windowInfoList size: %{public}d", static_cast<int32_t>(windowInfoList.size()));
-        SceneInputManager::GetInstance().
-            FlushDisplayInfoToMMI(std::move(windowInfoList), std::move(pixelMapList), forceFlush);
+        FullInfoForMMI fullInfoForMMI = SceneInputManager::GetInstance().GetFullWindowInfoList();
+        TLOGND(WmsLogTag::WMS_EVENT, "windowInfoList size: %{public}d",
+            static_cast<int32_t>(fullInfoForMMI.windowInfoList.size()));
+        SceneInputManager::GetInstance().FlushDisplayInfoToMMI(std::move(fullInfoForMMI.windowInfoList),
+            std::move(fullInfoForMMI.uiExtensionInfoList), std::move(fullInfoForMMI.pixelMapList), forceFlush);
     };
     TLOGD(WmsLogTag::WMS_EVENT, "in");
     taskScheduler_->PostAsyncTask(task, __func__);
@@ -16202,6 +16203,7 @@ void SceneSessionManager::DestroyExtensionSession(const sptr<IRemoteObject>& rem
             }
             sceneSession->RemoveUIExtSurfaceNodeId(persistentId);
             sceneSession->RemoveExtensionTokenInfo(abilityToken);
+            FlushWindowInfoToMMI(true);
         } else {
             ExtensionWindowFlags actions;
             actions.SetAllActive();
@@ -16325,9 +16327,11 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         UIExtensionTokenInfo tokenInfo;
         tokenInfo.abilityToken = token;
         tokenInfo.callingTokenId = callingTokenId;
+        tokenInfo.pid = pid;
         tokenInfo.canShowOnLockScreen = IsUIExtCanShowOnLockScreen(info.elementName, callingTokenId,
             info.extensionAbilityType);
         parentSession->AddExtensionTokenInfo(tokenInfo);
+        FlushWindowInfoToMMI(true);
         parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
         if (usage == UIExtensionUsage::MODAL && parentSession->GetCallingPid() != GetPid()) {
             ExtensionWindowEventInfo extensionInfo {
