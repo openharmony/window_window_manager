@@ -34,7 +34,7 @@ namespace Rosen {
 
 class AniWindow {
 public:
-    explicit AniWindow(const sptr<Window>& window);
+    explicit AniWindow(const sptr<Window>& window, ani_env* env);
     explicit AniWindow(const std::shared_ptr<OHOS::Rosen::Window>& window);
     ~AniWindow();
     sptr<Window> GetWindow() { return windowToken_; }
