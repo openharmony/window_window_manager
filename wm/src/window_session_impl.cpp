@@ -4902,6 +4902,7 @@ void WindowSessionImpl::RecoverSessionListener()
 template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
 {
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto iter = lifecycleListeners_.find(GetPersistentId());
     if (iter == lifecycleListeners_.end()) {
         return std::vector<sptr<IWindowLifeCycle>>();
@@ -4916,6 +4917,7 @@ EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSes
 template<typename T>
 EnableIfSame<T, IWindowStageLifeCycle, std::vector<sptr<IWindowStageLifeCycle>>> WindowSessionImpl::GetListeners()
 {
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
     std::vector<sptr<IWindowStageLifeCycle>> windowStageLifecycleListeners;
     for (auto& listener : windowStageLifecycleListeners_[GetPersistentId()]) {
         windowStageLifecycleListeners.push_back(listener);
