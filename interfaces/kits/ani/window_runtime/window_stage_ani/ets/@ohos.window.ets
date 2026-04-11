@@ -948,12 +948,26 @@ export class StatusBarPropertyInternal implements StatusBarProperty {
   contentColor: string;
 }
 
+export interface WindowInfoOptions {
+  excludeSystemWindows?: boolean;
+  foregroundAboveWindow?: int;
+  foregroundBelowWindow?: int;
+}
+
+export class WindowInfoOptionsInternal implements WindowInfoOptions {
+  excludeSystemWindows?: boolean;
+  foregroundAboveWindow?: int;
+  foregroundBelowWindow?: int;
+}
+
 export interface WindowLayoutInfo {
   windowRect: Rect;
+  windowAlpha?: double;
 }
 
 export class WindowLayoutInfoInternal implements WindowLayoutInfo {
   windowRect: Rect;
+  windowAlpha?: double;
 }
 
 export interface WindowInfo {
@@ -5556,7 +5570,8 @@ native function findWindowSync(nativeObj: long, name: string): Window;
 native function onSync(nativeObj: long, type: string, callback: object): void;
 native function offSync(nativeObj: long, type: string, callback?: object): void;
 native function createWindowSync(nativeObj: long, config: Configuration): Window;
-native function getAllWindowLayoutInfo(nativeObj: long, displayId: long): Array<WindowLayoutInfo>;
+native function getAllWindowLayoutInfo(nativeObj: long, displayId: long,
+  option: WindowInfoOptions): Array<WindowLayoutInfo>;
 native function getSnapshot(nativeObj: long, windowId: int): image.PixelMap;
 native function getVisibleWindowInfo(nativeObj: long): Array<WindowInfoInternal>;
 native function setGestureNavigationEnabled(nativeObj: long, enabled: boolean): void;
@@ -5770,7 +5785,25 @@ export function getAllWindowLayoutInfo(displayId: long): Promise<Array<WindowLay
   return new Promise<Array<WindowLayoutInfo>>((
     resolve: (value: Array<WindowLayoutInfo>) => void, reject: (error: BusinessError) => void): void => {
       taskpool.execute(() => {
-          return getAllWindowLayoutInfo(nativeObj, displayId);
+          let option: window.WindowInfoOptions = {
+            excludeSystemWindows: false,
+            foregroundAboveWindow: 0,
+            foregroundBelowWindow: 0
+          } as WindowInfoOptionsInternal;
+          return getAllWindowLayoutInfo(nativeObj, displayId, option);
+      }).then((ret: Any) => {
+          resolve(ret as Array<WindowLayoutInfo>);
+      }).catch((err: Any) => {
+          reject(err as BusinessError);
+      });
+  });
+}
+
+export function getAllWindowLayoutInfo(displayId: long, option?: WindowInfoOptions): Promise<Array<WindowLayoutInfo>> {
+  return new Promise<Array<WindowLayoutInfo>>((
+    resolve: (value: Array<WindowLayoutInfo>) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute(() => {
+          return getAllWindowLayoutInfo(nativeObj, displayId, option);
       }).then((ret: Any) => {
           resolve(ret as Array<WindowLayoutInfo>);
       }).catch((err: Any) => {

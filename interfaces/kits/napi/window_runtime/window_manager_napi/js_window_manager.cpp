@@ -586,22 +586,11 @@ napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
 
 bool JsWindowManager::ParseWindowInfoOptions(napi_env env, napi_value jsObject, WindowInfoOptions& option)
 {
-    if (!ParseJsValue(jsObject, env, "excludeSystemWindows", option.excludeSystemWindows)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse excludeSystemWindows failed");
-        return false;
-    }
-
-    if (!ParseJsValue(jsObject, env, "foregroundAboveWindow", option.foregroundAboveWindow)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse foregroundAboveWindow failed");
-        return false;
-    }
+    ParseJsValue(jsObject, env, "excludeSystemWindows", option.excludeSystemWindows);
+    ParseJsValue(jsObject, env, "foregroundAboveWindow", option.foregroundAboveWindow);
+    ParseJsValue(jsObject, env, "foregroundBelowWindow", option.foregroundBelowWindow);
     if (option.foregroundAboveWindow < 0) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid foregroundAboveWindow=%{public}d", option.foregroundAboveWindow);
-        return false;
-    }
-
-    if (!ParseJsValue(jsObject, env, "foregroundBelowWindow", option.foregroundBelowWindow)) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "parse foregroundBelowWindow failed");
         return false;
     }
     if (option.foregroundBelowWindow < 0) {
