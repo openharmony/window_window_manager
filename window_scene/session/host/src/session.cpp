@@ -2944,7 +2944,8 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
         return WSError::WS_OK;
     }
     bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
-    TLOGD(WmsLogTag::WMS_EVENT, "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, " +
+    TLOGD(WmsLogTag::WMS_EVENT,
+        "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, "
         "isModal: %{public}d, isLoosenedWithFreeMultiMode: %{public}d",
         GetPersistentId(), raiseEnabled, isPointDown, isModal, isLoosenedWithFreeMultiMode);
     if (!isPointDown) {
