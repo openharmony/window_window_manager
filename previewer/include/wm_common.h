@@ -1527,7 +1527,7 @@ struct WindowInfoOptions {
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
     uint32_t zOrder = 0;
-    float windowAlpha = 1.0f;
+    float windowAlpha = -1.0f;
 
     bool Marshalling(Parcel& parcel) const override
     {
