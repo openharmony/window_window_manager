@@ -19,21 +19,26 @@
 #include <animation/rs_animation_timing_curve.h>
 #include <animation/rs_animation_timing_protocol.h>
 #include <animation/rs_symbol_animation.h>
-#include <pipeline/rs_node_map.h>
-#include <modifier/rs_property.h>
-#include <feature/window_keyframe/rs_window_keyframe_node.h>
 #include <chrono>
+#include <feature/window_keyframe/rs_window_keyframe_node.h>
+#include <modifier/rs_property.h>
+#include <pipeline/rs_node_map.h>
 #include <unordered_set>
 
 #include "display_manager.h"
-#include "session/host/include/session.h"
 #include "session/host/include/move_drag_controller.h"
 #include "session/host/include/pc_fold_screen_controller.h"
+#include "session/host/include/session.h"
 #include "vsync_station.h"
 #include "wm_common.h"
 
 namespace OHOS::PowerMgr {
 class RunningLock;
+}
+
+namespace OHOS::MMI {
+struct WindowInfo;
+struct UIExtensionInfo;
 }
 
 namespace OHOS::Rosen {
@@ -176,6 +181,13 @@ struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
     uint32_t callingTokenId { 0 };
     sptr<IRemoteObject> abilityToken;
+    int32_t pid;
+};
+
+struct FullInfoForMMI {
+    std::vector<MMI::WindowInfo> windowInfoList;
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
+    std::vector<MMI::UIExtensionInfo> uiExtensionInfoList;
 };
 
 class SceneSession : public Session {
@@ -806,6 +818,7 @@ public:
     void AddUIExtSurfaceNodeId(uint64_t surfaceNodeId, int32_t persistentId);
     void RemoveUIExtSurfaceNodeId(int32_t persistentId);
     int32_t GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId) const;
+    void GetAllUIExtensionTokenInfo(std::vector<MMI::UIExtensionInfo>& uiExtensionInfoList) const;
     bool IsFreeMultiWindowMode() const
     {
         return systemConfig_.IsFreeMultiWindowMode();

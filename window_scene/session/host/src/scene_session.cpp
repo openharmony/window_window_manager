@@ -3508,6 +3508,18 @@ int32_t SceneSession::GetUIExtPersistentIdBySurfaceNodeId(uint64_t surfaceNodeId
     return ret->second;
 }
 
+void SceneSession::GetAllUIExtensionTokenInfo(std::vector<MMI::UIExtensionInfo>& uiExtensionInfoList) const
+{
+    std::for_each(extensionTokenInfos_.begin(), extensionTokenInfos_.end(),
+        [hostWindowId = GetPersistentId(), &uiExtensionInfoList](const UIExtensionTokenInfo& tokenInfo){
+        MMI::UIExtensionInfo uiExtensionInfo;
+        uiExtensionInfo.token = tokenInfo.abilityToken;
+        uiExtensionInfo.pid = tokenInfo.pid;
+        uiExtensionInfo.hostWindowId = hostWindowId;
+        uiExtensionInfoList.push_back(std::move(uiExtensionInfo));
+    });
+}
+
 bool SceneSession::IsInLSState() const
 {
     auto windowType = GetWindowType();
