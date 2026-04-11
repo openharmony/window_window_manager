@@ -3722,6 +3722,26 @@ HWTEST_F(SceneSessionManagerTest12, NotifyPageEnableFunc01, TestSize.Level1)
 
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
 }
+
+/**
+ * @tc.name: RecordLifeCycleExceptionEvent
+ * @tc.desc: Test RecordLifeCycleExceptionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RecordLifeCycleExceptionEvent, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "RecordLifeCycleExceptionEvent";
+    info.bundleName_ = "RecordLifeCycleExceptionEvent";
+    info.screenId_ = SCREEN_ID_INVALID;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->RecordLifeCycleExceptionEvent(sceneSession, ERR_OK,
+        WSErrorReason::WS_REASON_WINDOW_START_ERR, "test reason");
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
