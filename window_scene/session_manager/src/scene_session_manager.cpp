@@ -15839,16 +15839,16 @@ bool SceneSessionManager::FilterForListWindowInfo(const WindowInfoOption& window
 }
 
 WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
-    std::vector<sptr<WindowLayoutInfo>>& infos)
+    std::vector<sptr<WindowLayoutInfo>>& infos, const WindowInfoOptions& option)
 {
-    auto task = [this, displayId, &infos, funcName = __func__]() mutable {
+    auto task = [this, displayId, &infos, option, funcName = __func__]() mutable {
         bool isVirtualDisplay = false;
         if (displayId == VIRTUAL_DISPLAY_ID) {
             displayId = DEFAULT_DISPLAY_ID;
             isVirtualDisplay = true;
         }
         std::vector<sptr<SceneSession>> filteredSessions;
-        FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions);
+        FilterForGetAllWindowLayoutInfo(displayId, isVirtualDisplay, filteredSessions, option);
         for (const auto& session : filteredSessions) {
             Rect globalScaledRect;
             session->GetGlobalScaledRect(globalScaledRect);
@@ -15867,6 +15867,11 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
             }
             auto windowLayoutInfo = sptr<WindowLayoutInfo>::MakeSptr();
             windowLayoutInfo->rect = globalScaledRect;
+            if (auto surfaceNode = session->GetSurfaceNode()) {
+                windowLayoutInfo->windowAlpha = surfaceNode->GetStagingProperties().GetAlpha();
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: win=[%{public}d, %{public}s], alpha=%{public}f", funcName,
+                    session->GetWindowId(), session->GetWindowName().c_str(), windowLayoutInfo->windowAlpha);
+            }
             infos.emplace_back(windowLayoutInfo);
         }
         return WMError::WM_OK;
@@ -15875,12 +15880,35 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
 }
 
 void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-    std::vector<sptr<SceneSession>>& filteredSessions)
+    std::vector<sptr<SceneSession>>& filteredSessions, const WindowInfoOptions& option)
 {
+    uint32_t zOrderForAboveWin = 0;
+    uint32_t zOrderForBelowWin = 0;
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, session] : sceneSessionMap_) {
             if (session == nullptr) {
+                continue;
+            }
+            if (option.foregroundAboveWindow == session->GetPersistentId()) {
+                zOrderForAboveWin = session->GetZOrder();
+            }
+            if (option.foregroundBelowWindow == session->GetPersistentId()) {
+                zOrderForBelowWin = session->GetZOrder();
+            }
+        }
+    }
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& [_, session] : sceneSessionMap_) {
+            if (session == nullptr) {
+                continue;
+            }
+            if (zOrderForAboveWin > 0 && session->GetZOrder() <= zOrderForAboveWin ||
+                zOrderForBelowWin > 0 && session->GetZOrder() >= zOrderForBelowWin) {
+                continue;
+            }
+            if (option.excludeSystemWindows && WindowHelper::IsSystemWindow(session->GetWindowType())) {
                 continue;
             }
             if (session->GetSessionGlobalRect().IsInvalid()) {

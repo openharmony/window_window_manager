@@ -329,8 +329,8 @@ public:
     }
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
         std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
-    WMError GetAllWindowLayoutInfo(DisplayId displayId,
-        std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+        const WindowInfoOptions& option = WindowInfoOptions()) override { return WMError::WM_OK; }
     WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override { return WMError::WM_OK; }

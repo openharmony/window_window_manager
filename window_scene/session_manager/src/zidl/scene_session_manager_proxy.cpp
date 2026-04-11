@@ -2405,11 +2405,11 @@ WMError SceneSessionManagerProxy::ListWindowInfo(const WindowInfoOption& windowI
 }
 
 WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
-    std::vector<sptr<WindowLayoutInfo>>& infos)
+    std::vector<sptr<WindowLayoutInfo>>& infos, const WindowInfoOptions& option)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption msgOption;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -2418,13 +2418,25 @@ WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(option.excludeSystemWindows)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write excludeSystemWindows failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(option.foregroundAboveWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write foregroundAboveWindow failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(option.foregroundBelowWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write foregroundBelowWindow failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO), data, reply, msgOption) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
