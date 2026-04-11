@@ -123,6 +123,7 @@ enum class SessionInterfaceCode {
 
     // Window Layout Global Coordinate System
     TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT,
+    TRANS_ID_NOTIFY_RELATED_WINDOWS_LIMITS_CHANGED,
 
     // Extension
     TRANS_ID_TRANSFER_ABILITY_RESULT = 500,
