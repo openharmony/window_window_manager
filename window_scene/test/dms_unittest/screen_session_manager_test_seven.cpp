@@ -1382,7 +1382,7 @@ HWTEST_F(ScreenSessionManagerTest, ReportMultScreenChange, TestSize.Level1)
 {
     ScreenId mainScreenId = 0;
     ScreenId secondaryScreenId = 1;
-    MultiScreenMode screenMode = MultiScreenMode::MULTI_SCREEN_MODE_MIRROR;
+    MultiScreenMode screenMode = MultiScreenMode::SCREEN_MIRROR;
 
     ScreenProperty property;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(secondaryScreenId, property, 0);
@@ -1455,6 +1455,8 @@ HWTEST_F(ScreenSessionManagerTest, ReportUserSwitch, TestSize.Level1)
     int32_t userId = 100;
     ssm_->ReportUserSwitch(userId);
     ASSERT_NE(ssm_, nullptr);
+}
+
 }
 } // namespace Rosen
 } // namespace OHOS
