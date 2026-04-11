@@ -1673,7 +1673,7 @@ void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Displa
 
 void WindowManagerService::InitRSUIDirector()
 {
-    rsUiDirector_ = RSUIDirector::Create();
+    rsUiDirector_ = RSUIDirector::Create(nullptr);
     if (!rsUiDirector_) {
         TLOGE(WmsLogTag::WMS_SCB, "Failed to create RSUIDirector");
         return;
@@ -1688,7 +1688,6 @@ void WindowManagerService::InitRSUIDirector()
     rsUiDirector_->SetUITaskRunner([this](const std::function<void()>& task, uint32_t delay) {
             PostAsyncTask(task, "WindowManagerService:cacheGuard", delay);
         }, instanceId, useMultiInstance);
-    rsUiDirector_->Init(false, useMultiInstance);
     TLOGI(WmsLogTag::WMS_SCB, "Create RSUIDirector: %{public}s",
           RSAdapterUtil::RSUIDirectorToStr(rsUiDirector_).c_str());
 }
