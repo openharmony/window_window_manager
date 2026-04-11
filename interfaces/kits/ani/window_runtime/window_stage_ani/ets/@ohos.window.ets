@@ -6172,7 +6172,7 @@ function runWindowStageLifecycleEventCallback(cb: object, cbArg: int): void {
 
 function runOrientationResultCallback(promiseId: int, result: int): void {
   hilog.info(DOMAIN, TAG, `runOrientationResultCallback promiseId=${promiseId} result=${result}`);
-  WindowInternal.handleOrientationResult(promiseId, result as OrientationExecutionResult);
+  WindowInternal.handleOrientationResult(promiseId, OrientationExecutionResult.fromValue(result));
 }
 
 function runWindowEventCallback(cb: object, cbArg: int): void {
