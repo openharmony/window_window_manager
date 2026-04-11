@@ -413,6 +413,445 @@ HWTEST_F(WindowSessionPropertyTest, IsDecorEnable, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetAttachedWindowLimits01
+ * @tc.desc: Test SetAttachedWindowLimits with new sourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedWindowLimits01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    int32_t sourcePersistentId = 1001;
+    WindowLimits attachedLimits = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetAttachedWindowLimits(sourcePersistentId, attachedLimits);
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 1u);
+    EXPECT_EQ(attachedList[0].first, sourcePersistentId);
+    EXPECT_EQ(attachedList[0].second.minWidth_, 200);
+}
+
+/**
+ * @tc.name: SetAttachedWindowLimits02
+ * @tc.desc: Test SetAttachedWindowLimits with existing sourceId (update)
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedWindowLimits02, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    int32_t sourcePersistentId = 1002;
+    WindowLimits limits1 = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetAttachedWindowLimits(sourcePersistentId, limits1);
+
+    WindowLimits limits2 = { 2200, 1100, 250, 350, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetAttachedWindowLimits(sourcePersistentId, limits2);
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 1u);
+    EXPECT_EQ(attachedList[0].second.minWidth_, 250);
+}
+
+/**
+ * @tc.name: SetAttachedWindowLimits03
+ * @tc.desc: Test SetAttachedWindowLimits with multiple sourceIds (insertion order)
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedWindowLimits03, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits1 = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits limits2 = { 2200, 1100, 250, 350, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits limits3 = { 1800, 900, 150, 250, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+
+    property->SetAttachedWindowLimits(1, limits1);
+    property->SetAttachedWindowLimits(2, limits2);
+    property->SetAttachedWindowLimits(3, limits3);
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 3u);
+    EXPECT_EQ(attachedList[0].first, 1);
+    EXPECT_EQ(attachedList[1].first, 2);
+    EXPECT_EQ(attachedList[2].first, 3);
+}
+
+/**
+ * @tc.name: SetAttachedWindowLimits04
+ * @tc.desc: Test SetAttachedWindowLimits with VP unit limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedWindowLimits04, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    int32_t sourcePersistentId = 1004;
+    WindowLimits attachedLimits = { 1000, 500, 50, 100, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    property->SetAttachedWindowLimits(sourcePersistentId, attachedLimits);
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 1u);
+    EXPECT_EQ(attachedList[0].second.minWidth_, 50);
+}
+
+/**
+ * @tc.name: RemoveAttachedWindowLimits01
+ * @tc.desc: Test RemoveAttachedWindowLimits with existing sourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, RemoveAttachedWindowLimits01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    int32_t sourcePersistentId = 2001;
+    WindowLimits attachedLimits = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetAttachedWindowLimits(sourcePersistentId, attachedLimits);
+
+    property->RemoveAttachedWindowLimits(sourcePersistentId);
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 0u);
+}
+
+/**
+ * @tc.name: RemoveAttachedWindowLimits02
+ * @tc.desc: Test RemoveAttachedWindowLimits with non-existent sourceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, RemoveAttachedWindowLimits02, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetAttachedWindowLimits(1, limits);
+    property->SetAttachedWindowLimits(2, limits);
+
+    property->RemoveAttachedWindowLimits(999);
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 2u);
+}
+
+/**
+ * @tc.name: RemoveAttachedWindowLimits03
+ * @tc.desc: Test RemoveAttachedWindowLimits with multiple sourceIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, RemoveAttachedWindowLimits03, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits1 = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits limits2 = { 2200, 1100, 250, 350, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits limits3 = { 1800, 900, 150, 250, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+
+    property->SetAttachedWindowLimits(1, limits1);
+    property->SetAttachedWindowLimits(2, limits2);
+    property->SetAttachedWindowLimits(3, limits3);
+
+    property->RemoveAttachedWindowLimits(2);
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 2u);
+    EXPECT_EQ(attachedList[0].first, 1);
+    EXPECT_EQ(attachedList[1].first, 3);
+}
+
+/**
+ * @tc.name: GetAttachedWindowLimitsList01
+ * @tc.desc: Test GetAttachedWindowLimitsList with empty list
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetAttachedWindowLimitsList01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 0u);
+}
+
+/**
+ * @tc.name: GetAttachedWindowLimitsList02
+ * @tc.desc: Test GetAttachedWindowLimitsList returns copy
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetAttachedWindowLimitsList02, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetAttachedWindowLimits(1, limits);
+
+    auto attachedList1 = property->GetAttachedWindowLimitsList();
+    auto attachedList2 = property->GetAttachedWindowLimitsList();
+
+    EXPECT_EQ(attachedList1.size(), attachedList2.size());
+}
+
+/**
+ * @tc.name: ClearAttachedWindowLimitsList01
+ * @tc.desc: Test ClearAttachedWindowLimitsList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, ClearAttachedWindowLimitsList01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits = { 2000, 1000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetAttachedWindowLimits(1, limits);
+    property->SetAttachedWindowLimits(2, limits);
+    property->SetAttachedWindowLimits(3, limits);
+
+    property->ClearAttachedWindowLimitsList();
+
+    auto attachedList = property->GetAttachedWindowLimitsList();
+    EXPECT_EQ(attachedList.size(), 0u);
+}
+
+/**
+ * @tc.name: SetLimitsForAttachedWindows01
+ * @tc.desc: Test SetLimitsForAttachedWindows and GetLimitsForAttachedWindows with PX unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetLimitsForAttachedWindows01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits = { 1000, 2000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetLimitsForAttachedWindows(limits);
+
+    WindowLimits result = property->GetLimitsForAttachedWindows();
+    EXPECT_EQ(result.minWidth_, 200);
+    EXPECT_EQ(result.maxWidth_, 1000);
+    EXPECT_EQ(result.minHeight_, 300);
+    EXPECT_EQ(result.maxHeight_, 2000);
+    EXPECT_EQ(result.pixelUnit_, PixelUnit::PX);
+}
+
+/**
+ * @tc.name: SetLimitsForAttachedWindows02
+ * @tc.desc: Test SetLimitsForAttachedWindows and GetLimitsForAttachedWindows with VP unit
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetLimitsForAttachedWindows02, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits = { 500, 1000, 50, 100, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    property->SetLimitsForAttachedWindows(limits);
+
+    WindowLimits result = property->GetLimitsForAttachedWindows();
+    EXPECT_EQ(result.minWidth_, 50);
+    EXPECT_EQ(result.maxWidth_, 500);
+    EXPECT_EQ(result.minHeight_, 100);
+    EXPECT_EQ(result.maxHeight_, 1000);
+    EXPECT_EQ(result.pixelUnit_, PixelUnit::VP);
+}
+
+/**
+ * @tc.name: SetLimitsForAttachedWindows03
+ * @tc.desc: Test SetLimitsForAttachedWindows with multiple updates
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetLimitsForAttachedWindows03, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    WindowLimits limits1 = { 1000, 2000, 200, 300, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetLimitsForAttachedWindows(limits1);
+
+    WindowLimits result1 = property->GetLimitsForAttachedWindows();
+    EXPECT_EQ(result1.minWidth_, 200);
+
+    WindowLimits limits2 = { 1100, 2200, 250, 350, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    property->SetLimitsForAttachedWindows(limits2);
+
+    WindowLimits result2 = property->GetLimitsForAttachedWindows();
+    EXPECT_EQ(result2.minWidth_, 250);
+    EXPECT_EQ(result2.maxWidth_, 1100);
+}
+
+/**
+ * @tc.name: SetAttachedLimitOptions01
+ * @tc.desc: Test SetAttachedLimitOptions and GetAttachedLimitOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedLimitOptions01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    AttachLimitOptions options1{ true, false }; // height=true, width=false
+    property->SetAttachedLimitOptions(100, options1);
+
+    AttachLimitOptions result1 = property->GetAttachedLimitOptions(100);
+    EXPECT_TRUE(result1.isIntersectedHeightLimit);
+    EXPECT_FALSE(result1.isIntersectedWidthLimit);
+
+    AttachLimitOptions options2{ false, true }; // height=false, width=true
+    property->SetAttachedLimitOptions(200, options2);
+
+    AttachLimitOptions result2 = property->GetAttachedLimitOptions(200);
+    EXPECT_FALSE(result2.isIntersectedHeightLimit);
+    EXPECT_TRUE(result2.isIntersectedWidthLimit);
+}
+
+/**
+ * @tc.name: SetAttachedLimitOptions02
+ * @tc.desc: Test GetAttachedLimitOptions with non-existent window ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedLimitOptions02, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    AttachLimitOptions result = property->GetAttachedLimitOptions(999);
+    // Should return default options (false, false)
+    EXPECT_FALSE(result.isIntersectedHeightLimit);
+    EXPECT_FALSE(result.isIntersectedWidthLimit);
+}
+
+/**
+ * @tc.name: SetAttachedLimitOptions03
+ * @tc.desc: Test SetAttachedLimitOptions with update
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedLimitOptions03, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    AttachLimitOptions options1{ true, true };
+    property->SetAttachedLimitOptions(100, options1);
+
+    AttachLimitOptions result1 = property->GetAttachedLimitOptions(100);
+    EXPECT_TRUE(result1.isIntersectedHeightLimit);
+    EXPECT_TRUE(result1.isIntersectedWidthLimit);
+
+    // Update the same window ID
+    AttachLimitOptions options2{ false, false };
+    property->SetAttachedLimitOptions(100, options2);
+
+    AttachLimitOptions result2 = property->GetAttachedLimitOptions(100);
+    EXPECT_FALSE(result2.isIntersectedHeightLimit);
+    EXPECT_FALSE(result2.isIntersectedWidthLimit);
+}
+
+/**
+ * @tc.name: RemoveAttachedLimitOptions01
+ * @tc.desc: Test RemoveAttachedLimitOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, RemoveAttachedLimitOptions01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    AttachLimitOptions options{ true, true };
+    property->SetAttachedLimitOptions(100, options);
+    property->SetAttachedLimitOptions(200, options);
+
+    EXPECT_TRUE(property->GetAttachedLimitOptions(100).isIntersectedHeightLimit);
+    EXPECT_TRUE(property->GetAttachedLimitOptions(200).isIntersectedHeightLimit);
+
+    property->RemoveAttachedLimitOptions(100);
+
+    AttachLimitOptions result = property->GetAttachedLimitOptions(100);
+    EXPECT_FALSE(result.isIntersectedHeightLimit);
+    EXPECT_FALSE(result.isIntersectedWidthLimit);
+
+    // Window ID 200 should still exist
+    AttachLimitOptions result2 = property->GetAttachedLimitOptions(200);
+    EXPECT_TRUE(result2.isIntersectedHeightLimit);
+    EXPECT_TRUE(result2.isIntersectedWidthLimit);
+}
+
+/**
+ * @tc.name: GetAttachedLimitOptionsList01
+ * @tc.desc: Test GetAttachedLimitOptionsList with multiple windows
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, GetAttachedLimitOptionsList01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    property->SetAttachedLimitOptions(100, AttachLimitOptions{ true, false });
+    property->SetAttachedLimitOptions(200, AttachLimitOptions{ false, true });
+    property->SetAttachedLimitOptions(300, AttachLimitOptions{ true, true });
+
+    auto optionsList = property->GetAttachedLimitOptionsList();
+    EXPECT_EQ(optionsList.size(), 3u);
+
+    EXPECT_EQ(optionsList[0].first, 100);
+    EXPECT_TRUE(optionsList[0].second.isIntersectedHeightLimit);
+    EXPECT_FALSE(optionsList[0].second.isIntersectedWidthLimit);
+
+    EXPECT_EQ(optionsList[1].first, 200);
+    EXPECT_FALSE(optionsList[1].second.isIntersectedHeightLimit);
+    EXPECT_TRUE(optionsList[1].second.isIntersectedWidthLimit);
+
+    EXPECT_EQ(optionsList[2].first, 300);
+    EXPECT_TRUE(optionsList[2].second.isIntersectedHeightLimit);
+    EXPECT_TRUE(optionsList[2].second.isIntersectedWidthLimit);
+}
+
+/**
+ * @tc.name: ClearAttachedLimitOptionsList01
+ * @tc.desc: Test ClearAttachedLimitOptionsList
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, ClearAttachedLimitOptionsList01, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    property->SetAttachedLimitOptions(100, AttachLimitOptions{ true, false });
+    property->SetAttachedLimitOptions(200, AttachLimitOptions{ false, true });
+
+    EXPECT_EQ(property->GetAttachedLimitOptionsList().size(), 2u);
+
+    property->ClearAttachedLimitOptionsList();
+
+    EXPECT_EQ(property->GetAttachedLimitOptionsList().size(), 0u);
+}
+
+/**
+ * @tc.name: SetAttachedLimitOptions04
+ * @tc.desc: Test SetAttachedLimitOptions preserves order when updating existing entry
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAttachedLimitOptions04, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+
+    // Add three entries in order: 100, 200, 300
+    property->SetAttachedLimitOptions(100, AttachLimitOptions{ true, false });
+    property->SetAttachedLimitOptions(200, AttachLimitOptions{ false, true });
+    property->SetAttachedLimitOptions(300, AttachLimitOptions{ true, true });
+
+    auto optionsList1 = property->GetAttachedLimitOptionsList();
+    EXPECT_EQ(optionsList1.size(), 3u);
+    EXPECT_EQ(optionsList1[0].first, 100);
+    EXPECT_EQ(optionsList1[1].first, 200);
+    EXPECT_EQ(optionsList1[2].first, 300);
+
+    // Update entry 200 (middle element)
+    property->SetAttachedLimitOptions(200, AttachLimitOptions{ false, false });
+
+    auto optionsList2 = property->GetAttachedLimitOptionsList();
+    EXPECT_EQ(optionsList2.size(), 3u);
+
+    // Verify order is preserved: 100, 200, 300
+    EXPECT_EQ(optionsList2[0].first, 100);
+    EXPECT_TRUE(optionsList2[0].second.isIntersectedHeightLimit);
+    EXPECT_FALSE(optionsList2[0].second.isIntersectedWidthLimit);
+
+    EXPECT_EQ(optionsList2[1].first, 200);
+    EXPECT_FALSE(optionsList2[1].second.isIntersectedHeightLimit);  // Updated to false
+    EXPECT_FALSE(optionsList2[1].second.isIntersectedWidthLimit);    // Updated to false
+
+    EXPECT_EQ(optionsList2[2].first, 300);
+    EXPECT_TRUE(optionsList2[2].second.isIntersectedHeightLimit);
+    EXPECT_TRUE(optionsList2[2].second.isIntersectedWidthLimit);
+}
+
+/**
  * @tc.name: SetWindowModeSupportType
  * @tc.desc: SetWindowModeSupportType test
  * @tc.type: FUNC
