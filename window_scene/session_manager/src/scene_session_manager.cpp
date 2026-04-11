@@ -15908,10 +15908,14 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session == nullptr) {
                 continue;
             }
-            if (session->GetSessionGlobalRect().IsInvalid() ||
-                option.excludeSystemWindows && WindowHelper::IsSystemWindow(session->GetWindowType())||
-                zOrderForAboveWin > 0 && session->GetZOrder() <= zOrderForAboveWin ||
-                zOrderForBelowWin > 0 && session->GetZOrder() >= zOrderForBelowWin) {
+            if (session->GetSessionGlobalRect().IsInvalid()) {
+                continue;
+            }
+            if (option.excludeSystemWindows && WindowHelper::IsSystemWindow(session->GetWindowType())) {
+                continue;
+            }
+            if ((zOrderForAboveWin > 0 && session->GetZOrder() <= zOrderForAboveWin) ||
+                (zOrderForBelowWin > 0 && session->GetZOrder() >= zOrderForBelowWin)) {
                 continue;
             }
             if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(session->GetSessionProperty()->GetDisplayId()) &&
