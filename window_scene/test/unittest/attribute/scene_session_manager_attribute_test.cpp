@@ -386,7 +386,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage001, TestS
 
 /**
  * @tc.name: RecoverScreenWatermarkImage002
- * @tc.desc: test RecoverScreenWatermarkImage with different priorities
+ * @tc.desc: test RecoverScreenWatermarkImage when no watermark exists
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage002, TestSize.Level1)
@@ -396,7 +396,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage002, TestS
     auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
     ssm_->screenWatermarkBundleName_ = "";
     ssm_->screenWatermarkPriority_ = 0;
-    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 100), WMError::WM_OK);
+    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 1), WMError::WM_OK);
     ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
     ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
 }
