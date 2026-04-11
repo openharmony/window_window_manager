@@ -406,7 +406,7 @@ void SuperFoldStateManager::ModifyMirrorScreenVisibleRectInner(const OHOS::Rect&
     for (auto& [screenId, curRect]: mirrorScreenVisibleRectMap) {
         ScreenId rsId = SCREEN_ID_INVALID;
         ScreenSessionManager::GetInstance().ConvertScreenIdToRsScreenId(screenId, rsId);
-        auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession();
+        auto screenSession = ScreenSessionManager::GetInstance().GetScreenSession(screenId);
         if (screenSession == nullptr || screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
             continue;
         }
