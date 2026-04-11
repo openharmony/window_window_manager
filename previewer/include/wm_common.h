@@ -1511,7 +1511,7 @@ struct WindowDisplayInfo : public Parcelable {
 /**
  * @struct WindowInfoOptions
  *
- * @brief Layout info for all windows on the screen.
+ * @brief Options for getting window info.
  */
 struct WindowInfoOptions {
     bool excludeSystemWindows = false;
@@ -1522,7 +1522,7 @@ struct WindowInfoOptions {
 /**
  * @struct WindowLayoutInfo
  *
- * @brief Layout info for all windows on screen.
+ * @brief Layout info for all windows on the screen.
  */
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
