@@ -3430,6 +3430,27 @@ HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh01, Function | S
 }
 
 /**
+ * @tc.name: CheckBrokeNotAliveAndRefresh_02
+ * @tc.desc: test function : CheckBrokeNotAliveAndRefresh_02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh02, Function | SmallTest | Level2)
+{
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "CheckBrokeNotAliveAndRefresh02";
+    info.bundleName_ = "CheckBrokeNotAliveAndRefresh02";
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    info.SetWantSafely(wantPtr);
+    info.callerTypeForAnco = 0;
+    MockCollaboratorDllManager::MockPreHandleStartAbility(-1);
+    EXPECT_TRUE(ssm->CheckBrokeNotAliveAndRefresh(info));
+    EXPECT_EQ(info.callerTypeForAnco, -1);
+ 
+    MockCollaboratorDllManager::MockPreHandleStartAbility(0);
+}
+
+/**
  * @tc.name: RecoverOutline
  * @tc.desc: test function : OnRecoverStateChange
  * @tc.type: FUNC
