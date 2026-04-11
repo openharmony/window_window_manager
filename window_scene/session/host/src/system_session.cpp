@@ -490,7 +490,7 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
         constexpr int32_t WAIT_MILLISECONDS = 20;
         constexpr int32_t MAX_WAIT_TIMES = 10;
         int32_t waitTimes = 0;
-        while (windowId == 0 && waitTimes <= MAX_WAIT_TIMES) {
+        while (windowId == 0 && waitTimes < MAX_WAIT_TIMES) {
             std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MILLISECONDS));
             std::this_thread::yield();
             waitTimes++;
