@@ -43,6 +43,7 @@ ohos_source_set("ui_effect_controller_common") {
     integer_overflow = true
     ubsan = true
     boundary_sanitize = true
+    cfi_policy = "adaptive"
   }
 
   sources = [
@@ -163,6 +164,7 @@ ohos_shared_library("libwmutil_base") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "src/accessibility_window_info.cpp",

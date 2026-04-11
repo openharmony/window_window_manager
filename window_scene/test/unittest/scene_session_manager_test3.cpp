@@ -1993,7 +1993,7 @@ HWTEST_F(SceneSessionManagerTest3, NotifyRotationBegin, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     ssm_->NotifyRotationBegin();
-    EXPECT_FALSE(g_logMsg.find("NotifyRotationBegin") != std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("NotifyRotationBegin") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 } // namespace

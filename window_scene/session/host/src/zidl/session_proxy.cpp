@@ -357,6 +357,7 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         WindowSizeLimits windowSizeLimits = { reply.ReadUint32(), reply.ReadUint32(),
                                               reply.ReadUint32(), reply.ReadUint32() };
         property->SetWindowSizeLimits(windowSizeLimits);
+        property->SetIsWindowLimitsForcible(reply.ReadBool());
         property->SetIsAppSupportPhoneInPc(reply.ReadBool());
         property->SetIsPcAppInPad(reply.ReadBool());
         property->SetRequestedOrientation(static_cast<Orientation>(reply.ReadUint32()));
@@ -900,6 +901,10 @@ bool WriteEventParam(MessageParcel& data, SessionEvent event, const SessionEvent
     if (event == SessionEvent::EVENT_MAXIMIZE) {
         if (!data.WriteUint32(param.waterfallResidentState)) {
             TLOGE(WmsLogTag::WMS_EVENT, "Failed to write waterfallResidentState");
+            return false;
+        }
+        if (!data.WriteUint32(param.titleButtonEventType_)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to write titleButtonEventType_");
             return false;
         }
     } else if (event == SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE) {
@@ -1754,6 +1759,46 @@ WSError SessionProxy::ConvertOrientationAndRotation(const RotationInfoType from,
         return WSError::WS_ERROR_IPC_FAILED;
     }
     return static_cast<WSError>(ret);
+}
+
+WMError SessionProxy::SetPreferredOrientationWithResult(
+    Orientation orientation, uint32_t promiseId, bool needAnimation)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(orientation))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write orientation error");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(promiseId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write promiseId error");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(needAnimation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write needAnimation error");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_PREFERRED_ORIENTATION_WITH_RESULT),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
 }
 
 WSError SessionProxy::RequestSessionBack(bool needMoveToBackground)
@@ -2892,6 +2937,39 @@ WMError SessionProxy::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowI
     if (replyInfo) {
         hookWindowInfo = *replyInfo;
     }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
+WMError SessionProxy::GetSelectMode(SelectMode& selectMode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (!remote) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t requestCode = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_SELECT_MODE);
+    if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    uint32_t selectModeValue = 0;
+    if (!reply.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read selectMode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    selectMode = static_cast<SelectMode>(selectModeValue);
     int32_t ret = 0;
     if (!reply.ReadInt32(ret)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
@@ -4282,6 +4360,37 @@ WSError SessionProxy::NotifyIsFullScreenInForceSplitMode(bool isFullScreen)
     return static_cast<WSError>(ret);
 }
 
+WMError SessionProxy::NotifySplitRatioChanged(float newRatio)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(newRatio)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write newRatio failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SPLIT_RATIO_CHANGED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+        }
+    int32_t ret = 0;
+    if (!reply.ReadInt32(ret)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read ret failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(ret);
+}
+
 WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
 {
     MessageParcel data;
@@ -4308,7 +4417,7 @@ WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
     return WSError::WS_OK;
 }
 
-WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport)
+WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4319,6 +4428,10 @@ WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdate
     }
     if (!data.WriteBool(needUpdateViewport)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Write needUpdateViewport failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(selectMode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write selectMode failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 

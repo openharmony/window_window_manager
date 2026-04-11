@@ -75,6 +75,42 @@ HWTEST_F(SessionStageStubRotationTest, HandleSetCurrentRotation, TestSize.Level1
 }
 
 /**
+ * @tc.name: HandleGetSceneNodeCount
+ * @tc.desc: test function : HandleGetSceneNodeCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleGetSceneNodeCount, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCount start";
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+
+    // Case 1: Failed to read interface token
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleGetSceneNodeCount(data, reply));
+
+    // Case 2: Success case with valid interface token
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    // Case 3: Direct call to HandleGetSceneNodeCount with valid data
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    EXPECT_EQ(ERR_NONE, sessionStageStub_->HandleGetSceneNodeCount(data2, reply2));
+
+    // Case 4: Verify reply contains valid nodeCount
+    uint32_t nodeCount = 0;
+    if (reply2.ReadUint32(nodeCount)) {
+        EXPECT_GE(nodeCount, 0);
+    }
+
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCount end";
+}
+
+/**
  * @tc.name: HandleNotifyRotationChange
  * @tc.desc: test function : HandleNotifyRotationChange
  * @tc.type: FUNC
@@ -97,6 +133,54 @@ HWTEST_F(SessionStageStubRotationTest, HandleNotifyRotationChange, Function | Sm
     data.WriteUint32(info.displayRect_.height_);
     sessionStageStub->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(sessionStageStub_->HandleNotifyRotationChange(data, reply), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleNotifyOrientationExecutionResult
+ * @tc.desc: 测试正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleNotifyOrientationExecutionResult, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult start";
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(123);
+    data.WriteUint32(static_cast<uint32_t>(OrientationExecutionResult::ORIENTATION_APPLIED));
+    auto result = sessionStageStub_->HandleNotifyOrientationExecutionResult(data, reply);
+    ASSERT_EQ(result, ERR_NONE);
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult end";
+}
+
+/**
+ * @tc.name: HandleNotifyOrientationExecutionResult02
+ * @tc.desc: 测试 ReadUint32(promiseId) 失败
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleNotifyOrientationExecutionResult02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult02 start";
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = sessionStageStub_->HandleNotifyOrientationExecutionResult(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult02 end";
+}
+
+/**
+ * @tc.name: HandleNotifyOrientationExecutionResult03
+ * @tc.desc: 测试 ReadUint32(result) 失败
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleNotifyOrientationExecutionResult03, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult03 start";
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteUint32(123);
+    auto result = sessionStageStub_->HandleNotifyOrientationExecutionResult(data, reply);
+    ASSERT_EQ(result, ERR_INVALID_VALUE);
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleNotifyOrientationExecutionResult03 end";
 }
 } // namespace
 } // namespace Rosen

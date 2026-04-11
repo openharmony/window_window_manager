@@ -54,6 +54,8 @@ const std::map<std::string, RegisterListenerType> WINDOW_LISTENER_MAP {
     {DIALOG_DEATH_RECIPIENT_CB, RegisterListenerType::DIALOG_DEATH_RECIPIENT_CB},
     {WINDOW_STATUS_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_CHANGE_CB},
     {WINDOW_STATUS_DID_CHANGE_CB, RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB},
+    {PARENT_WINDOW_SIZE_CHANGE_CB, RegisterListenerType::PARENT_WINDOW_SIZE_CHANGE_CB},
+    {PARENT_WINDOW_STATUS_CHANGE_CB, RegisterListenerType::PARENT_WINDOW_STATUS_CHANGE_CB},
     {WINDOW_TITLE_BUTTON_RECT_CHANGE_CB, RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB},
     {WINDOW_VISIBILITY_CHANGE_CB, RegisterListenerType::WINDOW_VISIBILITY_CHANGE_CB},
     {OCCLUSION_STATE_CHANGE_CB, RegisterListenerType::OCCLUSION_STATE_CHANGE_CB},
@@ -682,6 +684,11 @@ WmErrorCode JsWindowRegisterManager::ProcessListener(RegisterListenerType regist
                 return ProcessWindowStatusChangeRegister(windowManagerListener, window, isRegister, env, parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_STATUS_DID_CHANGE_CB):
                 return ProcessWindowStatusDidChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::PARENT_WINDOW_SIZE_CHANGE_CB):
+                return ProcessParentWindowSizeChangeRegister(windowManagerListener, window, isRegister, env, parameter);
+            case static_cast<uint32_t>(RegisterListenerType::PARENT_WINDOW_STATUS_CHANGE_CB):
+                return ProcessParentWindowStatusChangeRegister(windowManagerListener, window, isRegister, env,
+                    parameter);
             case static_cast<uint32_t>(RegisterListenerType::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB):
                 return ProcessWindowTitleButtonRectChangeRegister(windowManagerListener, window, isRegister, env,
                     parameter);
@@ -840,6 +847,40 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusDidChangeRegister(sptr<J
         ret = MappingWmErrorCodeSafely(window->RegisterWindowStatusDidChangeListener(thisListener));
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterWindowStatusDidChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessParentWindowSizeChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IParentWindowSizeChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = MappingWmErrorCodeSafely(window->RegisterParentWindowSizeChangeListener(thisListener));
+    } else {
+        ret = MappingWmErrorCodeSafely(window->UnregisterParentWindowSizeChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsWindowRegisterManager::ProcessParentWindowStatusChangeRegister(sptr<JsWindowListener> listener,
+    sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IParentWindowStatusChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = MappingWmErrorCodeSafely(window->RegisterParentWindowStatusChangeListener(thisListener));
+    } else {
+        ret = MappingWmErrorCodeSafely(window->UnregisterParentWindowStatusChangeListener(thisListener));
     }
     return ret;
 }

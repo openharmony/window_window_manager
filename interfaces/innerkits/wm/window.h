@@ -85,6 +85,7 @@ class AccessibilityEventInfo;
 namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
+using NotifyOrientationExecutionResultFunc = std::function<void(uint32_t, OrientationExecutionResult)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
 using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
@@ -332,6 +333,39 @@ public:
      * @param status Mode of the current window.
      */
     virtual void OnWindowStatusDidChange(WindowStatus status) {}
+};
+
+/**
+ * @class IParentWindowSizeChangeListener
+ *
+ * @brief IParentWindowSizeChangeListener is used to observe the parent window size when parent window size changed.
+ *
+ */
+class IParentWindowSizeChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when parent window size changed.
+     *
+     * @param Rect rect of parent window.
+     */
+    virtual void OnParentWindowSizeChange(Rect rect) {}
+};
+
+/**
+ * @class IParentWindowStatusChangeListener
+ *
+ * @brief IParentWindowStatusChangeListener is used to observe the parent window status when
+ *        parent window status changed.
+ *
+ */
+class IParentWindowStatusChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when parent window status changed.
+     *
+     * @param status rect of parent window.
+     */
+    virtual void OnParentWindowStatusChange(WindowStatus status) {}
 };
 
 /**
@@ -1802,6 +1836,13 @@ public:
     virtual bool IsTransparent() const { return false; }
 
     /**
+     * @brief Get whether the session is blocking sub window.
+     *
+     * @return True means the session is blocking sub window, false means the opposite.
+     */
+    virtual bool IsBlockSubwindow() const { return false; }
+
+    /**
      * @brief Set brightness value of window.
      *
      * @param brightness Brightness of window.
@@ -2262,6 +2303,19 @@ public:
     virtual void UnregisterWindowDestroyedListener() {}
 
     /**
+     * @brief Register window Orientation execution result listener.
+     *
+     * @param func Function to notify Orientation execution result.
+     */
+    virtual void RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func) {}
+
+    /**
+     * @brief Unregister window Orientation execution result listener.
+     *
+     */
+    virtual void UnregisterNotifyOrientationExecutionResultFunc() {}
+
+    /**
      * @brief Register Occupied Area Change listener.
      *
      * @param listener IOccupiedAreaChangeListener.
@@ -2524,6 +2578,18 @@ public:
      * @param animation true means window rotation needs animation. Otherwise not needed.
      */
     virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
+
+    /**
+     * @brief Set requested orientation.
+     *
+     * @param Orientation Screen orientation.
+     * @param animation true means window rotation needs animation. Otherwise not needed.
+     */
+    virtual WMError SetPreferredOrientationWithResult(
+        Orientation orientation, uint32_t promiseId, bool needAnimation = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get the Target Orientation ConfigInfo.
@@ -3372,6 +3438,50 @@ public:
      * @return WM_OK means unregister success, others means unregister failed.
      */
     virtual WMError UnregisterWindowStatusDidChangeListener(const sptr<IWindowStatusDidChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Register parent window size change listener.
+     *
+     * @param listener IParentWindowSizeChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterParentWindowSizeChangeListener(const sptr<IParentWindowSizeChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister parent window size change listener.
+     *
+     * @param listener IParentWindowSizeChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterParentWindowSizeChangeListener(const sptr<IParentWindowSizeChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+        /**
+     * @brief Register parent window status change listener.
+     *
+     * @param listener IParentWindowStatusChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterParentWindowStatusChangeListener(const sptr<IParentWindowStatusChangeListener>& listener)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Unregister parent window status change listener.
+     *
+     * @param listener IParentWindowStatusChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterParentWindowStatusChangeListener(const sptr<IParentWindowStatusChangeListener>& listener)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4766,6 +4876,13 @@ public:
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
 
+     /**
+     * @brief Get is subwindow zLevel above parent loosened
+     *
+     * @return true means subwindow zLevel above parent loosened, others means follow parent.
+     */
+    virtual bool IsZLevelAboveParentLoosened() const { return false; }
+ 
     /**
      * @brief Set drag key frame policy.
      * effective order:
@@ -5214,6 +5331,16 @@ public:
     virtual WMError NotifyPageEnable(const std::string& action, const std::string& message)
     {
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
+    }
+
+    /**
+     * @brief notify split ratio changed
+     *
+     * @param newRatio new ratio
+     */
+    virtual WMError NotifySplitRatioChanged(float newRatio)
+    {
+        return WMError::WM_OK;
     }
 };
 }

@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <libxml/globals.h>
+#include <libxml/parser.h>
 #include <libxml/xmlstring.h>
 #include <map>
 #include <string>
@@ -556,7 +557,7 @@ uint64_t ScreenSceneConfig::GetUptimeSeconds()
     return static_cast<uint64_t>(ts.tv_sec);
 }
 
-void ScreenSceneConfig::SetRogResolution(const RogResolution rogResolution)
+void ScreenSceneConfig::SetRogResolution(const RogResolution& rogResolution)
 {
     rogResolution_ = rogResolution;
 }
@@ -577,16 +578,23 @@ RogResolution ScreenSceneConfig::GetRogResolution(uint32_t width, uint32_t heigh
                        GetRogDpi() > 0) {
                 SetRogResolution(RogResolution{ true, false, 0, rogDpi_, rogResolution_.width, rogResolution_.height });
             } else {
-                SetRogResolution(RogResolution{
-                    false, false, 0, static_cast<int32_t>(intNumbersConfig_[xmlNodeMap_[DPI]][0]), width, height });
+                int32_t densityDpi = 0;
+                if (intNumbersConfig_.count(xmlNodeMap_[DPI]) != 0) {
+                    densityDpi = intNumbersConfig_[xmlNodeMap_[DPI]][0];
+                }
+                SetRogResolution(RogResolution{ false, false, 0, static_cast<float>(densityDpi), width, height });
             }
             TLOGNFI(WmsLogTag::DMS, "rogResolution Init");
         } else {
             bool dmsSupport = (system::GetIntParameter<int32_t>("persist.window.screen.isSupportRog", 0) > 0);
             uint32_t dmsWidth = system::GetIntParameter<int32_t>("persist.window.screen.width", width);
             uint32_t dmsHeight = system::GetIntParameter<int32_t>("persist.window.screen.height", height);
-            float dmsDpi = static_cast<float>(
-                system::GetIntParameter<int32_t>("persist.window.screen.dpi", intNumbersConfig_[xmlNodeMap_[DPI]][0]));
+            int32_t densityDpi = 0;
+            if (intNumbersConfig_.count(xmlNodeMap_[DPI]) != 0) {
+                densityDpi = intNumbersConfig_[xmlNodeMap_[DPI]][0];
+            }
+            float dmsDpi =
+                static_cast<float>(system::GetIntParameter<int32_t>("persist.window.screen.dpi", densityDpi));
             SetRogResolution(RogResolution{ dmsSupport, false, 0, dmsDpi, dmsWidth, dmsHeight });
             TLOGNFI(WmsLogTag::DMS, "rogResolution Recover");
         }

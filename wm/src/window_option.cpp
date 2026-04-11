@@ -453,6 +453,16 @@ bool WindowOption::IsSubWindowOutlineEnabled() const
     return subWindowOutlineEnabled_;
 }
 
+void WindowOption::SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened)
+{
+    zLevelAboveParentLoosened_ = zLevelAboveParentLoosened;
+}
+ 
+bool WindowOption::IsSubWindowZLevelAboveParentLoosened() const
+{
+    return zLevelAboveParentLoosened_;
+}
+
 int64_t WindowOption::GetStartModalExtensionTimeStamp() const
 {
     return startModalExtensionTimeStamp_;
@@ -482,6 +492,15 @@ bool WindowOption::IsCrossProcessWindow() const
 {
     return isCrossProcessWindow_;
 }
+
+void WindowOption::SetIsBlockSubwindow(bool isBlockSubwindow)
+{
+    isBlockSubwindow_ = isBlockSubwindow;
+}
+
+bool WindowOption::IsBlockSubwindow() const
+{
+    return isBlockSubwindow_;
+}
 } // namespace Rosen
 } // namespace OHOS
-
