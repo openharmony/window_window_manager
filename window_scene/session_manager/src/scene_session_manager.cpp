@@ -14605,7 +14605,7 @@ bool SceneSessionManager::CheckBrokeNotAliveAndRefresh(SessionInfo& sessionInfo)
     sessionInfo.callerTypeForAnco = info->callerTypeForAnco;
     if (sessionInfo.callerTypeForAnco < static_cast<int32_t>(AAFwk::CallerTypeForAnco::DEFAULT)) {
         NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL),
-            "", sessionInfo.requestId, INVALID_WINDOW_ID);
+            "", sessionInfo.requestId, sessionInfo.persistentId_);
         return true;
     }
     if (sessionInfo.callerTypeForAnco == static_cast<int32_t>(AAFwk::CallerTypeForAnco::ADD)) {
