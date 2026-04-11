@@ -1596,12 +1596,25 @@ int SceneSessionManagerStub::HandleListWindowInfo(MessageParcel& data, MessagePa
 int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply)
 {
     uint64_t displayId = 0;
+    WindowInfoOptions option;
     if (!data.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadBool(option.excludeSystemWindows)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read excludeSystemWindows");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(option.foregroundAboveWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read foregroundAboveWindow");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(option.foregroundBelowWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read foregroundBelowWindow");
+        return ERR_INVALID_DATA;
+    }
     std::vector<sptr<WindowLayoutInfo>> infos;
-    WMError errCode = GetAllWindowLayoutInfo(displayId, infos);
+    WMError errCode = GetAllWindowLayoutInfo(displayId, infos, option);
     if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write window layout info");
         return ERR_INVALID_DATA;
