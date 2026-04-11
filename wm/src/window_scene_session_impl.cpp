@@ -949,9 +949,9 @@ WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
         subWindowSessionMap_[newParentWindowId].push_back(this);
     }
     property_->SetParentPersistentId(newParentWindowId);
-    UpdateSubWindowInfo(newParentWindow->GetProperty()->GetSubWindowLevel() + 1,
-        newParentWindow->GetContext());
-    if (state_ == WindowState::STATE_SHOWN &&
+    UpdateSubWindowInfo(newParentWindow->GetProperty()->GetSubWindowLevel() +
+        (IsLoosenedWithPcOrFreeMultiMode() ? 0 : 1), newParentWindow->GetContext());
+    if (!IsLoosenedWithPcOrFreeMultiMode() && state_ == WindowState::STATE_SHOWN &&
         newParentWindow->GetWindowState() == WindowState::STATE_HIDDEN) {
         UpdateSubWindowStateAndNotify(newParentWindowId, WindowState::STATE_HIDDEN);
     }
@@ -3058,6 +3058,10 @@ WMError WindowSceneSessionImpl::RaiseToAppTop()
     }
 
     WLOGFI("id: %{public}d", GetPersistentId());
+    if (IsLoosenedWithPcOrFreeMultiMode()) {
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}u is loosened", GetPersistentId());
+        return WMError::WM_OK;
+    }
     auto parentId = GetParentId();
     if (parentId == INVALID_SESSION_ID) {
         WLOGFE("Only the children of the main window can be raised!");
@@ -3114,6 +3118,11 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
         return WMError::WM_DO_NOTHING;
     }
     if (currentWindowId == static_cast<uint32_t>(subWindowId)) {
+        return WMError::WM_OK;
+    }
+    if (IsLoosenedWithPcOrFreeMultiMode() ||
+        (*targetWindow)->IsZLevelAboveParentLoosened()) {
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "source window or target window is loosened");
         return WMError::WM_OK;
     }
     auto hostSession = GetHostSession();
@@ -3179,7 +3188,10 @@ WMError WindowSceneSessionImpl::SetSubWindowZLevel(int32_t zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (IsLoosenedWithPcOrFreeMultiMode()) {
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}u is loosened", GetPersistentId());
+        return WMError::WM_OK;
+    }
     if (!windowSystemConfig_.supportZLevel_) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -3213,7 +3225,10 @@ WMError WindowSceneSessionImpl::GetSubWindowZLevel(int32_t& zLevel)
         TLOGE(WmsLogTag::WMS_HIERARCHY, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-
+    if (IsLoosenedWithPcOrFreeMultiMode()) {
+        TLOGI(WmsLogTag::WMS_HIERARCHY, "id: %{public}u is loosened", GetPersistentId());
+        return WMError::WM_OK;
+    }
     if (!windowSystemConfig_.supportZLevel_) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "The device is not supported");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
@@ -7718,18 +7733,15 @@ float WindowSceneSessionImpl::GetCustomDensity() const
     return customDensity_;
 }
 
-WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
 {
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
     const auto& property = GetProperty();
     if (windowAnchorInfo.isFromAttachOrDetach_ && (!(windowSystemConfig_.IsPcWindow() ||
         windowSystemConfig_.freeMultiWindowSupport_) || property_->IsAdaptToCompatibleDevice())) {
-            TLOGE(WmsLogTag::WMS_LAYOUT,
-                "isPcWindow: %{public}d , freeMultiWindowSupport: %{public}d, IsAdaptToCompatibleDevice: %{public}d",
-                windowSystemConfig_.IsPcWindow(), windowSystemConfig_.freeMultiWindowSupport_,
-                property_->IsAdaptToCompatibleDevice());
+        TLOGE(WmsLogTag::WMS_LAYOUT,
+            "isPcWindow: %{public}d , freeMultiWindowSupport: %{public}d, IsAdaptToCompatibleDevice: %{public}d",
+            windowSystemConfig_.IsPcWindow(), windowSystemConfig_.freeMultiWindowSupport_,
+            property_->IsAdaptToCompatibleDevice());
         return WMError::WM_OK;
     }
     if (windowAnchorInfo.isFromAttachOrDetach_ && (!windowAnchorInfo.isAnchoredByAttach_ &&
@@ -7739,6 +7751,10 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
     }
     if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (IsLoosenedWithPcOrFreeMultiMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
@@ -7753,6 +7769,18 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         TLOGI(WmsLogTag::WMS_SUB, "not support device");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WMError retValide = ValidateWindowAnchorInfo(windowAnchorInfo);
+    if (retValide != WMError::WM_OK) {
+        return retValide;
+    }
     auto hostSession = GetHostSession();
     if (!hostSession) {
         TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
@@ -7763,7 +7791,7 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (ret == WSError::WS_OK) {
-        property->SetWindowAnchorInfo(windowAnchorInfo);
+        GetProperty()->SetWindowAnchorInfo(windowAnchorInfo);
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
@@ -7779,6 +7807,10 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
         !WindowHelper::IsDialogWindow(property->GetWindowType())) {
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WMError::WM_ERROR_INVALID_OPERATION;
+    }
+    if (IsLoosenedWithPcOrFreeMultiMode()) {
+        TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (property->GetSubWindowLevel() > 1) {
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");

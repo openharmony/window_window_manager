@@ -328,6 +328,8 @@
             OHOS::Rosen::SceneSession::IsAppOrLowerSystemSession*;
             OHOS::Rosen::SceneSession::IsPcOrPadEnableActivation*;
             OHOS::Rosen::SceneSession::IsSubWindowOutlineEnabled*;
+            OHOS::Rosen::SceneSession::SetZLevelAboveParentLoosened*;
+            OHOS::Rosen::SceneSession::IsSubWindowZLevelAboveParentLoosened*;
             OHOS::Rosen::SceneSession::IsVisibleForAccessibility*;
             OHOS::Rosen::SceneSession::GetIsAncoForFloatingWindow*;
             OHOS::Rosen::SceneSession::IsTemporarilyShowWhenLocked*;

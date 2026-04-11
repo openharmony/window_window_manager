@@ -9473,6 +9473,13 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
             "[window][createSubWindowWithOptions]msg: Device not support."));
         return NapiGetUndefined(env);
     }
+    if (windowOption->IsSubWindowZLevelAboveParentLoosened() &&
+        !WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "SubWindowZLevelAboveParentLoosened property not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][createSubWindowWithOptions]msg: SubWindowZLevelAboveParentLoosened property not support."));
+        return NapiGetUndefined(env);
+    }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,

@@ -1961,10 +1961,16 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to outlineEnabled");
     }
 
+    bool zLevelAboveParentLoosened = false;
+    if (!ParseJsValue(jsObject, env, "zLevelAboveParentLoosened", zLevelAboveParentLoosened)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to zLevelAboveParentLoosened");
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevelAboveParentLoosened: %{public}d", zLevelAboveParentLoosened);
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
     windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
+    windowOption->SetZLevelAboveParentLoosened(zLevelAboveParentLoosened);
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }

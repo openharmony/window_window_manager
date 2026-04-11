@@ -613,6 +613,7 @@ private:
     static WMError VerifySubWindowLevel(bool isToast, const sptr<WindowSessionImpl>& parentSession);
     bool hasAncestorFloatSession(uint32_t parentId, const SessionMap& sessionMap);
     WMError SetParentWindowInner(int32_t oldParentWindowId, const sptr<WindowSessionImpl>& newParentWindow);
+    WMError ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;

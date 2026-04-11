@@ -345,6 +345,8 @@
             OHOS::Rosen::WindowOption::IsFollowCreatorLifecycle*;
             OHOS::Rosen::WindowOption::IsKeepScreenOn*;
             OHOS::Rosen::WindowOption::IsSubWindowOutlineEnabled*;
+            OHOS::Rosen::WindowOption::SetZLevelAboveParentLoosened*;
+            OHOS::Rosen::WindowOption::IsSubWindowZLevelAboveParentLoosened*;
             OHOS::Rosen::WindowOption::IsSystemKeyboard*;
             OHOS::Rosen::WindowOption::IsTurnScreenOn*;
             OHOS::Rosen::WindowOption::IsViewKeepScreenOn*;
