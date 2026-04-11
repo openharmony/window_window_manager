@@ -1314,7 +1314,9 @@ private:
     bool FilterForListWindowInfo(const WindowInfoOption& windowInfoOption,
         const sptr<SceneSession>& sceneSession) const;
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-        std::vector<sptr<SceneSession>>& filteredSessions, const WindowInfoOptions& option);
+        std::vector<sptr<SceneSession>>& filteredSessions, const WindowInfoOptions& option = WindowInfoOptions());
+    void GetZOrderByWindowInfoOptions(const WindowInfoOptions& option,
+        uint32_t& zOrderForAboveWin, uint32_t& zOrderForBelowWin);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
     bool IsSessionInSpecificDisplay(const sptr<SceneSession>& session, DisplayId displayId) const;
