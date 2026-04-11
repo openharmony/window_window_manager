@@ -2496,6 +2496,11 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo(int32_t userId)
     }
 }
 
+sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
+{
+    return GetDisplayInfoById(displayId, false);
+}
+
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo)
 {
     TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64" ", displayId);
@@ -2515,12 +2520,17 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId, 
             return displayInfo;
         }
 
-        if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && screenSession->GetScreenProperty().GetIsFakeInUse()) {
-            sptr<DisplayInfo> fakeDisplayInfo = FindDisplayInfoInSession(screenSession->GetFakeScreenSession(), displayId, isGetActualInfo);
-            if (fakeDisplayInfo != nullptr) {
-                TLOGD(WmsLogTag::DMS, "find fake success");
-                return fakeDisplayInfo;
-            }
+        if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
+            continue;
+        }
+        if (!screenSession->GetScreenProperty().GetIsFakeInUse()) {
+            continue;
+        }
+        sptr<DisplayInfo> fakeDisplayInfo = FindDisplayInfoInSession(screenSession->GetFakeScreenSession(),
+            displayId, isGetActualInfo);
+        if (fakeDisplayInfo != nullptr) {
+            TLOGD(WmsLogTag::DMS, "find fake success");
+            return fakeDisplayInfo;
         }
     }
     
@@ -2542,7 +2552,7 @@ sptr<DisplayInfo> ScreenSessionManager::FindDisplayInfoInSession(const sptr<Scre
 
     HandleRotationCorrectionExemption(displayInfo);
     if (displayId == displayInfo->GetDisplayId()) {
-        if (isGetActualInfo) {
+        if (!isGetActualInfo) {
             return HookDisplayInfoByUid(displayInfo, screenSession);
         }
         return displayInfo;

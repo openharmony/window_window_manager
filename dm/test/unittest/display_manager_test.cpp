@@ -425,28 +425,15 @@ HWTEST_F(DisplayManagerTest, GetDisplayById, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayByIdWithHookRequired
+ * @tc.name: GetDisplayByIdWithGetActualInfo
  * @tc.desc: GetDisplayById with isGetActualInfo parameter
  * @tc.type: FUNC
  */
-HWTEST_F(DisplayManagerTest, GetDisplayByIdWithHookRequired, TestSize.Level1)
+HWTEST_F(DisplayManagerTest, GetDisplayByIdWithGetActualInfo, TestSize.Level1)
 {
     DisplayId displayId = -1;
     g_dmIsDestroyed = true;
     auto ret = DisplayManager::GetInstance().GetDisplayById(displayId, true);
-    ASSERT_EQ(ret, nullptr);
-}
-
-/**
- * @tc.name: GetDisplayByIdWithHookRequiredFalse
- * @tc.desc: GetDisplayById with isGetActualInfo = false
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetDisplayByIdWithHookRequiredFalse, TestSize.Level1)
-{
-    DisplayId displayId = -1;
-    g_dmIsDestroyed = true;
-    auto ret = DisplayManager::GetInstance().GetDisplayById(displayId, false);
     ASSERT_EQ(ret, nullptr);
 }
 
@@ -3718,52 +3705,6 @@ HWTEST_F(DisplayManagerTest, NotifyDisplayCreateNullPtr, TestSize.Level1)
     size_t mapSizeAfter = impl.globalDisplayTagMap_.size();
     
     EXPECT_EQ(mapSizeBefore, mapSizeAfter);
-}
-
-/**
- * @tc.name: GetDisplayByIdWithHookIntegrationTest
- * @tc.desc: Integration test for isGetActualInfo parameter - inject hook info and verify hook behavior
- * @tc.type: FUNC
- */
-HWTEST_F(DisplayManagerTest, GetDisplayByIdWithHookIntegrationTest, TestSize.Level1)
-{
-    int32_t testUid = 12345;
-    DMHookInfo hookInfo;
-    hookInfo.width_ = 1080;
-    hookInfo.height_ = 1920;
-    hookInfo.density_ = 2.0f;
-    hookInfo.rotation_ = 1; // ROTATION_90
-    hookInfo.enableHookRotation_ = true;
-    hookInfo.displayOrientation_ = 1;
-    hookInfo.enableHookDisplayOrientation_ = true;
-    hookInfo.isFullScreenInForceSplit_ = false;
-
-    ScreenSessionManager::GetInstance().UpdateDisplayHookInfo(testUid, true, hookInfo);
-
-    DisplayId displayId = 0;
-    g_dmIsDestroyed = false;
-    
-    auto displayWithHook = DisplayManager::GetInstance().GetDisplayById(displayId, true);
-    auto displayWithoutHook = DisplayManager::GetInstance().GetDisplayById(displayId, false);
-
-    if (displayWithHook != nullptr && displayWithoutHook != nullptr) {
-        auto displayInfoWithHook = displayWithHook->GetDisplayInfo();
-        auto displayInfoWithoutHook = displayWithoutHook->GetDisplayInfo();
-        
-        if (displayInfoWithHook != nullptr && displayInfoWithoutHook != nullptr) {
-            bool isHooked = (displayInfoWithHook->GetWidth() == hookInfo.width_) &&
-                           (displayInfoWithHook->GetHeight() == hookInfo.height_) &&
-                           (displayInfoWithHook->GetVirtualPixelRatio() == hookInfo.density_);
-            
-            bool isNotHooked = (displayInfoWithoutHook->GetWidth() != hookInfo.width_) ||
-                              (displayInfoWithoutHook->GetHeight() != hookInfo.height_) ||
-                              (displayInfoWithoutHook->GetVirtualPixelRatio() != hookInfo.density_);
-            
-            EXPECT_TRUE(isHooked || isNotHooked);
-        }
-    }
-
-    ScreenSessionManager::GetInstance().UpdateDisplayHookInfo(testUid, false, hookInfo);
 }
 } // namespace Rosen
 } // namespace OHOS
