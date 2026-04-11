@@ -2681,7 +2681,7 @@ WSError SceneSessionManager::StartOrMinimizePcAppInPadUIAbilityBySCB(const sptr<
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_LIFE, "minimize failed! errCode: %{public}d", errCode);
             RecordLifeCycleExceptionEvent(sceneSession, errCode,
-                WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize pcappinpad fail");
+                WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize pcappinpad failed");
         }
     } else {
         TLOGI(WmsLogTag::WMS_LIFE,
@@ -2694,7 +2694,7 @@ WSError SceneSessionManager::StartOrMinimizePcAppInPadUIAbilityBySCB(const sptr<
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_LIFE, "start failed! errCode: %{public}d", errCode);
             RecordLifeCycleExceptionEvent(sceneSession, errCode,
-                WSErrorReason::WS_REASON_WINDOW_START_ERR, "start pcappinpad fail");
+                WSErrorReason::WS_REASON_WINDOW_START_ERR, "start pcappinpad failed");
             ExceptionInfo exceptionInfo;
             exceptionInfo.needRemoveSession = true;
             sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
@@ -3632,7 +3632,7 @@ WSError SceneSessionManager::PrepareTerminate(int32_t persistentId, bool& isPrep
         PrepareTerminateAbilityBySCB(sceneSessionInfo, isPrepareTerminate);
     if (errorCode != ERR_OK) {
         RecordLifeCycleExceptionEvent(sceneSession, errorCode,
-            WSErrorReason::WS_REASON_WINDOW_PRE_TERMINATE_ERR, "prepare terminate fail");
+            WSErrorReason::WS_REASON_WINDOW_PRE_TERMINATE_ERR, "prepare terminate failed");
     }
     TLOGI(WmsLogTag::WMS_MAIN, "Id:%{public}d isPrepareTerminate:%{public}d "
         "errorCode:%{public}d", persistentId, isPrepareTerminate, errorCode);
@@ -3909,7 +3909,7 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
         TLOGI(WmsLogTag::WMS_MAIN, "failed! errCode: %{public}d", errCode);
         RecordLifeCycleExceptionEvent(sceneSession, errCode,
             WSErrorReason::WS_REASON_WINDOW_START_ERR,
-            "start ability fail");
+            "start ability failed");
         ExceptionInfo exceptionInfo;
         exceptionInfo.needRemoveSession = true;
         sceneSession->NotifySessionExceptionInner(sceneSessionInfo, exceptionInfo, false, true);
@@ -4270,7 +4270,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
                     static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
             if (retCode != ERR_OK) {
                 RecordLifeCycleExceptionEvent(sceneSession, retCode,
-                    WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize ability fail");
+                    WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize ability failed");
             }
         }
         if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
@@ -4596,7 +4596,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
             static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
         if (ret != ERR_OK) {
             RecordLifeCycleExceptionEvent(sceneSession, ret,
-                WSErrorReason::WS_REASON_WINDOW_CLEAN_ERR, "clean ability fail");
+                WSErrorReason::WS_REASON_WINDOW_CLEAN_ERR, "clean ability failed");
         }
     } else {
         ffrtQueueHelper_->SubmitTask([this, weakSceneSession = wptr(sceneSession),
@@ -4606,7 +4606,7 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
             if (ret != ERR_OK) {
                 auto tempSession = weakSceneSession.promote();
                 RecordLifeCycleExceptionEvent(tempSession, ret,
-                    WSErrorReason::WS_REASON_WINDOW_CLOSE_ERR, "close ability fail");
+                    WSErrorReason::WS_REASON_WINDOW_CLOSE_ERR, "close ability failed");
             }
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s close ability ret:%{public}d, persistentId:%{public}d",
                 where, static_cast<int32_t>(ret), persistentId);
@@ -6080,7 +6080,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
             sceneSession->SetMinimizedFlagByUserSwitch(true);
         } else {
             RecordLifeCycleExceptionEvent(sceneSession, errCode,
-                WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize ability fail");
+                WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize ability failed");
             TLOGE(WmsLogTag::WMS_MULTI_USER, "minimize failed! errCode: %{public}d", errCode);
         }
     } else if (sceneSession->IsMinimizedByUserSwitch()) {
@@ -6095,7 +6095,7 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_MULTI_USER, "start failed! errCode: %{public}d", errCode);
             RecordLifeCycleExceptionEvent(sceneSession, errCode,
-                WSErrorReason::WS_REASON_WINDOW_START_ERR, "start ability fail");
+                WSErrorReason::WS_REASON_WINDOW_START_ERR, "start ability failed");
             ExceptionInfo exceptionInfo;
             exceptionInfo.needRemoveSession = true;
             sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
@@ -11832,7 +11832,7 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
         } else {
             auto sceneSession = GetSceneSession(sessionInfo.persistentId_);
             RecordLifeCycleExceptionEvent(sceneSession, result,
-                WSErrorReason::WS_REASON_WINDOW_SPECIFIED_ERR, "start specified fail");
+                WSErrorReason::WS_REASON_WINDOW_SPECIFIED_ERR, "start specified failed");
         }
         auto task = [bundleName = sessionInfo.bundleName_, appInstanceKey] {
             MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
@@ -14748,7 +14748,7 @@ BrokerStates SceneSessionManager::NotifyStartAbility(
             return BrokerStates::BROKER_STARTED;
         } else {
             RecordLifeCycleExceptionEvent(GetSceneSession(persistentId), *ret,
-                WSErrorReason::WS_REASON_WINDOW_ANCO_START_ERR, "anco start ability fail");
+                WSErrorReason::WS_REASON_WINDOW_ANCO_START_ERR, "anco start ability failed");
             return BrokerStates::BROKER_NOT_START;
         }
     }
@@ -14777,7 +14777,7 @@ void SceneSessionManager::NotifySessionCreate(sptr<SceneSession> sceneSession, c
         auto ret = collaborator->NotifyMissionCreated(abilitySessionInfo);
         if (ret != ERR_OK) {
             RecordLifeCycleExceptionEvent(sceneSession, ret,
-                WSErrorReason::WS_REASON_WINDOW_ANCO_SESSION_CREATE_ERR, "anco mission create fail");
+                WSErrorReason::WS_REASON_WINDOW_ANCO_SESSION_CREATE_ERR, "anco mission create failed");
         }
     }
 }
@@ -14816,7 +14816,7 @@ void SceneSessionManager::NotifyMoveSessionToForeground(int32_t collaboratorType
             auto sceneSession = GetSceneSession(persistentId);
             RecordLifeCycleExceptionEvent(sceneSession, retCode,
                 WSErrorReason::WS_REASON_WINDOW_ANCO_MOVE_SESSION_FOREGROUND_ERR,
-                "anco move mission foreground fail");
+                "anco move mission foreground failed");
         }
     }
 }
@@ -14834,7 +14834,7 @@ void SceneSessionManager::NotifyClearSession(int32_t collaboratorType, int32_t p
                 auto sceneSession = GetSceneSession(persistentId);
                 RecordLifeCycleExceptionEvent(sceneSession, ret,
                     WSErrorReason::WS_REASON_WINDOW_ANCO_CLEAR_SESSION_ERR,
-                    "anco clear mission fail");
+                    "anco clear mission failed");
             }
             HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s called clear mission ret: %{public}d, persistent id: %{public}d",

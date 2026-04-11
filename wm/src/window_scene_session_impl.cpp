@@ -488,7 +488,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         TLOGI(WmsLogTag::WMS_LIFE, "create specific failed, session is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
         RecordLifeCycleExceptionEvent(WMError::WM_ERROR_NULLPTR,
-            WMErrorReason::WM_REASON_SUB_WINDOW_IPC_CREATE_ERR, "sub window create fail when ipc");
+            WMErrorReason::WM_REASON_SUB_WINDOW_IPC_CREATE_ERR, "sub window create failed when ipc");
         return WMError::WM_ERROR_NULLPTR;
     }
     {
@@ -590,7 +590,7 @@ WMError WindowSceneSessionImpl::RecoverAndConnectSpecificSession()
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_RECOVER, "Recover failed, session is nullptr");
         RecordLifeCycleExceptionEvent(WMError::WM_ERROR_NULLPTR,
-            WMErrorReason::WM_REASON_SUB_WINDOW_IPC_RECOVER_ERR, "sub window recover fail when ipc");
+            WMErrorReason::WM_REASON_SUB_WINDOW_IPC_RECOVER_ERR, "sub window recover failed when ipc");
         windowRecoverStateChangeFunc_(true, WindowRecoverState::WINDOW_NOT_RECONNECT);
         return WMError::WM_ERROR_NULLPTR;
     }
@@ -806,7 +806,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         RecordWindowLifecycleChange("create");
     }
     RecordLifeCycleExceptionEvent(ret,
-        WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "window create fail");
+        WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "window create failed");
     UpdateAnimationSpeedIfEnabled();
     TLOGI(WmsLogTag::WMS_LIFE, "Window Create success [name:%{public}s, id:%{public}d], state:%{public}u, "
         "mode:%{public}u, enableDefaultDensity:%{public}d, displayId:%{public}" PRIu64,
@@ -1960,7 +1960,7 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
             property_->GetWindowName().c_str(), GetPersistentId(), type);
         RecordWindowLifecycleChange("show");
     } else {
-        RecordLifeCycleExceptionEvent(ret, WMErrorReason::WM_REASON_WINDOW_SHOW_ERR, "window show fail");
+        RecordLifeCycleExceptionEvent(ret, WMErrorReason::WM_REASON_WINDOW_SHOW_ERR, "window show failed");
         NotifyForegroundFailed(ret);
         TLOGI(WmsLogTag::WMS_LIFE, "Window show failed with errcode: %{public}d, name:%{public}s, id:%{public}d",
             static_cast<int32_t>(ret), property_->GetWindowName().c_str(), GetPersistentId());
@@ -2132,7 +2132,7 @@ WMError WindowSceneSessionImpl::Hide(uint32_t reason, bool withAnimation, bool i
         }
         RecordWindowLifecycleChange("hide");
     } else {
-        RecordLifeCycleExceptionEvent(res, WMErrorReason::WM_REASON_WINDOW_HIDE_ERR, "window hide fail");
+        RecordLifeCycleExceptionEvent(res, WMErrorReason::WM_REASON_WINDOW_HIDE_ERR, "window hide failed");
         TLOGI(WmsLogTag::WMS_LIFE, "Window hide failed, id:%{public}d, name:%{public}s, res:%{public}d",
             GetPersistentId(), property_->GetWindowName().c_str(), static_cast<int32_t>(res));
         NotifyBackgroundFailed(WMError::WM_DO_NOTHING);
@@ -2294,14 +2294,14 @@ WMError WindowSceneSessionImpl::DestroyInner(bool needNotifyServer)
     }
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "DestroyInner fail, ret:%{public}d", ret);
-        RecordLifeCycleExceptionEvent(ret, WMErrorReason::WM_REASON_WINDOW_DESTROY_ERR, "window destroy fail");
+        RecordLifeCycleExceptionEvent(ret, WMErrorReason::WM_REASON_WINDOW_DESTROY_ERR, "window destroy failed");
         return ret;
     }
 
     if (WindowHelper::IsMainWindow(GetType())) {
         if (auto hostSession = GetHostSession()) {
             ret = static_cast<WMError>(hostSession->Disconnect(true, identityToken_));
-            RecordLifeCycleExceptionEvent(ret, WMErrorReason::WM_REASON_WINDOW_DESTROY_ERR, "window disconnect fail");
+            RecordLifeCycleExceptionEvent(ret, WMErrorReason::WM_REASON_WINDOW_DESTROY_ERR, "window disconnect failed");
         }
     }
     return ret;
@@ -5914,7 +5914,7 @@ WMError WindowSceneSessionImpl::BindDialogTarget(sptr<IRemoteObject> targetToken
         TLOGE(WmsLogTag::WMS_DIALOG, "bind window failed with errCode:%{public}d", static_cast<int32_t>(ret));
         RecordLifeCycleExceptionEvent(ret,
             WMErrorReason::WM_REASON_SUB_WINDOW_IPC_BIND_DIALOG_TARGET_ERR,
-            "sub window bind dialog target fail when ipc");
+            "sub window bind dialog target failed when ipc");
     }
     return ret;
 }
