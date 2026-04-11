@@ -21,7 +21,10 @@
 
 #include "cutout_info.h"
 #include "xml_config_base.h"
-#include "libxml/parser.h"
+
+struct _xmlNode;
+using xmlNode = _xmlNode;
+using xmlNodePtr = xmlNode*;
 
 namespace OHOS::Rosen {
 struct DisplayFlag {
@@ -84,6 +87,7 @@ public:
     static RogResolution GetRogResolution(uint32_t width, uint32_t height);
     static uint64_t GetUptimeSeconds();
     static uint64_t GetBootTimeThreshold();
+    static void SetRogResolution(const RogResolution& rogResolution);
 
 private:
     static std::map<int32_t, std::string> xmlNodeMap_;
@@ -126,7 +130,6 @@ private:
     static void ParseDisplaysConfig(const xmlNodePtr& currPtr);
     static bool ParseFlagsConfig(const xmlNodePtr& flagsNode, DisplayFlag& outFlags);
     static void ReadRogResolutionConfigInfo(const xmlNodePtr& currNode);
-    static void SetRogResolution(const RogResolution rogResolution);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_SCREEN_SCENE_CONFIG_H

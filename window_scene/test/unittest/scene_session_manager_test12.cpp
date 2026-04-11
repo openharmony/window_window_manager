@@ -1632,15 +1632,22 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     sessionInfo2.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(sessionInfo2, nullptr);
     sceneSession2->SetRSVisible(true);
-    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    sceneSession2->SetSessionState(SessionState::STATE_BACKGROUND);
     WSRect rect2 = { 100, 0, 100, 100 };
     sceneSession2->SetSessionRect(rect2);
     sceneSession2->SetSessionGlobalRect(rect2);
+    sceneSession2->SetParentPersistentId(sceneSession1->GetPersistentId());
+    sceneSession2->SetParentSession(sceneSession1);
     sceneSession2->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
     ssm_->sceneSessionMap_.insert({ sceneSession2->GetPersistentId(), sceneSession2 });
     GlobalWindowMode globalWinMode2 = GlobalWindowMode::UNKNOWN;
     ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode2);
-    EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 6);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 2);
+
+    sceneSession2->SetSessionState(SessionState::STATE_FOREGROUND);
+    GlobalWindowMode globalWinMode3 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode3);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode3), 6);
 
     SessionInfo sessionInfo3;
     sessionInfo3.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_PIP);
@@ -1652,9 +1659,46 @@ HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode02, TestSize.Level0)
     sceneSession3->SetSessionGlobalRect(rect3);
     sceneSession3->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_PIP);
     ssm_->sceneSessionMap_.insert({ sceneSession3->GetPersistentId(), sceneSession3 });
-    GlobalWindowMode globalWinMode3 = GlobalWindowMode::UNKNOWN;
-    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode3);
-    EXPECT_EQ(static_cast<uint32_t>(globalWinMode3), 14);
+    GlobalWindowMode globalWinMode4 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode4);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode4), 14);
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetGlobalWindowMode03
+ * @tc.desc: test dialog window mode depends on dialog and main window foreground state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, GetGlobalWindowMode03, TestSize.Level0)
+{
+    SessionInfo mainInfo;
+    mainInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSession> mainSession = sptr<SceneSession>::MakeSptr(mainInfo, nullptr);
+    mainSession->SetRSVisible(true);
+    mainSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    mainSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    ssm_->sceneSessionMap_.insert({ mainSession->GetPersistentId(), mainSession });
+
+    SessionInfo dialogInfo;
+    dialogInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSession> dialogSession = sptr<SceneSession>::MakeSptr(dialogInfo, nullptr);
+    dialogSession->SetRSVisible(true);
+    dialogSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    dialogSession->SetParentPersistentId(mainSession->GetPersistentId());
+    dialogSession->SetParentSession(mainSession);
+    dialogSession->GetSessionProperty()->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    ssm_->sceneSessionMap_.insert({ dialogSession->GetPersistentId(), dialogSession });
+
+    GlobalWindowMode globalWinMode = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode), 1);
+
+    dialogSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    GlobalWindowMode globalWinMode2 = GlobalWindowMode::UNKNOWN;
+    ssm_->GetGlobalWindowMode(DEFAULT_DISPLAY_ID, globalWinMode2);
+    EXPECT_EQ(static_cast<uint32_t>(globalWinMode2), 5);
 
     ssm_->sceneSessionMap_.clear();
 }
@@ -3677,6 +3721,26 @@ HWTEST_F(SceneSessionManagerTest12, NotifyPageEnableFunc01, TestSize.Level1)
     auto result = ssm_->NotifyPageEnableFunc("com.test.app", 1, "enter", "HomePage");
 
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: RecordLifeCycleExceptionEvent
+ * @tc.desc: Test RecordLifeCycleExceptionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RecordLifeCycleExceptionEvent, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "RecordLifeCycleExceptionEvent";
+    info.bundleName_ = "RecordLifeCycleExceptionEvent";
+    info.screenId_ = SCREEN_ID_INVALID;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->RecordLifeCycleExceptionEvent(sceneSession, ERR_OK,
+        WSErrorReason::WS_REASON_WINDOW_START_ERR, "test reason");
 }
 } // namespace
 } // namespace Rosen

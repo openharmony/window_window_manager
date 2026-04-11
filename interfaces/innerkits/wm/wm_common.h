@@ -362,7 +362,27 @@ enum class WMError : int32_t {
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,
     WM_ERROR_INVALID_WINDOW_TYPE,
+    WM_ERROR_FORBID_SUBWINDOW,
 };
+
+/**
+ * @brief Enumerates error code of window only used for dfx.
+ */
+enum class WMErrorReason : int32_t {
+    WM_REASON = 0,
+    WM_REASON_WINDOW_CREATE_ERR,
+    WM_REASON_WINDOW_SHOW_ERR,
+    WM_REASON_WINDOW_HIDE_ERR,
+    WM_REASON_WINDOW_DESTROY_ERR,
+
+    WM_REASON_SUB_WINDOW = 100,
+    WM_REASON_SUB_WINDOW_IPC_ERR,
+    WM_REASON_SUB_WINDOW_IPC_CREATE_ERR,
+    WM_REASON_SUB_WINDOW_IPC_RECOVER_ERR,
+    WM_REASON_SUB_WINDOW_IPC_DESTROY_ERR,
+    WM_REASON_SUB_WINDOW_IPC_BIND_DIALOG_TARGET_ERR,
+};
+
 
 /**
  * @brief Enumerates error code of window only used for js api.
@@ -402,6 +422,7 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED = 1300027,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED = 1300028,
     WM_ERROR_INVALID_WINDOW_TYPE = 1300029,
+    WM_ERROR_FORBID_SUBWINDOW = 1300035,
 };
 
 /**
@@ -447,6 +468,9 @@ enum class ControlAppType : uint8_t {
     PRIVACY_WINDOW,
     CONTROL_APP_TYPE_END,
 };
+
+const ControlAppType CONTROL_APP_TYPE_ENUM_LIST[] = { ControlAppType::APP_LOCK, ControlAppType::PARENT_CONTROL,
+    ControlAppType::DLP, ControlAppType::PRIVACY_WINDOW };
 
 /**
  * @brief Enumerates flag of multiWindowUIType.
@@ -563,6 +587,8 @@ enum class WindowSizeChangeReason : uint32_t {
     SCENE_WITH_ANIMATION,
     LS_STATE_CHANGE,
     FULL_SCREEN_IN_FORCE_SPLIT,
+    HOOK_INFO_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
@@ -601,6 +627,15 @@ enum class DragResizeType : uint32_t {
     RESIZE_KEY_FRAME = 3,
     RESIZE_SCALE = 4,
     RESIZE_MAX_VALUE,  // invalid value begin, add new value above
+};
+
+/**
+ * @brief Enumerates select mode.
+ */
+enum class SelectMode : uint32_t {
+    WIDE_MODE = 0,
+    SQUARE_MODE = 1,
+    INVALID_MODE = 2,
 };
 
 /**
@@ -687,6 +722,7 @@ struct KeyFramePolicy : public Parcelable {
 struct HookWindowInfo : public Parcelable {
     bool enableHookWindow{ false };
     float widthHookRatio{ 1.0f };
+    bool notifyWindowChange{ false };
 
     static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
 
@@ -710,7 +746,8 @@ struct HookWindowInfo : public Parcelable {
         std::ostringstream oss;
         oss << std::boolalpha  // For true/false instead of 1/0
             << "enableHookWindow: " << enableHookWindow
-            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio;
+            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio
+            << ", notifyWindowChange: " << notifyWindowChange;
         return oss.str();
     }
 
@@ -718,13 +755,15 @@ private:
     bool WriteAllFields(Parcel& parcel) const
     {
         return parcel.WriteBool(enableHookWindow) &&
-               parcel.WriteFloat(widthHookRatio);
+               parcel.WriteFloat(widthHookRatio) &&
+               parcel.WriteBool(notifyWindowChange);
     }
 
     static bool ReadAllFields(Parcel& parcel, HookWindowInfo& info)
     {
         return parcel.ReadBool(info.enableHookWindow) &&
-               parcel.ReadFloat(info.widthHookRatio);
+               parcel.ReadFloat(info.widthHookRatio) &&
+               parcel.ReadBool(info.notifyWindowChange);
     }
 };
 
@@ -1159,6 +1198,7 @@ struct PartialSystemBarProperty {
     uint32_t contentColor_ = 0;
     bool enableAnimation_ = false;
     SystemBarPropertyFlag flag_;
+    bool isolate_ = false;
 };
 
 /*
@@ -1271,7 +1311,7 @@ struct HookInfo {
     uint32_t displayOrientation_;
     bool enableHookDisplayOrientation_;
     Rect actualRect_ = { 0, 0, 0, 0};
-    
+
     std::string ToString() const
     {
         std::ostringstream oss;
@@ -1456,19 +1496,60 @@ enum class WindowAnchor : uint32_t {
  */
 struct WindowAnchorInfo : public Parcelable {
     bool isAnchorEnabled_ = false;
+    bool isAnchoredByAttach_ = false; // Distinguish between binding and unbinding
+    bool isFromAttachOrDetach_ = false; // Distinguish addatchAndDetach or setRelative interfaces
     WindowAnchor windowAnchor_ = WindowAnchor::TOP_START;
     int32_t offsetX_ = 0;
     int32_t offsetY_ = 0;
+
+    struct AttachOptions : public Parcelable {
+        std::string currentLayoutMode = "";
+        AttachOptions() = default;
+        AttachOptions(std::string currentLayoutMode) : currentLayoutMode(currentLayoutMode) {}
+        bool operator==(const AttachOptions& other) const
+        {
+            return currentLayoutMode == other.currentLayoutMode;
+        }
+
+        bool operator!=(const AttachOptions& other) const
+        {
+            return !(*this == other);
+        }
+
+        bool Marshalling(Parcel& parcel) const override
+        {
+            return parcel.WriteString(currentLayoutMode);
+        }
+
+        static AttachOptions* Unmarshalling(Parcel& parcel)
+        {
+            std::string layoutMode = "";
+            auto attachOptions = std::make_unique<AttachOptions>();
+            if (!attachOptions) {
+                return nullptr;
+            }
+            if (!parcel.ReadString(layoutMode)) {
+                return nullptr;
+            }
+            attachOptions->currentLayoutMode = layoutMode;
+            return attachOptions.release();
+        }
+    };
+    AttachOptions attachOptions;
 
     WindowAnchorInfo() {}
     WindowAnchorInfo(bool isAnchorEnabled) : isAnchorEnabled_(isAnchorEnabled) {}
     WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
+    WindowAnchorInfo(bool isAnchorEnabled, bool isAnchoredByAttach,  WindowAnchor windowAnchor, int32_t offsetX,
+        int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled), isAnchoredByAttach_(isAnchoredByAttach),
+        windowAnchor_(windowAnchor), offsetX_(offsetX), offsetY_(offsetY) {}
 
     bool operator==(const WindowAnchorInfo& other) const
     {
-        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && isAnchoredByAttach_ == other.isAnchoredByAttach_ &&
+            isFromAttachOrDetach_ == other.isFromAttachOrDetach_ && windowAnchor_ == other.windowAnchor_ &&
             offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
     }
 
@@ -1479,8 +1560,10 @@ struct WindowAnchorInfo : public Parcelable {
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
-            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_);
+        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteBool(isAnchoredByAttach_) &&
+            parcel.WriteBool(isFromAttachOrDetach_) &&
+            parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) && parcel.WriteInt32(offsetX_) &&
+            parcel.WriteInt32(offsetY_) && parcel.WriteParcelable(&attachOptions);
     }
 
     static WindowAnchorInfo* Unmarshalling(Parcel& parcel)
@@ -1490,12 +1573,17 @@ struct WindowAnchorInfo : public Parcelable {
         if (windowAnchorInfo == nullptr) {
             return nullptr;
         }
-        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) || !parcel.ReadUint32(windowAnchorMode) ||
-            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_)) {
+        sptr<AttachOptions> attachOptions;
+        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_)||
+            !parcel.ReadBool(windowAnchorInfo->isAnchoredByAttach_) ||
+            !parcel.ReadBool(windowAnchorInfo->isFromAttachOrDetach_) || !parcel.ReadUint32(windowAnchorMode) ||
+            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_) ||
+            !(attachOptions = parcel.ReadParcelable<AttachOptions>())) {
             delete windowAnchorInfo;
             return nullptr;
         }
         windowAnchorInfo->windowAnchor_ = static_cast<WindowAnchor>(windowAnchorMode);
+        windowAnchorInfo->attachOptions.currentLayoutMode = attachOptions->currentLayoutMode;
         return windowAnchorInfo;
     }
 };
@@ -2185,15 +2273,17 @@ struct WindowUIInfo : public Parcelable {
  */
 struct WindowDisplayInfo : public Parcelable {
     DisplayId displayId = DISPLAY_ID_INVALID;
+    std::string displayName;
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteUint64(displayId);
+        return parcel.WriteUint64(displayId) && parcel.WriteString(displayName);
     }
 
     static WindowDisplayInfo* Unmarshalling(Parcel& parcel)
     {
         WindowDisplayInfo* windowDisplayInfo = new WindowDisplayInfo();
-        if (!parcel.ReadUint64(windowDisplayInfo->displayId)) {
+        if (!parcel.ReadUint64(windowDisplayInfo->displayId) ||
+            !parcel.ReadString(windowDisplayInfo->displayName)) {
             delete windowDisplayInfo;
             return nullptr;
         }
@@ -2250,6 +2340,8 @@ struct WindowMetaInfo : public Parcelable {
     bool isMidScene = false;
     bool isFocused = false;
     bool isTouchable = true;
+    int32_t mainWindowPersistentId = INVALID_WINDOW_ID;
+    ControlAppType controlAppType = ControlAppType::CONTROL_APP_TYPE_BEGIN;
 
     bool Marshalling(Parcel& parcel) const override
     {
@@ -2259,13 +2351,15 @@ struct WindowMetaInfo : public Parcelable {
                parcel.WriteUint64(surfaceNodeId) && parcel.WriteUint64(leashWinSurfaceNodeId) &&
                parcel.WriteBool(isPrivacyMode) && parcel.WriteBool(isMidScene) &&
                parcel.WriteBool(isFocused) && parcel.WriteUint32(static_cast<uint32_t>(windowMode)) &&
-               parcel.WriteBool(isTouchable);
+               parcel.WriteBool(isTouchable) && parcel.WriteInt32(mainWindowPersistentId) &&
+               parcel.WriteUint8(static_cast<uint8_t>(controlAppType));
     }
 
     static WindowMetaInfo* Unmarshalling(Parcel& parcel)
     {
         uint32_t windowTypeValue = 1;
         uint32_t windowModeValue = 1;
+        uint8_t controlAppTypeValue = 0;
         WindowMetaInfo* windowMetaInfo = new WindowMetaInfo();
         if (!parcel.ReadInt32(windowMetaInfo->windowId) || !parcel.ReadString(windowMetaInfo->windowName) ||
             !parcel.ReadString(windowMetaInfo->bundleName) || !parcel.ReadString(windowMetaInfo->abilityName) ||
@@ -2275,12 +2369,14 @@ struct WindowMetaInfo : public Parcelable {
             !parcel.ReadUint64(windowMetaInfo->leashWinSurfaceNodeId) ||
             !parcel.ReadBool(windowMetaInfo->isPrivacyMode) || !parcel.ReadBool(windowMetaInfo->isMidScene) ||
             !parcel.ReadBool(windowMetaInfo->isFocused) || !parcel.ReadUint32(windowModeValue) ||
-            !parcel.ReadBool(windowMetaInfo->isTouchable)) {
+            !parcel.ReadBool(windowMetaInfo->isTouchable) ||
+            !parcel.ReadInt32(windowMetaInfo->mainWindowPersistentId) || !parcel.ReadUint8(controlAppTypeValue)) {
             delete windowMetaInfo;
             return nullptr;
         }
         windowMetaInfo->windowType = static_cast<WindowType>(windowTypeValue);
         windowMetaInfo->windowMode = static_cast<WindowMode>(windowModeValue);
+        windowMetaInfo->controlAppType = static_cast<ControlAppType>(controlAppTypeValue);
         return windowMetaInfo;
     }
 };
@@ -3009,6 +3105,33 @@ struct OrientationInfo {
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
 };
 
+struct OrientationParams {
+    WmErrorCode errCode;
+    Orientation requestedOrientation;
+    std::string errMsg;
+};
+
+enum class OrientationExecutionResult : uint32_t {
+    START = 0,
+
+    /**
+     * Orientation policy is applied.
+     */
+    ORIENTATION_APPLIED = START,
+
+    /**
+     * Orientation policy is ignored.
+     */
+    ORIENTATION_IGNORED,
+
+    /**
+     * Orientation policy is pending and will be applied soon.
+     */
+    ORIENTATION_PENDING,
+
+    END,
+};
+
 /*
  * @brief Enumerates rotation change type.
  */
@@ -3625,6 +3748,16 @@ struct StateChangeOption {
         : parentPersistentId_(parentPersistentId), newState_(newState), reason_(reason),
           withAnimation_(withAnimation), withFocus_(withFocus), waitAttach_(waitAttach),
           isFromInnerkits_(isFromInnerkits), waitDetach_(waitDetach) {}
+};
+
+/**
+ * @enum TitleButtonEventType
+ * @brief Represent type of title button event.
+ */
+enum class TitleButtonEventType : uint32_t {
+    EVENT_TYPE_UNDEFINED = 0,
+    EVENT_TYPE_MAXIMIZE = 1,
+    EVENT_TYPE_END = 10,
 };
 }
 }

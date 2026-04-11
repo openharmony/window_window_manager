@@ -1005,7 +1005,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable, TestSize.Level1)
     ASSERT_NE(nullptr, window);
 
     auto ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -1036,7 +1036,7 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable01, TestSize.Level1)
     window->hostSession_ = nullptr;
 
     auto ret = window->NotifyPageEnable("enter", "HomePage");
-    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_PARAM);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 }
 
 /**
@@ -1089,6 +1089,169 @@ HWTEST_F(WindowSceneSessionImplTest6, NotifyPageEnable03, TestSize.Level1)
     EXPECT_EQ(window->NotifyPageEnable("exit", "HomePage"), WMError::WM_OK);
     EXPECT_EQ(window->NotifyPageEnable("enter", "DetailPage"), WMError::WM_OK);
 }
+
+/**
+ * @tc.name: ApplyForcibleLimitsNotForcible
+ * @tc.desc: Verify no changes when window limits are not forcible
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, ApplyForcibleLimitsNotForcible, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    ASSERT_NE(property, nullptr);
+
+    // Set window limits to not break system constraints
+    property->SetIsWindowLimitsForcible(false);
+
+    WindowLimits px;
+    px.maxWidth_ = 100;
+    px.maxHeight_ = 100;
+    px.minWidth_ = 10;
+    px.minHeight_ = 10;
+
+    WindowLimits vp;
+    vp.maxWidth_ = 100;
+    vp.maxHeight_ = 100;
+    vp.minWidth_ = 10;
+    vp.minHeight_ = 10;
+
+    window->ApplyForcibleLimits(px, vp, 2.0f, []() { return true; });
+
+    // should remain unchanged
+    EXPECT_EQ(px.maxWidth_, 100);
+    EXPECT_EQ(px.maxHeight_, 100);
+    EXPECT_EQ(px.minWidth_, 10);
+    EXPECT_EQ(px.minHeight_, 10);
+
+    EXPECT_EQ(vp.maxWidth_, 100);
+    EXPECT_EQ(vp.maxHeight_, 100);
+    EXPECT_EQ(vp.minWidth_, 10);
+    EXPECT_EQ(vp.minHeight_, 10);
 }
+
+/**
+ * @tc.name: ApplyForcibleLimitsNoPermission
+ * @tc.desc: Verify no changes when caller has no permission to break system limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, ApplyForcibleLimitsNoPermission, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    ASSERT_NE(property, nullptr);
+
+    // Enable break system constraints
+    property->SetIsWindowLimitsForcible(true);
+
+    WindowLimits px;
+    px.maxWidth_ = 200;
+    px.maxHeight_ = 200;
+    px.minWidth_ = 20;
+    px.minHeight_ = 20;
+
+    WindowLimits vp;
+    vp.maxWidth_ = 200;
+    vp.maxHeight_ = 200;
+    vp.minWidth_ = 20;
+    vp.minHeight_ = 20;
+
+    // Permission denied
+    window->ApplyForcibleLimits(px, vp, 2.0f, []() { return false; });
+
+    // should remain unchanged
+    EXPECT_EQ(px.maxWidth_, 200);
+    EXPECT_EQ(px.maxHeight_, 200);
+    EXPECT_EQ(px.minWidth_, 20);
+    EXPECT_EQ(px.minHeight_, 20);
+
+    EXPECT_EQ(vp.maxWidth_, 200);
+    EXPECT_EQ(vp.maxHeight_, 200);
+    EXPECT_EQ(vp.minWidth_, 20);
+    EXPECT_EQ(vp.minHeight_, 20);
+}
+
+/**
+ * @tc.name: ApplyForcibleLimitsWithPermission
+ * @tc.desc: Verify system limits are widened when forcible mode and permission are enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, ApplyForcibleLimitsWithPermission, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    ASSERT_NE(property, nullptr);
+
+    // Enable break system constraints
+    property->SetIsWindowLimitsForcible(true);
+
+    WindowLimits px;
+    px.maxWidth_ = 300;
+    px.maxHeight_ = 300;
+    px.minWidth_ = 50;
+    px.minHeight_ = 50;
+
+    WindowLimits vp;
+    vp.maxWidth_ = 300;
+    vp.maxHeight_ = 300;
+    vp.minWidth_ = 50;
+    vp.minHeight_ = 50;
+
+    constexpr float vpr = 2.0f;
+    constexpr uint32_t FORCIBLE_MAX = static_cast<uint32_t>(INT32_MAX);
+    constexpr uint32_t FORCIBLE_MIN = 1;
+
+    window->ApplyForcibleLimits(px, vp, vpr, []() { return true; });
+
+    // max should be expanded
+    EXPECT_EQ(px.maxWidth_, FORCIBLE_MAX);
+    EXPECT_EQ(px.maxHeight_, FORCIBLE_MAX);
+    EXPECT_EQ(vp.maxWidth_, FORCIBLE_MAX);
+    EXPECT_EQ(vp.maxHeight_, FORCIBLE_MAX);
+    // min should be relaxed to 1
+    EXPECT_EQ(px.minWidth_, FORCIBLE_MIN);
+    EXPECT_EQ(px.minHeight_, FORCIBLE_MIN);
+    EXPECT_EQ(vp.minWidth_, FORCIBLE_MIN);
+    EXPECT_EQ(vp.minHeight_, FORCIBLE_MIN);
+}
+
+/**
+ * @tc.name: ApplyForcibleLimitsMinAlreadySmaller
+ * @tc.desc: Verify min limits are not increased if already smaller than forcible minimum
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, ApplyForcibleLimitsMinAlreadySmaller, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    ASSERT_NE(property, nullptr);
+
+    property->SetIsWindowLimitsForcible(true);
+
+    WindowLimits px;
+    px.maxWidth_ = 300;
+    px.maxHeight_ = 300;
+    px.minWidth_ = 0;   // already smaller than FORCIBLE_MIN(1)
+    px.minHeight_ = 0;
+
+    WindowLimits vp;
+    vp.maxWidth_ = 300;
+    vp.maxHeight_ = 300;
+    vp.minWidth_ = 0;
+    vp.minHeight_ = 0;
+
+    window->ApplyForcibleLimits(px, vp, 2.0f, []() { return true; });
+
+    // should keep original smaller values
+    EXPECT_EQ(px.minWidth_, 0);
+    EXPECT_EQ(px.minHeight_, 0);
+    EXPECT_EQ(vp.minWidth_, 0);
+    EXPECT_EQ(vp.minHeight_, 0);
+}
+} // namespace
 } // namespace Rosen
 } // namespace OHOS

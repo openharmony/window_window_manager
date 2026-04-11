@@ -136,6 +136,8 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
+    virtual WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) = 0;
+    virtual WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) = 0;
     virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; };
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyLifecyclePausedStatus() = 0;
@@ -288,6 +290,8 @@ public:
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
+    virtual WSError GetSceneNodeCount(uint32_t& nodeCount) = 0;
+    virtual WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) = 0;
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& currentInfo)
@@ -300,8 +304,10 @@ public:
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) = 0;
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
+    virtual WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
     virtual WSError UpdateBrightness(float brightness) = 0;
 

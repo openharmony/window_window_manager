@@ -58,6 +58,7 @@ constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 extern const std::string WINDOW_SCREEN_LOCK_PREFIX;
 extern const std::string VIEW_SCREEN_LOCK_PREFIX;
+constexpr const char* BOUNDS_CHANGED = "OnBoundsChanged";
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 
@@ -128,6 +129,24 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_CONTEXT_ABNORMALLY = 1300006,
 
     WS_ERROR_EDM_CONTROLLED = 16000013, // enterprise limit
+};
+
+enum class WSErrorReason : int32_t {
+    WS_REASON_WINDOW_ERR = 1000,
+    WS_REASON_WINDOW_MINIMIZE_ERR,
+    WS_REASON_WINDOW_START_ERR,
+    WS_REASON_WINDOW_PRE_TERMINATE_ERR,
+    WS_REASON_WINDOW_STARTUP_EXC_ERR,
+    WS_REASON_WINDOW_CALL_ERR,
+    WS_REASON_WINDOW_CLEAN_ERR,
+    WS_REASON_WINDOW_CLOSE_ERR,
+    WS_REASON_WINDOW_SPECIFIED_ERR,
+
+    WS_REASON_WINDOW_ANCO_ERR = 1200,
+    WS_REASON_WINDOW_ANCO_START_ERR,
+    WS_REASON_WINDOW_ANCO_SESSION_CREATE_ERR,
+    WS_REASON_WINDOW_ANCO_MOVE_SESSION_FOREGROUND_ERR,
+    WS_REASON_WINDOW_ANCO_CLEAR_SESSION_ERR,
 };
 
 extern const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP;
@@ -499,6 +518,8 @@ struct SessionInfo {
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
     bool hasPrivacyModeControl = false;
+    // The Field has a value in useControlsession
+    int32_t mainWindowPersistentId_ = INVALID_SESSION_ID;
 
     /*
      * UIExtension
@@ -613,6 +634,7 @@ enum class SizeChangeReason : uint32_t {
     SNAPSHOT_ROTATION = 37,
     SCENE_WITH_ANIMATION,
     LS_STATE_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
@@ -1077,13 +1099,16 @@ struct SingleHandBackgroundTextConfig {
     int32_t height = -1;
     int32_t fontSize = 0;
     int32_t minFontSize = 0;
-    int32_t maxLines = 0;
+    int32_t maxLines = -1;
+    int32_t textAlign = 1;
     std::string maxFontScale = "";
 };
 
 struct SingleHandBackgroundLayoutConfig {
     bool isCustomLayout = false;
     WSRect settingButtonRect = {0, 0, 0, 0};
+    bool isSettingButtonMirror = false;
+    int32_t textContainerWidth = 0;
     SingleHandBackgroundTextConfig title;
     SingleHandBackgroundTextConfig content;
     SingleHandBackgroundTextConfig issueText;
@@ -1184,6 +1209,7 @@ struct SessionEventParam {
     uint32_t compatibleStyleMode = 0;
     int32_t windowGlobalPosX_ = 0;
     int32_t windowGlobalPosY_ = 0;
+    uint32_t titleButtonEventType_ = 0;
 };
 
 struct BackgroundParams {
@@ -1422,5 +1448,21 @@ enum class SidebarBlurType : uint32_t {
     DEFAULT_MAXIMIZE,
     END,
 };
+
+struct PreWindowProperty {
+    uint32_t rotation = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    PreWindowProperty() {}
+
+    PreWindowProperty(uint32_t rotation, uint32_t width, uint32_t height)
+    {
+        this->rotation = rotation;
+        this->width = width;
+        this->height = height;
+    }
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

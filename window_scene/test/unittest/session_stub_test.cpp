@@ -2409,8 +2409,10 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs, TestSize.Level1
         MessageParcel reply;
         uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE);
         uint32_t waterfallResidentState = 0;
+        uint32_t titleButtonEventType = 0;
         data.WriteUint32(eventId);
         data.WriteUint32(waterfallResidentState);
+        data.WriteUint32(titleButtonEventType);
 
         EXPECT_CALL(*session, OnSessionEvent(_, _))
             .Times(1)

@@ -1366,7 +1366,8 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     }
 
     if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
-        action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) &&
+        action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY ||
+        action == PropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP) &&
         !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
@@ -1388,6 +1389,13 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     if (action == PropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE &&
         !Permission::CheckCallingPermission("ohos.permission.PRIVACY_WINDOW")) {
         WLOGFE("Set privacy mode permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    // Note: verify set touchale areas permission.
+    if (action == PropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA &&
+        !Permission::IsSystemCalling() &&
+        !Permission::CheckCallingPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Set hot touch areas failed due to permission denied");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
 
