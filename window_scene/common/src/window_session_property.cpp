@@ -1614,7 +1614,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetAncoRealBundleName(parcel.ReadString());
     property->SetIsShowDecorInFreeMultiWindow(parcel.ReadBool());
     property->SetMobileAppInPadLayoutFullScreen(parcel.ReadBool());
-    property->SetForceSplitEnabled(parcel.ReadBool());
+    property->SetForceSplitEnable(parcel.ReadBool());
     UnmarshallingHookWindowInfo(parcel, property);
     property->SetIsFullScreenInForceSplitMode(parcel.ReadBool());
     property->SetPageCompatibleMode(static_cast<CompatibleStyleMode>(parcel.ReadInt32()));
