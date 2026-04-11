@@ -467,7 +467,6 @@ WSError SystemSession::StopFloatingBall()
     return WSError::WS_OK;
 }
 
-
 WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "session GetFloatingBallWindowId");
@@ -475,7 +474,6 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
         return WMError::WM_DO_NOTHING;
     }
     int32_t callingPid = IPCSkeleton::GetCallingPid();
- 
     return PostSyncTask([weakThis = wptr(this), callingPid, &windowId, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
