@@ -763,7 +763,7 @@ bool DisplayManager::Impl::SetVirtualScreenAsDefault(ScreenId screenId)
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
-    return DisplayManager::Impl::GetDisplayById(displayId, true);
+    return DisplayManager::Impl::GetDisplayById(displayId, false);
 }
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId, bool isGetActualInfo)
@@ -777,7 +777,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId, bool isG
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(displayId);
-        if (iter != displayMap_.end()) {
+        if (iter != displayMap_.end() && !isGetActualInfo) {
             static uint32_t getDisplayIntervalUs_ = (std::string(program_invocation_name) != "com.ohos.sceneboard")
                                                         ? APP_GET_DISPLAY_INTERVAL_US
                                                         : SCB_GET_DISPLAY_INTERVAL_US;
@@ -800,6 +800,12 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId, bool isG
         displayMap_.erase(displayId);
     }
     currentDisplayTagMap_[displayId] = targetTag;
+    if (isGetActualInfo && displayMap_[displayId] != nullptr &&
+        displayMap_[displayId]->GetDisplayInfoWithCache() != nullptr) {
+        TLOGI(WmsLogTag::DMS, "display: %{public}" PRIu64 " width: %{public}d, height: %{public}d", displayId,
+            displayMap_[displayId]->GetDisplayInfoWithCache()->GetWidth(),
+            displayMap_[displayId]->GetDisplayInfoWithCache()->GetHeight());
+    }
     return displayMap_[displayId];
 }
 
@@ -843,7 +849,7 @@ sptr<DisplayInfo> DisplayManager::Impl::GetVisibleAreaDisplayInfoById(DisplayId 
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
-    return GetDisplayById(displayId, true);
+    return GetDisplayById(displayId, false);
 }
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId, bool isGetActualInfo)

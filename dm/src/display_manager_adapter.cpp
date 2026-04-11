@@ -1085,7 +1085,7 @@ DMError DisplayManagerAdapter::HasImmersiveWindow(ScreenId screenId, bool& immer
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId)
 {
-    return GetDisplayInfo(displayId, true);
+    return GetDisplayInfo(displayId, false);
 }
 
 sptr<DisplayInfo> DisplayManagerAdapter::GetDisplayInfo(DisplayId displayId, bool isGetActualInfo)

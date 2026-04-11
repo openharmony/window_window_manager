@@ -77,8 +77,7 @@ const std::string ARG_CHANGE_OUTER_CMD = "outer";
 const std::string ANGLE_STR = "angle";
 const std::string HALL_STR = "hall";
 const std::string ARG_SET_LANDSCAPE_LOCK = "-landscapelock";
-const std::string ARG_SET_DURING_CALL_STATE = "-duringcallstate";
-const std::string ARG_SET_DISPLAY_HOOK = "-hidumper";
+const std::string ARG_SET_DURINGCALL_STATE = "-duringcallstate";
 const ScreenId SCREEN_ID_FULL = 0;
 const ScreenId SCREEN_ID_MAIN = 5;
 #ifdef FOLD_ABILITY_ENABLE
@@ -313,12 +312,9 @@ void ScreenSessionDumper::ExecuteInjectCmd2()
         SetSecondaryStatusChange(params_[0]);
     } else if (params_[0].find(ARG_SET_LANDSCAPE_LOCK) != std::string::npos) {
         SetLandscapeLock(params_[0]);
-    } else if (params_[0].find(ARG_SET_DURING_CALL_STATE) != std::string::npos) {
+    } else if (params_[0].find(ARG_SET_DURINGCALL_STATE) != std::string::npos) {
         SetDuringCallState(params_[0]);
-    } else if (params_[0].find(ARG_SET_DISPLAY_HOOK) != std::string::npos) {
-        SetDisplayHookInfo(params_[0]);
     }
-}
 }
 
 void ScreenSessionDumper::DumpEventTracker(EventTracker& tracker)
@@ -399,9 +395,7 @@ void ScreenSessionDumper::ShowHelpInfo()
         .append(" -publishcastevent        ")
         .append("|publish cast event\n")
         .append(" -registerhall        ")
-        .append("|set hall register, 0 to unregister, 1 to register\n")
-        .append(" -hidumper,<uid>,<w>,<h>,<density>,<enable>")
-        .append("|inject hook info by uid, enable: 0 or 1\n");
+        .append("|set hall register, 0 to unregister, 1 to register\n");
 }
 
 void ScreenSessionDumper::ShowAllScreenInfo()
@@ -1383,81 +1377,5 @@ void ScreenSessionDumper::TriggerSecondaryFoldStatus(const std::string &valueStr
     ScreenSessionManager::GetInstance().TriggerFoldStatusChange(static_cast<FoldStatus>(foldStatus));
 }
 #endif
-
-void ScreenSessionDumper::SetDisplayHookInfo(std::string input)
-{
-    std::ostringstream oss;
-    oss << "-------------- DMS DISPLAY HOOK INFO --------------" << std::endl;
-    dumpInfo_.append(oss.str());
-
-    size_t commaPos = input.find(',');
-    if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_DISPLAY_HOOK)) {
-        std::string paramsStr = input.substr(commaPos + 1);
-        std::vector<std::string> paramsVec = WindowHelper::Split(paramsStr, ",");
-        
-        if (paramsVec.size() < 5) {
-            dumpInfo_.append("[error]: insufficient parameters, expected format: -hidumper,<uid>,<width>,<height>,<density>,<enable>\n");
-            return;
-        }
-        
-        if (!IsNumber(paramsVec[0]) || !IsNumber(paramsVec[1]) || !IsNumber(paramsVec[2]) ||
-            !WindowHelper::IsFloatingNumber(paramsVec[3]) || !IsNumber(paramsVec[4])) {
-            dumpInfo_.append("[error]: invalid parameter format\n");
-            return;
-        }
-        
-        int32_t uid = std::stoi(paramsVec[0]);
-        uint32_t width = static_cast<uint32_t>(std::stoi(paramsVec[1]));
-        uint32_t height = static_cast<uint32_t>(std::stoi(paramsVec[2]));
-        float_t density = static_cast<float_t>(std::stof(paramsVec[3]));
-        bool enable = (std::stoi(paramsVec[4]) != 0);
-        
-        DMHookInfo hookInfo;
-        hookInfo.width_ = width;
-        hookInfo.height_ = height;
-        hookInfo.density_ = density;
-        hookInfo.enableHookRotation_ = false;
-        hookInfo.enableHookDisplayOrientation_ = false;
-        
-        ScreenSessionManager::GetInstance().UpdateDisplayHookInfo(uid, enable, hookInfo);
-        
-        std::ostringstream result;
-        result << "[success]: UpdateDisplayHookInfo, uid=" << uid 
-               << ", width=" << width << ", height=" << height 
-               << ", density=" << density << ", enable=" << (enable ? "true" : "false") << std::endl;
-        dumpInfo_.append(result.str());
-        
-        std::vector<DisplayId> displayIds = ScreenSessionManager::GetInstance().GetAllDisplayIds();
-        for (auto displayId : displayIds) {
-            DumpDisplayHookInfo(displayId, uid, enable);
-        }
-    }
-}
-
-void ScreenSessionDumper::DumpDisplayHookInfo(DisplayId displayId, int32_t uid, bool isHookEnabled)
-{
-    std::ostringstream oss;
-    oss << "--- Display ID: " << displayId << " ---" << std::endl;
-    
-    sptr<DisplayInfo> displayInfoWithHook = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId, true);
-    if (displayInfoWithHook != nullptr) {
-        oss << "[WithHook] Width: " << displayInfoWithHook->GetWidth()
-            << ", Height: " << displayInfoWithHook->GetHeight()
-            << ", Density: " << displayInfoWithHook->GetDensity() << std::endl;
-    } else {
-        oss << "[WithHook]: null" << std::endl;
-    }
-    
-    sptr<DisplayInfo> displayInfoWithoutHook = ScreenSessionManager::GetInstance().GetDisplayInfoById(displayId, false);
-    if (displayInfoWithoutHook != nullptr) {
-        oss << "[WithoutHook] Width: " << displayInfoWithoutHook->GetWidth()
-            << ", Height: " << displayInfoWithoutHook->GetHeight()
-            << ", Density: " << displayInfoWithoutHook->GetDensity() << std::endl;
-    } else {
-        oss << "[WithoutHook]: null" << std::endl;
-    }
-    
-    dumpInfo_.append(oss.str());
-}
 } // Rosen
 } // OHOS

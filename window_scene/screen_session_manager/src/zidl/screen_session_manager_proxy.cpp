@@ -2107,7 +2107,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(
 
 sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId)
 {
-    return GetDisplayInfoById(displayId, true);
+    return GetDisplayInfoById(displayId, false);
 }
 
 sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo)

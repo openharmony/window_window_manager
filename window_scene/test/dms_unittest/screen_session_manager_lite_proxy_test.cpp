@@ -150,30 +150,6 @@ HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDisplayInfoById, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetDisplayInfoByIdWithHookRequired
- * @tc.desc: GetDisplayInfoById with isGetActualInfo = true
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDisplayInfoByIdWithHookRequired, TestSize.Level1)
-{
-    DisplayId displayId = 1001;
-    auto res = screenSessionManagerLiteProxy_->GetDisplayInfoById(displayId, true);
-    ASSERT_EQ(nullptr, res);
-}
-
-/**
- * @tc.name: GetDisplayInfoByIdWithHookRequiredFalse
- * @tc.desc: GetDisplayInfoById with isGetActualInfo = false
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerLiteProxyTest, GetDisplayInfoByIdWithHookRequiredFalse, TestSize.Level1)
-{
-    DisplayId displayId = 1001;
-    auto res = screenSessionManagerLiteProxy_->GetDisplayInfoById(displayId, false);
-    ASSERT_EQ(nullptr, res);
-}
-
-/**
  * @tc.name: GetCutoutInfo
  * @tc.desc: GetCutoutInfo
  * @tc.type: FUNC
