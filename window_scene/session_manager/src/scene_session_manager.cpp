@@ -4613,7 +4613,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         AddClientDeathRecipient(sessionStage, newSession);
 
         auto displayId = newSession->GetSessionProperty()->GetDisplayId();
-        sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
+        sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
         renderSession = screenSession ? screenSession->GetRenderSession() : nullptr;
 
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
