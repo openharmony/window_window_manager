@@ -291,7 +291,7 @@ void AniWindow::OnSetPreferredOrientationWithResult(ani_env* env, ani_int orient
     TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] end: winId: %{public}u, result:%{public}d",
         windowToken_->GetWindowId(), static_cast<int32_t>(ret));
     if (ret != WMError::WM_OK) {
-        return AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
     }
 }
 
