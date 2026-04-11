@@ -15879,39 +15879,39 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
     return taskScheduler_->PostSyncTask(task, __func__);
 }
 
+void SceneSessionManager::GetZOrderByWindowInfoOptions(const WindowInfoOptions& option,
+    uint32_t& zOrderForAboveWin, uint32_t& zOrderForBelowWin)
+{
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [_, session] : sceneSessionMap_) {
+        if (session == nullptr) {
+            continue;
+        }
+        if (option.foregroundAboveWindow == session->GetPersistentId()) {
+            zOrderForAboveWin = session->GetZOrder();
+        }
+        if (option.foregroundBelowWindow == session->GetPersistentId()) {
+            zOrderForBelowWin = session->GetZOrder();
+        }
+    }
+}
+
 void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
     std::vector<sptr<SceneSession>>& filteredSessions, const WindowInfoOptions& option)
 {
     uint32_t zOrderForAboveWin = 0;
     uint32_t zOrderForBelowWin = 0;
+    GetZOrderByWindowInfoOptions(option, zOrderForAboveWin, zOrderForBelowWin);
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, session] : sceneSessionMap_) {
             if (session == nullptr) {
                 continue;
             }
-            if (option.foregroundAboveWindow == session->GetPersistentId()) {
-                zOrderForAboveWin = session->GetZOrder();
-            }
-            if (option.foregroundBelowWindow == session->GetPersistentId()) {
-                zOrderForBelowWin = session->GetZOrder();
-            }
-        }
-    }
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& [_, session] : sceneSessionMap_) {
-            if (session == nullptr) {
-                continue;
-            }
-            if (zOrderForAboveWin > 0 && session->GetZOrder() <= zOrderForAboveWin ||
+            if (session->GetSessionGlobalRect().IsInvalid() ||
+                option.excludeSystemWindows && WindowHelper::IsSystemWindow(session->GetWindowType())||
+                zOrderForAboveWin > 0 && session->GetZOrder() <= zOrderForAboveWin ||
                 zOrderForBelowWin > 0 && session->GetZOrder() >= zOrderForBelowWin) {
-                continue;
-            }
-            if (option.excludeSystemWindows && WindowHelper::IsSystemWindow(session->GetWindowType())) {
-                continue;
-            }
-            if (session->GetSessionGlobalRect().IsInvalid()) {
                 continue;
             }
             if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(session->GetSessionProperty()->GetDisplayId()) &&

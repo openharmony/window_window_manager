@@ -386,7 +386,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage001, TestS
 
 /**
  * @tc.name: RecoverScreenWatermarkImage002
- * @tc.desc: test RecoverScreenWatermarkImage when no watermark exists
+ * @tc.desc: test RecoverScreenWatermarkImage with different priorities
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage002, TestSize.Level1)
@@ -396,7 +396,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage002, TestS
     auto oldScreenWatermarkPriority = ssm_->screenWatermarkPriority_;
     ssm_->screenWatermarkBundleName_ = "";
     ssm_->screenWatermarkPriority_ = 0;
-    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 1), WMError::WM_OK);
+    EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 100), WMError::WM_OK);
     ssm_->screenWatermarkBundleName_ = oldScreenWatermarkBundleName;
     ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
 }
@@ -433,6 +433,105 @@ HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage004, TestS
     EXPECT_EQ(ssm_->RecoverScreenWatermarkImage("test.bundle", 100), WMError::WM_OK);
     ssm_->screenWatermarkBundleName_ = oldScreen;
     ssm_->screenWatermarkPriority_ = oldScreenWatermarkPriority;
+}
+
+/**
+ * @tc.name: FilterForGetAllWindowLayoutInfo001
+ * @tc.desc: test FilterForGetAllWindowLayoutInfo with empty sessions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, FilterForGetAllWindowLayoutInfo001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    std::vector<sptr<SceneSession>> filteredSessions;
+    WindowInfoOptions option;
+    ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions, option);
+    EXPECT_EQ(filteredSessions.size(), 0);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+}
+
+/**
+ * @tc.name: FilterForGetAllWindowLayoutInfo002
+ * @tc.desc: test FilterForGetAllWindowLayoutInfo with null session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, FilterForGetAllWindowLayoutInfo002, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_.insert(std::make_pair(1, nullptr));
+    std::vector<sptr<SceneSession>> filteredSessions;
+    WindowInfoOptions option;
+    ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions, option);
+    EXPECT_EQ(filteredSessions.size(), 0);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+}
+
+/**
+ * @tc.name: FilterForGetAllWindowLayoutInfo003
+ * @tc.desc: test FilterForGetAllWindowLayoutInfo with invalid rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, FilterForGetAllWindowLayoutInfo003, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "test.bundle";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetPersistentId(100);
+    ssm_->sceneSessionMap_.insert(std::make_pair(100, sceneSession));
+    std::vector<sptr<SceneSession>> filteredSessions;
+    WindowInfoOptions option;
+    ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions, option);
+    EXPECT_EQ(filteredSessions.size(), 0);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+}
+
+/**
+ * @tc.name: FilterForGetAllWindowLayoutInfo004
+ * @tc.desc: test FilterForGetAllWindowLayoutInfo with invalid session
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, FilterForGetAllWindowLayoutInfo004, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "test.bundle";
+    sessionInfo.isSystem_ = false;
+    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    sceneSession->property_->SetPersistentId(100);
+    sceneSession->persistentId_ = 100;
+    WSRect rect = {0, 0, 100, 100};
+    sceneSession->SetSessionRect(rect);
+    sceneSession->SetSessionGlobalRect(rect);
+    sceneSession->SetZOrder(100);
+    ssm_->sceneSessionMap_.insert(std::make_pair(100, sceneSession));
+    std::vector<sptr<SceneSession>> filteredSessions;
+    WindowInfoOptions option;
+    option.excludeSystemWindows = true;
+    ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions, option);
+    EXPECT_EQ(filteredSessions.size(), 0);
+    option.excludeSystemWindows = false;
+    option.foregroundAboveWindow = 100;
+    ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions, option);
+    EXPECT_EQ(filteredSessions.size(), 0);
+    option.foregroundAboveWindow = 10;
+    option.foregroundBelowWindow = 100;
+    ssm_->FilterForGetAllWindowLayoutInfo(DEFAULT_DISPLAY_ID, false, filteredSessions, option);
+    EXPECT_EQ(filteredSessions.size(), 0);
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
 }
 } // namespace
 } // namespace Rosen
