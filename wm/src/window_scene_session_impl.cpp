@@ -3121,7 +3121,7 @@ WMError WindowSceneSessionImpl::RaiseAboveTarget(int32_t subWindowId)
         return WMError::WM_OK;
     }
     if (IsLoosenedWithPcOrFreeMultiMode() ||
-        (*targetWindow)->IsLoosenedWithPcOrFreeMultiMode()) {
+        (*targetWindow)->IsZLevelAboveParentLoosened()) {
         TLOGI(WmsLogTag::WMS_HIERARCHY, "source window or target window is loosened");
         return WMError::WM_OK;
     }
@@ -7777,9 +7777,9 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    WMError ret = ValidateWindowAnchorInfo(windowAnchorInfo);
-    if (ret != WMError::WM_OK) {
-        return ret;
+    WMError retValide = ValidateWindowAnchorInfo(windowAnchorInfo);
+    if (retValide != WMError::WM_OK) {
+        return retValide;
     }
     auto hostSession = GetHostSession();
     if (!hostSession) {
@@ -7791,7 +7791,7 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (ret == WSError::WS_OK) {
-        property->SetWindowAnchorInfo(windowAnchorInfo);
+        GetProperty()->SetWindowAnchorInfo(windowAnchorInfo);
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
