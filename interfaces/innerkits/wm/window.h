@@ -180,7 +180,7 @@ public:
      *
      * @param isWindowSceneListener Whether is window listener.
      */
-    void SetIsWindowSceneListener(bool isWindowSceneListener) 
+    void SetIsWindowSceneListener(bool isWindowSceneListener)
     {
         isWindowSceneListener_ = isWindowSceneListener;
     }
@@ -188,7 +188,7 @@ public:
     /**
      * @brief Whether is window listener.
      */
-    bool IsWindowSceneListener() 
+    bool IsWindowSceneListener()
     {
         return isWindowSceneListener_;
     }
