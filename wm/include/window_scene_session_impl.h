@@ -81,6 +81,7 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) override;
 
     /*
      * Window Hierarchy

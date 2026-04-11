@@ -341,6 +341,13 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetPcAppInpadSpecificSystemBarInvisible(reply.ReadBool());
         property->SetPcAppInpadOrientationLandscape(reply.ReadBool());
         property->SetMobileAppInPadLayoutFullScreen(reply.ReadBool());
+        property->SetForceSplitEnable(reply.ReadBool());
+        sptr<HookWindowInfo> hookWindowInfo = reply.ReadParcelable<HookWindowInfo>();
+        if (hookWindowInfo == nullptr) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "read hookWindowInfo is nullptr!");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        property->SetHookWindowInfo(*hookWindowInfo);
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
         property->SetUseControlState(reply.ReadBool());
         property->SetAncoRealBundleName(reply.ReadString());

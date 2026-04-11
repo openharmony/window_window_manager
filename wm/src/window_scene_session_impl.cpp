@@ -8113,7 +8113,7 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool 
     bool enableForceSplit = false;
     if (WindowHelper::IsMainWindow(winType) &&
         GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport, selectMode);
+        // SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport, selectMode);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
@@ -8186,11 +8186,7 @@ WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()
         return WSError::WS_DO_NOTHING;
     }
 
-    HookWindowInfo hookWindowInfo{};
-    if (GetAppHookWindowInfoFromServer(hookWindowInfo) != WMError::WM_OK) {
-        return WSError::WS_DO_NOTHING;
-    }
-
+    HookWindowInfo hookWindowInfo = property_->GetHookWindowInfo();
     SetAppHookWindowInfo(hookWindowInfo);
     return WSError::WS_OK;
 }
@@ -8203,6 +8199,18 @@ WSError WindowSceneSessionImpl::UpdateAppHookWindowInfo(const HookWindowInfo& ho
         return WSError::WS_DO_NOTHING;
     }
     SetAppHookWindowInfo(hookWindowInfo);
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport,
+    SelectMode selectMode)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT "in");
+    WindowType winType = GetType();
+    if (!WindowHelper::IsMainWindow(winType)) {
+        return WSError::WS_DO_NOTHING;
+    }
+    SetForceSplitConfigEnable(isForceSplitEnabled, needUpdateViewport, selectMode);
     return WSError::WS_OK;
 }
 

@@ -286,6 +286,8 @@ private:
     static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     static napi_value NotifyOrientationExecutionResult(napi_env env, napi_callback_info info);
+    static napi_value SetForceSplitEnable(napi_env env, napi_callback_info info);
+    static napi_value UpdateHookWindowInfo(napi_env env, napi_callback_info info);
     static napi_value GetSceneNodeCount(napi_env env, napi_callback_info info);
     static napi_value NotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
     /*
@@ -393,6 +395,8 @@ private:
     napi_value OnGetUid(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
     napi_value OnNotifyOrientationExecutionResult(napi_env env, napi_callback_info info);
+    napi_value OnSetForceSplitEnable(napi_env env, napi_callback_info info);
+    napi_value OnUpdateHookWindowInfo(napi_env env, napi_callback_info info);
     napi_value OnGetSceneNodeCount(napi_env env, napi_callback_info info);
     napi_value OnNotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
 

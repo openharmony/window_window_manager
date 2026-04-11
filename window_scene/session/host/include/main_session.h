@@ -93,6 +93,8 @@ public:
     void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
     WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WSError UpdateHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) override;
     WMError NotifySplitRatioChanged(float newRatio) override;
 
     /*
