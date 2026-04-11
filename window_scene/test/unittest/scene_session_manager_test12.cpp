@@ -3434,7 +3434,7 @@ HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh01, Function | S
  * @tc.desc: test function : CheckBrokeNotAliveAndRefresh_02
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh02, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh02, TestSize.Level1)
 {
     auto ssm = sptr<SceneSessionManager>::MakeSptr();
     SessionInfo info;
@@ -3446,6 +3446,14 @@ HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh02, Function | S
     MockCollaboratorDllManager::MockPreHandleStartAbility(-1);
     EXPECT_TRUE(ssm->CheckBrokeNotAliveAndRefresh(info));
     EXPECT_EQ(info.callerTypeForAnco, -1);
+
+    MockCollaboratorDllManager::MockPreHandleStartAbility(1);
+    EXPECT_TRUE(ssm->CheckBrokeNotAliveAndRefresh(info));
+    EXPECT_EQ(info.callerTypeForAnco, 1);
+
+    MockCollaboratorDllManager::MockPreHandleStartAbility(2);
+    EXPECT_FALSE(ssm->CheckBrokeNotAliveAndRefresh(info));
+    EXPECT_EQ(info.callerTypeForAnco, 2);
  
     MockCollaboratorDllManager::MockPreHandleStartAbility(0);
 }
