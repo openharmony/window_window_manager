@@ -612,10 +612,10 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::UpdateSceneAnimationConfig);
     BindNativeFunction(env, objValue, "setMobileAppInPadLayoutFullScreen",
         moduleName, JsSceneSession::SetMobileAppInPadLayoutFullScreen);
-    BindNativeFunction(env, objValue, "notifyOrientationExecutionResult", moduleName,
-        JsSceneSession::NotifyOrientationExecutionResult);
     BindNativeFunction(env, objValue, "setForceSplitEnable", moduleName, JsSceneSession::SetForceSplitEnable);
     BindNativeFunction(env, objValue, "updateHookWindowInfo", moduleName, JsSceneSession::UpdateHookWindowInfo);
+    BindNativeFunction(env, objValue, "notifyOrientationExecutionResult", moduleName,
+        JsSceneSession::NotifyOrientationExecutionResult);
     BindNativeFunction(env, objValue, "getSceneNodeCount", moduleName,
         JsSceneSession::GetSceneNodeCount);
     BindNativeFunction(env, objValue, "notifyPreCalcWindowProperty", moduleName,
@@ -7341,7 +7341,7 @@ napi_value JsSceneSession::OnUpdateHookWindowInfo(napi_env env, napi_callback_in
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
+                                      "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
 
@@ -7349,7 +7349,7 @@ napi_value JsSceneSession::OnUpdateHookWindowInfo(napi_env env, napi_callback_in
     if (!ConvertHookWindowInfoFromJs(env, argv[ARG_INDEX_0], hookWindowInfo)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Failed to convert parameter to hookWindowInfo");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-            "Input parameter is missing or invalid"));
+                                      "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     auto session = weakSession_.promote();

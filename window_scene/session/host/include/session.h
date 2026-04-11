@@ -589,7 +589,7 @@ public:
     WSError SetPcAppInpadSpecificSystemBarInvisible(bool isPcAppInpadSpecificSystemBarInvisible);
     WSError SetPcAppInpadOrientationLandscape(bool isPcAppInpadOrientationLandscape);
     WSError SetMobileAppInPadLayoutFullScreen(bool isMobileAppInPadLayoutFullScreen);
-    virtual WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode);
+    virtual WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode)
         { return WSError::WS_OK; }
     bool NeedNotify() const;
     void SetNeedNotify(bool needNotify);

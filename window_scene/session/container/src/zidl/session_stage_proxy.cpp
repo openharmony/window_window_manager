@@ -2560,7 +2560,7 @@ WSError SessionStageProxy::UpdateAppHookWindowInfo(const HookWindowInfo& hookWin
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::SetForceSplitEnable(bool isForceSplitEnable, bool needUpdateViewport, SelectMode selectMode)
+WSError SessionStageProxy::SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode)
 {
     MessageParcel data;
     MessageParcel reply;

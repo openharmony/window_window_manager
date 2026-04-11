@@ -726,7 +726,7 @@ WSError MainSession::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInf
 WSError MainSession::UpdateHookWindowInfo(const HookWindowInfo& hookWindowInfo)
 {
     if (hookWindowInfo.widthHookRatio < 0.0f) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid hook window parameters: widthHookRatio:%{public}f"
+        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid hook window parameters: widthHookRatio:%{public}f",
             hookWindowInfo.widthHookRatio);
         return WSError::WS_ERROR_INVALID_PARAM;
     }

@@ -8205,9 +8205,9 @@ WSError WindowSceneSessionImpl::UpdateAppHookWindowInfo(const HookWindowInfo& ho
 WSError WindowSceneSessionImpl::SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport,
     SelectMode selectMode)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT "in");
-    WindowType winType = GetType();
-    if (!WindowHelper::IsMainWindow(winType)) {
+    TLOGI(WmsLogTag::WMS_COMPAT, "in");
+    const WindowType windowType = GetType();
+    if (!WindowHelper::IsMainWindow(windowType)) {
         return WSError::WS_DO_NOTHING;
     }
     SetForceSplitConfigEnable(isForceSplitEnabled, needUpdateViewport, selectMode);
