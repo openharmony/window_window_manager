@@ -121,7 +121,7 @@ public:
                             float translateY);
     bool OnExtendDisplayNodeChange(ScreenId firstId, ScreenId secondId) override;
     bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
-        const std::string& name, bool isExtend) override;
+        const std::string& name, sptr<IRemoteObject> renderSession, bool isExtend) override;
     bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId, ScreenId extendRSId) override;
     void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) override;
@@ -150,6 +150,7 @@ public:
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector(ScreenId screenId);
     std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);
+    sptr<IRemoteObject> GetRenderSessionToken();
     bool GetSupportsFocus(DisplayId displayId);
 
 protected:

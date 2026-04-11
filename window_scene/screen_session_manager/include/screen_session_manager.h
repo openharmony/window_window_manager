@@ -128,6 +128,7 @@ public:
     std::vector<uint64_t> FilterMissionIdsBySurfaceNodeIds(const std::vector<uint64_t>& missionIds,
         const std::vector<uint64_t>& surfaceNodeIds);
     void SetVirtualScreenUser(sptr<ScreenSession> screenSession, int32_t userId);
+    ScreenId GetAssociatedScreenId();
     virtual DMError SetVirtualScreenSurface(ScreenId screenId, sptr<IBufferProducer> surface) override;
     DMError AddVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
     DMError RemoveVirtualScreenBlockList(const std::vector<int32_t>& persistentIds) override;
@@ -211,7 +212,8 @@ public:
         bool isCaptureFullOfScreen = false, const std::vector<NodeId>& surfaceNodesList = {},
         SnapshotScaleInfo scaleInfo = { DEFAULT_SNAPSHOT_SCALE, DEFAULT_SNAPSHOT_SCALE, {} });
 
-    sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option);
+    sptr<ScreenSession> InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId, VirtualScreenOption option,
+        ScreenId associatedScreenId);
     sptr<ScreenSession> InitAndGetScreen(ScreenId rsScreenId);
     bool InitAbstractScreenModesInfo(sptr<ScreenSession>& absScreen);
     std::vector<ScreenId> GetAllValidScreenIds(const std::vector<ScreenId>& screenIds) const;
@@ -490,10 +492,11 @@ public:
         const std::string& secondaryScreenMode);
     void SwitchScrollParam(FoldDisplayMode displayMode);
     void OnScreenChange(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
+        ScreenChangeReason reason = ScreenChangeReason::DEFAULT, sptr<IRemoteObject> connectToRenderToken = nullptr);
     void OnScreenChangeInner(ScreenId screenId, ScreenEvent screenEvent,
-        ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
-    virtual void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
+        ScreenChangeReason reason = ScreenChangeReason::DEFAULT, sptr<IRemoteObject> connectToRenderToken = nullptr);
+    virtual void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason,
+        sptr<IRemoteObject> connectToRenderToken = nullptr);
     void OnFoldScreenChange(sptr<ScreenSession>& screenSession);
     void OnFoldStatusChange(bool isSwitching);
     void SetCoordinationFlag(bool isCoordinationFlag);
@@ -550,7 +553,7 @@ public:
 
     sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId) const;
     virtual sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId,
-        ScreenId defScreenId, ScreenProperty property);
+        ScreenId defScreenId, ScreenProperty property, sptr<IRemoteObject> connectToRenderToken);
     sptr<ScreenSession> GetScreenSessionByRsId(ScreenId rsScreenId);
     void NotifyExtendScreenCreateFinish() override;
     void NotifyExtendScreenDestroyFinish() override;
@@ -667,14 +670,16 @@ protected:
     ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
     EventTracker screenEventTracker_;
     sptr<ScreenSession> GetInternalScreenSession();
-    sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
-    sptr<ScreenSession> GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property);
+    sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property,
+        sptr<IRemoteObject> connectToRenderToken);
+    sptr<ScreenSession> GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property,
+        sptr<IRemoteObject> connectToRenderToken);
     virtual void NotifyCaptureStatusChangedGlobal();
     std::mutex screenChangeMutex_;
     std::mutex hasPrivateWindowForegroundMutex_;
-    sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
+    sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId, sptr<IRemoteObject> connectToRenderToken);
     void AdaptSuperHorizonalBoot(sptr<ScreenSession> screenSession, ScreenId screenId);
-    sptr<ScreenSession> GetOrCreatePhysicalScreenSession(ScreenId screenId);
+    sptr<ScreenSession> GetOrCreatePhysicalScreenSession(ScreenId screenId, sptr<IRemoteObject> connectToRenderToken);
     void DestroyExtendVirtualScreen();
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
@@ -726,7 +731,8 @@ private:
     bool HasExtendVirtualScreen();
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
-        ScreenProperty property);
+        ScreenProperty property, sptr<IRemoteObject> connectToRenderToken);
+    std::shared_ptr<RSUIContext> GetRsUIContextByScreenId(ScreenId screenId);
 
     /* physical screen session */
     sptr<ScreenSession> CreateFakePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
