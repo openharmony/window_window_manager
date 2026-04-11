@@ -647,6 +647,8 @@ ColorSpace WindowSessionImpl::GetColorSpace()
 WMError WindowSessionImpl::WindowSessionCreateCheck()
 {
     if (vsyncStation_ == nullptr || !vsyncStation_->IsVsyncReceiverCreated()) {
+        RecordLifeCycleExceptionEvent(WMError::WM_ERROR_NULLPTR,
+            WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "vsync station inner error");
         return WMError::WM_ERROR_NULLPTR;
     }
     const auto& name = property_->GetWindowName();
@@ -654,6 +656,8 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
     // check window name, same window names are forbidden
     if (windowSessionMap_.find(name) != windowSessionMap_.end()) {
         WLOGFE("WindowName(%{public}s) already exists.", name.c_str());
+        RecordLifeCycleExceptionEvent(WMError::WM_ERROR_REPEAT_OPERATION,
+            WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "window with the name already exists");
         return WMError::WM_ERROR_REPEAT_OPERATION;
     }
 
@@ -664,7 +668,9 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
             if (item.second.second && item.second.second->property_ &&
                 item.second.second->property_->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT_CAMERA) {
                     WLOGFE("Camera floating window is already exists.");
-                return WMError::WM_ERROR_REPEAT_OPERATION;
+                    RecordLifeCycleExceptionEvent(WMError::WM_ERROR_REPEAT_OPERATION,
+                        WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "camera floating window already exists");
+                    return WMError::WM_ERROR_REPEAT_OPERATION;
             }
         }
         uint32_t accessTokenId = static_cast<uint32_t>(IPCSkeleton::GetCallingTokenID());
@@ -672,6 +678,34 @@ WMError WindowSessionImpl::WindowSessionCreateCheck()
         TLOGI(WmsLogTag::DEFAULT, "Create camera float window, TokenId=%{private}u", accessTokenId);
     }
     return WMError::WM_OK;
+}
+
+void WindowSessionImpl::RecordLifeCycleExceptionEvent(WMError retCode,
+                                                      WMErrorReason errCode,
+                                                      const std::string& reason) const
+{
+    if (retCode == WMError::WM_OK) {
+        return;
+    }
+    std::ostringstream oss;
+    oss << "life cycle is abnormal: " << "bundleName: " << SysCapUtil::GetBundleName().c_str()
+        << ", windowName: " << GetWindowName().c_str()
+        << ", windowType: " << static_cast<int32_t>(GetType())
+        << ", errCode: " << static_cast<int32_t>(errCode)
+        << ", reason: " << reason.c_str()
+        << ", retCode: " << static_cast<int32_t>(retCode) << ";";
+    std::string info = oss.str();
+    TLOGI(WmsLogTag::WMS_LIFE, "window life cycle exception: %{public}s", info.c_str());
+    int32_t ret = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_LIFE_CYCLE_EXCEPTION",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", getpid(),
+        "UID", getuid(),
+        "MSG", info);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "write HiSysEvent error, ret:%{public}d", ret);
+    }
 }
 
 void WindowSessionImpl::SetDefaultDisplayIdIfNeed()
@@ -4872,6 +4906,7 @@ void WindowSessionImpl::RecoverSessionListener()
 template<typename T>
 EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSessionImpl::GetListeners()
 {
+    std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto iter = lifecycleListeners_.find(GetPersistentId());
     if (iter == lifecycleListeners_.end()) {
         return std::vector<sptr<IWindowLifeCycle>>();
@@ -4886,6 +4921,7 @@ EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSes
 template<typename T>
 EnableIfSame<T, IWindowStageLifeCycle, std::vector<sptr<IWindowStageLifeCycle>>> WindowSessionImpl::GetListeners()
 {
+    std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
     std::vector<sptr<IWindowStageLifeCycle>> windowStageLifecycleListeners;
     for (auto& listener : windowStageLifecycleListeners_[GetPersistentId()]) {
         windowStageLifecycleListeners.push_back(listener);
