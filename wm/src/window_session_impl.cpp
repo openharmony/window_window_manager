@@ -687,7 +687,7 @@ void WindowSessionImpl::RecordLifeCycleExceptionEvent(WMError retCode,
         return;
     }
     std::ostringstream oss;
-    oss << "life cycle is abnormal: " << "bundleName: " << GetBundleName().c_str()
+    oss << "life cycle is abnormal: " << "bundleName: " << SysCapUtil::GetBundleName().c_str()
         << ", windowName: " << GetWindowName().c_str()
         << ", windowType: " << static_cast<int32_t>(GetType())
         << ", errCode: " << static_cast<int32_t>(errCode)
