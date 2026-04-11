@@ -1511,7 +1511,7 @@ struct WindowDisplayInfo : public Parcelable {
 /**
  * @struct WindowInfoOptions
  *
- * @brief Options for getting window info.
+ * @brief Layout info for all windows on the screen.
  */
 struct WindowInfoOptions {
     bool excludeSystemWindows = false;
