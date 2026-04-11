@@ -89,6 +89,7 @@
 #ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DSOFTBUS
 #include "softbus_bus_center.h"
 #endif
+#include "rosen_text/text_config.h"
 #include "user_switch_reporter.h"
 #include "window_helper.h"
 #include "xcollie/watchdog.h"
@@ -525,6 +526,9 @@ void SceneSessionManager::Init()
     #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
         SubscribePowerManagerServiceSa();
     #endif
+
+    // Initialize locale indexing configuration
+    OHOS::Rosen::TextConfig::SetLocaleTextBreakEnabled(true);
 }
 
 void SceneSessionManager::RegisterBrightnessDataChangeListener()
