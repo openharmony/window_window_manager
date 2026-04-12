@@ -2500,8 +2500,14 @@ sptr<DisplayInfo> ScreenSessionManager::GetDefaultDisplayInfo(int32_t userId)
 
 sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
 {
+    return GetDisplayInfoById(displayId, false);
+}
+
+sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo)
+{
     TLOGD(WmsLogTag::DMS, "enter, displayId: %{public}" PRIu64" ", displayId);
     std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    
     for (auto sessionIt : screenSessionMap_) {
         auto screenSession = sessionIt.second;
         if (screenSession == nullptr) {
@@ -2509,42 +2515,51 @@ sptr<DisplayInfo> ScreenSessionManager::GetDisplayInfoById(DisplayId displayId)
                 sessionIt.first);
             continue;
         }
-        sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
-        if (displayInfo == nullptr) {
-            TLOGNFI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
-            continue;
-        }
-        HandleRotationCorrectionExemption(displayInfo);
-        if (displayId == displayInfo->GetDisplayId()) {
+
+        sptr<DisplayInfo> displayInfo = FindDisplayInfoInSession(screenSession, displayId, isGetActualInfo);
+        if (displayInfo != nullptr) {
             TLOGD(WmsLogTag::DMS, "success");
-            displayInfo = HookDisplayInfoByUid(displayInfo, screenSession);
             return displayInfo;
         }
+
         if (!FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
             continue;
         }
         if (!screenSession->GetScreenProperty().GetIsFakeInUse()) {
             continue;
         }
-        sptr<ScreenSession> fakeScreenSession = screenSession->GetFakeScreenSession();
-        if (fakeScreenSession == nullptr) {
-            TLOGNFE(WmsLogTag::DMS, "error, fakeScreenSession is nullptr.");
-            continue;
-        }
-        sptr<DisplayInfo> fakeDisplayInfo = fakeScreenSession->ConvertToDisplayInfo();
-        if (fakeDisplayInfo == nullptr) {
-            TLOGNFE(WmsLogTag::DMS, "error, fakeDisplayInfo is nullptr.");
-            continue;
-        }
-        HandleRotationCorrectionExemption(fakeDisplayInfo);
-        fakeDisplayInfo = HookDisplayInfoByUid(fakeDisplayInfo, fakeScreenSession);
-        DisplayId fakeDisplayId = fakeDisplayInfo->GetDisplayId();
-        if (displayId == fakeDisplayId) {
+        sptr<DisplayInfo> fakeDisplayInfo = FindDisplayInfoInSession(screenSession->GetFakeScreenSession(),
+            displayId, isGetActualInfo);
+        if (fakeDisplayInfo != nullptr) {
             TLOGD(WmsLogTag::DMS, "find fake success");
             return fakeDisplayInfo;
         }
     }
+    
     TLOGNFE(WmsLogTag::DMS, "failed. displayId: %{public}" PRIu64" ", displayId);
+    return nullptr;
+}
+
+sptr<DisplayInfo> ScreenSessionManager::FindDisplayInfoInSession(const sptr<ScreenSession>& screenSession, DisplayId displayId, bool isGetActualInfo)
+{
+    if (screenSession == nullptr) {
+        return nullptr;
+    }
+
+    sptr<DisplayInfo> displayInfo = screenSession->ConvertToDisplayInfo();
+    if (displayInfo == nullptr) {
+        TLOGNFI(WmsLogTag::DMS, "ConvertToDisplayInfo error, displayInfo is nullptr.");
+        return nullptr;
+    }
+
+    HandleRotationCorrectionExemption(displayInfo);
+    if (displayId == displayInfo->GetDisplayId()) {
+        if (!isGetActualInfo) {
+            return HookDisplayInfoByUid(displayInfo, screenSession);
+        }
+        return displayInfo;
+    }
+
     return nullptr;
 }
 
