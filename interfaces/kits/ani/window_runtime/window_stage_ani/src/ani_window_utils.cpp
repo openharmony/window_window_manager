@@ -861,7 +861,7 @@ ani_object AniWindowUtils::CreateAniWindowInfo(ani_env* env, const WindowVisibil
     CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("globalDisplayRect").c_str(), nullptr,
         CreateAniRect(env, info.GetGlobalDisplayRect()));
     CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("globalRect").c_str(), nullptr,
-    CreateAniRect(env, info.GetGlobalRect()));
+        CreateAniRect(env, info.GetGlobalRect()));
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] WindowInfo displayId before set: %{public}" PRIu64, info.GetDisplayId());
     ani_object aniDisplayId = CreateBaseTypeObject<long>(env, info.GetDisplayId());
     CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("displayId").c_str(), nullptr, aniDisplayId);
