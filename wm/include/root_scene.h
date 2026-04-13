@@ -17,7 +17,6 @@
 #define OHOS_ROSEN_ROOT_SCENE_H
 
 #include <mutex>
-#include <transaction/rs_interfaces.h>
 
 #include "vsync_station.h"
 #include "window.h"
@@ -155,7 +154,6 @@ public:
      */
     std::shared_ptr<RSUIDirector> GetRSUIDirector() const override;
     std::shared_ptr<RSUIContext> GetRSUIContext() const override;
-    std::shared_ptr<RSRenderInterface> GetRSRenderInterface();
 
 private:
     void RegisterInputEventListener();
