@@ -3003,7 +3003,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
-                const AvoidArea& avoidArea, int32_t sessionBottom, bool isLSState) {
+            const AvoidArea& avoidArea, int32_t sessionBottom, bool isLSState) {
             return CheckAvoidAreaForAINavigationBar(
                 isAINavigationBarVisible_[displayId], avoidArea, sessionBottom, isLSState);
         });
