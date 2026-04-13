@@ -248,6 +248,7 @@ const std::vector<std::string> g_syncGlobalPositionPermission {
 } // namespace
 
 std::map<int32_t, napi_ref> JsSceneSession::jsSceneSessionMap_;
+napi_ref JsSceneSession::jsSceneSessionProtoRef_ = nullptr;
 
 napi_value CreateJsPiPControlStatusObject(napi_env env, PiPControlStatusInfo controlStatusInfo)
 {
@@ -484,22 +485,76 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
             CreateJsValue(env, static_cast<int32_t>(SPECIFIC_ZINDEX_INVALID)));
         TLOGE(WmsLogTag::WMS_LIFE, "sessionProperty is nullptr!");
     }
-    const char* moduleName = "JsSceneSession";
-    BindNativeMethod(env, objValue, moduleName);
-    BindNativeMethodForKeyboard(env, objValue, moduleName);
-    BindNativeMethodForCompatiblePcMode(env, objValue, moduleName);
-    BindNativeMethodForPcAppInPadNormal(env, objValue, moduleName);
-    BindNativeMethodForSCBSystemSession(env, objValue, moduleName);
-    BindNativeMethodForFocus(env, objValue, moduleName);
-    BindNativeMethodForWaterfall(env, objValue, moduleName);
-    napi_ref jsRef = nullptr;
-    napi_status status = napi_create_reference(env, objValue, 1, &jsRef);
+    napi_status status = BindJsSceneSessionProto(env, objValue);
     if (status != napi_ok) {
-        WLOGFE("get ref failed");
+        return NapiGetUndefined(env);
+    }
+    napi_ref jsRef = nullptr;
+    status = napi_create_reference(env, objValue, 1, &jsRef);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DEFAULT, "get ref failed");
     }
     jsSceneSessionMap_[session->GetPersistentId()] = jsRef;
-    BindNativeFunction(env, objValue, "updateSizeChangeReason", moduleName, JsSceneSession::UpdateSizeChangeReason);
     return objValue;
+}
+
+napi_status JsSceneSession::BindJsSceneSessionProto(napi_env env, napi_value& objValue)
+{
+    napi_value protoKey;
+    napi_status status = napi_create_string_utf8(env, "__proto__", NAPI_AUTO_LENGTH, &protoKey);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DEFAULT, "create proto string failed");
+        return status;
+    }
+    napi_value protoObject;
+    status = GetJsSceneSessionProto(env, protoObject);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DEFAULT, "get or create proto failed");
+        return status;
+    }
+    status = napi_set_property(env, objValue, protoKey, protoObject);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::DEFAULT, "set proto failed");
+        return status;
+    }
+    return status;
+}
+
+napi_status JsSceneSession::GetJsSceneSessionProto(napi_env env, napi_value& proto)
+{
+    // Create Proto separately when called from a non-main thread.
+    auto nativeEngine = reinterpret_cast<NativeEngine*>(env);
+    if (!nativeEngine->IsMainThread()) {
+        TLOGI(WmsLogTag::DEFAULT, "No main thread call");
+        return CreateProtoAndBindNativeMethod(env, proto, "JsSceneSessionProto");
+    }
+    // Create and save Proto when called from main thread.
+    if (jsSceneSessionProtoRef_ != nullptr) {
+        return napi_get_reference_value(env, jsSceneSessionProtoRef_, &proto);
+    }
+    napi_status status = CreateProtoAndBindNativeMethod(env, proto, "JsSceneSessionProto");
+    if (status != napi_ok) {
+        return status;
+    }
+    return napi_create_reference(env, proto, 1, &jsSceneSessionProtoRef_);
+}
+
+napi_status JsSceneSession::CreateProtoAndBindNativeMethod(napi_env env, napi_value& proto, const char* moduleName)
+{
+    napi_status status = napi_create_object(env, &proto);
+    if (status != napi_ok || proto == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "proto is null");
+        return napi_object_expected;
+    }
+    BindNativeMethod(env, proto, moduleName);
+    BindNativeMethodForKeyboard(env, proto, moduleName);
+    BindNativeMethodForCompatiblePcMode(env, proto, moduleName);
+    BindNativeMethodForPcAppInPadNormal(env, proto, moduleName);
+    BindNativeMethodForSCBSystemSession(env, proto, moduleName);
+    BindNativeMethodForFocus(env, proto, moduleName);
+    BindNativeMethodForWaterfall(env, proto, moduleName);
+    BindNativeFunction(env, proto, "updateSizeChangeReason", moduleName, JsSceneSession::UpdateSizeChangeReason);
+    return status;
 }
 
 void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName)
@@ -1087,7 +1142,7 @@ void JsSceneSession::ProcessUseImplicitAnimationChangeRegister()
     });
     TLOGD(WmsLogTag::WMS_PC, "Register success, persistent id %{public}d", persistentId_);
 }
- 
+
 void JsSceneSession::OnUseImplicitAnimationChange(bool useImplicit)
 {
     const char* const funcName = __func__;
@@ -3504,7 +3559,7 @@ napi_value JsSceneSession::OnClearAllModifiers(napi_env env, napi_callback_info 
     TLOGD(WmsLogTag::WMS_RECOVER, "end");
     return NapiGetUndefined(env);
 }
- 
+
 napi_value JsSceneSession::OnUpdatePropertyWhenTriggerMode(napi_env env, napi_callback_info info)
 {
     auto session = weakSession_.promote();
@@ -5180,12 +5235,12 @@ napi_value JsSceneSession::CreateSessionInfosNapiValue(
 {
     napi_value arrayValue = nullptr;
     napi_create_array_with_length(env, sessionInfos.size(), &arrayValue);
- 
+
     if (arrayValue == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
         return NapiGetUndefined(env);
     }
- 
+
     int32_t index = 0;
     for (const auto& sessionInfo : sessionInfos) {
         napi_value objValue = nullptr;
@@ -5220,7 +5275,7 @@ napi_value JsSceneSession::CreatePendingInfosNapiValue(napi_env env,
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to create napi array");
         return NapiGetUndefined(env);
     }
- 
+
     int32_t index = 0;
     for (size_t i = 0; i < sessionInfos.size(); i++) {
         napi_value objValue = nullptr;
@@ -5233,7 +5288,7 @@ napi_value JsSceneSession::CreatePendingInfosNapiValue(napi_env env,
     }
     return arrayValue;
 }
- 
+
 void JsSceneSession::BatchPendingSessionsActivation(const std::vector<std::shared_ptr<SessionInfo>>& sessionInfos,
     const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)
 {
@@ -6491,7 +6546,7 @@ napi_value JsSceneSession::OnSendFbActionEvent(napi_env env, napi_callback_info 
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
- 
+
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "session is nullptr, id:%{public}d", persistentId_);
@@ -9263,7 +9318,7 @@ void JsSceneSession::ProcessRotationLockChangeRegister()
         jsSceneSession->OnRotationLockChange(locked);
     });
 }
- 
+
 void JsSceneSession::OnRotationLockChange(bool locked)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "rotation lock change to: %{public}d", locked);

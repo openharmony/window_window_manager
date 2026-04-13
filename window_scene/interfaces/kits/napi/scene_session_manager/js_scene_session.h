@@ -611,6 +611,10 @@ private:
     std::shared_ptr<NativeReference> GetJSCallback(const std::string& functionName);
     void ClearCbMap();
 
+    static napi_status BindJsSceneSessionProto(napi_env env, napi_value& objValue);
+    static napi_status GetJsSceneSessionProto(napi_env env, napi_value& proto);
+    static napi_status CreateProtoAndBindNativeMethod(napi_env env, napi_value& proto, const char* moduleName);
+
     napi_env env_;
     wptr<SceneSession> weakSession_ = nullptr;
     int32_t persistentId_ = -1;
@@ -619,6 +623,7 @@ private:
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
     std::atomic<bool> executionResultFinish_ = true;
+    static napi_ref jsSceneSessionProtoRef_;
 };
 } // namespace OHOS::Rosen
 
