@@ -488,7 +488,7 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
         waitTimes++;
         windowId = GetFbWindowId();
     }
-    TLOGND(WmsLogTag::WMS_SYSTEM, "waitTimes: %{public}d, mode: %{public}u", waitTimes, windowId);
+    TLOGNI(WmsLogTag::WMS_SYSTEM, "waitTimes: %{public}d, mode: %{public}u", waitTimes, windowId);
     return WMError::WM_OK;
 }
 
