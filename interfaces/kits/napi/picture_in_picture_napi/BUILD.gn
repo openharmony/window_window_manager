@@ -19,7 +19,7 @@ config("pip_config") {
   include_dirs = [ "../../../../wm/include" ]
 }
 
-ohos_shared_library("pipwindow_napi") {
+ohos_shared_library("pipwindow_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -33,6 +33,51 @@ ohos_shared_library("pipwindow_napi") {
     "js_pip_utils.cpp",
     "js_pip_window_listener.cpp",
     "js_pip_window_manager.cpp",
+  ]
+
+  configs = [
+    ":pip_config",
+    "../../../../resources/config/build:coverage_flags",
+  ]
+
+  deps = [
+    "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
+    "../../../../wm:libwm",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
+    "ace_engine:ace_uicontent",
+    "ace_engine:ace_xcomponent_controller",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
+}
+
+ohos_shared_library("pipwindow_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+    cfi_policy = "adaptive"
+  }
+  sources = [
     "js_pipwindow_module.cpp",
   ]
 
@@ -42,6 +87,7 @@ ohos_shared_library("pipwindow_napi") {
   ]
 
   deps = [
+    ":pipwindow_kit",
     "../../../../utils:libwmutil",
     "../../../../utils:libwmutil_base",
     "../../../../wm:libwm",
