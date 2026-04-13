@@ -65,7 +65,9 @@ void AniExtensionWindow::Finalizer(ani_env* env, ani_long nativeObj)
             delete obj->second;
             localObjs.erase(obj);
         }
-        env->GlobalReference_Delete(extensionWindow->GetAniRef());
+        if (env->GlobalReference_Delete(extensionWindow->GetAniRef()) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
+        }
     } else {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] extensionWindow is nullptr");
     }
@@ -112,7 +114,11 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return nullptr;
     }
-    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniExtensionWindow.get()));
+    ret = env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniExtensionWindow.get()));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to setNativeObj");
+        return nullptr;
+    }
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(obj, &ref) == ANI_OK) {
         aniExtensionWindow->SetAniRef(ref);
@@ -185,7 +191,10 @@ WmErrorCode AniExtensionWindow::UnregisterListener(ani_env* env, ani_string type
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     std::string cbType;
-    AniWindowUtils::GetStdString(env, type, cbType);
+    if (AniWindowUtils::GetStdString(env, type, cbType) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GetStdString failed");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI] type:%{public}s", cbType.c_str());
     sptr<Rosen::Window> window = extensionWindow_->GetWindow();
     return extensionRegisterManager_->UnregisterListener(window, cbType, CaseType::CASE_WINDOW, env, fn);
