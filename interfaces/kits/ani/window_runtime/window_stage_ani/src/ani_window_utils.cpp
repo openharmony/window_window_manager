@@ -819,6 +819,8 @@ ani_object AniWindowUtils::CreateAniWindowLayoutInfo(ani_env* env, const WindowL
     }
     CallAniMethodVoid(env, windowLayoutInfo, cls, Builder::BuildSetterName("windowRect").c_str(),
         nullptr, CreateAniRect(env, info.rect));
+    CallAniMethodVoid(env, windowLayoutInfo, cls, Builder::BuildSetterName("windowAlpha").c_str(),
+        nullptr, CreateBaseTypeObject<double>(env, info.windowAlpha));
     return windowLayoutInfo;
 }
 
