@@ -972,8 +972,9 @@ void ScreenSessionManager::RegisterScreenChangeListener()
 {
     TLOGNFI(WmsLogTag::DMS, "start");
     auto res = rsInterface_.SetScreenChangeCallback(
-        DmUtils::wrap_callback([this](ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason) {
-            OnScreenChange(screenId, screenEvent, reason);
+        DmUtils::wrap_callback([this](ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason, 
+            sptr<IRemoteObject> connectToRenderToken) {
+            OnScreenChange(screenId, screenEvent, reason, connectToRenderToken);
         })
     );
     if (res != StatusCode::SUCCESS) {
@@ -1198,7 +1199,17 @@ void ScreenSessionManager::SetScreenCorrection()
         int32_t phyOffset = static_cast<int32_t>(std::stoi(phyOffsets[0]));
         screenRotation = ConvertOffsetToCorrectRotation(phyOffset);
     }
-    auto correctionRet = rsInterface_.SetLogicalCameraRotationCorrection(screenId,
+    auto rsUIContext = GetRsUIContextByScreenId(screenId);
+    if (rsUIContext == nullptr) {
+        TLOGNFI(WmsLogTag::DMS, "rsUIContext is nullptr");
+        return;
+    }
+    auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
+    if (rsRenderInterface == nullptr) {
+        TLOGNFI(WmsLogTag::DMS, "rsRenderInterface is nullptr");
+        return;
+    }
+    auto correctionRet = rsRenderInterface->SetLogicalCameraRotationCorrection(screenId,
         static_cast<ScreenRotation>(GetCurrentConfigCorrection()));
     auto ret = rsInterface_.SetScreenCorrection(screenId, screenRotation);
     oss << "screenRotation: " << static_cast<int32_t>(screenRotation) << " ret value: " << ret;
@@ -1234,22 +1245,23 @@ ScreenId ScreenSessionManager::GenerateSmsScreenId(ScreenId rsScreenId)
     screenIdManager_.UpdateScreenId(rsScreenId, rsScreenId);
     return rsScreenId;
 }
- void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason)
+void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason,
+    sptr<IRemoteObject> connectToRenderToken)
 {
  	if (screenEvent == ScreenEvent::DISCONNECTED) {
  	    auto screenSession = GetScreenSessionByRsId(screenId);
  	    if (screenSession != nullptr && screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR) {
- 	        OnScreenChangeInner(screenId, screenEvent, reason);
+ 	        OnScreenChangeInner(screenId, screenEvent, reason, connectToRenderToken);
  	        return;
  	    }
  	}
  	if (!IsDefaultMirrorMode(screenId)) {
- 	    OnScreenChangeInner(screenId, screenEvent, reason);
+ 	    OnScreenChangeInner(screenId, screenEvent, reason, connectToRenderToken);
  	    return;
  	}
  	auto task = [=] {
  	    screenConnectTaskStage_ = SCREEN_CONNECT_STAGE_DEFAULT;
- 	    OnScreenChangeInner(screenId, screenEvent, reason);
+ 	    OnScreenChangeInner(screenId, screenEvent, reason, connectToRenderToken);
         if (screenConnectTaskStage_ == SCREEN_CONNECT_STAGE_DEFAULT) {
             TLOGNFW(WmsLogTag::DMS, "Screen connect task is interrupted");
             screenConnectTaskGroup_->FinishTask();
@@ -1258,7 +1270,8 @@ ScreenId ScreenSessionManager::GenerateSmsScreenId(ScreenId rsScreenId)
  	screenConnectTaskGroup_->AddTask(task);
 }
 
-void ScreenSessionManager::OnScreenChangeInner(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason)
+void ScreenSessionManager::OnScreenChangeInner(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason,
+    sptr<IRemoteObject> connectToRenderToken)
 {
     if (reason == ScreenChangeReason::HWCDEAD && screenEvent == ScreenEvent::DISCONNECTED) {
         TLOGNFW(WmsLogTag::DMS, "composer dead, ignore");
@@ -1274,10 +1287,11 @@ void ScreenSessionManager::OnScreenChangeInner(ScreenId screenId, ScreenEvent sc
         }
         return;
     }
-    OnScreenChangeDefault(screenId, screenEvent, reason);
+    OnScreenChangeDefault(screenId, screenEvent, reason, connectToRenderToken);
 }
 
-void ScreenSessionManager::OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason)
+void ScreenSessionManager::OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason,
+    sptr<IRemoteObject> connectToRenderToken)
 {
     std::ostringstream oss;
     oss << "OnScreenChange triggered. screenId: " << static_cast<int32_t>(screenId)
@@ -1286,13 +1300,13 @@ void ScreenSessionManager::OnScreenChangeDefault(ScreenId screenId, ScreenEvent 
     TLOGNFW(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " screenEvent: %{public}d",
         screenId, static_cast<int>(screenEvent));
     SetScreenCorrection();
-    auto screenSession = GetOrCreateScreenSession(screenId);
+    auto screenSession = GetOrCreateScreenSession(screenId, connectToRenderToken);
     if (!screenSession) {
         TLOGNFE(WmsLogTag::DMS, "screenSession is nullptr");
         return;
     }
     if (g_isPcDevice) {
-        auto physicalScreenSession = GetOrCreatePhysicalScreenSession(screenId);
+        auto physicalScreenSession = GetOrCreatePhysicalScreenSession(screenId, connectToRenderToken);
         if (!physicalScreenSession) {
             TLOGNFE(WmsLogTag::DMS, "physicalScreenSession is nullptr");
             return;
@@ -4076,7 +4090,7 @@ DMError ScreenSessionManager::SetScreenColorTransform(ScreenId screenId)
 }
 
 sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId screenId, ScreenId defScreenId,
-    ScreenProperty property)
+    ScreenProperty property, sptr<IRemoteObject> connectToRenderToken)
 {
     sptr<ScreenSession> screenSession = nullptr;
     ScreenSessionConfig config;
@@ -4093,6 +4107,7 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
         .defaultScreenId = defScreenId,
         .mirrorNodeId = nodeId,
         .property = property,
+        .renderSession = connectToRenderToken,
     };
     screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_MIRROR);
     screenSession->SetIsPhysicalMirrorSwitch(true);
@@ -4109,7 +4124,7 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSession(ScreenId scre
 }
 
 sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defScreenId,
-    ScreenProperty property)
+    ScreenProperty property, sptr<IRemoteObject> connectToRenderToken)
 {
 #ifdef WM_MULTI_SCREEN_ENABLE
     sptr<ScreenSession> screenSession = nullptr;
@@ -4117,7 +4132,7 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
         TLOGNFW(WmsLogTag::DMS, "mirror disabled by edm!");
         return screenSession;
     }
-    screenSession = GetPhysicalScreenSession(screenId, defScreenId, property);
+    screenSession = GetPhysicalScreenSession(screenId, defScreenId, property, connectToRenderToken);
     if (!screenSession) {
         TLOGNFE(WmsLogTag::DMS, "screenSession is null");
         return nullptr;
@@ -4152,13 +4167,14 @@ sptr<ScreenSession> ScreenSessionManager::CreatePhysicalMirrorSessionInner(Scree
 #endif
 }
 
-sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenId, ScreenProperty property)
+sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenId, ScreenProperty property,
+    sptr<IRemoteObject> connectToRenderToken)
 {
     ScreenId defScreenId = GetDefaultScreenId();
     TLOGNFW(WmsLogTag::DMS, "screenId:%{public}" PRIu64 "", screenId);
     if (IsDefaultMirrorMode(screenId)) {
 #ifdef WM_MULTI_SCREEN_ENABLE
-        return CreatePhysicalMirrorSessionInner(screenId, defScreenId, property);
+        return CreatePhysicalMirrorSessionInner(screenId, defScreenId, property, connectToRenderToken);
 #else
         return nullptr;
 #endif
@@ -4179,6 +4195,7 @@ sptr<ScreenSession> ScreenSessionManager::GetScreenSessionInner(ScreenId screenI
         .defaultScreenId = defScreenId,
         .name = screenName,
         .property = property,
+        .renderSession = connectToRenderToken,
     };
     sptr<ScreenSession> screenSession = nullptr;
     screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_FOR_REAL);
@@ -4656,7 +4673,8 @@ void ScreenSessionManager::InitExtendScreenDensity(sptr<ScreenSession> session, 
     return;
 }
 
-sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId)
+sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId screenId,
+    sptr<IRemoteObject> connectToRenderToken)
 {
     TLOGNFW(WmsLogTag::DMS, "ENTER. ScreenId: %{public}" PRIu64 "", screenId);
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
@@ -4688,7 +4706,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         return nullptr;
     }
 
-    sptr<ScreenSession> session = GetScreenSessionInner(screenId, property);
+    sptr<ScreenSession> session = GetScreenSessionInner(screenId, property, connectToRenderToken);
     if (session == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "get screen session fail ScreenId: %{public}" PRIu64, screenId);
         return session;
@@ -4824,7 +4842,17 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
         return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
     BrightnessInfo rsBrightnessInfo;
-    auto status = rsInterface_.GetBrightnessInfo(screenSession->GetPhyScreenId(), rsBrightnessInfo);
+    auto rsUIContext = screenSession->GetRSUIContext();
+    if (rsUIContext == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "rsUIContext is nullptr");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;;
+    }
+    auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
+    if (rsRenderInterface == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "rsRenderInterface is nullptr");
+        return DMError::DM_ERROR_ILLEGAL_PARAM;;
+    }
+    auto status = rsRenderInterface->GetBrightnessInfo(screenSession->GetPhyScreenId(), rsBrightnessInfo);
     if (static_cast<StatusCode>(status) != StatusCode::SUCCESS) {
         TLOGNFE(WmsLogTag::DMS, "get screen brightness info failed! status code:%{public}d", status);
         return DMError::DM_ERROR_ILLEGAL_PARAM;
@@ -7268,9 +7296,11 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         clientProxy->OnGetSurfaceNodeIdsFromMissionIdsChanged(option.missionIds_, surfaceNodeIds);
         option.missionIds_ = FilterMissionIdsBySurfaceNodeIds(option.missionIds_, surfaceNodeIds);
     }
-    TLOGNFI(WmsLogTag::DMS, "missionID size:%{public}ud", static_cast<uint32_t>(option.missionIds_.size()));
+    ScreenId associatedScreenId = GetAssociatedScreenId();
+    TLOGNFI(WmsLogTag::DMS, "missionID size:%{public}ud, associatedScreenId: %{public}" PRIu64,
+        static_cast<uint32_t>(option.missionIds_.size()), associatedScreenId);
     ScreenId rsId = rsInterface_.CreateVirtualScreen(option.name_, option.width_,
-        option.height_, option.surface_, SCREEN_ID_INVALID, option.flags_, option.missionIds_);
+        option.height_, option.surface_, associatedScreenId, option.flags_, option.missionIds_);
     if (rsId == SCREEN_ID_INVALID) {
         TLOGNFI(WmsLogTag::DMS, "rsId is invalid");
         return SCREEN_ID_INVALID;
@@ -7295,7 +7325,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
         } else {
             screenIdManager_.CreateScreenId(smsScreenId, rsId);
         }
-        auto screenSession = InitVirtualScreen(smsScreenId, rsId, option);
+        auto screenSession = InitVirtualScreen(smsScreenId, rsId, option, associatedScreenId);
         if (screenSession == nullptr) {
             TLOGNFW(WmsLogTag::DMS, "screenSession is nullptr");
             screenIdManager_.DeleteScreenId(smsScreenId);
@@ -7328,6 +7358,47 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     NotifyCaptureStatusChanged();
     SetOptionConfig(smsScreenId, option);
     return smsScreenId;
+}
+
+ScreenId ScreenSessionManager::GetAssociatedScreenId()
+{
+    if (!IsConcurrentUser()) {
+        TLOGNFI(WmsLogTag::DMS, "not support mulyi-screen nulti-user");
+        return MAIN_SCREEN_ID_DEFAULT;
+    }
+    auto userId = GetUserIdByCallingUid();
+    std::shared_ptr<UserInfo> userInfo = nullptr;
+    if (userId == INVALID_USER_ID) {
+        userId = GetForegroundConcurrentUser(CONTROL_PANEL_PHYSICAL_ID);
+        const auto displayUserMap = GetDisplayConcurrentUserMap();
+        auto displayIt = displayUserMap.find(CONTROL_PANEL_PHYSICAL_ID);
+        if (displayIt == displayUserMap.end()) {
+            TLOGNFE(WmsLogTag::DMS, "Can not find CONTROL_PANEL_PHYSICAL_ID in displayConcurrentUserMap");
+            return MAIN_SCREEN_ID_DEFAULT;
+        }
+        const auto &userMap = displayIt->second;
+        auto userIt = userMap.find(userId);
+        if (userIt == userMap.end()) {
+            TLOGNFE(WmsLogTag::DMS, "Can not find userId: %{public}" PRId32, userId);
+            return MAIN_SCREEN_ID_DEFAULT;
+        }
+        userInfo = std::make_shared<UserInfo>(userIt->second);
+    } else {
+        GetForegroundConcurrentUser(userId, userInfo);
+    }
+    if (userInfo == nullptr || !userInfo->isForeground) {
+        TLOGNFE(WmsLogTag::DMS, "userInfo is nullptr or is not foreground");
+        return MAIN_SCREEN_ID_DEFAULT;
+    }
+    DisplayId displayid = GetUserDisplayId(userId);
+    auto displayInfo = GetDisplayInfoById(displayid);
+    if (displayInfo == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "displayInfo is nullptr");
+        return MAIN_SCREEN_ID_DEFAULT;
+    }
+    auto associatedScreenId = screenIdManager_.ConvertToRsScreenId(displayInfo->GetScreenId());
+    TLOGNFI(WmsLogTag::DMS, "associatedScreenId: %{public}" PRIu64, associatedScreenId);
+    return associatedScreenId;
 }
 
 // filter valid missionIds, by dynamic whitelist
@@ -8435,14 +8506,20 @@ bool ScreenSessionManager::ScreenIdManager::HasRsScreenId(ScreenId smsScreenId) 
 }
 
 sptr<ScreenSession> ScreenSessionManager::InitVirtualScreen(ScreenId smsScreenId, ScreenId rsId,
-    VirtualScreenOption option)
+    VirtualScreenOption option, ScreenId associatedScreenId)
 {
     TLOGNFI(WmsLogTag::DMS, "Enter");
+    auto associatedScreenSession = GetScreenSession(associatedScreenId);
+    if (associatedScreenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "Get screenSession of screenId: %{public}" PRIu64 "failed", associatedScreenId);
+        return nullptr;
+    }
     ScreenSessionConfig config = {
         .screenId = smsScreenId,
         .rsId = rsId,
         .defaultScreenId = GetDefaultScreenId(),
         .name = option.name_,
+        .renderSession = associatedScreenSession->GetRenderSession(),
     };
     sptr<ScreenSession> screenSession =
         new(std::nothrow) ScreenSession(config, ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE);
@@ -9023,7 +9100,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     }
     TLOGNFW(WmsLogTag::DMS, "dma=%{public}d, displayId:%{public}" PRIu64, isUseDma, realDisplayId);
     std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
-    if (displayNode == nullptr) {
+    if (displayNode == nullptr || displayNode->GetRSUIContext() == nullptr ||
+        displayNode->GetRSUIContext()->GetRSRenderInterface() == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "displayNode is null!");
         return nullptr;
     }
@@ -9046,7 +9124,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         TLOGNFI(WmsLogTag::DMS, "Snapshot filtering surfaceNodesList surfaceNodes, size:%{public}ud",
             static_cast<uint32_t>(surfaceNodesList.size()));
     }
-    bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
+    bool ret = displayNode->GetRSUIContext()->GetRSRenderInterface()->TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGNFE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
         return nullptr;
@@ -9080,7 +9158,8 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetScreenHDR
     }
 #endif
     std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
-    if (displayNode == nullptr) {
+    if (displayNode == nullptr || displayNode->GetRSUIContext() == nullptr ||
+        displayNode->GetRSUIContext()->GetRSRenderInterface() == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "displayNode is null!");
         return {nullptr, nullptr};
     }
@@ -9101,7 +9180,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetScreenHDR
     if (surfaceNodesList.size() > 0) {
         TLOGNFI(WmsLogTag::DMS, "Snapshot filter, size:%{public}ud", static_cast<uint32_t>(surfaceNodesList.size()));
     }
-    bool ret = rsInterface_.TakeSurfaceCapture(displayNode, callback, config);
+    bool ret = displayNode->GetRSUIContext()->GetRSRenderInterface()->TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGNFE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
         return {nullptr, nullptr};
@@ -13832,7 +13911,8 @@ SessionOption ScreenSessionManager::GetSessionOption(sptr<ScreenSession> screenS
         .screenId_ = screenSession->GetScreenId(),
         .rotationCorrectionMap_ = screenSession->GetRotationCorrectionMap(),
         .supportsFocus_ = screenSession->GetSupportsFocus(),
-        .isBooting_ = IsOnBootAnimation()
+        .isBooting_ = IsOnBootAnimation(),
+        .connectToRenderToken_ = screenSession->GetRenderSession(),
     };
     return option;
 }
@@ -14176,7 +14256,8 @@ sptr<ScreenSession> ScreenSessionManager::CreateFakePhysicalMirrorSessionInner(S
 #endif
 }
 
-sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property)
+sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property,
+    sptr<IRemoteObject> connectToRenderToken)
 {
     ScreenId defScreenId = GetDefaultScreenId();
     TLOGNFW(WmsLogTag::DMS, "screenId:%{public}" PRIu64, screenId);
@@ -14203,6 +14284,7 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSessionInner(ScreenId
         .defaultScreenId = defScreenId,
         .name = screenName,
         .property = property,
+        .renderSession = connectToRenderToken,
     };
     sptr<ScreenSession> screenSession = nullptr;
     screenSession = new ScreenSession(config, ScreenSessionReason::CREATE_SESSION_WITHOUT_DISPLAY_NODE);
@@ -14215,7 +14297,8 @@ sptr<ScreenSession> ScreenSessionManager::GetPhysicalScreenSessionInner(ScreenId
     return screenSession;
 }
 
-sptr<ScreenSession> ScreenSessionManager::GetOrCreatePhysicalScreenSession(ScreenId screenId)
+sptr<ScreenSession> ScreenSessionManager::GetOrCreatePhysicalScreenSession(ScreenId screenId,
+    sptr<IRemoteObject> connectToRenderToken)
 {
     TLOGNFW(WmsLogTag::DMS, "ENTER. ScreenId: %{public}" PRIu64, screenId);
     sptr<ScreenSession> screenSession = GetPhysicalScreenSession(screenId);
@@ -14228,7 +14311,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreatePhysicalScreenSession(Scree
     CreateScreenProperty(screenId, property);
     TLOGNFW(WmsLogTag::DMS, "create screen property end");
 
-    sptr<ScreenSession> session = GetPhysicalScreenSessionInner(screenId, property);
+    sptr<ScreenSession> session = GetPhysicalScreenSessionInner(screenId, property, connectToRenderToken);
     if (session == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "get physical screen fail ScreenId: %{public}" PRIu64, screenId);
         return session;
@@ -15685,6 +15768,16 @@ void ScreenSessionManager::ProcessVirtualScreenDestroy(ScreenId screenId, Screen
         }
         TLOGNFW(WmsLogTag::DMS, "destroy success, sid: %{public}" PRIu64 ", rsId: %{public}" PRIu64, screenId, rsScreenId);
     }
+}
+
+std::shared_ptr<RSUIContext> ScreenSessionManager::GetRsUIContextByScreenId(ScreenId screenId)
+{
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "screenSession is null, screenId: %{public}" PRIu64, screenId);
+        return nullptr;
+    }
+    return screenSession->GetRSUIContext();
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen

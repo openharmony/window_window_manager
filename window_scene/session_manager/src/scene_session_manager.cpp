@@ -3402,8 +3402,11 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     int32_t requestId, bool useRequestTaskInfo)
 {
     const auto& sessionInfo = sceneSession->GetSessionInfo();
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
     abilitySessionInfo->sessionToken = sptr<ISession>(sceneSession)->AsObject();
+    sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+    abilitySessionInfo->renderSession = screenSession ? screenSession->GetRenderSession() : nullptr;
     abilitySessionInfo->identityToken = std::to_string(std::chrono::time_point_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now()).time_since_epoch().count());
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
@@ -3442,8 +3445,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
         TLOGI(WmsLogTag::WMS_LIFE, "want.appIndex is null, set want.appIndex:%{public}d", sessionInfo.appIndex_);
         abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, sessionInfo.appIndex_);
     }
-    abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID,
-        static_cast<int>(sceneSession->GetSessionProperty()->GetDisplayId()));
+    abilitySessionInfo->want.SetParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, static_cast<int>(displayId));
     abilitySessionInfo->instanceKey = sessionInfo.appInstanceKey_;
     if (sessionInfo.callState_ >= static_cast<uint32_t>(AAFwk::CallToState::UNKNOW) &&
         sessionInfo.callState_ <= static_cast<uint32_t>(AAFwk::CallToState::BACKGROUND)) {
@@ -4502,7 +4504,7 @@ void SceneSessionManager::DestroySpecificSession(const sptr<IRemoteObject>& remo
 WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
-    SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
+    SystemSessionConfig& systemConfig, sptr<IRemoteObject>& renderSession, sptr<IRemoteObject> token)
 {
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
@@ -4570,7 +4572,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &persistentId, &session, &systemConfig, token,
-                 pid, uid, isSystemCalling, initClientDisplayId]() {
+                &renderSession, pid, uid, isSystemCalling, initClientDisplayId]() {
         if (property == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "property is nullptr");
             return WSError::WS_ERROR_NULLPTR;
@@ -4609,6 +4611,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         NotifyCreateSpecificSession(newSession, property, type);
         session = newSession;
         AddClientDeathRecipient(sessionStage, newSession);
+
+        auto displayId = newSession->GetSessionProperty()->GetDisplayId();
+        sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
+        renderSession = screenSession ? screenSession->GetRenderSession() : nullptr;
 
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             CheckFloatWindowIsAnco(pid, newSession);

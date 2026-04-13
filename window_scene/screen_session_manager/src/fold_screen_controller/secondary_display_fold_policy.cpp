@@ -625,6 +625,7 @@ void SecondaryDisplayFoldPolicy::SetStatusFullActiveRectAndTpFeature(const sptr<
         if (isNeedToSetSwitch) {
             RSInterfaces::GetInstance().NotifyScreenSwitched();
         }
+        RSInterfaces::GetInstance().NotifyScreenSwitched();
         auto response = RSInterfaces::GetInstance().SetScreenActiveRect(0, rectCur);
         TLOGI(WmsLogTag::DMS, "rs response is %{public}ld", static_cast<long>(response));
     }

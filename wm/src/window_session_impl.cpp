@@ -304,11 +304,13 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
     } while (false)
 
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
-    const std::shared_ptr<RSUIContext>& rsUIContext)
+    const std::shared_ptr<RSUIContext>& rsUIContext, sptr<IRemoteObject> renderSession)
 {
     WLOGFD("[WMSCom] Constructor");
     property_ = sptr<WindowSessionProperty>::MakeSptr();
     windowOption_ = option;
+    rsUIContext_ = rsUIContext;
+    renderSession_ = renderSession;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
     WindowType optionWindowType = option->GetWindowType();
@@ -320,7 +322,10 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     followCreatorLifecycle_ = option->IsFollowCreatorLifecycle();
 
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
+    TLOGD(WmsLogTag::WMS_LIFE, "renderSession is %{public}p", renderSession.GetRefPtr());
+    if (renderSession) {
+        RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession, rsUIContext);
+    }
     if (WindowHelper::IsSubWindow(GetType())) {
         property_->SetDecorEnable(option->GetSubWindowDecorEnable());
     }
@@ -486,10 +491,8 @@ void WindowSessionImpl::SetSubWindowZLevelToProperty()
     }
 }
 
-RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string& name, WindowType type)
+RSSurfaceNodeType WindowSessionImpl::GetRSSurfaceNodeType(WindowType type)
 {
-    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = name;
     RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
     switch (type) {
         case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
@@ -517,11 +520,22 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
     }
-    auto surfaceNode = RSSurfaceNode::Create(
-        rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), GetRSUIContext());
-    RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
-    TLOGD(WmsLogTag::WMS_SCB, "Create RSSurfaceNode: %{public}s, name: %{public}s",
-          RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
+    return rsSurfaceNodeType;
+}
+
+RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string& name, WindowType type)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = name;
+    RSSurfaceNodeType rsSurfaceNodeType = GetRSSurfaceNodeType(type);
+    auto surfaceNode = renderSession_ ? RSSurfaceNode::Create(rsSurfaceNodeConfig, rsSurfaceNodeType, true,
+        property_->IsConstrainedModal(), GetRSUIContext())
+        : RSSurfaceNode::CreateSurfaceNode(rsSurfaceNodeConfig, true);
+    if (renderSession_) {
+        RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
+    }
+    TLOGI(WmsLogTag::WMS_SCB, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+        RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
     return surfaceNode;
 }
 
