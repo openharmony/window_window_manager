@@ -2714,22 +2714,17 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
     }
     // optional
     bool maximizeSupported = false;
-    ret = GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
-    if (ret != ANI_OK) {
+    if (GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported) != ANI_OK) {
         TLOGI(WmsLogTag::WMS_SUB, "Failed to get property maximizeSupported");
     }
     bool outlineEnabled = false;
-    ret = GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
-    if (ret != ANI_OK) {
+    if (GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled) != ANI_OK) {
         TLOGI(WmsLogTag::WMS_SUB, "Failed to get property outlineEnabled");
     }
-
-    GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
-    bool outlineEnabled = false;
-    GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
     bool zLevelAboveParentLoosened = false;
-    GetPropertyBoolObject(env, "zLevelAboveParentLoosened", aniObject, zLevelAboveParentLoosened);
-
+    if (GetPropertyBoolObject(env, "zLevelAboveParentLoosened", aniObject, zLevelAboveParentLoosened) != ANI_OK) {
+        TLOGI(WmsLogTag::WMS_SUB, "Failed to get property zLevelAboveParentLoosened");
+    }
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
