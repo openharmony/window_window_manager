@@ -376,7 +376,7 @@ bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea
     }
     auto diff =
         std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && diff <= 1;
+    return isVisible && ((diff <= 1 && !GetLSState()) || (diff <= 2 && GetLSState()));
 }
 
 void FillWindowDisplayName(WindowDisplayInfo& windowDisplayInfo)
