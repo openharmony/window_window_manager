@@ -619,14 +619,16 @@ HWTEST_F(SceneSessionManagerImmersiveTest, CheckAvoidAreaForAINavigationBar, Tes
 {
     ASSERT_NE(nullptr, ssm_);
     AvoidArea avoidArea;
-    ssm_->CheckAvoidAreaForAINavigationBar(false, avoidArea, 0);
-    EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(false, avoidArea, 0), false);
     avoidArea.topRect_ = { 0, 1, 1, 1 };
     EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(false, avoidArea, 0), false);
+    avoidArea.topRect_ = { 0, 0, 0, 0 };
     avoidArea.leftRect_ = { 0, 1, 1, 1 };
     EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(false, avoidArea, 0), false);
+    avoidArea.leftRect_ = { 0, 0, 0, 0 };
     avoidArea.rightRect_ = { 0, 1, 1, 1 };
     EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(false, avoidArea, 0), false);
+    avoidArea.rightRect_ = { 0, 0, 0, 0 };
+    EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(false, avoidArea, 0), true);
     avoidArea.bottomRect_ = { 0, 1, 1, 1 };
     EXPECT_EQ(ssm_->CheckAvoidAreaForAINavigationBar(false, avoidArea, 0), false);
 }
