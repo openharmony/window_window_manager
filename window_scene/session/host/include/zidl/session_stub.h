@@ -206,6 +206,11 @@ private:
 
     // Prelaunch Starting Window
     int HandleRemovePrelaunchStartingWindow(MessageParcel& data, MessageParcel& reply);
+
+    // Float View
+    int HandleStopFloatView(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateFloatView(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreFloatViewMainWindow(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

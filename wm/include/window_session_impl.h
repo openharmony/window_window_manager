@@ -98,6 +98,7 @@ public:
     static sptr<Window> Find(const std::string& name);
     static std::vector<sptr<Window>> GetSubWindow(int parentId);
     static sptr<WindowSessionImpl> GetWindowWithId(uint32_t windowId);
+    static bool IsAnyWindowMatchState(const WindowState &state);
 
     virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession,
@@ -442,6 +443,18 @@ public:
     WMError SetSpecificBarProperty(WindowType type, const SystemBarProperty& property) override;
     void SetLayoutTransform(const Transform& trans);
     Transform GetLayoutTransform() const override;
+
+    /*
+     *   Float View
+     */
+    void NotifyPrepareCloseFloatView() override;
+    WSError SendFvActionEvent(const std::string& action, const std::string& reason) override;
+    WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) override;
+    WSError SyncFvLimits(const FloatViewLimits& limits) override;
+    WMError UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) override;
+    WMError RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams) override;
+
+    WMError UpdateFloatShowWhenCreate(const bool showWhenCreate) override;
 
     /*
      * Window Decor

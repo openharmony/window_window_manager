@@ -85,6 +85,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DYNAMIC,                  ApiWindowType::TYPE_DYNAMIC                  },
     { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, ApiWindowType::TYPE_MUTISCREEN_COLLABORATION },
     { WindowType::WINDOW_TYPE_FB,                       ApiWindowType::TYPE_FB                       },
+    { WindowType::WINDOW_TYPE_FV,                       ApiWindowType::TYPE_FV                       },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -116,6 +117,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
     { ApiWindowType::TYPE_FB,                       WindowType::WINDOW_TYPE_FB                       },
+    { ApiWindowType::TYPE_FV,                       WindowType::WINDOW_TYPE_FV                       },
 };
 
 const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {

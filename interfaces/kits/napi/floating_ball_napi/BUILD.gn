@@ -16,10 +16,13 @@ import("../../../../windowmanager_aafwk.gni")
 
 config("fb_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "../../../../wm/include" ]
+  include_dirs = [
+    "../../../../wm/include",
+    "../common"
+  ]
 }
 
-ohos_shared_library("floatingball_napi") {
+ohos_shared_library("floatingball_kit") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -30,7 +33,6 @@ ohos_shared_library("floatingball_napi") {
   }
   sources = [
     "js_fb_window_manager.cpp",
-    "js_fbwindow_module.cpp",
     "js_fb_window_controller.cpp",
     "js_fb_utils.cpp",
     "js_fb_window_listener.cpp",
@@ -57,6 +59,53 @@ ohos_shared_library("floatingball_napi") {
     "hilog:libhilog",
     "image_framework:image",
     "ipc:ipc_single",
+    "napi:ace_napi",
+  ]
+  
+  public_configs = [ ":fb_config" ]
+
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "window_manager"
+  subsystem_name = "window"
+
+  defines = []
+  if (build_variant == "user") {
+    defines += [ "IS_RELEASE_VERSION" ]
+  }
+
+  version_script = "libfloatingball_kit.map"
+}
+
+ohos_shared_library("floatingball_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  sources = [
+    "js_fbwindow_module.cpp",
+  ]
+
+  configs = [
+    ":fb_config",
+    "../../../../resources/config/build:coverage_flags",
+  ]
+
+  deps = [
+    ":floatingball_kit",
+    "../../../../utils:libwmutil",
+    "../../../../utils:libwmutil_base",
+    "../../../../wm:libwm",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_common",
+    "ability_runtime:runtime",
+    "c_utils:utils",
     "napi:ace_napi",
   ]
 

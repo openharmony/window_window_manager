@@ -123,6 +123,8 @@ enum class ListenerFuncType : uint32_t {
     COMPATIBLE_MODE_CHANGE_CB,
     RECOVER_WINDOW_EFFECT_CB,
     PRE_CALC_WINDOW_PROPERTY_CB,
+    FLOAT_VIEW_STOP_CB,
+    FLOAT_VIEW_UPDATE_CB,
 };
 
 class SceneSession;
@@ -293,6 +295,11 @@ private:
      * PC Window
      */
     static napi_value GetZOrder(napi_env env, napi_callback_info info);
+    /*
+     * Float View Window
+     */
+    static napi_value SendFvActionEvent(napi_env env, napi_callback_info info);
+    static napi_value SyncFvWindowInfo(napi_env env, napi_callback_info info);
 
     napi_value OnActivateDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
@@ -402,6 +409,13 @@ private:
      */
     napi_value OnGetZOrder(napi_env env, napi_callback_info info);
 
+    /*
+     * Float View
+    */
+    napi_value OnSendFvActionEvent(napi_env env, napi_callback_info info);
+    napi_value OnSyncFvWindowInfo(napi_env env, napi_callback_info info);
+    bool GetFloatViewWindowInfo(napi_env env, napi_value jsValue, FloatViewWindowInfo& windowInfo);
+
     bool IsCallbackRegistered(napi_env env, const std::string& type, napi_value jsListenerObject);
     void ProcessChangeSessionVisibilityWithStatusBarRegister();
     void ProcessBufferAvailableChangeRegister();
@@ -474,6 +488,14 @@ private:
     void ProcessAnimateToTargetPropertyRegister();
     void ProcessSceneOutlineParamsChangeRegister();
     void ProcessRestartAppRegister();
+
+    /*
+     * Float View
+    */
+    void ProcessFloatViewStopRegister();
+    void OnFloatViewStop(const std::string& reason);
+    void ProcessFloatViewUpdateRegister();
+    void OnFloatViewUpdate(const FloatViewTemplateInfo& fvTemplateInfo);
 
     /*
      * Window Property

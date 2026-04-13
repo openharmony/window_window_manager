@@ -45,6 +45,10 @@ group("unittest") {
       ":wm_compatible_mode_window_session_impl_test",
       ":wm_floating_ball_new_test",
       ":wm_floating_ball_test",
+      ":wm_float_view_controller_test",
+      ":wm_float_view_manager_test",
+      ":wm_float_view_option_test",
+      ":wm_float_window_manager_test",
       ":wm_get_snapshot_callback_proxy_test",
       ":wm_get_snapshot_callback_stub_test",
       ":wm_input_transfer_station_test",
@@ -868,6 +872,46 @@ ohos_unittest("wm_load_intention_event_test") {
   module_out_path = module_out_path
 
   sources = [ "load_intention_event_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_float_view_controller_test") {
+  module_out_path = module_out_path
+
+  sources = [ "float_view_controller_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_float_view_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "float_view_manager_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_float_view_option_test") {
+  module_out_path = module_out_path
+
+  sources = [ "float_view_option_test.cpp" ]
+
+  deps = [ ":wm_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_float_window_manager_test") {
+  module_out_path = module_out_path
+
+  sources = [ "float_window_manager_test.cpp" ]
 
   deps = [ ":wm_unittest_common" ]
 
