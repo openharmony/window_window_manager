@@ -25,6 +25,7 @@ group("unittest") {
     ":wm_gtx_input_event_sender_test",
     ":wm_load_intention_event_test",
     ":wm_picture_in_picture_option_test",
+    ":wm_picture_in_picture_option_ani_test",
     ":wm_screen_scene_test",
     ":wm_vsync_station_test",
     ":wm_window_display_change_adapter_test",
@@ -629,6 +630,16 @@ ohos_unittest("wm_picture_in_picture_option_test") {
 
   deps = [ ":wm_unittest_common" ]
 
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_picture_in_picture_option_ani_test") {
+  module_out_path = module_out_path
+ 
+  sources = [ "picture_in_picture_option_ani_test.cpp" ]
+ 
+  deps = [ ":wm_unittest_common" ]
+ 
   external_deps = test_external_deps
 }
 
