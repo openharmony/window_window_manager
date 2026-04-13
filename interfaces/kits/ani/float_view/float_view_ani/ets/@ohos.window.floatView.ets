@@ -39,7 +39,7 @@ export default namespace floatView {
     setUIContext(path: string, contentStorage?: LocalStorage): Promise<void>;
     setFloatViewVisibilityInApp(visibleInApp: boolean): Promise<void>;
     setWindowSize(size: window.Size): Promise<void>;
-    getWindowProperties(): Promise<FloatViewWindowInfo>;
+    getWindowProperties(): FloatViewProperties;
     restoreMainWindow(wantParameters?: Record<string, object>): Promise<void>;
     onStateChange(callback: Callback<FloatViewStateChangeInfo>): void;
     offStateChange(callback?: Callback<FloatViewStateChangeInfo>): void;
@@ -68,7 +68,7 @@ export default namespace floatView {
     }
   }
 
-  export interface FloatViewWindowInfo {
+  export interface FloatViewProperties {
     windowId: int;
     displayId: int;
     windowRect: window.Rect;
@@ -77,7 +77,7 @@ export default namespace floatView {
     inSidebar: boolean;
   }
 
-  export class FloatViewWindowInfoInner implements FloatViewWindowInfo {
+  export class FloatViewPropertiesInner implements FloatViewProperties {
     windowId: int;
     displayId: int;
     windowRect: window.Rect;
@@ -272,19 +272,10 @@ export default namespace floatView {
         });
     }
 
-    native getWindowPropertiesNative(nativeObj: long): FloatViewWindowInfo;
-    public getWindowProperties(): Promise<FloatViewWindowInfo> {
-        return new Promise<FloatViewWindowInfo>(
-          (resolve: (value: FloatViewWindowInfo) => void, reject: (error: BusinessError) => void): void => {
-            taskpool.execute((): FloatViewWindowInfo => {
-                let res = this.getWindowPropertiesNative(this.nativeObj) as FloatViewWindowInfo;
-                return res;
-            }).then((ret: Any) :void => {
-                resolve(ret as FloatViewWindowInfo);
-            }).catch((err: Any) :void => {
-                reject(err as BusinessError);
-            });
-        });
+    native getWindowPropertiesNative(nativeObj: long): FloatViewProperties;
+    public getWindowProperties(): FloatViewProperties {
+      let res = this.getWindowPropertiesNative(this.nativeObj) as FloatViewProperties;
+      return res;
     }
 
     public native restoreMainWindowNative(nativeObj: long, wantParameters?: Record<string, object>): void;
