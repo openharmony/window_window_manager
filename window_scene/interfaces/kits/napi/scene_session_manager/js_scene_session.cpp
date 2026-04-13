@@ -1931,13 +1931,13 @@ void JsSceneSession::ProcessPendingSessionToBackgroundForDelegatorRegister()
     }
     const char* const where = __func__;
     session->SetPendingSessionToBackgroundForDelegatorListener([weakThis = wptr(this), where](
-        const SessionInfo& info, bool shouldBackToCaller) {
+        const SessionInfo& info, bool shouldBackToCaller, LifeCycleChangeReason reason) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->PendingSessionToBackgroundForDelegator(info, shouldBackToCaller);
+        jsSceneSession->PendingSessionToBackgroundForDelegator(info, shouldBackToCaller, reason);
     });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
@@ -5704,13 +5704,15 @@ void JsSceneSession::PendingSessionToBackground(const SessionInfo& info, const B
     taskScheduler_->PostMainThreadTask(task, "PendingSessionToBackground, name:" + info.bundleName_);
 }
 
-void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller)
+void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller,
+    LifeCycleChangeReason reason)
 {
     TLOGI(WmsLogTag::WMS_LIFE,
-        "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d",
-        info.bundleName_.c_str(), info.abilityName_.c_str(), shouldBackToCaller);
+        "bundleName=%{public}s, abilityName=%{public}s, shouldBackToCaller=%{public}d, reason=%{public}d",
+        info.bundleName_.c_str(), info.abilityName_.c_str(), shouldBackToCaller, reason);
     std::shared_ptr<SessionInfo> sessionInfo = std::make_shared<SessionInfo>(info);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo, env = env_, shouldBackToCaller] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, sessionInfo,
+        env = env_, shouldBackToCaller, reason] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession id:%{public}d has been destroyed", persistentId);
@@ -5723,11 +5725,12 @@ void JsSceneSession::PendingSessionToBackgroundForDelegator(const SessionInfo& i
         }
         napi_value jsSessionInfo = CreateJsSessionInfo(env, *sessionInfo);
         napi_value jsShouldBackToCaller = CreateJsValue(env, shouldBackToCaller);
+        napi_value jsLifeCycleChangeReason = CreateJsValue(env, static_cast<int32_t>(reason));
         if (jsSessionInfo == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "target session info is nullptr");
             return;
         }
-        napi_value argv[] = {jsSessionInfo, jsShouldBackToCaller};
+        napi_value argv[] = {jsSessionInfo, jsShouldBackToCaller, jsLifeCycleChangeReason};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, "PendingSessionToBackgroundForDelegator, name:" + info.bundleName_);

@@ -260,7 +260,24 @@ std::map<int32_t, std::vector<sptr<IParentWindowStatusChangeListener>>>
     WindowSessionImpl::parentWindowStatusChangeListeners_;
 bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
 
-#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
+#define CALL_LIFECYCLE_LISTENER(windowLifecycleCb, listeners, isGamePreLaunch)  \
+    do {                                                                        \
+        if (isGamePreLaunch) {                                                  \
+            for (auto& listener : (listeners)) {                                \
+                if (listener != nullptr && listener->IsWindowSceneListener()) { \
+                    listener->windowLifecycleCb();                              \
+                }                                                               \
+            }                                                                   \
+        } else {                                                                \
+            for (auto& listener : (listeners)) {                                \
+                if (listener != nullptr) {                                      \
+                    listener->windowLifecycleCb();                              \
+                }                                                               \
+            }                                                                   \
+        }                                                                       \
+    } while (0)
+
+#define CALL_WINDOW_STAGE_LIFECYCLE_LISTENER(windowLifecycleCb, listeners) \
     do {                                                      \
         for (auto& listener : (listeners)) {                  \
             if (listener != nullptr) {            \
@@ -5587,7 +5604,7 @@ void WindowSessionImpl::NotifyAfterForeground(bool needNotifyListeners, bool nee
         {
             std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
             auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners);
+            CALL_LIFECYCLE_LISTENER(AfterForeground, lifecycleListeners, isGamePreLaunch_);
         }
     }
     GetAttachStateSyncResult(waitAttach, true);
@@ -5674,7 +5691,7 @@ void WindowSessionImpl::NotifyAfterDidForeground(uint32_t reason)
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
         auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterDidForeground, lifecycleListeners);
+        CALL_LIFECYCLE_LISTENER(AfterDidForeground, lifecycleListeners, window->isGamePreLaunch_);
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
@@ -5684,7 +5701,7 @@ void WindowSessionImpl::NotifyAfterBackground(bool needNotifyListeners, bool nee
         {
             std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
             auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners);
+            CALL_LIFECYCLE_LISTENER(AfterBackground, lifecycleListeners, false);
         }
         NotifyAfterLifecycleBackground();
     }
@@ -5729,7 +5746,7 @@ void WindowSessionImpl::NotifyAfterDidBackground(uint32_t reason)
         }
         TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s execute", where);
         auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners);
+        CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners, false);
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
@@ -5818,7 +5835,7 @@ void WindowSessionImpl::NotifyWindowAfterFocused()
 {
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterFocused, lifecycleListeners, isGamePreLaunch_);
 }
 
 void WindowSessionImpl::NotifyWindowAfterUnfocused()
@@ -5826,7 +5843,7 @@ void WindowSessionImpl::NotifyWindowAfterUnfocused()
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     // use needNotifyUinContent to separate ui content callbacks
-    CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners, isGamePreLaunch_);
 }
 
 void WindowSessionImpl::NotifyUIContentHighlightStatus(bool isHighlighted)
@@ -5869,21 +5886,21 @@ void WindowSessionImpl::NotifyAfterDestroy()
 {
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterDestroyed, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterDestroyed, lifecycleListeners, false);
 }
 
 void WindowSessionImpl::NotifyAfterActive()
 {
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterActive, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterActive, lifecycleListeners, false);
 }
 
 void WindowSessionImpl::NotifyAfterInactive()
 {
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterInactive, lifecycleListeners, false);
 }
 
 void WindowSessionImpl::NotifyForegroundFailed(WMError ret)
@@ -5904,38 +5921,41 @@ void WindowSessionImpl::NotifyAfterResumed()
 {
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterResumed, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterResumed, lifecycleListeners, isGamePreLaunch_);
 }
 
 void WindowSessionImpl::NotifyAfterPaused()
 {
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners);
+    CALL_LIFECYCLE_LISTENER(AfterPaused, lifecycleListeners, false);
 }
 
 void WindowSessionImpl::NotifyAfterLifecycleForeground()
 {
+    if (isGamePreLaunch_) {
+        return;
+    }
     std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterLifecycleForeground, lifecycleListeners);
+    CALL_WINDOW_STAGE_LIFECYCLE_LISTENER(AfterLifecycleForeground, lifecycleListeners);
 }
 
 void WindowSessionImpl::NotifyAfterLifecycleBackground()
 {
     std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
     auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterLifecycleBackground, lifecycleListeners);
+    CALL_WINDOW_STAGE_LIFECYCLE_LISTENER(AfterLifecycleBackground, lifecycleListeners);
 }
 
-void WindowSessionImpl::NotifyAfterLifecycleResumed()
+void WindowSessionImpl::NotifyAfterLifecycleResumed(bool isGamePreLaunch)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
     bool useControlState = property_->GetUseControlState();
     if (useControlState) {
         auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
-        CALL_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
+        CALL_WINDOW_STAGE_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
         isInteractiveStateFlag_ = false;
         return;
     }
@@ -5949,8 +5969,10 @@ void WindowSessionImpl::NotifyAfterLifecycleResumed()
         return;
     }
     isInteractiveStateFlag_ = true;
-    auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterLifecycleResumed, lifecycleListeners);
+    if (!isGamePreLaunch) {
+        auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
+        CALL_WINDOW_STAGE_LIFECYCLE_LISTENER(AfterLifecycleResumed, lifecycleListeners);
+    }
 }
 
 void WindowSessionImpl::NotifyAfterLifecyclePaused()
@@ -5963,7 +5985,7 @@ void WindowSessionImpl::NotifyAfterLifecyclePaused()
     }
     isInteractiveStateFlag_ = false;
     auto lifecycleListeners = GetListeners<IWindowStageLifeCycle>();
-    CALL_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
+    CALL_WINDOW_STAGE_LIFECYCLE_LISTENER(AfterLifecyclePaused, lifecycleListeners);
 }
 
 WSError WindowSessionImpl::MarkProcessed(int32_t eventId)

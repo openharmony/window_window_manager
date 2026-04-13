@@ -115,6 +115,34 @@ ohos_unittest("wm_window_manager_test") {
   external_deps = test_external_deps
 }
 
+ohos_unittest("wm_game_prelaunch_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/wm/src" ]
+    sources = [ "game_prelaunch_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_window_scene_game_prelaunch_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [ "${window_base_path}/wm/src" ]
+    sources = [ "window_scene_game_prelaunch_test.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = test_external_deps
+}
+
 ohos_unittest("wm_window_display_change_adapter_test") {
   module_out_path = module_out_path
 

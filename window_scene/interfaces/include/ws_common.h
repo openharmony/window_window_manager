@@ -554,6 +554,12 @@ struct SessionInfo {
     std::string pageConfig = "";
     std::vector<std::string> combinedCompatibleConfig;
 
+    /**
+     * Game PreLaunch
+     */
+    bool isGamePrelaunch_ = false;
+    bool reuseSessionInGamePreLaunch_ = false;
+
     AAFwk::Want GetWantSafely() const
     {
         std::lock_guard<std::mutex> lock(*wantMutex_);
@@ -665,6 +671,7 @@ enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE_FULLSCREEN,
     EVENT_SWITCH_COMPATIBLE_MODE = 200,
     EVENT_NOTIFY_WINDOW_STAGE_CREATE_FINISHED,
+    EVENT_CLEAR_GAME_PRELAUNCH_FLAG,
     EVENT_END
 };
 
@@ -1370,7 +1377,7 @@ enum class LifeCycleChangeReason {
      */
     QUICK_BATCH_BACKGROUND,
 
-    SCREEN_ROTATION,
+    GAME_PRELAUNCH_BACKGROUND,
 
     REASON_END,
 };

@@ -122,6 +122,7 @@ const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be cha
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr uint8_t MAX_DOWN_TIMES = 100;
 constexpr const long PRE_CALC_WINDOW_PROPERTY_TIMEOUT = 1000;
+const std::string WANT_PARAM_GAME_PRELAUNCH = "ohos.params.gamePrelaunch";
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
 {
@@ -645,7 +646,8 @@ WSError SceneSession::BackgroundTask(const bool isSaveSnapshot, LifeCycleChangeR
             return ret;
         }
         session->SetSnapshotPrivacyMode(session->GetIsPrivacyMode());
-        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot) {
+        if (WindowHelper::IsMainWindow(session->GetWindowType()) && isSaveSnapshot && needSaveSnapshot &&
+            reason != LifeCycleChangeReason::GAME_PRELAUNCH_BACKGROUND) {
             session->SetFreeMultiWindow();
             session->SaveSnapshot(true, true, nullptr, false, reason);
         }
@@ -1146,6 +1148,13 @@ WSError SceneSession::OnSessionEvent(SessionEvent event, const SessionEventParam
         session->UpdateWaterfallMode(event);
         auto property = session->GetSessionProperty();
         bool proportionalScale = property->IsAdaptToProportionalScale();
+        if (event == SessionEvent::EVENT_CLEAR_GAME_PRELAUNCH_FLAG) {
+            if (session->GetSessionInfo().reuseSessionInGamePreLaunch_) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "Reset scene session reuseSessionInGamePreLaunch_ to false, id: %{public}d",
+                    session->GetPersistentId());
+                session->EditSessionInfo().reuseSessionInGamePreLaunch_ = false;
+            }
+        }
         if (event == SessionEvent::EVENT_START_MOVE) {
             if (!session->IsMovable()) {
                 return WSError::WS_OK;
@@ -6376,6 +6385,12 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         info.windowCreateParams->needAnimation = std::make_shared<bool>(withAnimation);
     }
 
+    if (abilitySessionInfo->want.HasParameter(WANT_PARAM_GAME_PRELAUNCH)) {
+        bool isGamePreLaunch = abilitySessionInfo->want.GetBoolParam(WANT_PARAM_GAME_PRELAUNCH, false);
+        info.isGamePrelaunch_ = isGamePreLaunch;
+        info.reuseSessionInGamePreLaunch_ = isGamePreLaunch;
+    }
+
     TLOGI(WmsLogTag::WMS_LIFE, "bundleName:%{public}s, moduleName:%{public}s, abilityName:%{public}s,"
         "appIndex:%{public}d, affinity:%{public}s. callState:%{public}d, want persistentId:%{public}d,"
         "uiAbilityId:%{public}" PRIu64 ", windowMode:%{public}d, callerId:%{public}d,"
@@ -6383,14 +6398,14 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
         "supportedWindowModes.size:%{public}zu, requestId:%{public}d,"
         "maxWindowWidth:%{public}d, minWindowWidth:%{public}d, maxWindowHeight:%{public}d, minWindowHeight:%{public}d, "
         "startWindowType:%{public}d, isPrelaunch:%{public}d, frameNum:%{public}d,"
-        "isTargetPlugin:%{public}d, hostBundleName:%{public}s",
+        "isTargetPlugin:%{public}d, hostBundleName:%{public}s, isGamePrelaunch: %{public}d",
         info.bundleName_.c_str(), info.moduleName_.c_str(), info.abilityName_.c_str(), info.appIndex_,
         info.sessionAffinity.c_str(), info.callState_, info.persistentId_, info.uiAbilityId_, info.windowMode,
         info.callerPersistentId_, info.needClearInNotShowRecent_, info.appInstanceKey_.c_str(),
         info.supportedWindowModes.size(), info.requestId,
         info.windowSizeLimits.maxWindowWidth, info.windowSizeLimits.minWindowWidth,
         info.windowSizeLimits.maxWindowHeight, info.windowSizeLimits.minWindowHeight, info.startWindowType_,
-        info.isPrelaunch_, info.frameNum_, info.isTargetPlugin, info.hostBundleName.c_str());
+        info.isPrelaunch_, info.frameNum_, info.isTargetPlugin, info.hostBundleName.c_str(), info.isGamePrelaunch_);
     return info;
 }
 

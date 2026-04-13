@@ -865,7 +865,7 @@ HWTEST_F(SceneSessionTest4, UnregisterSessionChangeListeners01, TestSize.Level1)
 
     sceneSession->UnregisterSessionChangeListeners();
     NotifyPendingSessionToBackgroundForDelegatorFunc func =[sceneSession](const SessionInfo& info,
-        bool shouldBackToCaller) { return; };
+        bool shouldBackToCaller, LifeCycleChangeReason reason) { return; };
     sceneSession->pendingSessionToBackgroundForDelegatorFunc_ = func;
     ASSERT_EQ(WSError::WS_OK, sceneSession->PendingSessionToBackgroundForDelegator(true));
 }
