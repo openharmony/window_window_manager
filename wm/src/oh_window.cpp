@@ -275,7 +275,7 @@ WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
 
     OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
     if (!FindFrameMetricsMeasuredListener(windowId, measuredCallbackId, listener)) {
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
 
     auto ret = window->UnregisterFrameMetricsChangeListener(listener);
@@ -404,11 +404,6 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
-        if (window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
-            return;
-        }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.enable_ = enabled;
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
@@ -436,11 +431,6 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
-        if (window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
-            return;
-        }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.contentColor_ = color;
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
@@ -465,11 +455,6 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
-            return;
-        }
-        if (window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
@@ -862,7 +847,7 @@ int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
 {
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
@@ -916,7 +901,7 @@ int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
 {
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
-        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);

@@ -57,6 +57,7 @@ enum class ListenerFunctionType : uint32_t {
     SET_SPECIFIC_SESSION_ZINDEX_CB,
     NOTIFY_SUPPORT_ROTATION_REGISTERED_CB,
     MINIMIZE_ALL_CB,
+    MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB,
     NOTIFY_PAGE_ENABLE_REGISTERED_CB,
 };
 
@@ -148,6 +149,7 @@ public:
     static napi_value GetAllJsonProfile(napi_env env, napi_callback_info info);
     static napi_value GetJsonProfile(napi_env env, napi_callback_info info);
     static napi_value SetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info);
+    static napi_value SetSelectMode(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -293,7 +295,8 @@ private:
     napi_value OnGetAllJsonProfile(napi_env env, napi_callback_info info);
     napi_value OnGetJsonProfile(napi_env env, napi_callback_info info);
     napi_value OnSetAppForceLandscapeConfigEnable(napi_env env, napi_callback_info info);
-    
+    napi_value OnSetSelectMode(napi_env env, napi_callback_info info);
+
     /*
      * PC Window
      */
@@ -438,6 +441,9 @@ private:
      */
     void RegisterSetSpecificWindowZIndexCallback();
     void OnSetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, SetSpecificZIndexReason reason);
+    void RegisterMoveMainWindowToTargetDisplayCallback();
+    void OnMoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId,
+        bool isFromScreenVirtual, bool isToScreenVirtual);
 
     napi_env env_;
     std::shared_mutex jsCbMapMutex_;

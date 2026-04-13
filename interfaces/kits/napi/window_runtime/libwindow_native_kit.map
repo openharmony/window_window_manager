@@ -244,6 +244,7 @@
             OHOS::Rosen::JsWindow::SetSystemBarProperties*;
             OHOS::Rosen::JsWindow::SetTitleAndDockHoverShown*;
             OHOS::Rosen::JsWindow::SetTitleButtonVisible*;
+            OHOS::Rosen::JsWindow::SetPreferredOrientationWithResult*;
             OHOS::Rosen::JsWindow::SetTopmost*;
             OHOS::Rosen::JsWindow::SetTouchable*;
             OHOS::Rosen::JsWindow::SetTouchableAreas*;
@@ -354,6 +355,7 @@
             OHOS::Rosen::NapiIsCallable*;
             OHOS::Rosen::NapiThrowError*;
             OHOS::Rosen::OrientationInit*;
+            OHOS::Rosen::OrientationExecutionResultInit*;
             OHOS::Rosen::ParseAndCheckRect*;
             OHOS::Rosen::ParseColorMetrics*;
             OHOS::Rosen::ParseJsValue*;

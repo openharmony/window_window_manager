@@ -2541,7 +2541,7 @@ HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated, TestSize.
     ASSERT_NE(iRemoteObjectMocker, nullptr);
     auto sProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     ASSERT_NE(sProxy, nullptr);
-    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     ASSERT_EQ(res, WSError::WS_OK);
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyAppForceLandscapeConfigEnableUpdated end";
 }
@@ -2559,7 +2559,7 @@ HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated01, TestSiz
     ASSERT_NE(sProxy, nullptr);
     
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
     MockMessageParcel::ClearAllErrorFlag();
 }
@@ -2573,7 +2573,7 @@ HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated02, TestSiz
 {
     auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     ASSERT_NE(sProxy, nullptr);
-    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 }
 
@@ -2588,7 +2588,7 @@ HWTEST_F(SessionProxyTest, NotifyAppForceLandscapeConfigEnableUpdated03, TestSiz
     mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
     auto sProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     ASSERT_NE(sProxy, nullptr);
-    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    auto res = sProxy->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_ERROR_IPC_FAILED);
 }
 

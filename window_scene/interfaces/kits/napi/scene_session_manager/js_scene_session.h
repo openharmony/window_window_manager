@@ -122,6 +122,7 @@ enum class ListenerFuncType : uint32_t {
     SNAPSHOT_SKIP_CHANGE_CB,
     COMPATIBLE_MODE_CHANGE_CB,
     RECOVER_WINDOW_EFFECT_CB,
+    PRE_CALC_WINDOW_PROPERTY_CB,
 };
 
 class SceneSession;
@@ -284,7 +285,9 @@ private:
     static napi_value SetPcAppInpadOrientationLandscape(napi_env env, napi_callback_info info);
     static napi_value UpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     static napi_value SetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
+    static napi_value NotifyOrientationExecutionResult(napi_env env, napi_callback_info info);
     static napi_value GetSceneNodeCount(napi_env env, napi_callback_info info);
+    static napi_value NotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
     /*
      * PC Window
      */
@@ -389,7 +392,9 @@ private:
     napi_value OnUpdateSceneAnimationConfig(napi_env env, napi_callback_info info);
     napi_value OnGetUid(napi_env env, napi_callback_info info);
     napi_value OnSetMobileAppInPadLayoutFullScreen(napi_env env, napi_callback_info info);
+    napi_value OnNotifyOrientationExecutionResult(napi_env env, napi_callback_info info);
     napi_value OnGetSceneNodeCount(napi_env env, napi_callback_info info);
+    napi_value OnNotifyPreCalcWindowProperty(napi_env env, napi_callback_info info);
 
     /*
      * PC Window
@@ -477,6 +482,7 @@ private:
     void ProcessRotationLockChangeRegister();
     void ProcessSnapshotSkipChangeRegister();
     void ProcessRecoverWindowEffectRegister();
+    void ProcessPreCalcWindowPropertyRegister();
 
     /*
      * PC Window Layout
@@ -528,7 +534,8 @@ private:
     void OnDefaultAnimationFlagChange(bool isNeedDefaultAnimationFlag);
     void OnIsCustomAnimationPlaying(bool status);
     void OnShowWhenLocked(bool showWhenLocked);
-    void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true);
+    void OnReuqestedOrientationChange(uint32_t orientation, bool needAnimation = true, uint32_t promiseId = 0);
+    void ProcessRequestedOrientationResult(uint32_t promiseId);
     void OnForceHideChange(bool hide);
     void OnWindowDragHotArea(uint32_t type, SizeChangeReason reason, DisplayId displayId);
     void OnTouchOutside();
@@ -569,6 +576,7 @@ private:
     void OnOutlineParamsChange(bool isOutlineEnabled, const OutlineStyleParams& outlineStyleParams);
     void OnRestartApp(const SessionInfo& info, int32_t callingPid);
     void OnCallingSessionIdChange(uint32_t callingSessionId);
+    void OnPreCalcWindowProperty();
 
     /*
      * Window Property
@@ -614,6 +622,7 @@ private:
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
     std::shared_ptr<MainThreadScheduler> taskScheduler_;
     static std::map<int32_t, napi_ref> jsSceneSessionMap_;
+    std::atomic<bool> executionResultFinish_ = true;
     static napi_ref jsSceneSessionProtoRef_;
 };
 } // namespace OHOS::Rosen

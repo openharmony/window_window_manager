@@ -2033,6 +2033,12 @@ void AniWindow::SetTouchableAreas(ani_env* env, ani_object obj, ani_long nativeO
 
 void AniWindow::OnSetTouchableAreas(ani_env* env, ani_array rects)
 {
+    if (!Permission::IsSystemCalling() &&
+        !Permission::CheckSelfPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]OnSetTouchableAreas permission denied!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION);
+        return;
+    }
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]window is nullptr!");
@@ -5360,23 +5366,23 @@ static void ParseAttachOptions(sptr<Window> windowToken, ani_env* env, ani_objec
         static_cast<ani_string>(nameValueRet));
         options.currentLayoutMode = currentLayoutMode;
     }
-    ani_ref parentWindowSizeChangeCallBack;
-    if (!getPropertyAndCheckUndefined(attachOptions, "parentWindowSizeChangeCallBack",
-        parentWindowSizeChangeCallBack, "parentWindowSizeChangeCallBack")) {
+    ani_ref parentWindowSizeChangeCallback;
+    if (!getPropertyAndCheckUndefined(attachOptions, "parentWindowSizeChangeCallback",
+        parentWindowSizeChangeCallback, "parentWindowSizeChangeCallback")) {
         return;
     }
-    if (parentWindowSizeChangeCallBack && registerManager->RegisterListener(windowToken, "parentWindowSizeChange",
-        CaseType::CASE_WINDOW, env, parentWindowSizeChangeCallBack, 0) != WmErrorCode::WM_OK) {
+    if (parentWindowSizeChangeCallback && registerManager->RegisterListener(windowToken, "parentWindowSizeChange",
+        CaseType::CASE_WINDOW, env, parentWindowSizeChangeCallback, 0) != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
-    ani_ref parentWindowStatusChangeCallBack;
-    if (!getPropertyAndCheckUndefined(attachOptions, "parentWindowStatusChangeCallBack",
-        parentWindowStatusChangeCallBack, "parentWindowStatusChangeCallBack")) {
+    ani_ref parentWindowStatusChangeCallback;
+    if (!getPropertyAndCheckUndefined(attachOptions, "parentWindowStatusChangeCallback",
+        parentWindowStatusChangeCallback, "parentWindowStatusChangeCallback")) {
         return;
     }
-    if (parentWindowStatusChangeCallBack && registerManager->RegisterListener(windowToken, "parentWindowStatusChange",
-        CaseType::CASE_WINDOW, env, parentWindowStatusChangeCallBack, 0) != WmErrorCode::WM_OK) {
+    if (parentWindowStatusChangeCallback && registerManager->RegisterListener(windowToken, "parentWindowStatusChange",
+        CaseType::CASE_WINDOW, env, parentWindowStatusChangeCallback, 0) != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
@@ -5425,10 +5431,11 @@ void AniWindow::OnAttachToParentWindow(ani_env* env, ani_object anchorInfo,
     WindowAnchorInfo windowAnchorInfo = { true, true, acceptWindowAnchorInfo.windowAnchor_,
         acceptWindowAnchorInfo.offsetX_, acceptWindowAnchorInfo.offsetY_};
     windowAnchorInfo.attachOptions.currentLayoutMode = acceptWindowAnchorInfo.attachOptions.currentLayoutMode;
+    windowAnchorInfo.isFromAttachOrDetach_ = true;
     TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offset:%{public}d currentLayoutMode:"
         "%{public}s", windowAnchorInfo.windowAnchor_, windowAnchorInfo.offsetX_, windowAnchorInfo.offsetY_,
         windowAnchorInfo.attachOptions.currentLayoutMode.c_str());
-    auto setWindowAnchorInfoRet = windowToken_->SetWindowAnchorInfo(windowAnchorInfo, true);
+    auto setWindowAnchorInfoRet = windowToken_->SetWindowAnchorInfo(windowAnchorInfo);
     auto it = WM_JS_TO_ERROR_CODE_MAP.find(setWindowAnchorInfoRet);
     WmErrorCode errorCode = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     if (errorCode != WmErrorCode::WM_OK) {
@@ -5479,7 +5486,7 @@ void AniWindow::OnDetachLayoutToParentWindow(ani_env* env)
 
     WindowAnchorInfo windowAnchorInfo = { false, false, WindowAnchor::TOP_START, 0, 0};
     windowAnchorInfo.attachOptions.currentLayoutMode = "";
-    auto setWindowAnchorInfoRet = windowToken_->SetWindowAnchorInfo(windowAnchorInfo, true);
+    auto setWindowAnchorInfoRet = windowToken_->SetWindowAnchorInfo(windowAnchorInfo);
     auto it = WM_JS_TO_ERROR_CODE_MAP.find(setWindowAnchorInfoRet);
     WmErrorCode errorCode = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     if (errorCode != WmErrorCode::WM_OK) {

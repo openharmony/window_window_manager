@@ -1936,6 +1936,50 @@ HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndex, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MoveMainWindowToTargetDisplay
+ * @tc.desc: test function : MoveMainWindowToTargetDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, MoveMainWindowToTargetDisplay, TestSize.Level1)
+{
+    MockAccesstokenKit::MockIsSystemApp(false);
+    WSError ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NOT_SYSTEM_APP);
+
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+
+    sptr<SceneSession> sceneSession = CreateSceneSession("test", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+    ssm_->sceneSessionMap_.clear();
+
+    sceneSession = CreateSceneSession("test", WindowType::WINDOW_TYPE_PIP);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetDisplayId(-1);
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+
+    sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    ret = ssm_->MoveMainWindowToTargetDisplay(999, 1); // 999 不存在
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_DISPLAY);
+
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
  * @tc.name: SetBufferAvailable
  * @tc.desc: test function : SetBufferAvailable
  * @tc.type: FUNC

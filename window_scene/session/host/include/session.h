@@ -249,6 +249,9 @@ public:
     std::string GetSessionLabel() const;
     void SetRestartAppListener(NotifyRestartAppFunc&& func);
     virtual void NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent event) {}
+    virtual PreWindowProperty PreCalcWindowProperty() { return PreWindowProperty(); }
+    bool IsSubWindowZLevelAboveParentLoosened() const;
+    bool IsLoosenedWithFreeMultiMode() const;
 
     /*
      * App Use Control

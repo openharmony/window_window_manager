@@ -89,14 +89,12 @@ WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReas
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
         WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
-        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr &&
-            session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_ != nullptr) {
+        if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
             if (Session::IsScbCoreEnabled()) {
                 session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);
             } else {
                 session->specificCallback_->onUpdateAvoidArea_(session->GetPersistentId());
             }
-            session->specificCallback_->onClearDisplayStatusBarTemporarilyFlags_();
         }
         return ret;
     }, "NotifyClientToUpdateRect");

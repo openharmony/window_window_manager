@@ -118,6 +118,42 @@ HWTEST_F(SessionStageProxyRotationTest, NotifyRotationChange, Function | SmallTe
     RotationChangeResult res = sessionStage_->NotifyRotationChange(info);
     ASSERT_EQ(0, res.windowRect_.width_);
 }
+
+/**
+ * @tc.name: NotifyOrientationExecutionResult
+ * @tc.desc: 测试 NotifyOrientationExecutionResult 的各种场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyRotationTest, NotifyOrientationExecutionResult, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: NotifyOrientationExecutionResult start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    uint32_t promiseId = 123;
+    OrientationExecutionResult result = OrientationExecutionResult::ORIENTATION_APPLIED;
+
+    WSError errCode = sessionStageProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sessionStageProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    errCode = sessionStageProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: NotifyOrientationExecutionResult end";
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

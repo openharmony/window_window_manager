@@ -97,10 +97,6 @@ ohos_shared_library("screen_session_manager") {
 
   public_configs = [ ":session_manager_public_config" ]
 
-  public_external_deps = [
-    "input:libmmi-client",
-    "input:libmmi-napi",
-  ]
   deps = [
     "${window_base_path}/etc:wms_etc",
     "${window_base_path}/utils:libwmutil",
@@ -141,6 +137,8 @@ ohos_shared_library("screen_session_manager") {
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
+    "input:libmmi-client",
+    "input:libmmi-napi",
     "ipc:ipc_core",
     "libxml2:libxml2",
     "os_account:os_account_innerkits",

@@ -691,6 +691,96 @@ HWTEST_F(SceneSessionRotationTest, ConvertWindowOrientationToDisplayRotation, Fu
     WSError result1 = sceneSession->ConvertWindowOrientationToDisplayRotation(value, convertedValue);
     EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
 }
+
+/**
+ * @tc.name: SetPreferredOrientationWithResult01
+ * @tc.desc: 测试正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionRotationTest, SetPreferredOrientationWithResult01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: SetPreferredOrientationWithResult01 start";
+    SessionInfo info;
+    info.abilityName_ = "SetPreferredOrientationWithResult01";
+    info.bundleName_ = "SetPreferredOrientationWithResult01";
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    Orientation orientation = Orientation::VERTICAL;
+    uint32_t promiseId = 123;
+    bool needAnimation = true;
+    
+    WMError result = sceneSession->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: SetPreferredOrientationWithResult01 end";
+}
+
+/**
+ * @tc.name: SetPreferredOrientationWithResult02
+ * @tc.desc: 测试 onRequestedOrientationChange_ 为空
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionRotationTest, SetPreferredOrientationWithResult02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: SetPreferredOrientationWithResult02 start";
+    SessionInfo info;
+    info.abilityName_ = "SetPreferredOrientationWithResult02";
+    info.bundleName_ = "SetPreferredOrientationWithResult02";
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    EXPECT_NE(sceneSession, nullptr);
+    Orientation orientation = Orientation::VERTICAL;
+    uint32_t promiseId = 123;
+    bool needAnimation = true;
+    
+    WMError result = sceneSession->SetPreferredOrientationWithResult(orientation, promiseId, needAnimation);
+    EXPECT_EQ(result, WMError::WM_OK);
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: SetPreferredOrientationWithResult02 end";
+}
+
+/**
+ * @tc.name: NotifyOrientationExecutionResult01
+ * @tc.desc: 测试正常流程
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionRotationTest, NotifyOrientationExecutionResult01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: NotifyOrientationExecutionResult01 start";
+    SessionInfo info;
+    info.abilityName_ = "NotifyOrientationExecutionResult01";
+    info.bundleName_ = "NotifyOrientationExecutionResult01";
+    sptr<SessionStageMocker> sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sceneSession->sessionStage_ = sessionStageMocker;
+    EXPECT_NE(sceneSession, nullptr);
+    uint32_t promiseId = 123;
+    OrientationExecutionResult result = OrientationExecutionResult::ORIENTATION_APPLIED;
+    
+    WSError ret = sceneSession->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: NotifyOrientationExecutionResult01 end";
+}
+
+/**
+ * @tc.name: NotifyOrientationExecutionResult02
+ * @tc.desc: 测试 sessionStage_ 为空
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionRotationTest, NotifyOrientationExecutionResult02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: NotifyOrientationExecutionResult02 start";
+    SessionInfo info;
+    info.abilityName_ = "NotifyOrientationExecutionResult02";
+    info.bundleName_ = "NotifyOrientationExecutionResult02";
+    sptr<SceneSessionMocker> sceneSession = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+    sceneSession->sessionStage_ = nullptr;
+    EXPECT_NE(sceneSession, nullptr);
+    uint32_t promiseId = 123;
+    OrientationExecutionResult result = OrientationExecutionResult::ORIENTATION_APPLIED;
+    
+    WSError ret = sceneSession->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: NotifyOrientationExecutionResult02 end";
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

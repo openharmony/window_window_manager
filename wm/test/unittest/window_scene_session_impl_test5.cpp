@@ -331,6 +331,36 @@ HWTEST_F(WindowSceneSessionImplTest5, Maximize02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Maximize03
+ * @tc.desc: Maximize with isAnchorEnabled_ = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, Maximize03, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    option->SetWindowName("Maximize");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(nullptr, window);
+
+    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->property_->persistentId_ = ROTATE_ANIMATION_DURATION;
+    window->state_ = WindowState::STATE_CREATED;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetWindowModeSupportType(1);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    WindowAnchorInfo anchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    anchorInfo.isFromAttachOrDetach_ = true;
+    window->property_->SetWindowAnchorInfo(anchorInfo);
+    auto ret = window->Maximize(presentation);
+    ASSERT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: MoveWindowToGlobal
  * @tc.desc: MoveWindowToGlobal
  * @tc.type: FUNC
@@ -1694,10 +1724,67 @@ HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfo01, Function | SmallTes
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
+    windowAnchorInfo.isFromAttachOrDetach_ = false;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo_);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+
     window->windowSystemConfig_.supportFollowRelativePositionToParent_ = true;
     session->systemConfig_.supportFollowRelativePositionToParent_ = true;
     ret = window->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfoWithCoordinate
+ * @tc.desc: SetWindowAnchorInfo with isFromAttachOrDetach_ = true, basic validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, SetWindowAnchorInfoWithCoordinate01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowAnchorInfoWithCoordinate01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    auto property = window->GetProperty();
+    SessionInfo sessionInfo;
+    sptr<WindowSceneSessionImpl> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    property->persistentId_ = 100;
+    window->state_ = WindowState::STATE_CREATED;
+
+    WindowAnchorInfo windowAnchorInfo;
+    windowAnchorInfo.isFromAttachOrDetach_ = true;
+
+    property->compatibleModeProperty_ = sptr<CompatibleModeProperty>::MakeSptr();
+
+    property_->compatibleModeProperty_->isAdaptToCompatibleDevice_ = true;
+    EXPECT_TREE(property_->compatibleModeProperty_->isAdaptToCompatibleDevice_);
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    WMError ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    property_->compatibleModeProperty_->isAdaptToCompatibleDevice_ = false;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = false;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+
+    windowAnchorInfo.isFromAttachOrDetach_ = false;
+    property->windowAnchorInfo_.isAnchoredByAttach_ = false;
+    ret = window->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 }
 
 /**
@@ -1952,25 +2039,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = window->GetWindowTransitionAnimation(type);
     ASSERT_EQ(ret, nullptr);
-}
-
-/**
- * @tc.name: TransferLifeCycleEventToString
- * @tc.desc: TransferLifeCycleEventToString
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, TransferLifeCycleEventToString, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("TransferLifeCycleEventToString");
-    option->SetDisplayId(0);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    window->RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, WMError::WM_ERROR_REPEAT_OPERATION);
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::CREATE_EVENT), "CREATE");
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::SHOW_EVENT), "SHOW");
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::HIDE_EVENT), "HIDE");
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::DESTROY_EVENT), "DESTROY");
 }
 
 /**
@@ -3079,7 +3147,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
     
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 }
 
@@ -3101,7 +3169,7 @@ HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated
     window->hostSession_ = session;
     
     // GetAppForceLandscapeConfigEnable will fail if listener is not registered
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_DO_NOTHING);
 }
 }

@@ -405,7 +405,7 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, TestSize.Level1)
     session->SetRequestedOrientation(orientation);
     session->onRequestedOrientationChange_ = nullptr;
     session->SetRequestedOrientation(orientation);
-    NotifyReqOrientationChangeFunc func = [](uint32_t orientation, bool needAnimation) {
+    NotifyReqOrientationChangeFunc func = [](uint32_t orientation, bool needAnimation, uint32_t promiseId) {
         return;
     };
     session->onRequestedOrientationChange_ = func;
@@ -677,9 +677,6 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
-    sceneSession->HandleSpecificSystemBarProperty(type, property);
-
-    sceneSession->isDisplayStatusBarTemporarily_.store(true);
     sceneSession->HandleSpecificSystemBarProperty(type, property);
 
     sceneSession->specificCallback_ = nullptr;

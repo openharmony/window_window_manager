@@ -130,6 +130,24 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_EDM_CONTROLLED = 16000013, // enterprise limit
 };
 
+enum class WSErrorReason : int32_t {
+    WS_REASON_WINDOW_ERR = 1000,
+    WS_REASON_WINDOW_MINIMIZE_ERR,
+    WS_REASON_WINDOW_START_ERR,
+    WS_REASON_WINDOW_PRE_TERMINATE_ERR,
+    WS_REASON_WINDOW_STARTUP_EXC_ERR,
+    WS_REASON_WINDOW_CALL_ERR,
+    WS_REASON_WINDOW_CLEAN_ERR,
+    WS_REASON_WINDOW_CLOSE_ERR,
+    WS_REASON_WINDOW_SPECIFIED_ERR,
+
+    WS_REASON_WINDOW_ANCO_ERR = 1200,
+    WS_REASON_WINDOW_ANCO_START_ERR,
+    WS_REASON_WINDOW_ANCO_SESSION_CREATE_ERR,
+    WS_REASON_WINDOW_ANCO_MOVE_SESSION_FOREGROUND_ERR,
+    WS_REASON_WINDOW_ANCO_CLEAR_SESSION_ERR,
+};
+
 extern const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP;
 
 bool CheckCollaboratorType(int32_t type);
@@ -615,6 +633,7 @@ enum class SizeChangeReason : uint32_t {
     SNAPSHOT_ROTATION = 37,
     SCENE_WITH_ANIMATION,
     LS_STATE_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
@@ -1428,5 +1447,21 @@ enum class SidebarBlurType : uint32_t {
     DEFAULT_MAXIMIZE,
     END,
 };
+
+struct PreWindowProperty {
+    uint32_t rotation = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    PreWindowProperty() {}
+
+    PreWindowProperty(uint32_t rotation, uint32_t width, uint32_t height)
+    {
+        this->rotation = rotation;
+        this->width = width;
+        this->height = height;
+    }
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H
