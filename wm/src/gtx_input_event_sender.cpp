@@ -69,9 +69,7 @@ void GtxInputEventSender::SetTouchEvent(Rosen::Rect rect, std::shared_ptr<MMI::P
 Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRedistributeCallback::OnInputEvent(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (keyEvent == nullptr) {
-        return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
-    }
+    (void)keyEvent;
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }
 
@@ -111,8 +109,7 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }
 
-void GtxInputEventSender::RegisterInputEventScale(int offsetX,
-    int offsetY, float scaleX, float scaleY)
+void GtxInputEventSender::RegisterInputEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
 {
     if (mCallbackInstance != nullptr) {
         Rosen::WindowInputRedistributeClient::UnRegisterInputEventRedistribute(mRecipientInfo);
@@ -143,8 +140,8 @@ __attribute__((visibility("default"))) void GetGtxTouchEvent(OHOS::GtxTouchEvent
     OHOS::GtxInputEventSender::GetInstance().GetTouchEvent(touchEvent);
 }
 
-__attribute__((visibility("default"))) void RegisterInputEventScale(int offsetX, int offsetY,
-    float scaleX, float scaleY)
+__attribute__((visibility("default"))) void
+    RegisterInputEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
 {
     OHOS::GtxInputEventSender::GetInstance().RegisterInputEventScale(offsetX, offsetY, scaleX, scaleY);
 }
