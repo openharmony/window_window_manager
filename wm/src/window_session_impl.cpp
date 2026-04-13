@@ -3878,7 +3878,16 @@ std::shared_ptr<Media::PixelMap> WindowSessionImpl::Snapshot()
     if (IsWindowSessionInvalid()) {
         return nullptr;
     }
-    auto rsInterface = GetRSRenderInterface();
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
+        return nullptr;
+    }
+    auto rsUICtx = surfaceNode_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return nullptr;
+    }
+    auto rsInterface = rsUICtx->GetRSRenderInterface();
     if (rsInterface == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
         return nullptr;
@@ -3908,7 +3917,16 @@ WMError WindowSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
             GetPersistentId(), state_);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto rsInterface = GetRSRenderInterface();
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsUICtx = surfaceNode_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsInterface = rsUICtx->GetRSRenderInterface();
     if (rsInterface == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -3934,7 +3952,16 @@ WMError WindowSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    auto rsInterface = GetRSRenderInterface();
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsUICtx = surfaceNode_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsInterface = rsUICtx->GetRSRenderInterface();
     if (rsInterface == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -9182,20 +9209,6 @@ std::shared_ptr<RSUIContext> WindowSessionImpl::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s, windowId: %{public}u",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
-}
-
-std::shared_ptr<RSRenderInterface> WindowSessionImpl::GetRSRenderInterface()
-{
-    if (surfaceNode_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
-        return nullptr;
-    }
-    auto rsUICtx = surfaceNode_->GetRSUIContext();
-    if (rsUICtx == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
-        return nullptr;
-    }
-    return rsUICtx->GetRSRenderInterface();
 }
 
 nlohmann::json WindowSessionImpl::SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle)
