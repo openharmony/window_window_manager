@@ -433,6 +433,12 @@
             VTT?for?OHOS::Rosen::PatternDetachCallback;
             VTT?for?OHOS::Rosen::WindowManagerProxy;
         };
+    extern "C" {
+        SetGtxTouchEventStatus*;
+        GetGtxTouchEvent*;
+        RegisterInputEventScale*;
+        UnRegisterInputEventScale*;
+    }
     local:
     *;
 };
