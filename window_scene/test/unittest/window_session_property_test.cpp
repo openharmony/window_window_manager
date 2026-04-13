@@ -1694,13 +1694,14 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
 
     Parcel parcel;
     std::shared_ptr<Media::PixelMap> icon;
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true}, icon, "test"};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", 0, true, false, 0, true}, icon, "test"};
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
     ASSERT_NE(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);
     ASSERT_NE(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
     ASSERT_NE(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
+    ASSERT_EQ(property->GetFbTemplateInfo().textUpdateAnimationType_, fbTemplateInfo.textUpdateAnimationType_);
 
     parcel.WriteParcelable(&fbTemplateInfo);
     property->UnmarshallingFbTemplateInfo(parcel, property);
@@ -1709,6 +1710,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     ASSERT_EQ(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
     ASSERT_EQ(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
+    ASSERT_EQ(property->GetFbTemplateInfo().textUpdateAnimationType_, fbTemplateInfo.textUpdateAnimationType_);
 }
 
 /**

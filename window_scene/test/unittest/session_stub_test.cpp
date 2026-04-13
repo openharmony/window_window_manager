@@ -435,7 +435,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_SYNC };
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true, "test"}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", 0, false, 0, true, "test"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
