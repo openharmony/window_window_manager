@@ -69,7 +69,6 @@ void GtxInputEventSender::SetTouchEvent(Rosen::Rect rect, std::shared_ptr<MMI::P
 Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRedistributeCallback::OnInputEvent(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    TLOGI(WmsLogTag::WMS_EVENT, "TouchManager OnInputEvent KeyEvent");
     if (keyEvent == nullptr) {
         return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
     }
@@ -82,16 +81,7 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
     if (pointerEvent == nullptr) {
         return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
     }
-    TLOGI(WmsLogTag::WMS_EVENT,
-          "TouchManager OnInputEvent PointerEvent, %{public}lu",
-          pointerEvent->GetAllPointerItems().size());
     for (auto& item : pointerEvent->GetAllPointerItems()) {
-        TLOGI(WmsLogTag::WMS_EVENT,
-              "pointerItem before, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, "
-              "displayYPos:%{public}f, windowPosY:%{public}f, windowY:%{public}d",
-              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(),
-              item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
-
         int32_t displayX = item.GetDisplayX();
         int32_t WindowX = item.GetWindowX();
         double DisplayXPos = item.GetDisplayXPos();
@@ -116,35 +106,18 @@ Rosen::InputAfterRedistributeBehavior GtxInputEventSender::NapiAVSessionInputRed
         item.SetWindowYPos(WindowYPos * mScaleY + mOffsetY);
         item.SetGlobalY(globalY * mScaleY + mOffsetY);
 
-        TLOGI(WmsLogTag::WMS_EVENT,
-              "pointerItem after, height:%{public}d, globalY:%{public}f, displayXPos:%{public}f, "
-              "displayYPos:%{public}f, windowPosY:%{public}f, windowY:%{public}d",
-              item.GetHeight(), item.GetGlobalY(), item.GetDisplayXPos(),
-              item.GetDisplayYPos(), item.GetWindowYPos(), item.GetWindowY());
+        pointerEvent->UpdatePointerItem(item.GetPointerId(), item);
     }
     return Rosen::InputAfterRedistributeBehavior::BEHAVIOR_NORMAL;
 }
 
-void GtxInputEventSender::NapiAVSessionInputRedistributeCallback::SetTouchEventScale(int offsetX,
+void GtxInputEventSender::RegisterInputEventScale(int offsetX,
     int offsetY, float scaleX, float scaleY)
 {
-    mOffsetX = offsetX;
-    mOffsetY = offsetY;
-    mScaleX = scaleX;
-    mScaleY = scaleY;
-}
-
-void GtxInputEventSender::SetTouchEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
-{
-    mOffsetX = offsetX;
-    mOffsetY = offsetY;
-    mScaleX = scaleX;
-    mScaleY = scaleY;
-}
-
-void GtxInputEventSender::RegisterInputEventScale()
-{
-    mCallbackInstance = std::make_shared<NapiAVSessionInputRedistributeCallback>(mOffsetX, mOffsetY, mScaleX, mScaleY);
+    if (mCallbackInstance != nullptr) {
+        Rosen::WindowInputRedistributeClient::UnRegisterInputEventRedistribute(mRecipientInfo);
+    }
+    mCallbackInstance = std::make_shared<NapiAVSessionInputRedistributeCallback>(offsetX, offsetY, scaleX, scaleY);
     mRecipientInfo.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
     mRecipientInfo.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_BEFORE_SEND_TO_COMPONENT;
     mRecipientInfo.type = Rosen::InputEventType::POINTER_EVENT;
@@ -156,6 +129,7 @@ void GtxInputEventSender::RegisterInputEventScale()
 void GtxInputEventSender::UnRegisterInputEventScale()
 {
     Rosen::WindowInputRedistributeClient::UnRegisterInputEventRedistribute(mRecipientInfo);
+    mCallbackInstance.reset();
 }
 
 extern "C" {
@@ -169,14 +143,9 @@ __attribute__((visibility("default"))) void GetGtxTouchEvent(OHOS::GtxTouchEvent
     OHOS::GtxInputEventSender::GetInstance().GetTouchEvent(touchEvent);
 }
 
-__attribute__((visibility("default"))) void SetTouchEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
+__attribute__((visibility("default"))) void RegisterInputEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
 {
-    OHOS::GtxInputEventSender::GetInstance().SetTouchEventScale(offsetX, offsetY, scaleX, scaleY);
-}
-
-__attribute__((visibility("default"))) void RegisterInputEventScale()
-{
-    OHOS::GtxInputEventSender::GetInstance().RegisterInputEventScale();
+    OHOS::GtxInputEventSender::GetInstance().RegisterInputEventScale(offsetX, offsetY, scaleX, scaleY);
 }
 
 __attribute__((visibility("default"))) void UnRegisterInputEventScale()
