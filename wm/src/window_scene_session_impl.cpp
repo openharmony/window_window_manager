@@ -7742,8 +7742,9 @@ WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo&
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!WindowHelper::IsSubWindow(property->GetWindowType()) || IsZLevelAboveParentLoosened()) {
-        TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid, windowType: %{public}d,
-            IsZLevelAboveParentLoosened: %{public}d", property->GetWindowType(), IsZLevelAboveParentLoosened());
+        TLOGE(WmsLogTag::WMS_SUB,
+            "only sub window is valid, windowType: %{public}d, IsZLevelAboveParentLoosened: %{public}d",
+            property->GetWindowType(), IsZLevelAboveParentLoosened());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
