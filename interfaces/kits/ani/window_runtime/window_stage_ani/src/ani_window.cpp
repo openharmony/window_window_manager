@@ -59,8 +59,8 @@ constexpr double MAX_GRAY_SCALE = 1.0;
 static std::mutex g_aniWindowMap_mutex;
 static std::map<std::string, ani_ref> g_aniWindowMap;
 
-AniWindow::AniWindow(const sptr<Window>& window)
-    : windowToken_(window), registerManager_(std::make_unique<AniWindowRegisterManager>())
+AniWindow::AniWindow(const sptr<Window>& window, ani_env* env)
+    : windowToken_(window), registerManager_(std::make_unique<AniWindowRegisterManager>()), env_(env)
 {
     NotifyNativeWinDestroyFunc func = [this](const std::string& windowName) {
         {
@@ -76,12 +76,18 @@ AniWindow::AniWindow(const sptr<Window>& window)
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in ani window", windowName.c_str());
     };
     windowToken_->RegisterWindowDestroyedListener(func);
+    NotifyOrientationExecutionResultFunc orientationFunc =
+        [this](uint32_t promiseId, OrientationExecutionResult result) {
+        this->NotifyOrientationExecutionResultResult(promiseId, static_cast<uint32_t>(result));
+    };
+    windowToken_->RegisterNotifyOrientationExecutionResultFunc(orientationFunc);
 }
 
 AniWindow::~AniWindow()
 {
     if (windowToken_ != nullptr) {
         windowToken_->UnregisterWindowDestroyedListener();
+        windowToken_->UnregisterNotifyOrientationExecutionResultFunc();
     }
 }
 
@@ -240,6 +246,66 @@ void AniWindow::OnSetPreferredOrientation(ani_env* env, ani_int orientation)
     TLOGNI(WmsLogTag::WMS_ROTATION,
         "[ANI] SetPreferredOrientation end, window [%{public}u, %{public}s] orientation=%{public}u",
         window->GetWindowId(), window->GetWindowName().c_str(), orientationValue);
+}
+
+void AniWindow::SetPreferredOrientationWithResult(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_int orientation, ani_int promiseId)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI] orientation:%{public}d promiseId:%{public}u",
+        static_cast<int32_t>(orientation), static_cast<uint32_t>(promiseId));
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] aniWindow is nullptr");
+        return;
+    }
+    aniWindow->OnSetPreferredOrientationWithResult(env, orientation, promiseId);
+}
+
+void AniWindow::OnSetPreferredOrientationWithResult(ani_env* env, ani_int orientation, ani_int promiseId)
+{
+    int32_t orientationValue = static_cast<int32_t>(orientation);
+    uint32_t promiseIdValue = static_cast<uint32_t>(promiseId);
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI] orientation:%{public}d promiseId:%{public}u",
+        orientationValue, promiseIdValue);
+    WmErrorCode errCode = WmErrorCode::WM_OK;
+    Orientation requestedOrientation = Orientation::UNSPECIFIED;
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] window is nullptr");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    auto apiOrientation = static_cast<ApiOrientation>(orientationValue);
+    if (apiOrientation < ApiOrientation::BEGIN || apiOrientation > ApiOrientation::END) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] Orientation %{public}u invalid!",
+            static_cast<uint32_t>(apiOrientation));
+        errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
+    } else {
+        requestedOrientation = JS_TO_NATIVE_ORIENTATION_MAP.at(apiOrientation);
+    }
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    WMError ret = window->SetPreferredOrientationWithResult(requestedOrientation, promiseIdValue);
+    TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] end: winId: %{public}u, result:%{public}d",
+        windowToken_->GetWindowId(), static_cast<int32_t>(ret));
+    if (ret != WMError::WM_OK) {
+        AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
+    }
+}
+
+void AniWindow::NotifyOrientationExecutionResultResult(uint32_t promiseId, uint32_t result)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "[ANI] promiseId:%{public}u result:%{public}u",
+        promiseId, result);
+    auto env = env_;
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "[ANI] env is null");
+        return;
+    }
+    AniWindowUtils::CallAniFunctionVoid(env, "@ohos.window.window",
+        "runOrientationResultCallback", nullptr, ani_int(promiseId), ani_int(result));
 }
 
 ani_int AniWindow::GetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj)
@@ -2171,7 +2237,7 @@ __attribute__((no_sanitize("cfi")))
         TLOGE(WmsLogTag::DEFAULT, "[ANI] null env %{public}u", ret);
         return nullptr;
     }
-    std::unique_ptr<AniWindow> aniWindow = std::make_unique<AniWindow>(window);
+    std::unique_ptr<AniWindow> aniWindow = std::make_unique<AniWindow>(window, env);
  
     ani_method initFunc = nullptr;
     if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
@@ -5067,7 +5133,7 @@ __attribute__((no_sanitize("cfi")))
         return cls;
     }
 
-    std::unique_ptr<AniWindow> uniqueWindow = std::make_unique<AniWindow>(window);
+    std::unique_ptr<AniWindow> uniqueWindow = std::make_unique<AniWindow>(window, env);
 
     ani_field contextField;
     if ((ret = env->Class_FindField(cls, "nativeObj", &contextField)) != ANI_OK) {
@@ -6658,6 +6724,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWindowColorSpace)},
         ani_native_function {"setPreferredOrientationSync", "li:",
             reinterpret_cast<void *>(AniWindow::SetPreferredOrientation)},
+        ani_native_function {"setPreferredOrientationWithResultSync", "lii:",
+            reinterpret_cast<void *>(AniWindow::SetPreferredOrientationWithResult)},
         ani_native_function {"getPreferredOrientation", "l:i",
             reinterpret_cast<void *>(AniWindow::GetPreferredOrientation)},
         ani_native_function {"convertOrientationAndRotation", "liii:i",
