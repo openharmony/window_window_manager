@@ -737,6 +737,7 @@ struct HookWindowInfo : public Parcelable {
     bool enableHookWindow{ false };
     float widthHookRatio{ 1.0f };
     bool notifyWindowChange{ false };
+    bool drawableRectHook{ false };
 
     static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
 
@@ -761,7 +762,8 @@ struct HookWindowInfo : public Parcelable {
         oss << std::boolalpha  // For true/false instead of 1/0
             << "enableHookWindow: " << enableHookWindow
             << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio
-            << ", notifyWindowChange: " << notifyWindowChange;
+            << ", notifyWindowChange: " << notifyWindowChange
+            << ", drawableRectHook: " << drawableRectHook;
         return oss.str();
     }
 
@@ -770,14 +772,16 @@ private:
     {
         return parcel.WriteBool(enableHookWindow) &&
                parcel.WriteFloat(widthHookRatio) &&
-               parcel.WriteBool(notifyWindowChange);
+               parcel.WriteBool(notifyWindowChange) &&
+               parcel.WriteBool(drawableRectHook);
     }
 
     static bool ReadAllFields(Parcel& parcel, HookWindowInfo& info)
     {
         return parcel.ReadBool(info.enableHookWindow) &&
                parcel.ReadFloat(info.widthHookRatio) &&
-               parcel.ReadBool(info.notifyWindowChange);
+               parcel.ReadBool(info.notifyWindowChange) &&
+               parcel.ReadBool(info.drawableRectHook);
     }
 };
 
