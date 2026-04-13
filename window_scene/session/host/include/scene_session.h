@@ -669,6 +669,33 @@ public:
     WSError SetCurrentRotation(int32_t currentRotation);
     WSError GetSceneNodeCount(uint32_t& nodeCount);
     WSError GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t timeoutMs = 3000);
+     WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result);	 
+     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height); 
+     WSError NotifyPageRotationIsIgnored(); 
+     WSError ConvertRotationToOrientation(uint32_t rotation, uint32_t width, uint32_t height, uint32_t& orientation); 
+     WSError ConvertOrientationAndRotation(const RotationInfoType from, const RotationInfoType to, 
+         const int32_t value, int32_t& convertedValue) override; 
+     WMError SetPreferredOrientationWithResult( 
+         Orientation orientation, uint32_t promiseId, bool needAnimation = true) override; 
+     WSError ConvertDisplayOrientationToWindowOrientation(const int32_t value, int32_t& convertedValue); 
+     WSError ConvertWindowOrientationToDisplayOrientation(const int32_t value, int32_t& convertedValue); 
+     WSError ConvertDisplayRotationToDisplayOrientation(const int32_t rotation, int32_t& orientation); 
+     WSError ConvertDisplayOrientationToDisplayRotation(const int32_t orientation, int32_t& rotation); 
+     WSError ConvertDisplayRotationToWindowOrientation(const int32_t value, int32_t& convertedValue); 
+     WSError ConvertWindowOrientationToDisplayRotation(const int32_t value, int32_t& convertedValue); 
+     void RegisterUpdateRotationChangeListener(NotifyRotationChangeFunc&& callback); 
+     WSError UpdateRotationChangeRegistered(int32_t persistentId, bool isRegister) override; 
+     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo, 
+         bool isRestrictNotify = false); 
+     bool isRotationChangeCallbackRegistered = false; 
+     void RegisterFollowScreenChangeCallback(NotifyFollowScreenChangeFunc&& callback); 
+     WSError UpdateFollowScreenChange(bool isFollowScreenChange); 
+     void RegisterRotationLockChangeCallback(NotifyRotationLockChangeFunc&& callback); 
+     PreWindowProperty PreCalcWindowProperty() override; 
+     WSError NotifyPreCalcWindowProperty(uint32_t rotation, uint32_t width, uint32_t height); 
+     void SetPreCalcWindowPropertyCallback(const  NotifyPreCalcWindowPropertyFunc& func); 
+     NotifyPreCalcWindowPropertyFunc preCalcWindowPropertyFunc_{}; 
+     RunnableFuture<PreWindowProperty> preWindowPropertyFuture_{};
 
     /*
      * Window Animation
