@@ -52,6 +52,7 @@ constexpr float INVALID_SCALE = 0;
 constexpr int32_t MIN_REQUEST_ID_FROM_ABILITY = 1;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
+constexpr uint32_t COMBINED_COMPATIBLE_CONFIG_MAX_SIZE = 5;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
@@ -551,7 +552,7 @@ struct SessionInfo {
      * Compatible Mode
      */
     std::string pageConfig = "";
-    std::string logicalDeviceConfig = "";
+    std::vector<std::string> combinedCompatibleConfig;
 
     AAFwk::Want GetWantSafely() const
     {

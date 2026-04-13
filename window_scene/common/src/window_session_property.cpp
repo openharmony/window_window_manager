@@ -2537,14 +2537,16 @@ CompatibleStyleMode WindowSessionProperty::GetPageCompatibleMode() const
     return pageCompatibleMode_;
 }
 
-void WindowSessionProperty::SetLogicalDeviceConfig(const std::string& logicalDeviceConfig)
+void WindowSessionProperty::SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig)
 {
-    logicalDeviceConfig_ = logicalDeviceConfig;
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
+    combinedCompatibleConfig_ = combinedCompatibleConfig;
 }
 
-std::string WindowSessionProperty::GetLogicalDeviceConfig() const
+std::vector<std::string> WindowSessionProperty::GetCombinedCompatibleConfig() const
 {
-    return logicalDeviceConfig_;
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
+    return combinedCompatibleConfig_;
 }
 
 void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
