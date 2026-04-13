@@ -365,7 +365,7 @@ public:
     };
 #endif
 
-bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+bool SceneSessionManager::CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
         !avoidArea.rightRect_.IsUninitializedRect()) {
@@ -3004,7 +3004,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
                 const AvoidArea& avoidArea, int32_t sessionBottom) {
-            return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
+            return this->CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
             return this->GetStatusBarAvoidHeight(displayId, barArea);
