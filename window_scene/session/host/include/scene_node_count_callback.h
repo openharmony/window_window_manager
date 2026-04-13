@@ -17,7 +17,7 @@
 #define OHOS_WINDOW_SCENE_SCENE_NODE_COUNT_CALLBACK_H
 
 #include "future.h"
-#include "zidl/scene_node_count_callback_proxy.h"
+#include "zidl/scene_node_count_callback_stub.h"
 
 namespace OHOS {
 namespace Rosen {
