@@ -485,14 +485,14 @@ HWTEST_F(SceneSessionImmersiveTest, HandleLayoutAvoidAreaUpdate, TestSize.Level1
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 
     session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId,
-        const AvoidArea& avoidArea, int32_t sessionBottom) {
+        const AvoidArea& avoidArea, int32_t sessionBottom, bool isLSState) {
         return true;
     };
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 
     session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId,
-        const AvoidArea& avoidArea, int32_t sessionBottom) {
+        const AvoidArea& avoidArea, int32_t sessionBottom, bool isLSState) {
         return false;
     };
     EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
