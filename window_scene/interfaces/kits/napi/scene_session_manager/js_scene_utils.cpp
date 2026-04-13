@@ -1186,6 +1186,9 @@ bool ConvertHookWindowInfoFromJs(napi_env env, napi_value jsObject, HookWindowIn
     if (!ConvertFromJsValueProperty(env, jsObject, "notifyWindowChange", hookWindowInfo.notifyWindowChange)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "drawableRectHook", hookWindowInfo.drawableRectHook)) {
+        return false;
+    }
     return true;
 }
 
