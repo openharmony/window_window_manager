@@ -1509,6 +1509,17 @@ struct WindowDisplayInfo : public Parcelable {
 };
 
 /**
+ * @struct WindowInfoOptions
+ *
+ * @brief Options for getting window info.
+ */
+struct WindowInfoOptions {
+    bool excludeSystemWindows = false;
+    int32_t foregroundAboveWindow = 0;
+    int32_t foregroundBelowWindow = 0;
+};
+
+/**
  * @struct WindowLayoutInfo
  *
  * @brief Layout info for all windows on the screen.
@@ -1516,11 +1527,12 @@ struct WindowDisplayInfo : public Parcelable {
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
     uint32_t zOrder = 0;
+    float windowAlpha = -1.0f;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
-               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder);
+               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder) && parcel.WriteFloat(windowAlpha);
     }
 
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
@@ -1528,7 +1540,7 @@ struct WindowLayoutInfo : public Parcelable {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
         if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
             !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_) ||
-            !parcel.ReadUint32(windowLayoutInfo->zOrder)) {
+            !parcel.ReadUint32(windowLayoutInfo->zOrder) || !parcel.ReadFloat(windowLayoutInfo->windowAlpha)) {
             delete windowLayoutInfo;
             return nullptr;
         }

@@ -122,7 +122,8 @@ public:
     WMError NotifyWatchFocusActiveChange(bool isActive) override;
     WMError GetParentMainWindowId(int32_t windowId, int32_t& mainWindowId) override;
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos) override;
-    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+        const WindowInfoOptions& option = WindowInfoOptions()) override;
     WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override;
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override;

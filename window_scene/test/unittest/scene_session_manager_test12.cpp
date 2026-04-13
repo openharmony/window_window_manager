@@ -1306,6 +1306,9 @@ HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, TestSize.Level0)
     sceneSession1->SetSessionGlobalRect(rect);
     int32_t zOrder = 100;
     sceneSession1->SetZOrder(zOrder);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession1->SetSurfaceNode(surfaceNode);
     ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
 
     constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
