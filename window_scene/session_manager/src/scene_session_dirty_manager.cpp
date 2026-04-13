@@ -711,8 +711,7 @@ void SceneSessionDirtyManager::GetModalUIExtensionInfo(std::vector<MMI::WindowIn
     }
 }
 
-auto SceneSessionDirtyManager::GetFullWindowInfoList() ->
-std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>>
+auto SceneSessionDirtyManager::GetFullWindowInfoList() -> FullInfoForMMI
 {
     std::vector<MMI::WindowInfo> windowInfoList;
     std::vector<std::shared_ptr<Media::PixelMap>> pixelMapList;
@@ -720,6 +719,7 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
     // all input event should trans to dialog window if dialog exists
     const auto dialogMap = GetDialogSessionMap(sceneSessionMap);
     uint32_t maxHotAreasNum = 0;
+    std::vector<MMI::UIExtensionInfo> uiExtensionInfoList;
     for (const auto& sceneSessionValuePair : sceneSessionMap) {
         const auto& sceneSessionValue = sceneSessionValuePair.second;
         if (sceneSessionValue == nullptr) {
@@ -752,11 +752,13 @@ std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::Pixel
         if (windowInfo.defaultHotAreas.size() > maxHotAreasNum) {
             maxHotAreasNum = windowInfo.defaultHotAreas.size();
         }
+        sceneSessionValue->GetAllUIExtensionTokenInfo(uiExtensionInfoList);
     }
     if (maxHotAreasNum > MMI::WindowInfo::DEFAULT_HOTAREA_COUNT) {
         std::sort(windowInfoList.begin(), windowInfoList.end(), CmpMMIWindowInfo);
     }
-    return {windowInfoList, pixelMapList};
+    TLOGD(WmsLogTag::WMS_EVENT, "uiExtensionInfo size=%{public}d", static_cast<int>(uiExtensionInfoList.size()));
+    return {windowInfoList, pixelMapList, uiExtensionInfoList};
 }
 
 void SceneSessionDirtyManager::UpdatePointerAreas(sptr<SceneSession> sceneSession,

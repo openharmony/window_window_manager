@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <libxml/globals.h>
+#include <libxml/parser.h>
 #include <libxml/xmlstring.h>
 #include <map>
 #include <string>

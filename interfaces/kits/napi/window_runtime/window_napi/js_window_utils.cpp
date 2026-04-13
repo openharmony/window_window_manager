@@ -439,6 +439,22 @@ napi_value OrientationInit(napi_env env)
     return objValue;
 }
 
+napi_value OrientationExecutionResultInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "ORIENTATION_APPLIED", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_APPLIED)));
+    napi_set_named_property(env, objValue, "ORIENTATION_IGNORED", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_IGNORED)));
+    napi_set_named_property(env, objValue, "ORIENTATION_PENDING", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_PENDING)));
+    return objValue;
+}
+
 napi_value WindowStageEventTypeInit(napi_env env)
 {
     WLOGFD("WindowStageEventTypeInit");
@@ -1945,10 +1961,16 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to outlineEnabled");
     }
 
+    bool zLevelAboveParentLoosened = false;
+    if (!ParseJsValue(jsObject, env, "zLevelAboveParentLoosened", zLevelAboveParentLoosened)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to zLevelAboveParentLoosened");
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevelAboveParentLoosened: %{public}d", zLevelAboveParentLoosened);
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
     windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
+    windowOption->SetZLevelAboveParentLoosened(zLevelAboveParentLoosened);
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }

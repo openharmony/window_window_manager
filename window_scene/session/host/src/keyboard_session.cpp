@@ -110,10 +110,10 @@ WSError KeyboardSession::Show(sptr<WindowSessionProperty> property)
         auto panelSession = session->GetKeyboardPanelSession();
         if (const auto callingSession = session->GetSceneSession(
                 session->GetSessionProperty()->GetCallingSessionId())) {
-            session->SetSessionBlackListWhenShow(
-                callingSession->isSkipSelfWhenShowOnVirtualScreen_.load(), panelSession);
-            session->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
-            panelSession->SetSkipEventOnCastPlus(callingSession->isSkipSelfWhenShowOnVirtualScreen_.load());
+            bool isCallingSessionSkip = session->GetSkipFlagForCallingSession(callingSession);
+            session->SetSessionBlackListWhenShow(isCallingSessionSkip, panelSession);
+            session->SetSkipEventOnCastPlus(isCallingSessionSkip);
+            panelSession->SetSkipEventOnCastPlus(isCallingSessionSkip);
         }
         TLOGNI(WmsLogTag::WMS_KEYBOARD,
             "Show keyboard session, id: %{public}d, calling id: %{public}d, targetDisplayId: %{public}" PRIu64 ", "
@@ -136,6 +136,18 @@ void KeyboardSession::SetSessionBlackListWhenShow(bool isCallingSessionSkip, con
         RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
         panelSession->RemoveSessionBlackList({ "SCB_KEYBOARD_FLOATING" });
     }
+}
+
+bool KeyboardSession::GetSkipFlagForCallingSession(const sptr<SceneSession>& callingSession) const
+{
+    if (!callingSession) {
+        return false;
+    }
+    auto mainSession = callingSession->GetMainSession();
+    if (!mainSession) {
+        return false;
+    }
+    return mainSession->isSkipSelfWhenShowOnVirtualScreen_.load();
 }
 
 WSError KeyboardSession::Hide()
@@ -696,6 +708,10 @@ void KeyboardSession::HandleKeyboardMoveDragEnd(const WSRect& rect, SizeChangeRe
         bool ret = session->GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
         if (!ret) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s get screen size failed", where);
+            WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(session->GetPersistentId(),
+                KeyboardLifeCycleException::MOVE_DRAG_EXCEPTION,
+                "HandleKeyboardMoveDragEnd: GetScreenWidthAndHeightFromClient failed"
+                "screenWidth=" + std::to_string(screenWidth) + ", screenHeight=" + std::to_string(screenHeight));
             return;
         }
         bool isLand = screenWidth > screenHeight;
@@ -740,6 +756,10 @@ void KeyboardSession::UseFocusIdIfCallingSessionIdInvalid(uint32_t callingSessio
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Using focusedSession id: %{public}d", focusedSessionId);
         GetSessionProperty()->SetCallingSessionId(focusedSessionId);
     }
+    WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetFocusedSessionId(),
+        KeyboardLifeCycleException::SHOW_EXCEPTION,
+        "callingSessionId invalid, use focusedId: " + std::to_string(focusedSessionId) +
+        ", callingSessionId:" + std::to_string(GetSessionProperty()->GetCallingSessionId()));
 }
 
 void KeyboardSession::EnableCallingSessionAvoidArea()
@@ -930,6 +950,10 @@ void KeyboardSession::RecalculatePanelRectForAvoidArea(WSRect& panelRect)
     bool result = GetScreenWidthAndHeightFromClient(sessionProperty, screenWidth, screenHeight);
     if (!result) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "Get screen width and height failed");
+        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetPersistentId(),
+            KeyboardLifeCycleException::PANEL_AVOID_HEIGHT_EXCEPTION,
+            "RecalculatePanelRectForAvoidArea: GetScreenWidthAndHeightFromClient failed, "
+            "screenWidth=" + std::to_string(screenWidth) + ", screenHeight=" + std::to_string(screenHeight));
         return;
     }
     bool isLandscape = screenHeight < screenWidth;
@@ -1283,6 +1307,10 @@ WMError KeyboardSession::IsLandscape(uint64_t displayId, bool& isLandscape)
         ScreenId screenId = ScreenSessionManagerClient::GetInstance().GetDefaultScreenId();
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Use default screenId: %{public}" PRIu64
             ", invalid displayId: %{public}" PRIu64"", screenId, displayId);
+        WindowInfoReporter::GetInstance().ReportKeyboardLifeCycleException(GetPersistentId(),
+            KeyboardLifeCycleException::HOT_AREA_EXCEPTION,
+            "IsLandscape: invalid displayId=" + std::to_string(displayId) +
+            ", use default screenId=" + std::to_string(screenId));
         if (screensProperties.find(screenId) != screensProperties.end()) {
             screenProperty = screensProperties[screenId];
             displayId = screenId;

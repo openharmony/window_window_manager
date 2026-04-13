@@ -2048,6 +2048,16 @@ WMError WindowManager::SetWatermarkImageForApp(const std::shared_ptr<Media::Pixe
     return WindowAdapter::GetInstance(userId_).SetWatermarkImageForApp(pixelMap);
 }
 
+WMError WindowManager::SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority)
+{
+    return WindowAdapter::GetInstance(userId_).SetScreenWatermarkImage(pixelMap, priority);
+}
+
+WMError WindowManager::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WindowAdapter::GetInstance(userId_).CleanScreenWatermarkImage(pixelMap);
+}
+
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
     WMError ret = WindowAdapter::GetInstance(userId_).GetVisibilityWindowInfo(infos);
@@ -2290,6 +2300,15 @@ WMError WindowManager::SetSpecificSystemWindowZIndex(WindowType windowType, int3
     WMError ret = WindowAdapter::GetInstance(userId_).SetSpecificWindowZIndex(windowType, zIndex);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "set specific system window zIndex failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId)
+{
+    WMError ret = WindowAdapter::GetInstance(userId_).MoveMainWindowToTargetDisplay(displayId, windowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed, windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
     }
     return ret;
 }

@@ -366,6 +366,25 @@ enum class WMError : int32_t {
 };
 
 /**
+ * @brief Enumerates error code of window only used for dfx.
+ */
+enum class WMErrorReason : int32_t {
+    WM_REASON = 0,
+    WM_REASON_WINDOW_CREATE_ERR,
+    WM_REASON_WINDOW_SHOW_ERR,
+    WM_REASON_WINDOW_HIDE_ERR,
+    WM_REASON_WINDOW_DESTROY_ERR,
+
+    WM_REASON_SUB_WINDOW = 100,
+    WM_REASON_SUB_WINDOW_IPC_ERR,
+    WM_REASON_SUB_WINDOW_IPC_CREATE_ERR,
+    WM_REASON_SUB_WINDOW_IPC_RECOVER_ERR,
+    WM_REASON_SUB_WINDOW_IPC_DESTROY_ERR,
+    WM_REASON_SUB_WINDOW_IPC_BIND_DIALOG_TARGET_ERR,
+};
+
+
+/**
  * @brief Enumerates error code of window only used for js api.
  */
 enum class WmErrorCode : int32_t {
@@ -569,6 +588,7 @@ enum class WindowSizeChangeReason : uint32_t {
     LS_STATE_CHANGE,
     FULL_SCREEN_IN_FORCE_SPLIT,
     HOOK_INFO_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
@@ -607,6 +627,15 @@ enum class DragResizeType : uint32_t {
     RESIZE_KEY_FRAME = 3,
     RESIZE_SCALE = 4,
     RESIZE_MAX_VALUE,  // invalid value begin, add new value above
+};
+
+/**
+ * @brief Enumerates select mode.
+ */
+enum class SelectMode : uint32_t {
+    WIDE_MODE = 0,
+    SQUARE_MODE = 1,
+    INVALID_MODE = 2,
 };
 
 /**
@@ -1282,7 +1311,7 @@ struct HookInfo {
     uint32_t displayOrientation_;
     bool enableHookDisplayOrientation_;
     Rect actualRect_ = { 0, 0, 0, 0};
-    
+
     std::string ToString() const
     {
         std::ostringstream oss;
@@ -1467,7 +1496,8 @@ enum class WindowAnchor : uint32_t {
  */
 struct WindowAnchorInfo : public Parcelable {
     bool isAnchorEnabled_ = false;
-    bool isAnchoredByAttach_ = false;
+    bool isAnchoredByAttach_ = false; // Distinguish between binding and unbinding
+    bool isFromAttachOrDetach_ = false; // Distinguish addatchAndDetach or setRelative interfaces
     WindowAnchor windowAnchor_ = WindowAnchor::TOP_START;
     int32_t offsetX_ = 0;
     int32_t offsetY_ = 0;
@@ -1519,7 +1549,8 @@ struct WindowAnchorInfo : public Parcelable {
     bool operator==(const WindowAnchorInfo& other) const
     {
         return isAnchorEnabled_ == other.isAnchorEnabled_ && isAnchoredByAttach_ == other.isAnchoredByAttach_ &&
-            windowAnchor_ == other.windowAnchor_ && offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
+            isFromAttachOrDetach_ == other.isFromAttachOrDetach_ && windowAnchor_ == other.windowAnchor_ &&
+            offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
     }
 
     bool operator!=(const WindowAnchorInfo& other) const
@@ -1530,8 +1561,9 @@ struct WindowAnchorInfo : public Parcelable {
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteBool(isAnchoredByAttach_) &&
+            parcel.WriteBool(isFromAttachOrDetach_) &&
             parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) && parcel.WriteInt32(offsetX_) &&
-            parcel.WriteInt32(offsetY_);
+            parcel.WriteInt32(offsetY_) && parcel.WriteParcelable(&attachOptions);
     }
 
     static WindowAnchorInfo* Unmarshalling(Parcel& parcel)
@@ -1541,13 +1573,17 @@ struct WindowAnchorInfo : public Parcelable {
         if (windowAnchorInfo == nullptr) {
             return nullptr;
         }
+        sptr<AttachOptions> attachOptions;
         if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_)||
-            !parcel.ReadBool(windowAnchorInfo->isAnchoredByAttach_) || !parcel.ReadUint32(windowAnchorMode) ||
-            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_)) {
+            !parcel.ReadBool(windowAnchorInfo->isAnchoredByAttach_) ||
+            !parcel.ReadBool(windowAnchorInfo->isFromAttachOrDetach_) || !parcel.ReadUint32(windowAnchorMode) ||
+            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_) ||
+            !(attachOptions = parcel.ReadParcelable<AttachOptions>())) {
             delete windowAnchorInfo;
             return nullptr;
         }
         windowAnchorInfo->windowAnchor_ = static_cast<WindowAnchor>(windowAnchorMode);
+        windowAnchorInfo->attachOptions.currentLayoutMode = attachOptions->currentLayoutMode;
         return windowAnchorInfo;
     }
 };
@@ -3067,6 +3103,33 @@ struct OrientationInfo {
     uint32_t rotation = 0;
     Rect rect = {0, 0, 0, 0};
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
+};
+
+struct OrientationParams {
+    WmErrorCode errCode;
+    Orientation requestedOrientation;
+    std::string errMsg;
+};
+
+enum class OrientationExecutionResult : uint32_t {
+    START = 0,
+
+    /**
+     * Orientation policy is applied.
+     */
+    ORIENTATION_APPLIED = START,
+
+    /**
+     * Orientation policy is ignored.
+     */
+    ORIENTATION_IGNORED,
+
+    /**
+     * Orientation policy is pending and will be applied soon.
+     */
+    ORIENTATION_PENDING,
+
+    END,
 };
 
 /*
