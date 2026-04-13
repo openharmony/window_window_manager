@@ -14,7 +14,7 @@
  */
 
 #include "window_session_impl.h"
-#include "scene/host/include/zidl/scene_node_count_callback_interface.h"
+#include "session/host/include/zidl/scene_node_count_callback_interface.h"
 
 #include <cstdlib>
 
