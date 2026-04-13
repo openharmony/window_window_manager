@@ -861,9 +861,10 @@ ani_object AniWindowUtils::CreateAniWindowInfo(ani_env* env, const WindowVisibil
     CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("globalDisplayRect").c_str(), nullptr,
         CreateAniRect(env, info.GetGlobalDisplayRect()));
     CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("globalRect").c_str(), nullptr,
-        CreateAniRect(env, info.GetGlobalRect()));
-    CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("displayId").c_str(), nullptr,
-        static_cast<ani_long>(info.GetDisplayId()));
+    CreateAniRect(env, info.GetGlobalRect()));
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI] WindowInfo displayId before set: %{public}" PRIu64, info.GetDisplayId());
+    ani_object aniDisplayId = CreateBaseTypeObject<long>(env, info.GetDisplayId());
+    CallAniMethodVoid(env, windowInfo, cls, Builder::BuildSetterName("displayId").c_str(), nullptr, aniDisplayId);
     ani_string bundleName;
     if (GetAniString(env, info.GetBundleName(), &bundleName) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] create string failed");
@@ -2722,10 +2723,18 @@ bool AniWindowUtils::ParseSubWindowOptions(ani_env *env, ani_object aniObject, c
     if (ret != ANI_OK) {
         TLOGI(WmsLogTag::WMS_SUB, "Failed to get property outlineEnabled");
     }
+
+    GetPropertyBoolObject(env, "maximizeSupported", aniObject, maximizeSupported);
+    bool outlineEnabled = false;
+    GetPropertyBoolObject(env, "outlineEnabled", aniObject, outlineEnabled);
+    bool zLevelAboveParentLoosened = false;
+    GetPropertyBoolObject(env, "zLevelAboveParentLoosened", aniObject, zLevelAboveParentLoosened);
+
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
     windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
+    windowOption->SetZLevelAboveParentLoosened(zLevelAboveParentLoosened);
     if (!ParseRectParam(env, aniObject, windowOption)) {
         return false;
     }

@@ -247,6 +247,15 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
 
     /**
+     * @brief Get the display object by id and specify whether to get actual info.
+     *
+     * @param displayId Id of the target display.
+     * @param isGetActualInfo Whether to get actual display info.
+     * @return Default display object.
+     */
+    sptr<Display> GetDisplayById(DisplayId displayId, bool isGetActualInfo);
+
+    /**
      * @brief Get the display object by id.Only for PC.
      *
      * @param displayId Id of the target display.

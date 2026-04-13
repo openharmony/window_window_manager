@@ -1631,6 +1631,7 @@ ohos_static_library("ws_unittest_common") {
   ]
 
   deps = [
+    "../../../test/common/utils:libtestutil",
     "${window_base_path}/dm:libdm",
     "${window_base_path}/utils:libwmutil",
     "${window_base_path}/utils:libwmutil_base",
@@ -1646,16 +1647,9 @@ ohos_static_library("ws_unittest_common") {
     "${window_base_path}/wm:libwm",
   ]
 
-  public_deps = [
-    "${window_base_path}/utils:libwmutil",
-    "${window_base_path}/utils:libwmutil_base",
-    "${window_base_path}/window_scene/session:screen_session_static",
-    "../../../test/common/utils:libtestutil",
-  ]
-
   external_deps = test_external_deps
 
-  public_external_deps = [
+  external_deps += [
     "ability_base:session_info",
     "ability_base:want",
   ]

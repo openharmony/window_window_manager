@@ -799,6 +799,33 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, IsFocusWindowParent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckCollaborator
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerLiteProxyTest, CheckCollaborator, TestSize.Level1)
+{
+    sptr<MockIRemoteObject> iRemoteObjectMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SceneSessionManagerLiteProxy> sceneSessionManagerLiteProxy =
+        sptr<SceneSessionManagerLiteProxy>::MakeSptr(iRemoteObjectMocker);
+    EXPECT_NE(sceneSessionManagerLiteProxy, nullptr);
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<IRemoteObject> token = nullptr;
+    bool isParent = false;
+    WSError errCode = sceneSessionManagerLiteProxy->IsFocusWindowParent(token, isParent);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_INVALID_PARAM);
+
+    int32_t type = CollaboratorType::RESERVE_TYPE;
+    EXPECT_TRUE(sceneSessionManagerLiteProxy->CheckCollaborator(type));
+    type = CollaboratorType::OTHERS_TYPE;
+    EXPECT_TRUE(sceneSessionManagerLiteProxy->CheckCollaborator(type));
+    type = CollaboratorType::REDIRECT_TYPE;
+    EXPECT_TRUE(sceneSessionManagerLiteProxy->CheckCollaborator(type));
+    type = CollaboratorType::DEFAULT_TYPE;
+    EXPECT_FALSE(sceneSessionManagerLiteProxy->CheckCollaborator(type));
+}
+
+/**
  * @tc.name: NotifyAppUseControlDisplay
  * @tc.desc: normal function
  * @tc.type: FUNC

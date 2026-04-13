@@ -1418,6 +1418,20 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
     return subWindowOutlineEnabled_;
 }
 
+void WindowSessionProperty::SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
+        zLevelAboveParentLoosened);
+    zLevelAboveParentLoosened_ = zLevelAboveParentLoosened;
+}
+ 
+bool WindowSessionProperty::IsSubWindowZLevelAboveParentLoosened() const
+{
+    TLOGD(WmsLogTag::WMS_SUB, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
+        zLevelAboveParentLoosened_);
+    return zLevelAboveParentLoosened_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     auto globalDisplayRect = GetGlobalDisplayRect();
@@ -1478,6 +1492,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAbilityHook_) &&
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(isFollowScreenChange_) &&
         parcel.WriteBool(subWindowOutlineEnabled_) &&
+        parcel.WriteBool(zLevelAboveParentLoosened_) &&
         parcel.WriteUint32(windowModeSupportType_) &&
         MarshallingShadowsInfo(parcel) &&
         MarshallingWindowAnchorInfo(parcel) &&
@@ -1494,7 +1509,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isRotationLock_) &&
         parcel.WriteInt32(frameNum_) &&
         parcel.WriteBool(isPrelaunch_) &&
-        parcel.WriteBool(isAppBufferReady_);
+        parcel.WriteBool(isAppBufferReady_) &&
+        parcel.WriteBool(isCrossProcessWindow_);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1601,6 +1617,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    property->SetZLevelAboveParentLoosened(parcel.ReadBool());
     property->SetWindowModeSupportType(parcel.ReadUint32());
     UnmarshallingShadowsInfo(parcel, property);
     UnmarshallingWindowAnchorInfo(parcel, property);
@@ -1618,6 +1635,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFrameNum(parcel.ReadInt32());
     property->SetPrelaunch(parcel.ReadBool());
     property->SetAppBufferReady(parcel.ReadBool());
+    property->SetIsCrossProcessWindow(parcel.ReadBool());
     return property;
 }
 
@@ -1722,6 +1740,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     shadowsInfo_ = property->shadowsInfo_;
     windowAnchorInfo_ = property->windowAnchorInfo_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
+    zLevelAboveParentLoosened_ = property->zLevelAboveParentLoosened_;
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
     isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
@@ -1736,6 +1755,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isRotationLock_ = property->isRotationLock_;
     statusBarHeightInImmersive_ = property->statusBarHeightInImmersive_;
     pageCompatibleMode_ = property->pageCompatibleMode_;
+    isCrossProcessWindow_ = property->isCrossProcessWindow_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
