@@ -7799,7 +7799,7 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     }
     if (IsZLevelAboveParentLoosened()) {
         TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
-        return WMError::WM_ERROR_INVALID_OPERATION;
+        return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (property->GetSubWindowLevel() > 1) {
         TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
