@@ -14,6 +14,7 @@
  */
 
 #include "zidl/scene_node_count_callback_stub.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -26,12 +27,12 @@ int SceneNodeCountCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& da
         TLOGE(WmsLogTag::WMS_ROTATION, "InterfaceToken check failed");
         return ERR_TRANSACTION_FAILED;
     }
-    PatternDetachCallbackMessage msgId = static_cast<PatternDetachCallbackMessage>(code);
+    SceneNodeCountCallbackMessage msgId = static_cast<SceneNodeCountCallbackMessage>(code);
     switch (msgId) {
-        case PatternDetachCallbackMessage::TRANS_ON_SCENE_NODE_COUNT: {
+        case SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT: {
             uint32_t nodeCount = 0;
-            if (!data.ReadInt32(persisitentId)) {
-                TLOGE(WmsLogTag::WMS_ROTATION, "Read persisitentId failed.");
+            if (!data.ReadUint32(nodeCount)) {
+                TLOGE(WmsLogTag::WMS_ROTATION, "Read nodeCount failed.");
                 return ERR_INVALID_DATA;
             }
             OnSceneNodeCount(nodeCount);
