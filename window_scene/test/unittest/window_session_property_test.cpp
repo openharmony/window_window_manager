@@ -1611,17 +1611,19 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetLogicalDeviceConfig
- * @tc.desc: SetLogicalDeviceConfig
+ * @tc.name: SetCombinedCompatibleConfig
+ * @tc.desc: SetCombinedCompatibleConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetLogicalDeviceConfig, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetCombinedCompatibleConfig, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    std::string config = "{}";
-    property->SetLogicalDeviceConfig(config);
-    auto result = property->GetLogicalDeviceConfig();
-    EXPECT_EQ(result, config);
+    std::vector<std::string> config = {"logicalDeviceConfig", "arkUIAndWebConfig"};
+    property->SetCombinedCompatibleConfig(config);
+    auto result = property->GetCombinedCompatibleConfig();
+    EXPECT_EQ(result.size(), config.size());
+    bool isEqual = std::equal(result.begin(), result.end(), config.begin());
+    EXPECT_TRUE(isEqual);
 }
 
 /**

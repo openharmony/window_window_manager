@@ -244,7 +244,7 @@ public:
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false,
         SelectMode selectMode = SelectMode::INVALID_MODE) override;
-    void SendLogicalDeviceConfigToArkUI();
+    void SendCombinedCompatibleConfigToArkUI();
     WMError NotifyPageEnable(const std::string& action, const std::string& message) override;
     WMError NotifySplitRatioChanged(float newRatio) override;
 
@@ -665,7 +665,7 @@ private:
     /*
      * Window Compatible Mode
      */
-    static std::atomic<bool> hasSentLogicalDeviceConfig_;
+    static std::atomic<bool> hasSentCombinedCompatibleConfig_;
 
     /*
      * Window Scene

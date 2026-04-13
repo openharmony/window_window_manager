@@ -234,6 +234,36 @@ WSError SessionProxy::Disconnect(bool isFromClient, const std::string& identityT
     return static_cast<WSError>(ret);
 }
 
+WSError ReadCombinedCompatibleConfig(MessageParcel& reply, sptr<WindowSessionProperty> property)
+{
+    uint32_t combinedConfigSize = 0;
+    if (!reply.ReadUint32(combinedConfigSize)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read size of combined compatible config failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (combinedConfigSize > 0 && combinedConfigSize <= COMBINED_COMPATIBLE_CONFIG_MAX_SIZE) {
+        std::vector<std::string> combinedCompatibleConfig;
+        combinedCompatibleConfig.reserve(combinedConfigSize);
+        for (uint32_t i = 0; i < combinedConfigSize; i++) {
+            std::string config;
+            if (!reply.ReadString(config)) {
+                TLOGE(WmsLogTag::WMS_COMPAT, "Read config failed");
+                return WSError::WS_ERROR_IPC_FAILED;
+            }
+            combinedCompatibleConfig.emplace_back(config);
+        }
+        if (!property) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "property is nullptr!");
+            return WSError::WS_ERROR_NULLPTR;
+        }
+        property->SetCombinedCompatibleConfig(combinedCompatibleConfig);
+    } else {
+        TLOGE(WmsLogTag::WMS_COMPAT, "combinedConfigSize: %{public}u fail to meet the conditions",
+            combinedConfigSize);
+    }
+    return WSError::WS_OK;
+}
+
 WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
     const std::shared_ptr<RSSurfaceNode>& surfaceNode, SystemSessionConfig& systemConfig,
     sptr<WindowSessionProperty> property, sptr<IRemoteObject> token,
@@ -345,7 +375,11 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetUseControlState(reply.ReadBool());
         property->SetAncoRealBundleName(reply.ReadString());
         property->SetIsShowDecorInFreeMultiWindow(reply.ReadBool());
-        property->SetLogicalDeviceConfig(reply.ReadString());
+        auto ret = ReadCombinedCompatibleConfig(reply, property);
+        if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Read combined compatible config error, ret:%{public}d", ret);
+            return ret;
+        }
         sptr<MissionInfo> missionInfo = reply.ReadParcelable<MissionInfo>();
         if (missionInfo == nullptr) {
             TLOGE(WmsLogTag::WMS_LIFE, "read missionInfo is nullptr.");

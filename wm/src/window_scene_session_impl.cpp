@@ -112,6 +112,7 @@ constexpr float MAX_GRAY_SCALE = 1.0f;
 constexpr int32_t DISPLAY_ID_C = 999;
 constexpr int32_t MAX_POINTERS = 16;
 constexpr int32_t TOUCH_SLOP_RATIO = 25;
+constexpr int32_t COMBINED_COMPATIBLE_CONFIG_SIZE = 2;
 const std::string WATERFALL_WINDOW_EVENT = "scb_waterfall_window_event";
 const std::string BACK_WINDOW_EVENT = "scb_back_window_event";
 const std::string COMPATIBLE_MAX_WINDOW_EVENT = "win_compatible_max_event";
@@ -235,7 +236,7 @@ static inline T SafeBoundAssign(T candidate, T lowerBound, T upperBound, T fallb
 std::mutex WindowSceneSessionImpl::keyboardPanelInfoChangeListenerMutex_;
 using WindowSessionImplMap = std::map<std::string, std::pair<int32_t, sptr<WindowSessionImpl>>>;
 std::mutex WindowSceneSessionImpl::windowAttachStateChangeListenerMutex_;
-std::atomic<bool> WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = false;
+std::atomic<bool> WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
 
 WindowSceneSessionImpl::WindowSceneSessionImpl(const sptr<WindowOption>& option,
     const std::shared_ptr<RSUIContext>& rsUIContext) : WindowSessionImpl(option, rsUIContext)
@@ -753,7 +754,7 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         SetDefaultDisplayIdIfNeed();
         SetTargetAPIVersion(SysCapUtil::GetApiCompatibleVersion());
         ret = Connect();
-        SendLogicalDeviceConfigToArkUI();
+        SendCombinedCompatibleConfigToArkUI();
         TLOGD(WmsLogTag::WMS_PC, "targeAPItVersion: %{public}d", GetTargetAPIVersion());
     } else { // system or sub window
         TLOGI(WmsLogTag::WMS_LIFE, "Create system or sub window with type=%{public}d", GetType());
@@ -8169,23 +8170,36 @@ void WindowSceneSessionImpl::SetForceSplitConfigEnable(bool enableForceSplit, bo
     uiContent->SetForceSplitEnable(enableForceSplit, splitMode, needUpdateViewport);
 }
 
-void WindowSceneSessionImpl::SendLogicalDeviceConfigToArkUI()
+void WindowSceneSessionImpl::SendCombinedCompatibleConfigToArkUI()
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName: %{public}s, logicalDeviceConfig: %{public}s",
-        property_->GetSessionInfo().bundleName_.c_str(), property_->GetLogicalDeviceConfig().c_str());
-    if (WindowSceneSessionImpl::hasSentLogicalDeviceConfig_) {
-        TLOGI(WmsLogTag::WMS_COMPAT, "Logical device config has already sent");
+    const auto& combinedCompatibleConfig = property_->GetCombinedCompatibleConfig();
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName: %{public}s, combinedCompatibleConfig size: %{public}zu",
+        property_->GetSessionInfo().bundleName_.c_str(), combinedCompatibleConfig.size());
+    if (combinedCompatibleConfig.size() < COMBINED_COMPATIBLE_CONFIG_SIZE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Combined compatible config size is less than %{public}u!",
+            COMBINED_COMPATIBLE_CONFIG_SIZE);
         return;
     }
-    Ace::UIContent::SetXComponentCompensationAngle(property_->GetLogicalDeviceConfig());
-    WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = true;
-    if (property_->GetLogicalDeviceConfig() == "") {
+    if (WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "Combined compatible config has already sent");
+        return;
+    }
+    const auto& logicalDeviceConfig = combinedCompatibleConfig[0];
+    const auto& arkUIAndWebConfig = combinedCompatibleConfig[1];
+    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, logicalDeviceConfig size:%{public}zu, arkUIAndWebConfig size:"
+        "%{public}zu", property_->GetSessionInfo().bundleName_.c_str(), logicalDeviceConfig.size(),
+        arkUIAndWebConfig.size());
+    Ace::UIContent::SetXComponentCompensationAngle(logicalDeviceConfig);
+    Ace::UIContent::SetUICorrectionConfig(arkUIAndWebConfig);
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = true;
+    if (logicalDeviceConfig == "") {
         TLOGI(WmsLogTag::WMS_COMPAT, "Send default logical device config to arkui");
-    } else if (property_->GetLogicalDeviceConfig() == "{}") {
+    } else if (logicalDeviceConfig == "{}") {
         TLOGI(WmsLogTag::WMS_COMPAT, "Send null logical device config to arkui");
     } else {
         TLOGI(WmsLogTag::WMS_COMPAT, "Send logical device config to arkui successfully!");
     }
+    TLOGI(WmsLogTag::WMS_COMPAT, "Send combined compatible config to arkui successfully!");
 }
 
 WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)

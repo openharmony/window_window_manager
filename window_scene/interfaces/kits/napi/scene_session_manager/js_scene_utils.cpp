@@ -826,9 +826,15 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "pageConfig", sessionInfo.pageConfig)) {
         return false;
     }
-    if (!ConvertFromJsValueProperty(env, jsObject, "logicalDeviceConfig", sessionInfo.logicalDeviceConfig)) {
+    std::vector<std::string> combinedCompatibleConfig;
+    napi_value jsCombinedCompatibleConfig = nullptr;
+    napi_get_named_property(env, jsObject, "combinedCompatibleConfig", &jsCombinedCompatibleConfig);
+    if (GetType(env, jsCombinedCompatibleConfig) != napi_undefined &&
+        !ParseArrayStringValue(env, jsCombinedCompatibleConfig, combinedCompatibleConfig)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get combinedCompatibleConfig");
         return false;
     }
+    sessionInfo.combinedCompatibleConfig = combinedCompatibleConfig;
     return true;
 }
 
@@ -2003,7 +2009,7 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue,
         "pageCompatibleMode", CreateJsValue(env, property->GetPageCompatibleMode()));
     napi_set_named_property(env, objValue,
-        "logicalDeviceConfig", CreateJsValue(env, property->GetLogicalDeviceConfig()));
+        "combinedCompatibleConfig", CreateJsValueFromStringArray(env, property->GetCombinedCompatibleConfig()));
 
     napi_value jsTransitionAnimationMapValue = nullptr;
     napi_create_object(env, &jsTransitionAnimationMapValue);
