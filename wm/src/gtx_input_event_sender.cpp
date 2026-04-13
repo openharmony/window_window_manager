@@ -140,8 +140,8 @@ __attribute__((visibility("default"))) void GetGtxTouchEvent(OHOS::GtxTouchEvent
     OHOS::GtxInputEventSender::GetInstance().GetTouchEvent(touchEvent);
 }
 
-__attribute__((visibility("default"))) void
-    RegisterInputEventScale(int offsetX, int offsetY, float scaleX, float scaleY)
+__attribute__((visibility("default"))) void RegisterInputEventScale(int offsetX, int offsetY,
+    float scaleX, float scaleY)
 {
     OHOS::GtxInputEventSender::GetInstance().RegisterInputEventScale(offsetX, offsetY, scaleX, scaleY);
 }
