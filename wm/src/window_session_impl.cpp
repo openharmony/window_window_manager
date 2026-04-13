@@ -3438,11 +3438,19 @@ WSError WindowSessionImpl::NotifyOrientationExecutionResult(uint32_t promiseId, 
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "winId: %{public}d promiseId: %{public}u, result: %{public}u",
         GetPersistentId(), promiseId, result);
-    if (!onNotifyOrientationExecutionResult_) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "winId: %{public}d NotifyOrientationExecutionResult is null", GetPersistentId());
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    onNotifyOrientationExecutionResult_(promiseId, result);
+    handler_->PostTask([weakWindow = wptr(this), promiseId, result, where = __func__] {
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s window is null", where);
+            return;
+        }
+        if (!window->onNotifyOrientationExecutionResult_) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s winId: %{public}d func is null",
+                where, window->GetPersistentId());
+            return;
+        }
+        window->onNotifyOrientationExecutionResult_(promiseId, result);
+        }, __func__);
     return WSError::WS_OK;
 }
 

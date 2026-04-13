@@ -891,6 +891,12 @@ export enum Orientation {
     FOLLOW_DESKTOP = 17
 }
 
+export enum OrientationExecutionResult {
+    ORIENTATION_APPLIED = 0,
+    ORIENTATION_IGNORED = 1,
+    ORIENTATION_PENDING = 2,
+}
+
 export enum RotationInfoType {
   WINDOW_ORIENTATION = 0,
   DISPLAY_ORIENTATION = 1,
@@ -1459,6 +1465,10 @@ export class TranslateOptionsInternal implements TranslateOptions {
   x?: double;
   y?: double;
   z?: double;
+}
+
+export interface OrientationResult {
+  executionResult : OrientationExecutionResult;
 }
 
 /**
@@ -2986,6 +2996,9 @@ export class WindowInternal implements Window {
     static readonly DEFAULT_RET_VAL = 1;
     static { loadLibrary('windowstageani_module.z') }
     private nativeObj: long;
+    private static nextPromiseId_: int = 0;
+    private static orientationPromiseMap_: Map<number, (value: OrientationResult) => void> =
+      new Map<number, (value: OrientationResult) => void>();
 
     public setNativeObj(nativeObj: long): void {
         this.nativeObj = nativeObj;
@@ -3050,6 +3063,7 @@ export class WindowInternal implements Window {
     private native setWindowShadowRadius(nativeObj: long, radius: double): void;
     private native setWindowColorSpaceSync(nativeObj: long, colorSpace: int): void;
     private native setPreferredOrientationSync(nativeObj: long, orientation: int): void;
+    private native setPreferredOrientationWithResultSync(nativeObj: long, orientation: int, promiseId: int): void;
     private native getPreferredOrientation(nativeObj: long): int;
     private native convertOrientationAndRotation(nativeObj: long, from: int, to: int, value: int): int;
     private native setWindowPrivacyModeSync(nativeObj: long, isPrivacyMode: boolean): void;
@@ -3749,6 +3763,34 @@ export class WindowInternal implements Window {
         callback(new BusinessError(), undefined);
       }).catch((err: Any) => {
         callback(err as BusinessError, undefined);
+      });
+    }
+
+    private static generatePromiseId(): int {
+        if (WindowInternal.nextPromiseId_ >= Number.MAX_SAFE_INTEGER) {
+            WindowInternal.nextPromiseId_ = 0;
+        }
+        return ++WindowInternal.nextPromiseId_;
+    }
+
+    public static handleOrientationResult(promiseId: int, result: OrientationExecutionResult): void {
+        const resolve = WindowInternal.orientationPromiseMap_.get(promiseId);
+        if (resolve) {
+            WindowInternal.orientationPromiseMap_.delete(promiseId);
+            resolve({executionResult: result});
+        }
+    }
+
+    public setPreferredOrientationWithResult(orientation: Orientation): Promise<OrientationResult> {
+      return new Promise<OrientationResult>((resolve: (value: OrientationResult) => void, reject: (error: BusinessError) => void ) => {
+        const promiseId = WindowInternal.generatePromiseId();
+        WindowInternal.orientationPromiseMap_.set(promiseId, resolve);
+        taskpool.execute(() => {
+          this.setPreferredOrientationWithResultSync(this.nativeObj, orientation, promiseId);
+        }).then((ret: Any) => {
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
       });
     }
 
@@ -5349,6 +5391,7 @@ export interface Window {
     setWindowColorSpace(colorSpace: ColorSpace, callback: AsyncCallback<void>): void;
     setPreferredOrientation(orientation: Orientation): Promise<void>;
     setPreferredOrientation(orientation: Orientation, callback: AsyncCallback<void>): void;
+    setPreferredOrientationWithResult(orientation: Orientation): Promise<OrientationResult>;
     getPreferredOrientation(): Orientation;
     convertOrientationAndRotation(from: RotationInfoType, to: RotationInfoType, value: int): int;
     setWindowPrivacyMode(isPrivacyMode: boolean): Promise<void>;
@@ -6168,6 +6211,11 @@ function runAvoidAreaChangeCallback(cb: object, area: object, type: int): void {
 function runWindowStageLifecycleEventCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: WindowStageLifecycleEventType) => void;
     func(WindowStageLifecycleEventType.fromValue(cbArg));
+}
+
+function runOrientationResultCallback(promiseId: int, result: int): void {
+  hilog.info(DOMAIN, TAG, `runOrientationResultCallback promiseId=${promiseId} result=${result}`);
+  WindowInternal.handleOrientationResult(promiseId, OrientationExecutionResult.fromValue(result));
 }
 
 function runWindowEventCallback(cb: object, cbArg: int): void {
