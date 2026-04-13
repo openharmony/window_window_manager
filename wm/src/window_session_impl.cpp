@@ -67,6 +67,7 @@
 #include "wm_common_inner.h"
 #include "window_input_redistribute_impl.h"
 #include "page_switch_log.h"
+#include "float_view_manager.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityEventInfo;
@@ -803,6 +804,7 @@ WMError WindowSessionImpl::Connect()
     if (IsInCompatScaleMode() || WindowHelper::IsUIExtensionWindow(GetType())) {
         RegisterWindowScaleCallback();
     }
+    FloatViewManager::isSupportFloatView_ = windowSystemConfig_.supportCreateFloatView_;
     return static_cast<WMError>(ret);
 }
 
@@ -6704,6 +6706,40 @@ WMError WindowSessionImpl::GetFloatingBallWindowId(uint32_t& windowId)
     return ret;
 }
 
+WSError WindowSessionImpl::SendFvActionEvent(const std::string& action, const std::string& reason)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "action: %{public}s, reason: %{public}s", action.c_str(), reason.c_str());
+    auto task = [action, reason]() {
+        FloatViewManager::DoActionEvent(action, reason);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SendFvActionEvent");
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason)
+{
+    auto windowId = GetWindowId();
+    TLOGI(WmsLogTag::WMS_SYSTEM, "SyncFvWindowInfo, windowId: %{public}u, windowInfo %{public}s, reason %{public}s",
+        windowId, windowInfo.ToString().c_str(), reason.c_str());
+    auto task = [windowInfo, windowId, reason]() {
+        FloatViewManager::SyncFvWindowInfo(windowId, windowInfo, reason);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SyncFvWindowInfo");
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::SyncFvLimits(const FloatViewLimits& limits)
+{
+    auto windowId = GetWindowId();
+    TLOGI(WmsLogTag::WMS_SYSTEM, "SyncFvLimits, windowId: %{public}u, limits %{public}s", windowId,
+        limits.ToString().c_str());
+    auto task = [limits, windowId]() {
+        FloatViewManager::SyncFvLimits(windowId, limits);
+    };
+    handler_->PostTask(task, "WMS_WindowSessionImpl_SyncFvLimits");
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::RegisterTouchOutsideListener(const sptr<ITouchOutsideListener>& listener)
 {
     bool isUpdate = false;
@@ -7771,6 +7807,20 @@ sptr<Window> WindowSessionImpl::Find(const std::string& name)
     return iter->second.second;
 }
 
+bool WindowSessionImpl::IsAnyWindowMatchState(const WindowState& state)
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    for (const auto& [name, windowPair] : windowSessionMap_) {
+        if (windowPair.second == nullptr) {
+            continue;
+        }
+        if (windowPair.second->GetWindowState() == state) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void WindowSessionImpl::SetAceAbilityHandler(const sptr<IAceAbilityHandler>& handler)
 {
     if (handler == nullptr) {
@@ -8321,6 +8371,78 @@ void WindowSessionImpl::NotifyPrepareCloseFloatingBall()
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
     hostSession->NotifyFloatingBallPrepareClose();
+}
+
+void WindowSessionImpl::NotifyPrepareCloseFloatView()
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "NotifyPrepareCloseFloatView");
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return;
+    }
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_IF_NULL(hostSession);
+    hostSession->NotifyFloatViewPrepareClose();
+}
+
+WMError WindowSessionImpl::UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    GetProperty()->SetFvTemplateInfo(fvTemplateInfo);
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    return hostSession->UpdateFloatView(fvTemplateInfo);
+}
+
+WMError WindowSessionImpl::UpdateFloatShowWhenCreate(const bool showWhenCreate)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (GetType() == WindowType::WINDOW_TYPE_FB) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "update floating ball show when create: %{public}d", showWhenCreate);
+        auto templateInfo = GetProperty()->GetFbTemplateInfo();
+        templateInfo.showWhenCreate_ = showWhenCreate;
+        GetProperty()->SetFbTemplateInfo(templateInfo);
+    }
+
+    if (GetType() == WindowType::WINDOW_TYPE_FV) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "update float view show when create: %{public}d", showWhenCreate);
+        auto templateInfo = GetProperty()->GetFvTemplateInfo();
+        templateInfo.showWhenCreate_ = showWhenCreate;
+        GetProperty()->SetFvTemplateInfo(templateInfo);
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSessionImpl::RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "restore float view main window id: %{public}d", GetWindowId());
+    auto parentWindow = FindWindowById(property_->GetParentPersistentId());
+    if (parentWindow == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "parentWindow is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    
+    auto hostSession = GetHostSession();
+    if (!hostSession) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "session is nullptr");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    WMError ret = hostSession->RestoreFloatViewMainWindow(wantParams);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "RestoreFloatViewMainWindow result is: %{public}d", static_cast<int32_t>(ret));
+        return ret;
+    }
+    return WMError::WM_OK;
 }
 
 WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)

@@ -744,6 +744,39 @@ public:
     {
         return WMError::WM_OK;
     }
+
+    /**
+     * @brief Close float view window while stopFv is called.
+     *
+     * Notify system that float view window is stopping and execute animation.
+     */
+    virtual void NotifyFloatViewPrepareClose() {}
+
+    /**
+     * @brief Notify prepare to close float view window
+     */
+    virtual WSError StopFloatView()
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief update float view.
+     *
+     * @param fvTemplateInfo the template info of the float view.
+     */
+    virtual WMError UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief restore main window of the float view.
+     *
+     * @param wantParams the info deleverd to the main window.
+     */
+    virtual WMError RestoreFloatViewMainWindow(
+        const std::shared_ptr<AAFwk::WantParams>& wantParams) { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 

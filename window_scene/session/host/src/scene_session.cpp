@@ -3967,9 +3967,9 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
 
     {
-        std::lock_guard<std::mutex> lock(floatWindowDownEventMutex_);
-        if (isPointDown && floatWindowDownEventCnt_ < MAX_DOWN_TIMES) {
-            ++floatWindowDownEventCnt_;
+        std::lock_guard<std::mutex> lock(floatDownEventMutex_);
+        if (isPointDown && floatDownEventCnt_ < MAX_DOWN_TIMES) {
+            ++floatDownEventCnt_;
         }
     }
 

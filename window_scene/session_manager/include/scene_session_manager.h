@@ -374,6 +374,12 @@ public:
     WSError SendAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /*
+     * Float view
+     */
+    WSError SyncFloatViewLimits(const FloatViewLimits &limits);
+    WMError GetFloatViewLimits(FloatViewLimits& limits) override;
+
+    /*
      * Multi User
      */
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
@@ -1106,6 +1112,7 @@ private:
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property) REQUIRES(SCENE_GUARD);
     void InitFbWindow(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
+    void InitFvWindow(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
@@ -1632,6 +1639,11 @@ private:
      */
     WSError IsFloatingBallValid(const sptr<SceneSession>& parentSession);
 
+    /*
+     * Float view
+     */
+    WSError CanCreateFloatView(const sptr<SceneSession>& parentSession);
+
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
     void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
@@ -2040,6 +2052,12 @@ private:
         const std::string& action, const std::string& message);
 
     std::atomic<SelectMode> selectMode_{SelectMode::INVALID_MODE};
+    
+    /*
+     * Float view
+     */
+    std::mutex floatViewLimitsMutex_;
+    FloatViewLimits floatViewLimits_ {};
 };
 } // namespace OHOS::Rosen
 

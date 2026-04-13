@@ -216,6 +216,7 @@ public:
         const std::unordered_set<std::string>& privacyWindowTags) override;
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
     WMError NotifySupportRotationRegistered() override;
+    WMError GetFloatViewLimits(FloatViewLimits& limits) override;
 
 private:
     template<typename T>

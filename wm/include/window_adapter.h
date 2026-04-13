@@ -260,6 +260,11 @@ public:
     void UnregisterOutlineRecoverCallbackFunc();
     virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
+    /**
+     * Float View
+     */
+    virtual WMError GetFloatViewLimits(FloatViewLimits &limits);
+
 private:
     friend class sptr<WindowAdapter>;
     ~WindowAdapter() override;

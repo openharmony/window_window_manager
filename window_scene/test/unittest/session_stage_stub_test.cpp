@@ -1838,6 +1838,102 @@ HWTEST_F(SessionStageStubTest, HandleUpdatePropertyWhenTriggerMode02, TestSize.L
     ASSERT_TRUE(sessionStageStub_ != nullptr);
     EXPECT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }
+
+/**
+ * @tc.name: HandleSendFvActionEvent
+ * @tc.desc: test function : HandleSendFvActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSendFvActionEvent, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    
+    // Case 1: Success
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    std::string action = "testAction";
+    std::string reason = "testReason";
+    data.WriteString(action);
+    data.WriteString(reason);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FV_ACTION_EVENT);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    // Case 2: Failed to read action
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data2, reply2, option));
+
+    // Case 3: Failed to read reason
+    MessageParcel data3;
+    MessageParcel reply3;
+    data3.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data3.WriteString(action);
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data3, reply3, option));
+}
+
+/**
+ * @tc.name: HandleSyncFvWindowInfo
+ * @tc.desc: test function : HandleSyncFvWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSyncFvWindowInfo, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    
+    // Case 1: Success
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<FloatViewWindowInfo> windowInfo = sptr<FloatViewWindowInfo>::MakeSptr();
+    data.WriteParcelable(windowInfo);
+    std::string reason = "testReason";
+    data.WriteString(reason);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_WINDOW_INFO);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    
+    // Case 2: Failed to read windowInfo
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data2, reply2, option));
+    
+    // Case 3: Failed to read reason
+    MessageParcel data3;
+    MessageParcel reply3;
+    data3.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data3.WriteParcelable(windowInfo);
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data3, reply3, option));
+}
+
+/**
+ * @tc.name: HandleSyncFvLimits
+ * @tc.desc: test function : HandleSyncFvLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSyncFvLimits, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    
+    // Case 1: Success
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<FloatViewLimits> limits = sptr<FloatViewLimits>::MakeSptr();
+    data.WriteParcelable(limits);
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_LIMITS);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+    ASSERT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+    
+    // Case 2: Failed to read limits
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    ASSERT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data2, reply2, option));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
