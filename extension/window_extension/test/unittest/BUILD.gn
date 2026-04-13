@@ -29,6 +29,12 @@ group("unittest") {
   }
 }
 
+const_deps = [
+  ":window_extension_unitest_common",
+  "${window_base_path}/utils:libwmutil_base",
+  "${window_base_path}/window_scene/common:window_scene_common",
+]
+
 ohos_unittest("extension_window_extension_proxy_test") {
   module_out_path = module_out_path
 
@@ -39,11 +45,14 @@ ohos_unittest("extension_window_extension_proxy_test") {
 
   include_dirs = [ "${window_base_path}/window_scene/test/mock" ]
 
-  deps = [ ":window_extension_unittest_common" ]
+  deps = const_deps
 
   external_deps = [
+    "accessibility:accessibility_common",
     "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
+    "input:libmmi-client",
     "napi:ace_napi",
   ]
 }
@@ -55,12 +64,15 @@ ohos_unittest("extension_window_extension_stub_impl_test") {
 
   include_dirs = [ "${window_base_path}/test/common/mock" ]
 
-  deps = [ ":window_extension_unittest_common" ]
+  deps = const_deps
 
   external_deps = [
     "ability_runtime:ability_manager",
+    "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
     "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "input:libmmi-client",
     "napi:ace_napi",
   ]
 }
@@ -111,6 +123,8 @@ config("window_extension_unittest_common_public_config") {
     "${window_base_path}/wm/test/mock",
     "${window_base_path}/wmserver/include",
     "${window_base_path}/wmserver/include/window_snapshot",
+    "${window_base_path}/interfaces/innerkits",
+    "${window_base_path}/interfaces/innerkits/dm",
     "${window_base_path}/interfaces/innerkits/wm",
     "${window_base_path}/utils/include",
     "${window_base_path}/window_scene",
