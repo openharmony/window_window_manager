@@ -2874,10 +2874,8 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
         auto area = GetAvoidAreaByType(avoidAreaType);
         // code below aims to check if ai bar avoid area reaches window rect's bottom
         // it should not be removed until unexpected window rect update issues were solved
-        bool isLSState = specificCallback_ && specificCallback_->onGetLSState_ && specificCallback_->onGetLSState_();
         if (avoidAreaType == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
-            !isAINavigationBarAvoidAreaValid_(GetSessionProperty()->GetDisplayId(), area,
-                GetSessionRect().height_, isLSState)) {
+            !isAINavigationBarAvoidAreaValid_(GetSessionProperty()->GetDisplayId(), area, GetSessionRect().height_)) {
             TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom of the rect");
             return WSError::WS_OK;
         }
@@ -2892,11 +2890,9 @@ WSError SceneSession::HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidAreaType)
             auto area = GetAvoidAreaByType(type);
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
-            bool isLSState = specificCallback_ &&
-                specificCallback_->onGetLSState_ && specificCallback_->onGetLSState_();
             if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR && isAINavigationBarAvoidAreaValid_ &&
                 !isAINavigationBarAvoidAreaValid_(GetSessionProperty()->GetDisplayId(),
-                    area, GetSessionRect().height_, isLSState)) {
+                    area, GetSessionRect().height_)) {
                 TLOGE(WmsLogTag::WMS_IMMS, "ai bar avoid area dose not reach the bottom "
                     "of the rect while traversing all avoid area type");
                 continue;
@@ -3665,12 +3661,10 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
             auto area = session->GetAvoidAreaByTypeInner(type);
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
-            bool isLSState = session->specificCallback_ &&
-                session->specificCallback_->onGetLSState_ && session->specificCallback_->onGetLSState_();
             if (type == AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                 if (session->isAINavigationBarAvoidAreaValid_ &&
                     !session->isAINavigationBarAvoidAreaValid_(session->GetSessionProperty()->GetDisplayId(),
-                        area, session->GetSessionRect().height_, isLSState)) {
+                        area, session->GetSessionRect().height_)) {
                     continue;
                 }
             }
