@@ -114,6 +114,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError GetSceneNodeCount(uint32_t& nodeCount) override;
+    WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) override;
     WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
