@@ -106,6 +106,12 @@ void FrameMetricsMeasuredCallback2(int32_t windowId, const OH_WindowManager_Fram
     FrameMetricsMeasuredCallback(windowId, metrics);
 }
 
+void DensityInfoChangeCallback(int32_t windowId, const OH_WindowManager_DensityInfo* info)
+{
+    (void)windowId;
+    (void)info;
+}
+
 /**
  * @tc.name: ShowWindow01
  * @tc.desc: return OK when show window
@@ -169,6 +175,20 @@ HWTEST_F(OHWindowTest, UnregisterDensityInfoChangeCallback_NullCallback, TestSiz
     ASSERT_NE(nullptr, scene_);
     ASSERT_NE(nullptr, scene_->GetMainWindow());
     auto ret = OH_WindowManager_UnregisterDensityInfoChangeCallback(scene_->GetMainWindow()->GetWindowId(), nullptr);
+    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
+}
+
+/**
+ * @tc.name: UnregisterDensityInfoChangeCallback_NotRegistered
+ * @tc.desc: unregister density info change callback without registration
+ * @tc.type: FUNC
+ */
+HWTEST_F(OHWindowTest, UnregisterDensityInfoChangeCallback_NotRegistered, TestSize.Level0)
+{
+    ASSERT_NE(nullptr, scene_);
+    ASSERT_NE(nullptr, scene_->GetMainWindow());
+    auto ret = OH_WindowManager_UnregisterDensityInfoChangeCallback(
+        scene_->GetMainWindow()->GetWindowId(), DensityInfoChangeCallback);
     EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
 }
 

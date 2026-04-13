@@ -434,7 +434,7 @@ WindowManager_ErrorCode UnregisterDensityInfoChangeCallbackInner(int32_t windowI
     {
         std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
         if (!FindDensityInfoChangeListener(windowId, callbackId, listener)) {
-            return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
+            return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
         }
     }
     auto window = Window::GetWindowWithId(windowId);
