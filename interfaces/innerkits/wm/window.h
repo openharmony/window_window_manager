@@ -85,6 +85,7 @@ class AccessibilityEventInfo;
 namespace OHOS {
 namespace Rosen {
 using NotifyNativeWinDestroyFunc = std::function<void(std::string windowName)>;
+using NotifyOrientationExecutionResultFunc = std::function<void(uint32_t, OrientationExecutionResult)>;
 using NotifyTransferComponentDataFunc = std::function<void(const AAFwk::WantParams& wantParams)>;
 using NotifyTransferComponentDataForResultFunc = std::function<AAFwk::WantParams(const AAFwk::WantParams& wantParams)>;
 using KeyEventFilterFunc = std::function<bool(const MMI::KeyEvent&)>;
@@ -2302,6 +2303,19 @@ public:
     virtual void UnregisterWindowDestroyedListener() {}
 
     /**
+     * @brief Register window Orientation execution result listener.
+     *
+     * @param func Function to notify Orientation execution result.
+     */
+    virtual void RegisterNotifyOrientationExecutionResultFunc(const NotifyOrientationExecutionResultFunc& func) {}
+
+    /**
+     * @brief Unregister window Orientation execution result listener.
+     *
+     */
+    virtual void UnregisterNotifyOrientationExecutionResultFunc() {}
+
+    /**
      * @brief Register Occupied Area Change listener.
      *
      * @param listener IOccupiedAreaChangeListener.
@@ -2564,6 +2578,18 @@ public:
      * @param animation true means window rotation needs animation. Otherwise not needed.
      */
     virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) {}
+
+    /**
+     * @brief Set requested orientation.
+     *
+     * @param Orientation Screen orientation.
+     * @param animation true means window rotation needs animation. Otherwise not needed.
+     */
+    virtual WMError SetPreferredOrientationWithResult(
+        Orientation orientation, uint32_t promiseId, bool needAnimation = true)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
 
     /**
      * @brief Get the Target Orientation ConfigInfo.
@@ -4681,7 +4707,7 @@ public:
      * @param windowAnchorInfo the windowAnchorInfo of subWindow.
      * @return WM_OK means set success.
      */
-    virtual WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo, bool isAttach = false)
+    virtual WMError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -4850,6 +4876,13 @@ public:
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
 
+     /**
+     * @brief Get is subwindow zLevel above parent loosened
+     *
+     * @return true means subwindow zLevel above parent loosened, others means follow parent.
+     */
+    virtual bool IsZLevelAboveParentLoosened() const { return false; }
+ 
     /**
      * @brief Set drag key frame policy.
      * effective order:
@@ -5298,6 +5331,16 @@ public:
     virtual WMError NotifyPageEnable(const std::string& action, const std::string& message)
     {
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
+    }
+
+    /**
+     * @brief notify split ratio changed
+     *
+     * @param newRatio new ratio
+     */
+    virtual WMError NotifySplitRatioChanged(float newRatio)
+    {
+        return WMError::WM_OK;
     }
 };
 }

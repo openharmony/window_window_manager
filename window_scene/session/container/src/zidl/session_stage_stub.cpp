@@ -250,6 +250,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetRouterStackInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT):
             return HandleGetSceneNodeCount(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ORIENTATION_EXECUTION_RESULT):
+            return HandleNotifyOrientationExecutionResult(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
             return HandleUpdateWindowModeForUITest(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
@@ -1243,6 +1245,23 @@ int SessionStageStub::HandleGetSceneNodeCount(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyOrientationExecutionResult(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t promiseId = 0;
+    if (!data.ReadUint32(promiseId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read promiseId failed");
+        return ERR_INVALID_VALUE;
+    }
+    uint32_t result = 0;
+    if (!data.ReadUint32(result)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read result failed");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyOrientationExecutionResult(promiseId, static_cast<OrientationExecutionResult>(result));
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "in");
@@ -1401,7 +1420,12 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessagePa
         TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
         return ERR_INVALID_DATA;
     }
-    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
+    uint32_t selectModeValue = 0;
+    if (!data.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read selectMode failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, static_cast<SelectMode>(selectModeValue));
     return ERR_NONE;
 }
 int SessionStageStub::HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply)

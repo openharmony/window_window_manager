@@ -137,6 +137,14 @@ public:
 
     DisplayId GetDisplayId() const { return displayId_; }
 
+    void SetMainWindowPersistentId(int32_t mainWindowPersistentId) { mainWindowPersistentId_ = mainWindowPersistentId; }
+
+    int32_t GetMainWindowPersistentId() const { return mainWindowPersistentId_; }
+
+    void SetControlAppType(ControlAppType controlAppType) { controlAppType_ = controlAppType; }
+
+    ControlAppType GetControlAppType() const { return controlAppType_; }
+
     uint32_t windowId_ { INVALID_WINDOW_ID };
     int32_t pid_ { 0 };
     int32_t uid_ { 0 };
@@ -155,6 +163,8 @@ public:
     int32_t callingPid_ { -1 };
     int32_t collaboratorType_ = 0;
     DisplayId displayId_ { DISPLAY_ID_INVALID };
+    int32_t mainWindowPersistentId_ = INVALID_WINDOW_ID;
+    ControlAppType controlAppType_ = ControlAppType::CONTROL_APP_TYPE_BEGIN;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_VISIBILITY_INFO_H

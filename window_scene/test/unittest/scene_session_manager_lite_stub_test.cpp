@@ -294,6 +294,13 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
+    WMError RegisterSessionLifecycleListenerByAppInstance(const sptr<ISessionLifecycleListener>& listener,
+                                                          const std::string& bundleName,
+                                                          int32_t appIndex,
+                                                          const std::string& appInstanceKey) override
+    {
+        return WMError::WM_OK;
+    }
     WMError UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener) override
     {
         return WMError::WM_OK;

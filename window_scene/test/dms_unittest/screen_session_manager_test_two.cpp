@@ -55,6 +55,7 @@ const int32_t IS_OS_SWITCH_PAD_NEED_RECOVER_MASK = 1;
 const bool IS_SUPPORT_RESOLUTION_EFFECT_CHANGE = EXTEND_DISPLAY_FUNCTIONS & RESOLUTION_EFFECT_FEATURE_MASK;
 const bool IS_OS_SWITCH_PAD_NEED_RECOVER =
     RESOLUTION_EFFECT_OS_MODE_RECOVER & IS_OS_SWITCH_PAD_NEED_RECOVER_MASK;
+const std::string SETTING_OFF_SCREEN_RENDERING_SWITCH_KEY = "off_screen_rendering_switch";
 }
 namespace {
     std::string g_errLog;
@@ -166,6 +167,20 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendScreenDpiFromSettingData, TestSize.L
     ssm_->SetExtendScreenDpiFromSettingData();
     EXPECT_TRUE(g_errLog.find("screen session is null") != std::string::npos);
 }
+
+/**
+ * @tc.name: SetExtendScreenDpi
+ * @tc.desc: SetExtendScreenDpi test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetExtendScreenDpi, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->SetExtendScreenDpi();
+    EXPECT_TRUE(g_errLog.find("get setting extend screen dpi") != std::string::npos);
+}
  
 /**
  * @tc.name: SetExtendScreenIndepDpi
@@ -178,7 +193,10 @@ HWTEST_F(ScreenSessionManagerTest, SetExtendScreenIndepDpi, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     ASSERT_NE(ssm_, nullptr);
     ssm_->SetExtendScreenIndepDpi();
-    EXPECT_TRUE(g_errLog.find("screen session is null") != std::string::npos);
+    bool offScreenRenderValue = true;
+    ScreenSettingHelper::GetSettingOffScreenRenderValue(offScreenRenderValue,
+        SETTING_OFF_SCREEN_RENDERING_SWITCH_KEY);
+    EXPECT_EQ(g_errLog.find("current is not independent dpi mode.") != std::string::npos, offScreenRenderValue);
 }
 
 /**
