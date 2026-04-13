@@ -365,7 +365,7 @@ public:
     };
 #endif
 
-bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom, bool isLSState)
 {
     if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
         !avoidArea.rightRect_.IsUninitializedRect()) {
@@ -376,7 +376,7 @@ bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea
     }
     auto diff =
         std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && ((diff <= 1 && !GetLSState()) || (diff <= 2 && GetLSState()));
+    return isVisible && ((diff <= 1 && !isLSState) || (diff <= 2 && isLSState));
 }
 
 void FillWindowDisplayName(WindowDisplayInfo& windowDisplayInfo)
@@ -3003,8 +3003,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             return this->IsLastFrameLayoutFinished(isLayoutFinished);
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
-                const AvoidArea& avoidArea, int32_t sessionBottom) {
-            return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
+                const AvoidArea& avoidArea, int32_t sessionBottom, bool isLSState) {
+            return CheckAvoidAreaForAINavigationBar(
+                isAINavigationBarVisible_[displayId], avoidArea, sessionBottom, isLSState);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
             return this->GetStatusBarAvoidHeight(displayId, barArea);
