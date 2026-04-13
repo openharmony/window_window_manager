@@ -9101,7 +9101,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
     TLOGNFW(WmsLogTag::DMS, "dma=%{public}d, displayId:%{public}" PRIu64, isUseDma, realDisplayId);
     std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
     if (displayNode == nullptr || displayNode->GetRSUIContext() == nullptr ||
-        displayNode->GetRSUIContext()->GetRenderInterface()) {
+        displayNode->GetRSUIContext()->GetRSRenderInterface() == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "displayNode is null!");
         return nullptr;
     }
@@ -9124,7 +9124,7 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenSnapshot(Display
         TLOGNFI(WmsLogTag::DMS, "Snapshot filtering surfaceNodesList surfaceNodes, size:%{public}ud",
             static_cast<uint32_t>(surfaceNodesList.size()));
     }
-    bool ret = displayNode->GetRSUIContext()->GetRenderInterface()->TakeSurfaceCapture(displayNode, callback, config);
+    bool ret = displayNode->GetRSUIContext()->GetRSRenderInterface()->TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGNFE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
         return nullptr;
@@ -9159,7 +9159,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetScreenHDR
 #endif
     std::shared_ptr<RSDisplayNode> displayNode = GetDisplayNodeByDisplayId(realDisplayId);
     if (displayNode == nullptr || displayNode->GetRSUIContext() == nullptr ||
-        displayNode->GetRSUIContext()->GetRenderInterface()) {
+        displayNode->GetRSUIContext()->GetRSRenderInterface() == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "displayNode is null!");
         return {nullptr, nullptr};
     }
@@ -9180,7 +9180,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> ScreenSessionManager::GetScreenHDR
     if (surfaceNodesList.size() > 0) {
         TLOGNFI(WmsLogTag::DMS, "Snapshot filter, size:%{public}ud", static_cast<uint32_t>(surfaceNodesList.size()));
     }
-    bool ret = displayNode->GetRSUIContext()->GetRenderInterface()->TakeSurfaceCapture(displayNode, callback, config);
+    bool ret = displayNode->GetRSUIContext()->GetRSRenderInterface()->TakeSurfaceCapture(displayNode, callback, config);
     if (!ret) {
         TLOGNFE(WmsLogTag::DMS, "TakeSurfaceCapture failed");
         return {nullptr, nullptr};
