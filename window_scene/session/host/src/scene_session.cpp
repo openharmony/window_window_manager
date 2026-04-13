@@ -14,6 +14,7 @@
  */
 
 #include "session/host/include/scene_session.h"
+#include "scene/host/include/zidl/scene_node_count_callback_proxy.h"
 #include <parameters.h>
 
 #include <ability_manager_client.h>
@@ -10263,13 +10264,33 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
+WSError SceneSession::GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t timeoutMs)
 {
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is nullptr");
+        nodeCount = 0;
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->GetSceneNodeCount(nodeCount);
+    TLOGI(WmsLogTag::WMS_ROTATION, 
+        "GetSceneNodeCountWithTimeout start, persistentId:%{public}d, timeout:%{public}dms", 
+        GetPersistentId(), timeoutMs);
+    auto callback = sptr<SceneNodeCountCallback>::MakeSptr();
+    callback->ResetResult();
+    WSError ret = sessionStage_->GetSceneNodeCount(callback->AsObject());
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed, persistentId:%{public}d", GetPersistentId());
+        nodeCount = 0;
+        return ret;
+    }
+    nodeCount callback->GetResult(timeoutMs);
+    TLOGI(WmsLogTag::WMS_ROTATION, "persistentId:%{public}d, nodeCount:%{public}u", GetPersistentId(), nodeCount);
+    return WSError::WS_OK;
+}
+
+// 修改原有同步方法，使用带超时的版本
+WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
+{
+    return GetSceneNodeCountWithTimeout(nodeCount, 3000);
 }
 
 
