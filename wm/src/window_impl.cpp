@@ -147,7 +147,7 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     }
     name_ = option->GetWindowName();
 
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, nullptr, nullptr);
 
     surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), option->GetWindowType());
     if (surfaceNode_ != nullptr) {

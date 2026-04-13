@@ -990,7 +990,8 @@ public:
      */
     static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
-        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
+        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false,
+        sptr<IRemoteObject> renderSession = nullptr);
 
     /**
      * @brief get and verify windowType, include sub_window/system_window

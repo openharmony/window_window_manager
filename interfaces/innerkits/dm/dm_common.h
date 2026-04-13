@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include <parcel.h>
+#include <iremote_object.h>
 
 namespace OHOS::Rosen {
 using DisplayId = uint64_t;
@@ -815,6 +816,7 @@ struct SessionOption {
     int32_t rotation_;
     std::map<int32_t, int32_t> rotationOrientationMap_;
     bool isBooting_ { false };
+    sptr<IRemoteObject> connectToRenderToken_ = nullptr;
 };
 
 /**

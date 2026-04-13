@@ -35,7 +35,8 @@ public:
     sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId, ScreenId defScreenId, ScreenProperty property);
     void NotifyCaptureStatusChangedGlobal();
     void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession);
-    void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
+    void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason,
+        sptr<IRemoteObject> connectToRenderToken);
     void ScreenConnectionChanged(sptr<ScreenSession>& screenSession, ScreenId screenId,
         ScreenEvent screenEvent, bool phyMirrorEnable);
     bool IsNeedAddInputServiceAbility();
