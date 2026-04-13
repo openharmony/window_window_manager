@@ -14,7 +14,7 @@
  */
 
 #include "session/host/include/scene_session.h"
-#include "scene/host/include/zidl/scene_node_count_callback_proxy.h"
+#include "session/host/include/scene_node_count_callback"
 #include <parameters.h>
 
 #include <ability_manager_client.h>
@@ -10271,9 +10271,7 @@ WSError SceneSession::GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t 
         nodeCount = 0;
         return WSError::WS_ERROR_NULLPTR;
     }
-    TLOGI(WmsLogTag::WMS_ROTATION, 
-        "GetSceneNodeCountWithTimeout start, persistentId:%{public}d, timeout:%{public}dms", 
-        GetPersistentId(), timeoutMs);
+    TLOGI(WmsLogTag::WMS_ROTATION, "start, winId:%{public}d, timeout:%{public}dms", GetPersistentId(), timeoutMs);
     auto callback = sptr<SceneNodeCountCallback>::MakeSptr();
     callback->ResetResult();
     WSError ret = sessionStage_->GetSceneNodeCount(callback->AsObject());
