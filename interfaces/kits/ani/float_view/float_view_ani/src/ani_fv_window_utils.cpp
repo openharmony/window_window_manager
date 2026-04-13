@@ -321,7 +321,7 @@ ani_object CreateAniFloatViewStateChangeInfoObject(ani_env* env, const FloatView
 }
 
 ani_object CreateAniFloatViewRectChangeInfoObject(ani_env* env,
-        const Rect& rect, double scale, const std::string& reason)
+    const Rect& rect, double scale, const std::string& reason)
 {
     RETURN_IF_NULL(env, nullptr);
     ani_class infoClass = nullptr;
@@ -331,8 +331,7 @@ ani_object CreateAniFloatViewRectChangeInfoObject(ani_env* env,
         return static_cast<ani_object>(AniGetUndefined(env));
     }
     ani_method ctor = nullptr;
-    ret = env->Class_FindMethod(infoClass, "<ctor>",
-        "C{@ohos.window.floatView.floatView.Rect}dC{std.core.String}:", &ctor);
+    ret = env->Class_FindMethod(infoClass, "<ctor>", "C{@ohos.window.window.Rect}dC{std.core.String}:", &ctor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "[ANI]find constructor failed");
         return static_cast<ani_object>(AniGetUndefined(env));
@@ -357,14 +356,14 @@ ani_object CreateAniFvWindowInfoObject(ani_env* env, const sptr<Window>& window,
 {
     RETURN_IF_NULL(env, nullptr);
     ani_class infoClass = nullptr;
-    ani_status ret = env->FindClass("@ohos.window.floatView.floatView.FloatViewWindowInfoInner", &infoClass);
+    ani_status ret = env->FindClass("@ohos.window.floatView.floatView.FloatViewPropertiesInner", &infoClass);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "[ANI]class not found");
         return static_cast<ani_object>(AniGetUndefined(env));
     }
     ani_method ctor = nullptr;
     ret = env->Class_FindMethod(infoClass, "<ctor>",
-        "iiC{@ohos.window.floatView.floatView.Rect}dC{@ohos.window.floatView.floatView.Rect}z:", &ctor);
+        "iiC{@ohos.window.window.Rect}dC{@ohos.window.window.Rect}z:", &ctor);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "[ANI]find constructor failed");
         return static_cast<ani_object>(AniGetUndefined(env));

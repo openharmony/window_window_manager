@@ -240,7 +240,7 @@ void AniFvController::OnSetWindowSizeAni(ani_env* env, ani_object sizeObj)
         return;
     }
     Rect rect;
-    if (!ParseWindowSize(env, sizeObj, rect)){
+    if (!ParseWindowSize(env, sizeObj, rect)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "[FV]parse window size failed");
         AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "convert window size failed.");
         return;
