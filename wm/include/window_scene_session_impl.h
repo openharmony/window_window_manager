@@ -366,12 +366,14 @@ public:
     /*
      * Window LifeCycle
      */
-    void Resume() override;
+    void Resume(bool isGamePreLaunch = false) override;
     void Pause() override;
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
     WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams) override;
+    WMError SetIsGamePreLaunch(bool isGamePreLaunch) override;
+    WMError ClearIsGamePreLaunch() override;
 
     /*
      * Window Event

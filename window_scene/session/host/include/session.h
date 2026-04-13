@@ -88,7 +88,7 @@ using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInf
 using NotifyPendingSessionToBackgroundFunc = std::function<void(const SessionInfo& info,
     const BackgroundParams& params)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
-    bool shouldBackToCaller)>;
+    bool shouldBackToCaller, LifeCycleChangeReason reason)>;
 using NotifyClickModalWindowOutsideFunc = std::function<void()>;
 using NotifyRaiseMainWindowAboveTargetFunc = std::function<void(int32_t targetId)>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
@@ -230,7 +230,8 @@ public:
     void ResetIsActive();
     WSError PendingSessionToForeground();
     WSError PendingSessionToBackground(const BackgroundParams& params);
-    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
+    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     void SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func);

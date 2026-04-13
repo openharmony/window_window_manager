@@ -174,7 +174,8 @@ private:
     void OnSessionException(const SessionInfo& info, const ExceptionInfo& exceptionInfo, bool startFail);
     void PendingSessionToForeground(const SessionInfo& info);
     void PendingSessionToBackground(const SessionInfo& info, const BackgroundParams& params);
-    void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller);
+    void PendingSessionToBackgroundForDelegator(const SessionInfo& info, bool shouldBackToCaller,
+        LifeCycleChangeReason reason);
     static napi_value SetTemporarilyShowWhenLocked(napi_env env, napi_callback_info info);
 
     static napi_value ActivateDragBySystem(napi_env env, napi_callback_info info);
