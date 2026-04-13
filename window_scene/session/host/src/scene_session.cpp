@@ -14,7 +14,7 @@
  */
 
 #include "session/host/include/scene_session.h"
-#include "session/host/include/scene_node_count_callback"
+#include "session/host/include/scene_node_count_callback.h"
 #include <parameters.h>
 
 #include <ability_manager_client.h>
@@ -10280,12 +10280,11 @@ WSError SceneSession::GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t 
         nodeCount = 0;
         return ret;
     }
-    nodeCount callback->GetResult(timeoutMs);
+    nodeCount = callback->GetResult(timeoutMs);
     TLOGI(WmsLogTag::WMS_ROTATION, "persistentId:%{public}d, nodeCount:%{public}u", GetPersistentId(), nodeCount);
     return WSError::WS_OK;
 }
 
-// 修改原有同步方法，使用带超时的版本
 WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
 {
     return GetSceneNodeCountWithTimeout(nodeCount, 3000);

@@ -1251,23 +1251,20 @@ int SessionStageStub::HandleGetSceneNodeCountWithCallback(MessageParcel& data, M
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "HandleGetSceneNodeCountWithCallback in");
     
-    sptr<IRemoteObject> callbackObj;
-    if (!data.ReadRemoteObject(callbackObj)) {
+    sptr<IRemoteObject> callbackObj = data.ReadRemoteObject();
+    if (callbackObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Read callback failed");
         return ERR_INVALID_VALUE;
     }
-    
     WSError ret = GetSceneNodeCount(callbackObj);
     if (ret != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed");
         return ERR_INVALID_VALUE;
     }
-    
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write error code failed");
         return ERR_INVALID_VALUE;
     }
-    
     return ERR_NONE;
 }
 
