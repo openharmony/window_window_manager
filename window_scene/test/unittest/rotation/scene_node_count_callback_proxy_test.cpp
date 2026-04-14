@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,7 @@ HWTEST_F(SceneNodeCountCallbackProxyTest, OnSceneNodeCount, TestSize.Level1)
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     sptr<SceneNodeCountCallbackProxy> sceneNodeCountCallbackProxy
         = sptr<SceneNodeCountCallbackProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(sceneNodeCountCallbackProxy, nullptr);
 
     // Case 1: Failed to write interface token
     uint32_t testNodeCount = 42;
@@ -87,7 +88,7 @@ HWTEST_F(SceneNodeCountCallbackProxyTest, OnSceneNodeCount, TestSize.Level1)
     MockMessageParcel::SetReadUint32ErrorFlag(false);
 
     // Case 3: remote is nullptr
-    sptr<SessionStageProxy> nullProxy = sptr<SceneNodeCountCallbackProxy>::MakeSptr(nullptr);
+    sptr<SceneNodeCountCallbackProxy> nullProxy = sptr<SceneNodeCountCallbackProxy>::MakeSptr(nullptr);
     nullProxy->OnSceneNodeCount(testNodeCount);
 
     // Case 4: Failed to send request

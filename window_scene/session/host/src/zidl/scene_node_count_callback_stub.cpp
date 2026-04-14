@@ -39,7 +39,7 @@ int SceneNodeCountCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& da
             break;
         }
         default:
-            TLOGW(WmsLogTag::WMS_ROTATION, "Unknown transaction code %{public}d", code);
+            TLOGW(WmsLogTag::WMS_ROTATION, "Unknown transaction code %{public}u", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
     return ERR_NONE;
