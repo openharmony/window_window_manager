@@ -70,6 +70,7 @@ ohos_unittest("extension_window_extension_stub_impl_test") {
     "ability_runtime:ability_manager",
     "accessibility:accessibility_common",
     "ace_engine:ace_uicontent",
+    "googletest:gmock",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "input:libmmi-client",
