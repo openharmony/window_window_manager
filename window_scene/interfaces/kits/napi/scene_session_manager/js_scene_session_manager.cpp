@@ -166,6 +166,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WaterfallResidentState", CreateWaterfallResidentState(env));
     napi_set_named_property(env, exportObj, "CompatibleStyleMode", CreateCompatibleStyleMode(env));
     napi_set_named_property(env, exportObj, "TitleButtonEventType", CreateTitleButtonEventType(env));
+    napi_set_named_property(env, exportObj, "FloatingBallTextUpdateAnimationType",
+        CreateJsSessionFbTextUpdateAnimationType(env));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(env, exportObj, "setBehindWindowFilterEnabled",
