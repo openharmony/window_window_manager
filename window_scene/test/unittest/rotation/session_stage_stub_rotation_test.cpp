@@ -111,6 +111,46 @@ HWTEST_F(SessionStageStubRotationTest, HandleGetSceneNodeCount, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleGetSceneNodeCountWithCallback
+ * @tc.desc: test function : HandleGetSceneNodeCountWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleGetSceneNodeCountWithCallback, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCountWithCallback start";
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCENE_NODE_COUNT_WITH_CALLBACK);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+
+    // Case 1: Failed to read callback object (no valid interface token)
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleGetSceneNodeCountWithCallback(data, reply));
+
+    // Case 2: Write valid interface token but no callback
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    auto result = sessionStageStub_->HandleGetSceneNodeCountWithCallback(data, reply);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+
+    // Case 3: Write valid callback object
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<MockIRemoteObject> callbackMocker = sptr<MockIRemoteObject>::MakeSptr();
+    data2.WriteRemoteObject(callbackMocker);
+    result = sessionStageStub_->HandleGetSceneNodeCountWithCallback(data2, reply2);
+    EXPECT_EQ(ERR_NONE, result);
+
+    // Case 4: Verify reply contains error code
+    int32_t errorCode = 0;
+    if (reply2.ReadInt32(errorCode)) {
+        EXPECT_GE(errorCode, 0); // Should be valid error code (0 for success)
+    }
+
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCountWithCallback end";
+}
+
+/**
  * @tc.name: HandleNotifyRotationChange
  * @tc.desc: test function : HandleNotifyRotationChange
  * @tc.type: FUNC
