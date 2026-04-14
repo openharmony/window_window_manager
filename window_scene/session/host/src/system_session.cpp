@@ -28,6 +28,7 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "System
 
 constexpr uint32_t MIN_SYSTEM_WINDOW_WIDTH = 1;
 constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 1;
+constexpr uint32_t INVALID_SESSION_ID = 0;
 constexpr uint8_t MAX_FB_CLICK_COUNT = 8;
 const std::string FB_CLICK_EVENT = "click";
 
@@ -474,21 +475,21 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
         return WMError::WM_DO_NOTHING;
     }
     if (IPCSkeleton::GetCallingPid() != GetCallingPid()) {
-        TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", __func__);
+        TLOGW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", __func__);
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     windowId = GetFbWindowId();
-    // wait FB_Panel to be created if windowId is 0
+    // wait FB_Panel to be created if windowId is INVALID_SESSION_ID = 0
     constexpr int32_t WAIT_MILLISECONDS = 20;
     constexpr int32_t MAX_WAIT_TIMES = 10;
     int32_t waitTimes = 0;
-    while (windowId == 0 && waitTimes < MAX_WAIT_TIMES) {
+    while (windowId == INVALID_SESSION_ID && waitTimes < MAX_WAIT_TIMES) {
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MILLISECONDS));
         std::this_thread::yield();
         waitTimes++;
         windowId = GetFbWindowId();
     }
-    TLOGNI(WmsLogTag::WMS_SYSTEM, "waitTimes: %{public}d, mode: %{public}u", waitTimes, windowId);
+    TLOGI(WmsLogTag::WMS_SYSTEM, "waitTimes: %{public}d, mode: %{public}u", waitTimes, windowId);
     return WMError::WM_OK;
 }
 
