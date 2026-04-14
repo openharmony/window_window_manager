@@ -2388,6 +2388,27 @@ napi_value CreateJsSessionPiPControlStatus(napi_env env)
     return objValue;
 }
 
+napi_value CreateJsSessionFbTextUpdateAnimationType(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to create fb animate type object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "ANIMATION_NONE", CreateJsValue(env,
+        static_cast<int32_t>(FloatingBallTextUpdateAnimationType::ANIMATION_NONE)));
+    napi_set_named_property(env, objValue, "ANIMATION_OPACITY", CreateJsValue(env,
+        static_cast<int32_t>(FloatingBallTextUpdateAnimationType::ANIMATION_OPACITY)));
+    return objValue;
+}
+
 napi_value CreateJsSessionGravity(napi_env env)
 {
     napi_value objValue = nullptr;

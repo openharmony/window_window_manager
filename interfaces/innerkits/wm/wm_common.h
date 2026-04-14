@@ -2155,6 +2155,12 @@ enum class FloatingBallTemplate : uint32_t {
     END = 5,
 };
 
+enum class FloatingBallTextUpdateAnimationType : uint32_t {
+    ANIMATION_NONE = 0,
+    ANIMATION_OPACITY = 1,
+    ANIMATION_END = 2,
+};
+
 struct PiPWindowSize {
     uint32_t width;
     uint32_t height;
