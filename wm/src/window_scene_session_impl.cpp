@@ -8129,17 +8129,6 @@ WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConf
     return hostSession->GetAppForceLandscapeConfig(config);
 }
 
-WMError WindowSceneSessionImpl::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return hostSession->GetAppForceLandscapeConfigEnable(enableForceSplit);
-}
-
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
@@ -8148,20 +8137,6 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
         config.supportSplit_ > 0) {
         SetForceSplitConfig(config);
-        return WSError::WS_OK;
-    }
-    return WSError::WS_DO_NOTHING;
-}
-
-WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
-    SelectMode selectMode)
-{
-    TLOGI(WmsLogTag::DEFAULT, "in");
-    WindowType winType = GetType();
-    bool enableForceSplit = false;
-    if (WindowHelper::IsMainWindow(winType) &&
-        GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        // SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport, selectMode);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
@@ -8223,13 +8198,6 @@ void WindowSceneSessionImpl::SendCombinedCompatibleConfigToArkUI()
         TLOGI(WmsLogTag::WMS_COMPAT, "Send logical device config to arkui successfully!");
     }
     TLOGI(WmsLogTag::WMS_COMPAT, "Send combined compatible config to arkui successfully!");
-}
-
-WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
-{
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return hostSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
 }
 
 WMError WindowSceneSessionImpl::GetSelectMode(SelectMode& selectMode)

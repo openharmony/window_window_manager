@@ -2984,9 +2984,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
         });
-        // sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
-        //     return this->GetAppHookWindowInfo(bundleName);
-        // });
         sceneSession->RegisterSelectModeFunc([this]() {
             return this->GetSelectMode();
         });
@@ -3052,9 +3049,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
 
         if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            // sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
-            //     return this->GetAppForceLandscapeConfigEnable(bundleName);
-            // });
             sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
                 const std::string& action, const std::string& message) {
                 return this->NotifyPageEnableFunc(bundleName, windowId, action, message);
@@ -17844,51 +17838,6 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UpdateAppHookWindowInfo(const std::string& bundleName,
-                                                     const HookWindowInfo& hookWindowInfo)
-{
-    if (bundleName.empty()) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Bundle name is empty");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (hookWindowInfo.widthHookRatio < 0.0f) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid hook window parameters: widthHookRatio:%{public}f, "
-            "bundleName:%{public}s", hookWindowInfo.widthHookRatio, bundleName.c_str());
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, hookWindowInfo:[%{public}s]", bundleName.c_str(),
-        hookWindowInfo.ToString().c_str());
-
-    HookWindowInfo preInfo;
-    {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
-        if (appHookWindowInfoMap_.count(bundleName)) {
-            preInfo = appHookWindowInfoMap_[bundleName];
-        } else {
-            preInfo = {};
-        }
-        HookWindowInfo newInfo = {};
-        newInfo.enableHookWindow = hookWindowInfo.enableHookWindow;
-        newInfo.widthHookRatio = hookWindowInfo.widthHookRatio;
-        newInfo.notifyWindowChange = false;
-        newInfo.drawableRectHook = hookWindowInfo.drawableRectHook;
-        appHookWindowInfoMap_[bundleName] = newInfo;
-    }
-
-    if (preInfo.enableHookWindow != hookWindowInfo.enableHookWindow ||
-        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio) ||
-        preInfo.drawableRectHook != hookWindowInfo.drawableRectHook) {
-        //Notify the client of the info change
-        std::shared_lock lock(sceneSessionMapMutex_);
-        for (const auto& [_, session] : sceneSessionMap_) {
-            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
-                session->UpdateAppHookWindowInfo(hookWindowInfo);
-            }
-        }
-    }
-    return WMError::WM_OK;
-}
-
 HookWindowInfo SceneSessionManager::GetAppHookWindowInfo(const std::string& bundleName)
 {
     if (bundleName.empty()) {
@@ -18200,46 +18149,6 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
     return WSError::WS_OK;
 }
 
-WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string& bundleName,
-    const bool enableForceSplit, bool needUpdateViewport, SelectMode selectMode)
-{
-    if (bundleName.empty()) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "bundle name is empty");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-
-    // update selectMode
-    SetSelectMode(selectMode);
-
-    AppForceLandscapeConfig config;
-    {
-        std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-        if (appForceLandscapeMap_.count(bundleName)) {
-            config = appForceLandscapeMap_[bundleName];
-        } else {
-            TLOGI(WmsLogTag::WMS_COMPAT, "app: %{public}s, config not find", bundleName.c_str());
-        }
-        config.configEnable_ = enableForceSplit;
-        appForceLandscapeMap_[bundleName] = config;
-    }
-    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        sceneSessionMapCopy = sceneSessionMap_;
-    }
-    for (const auto& iter : sceneSessionMapCopy) {
-        auto& session = iter.second;
-        if (session && session->GetSessionInfo().bundleName_ == bundleName &&
-            SessionHelper::IsMainWindow(session->GetWindowType())) {
-            session->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, selectMode);
-        }
-    }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d, needUpdateViewport:%{public}d, "
-        "selectMode: %{public}d", bundleName.c_str(), enableForceSplit, needUpdateViewport,
-        static_cast<uint32_t>(selectMode));
-    return WSError::WS_OK;
-}
-
 AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const std::string& bundleName)
 {
     if (bundleName.empty()) {
@@ -18252,22 +18161,6 @@ AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const st
         return {};
     }
     return appForceLandscapeMap_[bundleName];
-}
-
-bool SceneSessionManager::GetAppForceLandscapeConfigEnable(const std::string& bundleName)
-{
-    if (bundleName.empty()) {
-        return false;
-    }
-    std::shared_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-    if (appForceLandscapeMap_.empty() ||
-        appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
-        TLOGD(WmsLogTag::WMS_COMPAT, "app: %{public}s, config not find", bundleName.c_str());
-        return false;
-    }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d",
-        bundleName.c_str(), appForceLandscapeMap_[bundleName].configEnable_);
-    return appForceLandscapeMap_[bundleName].configEnable_;
 }
 
 WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId)

@@ -786,35 +786,11 @@ bool MainSession::RestoreAspectRatio(float ratio)
     return true;
 }
 
-WMError MainSession::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    if (forceSplitEnableFunc_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "forceSplitEnableFunc_ is null");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    enableForceSplit = forceSplitEnableFunc_(sessionInfo_.bundleName_);
-    return WMError::WM_OK;
-}
-
-WSError MainSession::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
-{
-    if (!sessionStage_) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "sessionStage_ is null");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, selectMode);
-}
-
 bool MainSession::GetSessionBoundedSystemTray(
     int32_t callingPid, uint32_t callingToken, const std::string &instanceKey) const
 {
     return (isSessionBoundedSystemTrayCallback_ &&
             isSessionBoundedSystemTrayCallback_(callingPid, callingToken, instanceKey));
-}
-
-void MainSession::RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func)
-{
-    forceSplitEnableFunc_ = std::move(func);
 }
 
 void MainSession::RemovePrelaunchStartingWindow()

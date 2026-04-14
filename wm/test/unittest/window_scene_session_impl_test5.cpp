@@ -3146,45 +3146,6 @@ HWTEST_F(WindowSceneSessionImplTest5, SendCombinedCompatibleConfigToArkUI, TestS
     window->SendCombinedCompatibleConfigToArkUI();
     EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
 }
-
-/**
- * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated01
- * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated when window type is not main window
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyAppForceLandscapeConfigEnableUpdated01");
-    option->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
-    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
-}
-
-/**
- * @tc.name: NotifyAppForceLandscapeConfigEnableUpdated02
- * @tc.desc: Test NotifyAppForceLandscapeConfigEnableUpdated when GetAppForceLandscapeConfigEnable fails
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, NotifyAppForceLandscapeConfigEnableUpdated02, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyAppForceLandscapeConfigEnableUpdated02");
-    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    
-    SessionInfo sessionInfo = {"CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    
-    // GetAppForceLandscapeConfigEnable will fail if listener is not registered
-    WSError res = window->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
-    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
-}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -153,7 +153,6 @@
             OHOS::Rosen::SceneSession::UpdateNormalModalUIExtension*;
             OHOS::Rosen::SceneSession::UpdatePrivacyModeControlInfo*;
             OHOS::Rosen::SceneSession::MaskSupportEnterWaterfallMode*;
-            OHOS::Rosen::SceneSession::RegisterAppHookWindowInfoFunc*;
             OHOS::Rosen::SceneSession::RegisterSelectModeFunc*;
             OHOS::Rosen::SceneSession::RegisterGetIsDockAutoHideFunc*;
             OHOS::Rosen::SceneSession::RemoveFingerPointerDownStatus*;

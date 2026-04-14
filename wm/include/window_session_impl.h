@@ -965,7 +965,6 @@ protected:
     void HookWindowSizeByHookWindowInfo(Rect& rect);
     void SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo);
     HookWindowInfo GetAppHookWindowInfo();
-    virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
     virtual WMError GetSelectMode(SelectMode& selectMode) { return WMError::WM_OK; }
 
     /*
@@ -1178,10 +1177,7 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; };
-    virtual WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) { return WMError::WM_OK; };
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
-        SelectMode selectMode) override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);

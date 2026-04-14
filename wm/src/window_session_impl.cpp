@@ -8845,11 +8845,6 @@ WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
-{
-    return WSError::WS_DO_NOTHING;
-}
-
 void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)
 {
     enableFrameLayoutFinishCb_ = enable;

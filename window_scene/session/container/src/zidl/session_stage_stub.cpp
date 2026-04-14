@@ -236,8 +236,6 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyRotationChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_ENABLE_UPDATED):
-            return HandleNotifyAppForceLandscapeConfigEnableUpdated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_HOOK_WINDOW_INFO_UPDATED):
             return HandleNotifyAppHookWindowInfoUpdated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAUSED_STATUS):
@@ -1480,22 +1478,6 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& 
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_COMPAT, "in");
-    bool needUpdateViewport = false;
-    if (!data.ReadBool(needUpdateViewport)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
-        return ERR_INVALID_DATA;
-    }
-    uint32_t selectModeValue = 0;
-    if (!data.ReadUint32(selectModeValue)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "read selectMode failed");
-        return ERR_INVALID_DATA;
-    }
-    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, static_cast<SelectMode>(selectModeValue));
-    return ERR_NONE;
-}
 int SessionStageStub::HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");

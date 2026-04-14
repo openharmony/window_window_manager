@@ -376,57 +376,6 @@ HWTEST_F(SceneSessionManagerLayoutTest, GetAppHookWindowInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateAppHookWindowInfo
- * @tc.desc: test function : UpdateAppHookWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLayoutTest, UpdateAppHookWindowInfo, TestSize.Level1)
-{
-    ASSERT_TRUE(ssm_ != nullptr);
-
-    // Case 1: empty bundleName
-    std::string bundleName = "";
-    HookWindowInfo hookWindowInfo;
-    WMError errCode = ssm_->UpdateAppHookWindowInfo(bundleName, hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_ERROR_NULLPTR);
-
-    // Case 2: Invalid hook window parameters
-    bundleName = "UpdateAppHookWindowInfo_Test";
-    hookWindowInfo.widthHookRatio = -0.5f;
-    errCode = ssm_->UpdateAppHookWindowInfo(bundleName, hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_ERROR_INVALID_PARAM);
-
-    // Case 3: not found session
-    hookWindowInfo.enableHookWindow = true;
-    hookWindowInfo.widthHookRatio = 0.5f;
-    ssm_->sceneSessionMap_.insert({ 999, nullptr });
-    errCode = ssm_->UpdateAppHookWindowInfo(bundleName, hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_OK);
-    ssm_->appHookWindowInfoMap_.clear();
-
-    // Case 4: bundleName not found
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = bundleName;
-    sessionInfo.abilityName_ = bundleName;
-    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(sessionInfo, nullptr);
-    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
-    errCode = ssm_->UpdateAppHookWindowInfo("randomBundleName", hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_OK);
-    ssm_->appHookWindowInfoMap_.clear();
-
-    // Case 5: success
-    errCode = ssm_->UpdateAppHookWindowInfo(bundleName, hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_OK);
-    EXPECT_NE(0, ssm_->appHookWindowInfoMap_.count(bundleName));
-
-    // Case 6: Repeat update
-    errCode = ssm_->UpdateAppHookWindowInfo(bundleName, hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_OK);
-    EXPECT_NE(0, ssm_->appHookWindowInfoMap_.count(bundleName));
-}
-
-/**
  * @tc.name: UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow
  * @tc.desc: test function : UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow
  * @tc.type: FUNC
