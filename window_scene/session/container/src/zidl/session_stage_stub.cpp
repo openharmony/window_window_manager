@@ -1249,7 +1249,7 @@ int SessionStageStub::HandleGetSceneNodeCount(MessageParcel& data, MessageParcel
 
 int SessionStageStub::HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_ROTATION, "HandleGetSceneNodeCountWithCallback in");
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
     sptr<IRemoteObject> callbackObj = data.ReadRemoteObject();
     if (callbackObj == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Read callback failed");
