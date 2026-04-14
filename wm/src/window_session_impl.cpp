@@ -991,7 +991,7 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow hide follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Hide(option.reason_, option.withAnimation_, option.isFromInnerkits_, option.waitDetach_);
                 subwindow->SetIsHiddenFollowingUIExtension(true);
-            } else if (!IsLoosenedWithPcOrFreeMultiMode()) {
+            } else if (!subwindow->IsLoosenedWithPcOrFreeMultiMode()) {
             // Window whose zLevelAboveParentLoosened in pc or freeMultiMode does not follow parent window lifecycle.
                 subwindow->state_ = WindowState::STATE_HIDDEN;
                 subwindow->NotifyAfterBackground();
@@ -1010,7 +1010,7 @@ void WindowSessionImpl::UpdateSubWindowStateWithOptions(const StateChangeOption&
                 TLOGI(WmsLogTag::WMS_SUB, "subwindow show follow uec, id: %{public}d", subwindow->GetPersistentId());
                 subwindow->Show(option.reason_, option.withAnimation_, option.withFocus_, option.waitAttach_);
                 subwindow->SetIsHiddenFollowingUIExtension(false);
-            } else if (!IsLoosenedWithPcOrFreeMultiMode() &&
+            } else if (!subwindow->IsLoosenedWithPcOrFreeMultiMode() &&
                 subwindow->GetRequestWindowState() == WindowState::STATE_SHOWN) {
             // Window whose zLevelAboveParentLoosened in pc or freeMultiMode does not follow parent window lifecycle.
                 subwindow->state_ = WindowState::STATE_SHOWN;
