@@ -1452,15 +1452,11 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
 
 void WindowSessionProperty::SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened)
 {
-    TLOGD(WmsLogTag::WMS_SUB, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
-        zLevelAboveParentLoosened);
     zLevelAboveParentLoosened_ = zLevelAboveParentLoosened;
 }
  
 bool WindowSessionProperty::IsSubWindowZLevelAboveParentLoosened() const
 {
-    TLOGD(WmsLogTag::WMS_SUB, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
-        zLevelAboveParentLoosened_);
     return zLevelAboveParentLoosened_;
 }
 
