@@ -188,9 +188,9 @@ HWTEST_F(SessionProxyTest, RestoreFloatMainWindow, TestSize.Level1)
     sptr<SessionProxy> failProxy_ = sptr<SessionProxy>::MakeSptr(remoteMocker);
     ASSERT_EQ(failProxy_->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_IPC_FAILED);
 
-    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
     ASSERT_EQ(sProxy->RestoreFloatMainWindow(wantParams), WMError::WM_ERROR_IPC_FAILED);
-    MockMessageParcel::SetReadUint32ErrorFlag(false);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
     ASSERT_EQ(sProxy->RestoreFloatMainWindow(wantParams), WMError::WM_OK);
 

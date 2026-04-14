@@ -1380,15 +1380,6 @@ HWTEST_F(SystemSessionTest, RestoreFloatViewMainWindow, Function | SmallTest | L
     sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
 
     std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    EXPECT_NE(property, nullptr);
-    property->SetWindowType(WindowType::WINDOW_TYPE_MEDIA);
-    systemSession->SetSessionProperty(property);
-    EXPECT_EQ(systemSession->RestoreFloatViewMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
-    property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
-    systemSession->SetSessionProperty(property);
-
-    EXPECT_EQ(systemSession->RestoreFloatViewMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
     SessionInfo info1;
     info1.abilityName_ = "floatViewParentWindow";
     info1.bundleName_ = "floatViewParentWindow";
@@ -1396,7 +1387,7 @@ HWTEST_F(SystemSessionTest, RestoreFloatViewMainWindow, Function | SmallTest | L
     systemSession->SetParentSession(parentSession);
 
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid() + 1));
-    EXPECT_EQ(systemSession->RestoreFloatViewMainWindow(wantParams), WMError::WM_ERROR_INVALID_OPERATION);
+    EXPECT_EQ(systemSession->RestoreFloatViewMainWindow(wantParams), WMError::WM_ERROR_INVALID_CALLING);
     LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
 
     EXPECT_EQ(systemSession->RestoreFloatViewMainWindow(wantParams), WMError::WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED);

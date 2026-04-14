@@ -88,7 +88,7 @@ void FloatViewManagerTest::SetUp()
 {
     option_ = sptr<FvOption>::MakeSptr();
     ASSERT_NE(nullptr, option_);
-    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     ASSERT_NE(nullptr, fvController_);
     mw_ = sptr<MockWindow>::MakeSptr();
     ASSERT_NE(nullptr, mw_);
@@ -128,7 +128,7 @@ HWTEST_F(FloatViewManagerTest, IsActiveController, TestSize.Level1)
     FloatViewManager::SetActiveController(fvController_);
     EXPECT_TRUE(FloatViewManager::IsActiveController(fvController_));
 
-    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     EXPECT_FALSE(FloatViewManager::IsActiveController(otherController));
 
     FloatViewManager::RemoveActiveController(fvController_);
@@ -167,7 +167,7 @@ HWTEST_F(FloatViewManagerTest, RemoveActiveController, TestSize.Level1)
     EXPECT_FALSE(FloatViewManager::HasActiveController());
 
     FloatViewManager::SetActiveController(fvController_);
-    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     FloatViewManager::RemoveActiveController(otherController);
     EXPECT_TRUE(FloatViewManager::HasActiveController());
     FloatViewManager::RemoveActiveController(fvController_);
@@ -262,7 +262,7 @@ HWTEST_F(FloatViewManagerTest, ControllerLifecycleTest, TestSize.Level1)
  */
 HWTEST_F(FloatViewManagerTest, RemoveActiveControllerBranchCoverage, TestSize.Level1)
 {
-    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     FloatViewManager::RemoveActiveController(otherController);
     EXPECT_EQ(nullptr, FloatViewManager::activeController_);
 
