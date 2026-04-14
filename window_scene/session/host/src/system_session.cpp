@@ -28,7 +28,6 @@ constexpr HiviewDFX::HiLogLabel LABEL = { LOG_CORE, HILOG_DOMAIN_WINDOW, "System
 
 constexpr uint32_t MIN_SYSTEM_WINDOW_WIDTH = 1;
 constexpr uint32_t MIN_SYSTEM_WINDOW_HEIGHT = 1;
-constexpr uint32_t INVALID_SESSION_ID = 0;
 constexpr uint8_t MAX_FB_CLICK_COUNT = 8;
 const std::string FB_CLICK_EVENT = "click";
 
