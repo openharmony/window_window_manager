@@ -181,6 +181,7 @@ public:
         TRANS_ID_MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY,
         TRANS_ID_SNAPSHOT_BY_WINDOW_ID,
         TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO,
+        TRANS_ID_GET_FLOAT_VIEW_LIMITS,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -189,7 +190,7 @@ public:
     virtual WSError PendingSessionToForeground(const sptr<IRemoteObject>& token,
         int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-        bool shouldBackToCaller = true) = 0;
+        bool shouldBackToCaller = true, int32_t reason = 0) = 0;
     virtual WSError GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
     virtual WSError GetFocusSessionElement(AppExecFwk::ElementName& element,
         DisplayId displayId = DEFAULT_DISPLAY_ID) = 0;
@@ -329,8 +330,8 @@ public:
     }
     WMError ListWindowInfo(const WindowInfoOption& windowInfoOption,
         std::vector<sptr<WindowInfo>>& infos) override { return WMError::WM_OK; }
-    WMError GetAllWindowLayoutInfo(DisplayId displayId,
-        std::vector<sptr<WindowLayoutInfo>>& infos) override { return WMError::WM_OK; }
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+        const WindowInfoOptions& option = WindowInfoOptions()) override { return WMError::WM_OK; }
     WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos) override { return WMError::WM_OK; }
     WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds, const WindowSnapshotConfiguration& config,
         const sptr<IRemoteObject>& callback) override { return WMError::WM_OK; }
@@ -506,6 +507,7 @@ public:
         return WMError::WM_OK;
     }
     WMError NotifySupportRotationRegistered() override { return WMError::WM_OK; }
+    WMError GetFloatViewLimits(FloatViewLimits& limits) override { return WMError::WM_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

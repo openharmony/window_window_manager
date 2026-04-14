@@ -367,6 +367,12 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleRemovePrelaunchStartingWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RECOVER_WINDOW_EFFECT):
             return HandleRecoverWindowEffect(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOAT_VIEW_PREPARE_CLOSE):
+            return HandleStopFloatView(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOAT_VIEW):
+            return HandleUpdateFloatView(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_VIEW_MAIN_WINDOW):
+            return HandleRestoreFloatViewMainWindow(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -457,6 +463,35 @@ int SessionStub::HandleHide(MessageParcel& data, MessageParcel& reply)
     WLOGFD("Hide!");
     WSError errCode = Hide();
     reply.WriteUint32(static_cast<uint32_t>(errCode));
+    return ERR_NONE;
+}
+
+int WriteCombinedCompatibleConfig(MessageParcel& reply, sptr<WindowSessionProperty> property)
+{
+    if (!property) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "property is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    auto combinedCompatibleConfig = property->GetCombinedCompatibleConfig();
+    auto combinedSize = combinedCompatibleConfig.size();
+    if (combinedSize > 0 && combinedSize <= COMBINED_COMPATIBLE_CONFIG_MAX_SIZE) {
+        if (!reply.WriteUint32(static_cast<uint32_t>(combinedSize))) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Write combinedSize failed!");
+            return ERR_INVALID_DATA;
+        }
+        for (decltype(combinedSize) i = 0; i < combinedSize; i++) {
+            if (!reply.WriteString(combinedCompatibleConfig[i])) {
+                TLOGE(WmsLogTag::WMS_COMPAT, "Write config failed!");
+                return ERR_INVALID_DATA;
+            }
+        }
+    } else {
+        if (!reply.WriteUint32(0)) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Write combinedSize failed!");
+            return ERR_INVALID_DATA;
+        }
+        TLOGE(WmsLogTag::WMS_COMPAT, "combinedSize: %{public}zu fail to meet the conditions", combinedSize);
+    }
     return ERR_NONE;
 }
 
@@ -558,7 +593,11 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetUseControlState());
         reply.WriteString(property->GetAncoRealBundleName());
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
-        reply.WriteString(property->GetLogicalDeviceConfig());
+        auto ret = WriteCombinedCompatibleConfig(reply, property);
+        if (ret != ERR_NONE) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Write combined compatible config error, ret:%{public}d", ret);
+            return ret;
+        }
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);
         reply.WriteBool(property->IsPrelaunch());
@@ -751,7 +790,7 @@ int SessionStub::HandleRestoreFloatMainWindow(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     WMError ret = RestoreFloatMainWindow(wantParams);
-    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
@@ -1857,6 +1896,49 @@ int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParce
     return ERR_NONE;
 }
 // LCOV_EXCL_STOP
+
+int SessionStub::HandleStopFloatView(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "HandleStopFloatView");
+    WSError errCode = StopFloatView();
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateFloatView(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleUpdateFloatView");
+    sptr<FloatViewTemplateInfo> fvTemplateInfo = data.ReadParcelable<FloatViewTemplateInfo>();
+    if (fvTemplateInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read fvTemplateInfo failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateFloatView(*fvTemplateInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRestoreFloatViewMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleRestoreFloatViewMainWindow In");
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "wantParams is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WMError ret = RestoreFloatViewMainWindow(wantParams);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
 
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {

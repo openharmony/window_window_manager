@@ -435,7 +435,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_SYNC };
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true, "test"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
@@ -456,6 +456,21 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
     res = session_->ProcessRemoteRequest(
     static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_ANCHOR_INFO), data, reply, option);
     ASSERT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOAT_VIEW_PREPARE_CLOSE), data, reply, option);
+    ASSERT_EQ(ERR_NONE, res);
+
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOAT_VIEW), data, reply, option);
+    ASSERT_NE(ERR_NONE, res);
+
+    data.WriteParcelable(nullptr);
+    res = session_->ProcessRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_VIEW_MAIN_WINDOW), data, reply, option);
+    ASSERT_NE(ERR_NONE, res);
 }
 
 /**
@@ -1934,7 +1949,7 @@ HWTEST_F(SessionStubTest, HandleUpdateFloatingBall, Function | SmallTest | Level
     auto result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_INVALID_DATA);
  
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true, "test"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     result = session_->HandleUpdateFloatingBall(data, reply);
     ASSERT_EQ(result, ERR_NONE);
@@ -2524,6 +2539,63 @@ HWTEST_F(SessionStubTest, HandleNotifyPageEnable02, TestSize.Level1)
 
     auto result = session_->HandleNotifyPageEnable(data, reply);
     EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleStopFloatView
+ * @tc.desc: Test HandleStopFloatView
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleStopFloatView, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    // Case 1: Success
+    auto result = session_->HandleStopFloatView(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleUpdateFloatView
+ * @tc.desc: Test HandleUpdateFloatView
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateFloatView, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    // Case 1: fvTemplateInfo is nullptr
+    auto result = session_->HandleUpdateFloatView(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+    
+    // Case 2: Success
+    sptr<FloatViewTemplateInfo> fvTemplateInfo = sptr<FloatViewTemplateInfo>::MakeSptr();
+    data.WriteParcelable(fvTemplateInfo);
+    result = session_->HandleUpdateFloatView(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRestoreFloatViewMainWindow
+ * @tc.desc: Test HandleRestoreFloatViewMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleRestoreFloatViewMainWindow, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    // Case 1: wantParams is nullptr
+    auto result = session_->HandleRestoreFloatViewMainWindow(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    
+    // Case 2: Success
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+    data.WriteParcelable(wantParams.get());
+    result = session_->HandleRestoreFloatViewMainWindow(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

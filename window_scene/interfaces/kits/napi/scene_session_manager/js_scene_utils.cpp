@@ -131,6 +131,7 @@ const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP {
     { WindowType::WINDOW_TYPE_MAGNIFICATION_MENU,       JsSessionType::TYPE_MAGNIFICATION_MENU      },
     { WindowType::WINDOW_TYPE_SELECTION,                JsSessionType::TYPE_SELECTION               },
     { WindowType::WINDOW_TYPE_FB,                       JsSessionType::TYPE_FLOATING_BALL           },
+    { WindowType::WINDOW_TYPE_FV,                       JsSessionType::TYPE_FLOAT_VIEW              },
 };
 
 const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
@@ -179,6 +180,7 @@ const std::map<JsSessionType, WindowType> JS_SESSION_TO_WINDOW_TYPE_MAP {
     { JsSessionType::TYPE_MAGNIFICATION_MENU,       WindowType::WINDOW_TYPE_MAGNIFICATION_MENU      },
     { JsSessionType::TYPE_SELECTION,                WindowType::WINDOW_TYPE_SELECTION               },
     { JsSessionType::TYPE_FLOATING_BALL,            WindowType::WINDOW_TYPE_FB                      },
+    { JsSessionType::TYPE_FLOAT_VIEW,               WindowType::WINDOW_TYPE_FV                      },
 };
 
 napi_value NapiGetUndefined(napi_env env)
@@ -826,9 +828,15 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!ConvertFromJsValueProperty(env, jsObject, "pageConfig", sessionInfo.pageConfig)) {
         return false;
     }
-    if (!ConvertFromJsValueProperty(env, jsObject, "logicalDeviceConfig", sessionInfo.logicalDeviceConfig)) {
+    std::vector<std::string> combinedCompatibleConfig;
+    napi_value jsCombinedCompatibleConfig = nullptr;
+    napi_get_named_property(env, jsObject, "combinedCompatibleConfig", &jsCombinedCompatibleConfig);
+    if (GetType(env, jsCombinedCompatibleConfig) != napi_undefined &&
+        !ParseArrayStringValue(env, jsCombinedCompatibleConfig, combinedCompatibleConfig)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to get combinedCompatibleConfig");
         return false;
     }
+    sessionInfo.combinedCompatibleConfig = combinedCompatibleConfig;
     return true;
 }
 
@@ -1176,6 +1184,9 @@ bool ConvertHookWindowInfoFromJs(napi_env env, napi_value jsObject, HookWindowIn
     }
     hookWindowInfo.widthHookRatio = static_cast<float>(widthHookRatio);
     if (!ConvertFromJsValueProperty(env, jsObject, "notifyWindowChange", hookWindowInfo.notifyWindowChange)) {
+        return false;
+    }
+    if (!ConvertFromJsValueProperty(env, jsObject, "drawableRectHook", hookWindowInfo.drawableRectHook)) {
         return false;
     }
     return true;
@@ -1917,6 +1928,10 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
         CreateJsValue(env, sessionInfo.hostAppInstanceKey));
     napi_set_named_property(env, objValue, "hostAbilityName",
         CreateJsValue(env, sessionInfo.hostAbilityName));
+    napi_set_named_property(env, objValue, "isGamePreLaunch",
+        CreateJsValue(env, sessionInfo.isGamePrelaunch_));
+    napi_set_named_property(env, objValue, "reuseSessionInGamePreLaunch",
+        CreateJsValue(env, sessionInfo.reuseSessionInGamePreLaunch_));
     return objValue;
 }
 
@@ -2003,7 +2018,7 @@ napi_value CreateJsSessionRecoverInfo(
     napi_set_named_property(env, objValue,
         "pageCompatibleMode", CreateJsValue(env, property->GetPageCompatibleMode()));
     napi_set_named_property(env, objValue,
-        "logicalDeviceConfig", CreateJsValue(env, property->GetLogicalDeviceConfig()));
+        "combinedCompatibleConfig", CreateJsValueFromStringArray(env, property->GetCombinedCompatibleConfig()));
 
     napi_value jsTransitionAnimationMapValue = nullptr;
     napi_create_object(env, &jsTransitionAnimationMapValue);
@@ -2884,6 +2899,7 @@ napi_value SessionTypeInit(napi_env env)
     SetTypeProperty(objValue, env, "TYPE_MAGNIFICATION_MENU", JsSessionType::TYPE_MAGNIFICATION_MENU);
     SetTypeProperty(objValue, env, "TYPE_SELECTION", JsSessionType::TYPE_SELECTION);
     SetTypeProperty(objValue, env, "TYPE_FLOATING_BALL", JsSessionType::TYPE_FLOATING_BALL);
+    SetTypeProperty(objValue, env, "TYPE_FLOAT_VIEW", JsSessionType::TYPE_FLOAT_VIEW);
     return objValue;
 }
 
@@ -3209,6 +3225,84 @@ bool convertAnimConfigFromJs(napi_env env, napi_value jsObject, SceneAnimationCo
                 config.animationParam_[i] = static_cast<float>(paramValue);
             }
         }
+    }
+    return true;
+}
+
+bool ConvertFloatViewLimitsFromJs(napi_env env, napi_value jsLimits, FloatViewLimits& limits)
+{
+    napi_value jsMinWidth = nullptr;
+    napi_get_named_property(env, jsLimits, "minWidth", &jsMinWidth);
+    napi_value jsMinHeight = nullptr;
+    napi_get_named_property(env, jsLimits, "minHeight", &jsMinHeight);
+    napi_value jsMaxWidth = nullptr;
+    napi_get_named_property(env, jsLimits, "maxWidth", &jsMaxWidth);
+    napi_value jsMaxHeight = nullptr;
+    napi_get_named_property(env, jsLimits, "maxHeight", &jsMaxHeight);
+    double minWidth = 0.0;
+    double minHeight = 0.0;
+    double maxWidth = 0.0;
+    double maxHeight = 0.0;
+    if (jsMinWidth == nullptr || !ConvertFromJsValue(env, jsMinWidth, minWidth)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to minWidth");
+        return false;
+    }
+    limits.minWidth_ = static_cast<float>(minWidth);
+    if (jsMinHeight == nullptr || !ConvertFromJsValue(env, jsMinHeight, minHeight)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to minHeight");
+        return false;
+    }
+    limits.minHeight_ = static_cast<float>(minHeight);
+    if (jsMaxWidth == nullptr || !ConvertFromJsValue(env, jsMaxWidth, maxWidth)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to maxWidth");
+        return false;
+    }
+    limits.maxWidth_ = static_cast<float>(maxWidth);
+    if (jsMaxHeight == nullptr || !ConvertFromJsValue(env, jsMaxHeight, maxHeight)) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to convert parameter to maxHeight");
+        return false;
+    }
+    limits.maxHeight_ = static_cast<float>(maxHeight);
+    return ConvertRatioLimitsFromJs(env, jsLimits, limits);
+}
+
+bool ConvertRatioLimitsFromJs(napi_env env, napi_value jsLimits, FloatViewLimits& limits)
+{
+    napi_value jsRatio = nullptr;
+    napi_get_named_property(env, jsLimits, "ratioLimits", &jsRatio);
+    if (jsRatio == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "jsRatio is null");
+        return false;
+    }
+    bool isArray = false;
+    if (napi_is_array(env, jsRatio, &isArray) != napi_ok || !isArray) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "Params ratio is not array");
+        return false;
+    }
+    uint32_t arrayLen = 0;
+    napi_get_array_length(env, jsRatio, &arrayLen);
+    if (arrayLen == 0) {
+        return true;
+    }
+    for (uint32_t i = 0; i < arrayLen; ++i) {
+        napi_value element = nullptr;
+        double paramValue = 0.0;
+        if (napi_get_element(env, jsRatio, i, &element) != napi_ok) {
+            return false;
+        }
+        napi_value jsMinRatio = nullptr;
+        napi_get_named_property(env, element, "minRatio", &jsMinRatio);
+        napi_value jsMaxRatio = nullptr;
+        napi_get_named_property(env, element, "maxRatio", &jsMaxRatio);
+        double minRatio = 0.0;
+        double maxRatio = 0.0;
+        if (jsMinRatio == nullptr || !ConvertFromJsValue(env, jsMinRatio, minRatio)) {
+            return false;
+        }
+        if (jsMaxRatio == nullptr || !ConvertFromJsValue(env, jsMaxRatio, maxRatio)) {
+            return false;
+        }
+        limits.ratioLimits_.emplace_back(std::make_pair(static_cast<float>(minRatio), static_cast<float>(maxRatio)));
     }
     return true;
 }

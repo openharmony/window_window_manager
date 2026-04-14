@@ -1189,6 +1189,34 @@ HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoById, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDisplayInfoByIdWithHookRequired
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByIdWithHookRequired, TestSize.Level1)
+{
+    sptr<DisplayInfo> expectation = nullptr;
+    DisplayId displayId {0};
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetDisplayInfoById(displayId, true);
+    ASSERT_EQ(res, expectation);
+}
+
+/**
+ * @tc.name: GetDisplayInfoByIdWithHookRequiredFalse
+ * @tc.desc: GetDisplayInfoById with isGetActualInfo = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerProxyTest, GetDisplayInfoByIdWithHookRequiredFalse, TestSize.Level1)
+{
+    sptr<DisplayInfo> expectation = nullptr;
+    DisplayId displayId {0};
+    MockMessageParcel::ClearAllErrorFlag();
+    auto res = screenSessionManagerProxy->GetDisplayInfoById(displayId, false);
+    ASSERT_EQ(res, expectation);
+}
+
+/**
  * @tc.name: GetDisplayInfoByScreen
  * @tc.desc: GetDisplayInfoByScreen
  * @tc.type: FUNC

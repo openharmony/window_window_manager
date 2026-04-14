@@ -374,6 +374,12 @@ public:
     WSError SendAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /*
+     * Float view
+     */
+    WSError SyncFloatViewLimits(const FloatViewLimits &limits);
+    WMError GetFloatViewLimits(FloatViewLimits& limits) override;
+
+    /*
      * Multi User
      */
     WSError InitUserInfo(int32_t userId, std::string& fileDir);
@@ -667,7 +673,8 @@ public:
     WMError UnregisterWindowPropertyChangeAgent(WindowInfoKey windowInfoKey,
         uint32_t interestInfo, const sptr<IWindowManagerAgent>& windowManagerAgent) override;
     WMError RecoverWindowPropertyChangeFlag(uint32_t observedFlags, uint32_t interestedFlags) override;
-    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) override;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+        const WindowInfoOptions& option = WindowInfoOptions()) override;
     WMError SetWindowSnapshotSkip(int32_t windowId, bool isSkip) override;
     WMError GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) override;
     WMError GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) override;
@@ -826,7 +833,7 @@ public:
         int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) override;
     WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-        bool shouldBackToCaller = true) override;
+        bool shouldBackToCaller = true, int32_t reason = 0) override;
     WSError TerminateSessionNew(
         const sptr<AAFwk::SessionInfo> info, bool needStartCaller, bool isFromBroker = false) override;
     WSError ClearSession(int32_t persistentId) override;
@@ -1105,6 +1112,7 @@ private:
     void InitSceneSession(sptr<SceneSession>& sceneSession, const SessionInfo& sessionInfo,
         const sptr<WindowSessionProperty>& property) REQUIRES(SCENE_GUARD);
     void InitFbWindow(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
+    void InitFvWindow(const sptr<SceneSession>& sceneSession, const sptr<WindowSessionProperty>& property);
     void RegisterSessionExceptionFunc(const sptr<SceneSession>& sceneSession);
     void NotifySessionForeground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation);
     void NotifySessionBackground(const sptr<SceneSession>& session, uint32_t reason, bool withAnimation,
@@ -1135,6 +1143,8 @@ private:
         const std::vector<int32_t>& windowIds, const sptr<IRemoteObject>& callback);
     void RegisterWindowStateErrorCallbackToMMI();
     void MoveStartLifeCycleTask(const sptr<SceneSession>& sceneSession);
+    void RecordLifeCycleExceptionEvent(const sptr<SceneSession>& sceneSession, int32_t retCode,
+        WSErrorReason errCode, const std::string& reason) const;
     std::mutex appsWithBoundSystemTrayMapMutex_;
     std::unordered_map<std::string, std::unordered_set<int32_t>> appsWithBoundSystemTrayMap_;
     MinimizeAllFunc minimizeAllFunc_;
@@ -1312,7 +1322,9 @@ private:
     bool FilterForListWindowInfo(const WindowInfoOption& windowInfoOption,
         const sptr<SceneSession>& sceneSession) const;
     void FilterForGetAllWindowLayoutInfo(DisplayId displayId, bool isVirtualDisplay,
-        std::vector<sptr<SceneSession>>& filteredSessions);
+        std::vector<sptr<SceneSession>>& filteredSessions, const WindowInfoOptions& option = WindowInfoOptions());
+    void GetZOrderByWindowInfoOptions(const WindowInfoOptions& option,
+        uint32_t& zOrderForAboveWin, uint32_t& zOrderForBelowWin);
     bool IsGetWindowLayoutInfoNeeded(const sptr<SceneSession>& session) const;
     int32_t GetFoldLowerScreenPosY() const;
     bool IsSessionInSpecificDisplay(const sptr<SceneSession>& session, DisplayId displayId) const;
@@ -1626,6 +1638,11 @@ private:
      * Floating ball
      */
     WSError IsFloatingBallValid(const sptr<SceneSession>& parentSession);
+
+    /*
+     * Float view
+     */
+    WSError CanCreateFloatView(const sptr<SceneSession>& parentSession);
 
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
@@ -2035,6 +2052,12 @@ private:
         const std::string& action, const std::string& message);
 
     std::atomic<SelectMode> selectMode_{SelectMode::INVALID_MODE};
+    
+    /*
+     * Float view
+     */
+    std::mutex floatViewLimitsMutex_;
+    FloatViewLimits floatViewLimits_ {};
 };
 } // namespace OHOS::Rosen
 
