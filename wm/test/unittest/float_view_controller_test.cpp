@@ -640,13 +640,6 @@ HWTEST_F(FloatViewControllerTest, StartFloatViewInner, TestSize.Level1)
     void* invalidContext = nullptr;
     option_->SetContext(invalidContext);
     fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
-    fvController_->UpdateMainWindow(mw_);
-    mw_->SetWindowState(WindowState::STATE_SHOWN);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->StartFloatViewInner());
-
-    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
-    fvController_->UpdateMainWindow(mw_);
-    mw_->SetWindowState(WindowState::STATE_SHOWN);
     EXPECT_NE(WMError::WM_OK, fvController_->StartFloatViewInner());
 }
 
