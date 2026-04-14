@@ -9241,10 +9241,7 @@ WSError WindowSessionImpl::SetCurrentRotation(int32_t currentRotation)
 
 WSError WindowSessionImpl::GetSceneNodeCount(uint32_t& nodeCount)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "post task");
     handler_->PostSyncTask([weakWindow = wptr(this), &nodeCount, where = __func__] {
-        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::GetSceneNodeCount");
-        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s in", where);
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: window is null", where);
