@@ -171,7 +171,12 @@ void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configurat
         }
         std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
         bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-        if (auto rsInterface = GetRSRenderInterface()) {
+        auto rsUICtx = GetRSUIContext();
+        if (rsUICtx == nullptr) {
+            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no rsUICtx");
+            continue;
+        }
+        if (auto rsInterface = rsUICtx->GetRSRenderInterface()) {
             bool ret = rsInterface->SetGlobalDarkColorMode(isDark);
             TLOGI(WmsLogTag::DEFAULT, "colorMode: %{public}s, ret: %{public}d", colorMode.c_str(), ret);
         }
@@ -196,7 +201,12 @@ void RootScene::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk
         GetWindowId(), GetDisplayId());
     std::string colorMode = configuration->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     bool isDark = (colorMode == AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    if (auto rsInterface = GetRSRenderInterface()) {
+    auto rsUICtx = GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no rsUICtx");
+        return;
+    }
+    if (auto rsInterface = rsUICtx->GetRSRenderInterface()) {
         bool ret = rsInterface->SetGlobalDarkColorMode(isDark);
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, colorMode: %{public}s, ret: %{public}d",
             GetWindowId(), colorMode.c_str(), ret);
@@ -567,16 +577,6 @@ std::shared_ptr<RSUIContext> RootScene::GetRSUIContext() const
     TLOGD(WmsLogTag::WMS_SCB, "%{public}s, windowId: %{public}d",
           RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str(), GetWindowId());
     return rsUIContext;
-}
-
-std::shared_ptr<RSRenderInterface> RootScene::GetRSRenderInterface()
-{
-    auto rsUICtx = GetRSUIContext();
-    if (rsUICtx == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "root win=%{public}d", GetWindowId());
-        return nullptr;
-    }
-    return rsUICtx->GetRSRenderInterface();
 }
 } // namespace Rosen
 } // namespace OHOS

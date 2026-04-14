@@ -5928,7 +5928,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
     std::lock_guard<std::mutex> lock(rsUIContextMutex_);
-    if (screenIdOfRSUIContext_ != screenId) {
+    if (screenIdOfRSUIContext_ != screenId || screenIdOfRSUIContext_ == SCREEN_ID_INVALID) {
         // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
         // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
         // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
@@ -5946,17 +5946,6 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
             caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
     }
     return rsUIContext_;
-}
-
-std::shared_ptr<RSRenderInterface> Session::GetRSRenderInterface(const char* caller)
-{
-    auto rsUICtx = GetRSUIContext(caller);
-    if (rsUICtx == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], caller=%{public}s",
-            GetPersistentId(), GetWindowName().c_str(), caller);
-        return nullptr;
-    }
-    return rsUICtx->GetRSRenderInterface();
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSShadowContext()
