@@ -72,30 +72,27 @@ HWTEST_F(SceneNodeCountCallbackProxyTest, OnSceneNodeCount, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
-    sptr<SessionStageProxy> sceneNodeCountCallbackProxy = sptr<SceneNodeCountCallbackProxy>::MakeSptr(remoteMocker);
+    sptr<SceneNodeCountCallbackProxy> sceneNodeCountCallbackProxy
+        = sptr<SceneNodeCountCallbackProxy>::MakeSptr(remoteMocker);
 
     // Case 1: Failed to write interface token
     uint32_t testNodeCount = 42;
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    WSError errCode = sceneNodeCountCallbackProxy->OnSceneNodeCount(testNodeCount);
-    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    sceneNodeCountCallbackProxy->OnSceneNodeCount(testNodeCount);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
     // Case 2: Failed to write nodeCount
     MockMessageParcel::SetReadUint32ErrorFlag(true);
-    errCode = sceneNodeCountCallbackProxy->OnSceneNodeCount(testNodeCount);
-    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    sceneNodeCountCallbackProxy->OnSceneNodeCount(testNodeCount);
     MockMessageParcel::SetReadUint32ErrorFlag(false);
 
     // Case 3: remote is nullptr
     sptr<SessionStageProxy> nullProxy = sptr<SceneNodeCountCallbackProxy>::MakeSptr(nullptr);
-    errCode = nullProxy->OnSceneNodeCount(testNodeCount);
-    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    nullProxy->OnSceneNodeCount(testNodeCount);
 
     // Case 4: Failed to send request
     remoteMocker->SetRequestResult(1);
-    errCode = sessionStageProxy->OnSceneNodeCount(testNodeCount);
-    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    sceneNodeCountCallbackProxy->OnSceneNodeCount(testNodeCount);
     remoteMocker->SetRequestResult(0);
 
     MockMessageParcel::ClearAllErrorFlag();

@@ -16,8 +16,8 @@
 #ifndef OHOS_WINDOW_SCENE_SCENE_NODE_COUNT_CALLBACK_STUB_H
 #define OHOS_WINDOW_SCENE_SCENE_NODE_COUNT_CALLBACK_STUB_H
 
-#include "scene_node_count_callback_interface.h"
 #include <iremote_stub.h>
+#include "scene_node_count_callback_interface.h"
 
 namespace OHOS {
 namespace Rosen {

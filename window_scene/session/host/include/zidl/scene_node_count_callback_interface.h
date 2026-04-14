@@ -26,6 +26,7 @@ public:
     
     enum class SceneNodeCountCallbackMessage : uint32_t {
         TRANS_ON_SCENE_NODE_COUNT = 0,
+        TRANS_ON_SCENE_NODE_INVALID,
     };
     
     virtual void OnSceneNodeCount(uint32_t nodeCount) = 0;

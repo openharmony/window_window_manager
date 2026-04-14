@@ -16,21 +16,13 @@
 #include <gtest/gtest.h>
 
 #include "session/host/include/zidl/scene_node_count_callback_stub.h"
+#include "session/host/include/scene_node_count_callback.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-// Mock implementation of ISceneNodeCountCallback for testing
-class MockSceneNodeCountCallback : public ISceneNodeCountCallback {
-public:
-    MockSceneNodeCountCallback() = default;
-    ~MockSceneNodeCountCallback() override = default;
-
-    MOCK_METHOD1(OnSceneNodeCount, void(uint32_t nodeCount), (override));
-};
-
 class SceneNodeCountCallbackStubTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -55,8 +47,7 @@ void SceneNodeCountCallbackStubTest::TearDown() {}
 HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_Success, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneNodeCountCallbackStubTest: OnRemoteRequest_Success start";
-    MockMessageParcel::ClearAllErrorFlag();
-    sptr<SceneNodeCountCallbackStub> stub = sptr<SceneNodeCountCallbackStub>::MakeSptr();
+    sptr<SceneNodeCountCallback> stub = sptr<SceneNodeCountCallback>::MakeSptr();
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -65,14 +56,9 @@ HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_Success, TestSize.Level
     uint32_t nodeCount = 42;
     data.WriteUint32(nodeCount);
 
-    // Create mock callback to capture the call
-    auto mockCallback = sptr<MockSceneNodeCountCallback>::MakeSptr();
-    EXPECT_CALL(*MockCallback, OnSceneNodeCount(nodeCount));
-
     int result = stub->OnRemoteRequest(
-        static_cast<uint32_t>(SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT),
+        static_cast<uint32_t>(ISceneNodeCountCallback::SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT),
         data, reply, option);
-
     EXPECT_EQ(ERR_NONE, result);
 
     GTEST_LOG_(INFO) << "SceneNodeCountCallbackStubTest: OnRemoteRequest_Success end";
@@ -86,8 +72,7 @@ HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_Success, TestSize.Level
 HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_InvalidCode, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneNodeCountCallbackStubTest: OnRemoteRequest_InvalidCode start";
-    MockMessageParcel::ClearAllErrorFlag();
-    sptr<SceneNodeCountCallbackStub> stub = sptr<SceneNodeCountCallbackStub>::MakeSptr();
+    sptr<SceneNodeCountCallback> stub = sptr<SceneNodeCountCallback>::MakeSptr();
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -98,11 +83,8 @@ HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_InvalidCode, TestSize.L
 
     // Should delegate to parent class for unknown codes
     int result = stub->OnRemoteRequest(
-        static_cast<uint32_t>(SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT + 1),
+        static_cast<uint32_t>(ISceneNodeCountCallback::SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_INVALID),
         data, reply, option);
-
-    // For unknown codes, parent class returns from IPCObjectStub::OnRemoteRequest
-    // which typically returns ERR_INVALID_DATA or similar
     EXPECT_NE(ERR_NONE, result);
 
     GTEST_LOG_(INFO) << "SceneNodeCountCallbackStubTest: OnRemoteRequest_InvalidCode end";
@@ -116,8 +98,7 @@ HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_InvalidCode, TestSize.L
 HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_InterfaceTokenMismatch, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneNodeCountCallbackStubTest: OnRemoteRequest_InterfaceTokenMismatch start";
-    MockMessageParcel::ClearAllErrorFlag();
-    sptr<SceneNodeCountCallbackStub> stub = sptr<SceneNodeCountCallbackStub>::MakeSptr();
+    sptr<SceneNodeCountCallback> stub = sptr<SceneNodeCountCallback>::MakeSptr();
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -126,7 +107,7 @@ HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_InterfaceTokenMismatch,
     data.WriteInterfaceToken(u"OHOS.ISceneNodeCountCallback.INVALID");
 
     int result = stub->OnRemoteRequest(
-        static_cast<uint32_t>(SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT),
+        static_cast<uint32_t>(ISceneNodeCountCallback::SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT),
         data, reply, option);
 
     EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
@@ -142,8 +123,7 @@ HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_InterfaceTokenMismatch,
 HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_ReadUint32Failed, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "SceneNodeCountCallbackStubTest: OnRemoteRequest_ReadUint32Failed start";
-    MockMessageParcel::ClearAllErrorFlag();
-    sptr<SceneNodeCountCallbackStub> stub = sptr<SceneNodeCountCallbackStub>::MakeSptr();
+    sptr<SceneNodeCountCallback> stub = sptr<SceneNodeCountCallback>::MakeSptr();
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;

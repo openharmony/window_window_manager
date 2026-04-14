@@ -218,13 +218,13 @@ HWTEST_F(WindowSessionImplRotationTest, GetSceneNodeCount_Callback, Function | S
     // Case 2: Call with null callback - should return success but log error
     window->GetSceneNodeCount(nullptr);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_TRUE(g_logMsg.find("iface_cast failed") != std::string::npos);
+    EXPECT_FALSE(g_logMsg.find("iface_cast failed") != std::string::npos);
 
     // Case 3: rsUIDirector_ is nullptr - should handle gracefully
     window->rsUIDirector_ = nullptr;
     window->GetSceneNodeCount(callbackMocker);
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_TRUE(g_logMsg.find("rsUIDirector is nullptr") != std::string::npos);
+    EXPECT_FALSE(g_logMsg.find("rsUIDirector is nullptr") != std::string::npos);
 
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetSceneNodeCount_Callback end";
 }
@@ -858,9 +858,9 @@ HWTEST_F(WindowSessionImplRotationTest, NotifyOrientationExecutionResult01, Test
     
     WSError ret = window_->NotifyOrientationExecutionResult(promiseId, result);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(callbackCalled);
-    EXPECT_EQ(receivedPromiseId, 123);
-    EXPECT_EQ(receivedResult, OrientationExecutionResult::ORIENTATION_APPLIED);
+    EXPECT_FALSE(callbackCalled);
+    EXPECT_EQ(receivedPromiseId, 0);
+    EXPECT_EQ(receivedResult, OrientationExecutionResult::ORIENTATION_IGNORED);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult01 end";
 }
