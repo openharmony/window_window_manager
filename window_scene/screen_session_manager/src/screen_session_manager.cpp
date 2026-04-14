@@ -2434,7 +2434,7 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
             << ", dO: " << static_cast<uint32_t>(displayInfo->GetDisplayOrientation()) << ", uid: " << uid
             << ", pid: " << IPCSkeleton::GetCallingPid();
         std::regex pattern("%");
-        TLOGNFI(WmsLogTag::DMS, "%{public}s", std::regex_replace(oss.str(), pattern, "%%").c_str());
+        TLOGNFI(WmsLogTag::DMS, " ScreenSessionManager::HookDisplayInfoByUid %{public}s", std::regex_replace(oss.str(), pattern, "%%").c_str());
         
         displayInfo->SetWidth(info.width_);
         displayInfo->SetHeight(info.height_);
@@ -2445,10 +2445,10 @@ sptr<DisplayInfo> ScreenSessionManager::HookDisplayInfoByUid(sptr<DisplayInfo> d
                 displayInfo->SetRotation(targetRotation);
                 DisplayOrientation targetOrientation = screenSession->CalcDisplayOrientation(targetRotation,
                     FoldDisplayMode::UNKNOWN);
-                TLOGNFI(WmsLogTag::DMS, "tR: %{public}u, tO: %{public}u", targetRotation, targetOrientation);
+                TLOGNFI(WmsLogTag::DMS, " ScreenSessionManager::HookDisplayInfoByUid 2 tR: %{public}u, tO: %{public}u", targetRotation, targetOrientation);
                 displayInfo->SetDisplayOrientation(targetOrientation);
             } else {
-                TLOGNFI(WmsLogTag::DMS, "ConvertToDisplayInfo error, screenSession is nullptr.");
+                TLOGNFI(WmsLogTag::DMS, " ScreenSessionManager::HookDisplayInfoByUid 3 ConvertToDisplayInfo error, screenSession is nullptr.");
                 return nullptr;
             }
         }
