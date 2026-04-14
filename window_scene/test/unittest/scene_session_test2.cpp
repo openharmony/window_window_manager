@@ -1278,6 +1278,11 @@ HWTEST_F(SceneSessionTest2, RaiseAppMainWindowToTop, TestSize.Level1)
     sceneSession->focusedOnShow_ = false;
     result = sceneSession->RaiseAppMainWindowToTop();
     EXPECT_EQ(WSError::WS_OK, result);
+
+    sceneSession->property_->SetZLevelAboveParentLoosened(true);
+    sceneSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    result = sceneSession->RaiseAppMainWindowToTop();
+    EXPECT_EQ(WSError::WS_OK, result);
 }
 
 /**
