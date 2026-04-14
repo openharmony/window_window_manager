@@ -20,7 +20,7 @@ namespace Rosen {
 
 void SceneNodeCountCallback::OnSceneNodeCount(uint32_t nodeCount)
 {
-    TLOGI(WmsLogTag::WMS_ROTATION, "OnSceneNodeCount received, count: %{public}u", nodeCount);
+    TLOGI(WmsLogTag::WMS_ROTATION, "received, count: %{public}u", nodeCount);
     future_.SetValue(nodeCount);
 }
 

@@ -9263,12 +9263,16 @@ WSError WindowSessionImpl::GetSceneNodeCount(uint32_t& nodeCount)
 WSError WindowSessionImpl::GetSceneNodeCount(const sptr<IRemoteObject>& callback)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "post task");
-    handler_->PostSyncTask([weakWindow = wptr(this), callback, where = __func__] {
+    handler_->PostTask([weakWindow = wptr(this), callback, where = __func__] {
         HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::GetSceneNodeCountCallback");
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s in", where);
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: window is null", where);
+            return;
+        }
+        if (window->rsUIDirector_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s rsUIDirector is nullptr", where);
             return;
         }
         uint32_t nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());

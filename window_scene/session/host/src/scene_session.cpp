@@ -10274,14 +10274,10 @@ WSError SceneSession::GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t 
     TLOGI(WmsLogTag::WMS_ROTATION, "start, winId:%{public}d, timeout:%{public}dms", GetPersistentId(), timeoutMs);
     auto callback = sptr<SceneNodeCountCallback>::MakeSptr();
     callback->ResetResult();
-    WSError ret = sessionStage_->GetSceneNodeCount(callback->AsObject());
-    if (ret != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed, persistentId:%{public}d", GetPersistentId());
-        nodeCount = 0;
-        return ret;
-    }
+    sessionStage_->GetSceneNodeCount(callback->AsObject());
+    TLOGI(WmsLogTag::WMS_ROTATION, "wait start, winId:%{public}d", GetPersistentId());
     nodeCount = callback->GetResult(timeoutMs);
-    TLOGI(WmsLogTag::WMS_ROTATION, "persistentId:%{public}d, nodeCount:%{public}u", GetPersistentId(), nodeCount);
+    TLOGI(WmsLogTag::WMS_ROTATION, "wait end, winId:%{public}d, nodeCount:%{public}u", GetPersistentId(), nodeCount);
     return WSError::WS_OK;
 }
 
