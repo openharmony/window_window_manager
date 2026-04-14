@@ -46,8 +46,19 @@ const std::map<FvWindowState, FloatViewState> STATE_TO_STATE = {
 };
 }
 FloatViewController::FloatViewController(const FvOption &option, napi_env env)
-    : weakRef_(this), option_(option), env_(env)
+    : weakRef_(this), option_(option), env_(env), type_(APIType::NAPI)
 {
+    curState_ = FvWindowState::FV_STATE_UNDEFINED;
+    id_ = FloatWindowManager::GetControllerId();
+    TLOGI(WmsLogTag::WMS_SYSTEM, "FloatViewController created, id: %{public}s", id_.c_str());
+}
+
+FloatViewController::FloatViewController(const FvOption &option, ani_env* env)
+    : weakRef_(this), option_(option), type_(APIType::ANI)
+{
+    if (env && (env->GetVM(&vm_) != ANI_OK || !vm_)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "FloatViewController for ani get vm failed");
+    }
     curState_ = FvWindowState::FV_STATE_UNDEFINED;
     id_ = FloatWindowManager::GetControllerId();
     TLOGI(WmsLogTag::WMS_SYSTEM, "FloatViewController created, id: %{public}s", id_.c_str());
@@ -341,7 +352,32 @@ WMError FloatViewController::DestroyFloatViewWindow(const std::string& reason)
 WMError FloatViewController::SetUIContext(const std::string &contextUrl,
     const std::shared_ptr<NativeReference>& contentStorage)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "SetUIContext called");
+    TLOGI(WmsLogTag::WMS_SYSTEM, "napi SetUIContext called");
+    if (type_ != APIType::NAPI) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "napi controller called by ani");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    std::lock_guard<std::mutex> lock(controllerMutex_);
+    option_.SetUIPath(contextUrl);
+    option_.SetStorage(contentStorage);
+    if (window_ == nullptr) {
+        if (IsStateWithWindow(curState_)) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        TLOGI(WmsLogTag::WMS_SYSTEM, "SetUIContext when window not created, save info");
+        return WMError::WM_OK;
+    }
+    return SetUIContextInner();
+}
+
+WMError FloatViewController::SetUIContext(const std::string &contextUrl, const ani_object& contentStorage)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "ani SetUIContext called");
+    if (type_ != APIType::ANI) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "ani controller called by napi");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetUIPath(contextUrl);
     option_.SetStorage(contentStorage);
@@ -358,19 +394,47 @@ WMError FloatViewController::SetUIContext(const std::string &contextUrl,
 
 WMError FloatViewController::SetUIContextInner()
 {
-    napi_value storage = nullptr;
-    auto contentStorage = option_.GetStorage();
-    auto contentUrl = option_.GetUIPath();
-    if (contentStorage != nullptr) {
-        storage = contentStorage->GetNapiValue();
-        TLOGI(WmsLogTag::WMS_SYSTEM, "Set UI Context with localStorage");
-    }
-    auto errCode = window_->NapiSetUIContent(contentUrl, env_, storage, BackupAndRestoreType::NONE);
-    if (errCode != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Set fv window content failed, err: %{public}u", errCode);
-        return WMError::WM_ERROR_INVALID_WINDOW;
+    if (type_ == APIType::NAPI) {
+        napi_value storage = nullptr;
+        auto contentStorage = option_.GetStorage();
+        auto contentUrl = option_.GetUIPath();
+        if (contentStorage != nullptr) {
+            storage = contentStorage->GetNapiValue();
+            TLOGI(WmsLogTag::WMS_SYSTEM, "Set UI Context with localStorage");
+        }
+        napi_env env = static_cast<napi_env>(env_);
+        auto errCode = window_->NapiSetUIContent(contentUrl, env, storage, BackupAndRestoreType::NONE);
+        if (errCode != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "Set fv window content failed, err: %{public}u", errCode);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+    } else if (type_ == APIType::ANI) {
+        auto contentUrl = option_.GetUIPath();
+        ani_object storage = option_.GetAniStorage();
+        ani_env* env = GetEnv();
+        auto errCode = window_->AniSetUIContent(contentUrl, env, storage, BackupAndRestoreType::NONE);
+        if (errCode != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "Set fv window content failed, err: %{public}u", errCode);
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
     }
     return WMError::WM_OK;
+}
+
+ani_env* FloatViewController::GetEnv() const
+{
+    if (!vm_) {
+        return nullptr;
+    }
+    if (type_ != APIType::ANI) {
+        return nullptr;
+    }
+    ani_env* env_ = nullptr;
+    ani_status ret = vm_->GetEnv(ANI_VERSION_1, &env_);
+    if (ret != ANI_OK || !env_) {
+        TLOGE(WmsLogTag::WMS_PIP, "PictureInPictureControllerAni Get Env failed ret:%{public}u", ret);
+    }
+    return env_;
 }
 
 WMError FloatViewController::SetVisibilityInApp(bool visibleInApp)
