@@ -2405,7 +2405,11 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
                 uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
                 intentParam_ = "";
             }
+            if (!navDestinationInfo_.empty()) {
+                uiContent->RestoreNavDestinationInfo(navDestinationInfo_, true);
+            }
             aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
+            navDestinationInfo_ = "";
             break;
         case WindowSetUIContentType::BY_SHARED:
             TLOGI(WmsLogTag::WMS_LIFE, "By shared, restoreNavDestinationInfo, id:%{public}d", GetPersistentId());
