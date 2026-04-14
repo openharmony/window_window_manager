@@ -9275,11 +9275,11 @@ WSError WindowSessionImpl::GetSceneNodeCount(const sptr<IRemoteObject>& callback
         uint32_t nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s success, count:%{public}u", where, nodeCount);
         auto sceneNodeCountCallback = iface_cast<ISceneNodeCountCallback>(callback);
-        if (sceneNodeCountCallback != nullptr) {
-            sceneNodeCountCallback->OnSceneNodeCount(nodeCount);
-        } else {
+        if (sceneNodeCountCallback == nullptr) {
             TLOGE(WmsLogTag::WMS_ROTATION, "%{public}s: iface_cast failed", where);
+            return;
         }
+        sceneNodeCountCallback->OnSceneNodeCount(nodeCount);
     }, __func__);
     return WSError::WS_OK;
 }
