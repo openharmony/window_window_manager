@@ -1900,7 +1900,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     if (state_ == WindowState::STATE_SHOWN) {
         TLOGI(WmsLogTag::WMS_LIFE, "window is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
-        if (WindowHelper::IsMainWindow(type)) {
+        if (WindowHelper::IsMainWindow(type) ||
+            (WindowHelper::IsSubWindow(type) && IsLoosenedWithPcOrFreeMultiMode())) {
             hostSession->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
