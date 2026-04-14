@@ -58,6 +58,8 @@ const std::string SYSTEM_DENSITY_CHANGE_CB = "systemDensityChange";
 const std::string ACROSS_DISPLAYS_CHANGE_CB = "mainWindowFullScreenAcrossDisplaysChanged";
 const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 const std::string WINDOW_STATUS_DID_CHANGE_CB = "windowStatusDidChange";
+const std::string PARENT_WINDOW_SIZE_CHANGE_CB = "parentWindowSizeChange";
+const std::string PARENT_WINDOW_STATUS_CHANGE_CB = "parentWindowStatusChange";
 const std::string WINDOW_TITLE_BUTTON_RECT_CHANGE_CB = "windowTitleButtonRectChange";
 const std::string WINDOW_NO_INTERACTION_DETECT_CB = "noInteractionDetected";
 const std::string WINDOW_RECT_CHANGE_CB = "windowRectChange";
@@ -725,6 +727,62 @@ void JsWindowListener::OnWindowStatusDidChange(WindowStatus windowstatus)
         thisListener->CallJsMethod(WINDOW_STATUS_DID_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWindowStatusDidChange") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
+    }
+}
+
+void JsWindowListener::OnParentWindowSizeChange(Rect rect)
+
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "wh[%{public}u, %{public}u]",
+        rect.width_, rect.height_);
+    // js callback should run in js thread
+    auto jsCallback = [self = weakRef_, rect, env = env_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert rect to jsObject", funcName);
+            return;
+        }
+        napi_set_named_property(env, objValue, "width", CreateJsValue(env, rect.width_));
+        napi_set_named_property(env, objValue, "height", CreateJsValue(env, rect.height_));
+        napi_value argv[] = {objValue};
+        thisListener->CallJsMethod(PARENT_WINDOW_SIZE_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "parentWindowSizeChangeCallback") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
+    }
+}
+
+void JsWindowListener::OnParentWindowStatusChange(WindowStatus status)
+
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "status: %{public}d", status);
+    // js callback should run in js thread
+    auto jsCallback = [self = weakRef_, status, env = env_, funcName = __func__] {
+        auto thisListener = self.promote();
+        if (thisListener == nullptr || env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
+            return;
+        }
+        HandleScope handleScope(env);
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert status to jsObject", funcName);
+            return;
+        }
+        napi_value argv[] = {CreateJsValue(env, static_cast<uint32_t>(status))};
+        thisListener->CallJsMethod(PARENT_WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
+    };
+    if (napi_send_event(env_, jsCallback, napi_eprio_high, "parentWindowStatusChangeCallback") !=
+            napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "failed to send event");
     }
 }

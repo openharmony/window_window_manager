@@ -44,7 +44,7 @@ public:
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
-        bool isModuleAbilityHookEnd = false) override;
+        bool isModuleAbilityHookEnd = false, bool isBlockSubwindow = false) override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
     WMError Resize(uint32_t width, uint32_t height) override;
@@ -213,6 +213,7 @@ public:
     WMError GetWindowStateSnapshot(std::string& winStateSnapshotJsonStr) override;
     WMError SetStatusBarColorForExtension(uint32_t color) override;
     WMError SetStatusBarColorForExtensionInner(uint32_t color);
+    bool IsBlockSubwindow() const override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -258,6 +259,7 @@ private:
     WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostStatusBarContentColorChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostRectChangeInGlobalDisplay(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnRecover(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     /*
      * Compatible Mode
@@ -295,6 +297,7 @@ private:
     uint32_t hostStatusBarContentColor_ { 0 };
     int64_t startModalExtensionTimeStamp_ = -1;
     std::atomic<bool> transparentUIExtensionFlag_ { false };
+    bool isBlockSubwindow_ = false;
 
     /*
      * PC Fold Screen

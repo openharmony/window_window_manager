@@ -247,6 +247,8 @@ public:
     uint32_t GetSubWindowLevel() const;
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
     bool IsSubWindowOutlineEnabled() const;
+    void SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened);
+    bool IsSubWindowZLevelAboveParentLoosened() const;
     void SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
     WindowAnchorInfo GetWindowAnchorInfo() const;
 
@@ -329,6 +331,8 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
+    void SetIsWindowLimitsForcible(bool isWindowLimitsForcible) { isWindowLimitsForcible_ = isWindowLimitsForcible; }
+    bool GetIsWindowLimitsForcible() const { return isWindowLimitsForcible_; }
 
     /*
      * Compatible mode
@@ -577,6 +581,7 @@ private:
      */
     uint32_t subWindowLevel_ = 0;
     bool subWindowOutlineEnabled_ = false;
+    bool zLevelAboveParentLoosened_ = false;
     WindowAnchorInfo windowAnchorInfo_;
 
     /*
@@ -614,6 +619,11 @@ private:
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
     bool isFullScreenWaterfallMode_ = false;
+
+    /**
+     * @brief Whether application-defined window size limits are allowed to exceed system limits.
+     */
+    bool isWindowLimitsForcible_ = false;
 
     /*
      * Keyboard

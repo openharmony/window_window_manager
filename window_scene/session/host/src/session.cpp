@@ -919,6 +919,35 @@ SessionState Session::GetSessionState() const
     return state_;
 }
 
+SessionState Session::GetRealSessionState()
+{
+    auto state = GetSessionState();
+    auto winType = GetWindowType();
+    if (!IsSessionForeground()) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType));
+        return state;
+    }
+    if (auto parent = GetParentSession()) {
+        state = parent->GetSessionState();
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d, parentId=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType), parent->GetWindowId());
+    }
+    if (WindowHelper::IsSubWindow(winType)) {
+        int32_t mainWinId = INVALID_SESSION_ID;
+        auto mainSession = GetMainSession();
+        if (mainSession != nullptr) {
+            state = mainSession->GetSessionState();
+            mainWinId = mainSession->GetWindowId();
+        }
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}d, mainWinId=%{public}d",
+            GetWindowId(), GetWindowName().c_str(), state, static_cast<int32_t>(winType), mainWinId);
+    }
+    return state;
+}
+
 void Session::SetSessionState(SessionState state)
 {
     if (state < SessionState::STATE_DISCONNECT || state > SessionState::STATE_END) {
@@ -1533,6 +1562,16 @@ WSError Session::UpdateRect(const WSRect& rect, SizeChangeReason reason,
     return UpdateRectWithLayoutInfo(rect, reason, updateReason, rsTransaction, {});
 }
 
+void Session::IsNeedNotifySubSessionParentSizeChange(const WSRect& rect)
+{
+    WSRect lastParentRect = GetLayoutController()->GetLastClientParentSize();
+    if (lastParentRect.width_ != rect.width_ || lastParentRect.height_ != rect.height_) {
+        Rect parentRect = { rect.posX_, rect.posY_, static_cast<uint32_t>(rect.width_),
+            static_cast<uint32_t>(rect.height_)};
+        NotifySubSessionParentSizeChange(parentRect);
+    }
+}
+
 WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
     const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
@@ -1540,7 +1579,9 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
     const auto persistentId = GetPersistentId();
     TLOGD(WmsLogTag::WMS_LAYOUT, "session update rect: id: %{public}d, rect:%{public}s, "
         "reason:%{public}u %{public}s", persistentId, rect.ToString().c_str(), reason, updateReason.c_str());
+    IsNeedNotifySubSessionParentSizeChange(rect);
     GetLayoutController()->SetSessionRect(rect);
+    GetLayoutController()->SetLastClientParentSize(rect);
     if (!IsSessionValid()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Session is invalid, id: %{public}d state: %{public}u",
             persistentId, GetSessionState());
@@ -1698,16 +1739,22 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
         GetSessionInfo().abilityInfo->windowModes : GetSessionInfo().supportedWindowModes;
     property->SetSupportedWindowModes(supportedWindowModes);
     property->SetWindowSizeLimits(GetSessionInfo().windowSizeLimits);
+
+    auto windowCreateParams = GetSessionInfo().windowCreateParams;
+    bool isWindowLimitsForcible = windowCreateParams ? windowCreateParams->isWindowLimitsForcible : false;
+    property->SetIsWindowLimitsForcible(isWindowLimitsForcible);
+
     property->SetIsAtomicService(GetSessionInfo().isAtomicService_);
     property->SetRequestedOrientation(GetSessionProperty()->GetRequestedOrientation());
     property->SetDefaultRequestedOrientation(GetSessionProperty()->GetDefaultRequestedOrientation());
     property->SetUserRequestedOrientation(GetSessionProperty()->GetUserRequestedOrientation());
     TLOGI(WmsLogTag::WMS_MAIN, "[id: %{public}d] requestedOrientation: %{public}u,"
         " defaultRequestedOrientation: %{public}u,"
-        " userRequestedOrientation: %{public}u", GetPersistentId(),
+        " userRequestedOrientation: %{public}u, isWindowLimitsForcible: %{public}d", GetPersistentId(),
         static_cast<uint32_t>(GetSessionProperty()->GetRequestedOrientation()),
         static_cast<uint32_t>(GetSessionProperty()->GetDefaultRequestedOrientation()),
-        static_cast<uint32_t>(GetSessionProperty()->GetUserRequestedOrientation()));
+        static_cast<uint32_t>(GetSessionProperty()->GetUserRequestedOrientation()),
+        isWindowLimitsForcible);
     property->SetCompatibleModeProperty(GetSessionProperty()->GetCompatibleModeProperty());
     if (property->GetCompatibleModeProperty()) {
         property->SetDragEnabled(!GetSessionProperty()->IsDragResizeDisabled());
@@ -1808,6 +1855,7 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
+    NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::FOREGROUND);
     UpdateSessionState(SessionState::STATE_FOREGROUND);
     if (!isActive_ || GetSessionInfo().reuseDelegatorWindow) {
         SetActive(true);
@@ -1876,6 +1924,7 @@ void Session::HandleDialogForeground()
 WSError Session::Background(bool isFromClient, const std::string& identityToken)
 {
     HandleDialogBackground();
+    NotifySubSessionParentStatusChange(GetWindowMode());
     SessionState state = GetSessionState();
     TLOGI(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background session, state: %{public}" PRIu32, GetPersistentId(),
         static_cast<uint32_t>(state));
@@ -2010,13 +2059,11 @@ WSError Session::SetActive(bool active)
         sessionStage_->SetActive(true);
         UpdateSessionState(SessionState::STATE_ACTIVE);
         isActive_ = active;
-        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::ACTIVE);
     }
     if (!active && GetSessionState() == SessionState::STATE_ACTIVE) {
         sessionStage_->SetActive(false);
         UpdateSessionState(SessionState::STATE_INACTIVE);
         isActive_ = active;
-        NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent::INACTIVE);
     }
     return WSError::WS_OK;
 }
@@ -2854,6 +2901,24 @@ void Session::HandlePointDownDialog()
     }
 }
 
+bool Session::IsSubWindowZLevelAboveParentLoosened() const
+{
+    if (auto sessionProperty = GetSessionProperty()) {
+        return sessionProperty->IsSubWindowZLevelAboveParentLoosened();
+    }
+    return false;
+}
+ 
+bool Session::IsLoosenedWithFreeMultiMode() const
+{
+    TLOGD(WmsLogTag::WMS_SUB,
+        "id: %{public}d, isAbover: %{public}d, IsFreeMultiWindowMode: %{public}d, ispc: %{public}d",
+        GetPersistentId(), IsSubWindowZLevelAboveParentLoosened(),
+        systemConfig_.IsFreeMultiWindowMode(), systemConfig_.IsPcWindow());
+    return IsSubWindowZLevelAboveParentLoosened() &&
+        (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
+}
+
 WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool isExecuteDelayRaise)
 {
     auto parentSession = GetParentSession();
@@ -2868,20 +2933,25 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN || isHoverDown;
     bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
+    bool isLoosenedWithFreeMultiMode = IsLoosenedWithFreeMultiMode();
     if (isExecuteDelayRaise) {
         if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
             RaiseToAppTopForPointDown();
         }
-        if (!raiseEnabled && parentSession && !isPointMove) {
+        if (!raiseEnabled && parentSession && !isPointMove && !isLoosenedWithFreeMultiMode) {
             parentSession->NotifyClick(!IsScbCoreEnabled());
         }
         return WSError::WS_OK;
     }
     bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
     TLOGD(WmsLogTag::WMS_EVENT,
-          "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
-          GetPersistentId(), raiseEnabled, isPointDown, isModal);
-    if (raiseEnabled && isPointDown) {
+        "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, "
+        "isModal: %{public}d, isLoosenedWithFreeMultiMode: %{public}d",
+        GetPersistentId(), raiseEnabled, isPointDown, isModal, isLoosenedWithFreeMultiMode);
+    if (!isPointDown) {
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled) {
         if (!isModal) {
             RaiseToAppTopForPointDown();
             return WSError::WS_OK;
@@ -2889,7 +2959,9 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
         if (auto mainSession = GetMainSession()) {
             mainSession->NotifyClick(false);
         }
-    } else if (parentSession && isPointDown) {
+        return WSError::WS_OK;
+    }
+    if (parentSession && !isLoosenedWithFreeMultiMode) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
@@ -3148,7 +3220,7 @@ bool Session::GetNeedUseBlurSnapshot() const
     bool snapshotPrivacyMode = GetSnapshotPrivacyMode();
     ControlInfo controlInfo;
     bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
-    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool isAppUseControl = controlInfo.isNeedControl;
     bool needUseBlurSnapshot = isPrivacyMode || snapshotPrivacyMode || (isAppControl && isAppUseControl);
     if (needUseBlurSnapshot) {
         TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isPrivacyMode: %{public}d, snapshotPrivacyMode: %{public}d, "
@@ -3189,7 +3261,7 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
         SaveSnapshot(true, true, nullptr);
         return;
     }
-    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    bool isAppUseControl = controlInfo.isNeedControl;
     TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d, isAppLock: %{public}d", persistentId_, isAppUseControl);
     if (isAppLockControl_.load() == isAppUseControl) {
         return;
@@ -3200,7 +3272,9 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
             NotifyAddSnapshot(false, false, false);
             return;
         }
-        NotifyAddSnapshot(true, false, false);
+        if (!controlInfo.isControlRecentOnly) {
+            NotifyAddSnapshot(true, false, false);
+        }
         SaveSnapshot(true, true, nullptr, true);
         return;
     }
@@ -4063,6 +4137,7 @@ WSError Session::NotifyFocusStatus(const sptr<FocusNotifyInfo>& focusNotifyInfo,
             GetPersistentId(), GetSessionState());
         return WSError::WS_ERROR_NULLPTR;
     }
+    NotifyCrossProcessChildrenLifecycle(isFocused ? ParentLifeCycleEvent::ACTIVE : ParentLifeCycleEvent::INACTIVE);
     sessionStage_->UpdateFocus(focusNotifyInfo, isFocused);
 
     return WSError::WS_OK;
@@ -4292,6 +4367,7 @@ void Session::OnVsyncReceivedAfterModeChanged()
         } else if (session->timesToWaitForVsync_.load() == 0 && session->sessionStage_ &&
                    session->isWindowModeDirty_.compare_exchange_strong(isWindowModeDirty, false)) {
             session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+            session->NotifySubSessionParentStatusChange(session->GetWindowMode());
         } else {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, sessionStage is null or mode is not dirty",
                 funcName, session->GetPersistentId());
@@ -4405,18 +4481,44 @@ WSError Session::SetSessionPropertyForReconnect(const sptr<WindowSessionProperty
 }
 
 /** @note @window.layout */
-void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
-    uint32_t minHeight, uint32_t maxFloatingWindowSize)
+void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
+    uint32_t minHeight, const ScreenMetrics& screenMetrics)
 {
-    constexpr uint32_t marginOfError = 2; // The max vp bias for preventing giant logs.
-    if (curWidth + marginOfError < minWidth || curWidth > maxFloatingWindowSize + marginOfError ||
-        curHeight + marginOfError < minHeight || curHeight > maxFloatingWindowSize + marginOfError) {
+    constexpr uint32_t MARGIN_OF_ERROR = 2; // The max vp bias for preventing giant logs.
+    constexpr float DEFAULT_DENSITY = 1.0f;
+
+    const auto& systemConfig = GetSystemConfig();
+    const uint32_t maxFloatingWindowSize = systemConfig.maxFloatingWindowSize_;
+
+    const bool isSizeBelowMin = (curWidth + MARGIN_OF_ERROR < minWidth) ||
+                                (curHeight + MARGIN_OF_ERROR < minHeight);
+    const bool isSizeAboveMax = (curWidth > maxFloatingWindowSize + MARGIN_OF_ERROR) ||
+                                (curHeight > maxFloatingWindowSize + MARGIN_OF_ERROR);
+
+    const WindowType winType = GetWindowType();
+    const bool isSystemWindowButNotDialog = WindowHelper::IsSystemWindowButNotDialog(winType);
+
+    const uint32_t screenWidth = screenMetrics.widthPx;
+    const uint32_t screenHeight = screenMetrics.heightPx;
+    const float density = screenMetrics.density;
+
+    const float safeDensity = (!NearZero(density)) ? density : DEFAULT_DENSITY;
+    const float screenWidthVp = screenWidth / safeDensity;
+    const float screenHeightVp = screenHeight / safeDensity;
+
+    const bool isSizeBelowScreen = (curWidth + MARGIN_OF_ERROR < screenWidthVp) ||
+                                   (curHeight + MARGIN_OF_ERROR < screenHeightVp);
+
+    const bool needReportException = isSizeAboveMax ||
+                                     (!isSystemWindowButNotDialog && isSizeBelowMin && isSizeBelowScreen);
+
+    if (needReportException) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "RectCheck err sessionID: %{public}d rect %{public}s",
             GetPersistentId(), GetSessionRect().ToString().c_str());
         std::ostringstream oss;
         oss << " RectCheck err size ";
         oss << " cur persistentId: " << GetPersistentId() << ",";
-        oss << " windowType: " << static_cast<uint32_t>(GetWindowType()) << ",";
+        oss << " windowType: " << static_cast<uint32_t>(winType) << ",";
         auto property = GetSessionProperty();
         if (property) {
             oss << " windowName: " << property->GetWindowName() << ",";
@@ -4426,10 +4528,11 @@ void Session::RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32
         oss << " curHeight: " << curHeight << ",";
         oss << " minWidth: " << minWidth << ",";
         oss << " minHeight: " << minHeight << ",";
+        oss << " screenWidth: " << screenWidth << ",";
+        oss << " screenHeight: " << screenHeight << ",";
         oss << " maxFloatingWindowSize: " << maxFloatingWindowSize << ",";
         oss << " sessionRect: " << GetSessionRect().ToString() << ";";
-        WindowInfoReporter::GetInstance().ReportWindowException(
-            static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
+        WindowInfoReporter::GetInstance().ReportWindowFrozen(WindowDFXHelperType::WINDOW_RECT_CHECK, oss.str());
     }
 }
 
@@ -4452,6 +4555,10 @@ void Session::RectCheckProcess()
     }
     auto screenProperty = screensProperties[displayId];
     float density = screenProperty.GetDensity();
+    ScreenMetrics screenMetrics{
+        .widthPx = static_cast<uint32_t>(screenProperty.GetBounds().rect_.width_),
+        .heightPx = static_cast<uint32_t>(screenProperty.GetBounds().rect_.height_),
+        .density = screenProperty.GetDensity()};
     if (!NearZero(density) && !NearZero(GetSessionRect().height_)) {
         float curWidth = GetSessionRect().width_ / density;
         float curHeight = GetSessionRect().height_ / density;
@@ -4472,7 +4579,7 @@ void Session::RectCheckProcess()
             WindowInfoReporter::GetInstance().ReportWindowException(
                 static_cast<int32_t>(WindowDFXHelperType::WINDOW_RECT_CHECK), getpid(), oss.str());
         }
-        RectCheck(curWidth, curHeight);
+        RectCheck(curWidth, curHeight, screenMetrics);
     }
 }
 
@@ -4489,9 +4596,26 @@ void Session::SetSessionRect(const WSRect& rect)
 }
 
 /** @note @window.layout */
+void Session::SetLastClientParentSize(const WSRect& rect)
+{
+    if (GetSessionRect() == rect) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
+        return;
+    }
+    layoutController_->SetLastClientParentSize(rect);
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
+}
+
+/** @note @window.layout */
 WSRect Session::GetSessionRect() const
 {
     return layoutController_->GetSessionRect();
+}
+
+/** @note @window.layout */
+WSRect Session::GetLastClientParentSize() const
+{
+    return layoutController_->GetLastClientParentSize();
 }
 
 /** @note @window.layout */
@@ -4747,6 +4871,17 @@ uint32_t Session::GetBlurBackgroundColor() const
 void Session::SetSnapshotScale(const float snapshotScale)
 {
     snapshotScale_ = snapshotScale;
+    if (scenePersistence_) {
+        scenePersistence_->SetSnapshotScale(snapshotScale);
+    }
+}
+
+void Session::InitPersistentScaledSnapshotParam(bool enabled)
+{
+    enablePersistentScaledSnapshot_ = enabled;
+    if (scenePersistence_) {
+        scenePersistence_->InitPersistentScaledSnapshotParam(enabled);
+    }
 }
 
 WSError Session::ProcessBackEvent()

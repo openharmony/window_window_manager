@@ -361,6 +361,18 @@ enum class AvoidAreaOption : uint32_t {
 };
 
 /**
+ * @brief Enumerates flag of ControlAppType.
+ */
+enum class ControlAppType : uint8_t {
+    CONTROL_APP_TYPE_BEGIN = 0,
+    APP_LOCK = 1,
+    PARENT_CONTROL,
+    DLP,
+    PRIVACY_WINDOW,
+    CONTROL_APP_TYPE_END,
+};
+
+/**
  * @brief Enumerates flag of multiWindowUIType.
  */
 enum class WindowUIType : uint8_t {
@@ -1042,19 +1054,59 @@ enum class WindowAnchor : uint32_t {
  */
 struct WindowAnchorInfo : public Parcelable {
     bool isAnchorEnabled_ = false;
+    bool isAnchoredByAttach_ = false; // Distinguish between binding and unbinding
+    bool isFromAttachOrDetach_ = false; // Distinguish addatchAndDetach or setRelative interfaces
     WindowAnchor windowAnchor_ = WindowAnchor::TOP_START;
     int32_t offsetX_ = 0;
     int32_t offsetY_ = 0;
+    struct AttachOptions : public Parcelable {
+        std::string currentLayoutMode = "";
+        AttachOptions() = default;
+        AttachOptions(const std::string&& currentLayoutMode) : currentLayoutMode(currentLayoutMode) {}
+        bool operator==(const AttachOptions& other) const
+        {
+            return currentLayoutMode == other.currentLayoutMode;
+        }
+
+        bool operator!=(const AttachOptions& other) const
+        {
+            return !(*this == other);
+        }
+
+        bool Marshalling(Parcel& parcel) const override
+        {
+            return parcel.WriteString(currentLayoutMode);
+        }
+
+        static AttachOptions* Unmarshalling(Parcel& parcel)
+        {
+            std::string layoutMode = "";
+            auto attachOptions = std::make_unique<AttachOptions>();
+            if (!attachOptions) {
+                return nullptr;
+            }
+            if (!parcel.ReadString(layoutMode)) {
+                return nullptr;
+            }
+            attachOptions->currentLayoutMode = layoutMode;
+            return attachOptions.release();
+        }
+    };
+    AttachOptions attachOptions;
 
     WindowAnchorInfo() {}
     WindowAnchorInfo(bool isAnchorEnabled) : isAnchorEnabled_(isAnchorEnabled) {}
     WindowAnchorInfo(bool isAnchorEnabled, WindowAnchor windowAnchor, int32_t offsetX,
         int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled),  windowAnchor_(windowAnchor),
         offsetX_(offsetX), offsetY_(offsetY) {}
+    WindowAnchorInfo(bool isAnchorEnabled, bool isAnchoredByAttach, WindowAnchor windowAnchor, int32_t offsetX,
+        int32_t offsetY) : isAnchorEnabled_(isAnchorEnabled), isAnchoredByAttach_(isAnchoredByAttach),
+        windowAnchor_(windowAnchor), offsetX_(offsetX), offsetY_(offsetY) {}
 
     bool operator==(const WindowAnchorInfo& other) const
     {
-        return isAnchorEnabled_ == other.isAnchorEnabled_ && windowAnchor_ == other.windowAnchor_ &&
+        return isAnchorEnabled_ == other.isAnchorEnabled_ && isAnchoredByAttach_ == other.isAnchoredByAttach_ &&
+            isFromAttachOrDetach_ == other.isFromAttachOrDetach_ && windowAnchor_ == other.windowAnchor_ &&
             offsetX_ == other.offsetX_ && offsetY_ == other.offsetY_;
     }
 
@@ -1065,8 +1117,9 @@ struct WindowAnchorInfo : public Parcelable {
 
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
-            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_);
+        return parcel.WriteBool(isAnchorEnabled_) && parcel.WriteBool(isAnchoredByAttach_) &&
+            parcel.WriteBool(isFromAttachOrDetach_) && parcel.WriteUint32(static_cast<uint32_t>(windowAnchor_)) &&
+            parcel.WriteInt32(offsetX_) && parcel.WriteInt32(offsetY_) && parcel.WriteParcelable(&attachOptions);
     }
 
     static WindowAnchorInfo* Unmarshalling(Parcel& parcel)
@@ -1076,12 +1129,17 @@ struct WindowAnchorInfo : public Parcelable {
         if (windowAnchorInfo == nullptr) {
             return nullptr;
         }
-        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) || !parcel.ReadUint32(windowAnchorMode) ||
-            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_)) {
+        sptr<AttachOptions> attachOptions;
+        if (!parcel.ReadBool(windowAnchorInfo->isAnchorEnabled_) ||
+            !parcel.ReadBool(windowAnchorInfo->isAnchoredByAttach_) ||
+            !parcel.ReadBool(windowAnchorInfo->isFromAttachOrDetach_) || !parcel.ReadUint32(windowAnchorMode) ||
+            !parcel.ReadInt32(windowAnchorInfo->offsetX_) || !parcel.ReadInt32(windowAnchorInfo->offsetY_) ||
+            !(attachOptions = parcel.ReadParcelable<AttachOptions>())) {
             delete windowAnchorInfo;
             return nullptr;
         }
         windowAnchorInfo->windowAnchor_ = static_cast<WindowAnchor>(windowAnchorMode);
+        windowAnchorInfo->attachOptions.currentLayoutMode = attachOptions->currentLayoutMode;
         return windowAnchorInfo;
     }
 };
@@ -1432,15 +1490,17 @@ struct WindowUIInfo : public Parcelable {
  */
 struct WindowDisplayInfo : public Parcelable {
     DisplayId displayId = DISPLAY_ID_INVALID;
+    std::string displayName;
     bool Marshalling(Parcel& parcel) const override
     {
-        return parcel.WriteUint64(displayId);
+        return parcel.WriteUint64(displayId) && parcel.WriteString(displayName);
     }
 
     static WindowDisplayInfo* Unmarshalling(Parcel& parcel)
     {
         WindowDisplayInfo* windowDisplayInfo = new WindowDisplayInfo();
-        if (!parcel.ReadUint64(windowDisplayInfo->displayId)) {
+        if (!parcel.ReadUint64(windowDisplayInfo->displayId) ||
+            !parcel.ReadString(windowDisplayInfo->displayName)) {
             delete windowDisplayInfo;
             return nullptr;
         }
@@ -1793,6 +1853,33 @@ struct RotationChangeInfo {
     uint32_t orientation_;
     DisplayId displayId_;
     Rect displayRect_;
+};
+
+struct OrientationParams {
+    WmErrorCode errCode;
+    Orientation requestedOrientation;
+    std::string errMsg;
+};
+
+enum class OrientationExecutionResult : uint32_t {
+    START = 0,
+
+    /**
+     * Orientation policy is applied.
+     */
+    ORIENTATION_APPLIED = START,
+
+    /**
+     * Orientation policy is ignored.
+     */
+    ORIENTATION_IGNORED,
+
+    /**
+     * Orientation policy is pending and will be applied soon.
+     */
+    ORIENTATION_PENDING,
+
+    END,
 };
 
 /**

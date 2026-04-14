@@ -2705,6 +2705,21 @@ HWTEST_F(WindowSessionImplTest5, WindowStatusToString, TestSize.Level1)
     WindowStatus invalidStatus = static_cast<WindowStatus>(999);
     EXPECT_EQ(WindowSessionImpl::WindowStatusToString(invalidStatus), "UNKNOWN");
 }
+
+/**
+ * @tc.name: RecordLifeCycleExceptionEvent
+ * @tc.desc: Test RecordLifeCycleExceptionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, RecordLifeCycleExceptionEvent, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("RecordLifeCycleExceptionEvent");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->RecordLifeCycleExceptionEvent(WMError::WM_ERROR_INVALID_WINDOW,
+        WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "test reason");
+    window->Destroy();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

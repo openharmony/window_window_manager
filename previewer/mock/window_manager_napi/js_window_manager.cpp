@@ -152,6 +152,13 @@ napi_value JsWindowManager::NotifyScreenshotEvent(napi_env env, napi_callback_in
     return nullptr;
 }
 
+/** @note @window.life */
+napi_value JsWindowManager::MoveMainWindowToTargetDisplay(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "mock: MoveMainWindowToTargetDisplay");
+    return nullptr;
+}
+
 static void GetNativeContext(napi_env env, napi_value nativeContext, void*& contextPtr, WMError& errCode)
 {
     AppExecFwk::Ability* ability = nullptr;
@@ -278,6 +285,8 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "setWaterMarkImage", moduleName, JsWindowManager::SetWaterMarkImage);
     BindNativeFunction(env, exportObj, "shiftAppWindowFocus", moduleName, JsWindowManager::ShiftAppWindowFocus);
     BindNativeFunction(env, exportObj, "notifyScreenshotEvent", moduleName, JsWindowManager::NotifyScreenshotEvent);
+    BindNativeFunction(env, exportObj, "moveMainWindowToTargetDisplay", moduleName,
+        JsWindowManager::MoveMainWindowToTargetDisplay);
     return NapiGetUndefined(env);
 }
 }  // namespace Rosen
