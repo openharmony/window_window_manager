@@ -115,7 +115,7 @@ void GtxInputEventSender::RegisterInputEventScale(int offsetX, int offsetY, floa
         Rosen::WindowInputRedistributeClient::UnRegisterInputEventRedistribute(mRecipientInfo);
     }
     mCallbackInstance = std::make_shared<NapiAVSessionInputRedistributeCallback>(offsetX, offsetY, scaleX, scaleY);
-    mRecipientInfo.identity = Rosen::InputRedistributeIdentity::IDENTITY_MEDIA_CONTROLLER;
+    mRecipientInfo.identity = Rosen::InputRedistributeIdentity::IDENTITY_CONTROL_DISPLAY_SEPARATION;
     mRecipientInfo.timing = Rosen::InputRedistributeTiming::REDISTRIBUTE_BEFORE_SEND_TO_COMPONENT;
     mRecipientInfo.type = Rosen::InputEventType::POINTER_EVENT;
     mRecipientInfo.priority = Rosen::DEFAULT_REDISTRIBUTE_PRIORITY;
