@@ -30,7 +30,7 @@ group("unittest") {
 }
 
 const_deps = [
-  ":window_extension_unitest_common",
+  ":window_extension_unittest_common",
   "${window_base_path}/utils:libwmutil_base",
   "${window_base_path}/window_scene/common:window_scene_common",
 ]
