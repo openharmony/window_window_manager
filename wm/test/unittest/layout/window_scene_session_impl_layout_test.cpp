@@ -921,28 +921,6 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, FillWindowLimits_By_PixelUnit, TestSi
 }
 
 /**
- * @tc.name: GetAppHookWindowInfoFromServer
- * @tc.desc: GetAppHookWindowInfoFromServer
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplLayoutTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("GetAppHookWindowInfoFromServer");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    const int32_t windowId = 2025;
-    window->property_->SetPersistentId(windowId);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    HookWindowInfo hookWindowInfo;
-    WMError res = window->GetAppHookWindowInfoFromServer(hookWindowInfo);
-    EXPECT_NE(res, WMError::WM_ERROR_INVALID_WINDOW);
-}
-
-/**
  * @tc.name: NotifyAppHookWindowInfoUpdated
  * @tc.desc: NotifyAppHookWindowInfoUpdated
  * @tc.type: FUNC

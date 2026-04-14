@@ -486,7 +486,6 @@ public:
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
-    virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
     virtual void RegisterPageEnableCallback(PageEnableCallback&& callback) {}
 
     /*
@@ -972,8 +971,6 @@ public:
     bool IsAnyParentSessionDragZooming() const override;
     bool IsNeedNotifyDragEventOnNextVsync() const;
     void NotifiedDragEventOnNextVsync();
-    void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
-    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void RegisterSelectModeFunc(GetSelectModeFunc&& func);
     WMError GetSelectMode(SelectMode& selectMode) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);

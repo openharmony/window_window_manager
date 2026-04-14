@@ -33,9 +33,6 @@ public:
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
     void RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics) override;
-    WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
-        SelectMode selectMode) override;
 
     /*
      * Window Hierarchy
@@ -89,7 +86,6 @@ public:
     bool IsFullScreenInForceSplit() override;
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
-    void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) override;
     void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
     WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
@@ -143,7 +139,6 @@ private:
     ForceSplitFullScreenChangeCallback forceSplitFullScreenChangeCallback_;
     std::atomic_bool isFullScreenInForceSplit_ { false };
     CompatibleModeChangeCallback compatibleModeChangeCallback_;
-    NotifyForceSplitEnableFunc forceSplitEnableFunc_;
     PageEnableCallback pageEnableCallback_;
 
     /*
