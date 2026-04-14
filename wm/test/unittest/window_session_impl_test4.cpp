@@ -292,7 +292,7 @@ HWTEST_F(WindowSessionImplTest4, SetSubWindowModal02, TestSize.Level1)
     EXPECT_EQ(res, WMError::WM_OK);
 
     window->property_->SetZLevelAboveParentLoosened(true);
-    window->SetSubWindowModal(true, modalityType);
+    res = window->SetSubWindowModal(true, ModalityType::APPLICATION_MODALITY);
     EXPECT_EQ(ret, WMError::WM_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplTest4: SetSubWindowModaltest02 end";
 }
