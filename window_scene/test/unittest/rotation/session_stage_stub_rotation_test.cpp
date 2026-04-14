@@ -20,6 +20,7 @@
 #include <message_option.h>
 #include <message_parcel.h>
 
+#include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -139,13 +140,8 @@ HWTEST_F(SessionStageStubRotationTest, HandleGetSceneNodeCountWithCallback, Test
     sptr<MockIRemoteObject> callbackMocker = sptr<MockIRemoteObject>::MakeSptr();
     data2.WriteRemoteObject(callbackMocker);
     result = sessionStageStub_->HandleGetSceneNodeCountWithCallback(data2, reply2);
-    EXPECT_EQ(ERR_NONE, result);
-
-    // Case 4: Verify reply contains error code
-    int32_t errorCode = 0;
-    if (reply2.ReadInt32(errorCode)) {
-        EXPECT_GE(errorCode, 0); // Should be valid error code (0 for success)
-    }
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 
     GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCountWithCallback end";
 }
