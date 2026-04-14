@@ -492,54 +492,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionListener01, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearDisplayStatusBarTemporarilyFlags01
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags01, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.abilityName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-}
-
-/**
- * @tc.name: ClearDisplayStatusBarTemporarilyFlags02
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags02, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.abilityName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    sceneSession->SetIsDisplayStatusBarTemporarily(true);
-    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
-}
-
-/**
- * @tc.name: ClearDisplayStatusBarTemporarilyFlags03
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags03, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.abilityName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    sceneSession->SetIsDisplayStatusBarTemporarily(true);
-    ssm_->ClearDisplayStatusBarTemporarilyFlags();
-    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
-}
-
-/**
  * @tc.name: RequestSceneSessionByCall01
  * @tc.desc: SceneSesionManager request scene session by call
  * @tc.type: FUNC
@@ -2270,6 +2222,23 @@ HWTEST_F(SceneSessionManagerTest, NotifySupportRotationRegistered, TestSize.Leve
     WMError ret = WMError::WM_OK;
     ret = ssm_->NotifySupportRotationRegistered();
     EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetSelectMode
+ * @tc.desc: SetSelectMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSelectMode, TestSize.Level1)
+{
+    ssm_->SetSelectMode(SelectMode::WIDE_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::WIDE_MODE);
+
+    ssm_->SetSelectMode(SelectMode::SQUARE_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::SQUARE_MODE);
+
+    ssm_->SetSelectMode(SelectMode::INVALID_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::INVALID_MODE);
 }
 } // namespace
 } // namespace Rosen

@@ -63,6 +63,50 @@ HWTEST_F(SessionStageProxyRotationTest, SetCurrentRotation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSceneNodeCount
+ * @tc.desc: test function : GetSceneNodeCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyRotationTest, GetSceneNodeCount, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetSceneNodeCount start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    uint32_t nodeCount = 0;
+    WSError errCode = sessionStageProxy->GetSceneNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->GetSceneNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 3: Failed to send request
+    remoteMocker->SetRequestResult(1);
+    errCode = sessionStageProxy->GetSceneNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(0);
+
+    // Case 4: Failed to read nodeCount
+    MockMessageParcel::SetReadUint32ErrorFlag(true);
+    errCode = sessionStageProxy->GetSceneNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetReadUint32ErrorFlag(false);
+
+    // Case 5: Success
+    errCode = sessionStageProxy->GetSceneNodeCount(nodeCount);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetSceneNodeCount end";
+}
+
+/**
  * @tc.name: NotifyRotationChange
  * @tc.desc: test function : NotifyRotationChange
  * @tc.type: FUNC
@@ -73,6 +117,42 @@ HWTEST_F(SessionStageProxyRotationTest, NotifyRotationChange, Function | SmallTe
     RotationChangeInfo info = { RotationChangeType::WINDOW_WILL_ROTATE, 0, 0, { 0, 0, 2720, 1270 } };
     RotationChangeResult res = sessionStage_->NotifyRotationChange(info);
     ASSERT_EQ(0, res.windowRect_.width_);
+}
+
+/**
+ * @tc.name: NotifyOrientationExecutionResult
+ * @tc.desc: 测试 NotifyOrientationExecutionResult 的各种场景
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyRotationTest, NotifyOrientationExecutionResult, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: NotifyOrientationExecutionResult start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    uint32_t promiseId = 123;
+    OrientationExecutionResult result = OrientationExecutionResult::ORIENTATION_APPLIED;
+
+    WSError errCode = sessionStageProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    errCode = sessionStageProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    errCode = sessionStageProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->NotifyOrientationExecutionResult(promiseId, result);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: NotifyOrientationExecutionResult end";
 }
 } // namespace
 } // namespace Rosen

@@ -19,7 +19,6 @@
 #include "dm_common.h"
 #include <ipc_skeleton.h>
 #include "transaction/rs_marshalling_helper.h"
-#include "session_manager/include/scene_session_manager.h"
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -170,7 +169,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
-            auto info = GetDisplayInfoById(displayId);
+            bool isGetActualInfo = data.ReadBool();
+            auto info = GetDisplayInfoById(displayId, isGetActualInfo);
             reply.WriteParcelable(info);
             break;
         }

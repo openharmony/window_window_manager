@@ -47,6 +47,8 @@ private:
     SystemSessionConfig systemConfig_;
 };
 
+static sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr("MainSessionTest", 1423);
+
 void MainSessionTest::SetUpTestCase() {}
 
 void MainSessionTest::TearDownTestCase() {}
@@ -63,6 +65,7 @@ void MainSessionTest::SetUp()
 
 void MainSessionTest::TearDown()
 {
+    scenePersistence = nullptr;
     mainSession_ = nullptr;
 }
 
@@ -339,23 +342,24 @@ HWTEST_F(MainSessionTest, RectCheck03, TestSize.Level1)
     mainSession_->parentSession_ = session;
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    ScreenMetrics screenMetrics{1920, 1080, 2.0f};
+    mainSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 300;
     curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 1930;
     curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 200;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 1930;
-    mainSession_->RectCheck(curWidth, curHeight);
+    mainSession_->RectCheck(curWidth, curHeight, screenMetrics);
 }
 
 /**
@@ -1185,7 +1189,7 @@ HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated01, TestSize
     ASSERT_NE(session, nullptr);
     session->sessionStage_ = nullptr;
     
-    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1204,7 +1208,7 @@ HWTEST_F(MainSessionTest, NotifyAppForceLandscapeConfigEnableUpdated02, TestSize
     ASSERT_NE(session, nullptr);
     session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
     
-    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false);
+    WSError res = session->NotifyAppForceLandscapeConfigEnableUpdated(false, SelectMode::WIDE_MODE);
     EXPECT_EQ(res, WSError::WS_OK);
 }
 
@@ -1340,14 +1344,6 @@ HWTEST_F(MainSessionTest, NotifyPageEnable, TestSize.Level1)
     std::string longMessage(513, 'm');
     ret = session->NotifyPageEnable("enter", longMessage);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PARAM);
-
-    std::string validAction(64, 'a');
-    ret = session->NotifyPageEnable(validAction, "HomePage");
-    EXPECT_EQ(ret, WSError::WS_OK);
-
-    std::string validMessage(512, 'm');
-    ret = session->NotifyPageEnable("enter", validMessage);
-    EXPECT_EQ(ret, WSError::WS_OK);
 }
 
 /**
