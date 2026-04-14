@@ -122,6 +122,7 @@ constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr uint8_t MAX_DOWN_TIMES = 100;
+constexpr int32_t GET_SCENE_NODE_COUNT_TIMEOUT = 50;
 constexpr const long PRE_CALC_WINDOW_PROPERTY_TIMEOUT = 1000;
 
 bool CheckIfRectElementIsTooLarge(const WSRect& rect)
@@ -10283,7 +10284,7 @@ WSError SceneSession::GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t 
 
 WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
 {
-    return GetSceneNodeCountWithTimeout(nodeCount, 3000);
+    return GetSceneNodeCountWithTimeout(nodeCount, GET_SCENE_NODE_COUNT_TIMEOUT);
 }
 
 

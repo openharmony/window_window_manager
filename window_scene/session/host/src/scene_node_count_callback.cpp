@@ -33,6 +33,5 @@ void SceneNodeCountCallback::ResetResult()
 {
     future_.ResetLock(0);
 }
-
 } // namespace Rosen
 } // namespace OHOS
