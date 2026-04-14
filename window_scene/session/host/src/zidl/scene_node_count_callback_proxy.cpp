@@ -46,6 +46,5 @@ void SceneNodeCountCallbackProxy::OnSceneNodeCount(uint32_t nodeCount)
         TLOGE(WmsLogTag::WMS_ROTATION, "SendRequest failed");
     }
 }
-
 } // namespace Rosen
 } // namespace OHOS
