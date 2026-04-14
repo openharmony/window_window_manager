@@ -360,14 +360,6 @@ WMError FloatViewController::SetUIContext(const std::string &contextUrl,
     std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetUIPath(contextUrl);
     option_.SetStorage(contentStorage);
-    if (window_ == nullptr) {
-        if (IsStateWithWindow(curState_)) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
-            return WMError::WM_ERROR_INVALID_WINDOW;
-        }
-        TLOGI(WmsLogTag::WMS_SYSTEM, "SetUIContext when window not created, save info");
-        return WMError::WM_OK;
-    }
     return SetUIContextInner();
 }
 
@@ -381,19 +373,18 @@ WMError FloatViewController::SetUIContext(const std::string &contextUrl, const a
     std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetUIPath(contextUrl);
     option_.SetStorage(contentStorage);
-    if (window_ == nullptr) {
-        if (IsStateWithWindow(curState_)) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
-            return WMError::WM_ERROR_INVALID_WINDOW;
-        }
-        TLOGI(WmsLogTag::WMS_SYSTEM, "SetUIContext when window not created, save info");
-        return WMError::WM_OK;
-    }
     return SetUIContextInner();
 }
 
 WMError FloatViewController::SetUIContextInner()
 {
+    if (window_ == nullptr) {
+        if (IsStateWithWindow(curState_)) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        return WMError::WM_OK;
+    }
     if (type_ == APIType::NAPI) {
         napi_value storage = nullptr;
         auto contentStorage = option_.GetStorage();
