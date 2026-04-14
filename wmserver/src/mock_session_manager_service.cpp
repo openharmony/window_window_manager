@@ -912,10 +912,12 @@ void MockSessionManagerService::SetScreenPrivacyWindowTagSwitch(
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "PrivacyWindowTags is empty");
         return;
     }
+    int32_t defaultWMSUserId;
     {
         std::lock_guard<std::mutex> lock(defaultWMSUserIdMutex_);
-        auto sessionManagerService = GetSessionManagerServiceInner(defaultWMSUserId_);
+        defaultWMSUserId = defaultWMSUserId_;
     }
+    auto sessionManagerService = GetSessionManagerServiceInner(defaultWMSUserId);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
         return;
