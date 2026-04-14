@@ -132,7 +132,7 @@ HWTEST_F(SceneNodeCountCallbackStubTest, OnRemoteRequest_ReadUint32Failed, TestS
     // Don't write Uint32, causing ReadUint32 to fail
 
     int result = stub->OnRemoteRequest(
-        static_cast<uint32_t>(SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT),
+        static_cast<uint32_t>(ISceneNodeCountCallback::SceneNodeCountCallbackMessage::TRANS_ON_SCENE_NODE_COUNT),
         data, reply, option);
 
     EXPECT_EQ(ERR_INVALID_DATA, result);
