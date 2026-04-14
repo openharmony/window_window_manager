@@ -27,6 +27,7 @@
 #include "occupied_area_change_info.h"
 #include "data_handler_interface.h"
 #include "floating_ball_template_base_info.h"
+#include "float_view_template_info.h"
 
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
@@ -174,6 +175,26 @@ public:
      * @brief Notify caller that window is already background.
      */
     virtual void AfterDidBackground() {}
+
+    /**
+     * @brief Set is window scene listener.
+     *
+     * @param isWindowSceneListener Whether is window listener.
+     */
+    void SetIsWindowSceneListener(bool isWindowSceneListener)
+    {
+        isWindowSceneListener_ = isWindowSceneListener;
+    }
+
+    /**
+     * @brief Whether is window listener.
+     */
+    bool IsWindowSceneListener()
+    {
+        return isWindowSceneListener_;
+    }
+protected:
+    bool isWindowSceneListener_ = false;
 };
 
 /**
@@ -1129,6 +1150,26 @@ public:
     static void UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration);
 
     /**
+     * @brief create fb window with session
+     *
+     * @param option window propertion
+     * @param fvTemplateInfo template info of fv window
+     * @param context ability context
+     * @param errCode error code of create fv window
+     * @return sptr<Window> If create fv window success, return window instance; Otherwise, return nullptr
+     */
+    static sptr<Window> CreateFv(sptr<WindowOption>& option, const FloatViewTemplateInfo& fvTemplateInfo,
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode);
+
+    /**
+     * @brief Check if any window matches the given state
+     *
+     * @param state The state to match
+     * @return True if any window matches the given state, false otherwise
+     */
+    static bool IsAnyWindowMatchState(const WindowState& state);
+
+    /**
      * @brief Get surface node from RS
      *
      * @return Surface node from RS
@@ -1628,7 +1669,7 @@ public:
     /**
      * @brief Resume window
      */
-    virtual void Resume() {}
+    virtual void Resume(bool isGamePreLaunch = false) {}
 
     /**
      * @brief Pause window
@@ -4048,6 +4089,27 @@ public:
     }
 
     /**
+     * @brief Set is game prelaunch.
+     *
+     * @param isGamePreLaunch is game prelaunch.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError SetIsGamePreLaunch(bool isGamePreLaunch)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
+     * @brief Clear is game prelaunch.
+     *
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError ClearIsGamePreLaunch()
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+
+    /**
      * @brief Register keyboard panel info change listener.
      *
      * @param listener IKeyboardPanelInfoChangeListener.
@@ -4876,6 +4938,13 @@ public:
      */
     virtual bool IsSubWindowMaximizeSupported() const { return false; }
 
+     /**
+     * @brief Get is subwindow zLevel above parent loosened
+     *
+     * @return true means subwindow zLevel above parent loosened, others means follow parent.
+     */
+    virtual bool IsZLevelAboveParentLoosened() const { return false; }
+ 
     /**
      * @brief Set drag key frame policy.
      * effective order:
@@ -5332,6 +5401,41 @@ public:
      * @param newRatio new ratio
      */
     virtual WMError NotifySplitRatioChanged(float newRatio)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief Notify prepare to close float view window
+     */
+    virtual void NotifyPrepareCloseFloatView() {}
+
+    /**
+     * @brief update float view.
+     *
+     * @param fvTemplateInfo the template info of the float view.
+     */
+    virtual WMError UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief restore main window of the float view.
+     *
+     * @param wantParams the info deleverd to the main window.
+     */
+    virtual WMError RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams)
+    {
+        return WMError::WM_OK;
+    }
+
+    /**
+     * @brief update float view.
+     *
+     * @param showWhenCreate show when create for float view or floating ball.
+     */
+    virtual WMError UpdateFloatShowWhenCreate(const bool showWhenCreate)
     {
         return WMError::WM_OK;
     }

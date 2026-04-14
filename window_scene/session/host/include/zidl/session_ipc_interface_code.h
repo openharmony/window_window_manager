@@ -185,6 +185,11 @@ enum class SessionInterfaceCode {
 
     // Prelaunch Starting Window
     TRANS_ID_NOTIFY_REMOVE_PRELAUNCH_STARTING_WINDOW,
+
+    // Float View
+    TRANS_ID_NOTIFY_FLOAT_VIEW_PREPARE_CLOSE,
+    TRANS_ID_UPDATE_FLOAT_VIEW,
+    TRANS_ID_RESTORE_FLOAT_VIEW_MAIN_WINDOW,
 };
 } // namespace Rosen
 } // namespace OHOS

@@ -1997,9 +1997,10 @@ WMError WindowManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     return ret;
 }
 
-WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const
+WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+    const WindowInfoOptions& option) const
 {
-    WMError ret = WindowAdapter::GetInstance(userId_).GetAllWindowLayoutInfo(displayId, infos);
+    WMError ret = WindowAdapter::GetInstance(userId_).GetAllWindowLayoutInfo(displayId, infos, option);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
@@ -2036,6 +2037,11 @@ WMError WindowManager::SetWindowSnapshotSkip(int32_t windowId, bool isSkip)
 WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode& globalWinMode) const
 {
     return WindowAdapter::GetInstance(userId_).GetGlobalWindowMode(displayId, globalWinMode);
+}
+
+WMError WindowManager::GetFloatViewLimits(FloatViewLimits &limits) const
+{
+    return WindowAdapter::GetInstance(userId_).GetFloatViewLimits(limits);
 }
 
 WMError WindowManager::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const

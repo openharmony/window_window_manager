@@ -102,6 +102,7 @@ enum class JsSessionType : uint32_t {
     TYPE_MAGNIFICATION_MENU = 43,
     TYPE_SELECTION = 44,
     TYPE_FLOATING_BALL = 45,
+    TYPE_FLOAT_VIEW = 46,
 };
 
 extern const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP;
@@ -207,6 +208,8 @@ bool convertAnimConfigFromJs(napi_env env, napi_value value, SceneAnimationConfi
 bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
     SupportRotationInfo& suppoortRotationInfo);
 bool ParseBoolArrayValueFromJsValue(napi_env env, napi_value array, std::vector<bool>& vector);
+bool ConvertFloatViewLimitsFromJs(napi_env env, napi_value jsLimits, FloatViewLimits& limits);
+bool ConvertRatioLimitsFromJs(napi_env env, napi_value jsLimits, FloatViewLimits& limits);
 template<class T>
 bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
 {

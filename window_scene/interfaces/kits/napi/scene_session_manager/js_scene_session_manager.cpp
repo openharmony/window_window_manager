@@ -379,6 +379,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     BindNativeFunction(env, exportObj, "getJsonProfile", moduleName,
         JsSceneSessionManager::GetJsonProfile);
     BindNativeFunction(env, exportObj, "sendAxisEvent", moduleName, JsSceneSessionManager::SendAxisEvent);
+    BindNativeFunction(env, exportObj, "syncFloatViewLimits", moduleName, JsSceneSessionManager::SyncFloatViewLimits);
     return NapiGetUndefined(env);
 }
 
@@ -1226,6 +1227,13 @@ napi_value JsSceneSessionManager::SendAxisEvent(napi_env env, napi_callback_info
     TLOGI(WmsLogTag::WMS_EVENT, "in");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSendAxisEvent(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::SyncFloatViewLimits(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_EVENT, "in");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSyncFloatViewLimits(env, info) : nullptr;
 }
 
 napi_value JsSceneSessionManager::PreloadInLakeApp(napi_env env, napi_callback_info info)
@@ -2303,6 +2311,9 @@ napi_value JsSceneSessionManager::OnRequestSceneSession(napi_env env, napi_callb
         if (!sessionInfo.pageConfig.empty()) {
             sceneSession->EditSessionInfo().pageConfig = sessionInfo.pageConfig;
         }
+        if (!sessionInfo.combinedCompatibleConfig.empty()) {
+            sceneSession->EditSessionInfo().combinedCompatibleConfig = sessionInfo.combinedCompatibleConfig;
+        }
         return jsSceneSessionObj;
     }
 }
@@ -3371,6 +3382,36 @@ napi_value JsSceneSessionManager::OnSendAxisEvent(napi_env env, napi_callback_in
     }
     pointerEvent->SetZOrder(zIndex);
     SceneSessionManager::GetInstance().SendAxisEvent(pointerEvent);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSyncFloatViewLimits(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    napi_value jsLimits = argv[0];
+    if (jsLimits == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert jsLimits");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    FloatViewLimits limits;
+    if (!ConvertFloatViewLimitsFromJs(env, jsLimits, limits)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to FloatViewLimits");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Failed to convert parameter to FloatViewLimits"));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().SyncFloatViewLimits(limits);
     return NapiGetUndefined(env);
 }
 

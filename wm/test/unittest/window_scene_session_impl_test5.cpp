@@ -2042,25 +2042,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetWindowTransitionAnimation01, Function |
 }
 
 /**
- * @tc.name: TransferLifeCycleEventToString
- * @tc.desc: TransferLifeCycleEventToString
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplTest5, TransferLifeCycleEventToString, Function | SmallTest | Level2)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("TransferLifeCycleEventToString");
-    option->SetDisplayId(0);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    ASSERT_NE(window, nullptr);
-    window->RecordLifeCycleExceptionEvent(LifeCycleEvent::CREATE_EVENT, WMError::WM_ERROR_REPEAT_OPERATION);
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::CREATE_EVENT), "CREATE");
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::SHOW_EVENT), "SHOW");
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::HIDE_EVENT), "HIDE");
-    ASSERT_EQ(window->TransferLifeCycleEventToString(LifeCycleEvent::DESTROY_EVENT), "DESTROY");
-}
-
-/**
  * @tc.name: FillTargetOrientationConfig
  * @tc.desc: FillTargetOrientationConfig
  * @tc.type: FUNC
@@ -3117,14 +3098,14 @@ HWTEST_F(WindowSceneSessionImplTest5, SetForceSplitConfigEnable02, TestSize.Leve
 }
 
 /**
- * @tc.name: SendLogicalDeviceConfigToArkUI
- * @tc.desc: Test SendLogicalDeviceConfigToArkUI
+ * @tc.name: SendCombinedCompatibleConfigToArkUI
+ * @tc.desc: Test SendCombinedCompatibleConfigToArkUI
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplTest5, SendLogicalDeviceConfigToArkUI, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplTest5, SendCombinedCompatibleConfigToArkUI, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SendLogicalDeviceConfigToArkUI");
+    option->SetWindowName("SendCombinedCompatibleConfigToArkUI");
     option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     ASSERT_NE(window, nullptr);
@@ -3133,24 +3114,37 @@ HWTEST_F(WindowSceneSessionImplTest5, SendLogicalDeviceConfigToArkUI, TestSize.L
     std::shared_ptr<Ace::UIContent> uiContent = window->GetUIContentSharedPtr();
     EXPECT_EQ(uiContent, nullptr);
 
-    EXPECT_FALSE(WindowSceneSessionImpl::hasSentLogicalDeviceConfig_);
-    window->SendLogicalDeviceConfigToArkUI();
-    EXPECT_TRUE(WindowSceneSessionImpl::hasSentLogicalDeviceConfig_);
+    EXPECT_FALSE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with empty config (should return early)
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_FALSE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with config had been sent (should return early)
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = true;
+    window->property_->SetCombinedCompatibleConfig({"logicalDeviceConfig", "arkUIAndWebConfig"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with logicalDeviceConfig is ""
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"", "arkUIAndWebConfig"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
+    
+    // Test with logicalDeviceConfig is "{}"
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"{}", "arkUIAndWebConfig"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
 
-    WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = false;
-    window->property_->SetLogicalDeviceConfig("");
-    window->SendLogicalDeviceConfigToArkUI();
-    EXPECT_TRUE(WindowSceneSessionImpl::hasSentLogicalDeviceConfig_);
-
-    WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = false;
-    window->property_->SetLogicalDeviceConfig("{}");
-    window->SendLogicalDeviceConfigToArkUI();
-    EXPECT_TRUE(WindowSceneSessionImpl::hasSentLogicalDeviceConfig_);
-
-    WindowSceneSessionImpl::hasSentLogicalDeviceConfig_ = false;
-    window->property_->SetLogicalDeviceConfig("{aaa: bbb}");
-    window->SendLogicalDeviceConfigToArkUI();
-    EXPECT_TRUE(WindowSceneSessionImpl::hasSentLogicalDeviceConfig_);
+    // Test with logicalDeviceConfig is normal config
+    WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_ = false;
+    window->property_->SetCombinedCompatibleConfig({"{aaa: bbb}", "arkUIAndWebConfig"});
+    window->SendCombinedCompatibleConfigToArkUI();
+    EXPECT_TRUE(WindowSceneSessionImpl::hasSentCombinedCompatibleConfig_);
 }
 
 /**

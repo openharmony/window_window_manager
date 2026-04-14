@@ -836,7 +836,7 @@ HWTEST_F(WindowSessionImplRotationTest, NotifyOrientationExecutionResult02, Test
     ASSERT_NE(window_, nullptr);
     
     WSError ret = window_->NotifyOrientationExecutionResult(123, OrientationExecutionResult::ORIENTATION_APPLIED);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WSError::WS_OK);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult02 end";
 }
