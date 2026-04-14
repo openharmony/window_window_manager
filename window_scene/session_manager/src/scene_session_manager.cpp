@@ -3368,7 +3368,7 @@ sptr<SceneSession> SceneSessionManager::RequestSceneSession(const SessionInfo& s
             MultiInstanceManager::GetInstance().FillInstanceKeyIfNeed(sceneSession);
         }
         LOCK_GUARD_EXPR(SCENE_GUARD, InitSceneSession(sceneSession, sessionInfo, property));
-        if (CheckCollaboratorType(sceneSession->GetCollaboratorType())) {
+        if (CheckCollaboratorType(sceneSession->GetCollaboratorType()) && !sessionInfo.isSkipAncoNotifyPreStart) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: ancoSceneState: %{public}d",
                 where, sceneSession->GetSessionInfo().ancoSceneState);
             bool isPreHandleSuccess = PreHandleCollaboratorStartAbility(sceneSession);
@@ -14731,6 +14731,11 @@ bool SceneSessionManager::CheckBrokeNotAliveAndRefresh(SessionInfo& sessionInfo)
         return false;
     }
     sessionInfo.callerTypeForAnco = info->callerTypeForAnco;
+    if (sessionInfo.callerTypeForAnco < static_cast<int32_t>(AAFwk::CallerTypeForAnco::DEFAULT)) {
+        NotifyAmsPendingSessionWhenFail(static_cast<uint32_t>(RequestResultCode::FAIL),
+            "", sessionInfo.requestId, sessionInfo.persistentId_);
+        return true;
+    }
     if (sessionInfo.callerTypeForAnco == static_cast<int32_t>(AAFwk::CallerTypeForAnco::ADD)) {
         sessionInfo.SetWantSafely(*notifyWant);
         sessionInfo.bundleName_ = notifyWant->GetBundle();
@@ -14768,7 +14773,8 @@ BrokerStates SceneSessionManager::CheckIfReuseSession(SessionInfo& sessionInfo)
         return BrokerStates::BROKER_UNKOWN;
     }
     if (collaboratorType == CollaboratorType::RESERVE_TYPE && CheckBrokeNotAliveAndRefresh(sessionInfo)) {
-        return BrokerStates::BROKER_UNKOWN;
+        return sessionInfo.callerTypeForAnco >= static_cast<int32_t>(AAFwk::CallerTypeForAnco::DEFAULT) ?
+            BrokerStates::BROKER_UNKOWN : BrokerStates::BROKER_NOT_START;
     }
     BrokerStates resultValue = NotifyStartAbility(collaboratorType, sessionInfo);
     sessionInfo.collaboratorType_ = collaboratorType;

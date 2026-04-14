@@ -497,6 +497,7 @@ struct SessionInfo {
     SpecifiedReason specifiedReason_ = SpecifiedReason::DEFAULT;
     // only init when requestSceneSession from SCB
     bool isAncoApplication_ = false;
+    bool isSkipAncoNotifyPreStart = false;
     bool isPrelaunch_ = false;
     int32_t frameNum_ = 0;
     bool isTargetPlugin = false;
