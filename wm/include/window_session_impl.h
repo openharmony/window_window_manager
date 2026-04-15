@@ -327,6 +327,8 @@ public:
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
     WMError UnregisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
+    WMError RegisterWindowDensityChangeListener(const IWindowDensityChangeListenerSptr& listener) override;
+    WMError UnregisterWindowDensityChangeListener(const IWindowDensityChangeListenerSptr& listener) override;
     WMError RegisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
     WMError UnregisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
@@ -494,6 +496,7 @@ public:
 
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void RecoverSessionListener();
+    void RecoverDensityChangeListener();
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
@@ -1006,6 +1009,7 @@ protected:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<bool> defaultDensityEnabledStageConfig_ = false;
     WSError NotifySystemDensityChange(float density);
+    WSError NotifyWindowDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
 
@@ -1078,6 +1082,8 @@ private:
     EnableIfSame<T, IDisplayIdChangeListener, std::vector<IDisplayIdChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowDensityChangeListener, std::vector<IWindowDensityChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IAcrossDisplaysChangeListener, std::vector<IAcrossDisplaysChangeListenerSptr>> GetListeners();
     template<typename T>
@@ -1262,6 +1268,8 @@ private:
     static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
     static std::mutex systemDensityChangeListenerMutex_;
     static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
+    static std::mutex windowDensityChangeListenerMutex_;
+    static std::unordered_map<int32_t, std::vector<IWindowDensityChangeListenerSptr>> windowDensityChangeListeners_;
     static std::recursive_mutex acrossDisplaysChangeListenerMutex_;
     static std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
         acrossDisplaysChangeListeners_;
