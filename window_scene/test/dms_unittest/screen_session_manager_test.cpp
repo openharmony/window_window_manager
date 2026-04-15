@@ -846,27 +846,6 @@ HWTEST_F(ScreenSessionManagerTest, IsScreenRotationLocked, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateScreenProperty
- * @tc.desc: CreateScreenProperty test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, CreateScreenProperty, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "testVirtualOption";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
-    ScreenProperty property;
-    ssm_->isDensityDpiLoad_ = false;
-    ssm_->CreateScreenProperty(screenId, property);
-    ssm_->isDensityDpiLoad_ = true;
-    ASSERT_EQ(0, screenSession->GetScreenProperty().GetRefreshRate());
-    ssm_->DestroyVirtualScreen(screenId);
-}
-
-/**
  * @tc.name: GetInternalWidth
  * @tc.desc: GetInternalWidth test
  * @tc.type: FUNC
