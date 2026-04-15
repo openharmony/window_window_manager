@@ -548,4 +548,12 @@ WSError SceneSessionManagerLite::NotifyAppUseControlDisplay(DisplayId displayId,
     TLOGI(WmsLogTag::WMS_PATTERN, "in");
     return SceneSessionManager::GetInstance().NotifyAppUseControlDisplay(displayId, useControl);
 }
+
+WMError SceneSessionManagerLite::GetAppWindowShowingInfosByBundleName(const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey, std::vector<AppWindowShowingInfo>& windowInfos)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "in");
+    return SceneSessionManager::GetInstance().GetAppWindowShowingInfosByBundleName(
+        bundleName, appIndex, appInstanceKey, windowInfos);
+}
 } // namespace OHOS::Rosen

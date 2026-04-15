@@ -312,6 +312,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleGetCrossProcessWindowInfo(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FLOAT_VIEW_LIMITS):
             return HandleGetFloatViewLimits(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_APP_WINDOW_SHOWING_INFOS_BY_BUNDLE_NAME):
+            return HandleGetAppWindowShowingInfosByBundleName(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -3062,6 +3064,46 @@ int SceneSessionManagerStub::HandleGetCrossProcessWindowInfo(MessageParcel& data
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write errCode fail");
         return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetAppWindowShowingInfosByBundleName(MessageParcel& data, MessageParcel& reply)
+{
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read bundleName failed");
+        return ERR_INVALID_DATA;
+    }
+    int32_t appIndex = 0;
+    if (!data.ReadInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read appIndex failed");
+        return ERR_INVALID_DATA;
+    }
+    std::string appInstanceKey;
+    if (!data.ReadString(appInstanceKey)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "read appInstanceKey failed");
+        return ERR_INVALID_DATA;
+    }
+    
+    std::vector<AppWindowShowingInfo> windowInfos;
+    WMError ret = GetAppWindowShowingInfosByBundleName(bundleName, appIndex, appInstanceKey, windowInfos);
+    
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_MAIN, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    if (ret == WMError::WM_OK) {
+        if (!reply.WriteInt32(static_cast<int32_t>(windowInfos.size()))) {
+            TLOGE(WmsLogTag::WMS_MAIN, "write size failed");
+            return ERR_INVALID_DATA;
+        }
+        for (const auto& info : windowInfos) {
+            if (!reply.WriteParcelable(&info)) {
+                TLOGE(WmsLogTag::WMS_MAIN, "write AppWindowShowingInfo failed");
+                return ERR_INVALID_DATA;
+            }
+        }
     }
     return ERR_NONE;
 }

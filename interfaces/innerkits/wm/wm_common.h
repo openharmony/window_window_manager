@@ -3587,6 +3587,37 @@ struct RecentSessionInfo : public Parcelable {
     RecentSessionState sessionState = RecentSessionState::DISCONNECT;
 };
 
+struct AppWindowShowingInfo : public Parcelable {
+    AppWindowShowingInfo() = default;
+    AppWindowShowingInfo(int32_t persistentId) : persistentId(persistentId) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(persistentId) &&
+               parcel.WriteString(windowName) &&
+               parcel.WriteUint32(sessionState) &&
+               parcel.WriteBool(isShowOnDock);
+    }
+
+    static AppWindowShowingInfo* Unmarshalling(Parcel& parcel)
+    {
+        AppWindowShowingInfo* info = new AppWindowShowingInfo();
+        if (!parcel.ReadInt32(info->persistentId) ||
+            !parcel.ReadString(info->windowName) ||
+            !parcel.ReadUint32(info->sessionState) ||
+            !parcel.ReadBool(info->isShowOnDock)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    int32_t persistentId = -1;
+    std::string windowName;
+    uint32_t sessionState = 0;
+    bool isShowOnDock = false;
+};
+
 /**
  * @brief Screenshot event type.
  */

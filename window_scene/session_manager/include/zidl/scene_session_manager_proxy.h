@@ -217,6 +217,8 @@ public:
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams) override;
     WMError NotifySupportRotationRegistered() override;
     WMError GetFloatViewLimits(FloatViewLimits& limits) override;
+    WMError GetAppWindowShowingInfosByBundleName(const std::string& bundleName, int32_t appIndex = 0,
+        const std::string& appInstanceKey = "", std::vector<AppWindowShowingInfo>& windowInfos) override;
 
 private:
     template<typename T>

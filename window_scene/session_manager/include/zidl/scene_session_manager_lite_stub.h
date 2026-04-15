@@ -120,7 +120,7 @@ private:
     int HandleNotifyAppUseControlDisplay(MessageParcel& data, MessageParcel& reply);
     int HandleRegisterPipChgListener(MessageParcel& data, MessageParcel& reply);
     int HandleUnregisterPipChgListener(MessageParcel& data, MessageParcel& reply);
-
+    int HandleGetAppWindowShowingInfosByBundleName(MessageParcel& data, MessageParcel& reply);
     int ProcessRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Rosen

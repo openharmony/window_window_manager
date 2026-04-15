@@ -182,6 +182,7 @@ public:
         TRANS_ID_SNAPSHOT_BY_WINDOW_ID,
         TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO,
         TRANS_ID_GET_FLOAT_VIEW_LIMITS,
+        TRANS_ID_GET_APP_WINDOW_SHOWING_INFOS_BY_BUNDLE_NAME,
     };
 
     virtual WSError SetSessionLabel(const sptr<IRemoteObject>& token, const std::string& label) = 0;
@@ -508,6 +509,24 @@ public:
     }
     WMError NotifySupportRotationRegistered() override { return WMError::WM_OK; }
     WMError GetFloatViewLimits(FloatViewLimits& limits) override { return WMError::WM_OK; }
+
+    /**
+     * @brief Get application window information list by bundleName, appIndex and appInstanceKey
+     *
+     * This function is used to query application window information list
+     * including windowId, windowName, sessionState and isShowOnDock
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param bundleName The bundle name of the application
+     * @param appIndex The app index of the application, default is 0
+     * @param appInstanceKey The app instance key, default is empty (no filter)
+     * @param windowInfos The window information list for output
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError GetAppWindowShowingInfosByBundleName(const std::string& bundleName, int32_t appIndex = 0,
+        const std::string& appInstanceKey = "", std::vector<AppWindowShowingInfo>& windowInfos) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H
