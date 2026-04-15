@@ -2559,7 +2559,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
     screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
 
-    RRect bounds1, bounds2, bounds3; 
+    RRect bounds1, bounds2, bounds3;
     bounds1.rect_.left_ = 0;
     bounds1.rect_.top_ = 0;
     bounds1.rect_.width_ = 100;
@@ -2607,7 +2607,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged04, TestSize.Level1)
     screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
 
-    RRect bounds1, bounds2; 
+    RRect bounds1, bounds2;
     bounds1.rect_.left_ = 0;
     bounds1.rect_.top_ = 0;
     bounds1.rect_.width_ = 100;
@@ -2639,13 +2639,13 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged05, TestSize.Level1)
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     ScreenId screenId = 0;
-    ScreenProperty property1 ,property2;
+    ScreenProperty property1, property2;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
     sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
     screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
 
-    RRect bounds1, bounds2; 
+    RRect bounds1, bounds2;
     bounds1.rect_.left_ = 0;
     bounds1.rect_.top_ = 0;
     bounds1.rect_.width_ = 100;

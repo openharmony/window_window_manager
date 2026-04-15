@@ -231,12 +231,9 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     return iter->second;
 }
 
-static inline bool IsBoundsChanged(RRect oldBounds, RRect newBounds) {
-    TLOGD(WmsLogTag::DMS, "oldbounds:%{public}f,%{public}f,%{public}f,%{public}f,"
-        "newbounds:%{public}f,%{public}f,%{public}f,%{public}f",
-        oldBounds.rect_.left_, oldBounds.rect_.top_, oldBounds.rect_.width_,oldBounds.rect_.height_,
-        newBounds.rect_.left_, newBounds.rect_.top_, newBounds.rect_.width_, newBounds.rect_.height_);
-    if (oldBounds.rect_.left_ == newBounds.rect_.left_ && newBounds.rect_.top_ == oldBounds.rect_.top_){
+static inline bool IsBoundsChanged(RRect oldBounds, RRect newBounds)
+{
+    if (oldBounds.rect_.left_ == newBounds.rect_.left_ && newBounds.rect_.top_ == oldBounds.rect_.top_) {
         if ((oldBounds.rect_.width_ == newBounds.rect_.width_ && oldBounds.rect_.height_ == newBounds.rect_.height_) ||
             (oldBounds.rect_.height_ == newBounds.rect_.width_ && oldBounds.rect_.width_ == newBounds.rect_.height_)) {
             return false;
