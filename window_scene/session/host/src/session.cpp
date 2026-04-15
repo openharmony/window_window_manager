@@ -200,16 +200,19 @@ int32_t Session::GetCurrentRotation() const
 void Session::SetSurfaceNode(const std::shared_ptr<RSSurfaceNode>& surfaceNode)
 {
     RSAdapterUtil::SetRSUIContext(surfaceNode, GetRSUIContext(), true);
-    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
-    surfaceNode_ = surfaceNode;
-    if (surfaceNode_) {
-        surfaceNode_->MarkLayerPartRender(isLayerPartRender_);
-    }
-    shadowSurfaceNode_ = RSAdapterUtil::IsClientMultiInstanceEnabled() && surfaceNode_ ?
-        surfaceNode_->CreateShadowSurfaceNode() : nullptr;
+    {
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+        surfaceNode_ = surfaceNode;
+        if (surfaceNode_) {
+            surfaceNode_->MarkLayerPartRender(isLayerPartRender_);
+        }
+        shadowSurfaceNode_ = RSAdapterUtil::IsClientMultiInstanceEnabled() && surfaceNode_ ?
+            surfaceNode_->CreateShadowSurfaceNode() : nullptr;
 
-    // Reset move drag shadow surface node when surface node changes.
-    moveDragShadowSurfaceNode_ = nullptr;
+        // Reset move drag shadow surface node when surface node changes.
+        moveDragShadowSurfaceNode_ = nullptr;
+    }
+    OnSurfaceNodeChanged();
 }
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
