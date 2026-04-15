@@ -291,6 +291,9 @@ public:
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError GetSceneNodeCount(uint32_t& nodeCount) = 0;
+    virtual WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) = 0;
+    
+    virtual WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) = 0;
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& currentInfo)
@@ -303,7 +306,8 @@ public:
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) = 0;
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
     virtual WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
@@ -386,6 +390,38 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Send fv event to client.
+     *
+     * Send the fv event to client. Such as close events.
+     *
+     * @param action Indicates the action name.
+     * @param reason Indicates the reason for the action.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SendFvActionEvent(const std::string& action, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view window info to client.
+     *
+     * Sync float view window info to client.
+     *
+     * @param windowInfo Indicates the float view window info.
+     * @param reason Indicates the reason string for the sync.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view limits info to client.
+     *
+     * Sync float view limits info to client.
+     *
+     * @param limits Indicates the float view limits info.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvLimits(const FloatViewLimits& limits) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

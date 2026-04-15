@@ -41,7 +41,8 @@ typedef struct OH_WindowManager_FrameMetrics OH_WindowManager_FrameMetrics;
  *
  * @since 26.0.0
  */
-typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(int32_t windowId, OH_WindowManager_FrameMetrics* metrics);
+typedef void (*OH_WindowManager_FrameMetricsMeasuredCallback)(
+    int32_t windowId, const OH_WindowManager_FrameMetrics* metrics);
 
 /**
  * @brief Enumerates the result types of the wm interface

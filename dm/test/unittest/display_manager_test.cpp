@@ -27,6 +27,7 @@
 #include "scene_board_judgement.h"
 #include "singleton_mocker.h"
 #include "window_scene.h"
+#include "screen_session_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -420,6 +421,19 @@ HWTEST_F(DisplayManagerTest, GetDisplayById, TestSize.Level1)
     DisplayId displayId = -1;
     g_dmIsDestroyed = true;
     auto ret = DisplayManager::GetInstance().GetDisplayById(displayId);
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetDisplayByIdWithGetActualInfo
+ * @tc.desc: GetDisplayById with isGetActualInfo parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, GetDisplayByIdWithGetActualInfo, TestSize.Level1)
+{
+    DisplayId displayId = -1;
+    g_dmIsDestroyed = true;
+    auto ret = DisplayManager::GetInstance().GetDisplayById(displayId, true);
     ASSERT_EQ(ret, nullptr);
 }
 
@@ -3803,7 +3817,6 @@ HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_UnknownMode, TestSize.Level1)
 
     FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::UNKNOWN);
     EXPECT_EQ(result, FoldDisplayMode::UNKNOWN);
-}
 }
 } // namespace Rosen
 } // namespace OHOS

@@ -69,6 +69,11 @@ public:
         return WMError::WM_OK;
     }
 
+    WMError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId) override
+    {
+        return WMError::WM_OK;
+    }
+
     WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid) override
     {
@@ -3173,6 +3178,24 @@ HWTEST_F(WindowManagerTest, NotifyWindowGlobalRectChange, TestSize.Level1)
     windowManager.pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
     EXPECT_EQ(listener->count_, 2);
     EXPECT_EQ(listener2->count_, 1);
+}
+
+/**
+ * @tc.name: MoveMainWindowToTargetDisplay
+ * @tc.desc: MoveMainWindowToTargetDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, MoveMainWindowToTargetDisplay, TestSize.Level1)
+{
+    WMError ret;
+
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    ret = instance_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_NE(WMError::WM_OK, ret);
+
+    ret = mockInstance_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 } // namespace
 } // namespace Rosen

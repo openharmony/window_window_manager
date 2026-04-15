@@ -704,6 +704,21 @@ HWTEST_F(SceneSessionManagerTest12, CreateAndConnectSpecificSession04, TestSize.
     ssm_->CreateAndConnectSpecificSession(sessionStage, eventChannel, node, property, id, session,
         systemConfig, token);
     EXPECT_NE(property->GetWindowType(), WindowType::WINDOW_TYPE_SCB_SUB_WINDOW);
+
+    // Test WINDOW_TYPE_FV with valid parent session
+    property->SetWindowType(WindowType::WINDOW_TYPE_FV);
+    property->SetParentPersistentId(parentSession->GetPersistentId());
+    property->SetSystemCalling(true);
+    auto res = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
+    EXPECT_EQ(WSError::WS_OK, res);
+
+    // Test WINDOW_TYPE_FV with invalid parent session (background state)
+    property->SetWindowType(WindowType::WINDOW_TYPE_FV);
+    property->SetParentPersistentId(parentSession->GetPersistentId());
+    res = ssm_->CreateAndConnectSpecificSession(
+        sessionStage, eventChannel, node, property, id, session, systemConfig, token);
+    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARENT, res);
 }
 
 /**
@@ -1306,6 +1321,9 @@ HWTEST_F(SceneSessionManagerTest12, GetAllWindowLayoutInfo01, TestSize.Level0)
     sceneSession1->SetSessionGlobalRect(rect);
     int32_t zOrder = 100;
     sceneSession1->SetZOrder(zOrder);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    sceneSession1->SetSurfaceNode(surfaceNode);
     ssm_->sceneSessionMap_.insert({ sceneSession1->GetPersistentId(), sceneSession1 });
 
     constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
@@ -3430,6 +3448,35 @@ HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh01, Function | S
 }
 
 /**
+ * @tc.name: CheckBrokeNotAliveAndRefresh_02
+ * @tc.desc: test function : CheckBrokeNotAliveAndRefresh_02
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, CheckBrokeNotAliveAndRefresh02, TestSize.Level1)
+{
+    auto ssm = sptr<SceneSessionManager>::MakeSptr();
+    SessionInfo info;
+    info.abilityName_ = "CheckBrokeNotAliveAndRefresh02";
+    info.bundleName_ = "CheckBrokeNotAliveAndRefresh02";
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    info.SetWantSafely(wantPtr);
+    info.callerTypeForAnco = 0;
+    MockCollaboratorDllManager::MockPreHandleStartAbility(-1);
+    EXPECT_TRUE(ssm->CheckBrokeNotAliveAndRefresh(info));
+    EXPECT_EQ(info.callerTypeForAnco, -1);
+
+    MockCollaboratorDllManager::MockPreHandleStartAbility(1);
+    EXPECT_TRUE(ssm->CheckBrokeNotAliveAndRefresh(info));
+    EXPECT_EQ(info.callerTypeForAnco, 1);
+
+    MockCollaboratorDllManager::MockPreHandleStartAbility(2);
+    EXPECT_FALSE(ssm->CheckBrokeNotAliveAndRefresh(info));
+    EXPECT_EQ(info.callerTypeForAnco, 2);
+ 
+    MockCollaboratorDllManager::MockPreHandleStartAbility(0);
+}
+
+/**
  * @tc.name: RecoverOutline
  * @tc.desc: test function : OnRecoverStateChange
  * @tc.type: FUNC
@@ -3721,6 +3768,26 @@ HWTEST_F(SceneSessionManagerTest12, NotifyPageEnableFunc01, TestSize.Level1)
     auto result = ssm_->NotifyPageEnableFunc("com.test.app", 1, "enter", "HomePage");
 
     EXPECT_EQ(result, WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: RecordLifeCycleExceptionEvent
+ * @tc.desc: Test RecordLifeCycleExceptionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest12, RecordLifeCycleExceptionEvent, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+
+    SessionInfo info;
+    info.abilityName_ = "RecordLifeCycleExceptionEvent";
+    info.bundleName_ = "RecordLifeCycleExceptionEvent";
+    info.screenId_ = SCREEN_ID_INVALID;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ssm_->RecordLifeCycleExceptionEvent(sceneSession, ERR_OK,
+        WSErrorReason::WS_REASON_WINDOW_START_ERR, "test reason");
 }
 } // namespace
 } // namespace Rosen

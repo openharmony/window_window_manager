@@ -250,6 +250,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetRouterStackInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT):
             return HandleGetSceneNodeCount(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCENE_NODE_COUNT_WITH_CALLBACK):
+            return HandleGetSceneNodeCountWithCallback(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ORIENTATION_EXECUTION_RESULT):
+            return HandleNotifyOrientationExecutionResult(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
             return HandleUpdateWindowModeForUITest(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
@@ -274,6 +278,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyParentLifecycleEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO):
             return HandleUpdateAppHookWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FV_ACTION_EVENT):
+            return HandleSendFvActionEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_WINDOW_INFO):
+            return HandleSyncFvWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_LIMITS):
+            return HandleSyncFvLimits(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -888,6 +898,66 @@ int SessionStageStub::HandleSendFbActionEvent(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleSendFvActionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSendFvActionEvent");
+    std::string action;
+    if (!data.ReadString(action)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read action failed.");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    std::string reason;
+    if (!data.ReadString(reason)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read reason failed.");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SendFvActionEvent(action, reason);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSyncFvWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSyncFvWindowInfo");
+    sptr<FloatViewWindowInfo> windowInfo = data.ReadParcelable<FloatViewWindowInfo>();
+    if (windowInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read windowInfo failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    std::string reason = "";
+    if (!data.ReadString(reason)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read reason failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SyncFvWindowInfo(*windowInfo, reason);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSyncFvLimits(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSyncFvLimits");
+    sptr<FloatViewLimits> limits = data.ReadParcelable<FloatViewLimits>();
+    if (limits == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read limits failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SyncFvLimits(*limits);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleSetPiPControlEvent(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_PIP, "called");
@@ -1243,6 +1313,43 @@ int SessionStageStub::HandleGetSceneNodeCount(MessageParcel& data, MessageParcel
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    sptr<IRemoteObject> callbackObj = data.ReadRemoteObject();
+    if (callbackObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Read callback failed");
+        return ERR_INVALID_VALUE;
+    }
+    WSError ret = GetSceneNodeCount(callbackObj);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write error code failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyOrientationExecutionResult(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t promiseId = 0;
+    if (!data.ReadUint32(promiseId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read promiseId failed");
+        return ERR_INVALID_VALUE;
+    }
+    uint32_t result = 0;
+    if (!data.ReadUint32(result)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read result failed");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyOrientationExecutionResult(promiseId, static_cast<OrientationExecutionResult>(result));
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "in");
@@ -1401,7 +1508,12 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessagePa
         TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
         return ERR_INVALID_DATA;
     }
-    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
+    uint32_t selectModeValue = 0;
+    if (!data.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read selectMode failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, static_cast<SelectMode>(selectModeValue));
     return ERR_NONE;
 }
 int SessionStageStub::HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply)

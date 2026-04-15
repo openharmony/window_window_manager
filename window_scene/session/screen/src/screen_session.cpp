@@ -2707,13 +2707,13 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
     if (isForceCloseHdr == false) {
         DmsXcollie dmsXcollie("DMS:SetForceCloseHdr:GetScreenHDRStatus", XCOLLIE_TIMEOUT_5S);
         HdrStatus hdrStatus = HdrStatus::NO_HDR;
-        TLOGI(WmsLogTag::DMS, "Start get screen status.");
-        auto ret = RSInterfaces::GetInstance().GetScreenHDRStatus(rsId_, hdrStatus);
+        TLOGI(WmsLogTag::DMS, "Start get screen status, screenId: %{public}" PRIu64, phyScreenId_);
+        auto ret = RSInterfaces::GetInstance().GetScreenHDRStatus(phyScreenId_, hdrStatus);
         if (ret == StatusCode::SUCCESS && hdrStatus == HdrStatus::NO_HDR) {
             hdrDuration = DURATION_0MS;
         }
     }
-    TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d", isForceCloseHdr);
+    TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d, hdrDuration is %{public}d", isForceCloseHdr, hdrDuration);
     auto rsUIContext = GetRSUIContext();
     RSAnimationTimingProtocol timingProtocol;
     // Duration of the animation
@@ -3382,6 +3382,8 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
         screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
         screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
+        screenProperty.SetScreenRealWidth(eventPara.GetScreenRealWidth());
+        screenProperty.SetScreenRealHeight(eventPara.GetScreenRealHeight());
         TLOGI(WmsLogTag::DMS, "ProcPropertyChange : Orientation= %{public}u", deviceOrientation);
     }
     screenProperty.SetPhysicalTouchBounds(GetRotationCorrection(eventPara.GetDisplayMode()));

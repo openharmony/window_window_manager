@@ -1022,9 +1022,11 @@ public:
      *
      * @param displayId DisplayId of which display to get window layout infos.
      * @param infos Window layout infos.
+     * @param option Options for getting window info.
      * @return WM_OK means get success, others means get failed.
      */
-    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+        const WindowInfoOptions& option = WindowInfoOptions()) const;
 
     /**
      * @brief Get global window mode.
@@ -1079,6 +1081,23 @@ public:
      * @return WM_OK means get success, others means get failed.
      */
     WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
+
+    /**
+     * @brief Set screen watermark image.
+     *
+     * @param pixelMap the watermark image to set.
+     * @param priority the priority of application, less value means higher priority.
+     * @return WM_OK means success, others means failed.
+     */
+    WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority);
+
+    /**
+     * @brief Clean screen watermark image.
+     *
+     * @param pixelMap the watermark image to clean.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap);
 
     /**
      * @brief Get visibility window info.
@@ -1182,6 +1201,15 @@ public:
      * @return WM_OK means set zIndex success, others means failed.
      */
     WMError SetSpecificSystemWindowZIndex(WindowType windowType, int32_t zIndex);
+
+    /**
+     * @brief Move main window to target display.
+     *
+     * @param displayId Display id of the target display
+     * @param windowId Window id of the main window
+     * @return WM_OK means move success, others means failed.
+     */
+    WMError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId);
 
     /**
      * @brief Set start window background color.
@@ -1548,6 +1576,14 @@ public:
      * @return WM_OK means update success, others means update failed.
      */
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
+
+    /**
+     * @brief Get Float View Limits.
+     *
+     * @param floatViewLimits Float view limits.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetFloatViewLimits(FloatViewLimits& floatViewLimits) const;
 
 private:
     /**

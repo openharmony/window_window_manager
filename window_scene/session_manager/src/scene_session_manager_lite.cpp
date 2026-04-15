@@ -134,10 +134,11 @@ WSError SceneSessionManagerLite::PendingSessionToBackground(const sptr<IRemoteOb
 }
 
 WSError SceneSessionManagerLite::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-    bool shouldBackToCaller)
+    bool shouldBackToCaller, int32_t reason)
 {
     WLOGFD("in");
-    return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
+    return SceneSessionManager::GetInstance().PendingSessionToBackgroundForDelegator(token,
+        shouldBackToCaller, reason);
 }
 
 WSError SceneSessionManagerLite::GetFocusSessionToken(sptr<IRemoteObject>& token, DisplayId displayId)
@@ -401,6 +402,15 @@ WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByBundles(
     const sptr<ISessionLifecycleListener>& listener, const std::vector<std::string>& bundleNameList)
 {
     return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(listener, bundleNameList);
+}
+
+WMError SceneSessionManagerLite::RegisterSessionLifecycleListenerByAppInstance(
+    const sptr<ISessionLifecycleListener>& listener, const std::string& bundleName,
+    int32_t appIndex, const std::string& appInstanceKey)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    return SceneSessionManager::GetInstance().RegisterSessionLifecycleListener(
+        listener, bundleName, appIndex, appInstanceKey);
 }
 
 WMError SceneSessionManagerLite::UnregisterSessionLifecycleListener(const sptr<ISessionLifecycleListener>& listener)
