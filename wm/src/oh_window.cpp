@@ -906,6 +906,10 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowMan
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "info is null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
+    if (windowId < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
     *info = nullptr;
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
@@ -914,8 +918,11 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowMan
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
     eventHandler->PostSyncTask([windowId, info, &errCode, where = __func__] {
-        auto densityInfoInner = static_cast<OH_WindowManager_DensityInfo*>(
-            malloc(sizeof(OH_WindowManager_DensityInfo)));
+        auto freeDeleter = [](OH_WindowManager_DensityInfo* ptr) {
+            free(ptr);
+        };
+        std::unique_ptr<OH_WindowManager_DensityInfo, decltype(freeDeleter)> densityInfoInner(
+            static_cast<OH_WindowManager_DensityInfo*>(malloc(sizeof(OH_WindowManager_DensityInfo))), freeDeleter);
         if (densityInfoInner == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE,
                 "%{public}s densityInfoInner is null, windowId:%{public}d", where, windowId);
@@ -924,13 +931,13 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowMan
         }
         errCode = GetDensityInfoInner(windowId, *densityInfoInner);
         if (errCode != WindowManager_ErrorCode::OK) {
-            WINDOW_MANAGER_FREE_MEMORY(densityInfoInner);
             return;
         }
-        *info = densityInfoInner;
-        }, __func__);
+        *info = densityInfoInner.release();
+    }, __func__);
     return errCode;
 }
+
 
 int32_t OH_WindowManager_DensityInfo_Release(const OH_WindowManager_DensityInfo* info)
 {
