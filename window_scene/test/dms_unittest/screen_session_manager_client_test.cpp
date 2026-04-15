@@ -2553,7 +2553,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
     logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     ScreenId screenId = 0;
-    ScreenProperty property1 ,property2;
+    ScreenProperty property1, property2;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
     sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
     screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
