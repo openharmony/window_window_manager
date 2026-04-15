@@ -921,8 +921,9 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowMan
         auto freeDeleter = [](OH_WindowManager_DensityInfo* ptr) {
             free(ptr);
         };
+        auto densityInfoRaw = static_cast<OH_WindowManager_DensityInfo*>(malloc(sizeof(OH_WindowManager_DensityInfo)));
         std::unique_ptr<OH_WindowManager_DensityInfo, decltype(freeDeleter)> densityInfoInner(
-            static_cast<OH_WindowManager_DensityInfo*>(malloc(sizeof(OH_WindowManager_DensityInfo))), freeDeleter);
+            densityInfoRaw, freeDeleter);
         if (densityInfoInner == nullptr) {
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE,
                 "%{public}s densityInfoInner is null, windowId:%{public}d", where, windowId);
@@ -934,7 +935,7 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowMan
             return;
         }
         *info = densityInfoInner.release();
-    }, __func__);
+        }, __func__);
     return errCode;
 }
 
