@@ -3884,17 +3884,6 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
     return true;
 }
 
-static inline bool IsBoundsChanged(RRect oldBounds, DMRect newRect) {
-    if (oldBounds.rect_.left_ == newRect.posX_ && oldBounds.rect_.top_ == newRect.posY_){
-        if((oldBounds.rect_.width_ == newRect.width_ && oldBounds.rect_.height_ == newRect.height_) ||
-            (oldBounds.rect_.height_ == newRect.width_ && oldBounds.rect_.width_ == newRect.height_)) {
-            return false;
-        }
-        return true;
-    }
-    return true;
-}
-
 void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& targetRect)
 {
     if (internalSession == nullptr) {
@@ -3902,11 +3891,6 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
         return;
     }
     // Setting the display area of the internal screen
-    auto oldProperty = internalSession->GetScreenProperty();
-    if(!IsBoundsChanged(oldProperty.GetBounds(), targetRect)) {
-        TLOGNFI(WmsLogTag::DMS, "bounds not change");
-        return;
-    }
     auto newProperty = internalSession->GetPropertyByResolution(targetRect);
     newProperty.SetPropertyChangeReason(ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
     newProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::RESOLUTION_EFFECT_CHANGE);
@@ -3919,11 +3903,6 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
         oldProperty.SetMirrorHeight(newProperty.GetMirrorHeight());
     }
     internalSession->SetScreenProperty(oldProperty);
-    if (oldProperty.GetScreenAreaWidth() != targetRect.width_ ||
-        oldProperty.GetScreenAreaHeight() != targetRect.height_) {
-        NotifyScreenChanged(internalSession->ConvertToScreenInfo(), ScreenChangeEvent::CHANGE_MODE);
-        NotifyDisplayChanged(internalSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_SIZE_CHANGED);
-    }
     // Black out invalid area
     auto clientProxy = GetClientProxy();
     if (clientProxy == nullptr) {
@@ -13188,6 +13167,7 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         std::lock_guard<std::recursive_mutex> lock(screenModeChangeMutex_);
         if (mainScreenId == secondaryScreenId && mainScreenId == SCREEN_ID_OUTER_ONLY) {
             TLOGNFW(WmsLogTag::DMS, "set to outer only mode.");
+            RecoveryResolutionEffect();
             SetIsOuterOnlyMode(true);
             MultiScreenModeChange(mainScreenId, mainScreenId, "off");
             return DMError::DM_OK;
