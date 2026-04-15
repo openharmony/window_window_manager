@@ -584,6 +584,22 @@ napi_value JsWindowManager::OnCreate(napi_env env, napi_callback_info info)
     return result;
 }
 
+bool JsWindowManager::ParseWindowInfoOptions(napi_env env, napi_value jsObject, WindowInfoOptions& option)
+{
+    ParseJsValue(jsObject, env, "excludeSystemWindows", option.excludeSystemWindows);
+    ParseJsValue(jsObject, env, "foregroundAboveWindow", option.foregroundAboveWindow);
+    ParseJsValue(jsObject, env, "foregroundBelowWindow", option.foregroundBelowWindow);
+    if (option.foregroundAboveWindow < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid foregroundAboveWindow=%{public}d", option.foregroundAboveWindow);
+        return false;
+    }
+    if (option.foregroundBelowWindow < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "invalid foregroundBelowWindow=%{public}d", option.foregroundBelowWindow);
+        return false;
+    }
+    return true;
+}
+
 bool JsWindowManager::ParseRequiredConfigOption(napi_env env, napi_value jsObject,
     WindowOption& option)
 {
@@ -1581,7 +1597,7 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
     size_t argc = ARGC_FOUR;
     napi_value argv[ARGC_FOUR] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_ONE) {
+    if (argc != ARGC_ONE && argc != ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getAllWindowLayoutInfo]msg: Mandatory parameters are left unspecified");
@@ -1598,24 +1614,31 @@ napi_value JsWindowManager::OnGetAllWindowLayoutInfo(napi_env env, napi_callback
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][getAllWindowLayoutInfo]msg: Parameter verification failed");
     }
+    WindowInfoOptions option;
+    if (argc == ARGC_TWO && !ParseWindowInfoOptions(env, argv[1], option)) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+            "[window][getAllWindowLayoutInfo]msg: Failed to parse the option");
+    }
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [env, task = napiAsyncTask, displayId, where = __func__] {
+    auto asyncTask = [env, task = napiAsyncTask, displayId, option, where = __func__] {
         std::vector<sptr<WindowLayoutInfo>> infos;
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
+        auto errCode = SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(
+            static_cast<uint64_t>(displayId), infos, option);
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+            "%{public}s: displayId=%{public}u, option=[%{public}d, %{public}d, %{public}d], errCode=%{public}d",
+            where, static_cast<uint32_t>(displayId), option.excludeSystemWindows, option.foregroundAboveWindow,
+            option.foregroundBelowWindow, errCode);
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, CreateJsWindowLayoutInfoArrayObject(env, infos));
-            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s success", where);
         } else {
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][getAllWindowLayoutInfo]"));
-            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s failed", where);
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetAllWindowLayoutInfo") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env,
-            CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
-                "[window][getAllWindowLayoutInfo]msg: Internal task error"));
+        napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY),
+            "[window][getAllWindowLayoutInfo]msg: Internal task error"));
     }
     return result;
 }

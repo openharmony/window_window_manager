@@ -1022,9 +1022,11 @@ public:
      *
      * @param displayId DisplayId of which display to get window layout infos.
      * @param infos Window layout infos.
+     * @param option Options for getting window info.
      * @return WM_OK means get success, others means get failed.
      */
-    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const;
+    WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+        const WindowInfoOptions& option = WindowInfoOptions()) const;
 
     /**
      * @brief Get global window mode.
@@ -1574,6 +1576,14 @@ public:
      * @return WM_OK means update success, others means update failed.
      */
     WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
+
+    /**
+     * @brief Get Float View Limits.
+     *
+     * @param floatViewLimits Float view limits.
+     * @return WM_OK means get success, others means get failed.
+     */
+    WMError GetFloatViewLimits(FloatViewLimits& floatViewLimits) const;
 
 private:
     /**

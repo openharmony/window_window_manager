@@ -81,6 +81,7 @@ public:
     sptr<Display> GetDefaultDisplaySync(int32_t userId = CONCURRENT_USER_ID_DEFAULT);
     std::vector<DisplayPhysicalResolution> GetAllDisplayPhysicalResolution();
     sptr<Display> GetDisplayById(DisplayId displayId);
+    sptr<Display> GetDisplayById(DisplayId displayId, bool isGetActualInfo);
     sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
     DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow);
@@ -762,6 +763,11 @@ bool DisplayManager::Impl::SetVirtualScreenAsDefault(ScreenId screenId)
 
 sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
 {
+    return DisplayManager::Impl::GetDisplayById(displayId, false);
+}
+
+sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId, bool isGetActualInfo)
+{
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "screen id is invalid");
         return nullptr;
@@ -771,7 +777,7 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
         auto iter = displayMap_.find(displayId);
-        if (iter != displayMap_.end()) {
+        if (iter != displayMap_.end() && !isGetActualInfo) {
             static uint32_t getDisplayIntervalUs_ = (std::string(program_invocation_name) != "com.ohos.sceneboard")
                                                         ? APP_GET_DISPLAY_INTERVAL_US
                                                         : SCB_GET_DISPLAY_INTERVAL_US;
@@ -782,7 +788,8 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
             targetTag = globalDisplayTagMap_[displayId];
         }
     }
-    sptr<DisplayInfo> displayInfo = SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId);
+    sptr<DisplayInfo> displayInfo =
+        SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayInfo(displayId, isGetActualInfo);
     if (displayInfo == nullptr) {
         TLOGW(WmsLogTag::DMS, "display null id : %{public}" PRIu64" ", displayId);
         return nullptr;
@@ -793,6 +800,12 @@ sptr<Display> DisplayManager::Impl::GetDisplayById(DisplayId displayId)
         displayMap_.erase(displayId);
     }
     currentDisplayTagMap_[displayId] = targetTag;
+    if (isGetActualInfo && displayMap_[displayId] != nullptr &&
+        displayMap_[displayId]->GetDisplayInfoWithCache() != nullptr) {
+        TLOGI(WmsLogTag::DMS, "display: %{public}" PRIu64 " width: %{public}d, height: %{public}d", displayId,
+            displayMap_[displayId]->GetDisplayInfoWithCache()->GetWidth(),
+            displayMap_[displayId]->GetDisplayInfoWithCache()->GetHeight());
+    }
     return displayMap_[displayId];
 }
 
@@ -836,12 +849,17 @@ sptr<DisplayInfo> DisplayManager::Impl::GetVisibleAreaDisplayInfoById(DisplayId 
 
 sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId)
 {
+    return GetDisplayById(displayId, false);
+}
+
+sptr<Display> DisplayManager::GetDisplayById(DisplayId displayId, bool isGetActualInfo)
+{
     if (g_dmIsDestroyed) {
         TLOGI(WmsLogTag::DMS, "DM has been destructed");
         return nullptr;
     }
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    return pImpl_->GetDisplayById(displayId);
+    return pImpl_->GetDisplayById(displayId, isGetActualInfo);
 }
 
 sptr<DisplayInfo> DisplayManager::GetVisibleAreaDisplayInfoById(DisplayId displayId)

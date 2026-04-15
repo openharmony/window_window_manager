@@ -1252,7 +1252,7 @@ WSError SceneSessionManagerProxy::PendingSessionToForeground(const sptr<IRemoteO
 }
 
 WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-    bool shouldBackToCaller)
+    bool shouldBackToCaller, int32_t reason)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "run");
     MessageParcel data;
@@ -1270,6 +1270,11 @@ WSError SceneSessionManagerProxy::PendingSessionToBackgroundForDelegator(const s
 
     if (!data.WriteBool(shouldBackToCaller)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write shouldBackToCaller failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    if (!data.WriteInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write reason failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
 
@@ -2405,11 +2410,11 @@ WMError SceneSessionManagerProxy::ListWindowInfo(const WindowInfoOption& windowI
 }
 
 WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
-    std::vector<sptr<WindowLayoutInfo>>& infos)
+    std::vector<sptr<WindowLayoutInfo>>& infos, const WindowInfoOptions& option)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption msgOption;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
@@ -2418,13 +2423,25 @@ WMError SceneSessionManagerProxy::GetAllWindowLayoutInfo(DisplayId displayId,
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write displayId failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(option.excludeSystemWindows)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write excludeSystemWindows failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(option.foregroundAboveWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write foregroundAboveWindow failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(option.foregroundBelowWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write foregroundBelowWindow failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
-        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO), data, reply, option) != ERR_NONE) {
+        SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_LAYOUT_INFO), data, reply, msgOption) != ERR_NONE) {
         return WMError::WM_ERROR_IPC_FAILED;
     }
     if (!MarshallingHelper::UnmarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
@@ -2616,6 +2633,40 @@ WMError SceneSessionManagerProxy::GetGlobalWindowMode(DisplayId displayId, Globa
         return WMError::WM_ERROR_IPC_FAILED;
     }
     globalWinMode = static_cast<GlobalWindowMode>(mode);
+    return static_cast<WMError>(errCode);
+}
+
+WMError SceneSessionManagerProxy::GetFloatViewLimits(FloatViewLimits& limits)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write interfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    auto reqErrCode = remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FLOAT_VIEW_LIMITS), data, reply, option);
+    if (reqErrCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "send request failed, errCode: %{public}d", reqErrCode);
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<FloatViewLimits> limitsInfo(reply.ReadParcelable<FloatViewLimits>());
+    if (limitsInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read float view limits failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    limits = *limitsInfo;
     return static_cast<WMError>(errCode);
 }
 

@@ -291,6 +291,8 @@ public:
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError GetSceneNodeCount(uint32_t& nodeCount) = 0;
+    virtual WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) = 0;
+    
     virtual WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) = 0;
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
@@ -388,6 +390,38 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Send fv event to client.
+     *
+     * Send the fv event to client. Such as close events.
+     *
+     * @param action Indicates the action name.
+     * @param reason Indicates the reason for the action.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SendFvActionEvent(const std::string& action, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view window info to client.
+     *
+     * Sync float view window info to client.
+     *
+     * @param windowInfo Indicates the float view window info.
+     * @param reason Indicates the reason string for the sync.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view limits info to client.
+     *
+     * Sync float view limits info to client.
+     *
+     * @param limits Indicates the float view limits info.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvLimits(const FloatViewLimits& limits) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

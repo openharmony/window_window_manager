@@ -310,6 +310,8 @@ int SceneSessionManagerStub::ProcessRemoteRequest(uint32_t code, MessageParcel& 
             return HandleMoveMainWindowToTargetDisplay(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_CROSS_PROCESS_WINDOW_INFO):
             return HandleGetCrossProcessWindowInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_GET_FLOAT_VIEW_LIMITS):
+            return HandleGetFloatViewLimits(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -744,7 +746,12 @@ int SceneSessionManagerStub::HandlePendingSessionToBackgroundForDelegator(Messag
         TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
+    int32_t reason = static_cast<int32_t>(LifeCycleChangeReason::DEFAULT);
+    if (!data.ReadInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read reason failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller, reason);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -1596,12 +1603,25 @@ int SceneSessionManagerStub::HandleListWindowInfo(MessageParcel& data, MessagePa
 int SceneSessionManagerStub::HandleGetAllWindowLayoutInfo(MessageParcel& data, MessageParcel& reply)
 {
     uint64_t displayId = 0;
+    WindowInfoOptions option;
     if (!data.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read displayId");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadBool(option.excludeSystemWindows)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read excludeSystemWindows");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(option.foregroundAboveWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read foregroundAboveWindow");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadInt32(option.foregroundBelowWindow)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to read foregroundBelowWindow");
+        return ERR_INVALID_DATA;
+    }
     std::vector<sptr<WindowLayoutInfo>> infos;
-    WMError errCode = GetAllWindowLayoutInfo(displayId, infos);
+    WMError errCode = GetAllWindowLayoutInfo(displayId, infos, option);
     if (!MarshallingHelper::MarshallingVectorParcelableObj<WindowLayoutInfo>(reply, infos)) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write window layout info");
         return ERR_INVALID_DATA;
@@ -1712,6 +1732,20 @@ int SceneSessionManagerStub::HandleGetGlobalWindowMode(MessageParcel& data, Mess
     }
     if (!reply.WriteUint32(static_cast<uint32_t>(globalWinMode))) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to write global window mode");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerStub::HandleGetFloatViewLimits(MessageParcel& data, MessageParcel& reply)
+{
+    FloatViewLimits limits;
+    if (!reply.WriteInt32(static_cast<int32_t>(GetFloatViewLimits(limits)))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteParcelable(&limits)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to write float view limits");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;

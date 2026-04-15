@@ -93,6 +93,7 @@ public:
     MOCK_METHOD1(SetStageKeyFramePolicy, WSError(const KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
     MOCK_METHOD1(GetSceneNodeCount, WSError(uint32_t& nodeCount));
+    MOCK_METHOD1(GetSceneNodeCount, WSError(const sptr<IRemoteObject>& callback));
     MOCK_METHOD2(NotifyOrientationExecutionResult, WSError(uint32_t promiseId, OrientationExecutionResult result));
     MOCK_METHOD0(NotifyLifecyclePausedStatus, void(void));
     MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));
@@ -109,6 +110,9 @@ public:
     MOCK_METHOD1(UpdateWindowUIType, WSError(WindowUIType windowUIType));
     MOCK_METHOD1(UpdatePropertyWhenTriggerMode, WSError(const sptr<WindowSessionProperty>& property));
     MOCK_METHOD1(UpdateAppHookWindowInfo, WSError(const HookWindowInfo& hookWindowInfo));
+    MOCK_METHOD2(SendFvActionEvent, WSError(const std::string& action, const std::string& reason));
+    MOCK_METHOD2(SyncFvWindowInfo, WSError(const FloatViewWindowInfo& windowInfo, const std::string& reason));
+    MOCK_METHOD1(SyncFvLimits, WSError(const FloatViewLimits& limits));
 };
 } // namespace Rosen
 } // namespace OHOS

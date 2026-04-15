@@ -44,6 +44,7 @@ public:
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
     static napi_value PictureInPicturePossible(napi_env env, napi_callback_info info);
+    sptr<PictureInPictureController> GetController() { return pipController_; }
 private:
     enum class ListenerType : uint32_t {
         STATE_CHANGE_CB,

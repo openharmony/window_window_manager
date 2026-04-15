@@ -1726,7 +1726,7 @@ HWTEST_F(SceneSessionManagerTest7, SetImageForRecent001, TestSize.Level1)
     abilityInfo->applicationInfo = applicationInfo;
     sceneSession->SetAbilitySessionInfo(abilityInfo);
     result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
-    ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 
     applicationInfo.isSystemApp = true;
     abilityInfo->applicationInfo = applicationInfo;

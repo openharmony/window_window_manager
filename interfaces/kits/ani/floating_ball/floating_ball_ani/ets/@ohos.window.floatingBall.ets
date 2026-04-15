@@ -60,12 +60,18 @@ export default namespace floatingBall {
     SIMPLE = 4,
   }
 
+  export enum FloatingBallTextUpdateAnimationType {
+    ANIMATION_NONE = 0,
+    ANIMATION_OPACITY = 1,
+  }
+
   export interface FloatingBallParams {
     template: FloatingBallTemplate;
     title: string;
     content?: string;
     backgroundColor?: string;
     icon?: image.PixelMap;
+    textUpdateAnimationType?: FloatingBallTextUpdateAnimationType;
   }
 
   export enum FloatingBallState {

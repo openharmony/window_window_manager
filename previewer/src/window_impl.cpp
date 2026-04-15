@@ -446,6 +446,18 @@ WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarPrope
     return WMError::WM_OK;
 }
 
+WMError WindowImpl::SetFloatNavigationAvoidAreaEnabled(bool enable)
+{
+    floatNavigationAvoidAreaEnabled_ = enable;
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::GetFloatNavigationAvoidAreaEnabled(bool& enable) const
+{
+    enable = floatNavigationAvoidAreaEnabled_;
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::UpdateSystemBarProperty(bool status)
 {
     bool enable = !status;
@@ -974,7 +986,11 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
         WLOGFE("invalid avoidArea");
         return;
     }
-
+    bool floatNavigationAvoidAreaEnabled_ = false;
+    GetFloatNavigationAvoidAreaEnabled(floatNavigationAvoidAreaEnabled_);
+    if (!floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+        return;
+    }
     WLOGFI("type:%{public}d, top:{%{public}d,%{public}d,%{public}d,%{public}d}, "
         "left:{%{public}d,%{public}d,%{public}d,%{public}d}, right:{%{public}d,%{public}d,%{public}d,%{public}d}, "
         "bottom:{%{public}d,%{public}d,%{public}d,%{public}d}",

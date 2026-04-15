@@ -114,6 +114,7 @@ public:
         const std::shared_ptr<RSTransaction>& rsTransaction) override;
     WSError SetCurrentRotation(int32_t currentRotation) override;
     WSError GetSceneNodeCount(uint32_t& nodeCount) override;
+    WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) override;
     WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
     WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
@@ -125,6 +126,9 @@ public:
     void NotifyAppUseControlStatus(bool isUseControl) override;
     WMError GetRouterStackInfo(std::string& routerStackInfo) override;
     WSError SendFbActionEvent(const std::string& action) override;
+    WSError SendFvActionEvent(const std::string& action, const std::string& reason) override;
+    WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) override;
+    WSError SyncFvLimits(const FloatViewLimits& limits) override;
 
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
     WSError AddSidebarBlur() override;

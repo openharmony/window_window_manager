@@ -102,6 +102,7 @@
             OHOS::Rosen::SceneSessionManager::NotifyForegroundInteractiveStatus*;
             OHOS::Rosen::SceneSessionManager::NotifyHookOrientationChange*;
             OHOS::Rosen::SceneSessionManager::NotifyNextAvoidRectInfo*;
+            OHOS::Rosen::SceneSessionManager::NotifyFloatNavigationInfo*;
             OHOS::Rosen::SceneSessionManager::NotifyOnAttachToFrameNode*;
             OHOS::Rosen::SceneSessionManager::NotifyRecoveringFinished*;
             OHOS::Rosen::SceneSessionManager::NotifySessionTransferToTargetScreenEvent*;
@@ -223,6 +224,7 @@
             OHOS::Rosen::SceneSessionManager::NotifyRotationBegin*;
             OHOS::Rosen::SceneSessionManager::RegisterPageEnableFunc*;
             OHOS::Rosen::SceneSessionManagerLite::GetInstance*;
+            OHOS::Rosen::SceneSessionManager::SyncFloatViewLimits*;
             OHOS::Rosen::SessionLifecycleListenerStub::OnRemoteRequest*;
             OHOS::Rosen::SessionRouterStackListenerStub::OnRemoteRequest*;
             OHOS::Rosen::UIEffectManager::GetInstance*;
