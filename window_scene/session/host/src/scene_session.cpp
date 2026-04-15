@@ -10996,6 +10996,18 @@ bool SceneSession::IsAncoInFullScreen()
 {
     return IsAnco() && IsPcWindow() && GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN;
 }
+
+void SceneSession::SetIsShowOnDock(bool isShowOnDock)
+{
+    isShowOnDock_ = isShowOnDock;
+    TLOGND(WmsLogTag::WMS_MAIN, "SetIsShowOnDock, persistentId:%{public}d, isShowOnDock:%{public}d",
+        GetPersistentId(), isShowOnDock);
+}
+
+bool SceneSession::GetIsShowOnDock() const
+{
+    return isShowOnDock_;
+}
 /*
  * Window Event end
  */

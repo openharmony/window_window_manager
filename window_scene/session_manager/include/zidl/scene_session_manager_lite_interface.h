@@ -133,6 +133,7 @@ public:
         TRANS_ID_GET_MAIN_WINDOW_INFO_BY_TOKEN,
         TRANS_ID_NOTIFY_APP_USE_CONTROL_DISPLAY,
         TRANS_ID_GET_SESSION_INFO_WITH_DISPLAY,
+        TRANS_ID_GET_APP_WINDOW_SHOWING_INFOS_BY_BUNDLE_NAME,
     };
 
     /*
@@ -476,6 +477,24 @@ public:
     }
     virtual WMError UnregisterPipChgListenerByScreenId(int32_t screenId) { return WMError::WM_OK; }
     virtual WSError NotifyAppUseControlDisplay(DisplayId displayId, bool useControl) { return WSError::WS_OK; };
+
+    /**
+     * @brief Get application window information list by bundleName, appIndex and appInstanceKey
+     *
+     * This function is used to query application window information list
+     * including windowId, windowName, sessionState and isShowOnDock
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param bundleName The bundle name of the application
+     * @param appIndex The app index of the application, default is 0
+     * @param appInstanceKey The app instance key, default is empty (no filter)
+     * @param windowInfos The window information list for output
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError GetAppWindowShowingInfosByBundleName(const std::string& bundleName, int32_t appIndex = 0,
+        const std::string& appInstanceKey = "", std::vector<AppWindowShowingInfo>& windowInfos) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_LITE_INTERFACE_H
