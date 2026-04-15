@@ -66,6 +66,8 @@ test_external_deps = [
   "ipc:ipc_core",
   "samgr:samgr_proxy",
   "init:libbegetutil",
+  "graphic_2d:librender_service_base",
+  "graphic_2d:librender_service_client",
 ]
 
 test_source_common = [
