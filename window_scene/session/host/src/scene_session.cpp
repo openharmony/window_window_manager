@@ -14,6 +14,7 @@
  */
 
 #include "session/host/include/scene_session.h"
+#include "session/host/include/scene_node_count_callback.h"
 #include <parameters.h>
 
 #include <ability_manager_client.h>
@@ -121,6 +122,7 @@ constexpr int32_t MAX_ROTATION_VALUE = 3;
 const std::string OPTIONAL_SHOW = "OPTIONAL_SHOW"; // startWindowType can be changed by startAbility option.
 const int32_t SCREEN_LOCK_Z_ORDER = 2000;
 constexpr uint8_t MAX_DOWN_TIMES = 100;
+constexpr int32_t GET_SCENE_NODE_COUNT_TIMEOUT = 50;
 constexpr const long PRE_CALC_WINDOW_PROPERTY_TIMEOUT = 1000;
 const std::string WANT_PARAM_GAME_PRELAUNCH = "ohos.params.gamePrelaunch";
 
@@ -10281,13 +10283,26 @@ WSError SceneSession::SetCurrentRotation(int32_t currentRotation)
     return WSError::WS_OK;
 }
 
-WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
+WSError SceneSession::GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t timeoutMs)
 {
     if (!sessionStage_) {
-        TLOGE(WmsLogTag::DEFAULT, "sessionStage_ is nullptr");
+        TLOGE(WmsLogTag::WMS_ROTATION, "sessionStage_ is nullptr");
+        nodeCount = 0;
         return WSError::WS_ERROR_NULLPTR;
     }
-    return sessionStage_->GetSceneNodeCount(nodeCount);
+    TLOGI(WmsLogTag::WMS_ROTATION, "start, winId:%{public}d, timeout:%{public}dms", GetPersistentId(), timeoutMs);
+    auto callback = sptr<SceneNodeCountCallback>::MakeSptr();
+    callback->ResetResult();
+    sessionStage_->GetSceneNodeCount(callback->AsObject());
+    TLOGI(WmsLogTag::WMS_ROTATION, "wait start, winId:%{public}d", GetPersistentId());
+    nodeCount = callback->GetResult(timeoutMs);
+    TLOGI(WmsLogTag::WMS_ROTATION, "wait end, winId:%{public}d, nodeCount:%{public}u", GetPersistentId(), nodeCount);
+    return WSError::WS_OK;
+}
+
+WSError SceneSession::GetSceneNodeCount(uint32_t& nodeCount)
+{
+    return GetSceneNodeCountWithTimeout(nodeCount, GET_SCENE_NODE_COUNT_TIMEOUT);
 }
 
 

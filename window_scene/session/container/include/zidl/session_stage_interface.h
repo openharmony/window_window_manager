@@ -291,6 +291,8 @@ public:
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError GetSceneNodeCount(uint32_t& nodeCount) = 0;
+    virtual WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) = 0;
+    
     virtual WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) = 0;
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
