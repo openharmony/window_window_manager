@@ -4587,10 +4587,6 @@ void SceneSessionManager::ResetWantInfo(const sptr<SceneSession>& sceneSession)
 
 void SceneSessionManager::MoveStartLifeCycleTask(const sptr<SceneSession>& sceneSession)
 {
-    if(!sceneSession->IsPcWindow()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d is not pc window", sceneSession->GetPersistentId());
-        return;
-    }
     if(!sceneSession->isRemoving_) {
         TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d is not removing.", sceneSession->GetPersistentId());
         return;

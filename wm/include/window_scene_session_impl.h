@@ -369,7 +369,7 @@ public:
      * Window LifeCycle
      */
     void Resume(bool isGamePreLaunch = false) override;
-    void Pause() override;
+    void Pause(bool isGamePreLaunch = false) override;
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
