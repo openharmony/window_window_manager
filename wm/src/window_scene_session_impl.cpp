@@ -7787,12 +7787,10 @@ WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo&
         TLOGE(WmsLogTag::WMS_SUB, "Repeated invoking");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
-    if (IsLoosenedWithPcOrFreeMultiMode()) {
-        TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) || IsZLevelAboveParentLoosened()) {
+        TLOGE(WmsLogTag::WMS_SUB,
+            "only sub window is valid, windowType: %{public}d, IsZLevelAboveParentLoosened: %{public}d",
+            property->GetWindowType(), IsZLevelAboveParentLoosened());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
@@ -7846,7 +7844,7 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (IsLoosenedWithPcOrFreeMultiMode()) {
+    if (IsZLevelAboveParentLoosened()) {
         TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
