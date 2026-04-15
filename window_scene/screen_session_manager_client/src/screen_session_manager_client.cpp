@@ -252,7 +252,7 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         return;
     }
     if (reason == ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE) {
-        if(!IsBoundsChanged(screenSession->GetScreenProperty().GetBounds(), property.GetBounds()) &&
+        if (!IsBoundsChanged(screenSession->GetScreenProperty().GetBounds(), property.GetBounds()) &&
             !IsBoundsChanged(screenSession->GetPropertyNeedNotified().GetBounds(), property.GetBounds())) {
             TLOGNFI(WmsLogTag::DMS, "bounds not change");
             return;
