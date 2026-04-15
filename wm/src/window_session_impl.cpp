@@ -14,6 +14,7 @@
  */
 
 #include "window_session_impl.h"
+#include "session/host/include/zidl/scene_node_count_callback_interface.h"
 
 #include <cstdlib>
 
@@ -9411,6 +9412,33 @@ WSError WindowSessionImpl::GetSceneNodeCount(uint32_t& nodeCount)
         }
         nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s success, count: %{public}u", where, nodeCount);
+    }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::GetSceneNodeCount(const sptr<IRemoteObject>& callback)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "post task");
+    handler_->PostTask([weakWindow = wptr(this), callback, where = __func__] {
+        HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "WindowSessionImpl::GetSceneNodeCountCallback");
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s in", where);
+        auto window = weakWindow.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s: window is null", where);
+            return;
+        }
+        if (window->rsUIDirector_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s rsUIDirector is nullptr", where);
+            return;
+        }
+        uint32_t nodeCount = static_cast<uint32_t>(window->rsUIDirector_->GetUIDescendantCount());
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s success, count:%{public}u", where, nodeCount);
+        auto sceneNodeCountCallback = iface_cast<ISceneNodeCountCallback>(callback);
+        if (sceneNodeCountCallback == nullptr) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "%{public}s: iface_cast failed", where);
+            return;
+        }
+        sceneNodeCountCallback->OnSceneNodeCount(nodeCount);
     }, __func__);
     return WSError::WS_OK;
 }

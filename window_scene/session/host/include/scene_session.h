@@ -681,6 +681,7 @@ public:
     void RegisterRequestedOrientationChangeCallback(NotifyReqOrientationChangeFunc&& callback);
     WSError SetCurrentRotation(int32_t currentRotation);
     WSError GetSceneNodeCount(uint32_t& nodeCount);
+    WSError GetSceneNodeCountWithTimeout(uint32_t& nodeCount, int32_t timeoutMs = 3000);
     WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result);
     WSError NotifyRotationProperty(uint32_t rotation, uint32_t width, uint32_t height);
     WSError NotifyPageRotationIsIgnored();

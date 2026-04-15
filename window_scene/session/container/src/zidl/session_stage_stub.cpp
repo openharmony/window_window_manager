@@ -250,6 +250,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetRouterStackInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT):
             return HandleGetSceneNodeCount(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCENE_NODE_COUNT_WITH_CALLBACK):
+            return HandleGetSceneNodeCountWithCallback(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ORIENTATION_EXECUTION_RESULT):
             return HandleNotifyOrientationExecutionResult(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
@@ -1306,6 +1308,26 @@ int SessionStageStub::HandleGetSceneNodeCount(MessageParcel& data, MessageParcel
     }
     if (!reply.WriteUint32(nodeCount)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write nodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    sptr<IRemoteObject> callbackObj = data.ReadRemoteObject();
+    if (callbackObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Read callback failed");
+        return ERR_INVALID_VALUE;
+    }
+    WSError ret = GetSceneNodeCount(callbackObj);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write error code failed");
         return ERR_INVALID_VALUE;
     }
     return ERR_NONE;
