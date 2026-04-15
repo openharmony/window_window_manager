@@ -213,7 +213,7 @@ constexpr int32_t SCREEN_CONNECT_STAGE_TWO = 2;
 constexpr int32_t SCREEN_CONNECT_FINISH = 0;
 const bool IS_COORDINATION_SUPPORT =
     OHOS::system::GetBoolParameter("const.window.foldabledevice.is_coordination_support", false);
-
+const int32_t PRODUCT_CODE_SIZE = 4;
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
 constexpr uint32_t COMMON_EVENT_SERVICE_ID = 3299;
