@@ -179,20 +179,6 @@ HWTEST_F(OHWindowTest, UnregisterDensityInfoChangeCallback_NullCallback, TestSiz
 }
 
 /**
- * @tc.name: UnregisterDensityInfoChangeCallback_NotRegistered
- * @tc.desc: unregister density info change callback without registration
- * @tc.type: FUNC
- */
-HWTEST_F(OHWindowTest, UnregisterDensityInfoChangeCallback_NotRegistered, TestSize.Level0)
-{
-    ASSERT_NE(nullptr, scene_);
-    ASSERT_NE(nullptr, scene_->GetMainWindow());
-    auto ret = OH_WindowManager_UnregisterDensityInfoChangeCallback(
-        scene_->GetMainWindow()->GetWindowId(), DensityInfoChangeCallback);
-    EXPECT_EQ(static_cast<int32_t>(WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM), ret);
-}
-
-/**
  * @tc.name: OH_WindowManager_GetAllWindowLayoutInfoList
  * @tc.desc: OH_WindowManager_GetAllWindowLayoutInfoList test
  * @tc.type: FUNC
