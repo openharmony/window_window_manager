@@ -1016,6 +1016,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_SYSTEM_GESTURE,                // area for system gesture
     TYPE_KEYBOARD,                      // area for soft input keyboard
     TYPE_NAVIGATION_INDICATOR,          // area for navigation indicator
+    TYPE_FLOAT_NAVIGATION,              // area for float navigation
     TYPE_END,
 };
 

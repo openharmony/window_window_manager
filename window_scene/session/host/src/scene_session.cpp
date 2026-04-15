@@ -109,6 +109,7 @@ constexpr int32_t API_VERSION_18 = 18;
 constexpr int32_t HOOK_SYSTEM_BAR_HEIGHT = 40;
 constexpr int32_t HOOK_AI_BAR_HEIGHT = 28;
 constexpr int32_t POW_DOUBLE = 2;
+constexpr int32_t CUTOUT_OFFSET_VP = 30;
 constexpr int32_t MULTI_WINDOW_TITLE_BAR_DEFAULT_HEIGHT_VP = 32;
 constexpr int32_t MAX_FLOAT_TITLE_BAR_HEIGHT_VP = 40;
 constexpr uint32_t ROTATION_DEGREE = 90;
@@ -3260,6 +3261,63 @@ void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea, bo
     PatchAINavigationBarArea(avoidArea);
 }
 
+void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
+{
+    auto display = DisplayManager::GetInstance().GetDisplayById(GetSessionProperty()->GetDisplayId());
+    if (display == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Failed to get display");
+        return;
+    }
+    sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
+    if (cutoutInfo == nullptr) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout info");
+        return;
+    }
+    std::vector<DMRect> cutoutAreas = cutoutInfo->GetBoundingRects();
+    if (cutoutAreas.empty()) {
+        TLOGI(WmsLogTag::WMS_IMMS, "There is no cutout area");
+        return;
+    }
+    for (auto& cutoutArea : cutoutAreas) {
+        WSRect cutoutRect = {
+            cutoutArea.posX_,
+            cutoutArea.posY_,
+            cutoutArea.width_,
+            cutoutArea.height_
+        };
+        auto isOverlap = SessionHelper::GetOverlap(floatNavigationArea,
+            cutoutRect, floatNavigationArea.posX_, floatNavigationArea.posY_) != WSRect::EMPTY_RECT;
+        float vpr = display->GetVirtualPixelRatio();
+        auto rect = GetSessionRect();
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d floatnavigation: %{public}s, cutout: %{public}s "
+            "rect: %{public}s, vpr: %{public}f",
+            GetPersistentId(), floatNavigationArea.ToString().c_str(), cutoutRect.ToString().c_str(),
+            rect.ToString().c_str(), vpr);
+        floatNavigationArea.posX_ = (isOverlap && rect.width_ > rect.height_) ? 
+            (cutoutRect.posX_ - std::ceil(vpr * CUTOUT_OFFSET_VP)) : floatNavigationArea.posX_;
+    }
+}
+
+void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool ignoreVisibility)
+{
+    bool visible = false;
+    WSRect floatNavigationArea;
+    std::tuple<bool, WSRect, WSRect> floatNavagationInfo;
+    if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
+        specificCallback_->onGetFloatNavagationInfo_(
+            GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
+        auto [visibleFromTuple, portraitRect, landspaceRect] = floatNavagationInfo;
+        visible = visibleFromTuple;
+        floatNavigationArea = rect.width_ > rect.height_ ? landspaceRect : portraitRect;
+    }
+    if (!visible && !ignoreVisibility) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());
+        return;
+    }
+    PatchFloatNavigationArea(floatNavigationArea);
+    CalculateAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect, floatNavigationArea, avoidArea);
+}
+
 void SceneSession::HookAvoidAreaInCompatibleMode(const WSRect& rect, AvoidAreaType avoidAreaType,
     AvoidArea& avoidArea) const
 {
@@ -3613,6 +3671,10 @@ AvoidArea SceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, const WSRect
             GetAINavigationBarArea(sessionRect, avoidArea, ignoreVisibility);
             return avoidArea;
         }
+        case AvoidAreaType::TYPE_FLOAT_NAVIGATION: {
+            GetFloatNavigationAvoidArea(sessionRect, avoidArea, ignoreVisibility);
+            return avoidArea;
+        }
         default: {
             TLOGE(WmsLogTag::WMS_IMMS, "cannot find win %{public}d type %{public}u",
                 GetPersistentId(), type);
@@ -3629,6 +3691,9 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
+        if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
+            return {};
+        }
         return session->GetAvoidAreaByTypeInner(type, rect);
     }, __func__);
 }
@@ -3639,6 +3704,9 @@ AvoidArea SceneSession::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
+            return {};
+        }
+        if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
             return {};
         }
         return session->GetAvoidAreaByTypeInner(type, rect, true);
@@ -3663,6 +3731,9 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
             auto type = static_cast<AvoidAreaType>(avoidType);
+            if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
+                continue;
+            }
             auto area = session->GetAvoidAreaByTypeInner(type);
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
@@ -6791,6 +6862,12 @@ bool SceneSession::GetGestureBackEnabled()
 bool SceneSession::GetEnableGestureBackHadSet()
 {
     return isEnableGestureBackHadSet_;
+}
+
+WMError SceneSession::SetFloatNavigationAvoidAreaEnabled(bool isEnabled)
+{
+    isFloatNavigationAvoidAreaEnabled_ = isEnabled;
+    return WMError::WM_OK;
 }
 
 void SceneSession::UpdateFullScreenWaterfallMode(bool isWaterfallMode)

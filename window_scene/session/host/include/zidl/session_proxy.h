@@ -153,6 +153,11 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Float Navigation Avoid Area
+     */
+    WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) override;
+
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 

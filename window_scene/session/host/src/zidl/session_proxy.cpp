@@ -3149,6 +3149,34 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
     return static_cast<WMError>(ret);
 }
 
+WMError SessionProxy::SetFloatNavigationAvoidAreaEnabled(bool isEnabled)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_IMMS, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isEnabled)) {
+        TLOGE(WmsLogTag::WMS_IMMS, "Write isEnabled failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FLOAT_NAVIGATION_AVOID_AREA_ENABLED),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WMError>(ret);
+}
+
 WSError SessionProxy::NotifySubModalTypeChange(SubWindowModalType subWindowModalType)
 {
     MessageParcel data;
