@@ -835,6 +835,25 @@ HWTEST_F(WindowSessionTest2, SetSurfaceNodeTriggerOnSurfaceNodeChanged, TestSize
 }
 
 /**
+ * @tc.name: SetSurfaceNodeTriggerOnSurfaceNodeChanged
+ * @tc.desc: SetSurfaceNode should trigger OnSurfaceNodeChanged callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest2, SetSurfaceNodeTriggerOnSurfaceNodeChanged, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetSurfaceNodeTriggerOnSurfaceNodeChanged";
+    info.bundleName_ = "SetSurfaceNodeTriggerOnSurfaceNodeChanged";
+    sptr<SurfaceNodeChangedSession> session = sptr<SurfaceNodeChangedSession>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+
+    std::shared_ptr<RSSurfaceNode> surfaceNode = WindowSessionTest2::CreateRSSurfaceNode();
+    ASSERT_NE(surfaceNode, nullptr);
+    session->SetSurfaceNode(surfaceNode);
+    EXPECT_TRUE(session->isOnSurfaceNodeChangedCalled_);
+}
+
+/**
  * @tc.name: SetAndGetLeashWinShadowSurfaceNode
  * @tc.desc: SetAndGetLeashWinShadowSurfaceNode
  * @tc.type: FUNC
