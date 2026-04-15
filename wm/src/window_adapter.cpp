@@ -347,12 +347,13 @@ WMError WindowAdapter::ListWindowInfo(const WindowInfoOption& windowInfoOption, 
     return wmsProxy->ListWindowInfo(windowInfoOption, infos);
 }
 
-WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos)
+WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+    const WindowInfoOptions& option)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->GetAllWindowLayoutInfo(displayId, infos);
+    return wmsProxy->GetAllWindowLayoutInfo(displayId, infos, option);
 }
 
 WMError WindowAdapter::GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos)
@@ -388,6 +389,14 @@ WMError WindowAdapter::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     return wmsProxy->GetGlobalWindowMode(displayId, globalWinMode);
 }
 
+WMError WindowAdapter::GetFloatViewLimits(FloatViewLimits &limits)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetFloatViewLimits(limits);
+}
+
 WMError WindowAdapter::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
@@ -420,6 +429,50 @@ WMError WindowAdapter::RecoverWatermarkImageForApp()
     auto errCode = windowManagerServiceProxy_->RecoverWatermarkImageForApp(appWatermarkName_);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "watermarkName: %{public}s, errCode: %{public}d",
         appWatermarkName_.c_str(), static_cast<int32_t>(errCode));
+    return errCode;
+}
+
+WMError WindowAdapter::SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    std::string bundleName;
+    auto errCode = wmsProxy->SetScreenWatermarkImage(pixelMap, priority, bundleName);
+    if (errCode == WMError::WM_OK) {
+        screenWatermarkBundleName_ = bundleName;
+        screenWatermarkPriority_ = priority;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "bundleName=%{public}s, priority=%{public}u, ret=%{public}d",
+        bundleName.c_str(), priority, static_cast<int32_t>(errCode));
+    return errCode;
+}
+
+WMError WindowAdapter::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    auto errCode = wmsProxy->CleanScreenWatermarkImage(pixelMap);
+    if (errCode == WMError::WM_OK) {
+        screenWatermarkBundleName_ = "";
+        screenWatermarkPriority_ = 0;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "ret=%{public}d", static_cast<int32_t>(errCode));
+    return errCode;
+}
+
+WMError WindowAdapter::RecoverScreenWatermarkImage()
+{
+    if (screenWatermarkBundleName_.empty()) {
+        return WMError::WM_OK;
+    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    auto errCode = wmsProxy->RecoverScreenWatermarkImage(screenWatermarkBundleName_, screenWatermarkPriority_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "bundleName=%{public}s, priority=%{public}u, errCode=%{public}d",
+        screenWatermarkBundleName_.c_str(), screenWatermarkPriority_, static_cast<int32_t>(errCode));
     return errCode;
 }
 
@@ -622,6 +675,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     ReregisterWindowManagerAgent();
     RecoverWindowPropertyChangeFlag();
     RecoverWatermarkImageForApp();
+    RecoverScreenWatermarkImage();
     RecoverSpecificZIndexSetByApp();
 
     // Avoid directly copying maps to improve performance and thread lock problem.
@@ -1192,6 +1246,17 @@ WMError WindowAdapter::SetSpecificWindowZIndex(WindowType windowType, int32_t zI
         SessionManager::GetInstance(userId_).NotifySetSpecificWindowZIndex();
     }
     TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d", windowType, zIndex);
+    return ret;
+}
+
+WMError WindowAdapter::MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_DO_NOTHING);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_DO_NOTHING);
+    WMError ret = static_cast<WMError>(wmsProxy->MoveMainWindowToTargetDisplay(displayId, windowId));
+    TLOGI(WmsLogTag::WMS_LIFE, "displayId: %{public}" PRIu64 ", windowId: %{public}d, ret: %{public}d",
+        displayId, windowId, ret);
     return ret;
 }
 

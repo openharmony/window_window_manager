@@ -475,6 +475,8 @@ void Session::SetSessionInfo(const SessionInfo& info)
     sessionInfo_.processOptions = info.processOptions;
     sessionInfo_.disableDelegator = info.disableDelegator;
     sessionInfo_.reuseDelegatorWindow = info.reuseDelegatorWindow;
+    sessionInfo_.isGamePrelaunch_ = info.isGamePrelaunch_;
+    sessionInfo_.reuseSessionInGamePreLaunch_ = info.reuseSessionInGamePreLaunch_;
 }
 
 void Session::SetSessionInfoWindowInputType(uint32_t windowInputType)
@@ -2635,12 +2637,12 @@ void Session::SetPendingSessionToBackgroundForDelegatorListener(
     }, __func__);
 }
 
-WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller)
+WSError Session::PendingSessionToBackgroundForDelegator(bool shouldBackToCaller, LifeCycleChangeReason reason)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d",
-        GetPersistentId(), shouldBackToCaller);
+    TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, shouldBackToCaller: %{public}d, reason: %{public}d",
+        GetPersistentId(), shouldBackToCaller, reason);
     if (pendingSessionToBackgroundForDelegatorFunc_) {
-        pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller);
+        pendingSessionToBackgroundForDelegatorFunc_(GetSessionInfo(), shouldBackToCaller, reason);
     }
     return WSError::WS_OK;
 }
@@ -2901,6 +2903,24 @@ void Session::HandlePointDownDialog()
     }
 }
 
+bool Session::IsSubWindowZLevelAboveParentLoosened() const
+{
+    if (auto sessionProperty = GetSessionProperty()) {
+        return sessionProperty->IsSubWindowZLevelAboveParentLoosened();
+    }
+    return false;
+}
+ 
+bool Session::IsLoosenedWithFreeMultiMode() const
+{
+    TLOGD(WmsLogTag::WMS_SUB,
+        "id: %{public}d, isAbover: %{public}d, IsFreeMultiWindowMode: %{public}d, ispc: %{public}d",
+        GetPersistentId(), IsSubWindowZLevelAboveParentLoosened(),
+        systemConfig_.IsFreeMultiWindowMode(), systemConfig_.IsPcWindow());
+    return IsSubWindowZLevelAboveParentLoosened() &&
+        (systemConfig_.IsPcWindow() || systemConfig_.IsFreeMultiWindowMode());
+}
+
 WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool isExecuteDelayRaise)
 {
     auto parentSession = GetParentSession();
@@ -2915,20 +2935,25 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
     bool isPointDown = action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN || isHoverDown;
     bool isPointMove = action == MMI::PointerEvent::POINTER_ACTION_MOVE;
+    bool isLoosenedWithFreeMultiMode = IsLoosenedWithFreeMultiMode();
     if (isExecuteDelayRaise) {
         if (raiseEnabled && action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP) {
             RaiseToAppTopForPointDown();
         }
-        if (!raiseEnabled && parentSession && !isPointMove) {
+        if (!raiseEnabled && parentSession && !isPointMove && !isLoosenedWithFreeMultiMode) {
             parentSession->NotifyClick(!IsScbCoreEnabled());
         }
         return WSError::WS_OK;
     }
     bool isModal = WindowHelper::IsModalWindow(property->GetWindowFlags());
     TLOGD(WmsLogTag::WMS_EVENT,
-          "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, isModal: %{public}d",
-          GetPersistentId(), raiseEnabled, isPointDown, isModal);
-    if (raiseEnabled && isPointDown) {
+        "id: %{public}d, raiseEnabled: %{public}d, isPointDown: %{public}d, "
+        "isModal: %{public}d, isLoosenedWithFreeMultiMode: %{public}d",
+        GetPersistentId(), raiseEnabled, isPointDown, isModal, isLoosenedWithFreeMultiMode);
+    if (!isPointDown) {
+        return WSError::WS_OK;
+    }
+    if (raiseEnabled) {
         if (!isModal) {
             RaiseToAppTopForPointDown();
             return WSError::WS_OK;
@@ -2936,7 +2961,9 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
         if (auto mainSession = GetMainSession()) {
             mainSession->NotifyClick(false);
         }
-    } else if (parentSession && isPointDown) {
+        return WSError::WS_OK;
+    }
+    if (parentSession && !isLoosenedWithFreeMultiMode) {
         // sub window is forbidden to raise to top after click, but its parent should raise
         parentSession->NotifyClick(!IsScbCoreEnabled());
     }
@@ -4337,6 +4364,7 @@ void Session::OnVsyncReceivedAfterModeChanged()
         } else if (session->timesToWaitForVsync_.load() == 0 && session->sessionStage_ &&
                    session->isWindowModeDirty_.compare_exchange_strong(isWindowModeDirty, false)) {
             session->sessionStage_->NotifyLayoutFinishAfterWindowModeChange(session->GetWindowMode());
+            session->NotifySubSessionParentStatusChange(session->GetWindowMode());
         } else {
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}d, sessionStage is null or mode is not dirty",
                 funcName, session->GetPersistentId());

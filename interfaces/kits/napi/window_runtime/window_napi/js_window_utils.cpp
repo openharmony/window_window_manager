@@ -85,6 +85,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DYNAMIC,                  ApiWindowType::TYPE_DYNAMIC                  },
     { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, ApiWindowType::TYPE_MUTISCREEN_COLLABORATION },
     { WindowType::WINDOW_TYPE_FB,                       ApiWindowType::TYPE_FB                       },
+    { WindowType::WINDOW_TYPE_FV,                       ApiWindowType::TYPE_FV                       },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -116,6 +117,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
     { ApiWindowType::TYPE_FB,                       WindowType::WINDOW_TYPE_FB                       },
+    { ApiWindowType::TYPE_FV,                       WindowType::WINDOW_TYPE_FV                       },
 };
 
 const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
@@ -436,6 +438,22 @@ napi_value OrientationInit(napi_env env)
         static_cast<int32_t>(ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED)));
     napi_set_named_property(env, objValue, "FOLLOW_DESKTOP", CreateJsValue(env,
         static_cast<int32_t>(ApiOrientation::FOLLOW_DESKTOP)));
+    return objValue;
+}
+
+napi_value OrientationExecutionResultInit(napi_env env)
+{
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+
+    napi_set_named_property(env, objValue, "ORIENTATION_APPLIED", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_APPLIED)));
+    napi_set_named_property(env, objValue, "ORIENTATION_IGNORED", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_IGNORED)));
+    napi_set_named_property(env, objValue, "ORIENTATION_PENDING", CreateJsValue(env,
+        static_cast<int32_t>(OrientationExecutionResult::ORIENTATION_PENDING)));
     return objValue;
 }
 
@@ -1016,6 +1034,7 @@ napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutI
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "windowRect", GetRectAndConvertToJsValue(env, info->rect));
+    napi_set_named_property(env, objValue, "windowAlpha", CreateJsValue(env, info->windowAlpha));
     return objValue;
 }
 
@@ -1945,10 +1964,16 @@ bool ParseSubWindowOptions(napi_env env, napi_value jsObject, const sptr<WindowO
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to outlineEnabled");
     }
 
+    bool zLevelAboveParentLoosened = false;
+    if (!ParseJsValue(jsObject, env, "zLevelAboveParentLoosened", zLevelAboveParentLoosened)) {
+        TLOGE(WmsLogTag::WMS_SUB, "Failed to convert parameter to zLevelAboveParentLoosened");
+    }
+    TLOGI(WmsLogTag::WMS_SUB, "zLevelAboveParentLoosened: %{public}d", zLevelAboveParentLoosened);
     windowOption->SetSubWindowTitle(title);
     windowOption->SetSubWindowDecorEnable(decorEnabled);
     windowOption->SetSubWindowMaximizeSupported(maximizeSupported);
     windowOption->SetSubWindowOutlineEnabled(outlineEnabled);
+    windowOption->SetZLevelAboveParentLoosened(zLevelAboveParentLoosened);
     if (!ParseRectParam(env, jsObject, windowOption)) {
         return false;
     }

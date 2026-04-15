@@ -37,11 +37,13 @@ public:
     static napi_value RegisterCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterCallback(napi_env env, napi_callback_info info);
     static napi_value GetFloatingBallWindowInfo(napi_env env, napi_callback_info info);
-
+    napi_value GetFloatingBallOptionFromJs(napi_env env, napi_value optionObject, FbOption& option);
+    sptr<FloatingBallController> GetController() const;
 private:
     napi_value OnStartFloatingBall(napi_env env, napi_callback_info info);
     napi_value StartFloatingBallTask(napi_env env, const FbOption& option);
     napi_value OnUpdateFloatingBall(napi_env env, napi_callback_info info);
+    napi_value UpdateFloatingBallTask(napi_env env, const FbOption &option);
     napi_value OnStopFloatingBall(napi_env env, napi_callback_info info);
     napi_value OnRestoreMainWindow(napi_env env, napi_callback_info info);
 
@@ -60,8 +62,6 @@ private:
     WMError ProcessStateChangeUnRegister(const sptr<JsFbWindowListener>& listener);
     WMError ProcessClickEventUnRegister(const sptr<JsFbWindowListener>& listener);
 
-    napi_value GetFloatingBallOptionFromJs(napi_env env, napi_value optionObject, FbOption& option);
-    napi_value CheckParams(napi_env env, const FbOption& option);
     napi_value GetIcon(napi_env env, napi_value value, FbOption& option);
 
     sptr<FloatingBallController> fbController_ = nullptr;

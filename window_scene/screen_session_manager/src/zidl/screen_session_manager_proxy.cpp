@@ -2107,6 +2107,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(
 
 sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId)
 {
+    return GetDisplayInfoById(displayId, false);
+}
+
+sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo)
+{
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGW(WmsLogTag::DMS, "remote is nullptr");
@@ -2122,6 +2127,10 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
     }
     if (!data.WriteUint64(displayId)) {
         TLOGW(WmsLogTag::DMS, "WriteUint64 displayId failed");
+        return nullptr;
+    }
+    if (!data.WriteBool(isGetActualInfo)) {
+        TLOGW(WmsLogTag::DMS, "WriteBool isGetActualInfo failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),

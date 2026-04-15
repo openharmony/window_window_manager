@@ -1997,9 +1997,10 @@ WMError WindowManager::ListWindowInfo(const WindowInfoOption& windowInfoOption,
     return ret;
 }
 
-WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos) const
+WMError WindowManager::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+    const WindowInfoOptions& option) const
 {
-    WMError ret = WindowAdapter::GetInstance(userId_).GetAllWindowLayoutInfo(displayId, infos);
+    WMError ret = WindowAdapter::GetInstance(userId_).GetAllWindowLayoutInfo(displayId, infos, option);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed");
     }
@@ -2038,6 +2039,11 @@ WMError WindowManager::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     return WindowAdapter::GetInstance(userId_).GetGlobalWindowMode(displayId, globalWinMode);
 }
 
+WMError WindowManager::GetFloatViewLimits(FloatViewLimits &limits) const
+{
+    return WindowAdapter::GetInstance(userId_).GetFloatViewLimits(limits);
+}
+
 WMError WindowManager::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName) const
 {
     return WindowAdapter::GetInstance(userId_).GetTopNavDestinationName(windowId, topNavDestName);
@@ -2046,6 +2052,16 @@ WMError WindowManager::GetTopNavDestinationName(int32_t windowId, std::string& t
 WMError WindowManager::SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
     return WindowAdapter::GetInstance(userId_).SetWatermarkImageForApp(pixelMap);
+}
+
+WMError WindowManager::SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority)
+{
+    return WindowAdapter::GetInstance(userId_).SetScreenWatermarkImage(pixelMap, priority);
+}
+
+WMError WindowManager::CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap)
+{
+    return WindowAdapter::GetInstance(userId_).CleanScreenWatermarkImage(pixelMap);
 }
 
 WMError WindowManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
@@ -2290,6 +2306,15 @@ WMError WindowManager::SetSpecificSystemWindowZIndex(WindowType windowType, int3
     WMError ret = WindowAdapter::GetInstance(userId_).SetSpecificWindowZIndex(windowType, zIndex);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_FOCUS, "set specific system window zIndex failed");
+    }
+    return ret;
+}
+
+WMError WindowManager::MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId)
+{
+    WMError ret = WindowAdapter::GetInstance(userId_).MoveMainWindowToTargetDisplay(displayId, windowId);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "failed, windowId: %{public}d, displayId: %{public}" PRIu64, windowId, displayId);
     }
     return ret;
 }

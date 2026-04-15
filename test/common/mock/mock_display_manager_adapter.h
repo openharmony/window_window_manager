@@ -98,6 +98,7 @@ public:
     MOCK_METHOD2(SetScreenHDRFormat, DMError(ScreenId screenId, int32_t modeIdx));
     MOCK_METHOD2(GetScreenColorSpace, DMError(ScreenId screenId, GraphicCM_ColorSpaceType& colorSpace));
     MOCK_METHOD2(SetScreenColorSpace, DMError(ScreenId screenId, GraphicCM_ColorSpaceType colorSpace));
+    MOCK_METHOD2(SetVirtualPixelRatio, DMError(ScreenId screenId, float virtualPixelRatio));
 };
 } // namespace Rosen
 } // namespace OHOS

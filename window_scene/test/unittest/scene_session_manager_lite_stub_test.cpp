@@ -72,7 +72,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token, bool shouldBackToCaller) override
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller, int32_t reason) override
     {
         return WSError::WS_OK;
     }
@@ -291,6 +292,13 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
                                                       const std::vector<std::string>& bundleNameList) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError RegisterSessionLifecycleListenerByAppInstance(const sptr<ISessionLifecycleListener>& listener,
+                                                          const std::string& bundleName,
+                                                          int32_t appIndex,
+                                                          const std::string& appInstanceKey) override
     {
         return WMError::WM_OK;
     }

@@ -1277,6 +1277,41 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid03, TestSize.Level1)
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
+
+/**
+ * @tc.name: HookDisplayInfoByUid04
+ * @tc.desc: HookDisplayInfo by uid with isFullScreenInForceSplit_ condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid04, TestSize.Level1)
+{
+    ScreenId screenId;
+    sptr<ScreenSession> screenSession = InitTestScreenSession("HookDisplayInfoByUid04", screenId);
+    ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
+    sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    uint32_t uid = getuid();
+    
+    uint32_t originalWidth = displayInfo->GetWidth();
+    uint32_t originalHeight = displayInfo->GetHeight();
+    
+    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
+    dmHookInfo.isFullScreenInForceSplit_ = true;
+    ssm_->displayHookMap_[uid] = dmHookInfo;
+    EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
+    displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
+    EXPECT_EQ(displayInfo->GetWidth(), originalWidth);
+    EXPECT_EQ(displayInfo->GetHeight(), originalHeight);
+    ssm_->displayHookMap_.erase(uid);
+    
+    dmHookInfo.isFullScreenInForceSplit_ = false;
+    ssm_->displayHookMap_[uid] = dmHookInfo;
+    displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
+    EXPECT_EQ(displayInfo->GetWidth(), dmHookInfo.width_);
+    EXPECT_EQ(displayInfo->GetHeight(), dmHookInfo.height_);
+    ssm_->displayHookMap_.erase(uid);
+    ssm_->DestroyVirtualScreen(screenId);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
