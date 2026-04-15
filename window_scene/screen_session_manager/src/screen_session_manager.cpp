@@ -11800,12 +11800,13 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
             userSwitching_ = false;
         }
     }
+    auto userId = GetUserIdByCallingUid();
+    auto newScbPid = IPCSkeleton::GetCallingPid();
     {
         std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
         SetClientProxy(client);
         SwitchModeHandleExternalScreen(isPcMode);
-        auto userId = GetUserIdByCallingUid();
-        auto newScbPid = IPCSkeleton::GetCallingPid();
+
         {
             std::lock_guard<std::recursive_mutex> lock(userPidMapMutex_);
             userPidMap_[userId] = newScbPid;
