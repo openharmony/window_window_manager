@@ -347,6 +347,8 @@ public:
         SystemBarPropertyOwner owner) override;
     WMError RemoveOwnSystemBarProperty(WindowType type, const SystemBarPropertyFlag& flag,
         SystemBarPropertyOwner owner) override;
+    WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
+    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
 
     /*
      * Window Pattern
@@ -561,6 +563,7 @@ private:
     std::atomic<bool> cacheEnableImmersiveMode_ = false;
     std::atomic<bool> maximizeLayoutFullScreen_ = false;
     std::atomic<bool> titleHoverShowEnabled_ = true;
+    std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
