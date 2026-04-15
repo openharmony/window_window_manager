@@ -1030,6 +1030,7 @@ protected:
      */
     std::shared_ptr<RSUIContext> GetRSShadowContext();
     std::shared_ptr<RSUIContext> GetRSLeashWinShadowContext();
+    virtual void OnSurfaceNodeChanged() {}
 
     static std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     int32_t persistentId_ = INVALID_SESSION_ID;

@@ -1740,6 +1740,9 @@ private:
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
+    void OnSurfaceNodeChanged() override;
+    void UpdateSurfaceDarkMode();
+    bool GetDarkMode() const;
     std::string colorMode_;
     bool hasDarkRes_ = false;
     mutable std::mutex colorModeMutex_;
