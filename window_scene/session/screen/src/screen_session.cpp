@@ -844,6 +844,12 @@ void ScreenSession::SetPropertyNeedNotified(const ScreenProperty& property)
     isNeedNotify = true;
 }
 
+ScreenProperty ScreenSession::GetPropertyNeedNotified()
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    return propertyNeedNotified_;
+}
+
 void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty,
     const ScreenProperty& eventPara)
 {
