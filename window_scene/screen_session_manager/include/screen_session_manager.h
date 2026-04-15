@@ -170,6 +170,7 @@ public:
         DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen) override;
     virtual std::shared_ptr<Media::PixelMap> GetSnapshotByPicker(Media::Rect &rect, DmErrorCode* errorCode) override;
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) override;
+    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo) override;
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
@@ -796,6 +797,8 @@ private:
     int Dump(int fd, const std::vector<std::u16string>& args) override;
     sptr<DisplayInfo> HookDisplayInfoByUid(sptr<DisplayInfo> displayInfo, const sptr<ScreenSession>& screenSession,
         int32_t uid = INVALID_UID);
+    sptr<DisplayInfo> FindDisplayInfoInSession(const sptr<ScreenSession>& screenSession, DisplayId displayId,
+        bool isGetActualInfo = false);
     DisplayId GetFakeDisplayId(sptr<ScreenSession> screenSession);
     DMError SetVirtualScreenSecurityExemption(ScreenId screenId, uint32_t pid,
         std::vector<uint64_t>& windowIdList) override;

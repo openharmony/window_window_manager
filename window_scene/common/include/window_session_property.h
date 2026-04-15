@@ -27,6 +27,7 @@
 #include <cfloat>
 #include "pixel_map.h"
 #include "floating_ball_template_info.h"
+#include "float_view_template_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -109,6 +110,7 @@ public:
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo);
+    void SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
@@ -177,6 +179,7 @@ public:
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     FloatingBallTemplateInfo GetFbTemplateInfo() const;
+    FloatViewTemplateInfo GetFvTemplateInfo() const;
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
@@ -194,6 +197,8 @@ public:
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingFbTemplateInfo(Parcel& parcel) const;
     static void UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingFvTemplateInfo(Parcel& parcel) const;
+    static void UnmarshallingFvTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
@@ -247,6 +252,8 @@ public:
     uint32_t GetSubWindowLevel() const;
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
     bool IsSubWindowOutlineEnabled() const;
+    void SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened);
+    bool IsSubWindowZLevelAboveParentLoosened() const;
     void SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
     WindowAnchorInfo GetWindowAnchorInfo() const;
 
@@ -358,8 +365,8 @@ public:
     RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
     void SetPageCompatibleMode(CompatibleStyleMode compatibleMode);
     CompatibleStyleMode GetPageCompatibleMode() const;
-    void SetLogicalDeviceConfig(const std::string& logicalDeviceConfig);
-    std::string GetLogicalDeviceConfig() const;
+    void SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig);
+    std::vector<std::string> GetCombinedCompatibleConfig() const;
 
     /*
      * Keyboard
@@ -523,6 +530,8 @@ private:
     PiPTemplateInfo pipTemplateInfo_ = {};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
     mutable std::mutex fbTemplateMutex_;
+    FloatViewTemplateInfo fvTemplateInfo_ = {};
+    mutable std::mutex fvTemplateMutex_;
     KeyboardLayoutParams keyboardLayoutParams_;
     std::map<uint64_t, KeyboardLayoutParams> keyboardLayoutParamsMap_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
@@ -566,7 +575,8 @@ private:
     mutable std::mutex compatibleModeMutex_;
     bool isFullScreenInForceSplitMode_ = false;
     CompatibleStyleMode pageCompatibleMode_ = CompatibleStyleMode::INVALID_VALUE;
-    std::string logicalDeviceConfig_ = "";
+    std::vector<std::string> combinedCompatibleConfig_;
+    mutable std::mutex combinedCompatibleConfigMutex_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
@@ -579,6 +589,7 @@ private:
      */
     uint32_t subWindowLevel_ = 0;
     bool subWindowOutlineEnabled_ = false;
+    bool zLevelAboveParentLoosened_ = false;
     WindowAnchorInfo windowAnchorInfo_;
 
     /*
@@ -957,8 +968,10 @@ struct SystemSessionConfig : public Parcelable {
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
     bool supportUIExtensionSubWindow_ = false;
+    bool supportCreateFloatView_ = false;
 
     void ConvertSupportUIExtensionSubWindow(const std::string& itemValue);
+    void ConvertSupportCreateFloatView(const std::string& itemValue);
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -1029,6 +1042,9 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteFloat(defaultCornerRadius_)) {
             return false;
         }
+        if (!parcel.WriteBool(supportCreateFloatView_)) {
+            return false;
+        }
         return true;
     }
 
@@ -1086,6 +1102,7 @@ struct SystemSessionConfig : public Parcelable {
             delete config;
             return nullptr;
         }
+        config->supportCreateFloatView_ = parcel.ReadBool();
         return config;
     }
         

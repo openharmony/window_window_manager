@@ -1336,6 +1336,20 @@ napi_value JsWindow::GetGestureBackEnabled(napi_env env, napi_callback_info info
     return (me != nullptr) ? me->OnGetGestureBackEnabled(env, info) : nullptr;
 }
 
+napi_value JsWindow::SetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetFloatNavigationAvoidAreaEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsFloatNavigationAvoidAreaEnabled(env, info) : nullptr;
+}
+
 napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "[NAPI]");
@@ -5336,6 +5350,13 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
             TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setTouchableAreas]msg:window is null"));
+            return;
+        }
+        if (!Permission::IsSystemCalling() &&
+            !Permission::CheckSelfPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "OnSetTouchableAreas permission denied!");
+            task->Reject(
+                env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NO_PERMISSION, "OnSetTouchableAreas failed"));
             return;
         }
         WMError ret = weakWindow->SetTouchHotAreas(touchableAreas);
@@ -9432,6 +9453,70 @@ napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info in
     return CreateJsValue(env, enable);
 }
 
+napi_value JsWindow::OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setFloatNavigationAvoidAreaEnabled]msg: Mandatory parameters are left unspecified");
+    }
+    bool enabled = false;
+    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enabled) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enabled");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setFloatNavigationAvoidanceEnabled]msg: Incorrect parameter types");
+    }
+    napi_value result = nullptr;
+    const char* const where = __func__;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, enabled, argc, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setFloatNavigationAvoidAreaEnabled]msg: The window is not created or destroyed"));
+            return;
+        }
+        auto errCode = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFloatNavigationAvoidAreaEnabled(enabled));
+        if (errCode == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, errCode);
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
+                "[window][setFloatNavigationAvoidAreaEnabled]"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high,
+        "OnSetFloatNavigationAvoidAreaEnabled") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setFloatNavigationAvoidAreaEnabled]msg: Internal task error"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnIsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isFloatNavigationAvoidAreaEnabled]msg: The window is not created or destroyed");
+    }
+    bool enable = false;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetFloatNavigationAvoidAreaEnabled(enable));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isFloatNavigationAvoidAreaEnabled]");
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] enable %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
+    return CreateJsValue(env, enable);
+}
+
 napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -9471,6 +9556,13 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
             "[window][createSubWindowWithOptions]msg: Device not support."));
+        return NapiGetUndefined(env);
+    }
+    if (windowOption->IsSubWindowZLevelAboveParentLoosened() &&
+        !WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "SubWindowZLevelAboveParentLoosened property not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][createSubWindowWithOptions]msg: SubWindowZLevelAboveParentLoosened property not support."));
         return NapiGetUndefined(env);
     }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -10492,6 +10584,10 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getParentWindow", moduleName, JsWindow::GetParentWindow);
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
+    BindNativeFunction(env, object, "setFloatNavigationAvoidAreaEnabled", moduleName,
+        JsWindow::SetFloatNavigationAvoidAreaEnabled);
+    BindNativeFunction(env, object, "isFloatNavigationAvoidAreaEnabled", moduleName,
+        JsWindow::IsFloatNavigationAvoidAreaEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
     BindNativeFunction(env, object, "setDefaultDensityEnabled", moduleName, JsWindow::SetDefaultDensityEnabled);
     BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,

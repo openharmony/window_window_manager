@@ -102,6 +102,7 @@ private:
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleSetFloatNavigationAvoidAreaEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
@@ -206,6 +207,11 @@ private:
 
     // Prelaunch Starting Window
     int HandleRemovePrelaunchStartingWindow(MessageParcel& data, MessageParcel& reply);
+
+    // Float View
+    int HandleStopFloatView(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateFloatView(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreFloatViewMainWindow(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

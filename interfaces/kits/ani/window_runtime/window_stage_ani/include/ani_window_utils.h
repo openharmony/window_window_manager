@@ -265,6 +265,8 @@ public:
     static std::vector<EnumType> ExtractEnumValues(ani_env* env, ani_object enumArrayObj);
     static bool ParseSubWindowOptions(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseRectParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
+    static bool HandleModalityTypeParsing(ani_env* env, ani_object aniObject,
+        const sptr<WindowOption>& windowOption, bool isModal);
     static bool ParseModalityParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     static bool ParseZLevelParam(ani_env *env, ani_object aniObject, const sptr<WindowOption>& windowOption);
     template<typename T>

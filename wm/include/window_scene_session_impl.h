@@ -244,7 +244,7 @@ public:
     void NotifyIsFullScreenInForceSplitMode(bool isFullScreen) override;
     void SetForceSplitConfigEnable(bool enableForceSplit, bool needUpdateViewport = false,
         SelectMode selectMode = SelectMode::INVALID_MODE) override;
-    void SendLogicalDeviceConfigToArkUI();
+    void SendCombinedCompatibleConfigToArkUI();
     WMError NotifyPageEnable(const std::string& action, const std::string& message) override;
     WMError NotifySplitRatioChanged(float newRatio) override;
 
@@ -347,6 +347,8 @@ public:
         SystemBarPropertyOwner owner) override;
     WMError RemoveOwnSystemBarProperty(WindowType type, const SystemBarPropertyFlag& flag,
         SystemBarPropertyOwner owner) override;
+    WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
+    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
 
     /*
      * Window Pattern
@@ -366,12 +368,14 @@ public:
     /*
      * Window LifeCycle
      */
-    void Resume() override;
+    void Resume(bool isGamePreLaunch = false) override;
     void Pause() override;
 
     WSError CloseSpecificScene() override;
     WMError SetSubWindowSource(SubWindowSource source) override;
     WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams) override;
+    WMError SetIsGamePreLaunch(bool isGamePreLaunch) override;
+    WMError ClearIsGamePreLaunch() override;
 
     /*
      * Window Event
@@ -559,6 +563,7 @@ private:
     std::atomic<bool> cacheEnableImmersiveMode_ = false;
     std::atomic<bool> maximizeLayoutFullScreen_ = false;
     std::atomic<bool> titleHoverShowEnabled_ = true;
+    std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);
@@ -613,6 +618,7 @@ private:
     static WMError VerifySubWindowLevel(bool isToast, const sptr<WindowSessionImpl>& parentSession);
     bool hasAncestorFloatSession(uint32_t parentId, const SessionMap& sessionMap);
     WMError SetParentWindowInner(int32_t oldParentWindowId, const sptr<WindowSessionImpl>& newParentWindow);
+    WMError ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
 
     WMError RegisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
     WMError UnregisterKeyboardPanelInfoChangeListener(const sptr<IKeyboardPanelInfoChangeListener>& listener) override;
@@ -664,7 +670,7 @@ private:
     /*
      * Window Compatible Mode
      */
-    static std::atomic<bool> hasSentLogicalDeviceConfig_;
+    static std::atomic<bool> hasSentCombinedCompatibleConfig_;
 
     /*
      * Window Scene
@@ -684,7 +690,6 @@ private:
      */
     void NotifyFreeMultiWindowModeResume();
     std::string TransferLifeCycleEventToString(LifeCycleEvent type) const;
-    void RecordLifeCycleExceptionEvent(LifeCycleEvent event, WMError erCode) const;
     WindowLifeCycleInfo GetWindowLifecycleInfo() const;
 
     /**

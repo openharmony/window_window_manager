@@ -145,6 +145,9 @@ group("unittest") {
       "rotation:ws_session_stub_rotation_test",
       "rotation:ws_session_stage_proxy_rotation_test",
       "rotation:ws_session_stage_stub_rotation_test",
+      "rotation:ws_scene_node_count_callback_proxy_test",
+      "rotation:ws_scene_node_count_callback_stub_test",
+      "rotation:ws_scene_node_count_callback_test",
       "window_pattern:window_pattern_snapshot_test",
       "window_pattern:window_pattern_starting_window_test",
       "window_recover:ws_window_recover_session_test",
@@ -581,6 +584,16 @@ ohos_unittest("ws_session_stage_stub_lifecycle_test") {
   external_deps = test_external_deps
 }
 
+ohos_unittest("ws_scene_session_manager_game_prelaunch_test") {
+  module_out_path = module_out_path
+
+  sources = [ "scene_session_manager_game_prelaunch_test.cpp" ]
+
+  deps = [ ":ws_unittest_common" ]
+
+  external_deps = test_external_deps
+}
+
 ohos_unittest("ws_scene_session_manager_test") {
   module_out_path = module_out_path
 
@@ -971,8 +984,14 @@ ohos_unittest("ws_scene_session_manager_stub_test2") {
 
 ohos_unittest("ws_scene_session_manager_supplement_test") {
   module_out_path = module_out_path
-  include_dirs = [ "${window_base_path}/test/common/utils/include/" ]
-  sources = [ "scene_session_manager_supplement_test.cpp" ]
+  include_dirs = [ 
+    "${window_base_path}/test/common/utils/include/",
+    "${window_base_path}/window_scene/test/mock"
+  ]
+  sources = [ 
+    "${window_base_path}/window_scene/test/mock/mock_accesstoken_kit.cpp",
+    "scene_session_manager_supplement_test.cpp"
+    ]
 
   cflags_cc = [ "-Wno-thread-safety" ]
 

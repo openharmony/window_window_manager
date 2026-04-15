@@ -2120,6 +2120,124 @@ HWTEST_F(WindowSessionTest, TransformGlobalRectToRelativeRect_CompatibilityMode0
     // Should return parent's client display id (default display)
     EXPECT_EQ(displayId, static_cast<DisplayId>(0));
 }
+
+/**
+ * @tc.name: IsSubWindowZLevelAboveParentLoosened_Default
+ * @tc.desc: test IsSubWindowZLevelAboveParentLoosened with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSubWindowZLevelAboveParentLoosened_Default, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    ASSERT_EQ(false, session->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: IsSubWindowZLevelAboveParentLoosened_Enabled
+ * @tc.desc: test IsSubWindowZLevelAboveParentLoosened with enabled value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSubWindowZLevelAboveParentLoosened_Enabled, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(true);
+    ASSERT_EQ(true, session->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: IsSubWindowZLevelAboveParentLoosened_NullProperty
+ * @tc.desc: test IsSubWindowZLevelAboveParentLoosened with null property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSubWindowZLevelAboveParentLoosened_NullProperty, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = nullptr;
+    ASSERT_EQ(false, session->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_Default
+ * @tc.desc: test IsLoosenedWithFreeMultiMode with default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_Default, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    ASSERT_EQ(false, session->IsLoosenedWithFreeMultiMode());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_EnabledPc
+ * @tc.desc: test IsLoosenedWithFreeMultiMode with PC mode enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_EnabledPc, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(true);
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(true, session->IsLoosenedWithFreeMultiMode());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_EnabledFreeMulti
+ * @tc.desc: test IsLoosenedWithFreeMultiMode with FreeMulti mode enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_EnabledFreeMulti, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(true);
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
+    ASSERT_EQ(true, session->IsLoosenedWithFreeMultiMode());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_NotEnabled
+ * @tc.desc: test IsLoosenedWithFreeMultiMode when zLevel not loosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_NotEnabled, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(false);
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(false, session->IsLoosenedWithFreeMultiMode());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
