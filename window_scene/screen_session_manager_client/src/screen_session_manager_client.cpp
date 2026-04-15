@@ -245,7 +245,7 @@ static inline bool IsBoundsChanged(RRect oldBounds, RRect newBounds) {
     }
     return true;
 }
- 
+
 void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
     const ScreenProperty& property, ScreenPropertyChangeReason reason)
 {
