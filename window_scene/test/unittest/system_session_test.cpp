@@ -1013,6 +1013,45 @@ HWTEST_F(SystemSessionTest, GetFloatingBallWindowId, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: GetFloatingBallWindowId_PollingWaitLoop
+ * @tc.desc: Test GetFloatingBallWindowId with windowId == 0 && waitTimes >= MAX_WAIT_TIMES polling loop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemSessionTest, GetFloatingBallWindowId_PollingWaitLoop, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    sptr<SceneSession::SpecificSessionCallback> specificCallback =
+        sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
+    sptr<SystemSession> systemSession = sptr<SystemSession>::MakeSptr(info, specificCallback);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(property, nullptr);
+
+    // Setup: FB window type
+    property->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    systemSession->SetSessionProperty(property);
+
+    // Setup: Set calling pid to match
+    LOCK_GUARD_EXPR(SCENE_GUARD, systemSession->SetCallingPid(IPCSkeleton::GetCallingPid()));
+
+    // Setup: Mock getFbPanelWindowIdFunc to track polling loop calls and always return 0
+    uint32_t callCount = 0;
+    auto getFbPanelWindowIdFunc = [&callCount](uint32_t& windowId) -> WMError {
+        windowId = 0;  // Always return 0 to trigger polling
+        callCount++;   // Count how many times this is called
+        return WMError::WM_OK;
+    };
+    systemSession->RegisterGetFbPanelWindowIdFunc(getFbPanelWindowIdFunc);
+
+    // Test: Call GetFloatingBallWindowId
+    uint32_t resultWindowId = 999;
+    WMError result = systemSession->GetFloatingBallWindowId(resultWindowId);
+
+    EXPECT_EQ(result, WMError::WM_OK);
+    EXPECT_EQ(resultWindowId, 0);
+    EXPECT_EQ(callCount, 11);
+}
+
+/**
  * @tc.name: NotifyUpdateFloatingBall
  * @tc.desc: NotifyUpdateFloatingBall
  * @tc.type: FUNC
