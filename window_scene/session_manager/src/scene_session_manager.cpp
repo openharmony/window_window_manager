@@ -365,20 +365,6 @@ public:
     };
 #endif
 
-bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
-{
-    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
-        !avoidArea.rightRect_.IsUninitializedRect()) {
-        return false;
-    }
-    if (avoidArea.bottomRect_.IsUninitializedRect()) {
-        return true;
-    }
-    auto diff =
-        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && diff <= 1;
-}
-
 void FillWindowDisplayName(WindowDisplayInfo& windowDisplayInfo)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(windowDisplayInfo.displayId);
@@ -3008,7 +2994,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
                 const AvoidArea& avoidArea, int32_t sessionBottom) {
-            return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
+            return this->CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
             return this->GetStatusBarAvoidHeight(displayId, barArea);
@@ -14032,6 +14018,21 @@ void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& 
     } else {
         isVisible = false;
     }
+}
+
+bool SceneSessionManager::CheckAvoidAreaForAINavigationBar(
+    bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+{
+    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+        !avoidArea.rightRect_.IsUninitializedRect()) {
+        return false;
+    }
+    if (avoidArea.bottomRect_.IsUninitializedRect()) {
+        return true;
+    }
+    auto diff =
+        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
+    return isVisible && ((diff <= 1 && !GetLSState()) || (diff <= 5 && GetLSState()));
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)
