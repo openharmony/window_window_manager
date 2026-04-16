@@ -7974,6 +7974,12 @@ void WindowSessionImpl::NotifyWindowStatusChange(WindowMode mode)
             TLOGW(WmsLogTag::WMS_FOCUS, "write event fail, WINDOW_STATUS_CHANGE, ret=%{public}d", ret);
         }
     }
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        AAFwk::Want want;
+        want.SetParam(Extension::HOST_WINDOW_STATUS_FIELD, static_cast<int32_t>(windowStatus));
+        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_STATUS),
+            want, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
+    }
 }
 
 /** @note @window.layout */
@@ -8590,6 +8596,9 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     bool gestureBackEnable = true;
     GetGestureBackEnabled(gestureBackEnable);
     want.SetParam(Extension::GESTURE_BACK_ENABLED, AAFwk::Integer::Box(static_cast<int32_t>(gestureBackEnable)));
+    auto windowStatus = GetWindowStatusInner(GetWindowMode());
+    want.SetParam(Extension::HOST_WINDOW_STATUS_FIELD,
+        AAFwk::Integer::Box(static_cast<int32_t>(windowStatus)));
 }
 
 WMError WindowSessionImpl::OnExtensionMessage(uint32_t code, int32_t persistentId, const AAFwk::Want& data)

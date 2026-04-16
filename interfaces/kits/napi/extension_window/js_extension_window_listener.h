@@ -32,16 +32,17 @@
 namespace OHOS {
 namespace Rosen {
 class JsExtensionWindowListener : public IWindowChangeListener,
-                                  public IWindowRectChangeListener,
-                                  public IAvoidAreaChangedListener,
-                                  public IWindowLifeCycle,
-                                  public IOccupiedAreaChangeListener,
-                                  public IDisplayIdChangeListener,
-                                  public ISystemDensityChangeListener,
-                                  public IScreenshotListener,
-                                  public IExtensionSecureLimitChangeListener,
-                                  public IKeyboardDidShowListener,
-                                  public IKeyboardDidHideListener {
+                                   public IWindowRectChangeListener,
+                                   public IAvoidAreaChangedListener,
+                                   public IWindowLifeCycle,
+                                   public IOccupiedAreaChangeListener,
+                                   public IDisplayIdChangeListener,
+                                   public ISystemDensityChangeListener,
+                                   public IScreenshotListener,
+                                   public IExtensionSecureLimitChangeListener,
+                                   public IKeyboardDidShowListener,
+                                   public IKeyboardDidHideListener,
+                                   public IWindowStatusChangeListener {
 public:
     JsExtensionWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsExtensionWindowListener> (this)) {
@@ -59,6 +60,7 @@ public:
     void OnSecureLimitChange(bool isLimit) override;
     void OnKeyboardDidShow(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void OnKeyboardDidHide(const KeyboardPanelInfo& keyboardPanelInfo) override;
+    void OnWindowStatusChange(WindowStatus status) override;
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterFocused() override;

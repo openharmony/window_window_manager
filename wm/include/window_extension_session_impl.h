@@ -256,6 +256,8 @@ private:
     WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostStatusBarContentColorChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostRectChangeInGlobalDisplay(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnHostWindowStatusChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError GetWindowStatus(WindowStatus& windowStatus) override;
 
     /*
      * Compatible Mode
@@ -292,6 +294,7 @@ private:
     std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
     std::vector<sptr<IRectChangeInGlobalDisplayListener>> hostRectChangeInGlobalDisplayListenerList_;
+    WindowStatus hostWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     uint32_t hostStatusBarContentColor_ { 0 };
     int64_t startModalExtensionTimeStamp_ = -1;
 
