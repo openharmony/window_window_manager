@@ -211,8 +211,12 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
         if (!isModal) {
             RaiseToAppTopForPointDown();
-        } else if (auto mainSession = GetMainSession()) {
-            mainSession->NotifyClick(false);
+        } else if (auto mainSession = GetMainSessionOrLoosenedSession()) {
+            if (mainSession->IsLoosenedWithFreeMultiMode()) {
+                mainSession->RaiseToAppTopForPointDown();
+            } else {
+                mainSession->NotifyClick(false);
+            }
         }
     }
     auto ret = SceneSession::ProcessPointDownSession(posX, posY);

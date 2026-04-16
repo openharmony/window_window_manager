@@ -2733,6 +2733,17 @@ sptr<Session> Session::GetMainSession() const
     }
 }
 
+sptr<Session> Session::GetMainSessionOrLoosenedSession() const
+{
+    if (SessionHelper::IsMainWindow(GetWindowType()) || IsLoosenedWithFreeMultiMode()) {
+        return const_cast<Session*>(this);
+    } else if (parentSession_) {
+        return parentSession_->GetMainSession();
+    } else {
+        return nullptr;
+    }
+}
+
 sptr<Session> Session::GetMainOrFloatSession() const
 {
     auto windowType = GetWindowType();
@@ -2958,8 +2969,12 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
             RaiseToAppTopForPointDown();
             return WSError::WS_OK;
         }
-        if (auto mainSession = GetMainSession()) {
-            mainSession->NotifyClick(false);
+        if (auto mainSession = GetMainSessionOrLoosenedSession()) {
+            if (mainSession->IsLoosenedWithFreeMultiMode()) {
+                mainSession->RaiseToAppTopForPointDown();
+            } else {
+                mainSession->NotifyClick(false);
+            }
         }
         return WSError::WS_OK;
     }

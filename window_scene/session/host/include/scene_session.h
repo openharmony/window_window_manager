@@ -594,6 +594,7 @@ public:
     std::string GetUpdatedIconPath() const;
     int32_t GetParentPersistentId() const;
     int32_t GetMainSessionId();
+    int32_t GetMainSessionOrLoosenedSessionId();
     virtual int32_t GetMissionId() const { return persistentId_; };
     Orientation GetRequestedOrientation() const;
     std::vector<sptr<SceneSession>> GetSubSession() const;

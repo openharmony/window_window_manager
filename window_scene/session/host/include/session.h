@@ -886,6 +886,7 @@ public:
      * PC Window
      */
     sptr<Session> GetMainSession() const;
+    sptr<Session> GetMainSessionOrLoosenedSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
     bool IsAncestorsSession(int32_t ancestorsId) const;
