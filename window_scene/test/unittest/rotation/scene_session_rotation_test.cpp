@@ -460,6 +460,36 @@ HWTEST_F(SceneSessionRotationTest, GetSceneNodeCount, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSceneNodeCountWithTimeout
+ * @tc.desc: GetSceneNodeCountWithTimeout function with different timeout values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionRotationTest, GetSceneNodeCountWithTimeout, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetSceneNodeCountWithTimeout start";
+    SessionInfo info;
+    info.abilityName_ = "GetSceneNodeCountWithTimeout";
+    info.bundleName_ = "GetSceneNodeCountWithTimeout";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, session);
+
+    // Case 1: sessionStage_ is nullptr - should return error
+    uint32_t nodeCount = 0;
+    auto ret = session->GetSceneNodeCount(nodeCount);
+    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, ret);
+
+    sptr<SessionStageMocker> sessionStage = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = sessionStage;
+
+    // Case 2: Custom timeout
+    int32_t customTimeout = 5000;
+    ret = session->GetSceneNodeCountWithTimeout(nodeCount, customTimeout);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    GTEST_LOG_(INFO) << "SceneSessionRotationTest: GetSceneNodeCountWithTimeout end";
+}
+
+/**
  * @tc.name: ConvertOrientationAndRotation
  * @tc.desc: ConvertOrientationAndRotation function
  * @tc.type: FUNC

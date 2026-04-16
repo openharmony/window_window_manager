@@ -114,6 +114,7 @@ private:
     int HandleUpdateAppHookWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetSceneNodeCount(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyOrientationExecutionResult(MessageParcel& data, MessageParcel& reply);
     int HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply);
     int HandleSendFbActionEvent(MessageParcel& data, MessageParcel& reply);
@@ -124,6 +125,9 @@ private:
     int HandleUpdateWindowUIType(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePropertyWhenTriggerMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyParentLifecycleEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSendFvActionEvent(MessageParcel& data, MessageParcel& reply);
+    int HandleSyncFvWindowInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleSyncFvLimits(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

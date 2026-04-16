@@ -924,6 +924,18 @@ FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
     return fbTemplateInfo_;
 }
 
+void WindowSessionProperty::SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo)
+{
+    std::lock_guard<std::mutex> lock(fvTemplateMutex_);
+    fvTemplateInfo_ = fvTemplateInfo;
+}
+
+FloatViewTemplateInfo WindowSessionProperty::GetFvTemplateInfo() const
+{
+    std::lock_guard<std::mutex> lock(fvTemplateMutex_);
+    return fvTemplateInfo_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -1110,6 +1122,7 @@ void WindowSessionProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowSes
 
 void WindowSessionProperty::UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
 {
+    std::lock_guard lock(property->touchHotAreasMutex_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapePanelHotAreas_);
@@ -1155,6 +1168,26 @@ void WindowSessionProperty::UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSe
         return;
     }
     property->SetFbTemplateInfo(*fbTemplateInfo);
+}
+
+bool WindowSessionProperty::MarshallingFvTemplateInfo(Parcel& parcel) const
+{
+    if (!WindowHelper::IsFvWindow(type_)) {
+        return true;
+    }
+    return parcel.WriteParcelable(&fvTemplateInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingFvTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    if (!WindowHelper::IsFvWindow(property->GetWindowType())) {
+        return;
+    }
+    sptr<FloatViewTemplateInfo> fvTemplateInfo = parcel.ReadParcelable<FloatViewTemplateInfo>();
+    if (fvTemplateInfo == nullptr) {
+        return;
+    }
+    property->SetFvTemplateInfo(*fvTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -1420,15 +1453,11 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
 
 void WindowSessionProperty::SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened)
 {
-    TLOGD(WmsLogTag::WMS_SUB, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
-        zLevelAboveParentLoosened);
     zLevelAboveParentLoosened_ = zLevelAboveParentLoosened;
 }
  
 bool WindowSessionProperty::IsSubWindowZLevelAboveParentLoosened() const
 {
-    TLOGD(WmsLogTag::WMS_SUB, "Property id:%{public}d, isabove:%{public}d", GetPersistentId(),
-        zLevelAboveParentLoosened_);
     return zLevelAboveParentLoosened_;
 }
 
@@ -1510,7 +1539,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(frameNum_) &&
         parcel.WriteBool(isPrelaunch_) &&
         parcel.WriteBool(isAppBufferReady_) &&
-        parcel.WriteBool(isCrossProcessWindow_);
+        parcel.WriteBool(isCrossProcessWindow_) &&
+        MarshallingFvTemplateInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1636,6 +1666,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetPrelaunch(parcel.ReadBool());
     property->SetAppBufferReady(parcel.ReadBool());
     property->SetIsCrossProcessWindow(parcel.ReadBool());
+    UnmarshallingFvTemplateInfo(parcel, property);
     return property;
 }
 
@@ -2537,14 +2568,16 @@ CompatibleStyleMode WindowSessionProperty::GetPageCompatibleMode() const
     return pageCompatibleMode_;
 }
 
-void WindowSessionProperty::SetLogicalDeviceConfig(const std::string& logicalDeviceConfig)
+void WindowSessionProperty::SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig)
 {
-    logicalDeviceConfig_ = logicalDeviceConfig;
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
+    combinedCompatibleConfig_ = combinedCompatibleConfig;
 }
 
-std::string WindowSessionProperty::GetLogicalDeviceConfig() const
+std::vector<std::string> WindowSessionProperty::GetCombinedCompatibleConfig() const
 {
-    return logicalDeviceConfig_;
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
+    return combinedCompatibleConfig_;
 }
 
 void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
@@ -2893,6 +2926,11 @@ int32_t WindowSessionProperty::GetStatusBarHeightInImmersive() const
 void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& itemValue)
 {
     supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
+}
+
+void SystemSessionConfig::ConvertSupportCreateFloatView(const std::string& itemValue)
+{
+    supportCreateFloatView_ = StringUtil::ConvertStringToBool(itemValue);
 }
 
 void WindowSessionProperty::SetPrelaunch(bool isPrelaunch)

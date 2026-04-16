@@ -127,6 +127,7 @@ enum class WindowType : uint32_t {
     WINDOW_TYPE_MAGNIFICATION_MENU,
     WINDOW_TYPE_SELECTION,
     WINDOW_TYPE_FB,
+    WINDOW_TYPE_FV,
     ABOVE_APP_SYSTEM_WINDOW_END,
 
     SYSTEM_SUB_WINDOW_BASE = 2500,
@@ -191,6 +192,7 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_FLOATING,
     WINDOW_MODE_PIP,
     WINDOW_MODE_FB,
+    WINDOW_MODE_FV,
 };
 
 /**
@@ -273,6 +275,11 @@ enum class WMError : int32_t {
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,
     WM_ERROR_INVALID_WINDOW_TYPE,
+    WM_ERROR_FV_REPEAT_OPERATION,
+    WM_ERROR_FV_INVALID_STATE,
+    WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED,
+    WM_ERROR_FV_START_FAILED,
+    WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS,
 };
 
 /**
@@ -314,6 +321,12 @@ enum class WmErrorCode : int32_t {
     WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED = 1300027,
     WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED = 1300028,
     WM_ERROR_INVALID_WINDOW_TYPE = 1300029,
+    WM_ERROR_FV_REPEAT_OPERATION = 1300030,
+    WM_ERROR_FV_INVALID_STATE = 1300031,
+    WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED = 1300032,
+    WM_ERROR_FV_START_FAILED = 1300033,
+    WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS = 1300034,
+    WM_ERROR_FORBID_SUBWINDOW = 1300035,
 };
 
 /**
@@ -421,7 +434,11 @@ const std::map<WMError, WmErrorCode> WM_JS_TO_ERROR_CODE_MAP {
     {WMError::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED, WmErrorCode::WM_ERROR_FB_UPDATE_TEMPLATE_TYPE_DENIED  },
     {WMError::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED,  WmErrorCode::WM_ERROR_FB_UPDATE_STATIC_TEMPLATE_DENIED  },
     {WMError::WM_ERROR_UI_EFFECT_ERROR,                WmErrorCode::WM_ERROR_UI_EFFECT_ERROR          },
-    {WMError::WM_ERROR_INVALID_CALLING,                WmErrorCode::WM_ERROR_INVALID_CALLING          },
+    {WMError::WM_ERROR_FV_REPEAT_OPERATION,            WmErrorCode::WM_ERROR_FV_REPEAT_OPERATION      },
+    {WMError::WM_ERROR_FV_INVALID_STATE,               WmErrorCode::WM_ERROR_FV_INVALID_STATE         },
+    {WMError::WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED,  WmErrorCode::WM_ERROR_FV_RESTORE_MAIN_WINDOW_FAILED  },
+    {WMError::WM_ERROR_FV_START_FAILED,                WmErrorCode::WM_ERROR_FV_START_FAILED          },
+    {WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS,        WmErrorCode::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS  },
 };
 
 /**
@@ -578,6 +595,7 @@ struct KeyFramePolicy : public Parcelable {
 struct HookWindowInfo : public Parcelable {
     bool enableHookWindow{ false };
     float widthHookRatio{ 1.0f };
+    bool drawableRectHook{ false };
 
     static constexpr float DEFAULT_WINDOW_SIZE_HOOK_RATIO = 1.0f;
 
@@ -601,7 +619,8 @@ struct HookWindowInfo : public Parcelable {
         std::ostringstream oss;
         oss << std::boolalpha  // For true/false instead of 1/0
             << "enableHookWindow: " << enableHookWindow
-            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio;
+            << ", widthHookRatio: " << std::fixed << std::setprecision(precision) << widthHookRatio
+            << ", drawableRectHook: " << drawableRectHook;
         return oss.str();
     }
 
@@ -609,13 +628,15 @@ private:
     bool WriteAllFields(Parcel& parcel) const
     {
         return parcel.WriteBool(enableHookWindow) &&
-               parcel.WriteFloat(widthHookRatio);
+               parcel.WriteFloat(widthHookRatio) &&
+               parcel.WriteBool(drawableRectHook);
     }
 
     static bool ReadAllFields(Parcel& parcel, HookWindowInfo& info)
     {
         return parcel.ReadBool(info.enableHookWindow) &&
-               parcel.ReadFloat(info.widthHookRatio);
+               parcel.ReadFloat(info.widthHookRatio) &&
+               parcel.ReadBool(info.drawableRectHook);
     }
 };
 
@@ -995,6 +1016,7 @@ enum class AvoidAreaType : uint32_t {
     TYPE_SYSTEM_GESTURE,                // area for system gesture
     TYPE_KEYBOARD,                      // area for soft input keyboard
     TYPE_NAVIGATION_INDICATOR,          // area for navigation indicator
+    TYPE_FLOAT_NAVIGATION,              // area for float navigation
     TYPE_END,
 };
 
@@ -1509,6 +1531,17 @@ struct WindowDisplayInfo : public Parcelable {
 };
 
 /**
+ * @struct WindowInfoOptions
+ *
+ * @brief Options for getting window info.
+ */
+struct WindowInfoOptions {
+    bool excludeSystemWindows = false;
+    int32_t foregroundAboveWindow = 0;
+    int32_t foregroundBelowWindow = 0;
+};
+
+/**
  * @struct WindowLayoutInfo
  *
  * @brief Layout info for all windows on the screen.
@@ -1516,11 +1549,12 @@ struct WindowDisplayInfo : public Parcelable {
 struct WindowLayoutInfo : public Parcelable {
     Rect rect = Rect::EMPTY_RECT;
     uint32_t zOrder = 0;
+    float windowAlpha = -1.0f;
 
     bool Marshalling(Parcel& parcel) const override
     {
         return parcel.WriteInt32(rect.posX_) && parcel.WriteInt32(rect.posY_) && parcel.WriteUint32(rect.width_) &&
-               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder);
+               parcel.WriteUint32(rect.height_) && parcel.WriteUint32(zOrder) && parcel.WriteFloat(windowAlpha);
     }
 
     static WindowLayoutInfo* Unmarshalling(Parcel& parcel)
@@ -1528,7 +1562,7 @@ struct WindowLayoutInfo : public Parcelable {
         WindowLayoutInfo* windowLayoutInfo = new WindowLayoutInfo();
         if (!parcel.ReadInt32(windowLayoutInfo->rect.posX_) || !parcel.ReadInt32(windowLayoutInfo->rect.posY_) ||
             !parcel.ReadUint32(windowLayoutInfo->rect.width_) || !parcel.ReadUint32(windowLayoutInfo->rect.height_) ||
-            !parcel.ReadUint32(windowLayoutInfo->zOrder)) {
+            !parcel.ReadUint32(windowLayoutInfo->zOrder) || !parcel.ReadFloat(windowLayoutInfo->windowAlpha)) {
             delete windowLayoutInfo;
             return nullptr;
         }

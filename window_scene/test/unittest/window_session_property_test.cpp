@@ -1611,17 +1611,19 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetLogicalDeviceConfig
- * @tc.desc: SetLogicalDeviceConfig
+ * @tc.name: SetCombinedCompatibleConfig
+ * @tc.desc: SetCombinedCompatibleConfig
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, SetLogicalDeviceConfig, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, SetCombinedCompatibleConfig, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    std::string config = "{}";
-    property->SetLogicalDeviceConfig(config);
-    auto result = property->GetLogicalDeviceConfig();
-    EXPECT_EQ(result, config);
+    std::vector<std::string> config = {"logicalDeviceConfig", "arkUIAndWebConfig"};
+    property->SetCombinedCompatibleConfig(config);
+    auto result = property->GetCombinedCompatibleConfig();
+    EXPECT_EQ(result.size(), config.size());
+    bool isEqual = std::equal(result.begin(), result.end(), config.begin());
+    EXPECT_TRUE(isEqual);
 }
 
 /**
@@ -1682,7 +1684,7 @@ HWTEST_F(WindowSessionPropertyTest, SetMobileAppInPadLayoutFullScreen, TestSize.
 
 /**
  * @tc.name: UnmarshallingFbTemplateInfoTest
- * @tc.desc: UnmarshallingFbTemplateInfoTest
+ * @tc.desc: Test UnmarshallingFbTemplateInfo
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Level1)
@@ -1692,13 +1694,14 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
 
     Parcel parcel;
     std::shared_ptr<Media::PixelMap> icon;
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, icon};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", 0, true, false, 0, true}, icon, "test"};
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
     ASSERT_NE(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);
     ASSERT_NE(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
     ASSERT_NE(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
+    ASSERT_EQ(property->GetFbTemplateInfo().textUpdateAnimationType_, fbTemplateInfo.textUpdateAnimationType_);
 
     parcel.WriteParcelable(&fbTemplateInfo);
     property->UnmarshallingFbTemplateInfo(parcel, property);
@@ -1707,6 +1710,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     ASSERT_EQ(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
     ASSERT_EQ(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
+    ASSERT_EQ(property->GetFbTemplateInfo().textUpdateAnimationType_, fbTemplateInfo.textUpdateAnimationType_);
 }
 
 /**
@@ -2192,6 +2196,26 @@ HWTEST_F(WindowSessionPropertyTest, MarshallingUnmarshallingZLevelAboveParentLoo
     sptr<WindowSessionProperty> targetProperty = property->Unmarshalling(parcel);
     ASSERT_NE(targetProperty, nullptr);
     ASSERT_EQ(true, targetProperty->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: UnmarshallingFvTemplateInfo
+ * @tc.desc: UnmarshallingFvTemplateInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingFvTemplateInfo, TestSize.Level1)
+{
+    Parcel parcel = Parcel();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_FV);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_FV, property->GetWindowType());
+    FloatViewTemplateInfo fvTemplateInfo;
+    fvTemplateInfo.bindWindowId_ = 1;
+    property->SetFvTemplateInfo(fvTemplateInfo);
+    property->MarshallingFvTemplateInfo(parcel);
+    property->UnmarshallingFvTemplateInfo(parcel, property);
+    EXPECT_EQ(property->GetFvTemplateInfo().bindWindowId_, fvTemplateInfo.bindWindowId_);
 }
 } // namespace
 } // namespace Rosen

@@ -69,6 +69,7 @@ public:
     virtual nlohmann::ordered_json GetFoldCreaseRegionJson();
     virtual void NotifyRunSensorFoldStateManager();
     virtual float GetSpecialVirtualPixelRatio();
+    virtual void PowerkeySetScreenActiveRect();
 private:
     std::vector<FoldCreaseRegionItem> foldCreaseRegionItems_;
 };

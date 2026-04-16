@@ -468,6 +468,7 @@ public:
     bool IsBootingConnect() const;
     void CheckAndNotifyPropertyChange();
     void SetPropertyNeedNotified(const ScreenProperty& property);
+    ScreenProperty GetPropertyNeedNotified();
 private:
     bool IsVertical(Rotation rotation) const;
     Orientation CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const;
