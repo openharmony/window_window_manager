@@ -22,7 +22,6 @@
 #include <vector>
 
 #include <event_handler.h>
-#include <transaction/rs_interfaces.h>
 
 #include "dm_common.h"
 #include "interfaces/include/ws_common.h"
@@ -964,7 +963,6 @@ public:
      * RS Client Multi Instance
      */
     std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
-    std::shared_ptr<RSRenderInterface> GetRSRenderInterface(const char* caller = "");
 
     /*
      * Window highligt outline
