@@ -6813,12 +6813,6 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         return nullptr;
     }
     uint32_t maskWidth = windowMask[0].size();
-    for (uint32_t i = 0; i < maskHeight; i++) {
-        if (windowMask[i].size() != maskWidth) {
-            TLOGE(WmsLogTag::WMS_PC, "WindowMask row size mismatch, row:%{public}d", i);
-            return nullptr;
-        }
-    }
     if ((windowRect.height_ > 0 && windowRect.height_ != maskHeight) ||
         (windowRect.width_ > 0 && windowRect.width_ != maskWidth)) {
         WLOGFE("WindowMask is invalid");
@@ -6841,7 +6835,8 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
-            uint32_t channel = windowMask[i][j] > 0 ? fullChannel : 0;
+            uint32_t value = (j < windowMask[i].size()) ? windowMask[i][j] : 1;
+            uint32_t channel = value > 0 ? fullChannel : 0;
             uint32_t channelIndex = idx * bgraChannel;
             data[channelIndex] = channel; // blue channel
             data[channelIndex + greenChannel] = channel; // green channel
