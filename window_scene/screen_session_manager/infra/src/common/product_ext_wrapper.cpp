@@ -46,7 +46,7 @@ void ProductExtWrapper::InitProductExtWrapper()
 void* ProductExtWrapper::GetHandleByName(const std::string& getFuncName)
 {
     void* funcHandle = nullptr;
-    int32_t cnt = 0;
+    uint32_t cnt = 0;
     do {
         cnt++;
         TryReloadDmsExtension();
