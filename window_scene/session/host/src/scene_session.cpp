@@ -5425,7 +5425,7 @@ int32_t SceneSession::GetMainSessionId()
 
 int32_t SceneSession::GetMainSessionOrLoosenedSessionId()
 {
-    const auto& mainSession = GetMainSession();
+    const auto& mainSession = GetMainSessionOrLoosenedSession();
     if (mainSession) {
         return mainSession->GetPersistentId();
     }
