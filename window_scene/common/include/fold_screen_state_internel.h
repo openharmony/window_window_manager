@@ -32,6 +32,7 @@ static const std::string SINGLE_POCKET_DISPLAY = "4";
 static const std::string SUPER_FOLD_DISPLAY = "5";
 static const std::string SECONDARY_FOLD_DISPLAY = "6";
 static const std::string SINGLE_SUPER_DISPLAY = "7";
+static const std::string SECONDARY_SUPER_DISPLAY = "8";
 static const std::string DEFAULT_OFFSET = "0";
 static const size_t THIRD_ANGLE = 2;
 }
@@ -74,6 +75,11 @@ public:
         return GetFoldType() == SINGLE_SUPER_DISPLAY;
     }
 
+    static bool IsSecondaryDisplaySuperFoldDevice()
+    {
+        return GetFoldType() == SECONDARY_SUPER_DISPLAY;
+    }
+
     static bool IsSuperFoldDisplayDevice()
     {
         return GetFoldType() == SUPER_FOLD_DISPLAY;
@@ -89,7 +95,10 @@ public:
         if (IsDualDisplayFoldDevice()) {
             return foldDisplayMode == FoldDisplayMode::SUB;
         }
-        if (IsSingleDisplayFoldDevice() || IsSingleDisplayPocketFoldDevice() || IsSingleDisplaySuperFoldDevice()) {
+        if (FoldScreenStateInternel::IsSingleDisplayFoldDevice() ||
+            FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
+            FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() ||
+            FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) {
             return foldDisplayMode == FoldDisplayMode::MAIN;
         }
         return false;
@@ -223,6 +232,12 @@ public:
         }
 
         return std::fabs(a-b) < epsilon;
+    }
+
+    static bool IsLoadDmsExt()
+    {
+        return FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() ||
+            FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice();
     }
 };
 } // Rosen
