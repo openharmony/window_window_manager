@@ -205,7 +205,17 @@ void WindowManagerService::InitWithRanderServiceAdded()
     auto windowVisibilityChangeCb =
         [this](std::shared_ptr<RSOcclusionData> occlusionData) { this->WindowVisibilityChangeCallback(occlusionData); };
     WLOGI("RegisterWindowVisibilityChangeCallback");
-    if (rsInterface_.RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
+    auto rsUICtx = rsUiDirector_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no rsUICtx");
+        return;
+    }
+    auto rsInterface = rsUICtx->GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return;
+    }
+    if (rsInterface->RegisterOcclusionChangeCallback(windowVisibilityChangeCb) != WM_OK) {
         WLOGFE("RegisterWindowVisibilityChangeCallback failed");
     }
 }
