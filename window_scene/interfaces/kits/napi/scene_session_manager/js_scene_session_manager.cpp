@@ -4780,16 +4780,6 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
     }
 
     AppForceLandscapeConfig config;
-    napi_value jsMode = nullptr;
-    napi_get_named_property(env, argv[ARG_INDEX_ONE], "mode", &jsMode);
-    RETURN_IF_CONVERT_FAIL(env, jsMode, config.mode_, "mode", WmsLogTag::DEFAULT);
-    napi_value jsSupportSplit = nullptr;
-    napi_get_named_property(env, argv[ARG_INDEX_ONE], "supportSplit", &jsSupportSplit);
-    RETURN_IF_CONVERT_FAIL(env, jsSupportSplit, config.supportSplit_, "supportSplit", WmsLogTag::DEFAULT);
-    napi_value jsIgnoreOrient = nullptr;
-    napi_get_named_property(env, argv[ARG_INDEX_ONE], "ignoreOrientation", &jsIgnoreOrient);
-    RETURN_IF_CONVERT_FAIL(env, jsIgnoreOrient, config.ignoreOrientation_, "ignoreOrientation",
-        WmsLogTag::DEFAULT);
     napi_value jsContainsSysConfig = nullptr;
     napi_get_named_property(env, argv[ARG_INDEX_ONE], "containsSysConfig", &jsContainsSysConfig);
     RETURN_IF_CONVERT_FAIL(env, jsContainsSysConfig, config.containsSysConfig_, "containsSysConfig",
@@ -4814,12 +4804,10 @@ napi_value JsSceneSessionManager::OnSetAppForceLandscapeConfig(napi_env env, nap
     napi_get_named_property(env, argv[ARG_INDEX_THREE], "configJsonStr", &jsAppConfigJsonStr);
     ConvertFromJsValue(env, jsAppConfigJsonStr, config.appConfigJsonStr_);
 
-    TLOGI(WmsLogTag::DEFAULT, "SetAppForceLandscapeConfig bundleName: %{public}s, mode: %{public}d, "
-        "supportSplit: %{public}d, ignoreOrientation: %{public}d, containsSysConfig: %{public}d, "
-        "containsAppConfig: %{public}d, isSysRouter: %{public}d, sysConfigJsonStr: %{public}s,"
+    TLOGI(WmsLogTag::DEFAULT, "SetAppForceLandscapeConfig bundleName: %{public}s, containsSysConfig: %{public}d, "
+        "containsAppConfig: %{public}d, isSysRouter: %{public}d, sysConfigJsonStr: %{public}s, "
         "sysHomePage: %{public}s, isAppRouter: %{public}d, appConfigJsonStr: %{public}s",
-        bundleName.c_str(), config.mode_, config.supportSplit_, config.ignoreOrientation_,
-        config.containsSysConfig_, config.containsAppConfig_, config.isSysRouter_,
+        bundleName.c_str(), config.containsSysConfig_, config.containsAppConfig_, config.isSysRouter_,
         config.sysConfigJsonStr_.c_str(), config.sysHomePage_.c_str(), config.isAppRouter_,
         config.appConfigJsonStr_.c_str());
     SceneSessionManager::GetInstance().SetAppForceLandscapeConfig(bundleName, config);

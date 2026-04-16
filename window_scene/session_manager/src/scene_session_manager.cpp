@@ -171,8 +171,6 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 0;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 0;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
-constexpr int32_t FORCE_SPLIT_MODE = 5;
-constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t SHOWABILITY_SCENARIOS = 0x00000002;
 const std::string FB_PANEL_NAME = "Fb_panel";
 constexpr std::size_t MAX_APP_BOUND_TRAY_MAP_SIZE = 50;
@@ -3052,6 +3050,9 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
             sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
                 const std::string& action, const std::string& message) {
                 return this->NotifyPageEnableFunc(bundleName, windowId, action, message);
+            });
+            sceneSession->RegisterSetSelectModeCallback([this](SelectMode selectMode) {
+                return this->SetSelectMode(selectMode);
             });
         }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
@@ -15999,7 +16000,7 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
             if (isVirtualDisplay) {
                 globalScaledRect.posY_ -= GetFoldLowerScreenPosY();
             }
-            HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
+            HookWindowInfo hookWindowInfo = session->GetSessionProperty()->GetHookWindowInfo();
             if (hookWindowInfo.enableHookWindow && !session->IsFullScreenInForceSplit() &&
                 WindowHelper::IsMainWindow(session->GetWindowType()) &&
                 !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
@@ -16273,7 +16274,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                 where, session->GetWindowId(), displayId);
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: wid=%{public}d, globalDisplayRect=%{public}s",
                 where, static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
-            HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
+            HookWindowInfo hookWindowInfo = session->GetSessionProperty()->GetHookWindowInfo();
             if (hookWindowInfo.enableHookWindow && !session->IsFullScreenInForceSplit() &&
                 WindowHelper::IsMainWindow(session->GetWindowType()) &&
                 !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
@@ -17805,7 +17806,7 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     dmHookInfo.displayOrientation_ = 0;
     dmHookInfo.enableHookDisplayOrientation_ = false;
     {
-        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        std::shared_lock lock(fullScreenInForceSplitUidSetMutex_);
         dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
     }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
@@ -17831,44 +17832,21 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
         .posX_ = hookInfo.actualRect_.posX_, .posY_ = hookInfo.actualRect_.posY_,
     .width_ = hookInfo.actualRect_.width_, .height_ = hookInfo.actualRect_.height_};
     {
-        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        std::shared_lock lock(fullScreenInForceSplitUidSetMutex_);
         dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
     }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
 
-HookWindowInfo SceneSessionManager::GetAppHookWindowInfo(const std::string& bundleName)
-{
-    if (bundleName.empty()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Empty bundle name requested");
-        return {};
-    }
-    std::shared_lock lock(appHookWindowInfoMapMutex_);
-    const auto& it = appHookWindowInfoMap_.find(bundleName);
-    if (it == appHookWindowInfoMap_.end()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "app: %{public}s, hookWindowInfo not find", bundleName.c_str());
-        return {};
-    }
-    return it->second;
-}
-
 void SceneSessionManager::UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool isOpenFreeMultiWindow)
 {
-    std::unordered_set<std::string> bundleNames;
-    {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
-        for (auto& [bundleName, hookWindowInfo] : appHookWindowInfoMap_) {
+    std::shared_lock lock(sceneSessionMapMutex_);
+    for (const auto& [_, session] : sceneSessionMap_) {
+        if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {
+            auto hookWindowInfo = session->GetSessionProperty()->GetHookWindowInfo();
             hookWindowInfo.enableHookWindow = !isOpenFreeMultiWindow;
-            bundleNames.insert(bundleName);
-        }
-    }
-    {
-        std::shared_lock lock(sceneSessionMapMutex_);
-        for (const auto& [_, session] : sceneSessionMap_) {
-            if (session && bundleNames.count(session->GetSessionInfo().bundleName_)) {
-                session->NotifyAppHookWindowInfoUpdated();
-            }
+            session->UpdateHookWindowInfo(hookWindowInfo);
         }
     }
 }
@@ -18121,31 +18099,12 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
     }
 
     TLOGI(WmsLogTag::WMS_COMPAT,
-        "bundleName:%{public}s, config:[mode_%{public}d, supportSplit_%{public}d, ignoreOrientation_%{public}d, "
-        "containsSysConfig_%{public}d, isSysRouter_%{public}d, sysHomePage_%{public}s, sysConfigJsonStr_%{public}s, "
-        "containsAppConfig_%{public}d, isAppRouter_%{public}d, appConfigJsonStr_%{public}s]",
-        bundleName.c_str(),
-        config.mode_,
-        config.supportSplit_,
-        config.ignoreOrientation_,
-        config.containsSysConfig_,
-        config.isSysRouter_,
-        config.sysHomePage_.c_str(),
-        config.sysConfigJsonStr_.c_str(),
-        config.containsAppConfig_,
-        config.isAppRouter_,
+        "bundleName:%{public}s, config:[containsSysConfig_%{public}d, isSysRouter_%{public}d, sysHomePage_%{public}s, "
+        "sysConfigJsonStr_%{public}s, containsAppConfig_%{public}d, isAppRouter_%{public}d, "
+        "appConfigJsonStr_%{public}s]",
+        bundleName.c_str(), config.containsSysConfig_, config.isSysRouter_, config.sysHomePage_.c_str(),
+        config.sysConfigJsonStr_.c_str(), config.containsAppConfig_, config.isAppRouter_,
         config.appConfigJsonStr_.c_str());
-    if (preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE ||
-        preConfig.mode_ == NAV_FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) {
-        //Notify the client of the mode change
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& iter : sceneSessionMap_) {
-            auto& session = iter.second;
-            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
-                session->NotifyAppForceLandscapeConfigUpdated();
-            }
-        }
-    }
     return WSError::WS_OK;
 }
 
@@ -20497,10 +20456,10 @@ void SceneSessionManager::DeleteAllOutline(const sptr<IRemoteObject>& remoteObje
 void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen)
 {
     if (isFullScreen) {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
+        std::unique_lock lock(fullScreenInForceSplitUidSetMutex_);
         fullScreenInForceSplitUidSet_.insert(uid);
     } else {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
+        std::unique_lock lock(fullScreenInForceSplitUidSetMutex_);
         fullScreenInForceSplitUidSet_.erase(uid);
     }
     ScreenSessionManagerClient::GetInstance().NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);

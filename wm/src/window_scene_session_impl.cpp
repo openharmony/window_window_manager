@@ -8025,7 +8025,7 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
         windowPropertyInfo.globalDisplayRect.ToString().c_str());
     HookWindowSizeByHookWindowInfo(windowPropertyInfo.windowRect);
     HookWindowSizeByHookWindowInfo(windowPropertyInfo.globalDisplayRect);
-    auto hookWindowInfo = GetAppHookWindowInfo();
+    auto hookWindowInfo = GetProperty()->GetHookWindowInfo();
     if (hookWindowInfo.drawableRectHook) {
         HookWindowSizeByHookWindowInfo(windowPropertyInfo.drawableRect);
     }
@@ -8135,7 +8135,7 @@ WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     WindowType winType = GetType();
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.supportSplit_ > 0) {
+        (config.containsSysConfig_ || config.containsAppConfig_)) {
         SetForceSplitConfig(config);
         return WSError::WS_OK;
     }
@@ -8205,19 +8205,6 @@ WMError WindowSceneSessionImpl::GetSelectMode(SelectMode& selectMode)
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->GetSelectMode(selectMode);
-}
-
-WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
-    const WindowType windowType = GetType();
-    if (!WindowHelper::IsMainWindow(windowType)) {
-        return WSError::WS_DO_NOTHING;
-    }
-
-    HookWindowInfo hookWindowInfo = property_->GetHookWindowInfo();
-    SetAppHookWindowInfo(hookWindowInfo);
-    return WSError::WS_OK;
 }
 
 WSError WindowSceneSessionImpl::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)

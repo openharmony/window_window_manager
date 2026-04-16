@@ -1608,22 +1608,6 @@ HWTEST_F(SessionStageStubTest, HandleUpdateGlobalDisplayRectFromServerSuccess, T
 }
 
 /**
- * @tc.name: HandleNotifyAppHookWindowInfoUpdated
- * @tc.desc: test function : HandleNotifyAppHookWindowInfoUpdated
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyAppHookWindowInfoUpdated, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_HOOK_WINDOW_INFO_UPDATED);
-    ASSERT_TRUE(sessionStageStub_ != nullptr);
-    EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
-}
-
-/**
  * @tc.name: HandleUpdateAppHookWindowInfo
  * @tc.desc: test function : HandleUpdateAppHookWindowInfo
  * @tc.type: FUNC

@@ -654,7 +654,6 @@ public:
     void SetHasRootSceneRequestedVsyncFunc(HasRootSceneRequestedVsyncFunc&& func);
     void SetRequestVsyncByRootSceneWhenModeChangeFunc(RequestVsyncByRootSceneWhenModeChangeFunc&& func);
     WMError UpdateWindowModeByIdForUITest(int32_t windowId, int32_t updateMode) override;
-    HookWindowInfo GetAppHookWindowInfo(const std::string& bundleName);
     void UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool isOpenFreeMultiWindow);
     void UpdateRsCmdBlockingCount(bool enable);
     int32_t GetOrResetRsCmdBlockingCount();
@@ -1737,8 +1736,7 @@ private:
     bool singleHandModeEnable_ = true;
     SingleHandBackgroundLayoutConfig singleHandBackgroundLayoutConfig_;
     std::unordered_set<std::string> appsWithDeduplicatedWindowStatus_;
-    std::shared_mutex appHookWindowInfoMapMutex_;
-    std::unordered_map<std::string, HookWindowInfo> appHookWindowInfoMap_;
+    std::shared_mutex fullScreenInForceSplitUidSetMutex_;
     void InitVsyncStation();
     void BindVsyncStation(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);

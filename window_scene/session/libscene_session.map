@@ -154,6 +154,7 @@
             OHOS::Rosen::SceneSession::UpdatePrivacyModeControlInfo*;
             OHOS::Rosen::SceneSession::MaskSupportEnterWaterfallMode*;
             OHOS::Rosen::SceneSession::RegisterSelectModeFunc*;
+            OHOS::Rosen::SceneSession::RegisterSetSelectModeCallback*;
             OHOS::Rosen::SceneSession::RegisterGetIsDockAutoHideFunc*;
             OHOS::Rosen::SceneSession::RemoveFingerPointerDownStatus*;
             OHOS::Rosen::SceneSession::SetGetAllAppUseControlMapFunc*;

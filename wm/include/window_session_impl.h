@@ -555,7 +555,6 @@ public:
     WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override { return WSError::WS_OK; }
     WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
-    WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override { return WSError::WS_DO_NOTHING; }
     WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) override
         { return WSError::WS_DO_NOTHING; }
@@ -964,7 +963,6 @@ protected:
     std::atomic_bool hasSetEnableDrag_ = false;
     void HookWindowSizeByHookWindowInfo(Rect& rect);
     void SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo);
-    HookWindowInfo GetAppHookWindowInfo();
     virtual WMError GetSelectMode(SelectMode& selectMode) { return WMError::WM_OK; }
 
     /*
@@ -1314,8 +1312,6 @@ private:
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<WindowStatus> lastStatusWhenNotifyParentStatusChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
-    std::shared_mutex hookWindowInfoMutex_;
-    HookWindowInfo hookWindowInfo_;
     std::atomic_bool notifySizeChangeFlag_ = false;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
     mutable std::mutex globalScaledRectMutex_;
