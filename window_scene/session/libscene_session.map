@@ -50,6 +50,8 @@
             OHOS::Rosen::SceneSession::IsDelayFocusChange*;
             OHOS::Rosen::SceneSession::IsShowOnLockScreen*;
             OHOS::Rosen::SceneSession::NotifyTouchOutside*;
+            OHOS::Rosen::SceneSession::SetIsShowOnDock*;
+            OHOS::Rosen::SceneSession::GetIsShowOnDock*;
             OHOS::Rosen::SceneSession::RemoveToastSession*;
             OHOS::Rosen::SceneSession::SetCurrentRotation*;
             OHOS::Rosen::SceneSession::SetPiPControlEvent*;
