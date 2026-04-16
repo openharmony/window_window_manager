@@ -37,6 +37,7 @@ public:
     static void Finalizer(ani_env *env, ani_long nativeObj);
     ani_ref GetAniRef() {return aniRef_;}
     void SetAniRef(const ani_ref &aniRef) {aniRef_ = aniRef;}
+    sptr<FloatViewController> GetController() const;
     static void StartFloatViewAni(ani_env *env, ani_object obj, ani_long nativeObj);
     static void StopFloatViewAni(ani_env *env, ani_object obj, ani_long nativeObj);
     static void SetUIContextAni(ani_env *env, ani_object obj, ani_long nativeObj,
