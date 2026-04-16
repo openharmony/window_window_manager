@@ -7447,6 +7447,7 @@ ScreenId ScreenSessionManager::CreateVirtualScreen(VirtualScreenOption option,
     virtualScreenCount_ = virtualScreenCount_ + 1;
     NotifyCaptureStatusChanged();
     SetOptionConfig(smsScreenId, option);
+    ReportCreateVirtualScreen(smsScreenId);
     return smsScreenId;
 }
 
@@ -7826,6 +7827,7 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId, bool isCal
     virtualScreenCount_ = virtualScreenCount_ > 0 ? virtualScreenCount_ - 1 : 0;
     NotifyCaptureStatusChanged();
     rsInterface_.RemoveVirtualScreen(rsScreenId);
+    ReportDestoryVirtualScreen(rsScreenId);
     return DMError::DM_OK;
 }
 
@@ -9556,6 +9558,7 @@ bool ScreenSessionManager::OnRemoteDied(const sptr<IRemoteObject>& agent)
         }
         TLOGNFI(WmsLogTag::DMS, "destroy screenId in OnRemoteDied: %{public}" PRIu64, screenId);
         DMError res = DestroyVirtualScreen(screenId);
+        ReportDestoryVirtualScreenDeath(screenId);
         if (res != DMError::DM_OK) {
             TLOGNFE(WmsLogTag::DMS, "destroy failed in OnRemoteDied: %{public}" PRIu64, screenId);
             ret = false;
@@ -11388,6 +11391,7 @@ void ScreenSessionManager::SwitchUser()
     }
     SwitchScbNodeHandle(userId, newScbPid, false);
     MockSessionManagerService::GetInstance().NotifyWMSConnected(userId, defaultId, false);
+    ReportUserSwitch(userId);
 #endif
 }
 
@@ -11623,6 +11627,7 @@ bool ScreenSessionManager::HandleSwitchPcMode()
         g_isPcDevice = false;
         ChangeWatchDogTimeInterval(SCREEN_SESSION_MANAGER_THREAD, NON_PC_WATCH_DOG_TIME_INTERVAL);
     }
+    ReportModeChange(g_isPcDevice);
     return g_isPcDevice;
 }
 
@@ -11807,12 +11812,13 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
             userSwitching_ = false;
         }
     }
+    auto userId = GetUserIdByCallingUid();
+    auto newScbPid = IPCSkeleton::GetCallingPid();
     {
         std::unique_lock<std::mutex> lock(oldScbPidsMutex_);
         SetClientProxy(client);
         SwitchModeHandleExternalScreen(isPcMode);
-        auto userId = GetUserIdByCallingUid();
-        auto newScbPid = IPCSkeleton::GetCallingPid();
+
         {
             std::lock_guard<std::recursive_mutex> lock(userPidMapMutex_);
             userPidMap_[userId] = newScbPid;
@@ -11849,6 +11855,7 @@ void ScreenSessionManager::SetClient(const sptr<IScreenSessionManagerClient>& cl
     }
     AddScbClientDeathRecipient(client, IPCSkeleton::GetCallingPid());
     SwitchUserResetDisplayNodeScreenId();
+    ReportUserSwitch(userId);
 }
 
 void ScreenSessionManager::SwitchUserResetDisplayNodeScreenId()
@@ -12586,6 +12593,98 @@ void ScreenSessionManager::CheckAndSendHiSysEvent(const std::string& eventName, 
     TLOGNFI(WmsLogTag::DMS, "%{public}s: Write HiSysEvent ret:%{public}d", eventName.c_str(), eventRet);
 }
 
+void ScreenSessionManager::ReportMultScreenChange(ScreenId mainScreenId, ScreenId secondaryScreenId,
+MultiScreenMode screenMode) const
+{
+    int32_t mode = static_cast<int32_t>(screenMode);
+    TLOGNFI(WmsLogTag::DMS, "ReportMultScreenChange screenMode: %{public}d", mode);
+    TLOGNFI(WmsLogTag::DMS, "mainScreenId: %{public}" PRIu64", secondaryScreenId:%{public}" PRIu64"",
+    mainScreenId, secondaryScreenId);
+    auto screenSession = GetScreenSession(secondaryScreenId);
+    if (!screenSession) {
+        TLOGNFE(WmsLogTag::DMS, "screenSession is nullptr");
+        return;
+    }
+    int connection_mode = static_cast<int32_t>(screenSession->GetIsRealScreen());
+    int32_t ret = HiSysEventWrite(
+    OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+    "SCREEN_CHANGE",
+    OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+    "MAIN_SCREEN_ID", mainScreenId,
+    "SECONDARY_SCREEN_ID", secondaryScreenId,
+    "CONNECTION_MODE", connection_mode,
+    "MULTISCREEN_MODE", mode);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportMultScreenChange Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
+void ScreenSessionManager::ReportCreateVirtualScreen(ScreenId ScreenId) const
+{
+    TLOGNFI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, ScreenId);
+    int32_t ret = HiSysEventWrite(
+    OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+    "SCREEN_CHANGE",
+    OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+    "CREATE_VIRTUAL_SCREEN", ScreenId);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportCreateVirtualScreen Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
+void ScreenSessionManager::ReportDestoryVirtualScreen(ScreenId ScreenId) const
+{
+    TLOGNFI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, ScreenId);
+    int32_t ret = HiSysEventWrite(
+    OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+    "SCREEN_CHANGE",
+    OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+    "DESTORY_VIRTUAL_SCREEN", ScreenId);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportDestoryVirtualScreen Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
+void ScreenSessionManager::ReportDestoryVirtualScreenDeath(ScreenId ScreenId) const
+{
+    TLOGNFI(WmsLogTag::DMS, "ScreenId: %{public}" PRIu64, ScreenId);
+    int32_t ret = HiSysEventWrite(
+    OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+    "SCREEN_CHANGE",
+    OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+    "DESTORY_VIRTUAL_SCREEN_DEATH", ScreenId);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportDestoryVirtualScreenDeath Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
+void ScreenSessionManager::ReportModeChange(bool isPcDevice) const
+{
+    int32_t mode = static_cast<int32_t>(isPcDevice);
+    TLOGNFI(WmsLogTag::DMS, "mode: %{public}d", mode);
+    int32_t ret = HiSysEventWrite(
+    OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+    "SCREEN_CHANGE",
+    OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+    "MODE_CHANGE", mode);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportModeChange Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
+void ScreenSessionManager::ReportUserSwitch(int32_t userId) const
+{
+    TLOGNFI(WmsLogTag::DMS, "userId: %{public}d", userId);
+    int32_t ret = HiSysEventWrite(
+    OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+    "SCREEN_CHANGE",
+    OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+    "USER_SWITCH", userId);
+    if (ret != 0) {
+        TLOGE(WmsLogTag::DMS, "ReportUserSwitch Write HiSysEvent error, ret: %{public}d", ret);
+    }
+}
+
 DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, bool isProxy)
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -13205,6 +13304,7 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
         SetScreenCastInfo(secondaryScreenId, mainScreenId, combination);
     }
     NotifyScreenModeChange();
+    ReportMultScreenChange(mainScreenId, secondaryScreenId, screenMode);
 #endif
     return DMError::DM_OK;
 }
