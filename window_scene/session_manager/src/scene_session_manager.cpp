@@ -19468,15 +19468,15 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::GetAppWindowShowingInfosByBundleName(const std::string& bundleName,
-    int32_t appIndex, const std::string& appInstanceKey, std::vector<AppWindowShowingInfo>& windowInfos)
+WMError SceneSessionManager::GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+    std::vector<AppWindowShowingInfo>& windowInfos)
 {
-    if (bundleName.empty()) {
+    if (appInfo.bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_MAIN, "bundleName is empty");
         return WMError::WM_ERROR_INVALID_PARAM;
     }
     std::vector<sptr<SceneSession>> sceneSessions;
-    GetSceneSessionsByAppInstance(bundleName, appIndex, appInstanceKey, sceneSessions);
+    GetSceneSessionsByAppInstance(appInfo.bundleName, appInfo.appIndex, appInfo.appInstanceKey, sceneSessions);
     windowInfos.clear();
     for (const auto& session : sceneSessions) {
         if (session == nullptr) {

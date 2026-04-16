@@ -525,8 +525,8 @@ public:
      * @param windowInfos The window information list for output
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
-    virtual WMError GetAppWindowShowingInfosByBundleName(const std::string& bundleName, int32_t appIndex = 0,
-        const std::string& appInstanceKey = "", std::vector<AppWindowShowingInfo>& windowInfos) = 0;
+    virtual WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+        std::vector<AppWindowShowingInfo>& windowInfos) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_MANAGER_INTERFACE_H

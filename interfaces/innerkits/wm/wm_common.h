@@ -3587,6 +3587,35 @@ struct RecentSessionInfo : public Parcelable {
     RecentSessionState sessionState = RecentSessionState::DISCONNECT;
 };
 
+struct ApplicationInfo : public Parcelable {
+    ApplicationInfo() = default;
+    ApplicationInfo(const std::string& bundleName, int32_t appIndex = 0, const std::string& appInstanceKey = "")
+        : bundleName(bundleName), appIndex(appIndex), appInstanceKey(appInstanceKey) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteString(bundleName) &&
+               parcel.WriteInt32(appIndex) &&
+               parcel.WriteString(appInstanceKey);
+    }
+
+    static ApplicationInfo* Unmarshalling(Parcel& parcel)
+    {
+        ApplicationInfo* info = new ApplicationInfo();
+        if (!parcel.ReadString(info->bundleName) ||
+            !parcel.ReadInt32(info->appIndex) ||
+            !parcel.ReadString(info->appInstanceKey)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    std::string bundleName;
+    int32_t appIndex = 0;
+    std::string appInstanceKey;
+};
+
 struct AppWindowShowingInfo : public Parcelable {
     AppWindowShowingInfo() = default;
     AppWindowShowingInfo(int32_t persistentId) : persistentId(persistentId) {}

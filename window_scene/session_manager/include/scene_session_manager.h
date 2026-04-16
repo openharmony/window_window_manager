@@ -812,8 +812,8 @@ public:
     sptr<SceneSession> GetSessionForAppUseControl(const AppUseControlInfo& appUseControlInfo);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
-    WMError GetAppWindowShowingInfosByBundleName(const std::string& bundleName, int32_t appIndex = 0,
-        const std::string& appInstanceKey = "", std::vector<AppWindowShowingInfo>& windowInfos);
+    WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+        std::vector<AppWindowShowingInfo>& windowInfos);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
