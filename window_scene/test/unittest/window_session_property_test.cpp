@@ -2129,6 +2129,117 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFvTemplateInfo, TestSize.Level1
     property->UnmarshallingFvTemplateInfo(parcel, property);
     EXPECT_EQ(property->GetFvTemplateInfo().bindWindowId_, fvTemplateInfo.bindWindowId_);
 }
+
+/**
+ * @tc.name: SetForceSplitEnable001
+ * @tc.desc: SetForceSplitEnable and GetForceSplitEnable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetForceSplitEnable001, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    property->SetForceSplitEnable(true);
+    ASSERT_EQ(property->GetForceSplitEnable(), true);
+
+    property->SetForceSplitEnable(false);
+    ASSERT_EQ(property->GetForceSplitEnable(), false);
+}
+
+/**
+ * @tc.name: SetHookWindowInfo001
+ * @tc.desc: SetHookWindowInfo and GetHookWindowInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetHookWindowInfo001, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.5f;
+    hookInfo.drawableRectHook = true;
+
+    property->SetHookWindowInfo(hookInfo);
+    auto retInfo = property->GetHookWindowInfo();
+    ASSERT_EQ(retInfo.enableHookWindow, true);
+    ASSERT_EQ(retInfo.widthHookRatio, 0.5f);
+    ASSERT_EQ(retInfo.drawableRectHook, true);
+}
+
+/**
+ * @tc.name: MarshallingHookWindowInfo001
+ * @tc.desc: test MarshallingHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingHookWindowInfo001, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.6f;
+    property->SetHookWindowInfo(hookInfo);
+
+    Parcel parcel;
+    bool ret = property->MarshallingHookWindowInfo(parcel);
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: UnmarshallingHookWindowInfo001
+ * @tc.desc: test UnmarshallingHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingHookWindowInfo001, TestSize.Level1)
+{
+    Parcel parcel;
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.7f;
+    parcel.WriteParcelable(&hookInfo);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    WindowSessionProperty::UnmarshallingHookWindowInfo(parcel, property);
+    auto retInfo = property->GetHookWindowInfo();
+    ASSERT_EQ(retInfo.enableHookWindow, true);
+    ASSERT_EQ(retInfo.widthHookRatio, 0.7f);
+}
+
+/**
+ * @tc.name: MarshallingUnmarshallingWithHookWindowInfo
+ * @tc.desc: test Marshalling and Unmarshalling with HookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingUnmarshallingWithHookWindowInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetPersistentId(100);
+
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.8f;
+    hookInfo.drawableRectHook = true;
+    property->SetHookWindowInfo(hookInfo);
+    property->SetForceSplitEnable(true);
+
+    Parcel parcel;
+    bool ret = property->Marshalling(parcel);
+    ASSERT_EQ(true, ret);
+
+    sptr<WindowSessionProperty> targetProperty = property->Unmarshalling(parcel);
+    ASSERT_NE(targetProperty, nullptr);
+    ASSERT_EQ(targetProperty->GetHookWindowInfo().enableHookWindow, true);
+    ASSERT_EQ(targetProperty->GetHookWindowInfo().widthHookRatio, 0.8f);
+    ASSERT_EQ(targetProperty->GetHookWindowInfo().drawableRectHook, true);
+    ASSERT_EQ(targetProperty->GetForceSplitEnable(), true);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
