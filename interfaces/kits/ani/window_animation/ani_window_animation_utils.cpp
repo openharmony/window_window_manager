@@ -15,10 +15,20 @@
 
 #include "ani_window_animation_utils.h"
 
+#include <optional>
+
 #include <accesstoken_kit.h>
 #include <ipc_skeleton.h>
 #include <tokenid_kit.h>
 #include "window_manager_hilog.h"
+
+#define RETURN_IF_NULL(param, ...)                                             \
+    do {                                                                       \
+        if (!param) {                                                          \
+            TLOGE(WmsLogTag::DEFAULT, "[ANI] The %{public}s is null", #param); \
+            return __VA_ARGS__;                                                \
+        }                                                                      \
+    } while (0)
 
 namespace OHOS {
 namespace Rosen {
@@ -89,6 +99,64 @@ ani_object CreateAniUndefined(ani_env* env)
     return static_cast<ani_object>(aniRef);
 }
 
+/**
+ * @brief Get an optional property reference from an ANI object.
+ *
+ * @param env       ANI environment.
+ * @param aniObject Source ANI object.
+ * @param propName  Property name.
+ * @return ani_ref Reference to the property, or nullptr if not present/undefined/error.
+ */
+ani_ref GetOptionalProp(ani_env* env, ani_object aniObject, const char* propName)
+{
+    RETURN_IF_NULL(env, nullptr);
+    RETURN_IF_NULL(aniObject, nullptr);
+    RETURN_IF_NULL(propName, nullptr);
+
+    ani_ref propRef = nullptr;
+    ani_status ret = env->Object_GetPropertyByName_Ref(aniObject, propName, &propRef);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to get property %{public}s. ret: %{public}d", propName, ret);
+        return nullptr;
+    }
+    RETURN_IF_NULL(propRef, nullptr);
+
+    ani_boolean isUndefined = ANI_FALSE;
+    ret = env->Reference_IsUndefined(propRef, &isUndefined);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to check undefined for %{public}s. ret: %{public}d", propName, ret);
+        return nullptr;
+    }
+    if (isUndefined) {
+        TLOGD(WmsLogTag::DEFAULT, "[ANI] %{public}s is undefined.", propName);
+        return nullptr;
+    }
+    return propRef;
+}
+
+/**
+ * @brief Get an optional boolean property from an ANI object.
+ *
+ * @param env       ANI environment.
+ * @param aniObject Source ANI object.
+ * @param propName  Property name.
+ * @return std::optional<bool> Boolean value, or std::nullopt if not present/undefined/error.
+ */
+std::optional<bool> GetOptionalBoolProp(ani_env* env, ani_object aniObject, const char* propName)
+{
+    ani_ref boolRef = GetOptionalProp(env, aniObject, propName);
+    RETURN_IF_NULL(boolRef, std::nullopt);
+
+    ani_boolean boolValue = ANI_FALSE;
+    ani_status ret =
+        env->Object_CallMethodByName_Boolean(static_cast<ani_object>(boolRef), "toBoolean", ":z", &boolValue);
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] Failed to convert %{public}s to boolean. ret: %{public}d", propName, ret);
+        return std::nullopt;
+    }
+    return static_cast<bool>(boolValue);
+}
+
 std::string GetAnimationCurveItemName(WindowAnimationCurve curve)
 {
     std::string name = "LINEAR";
@@ -147,9 +215,9 @@ bool ParseDurationValue(ani_env* env, ani_object aniObject, ani_long& aniDuratio
         TLOGW(WmsLogTag::WMS_ANIMATION, "[ANI] Duration is undefined.");
         return false;
     }
-    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(durationRef), "unboxed", ":l", &aniDuration);
+    ret = env->Object_CallMethodByName_Long(static_cast<ani_object>(durationRef), "toLong", ":l", &aniDuration);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Unboxed duration value failed. %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] toLong duration value failed. %{public}d", ret);
         return false;
     }
     return true;
@@ -206,11 +274,11 @@ template<typename T>
 const char* GetClassName()
 {
     if (std::is_same<T, int>::value) {
-        return "Lstd/core/Int;";
+        return "std.core.Int";
     } else if (std::is_same<T, double>::value) {
-        return "Lstd/core/Double;";
+        return "std.core.Double";
     } else if (std::is_same<T, long>::value) {
-        return "Lstd/core/Long;";
+        return "std.core.Long";
     } else {
         return nullptr;
     }
@@ -220,11 +288,11 @@ template<typename T>
 const char* GetCtorSignature()
 {
     if (std::is_same<T, int>::value) {
-        return "I:V";
+        return "i:";
     } else if (std::is_same<T, double>::value) {
-        return "D:V";
+        return "d:";
     } else if (std::is_same<T, long>::value) {
-        return "J:V";
+        return "l:";
     } else {
         return nullptr;
     }
@@ -440,14 +508,14 @@ ani_object ConvertWindowAnimationOptionToAniValue(ani_env* env,
             [[fallthrough]];
         }
         case WindowAnimationCurve::INTERPOLATION_SPRING: {
-            ani_array_ref params = nullptr;
-            if (env->Array_New_Ref(aniClass, ANIMATION_PARAM_SIZE, static_cast<ani_ref>(CreateAniUndefined(env)),
+            ani_array params = nullptr;
+            if (env->Array_New(ANIMATION_PARAM_SIZE, static_cast<ani_ref>(CreateAniUndefined(env)),
                 &params) != ANI_OK) {
                 TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] create array failed");
                 return nullptr;
             }
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
-                if (env->Array_Set_Ref(params, i, CreateDouble(env, animationConfig.param[i])) != ANI_OK) {
+                if (env->Array_Set(params, i, CreateDouble(env, animationConfig.param[i])) != ANI_OK) {
                     TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] set params failed at %{public}d", i);
                     return nullptr;
                 }
@@ -495,10 +563,10 @@ bool ConvertTransitionAnimationFromAniValue(ani_env* env, ani_object aniObject,
     }
 
     ani_double aniOpacityValue = 0;
-    ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(aniOpacityObj), "unboxed", ":d",
+    ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(aniOpacityObj), "toDouble", ":d",
         &aniOpacityValue);
     if (ret != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Opacity unboxed failed. ret: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] Opacity toDouble failed. ret: %{public}d", ret);
         result = WmErrorCode::WM_ERROR_INVALID_PARAM;
         return false;
     }
@@ -593,10 +661,11 @@ bool ConvertWindowCreateParamsFromAniValue(ani_env* env, ani_object aniObject,
     } else {
         TLOGW(WmsLogTag::WMS_ANIMATION, "[ANI] There is no animationParams.");
     }
-    
+
+    bool isSystemCalling = IsSystemCalling();
     ani_ref aniAnimationSystemParams = nullptr;
     if (!CheckIsUndefinedAndGetProperty(env, aniObject, "systemAnimationParams", &aniAnimationSystemParams) &&
-        IsSystemCalling()) {
+        isSystemCalling) {
         windowCreateParams.animationSystemParams = std::make_shared<StartAnimationSystemOptions>();
         if (!ConvertStartAnimationSystemOptionsFromAniValue(env,
             static_cast<ani_object>(aniAnimationSystemParams), *(windowCreateParams.animationSystemParams))) {
@@ -604,6 +673,28 @@ bool ConvertWindowCreateParamsFromAniValue(ani_env* env, ani_object aniObject,
         }
     } else {
         TLOGW(WmsLogTag::WMS_ANIMATION, "[ANI] There is no systemAnimationParams.");
+    }
+    ani_ref aniNeedAnimation = nullptr;
+    ani_status status = env->Object_GetPropertyByName_Ref(aniObject, "needAnimation", &aniNeedAnimation);
+    if (status == ANI_OK) {
+        ani_boolean isUndefined = true;
+        if (env->Reference_IsUndefined(aniNeedAnimation, &isUndefined) == ANI_OK && !isUndefined) {
+            ani_boolean isNeeded = false;
+            ani_status boolStatus = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(aniNeedAnimation),
+                "toBoolean", ":z", &isNeeded);
+            if (boolStatus != ANI_OK) {
+                boolStatus = env->Object_GetPropertyByName_Boolean(aniObject, "needAnimation", &isNeeded);
+            }
+            if (boolStatus == ANI_OK) {
+                windowCreateParams.needAnimation = std::make_shared<bool>(static_cast<bool>(isNeeded));
+            }
+        }
+    }
+    if (isSystemCalling) {
+        windowCreateParams.isWindowLimitsForcible =
+            GetOptionalBoolProp(env, aniObject, "isWindowLimitsForcible").value_or(false);
+    } else {
+        windowCreateParams.isWindowLimitsForcible = false;
     }
     return true;
 }
@@ -705,13 +796,13 @@ bool ConvertWindowAnimationOptionFromAniValue(ani_env* env, ani_object aniAnimat
             }
             for (uint32_t i = 0; i < ANIMATION_PARAM_SIZE; ++i) {
                 ani_ref element;
-                ret = env->Array_Get_Ref(static_cast<ani_array_ref>(aniParam), i, &element);
+                ret = env->Array_Get(static_cast<ani_array>(aniParam), i, &element);
                 if (ret != ANI_OK) {
                     result = WmErrorCode::WM_ERROR_INVALID_PARAM;
                     return false;
                 }
                 ani_double value = 0;
-                ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(element), "unboxed", ":d", &value);
+                ret = env->Object_CallMethodByName_Double(static_cast<ani_object>(element), "toDouble", ":d", &value);
                 if (ret != ANI_OK) {
                     result = WmErrorCode::WM_ERROR_INVALID_PARAM;
                     return false;

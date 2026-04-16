@@ -78,6 +78,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         mainWindow_ = mainWindow;
     }
     mainWindowId_ = mainWindow->GetWindowId();
+    if (listener != nullptr) {
+        listener->SetIsWindowSceneListener(true);
+    }
     mainWindow->RegisterLifeCycleListener(listener);
 
     // report when application startup request window
@@ -100,10 +103,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
     if (context != nullptr) {
         option->SetBundleName(context->GetBundleName());
         std::string moduleName = context->GetHapModuleInfo() ? context->GetHapModuleInfo()->moduleName : "";
-        if (!moduleName.empty()) {
-            isModuleAbilityHookEnd =
-                SingletonContainer::Get<WindowManager>().IsModuleHookOff(isModuleAbilityHookEnd, moduleName);
-        }
+        TLOGI(WmsLogTag::WMS_MAIN, "set isModuleAbilityHookEnd");
+        isModuleAbilityHookEnd =
+            SingletonContainer::Get<WindowManager>().IsModuleHookOff(isModuleAbilityHookEnd, moduleName);
     }
     auto mainWindow = SingletonContainer::Get<StaticCall>()
         .CreateWindow(option, context, iSession, identityToken, isModuleAbilityHookEnd);
@@ -116,6 +118,9 @@ WMError WindowScene::Init(DisplayId displayId, const std::shared_ptr<AbilityRunt
         mainWindow_ = mainWindow;
     }
     mainWindowId_ = mainWindow->GetWindowId();
+    if (listener != nullptr) {
+        listener->SetIsWindowSceneListener(true);
+    }
     mainWindow->RegisterLifeCycleListener(listener);
 
     // report when application startup request window
@@ -155,26 +160,29 @@ std::vector<sptr<Window>> WindowScene::GetSubWindow()
     return SingletonContainer::Get<StaticCall>().GetSubWindow(parentId);
 }
 
-WMError WindowScene::GoForeground(uint32_t reason)
+WMError WindowScene::GoForeground(uint32_t reason, bool isGamePreLaunch)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "reason: %{public}u", reason);
+    TLOGI(WmsLogTag::WMS_MAIN, "reason: %{public}u isGamePreLaunch: %{public}d", reason, isGamePreLaunch);
     auto mainWindow = GetMainWindow();
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    return mainWindow->Show(reason);
+    mainWindow->SetIsGamePreLaunch(isGamePreLaunch);
+    WMError err = mainWindow->Show(reason);
+    mainWindow->ClearIsGamePreLaunch();
+    return err;
 }
 
-WMError WindowScene::GoResume()
+WMError WindowScene::GoResume(bool isGamePreLaunch)
 {
-    TLOGI(WmsLogTag::WMS_MAIN, "in");
+    TLOGI(WmsLogTag::WMS_MAIN, "in isGamePreLaunch: %{public}d", isGamePreLaunch);
     auto mainWindow = GetMainWindow();
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "failed, because main window is null");
         return WMError::WM_ERROR_NULLPTR;
     }
-    mainWindow->Resume();
+    mainWindow->Resume(isGamePreLaunch);
     return WMError::WM_OK;
 }
 

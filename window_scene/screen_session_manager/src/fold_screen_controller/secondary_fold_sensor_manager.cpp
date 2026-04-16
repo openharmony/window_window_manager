@@ -54,7 +54,7 @@ const int32_t FULL_STATUS_HEIGHT = 3;
 const int32_t GLOBAL_FULL_STATUS_WIDTH = 4;
 const int32_t SCREEN_HEIGHT = 5;
 const int32_t FULL_STATUS_OFFSET_X = 6;
-const int32_t PARAMS_VECTOR_SIZE = 7;
+const int32_t PARAMS_VECTOR_SIZE = 9;
 } // namespace
 WM_IMPLEMENT_SINGLE_INSTANCE(SecondaryFoldSensorManager);
 
@@ -78,6 +78,15 @@ void SecondaryFoldSensorManager::SetSensorFoldStateManager(sptr<SensorFoldStateM
     sensorFoldStateManager_ = sensorFoldStateManager;
 }
 
+void SecondaryFoldSensorManager::SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler)
+{
+    if (scheduler == nullptr) {
+        TLOGE(WmsLogTag::DMS, "scheduler is nullptr.");
+        return;
+    }
+    sensorFoldStateManager_->SetTaskScheduler(scheduler);
+}
+
 void SecondaryFoldSensorManager::RegisterPostureCallback()
 {
     int32_t ret = DMS::ScreenSensorMgr::GetInstance().SubscribeSensorCallback(
@@ -88,12 +97,33 @@ void SecondaryFoldSensorManager::RegisterPostureCallback()
     }
 }
 
+void SecondaryFoldSensorManager::UnRegisterPostureCallback()
+{
+    int ret = DMS::ScreenSensorMgr::GetInstance().UnSubscribeSensorCallback(SENSOR_TYPE_ID_POSTURE);
+    if (ret == SENSOR_SUCCESS) {
+        registerPosture_ = false;
+        TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "failed with ret: %{public}d", ret);
+    }
+}
+
 void SecondaryFoldSensorManager::RegisterHallCallback()
 {
     int32_t ret = DMS::ScreenSensorMgr::GetInstance().SubscribeSensorCallback(
         SENSOR_TYPE_ID_HALL_EXT, POSTURE_INTERVAL, SecondarySensorHallDataCallbackExt);
     if (ret == SENSOR_SUCCESS) {
         TLOGI(WmsLogTag::DMS, "RegisterHallCallback: success.");
+    }
+}
+
+void SecondaryFoldSensorManager::UnRegisterHallCallback()
+{
+    int ret = DMS::ScreenSensorMgr::GetInstance().UnSubscribeSensorCallback(SENSOR_TYPE_ID_HALL_EXT);
+    if (ret == SENSOR_SUCCESS) {
+        TLOGI(WmsLogTag::DMS, "success.");
+    } else {
+        TLOGE(WmsLogTag::DMS, "failed with ret: %{public}d", ret);
     }
 }
 

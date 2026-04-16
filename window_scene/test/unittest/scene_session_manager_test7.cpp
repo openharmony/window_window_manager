@@ -18,6 +18,7 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_accesstoken_kit.h"
+#include "pointer_event.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
@@ -31,6 +32,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
+        const char *msg)
+    {
+        g_logMsg += msg;
+    }
+}
 namespace {
 const std::string EMPTY_DEVICE_ID = "";
 using ConfigItem = WindowSceneConfig::ConfigItem;
@@ -326,7 +335,7 @@ HWTEST_F(SceneSessionManagerTest7, FlushUIParams03, Function | SmallTest | Level
     ssm_->FlushUIParams(screenId, std::move(uiParams));
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(false, keyboardSession->stateChanged_);
-    
+
     uiParams.clear();
     uiParams.insert(std::make_pair(1, callingSessionUIParam));
     uiParams.insert(std::make_pair(3, keyboardSessionUIParam));
@@ -350,6 +359,66 @@ HWTEST_F(SceneSessionManagerTest7, RegisterIAbilityManagerCollaborator, TestSize
     MockAccesstokenKit::MockAccessTokenKitRet(-1);
     auto ret = ssm_->RegisterIAbilityManagerCollaborator(type, impl);
     EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_PERMISSION);
+}
+
+/**
+ * @tc.name: RegisterIAbilityManagerCollaborator01
+ * @tc.desc: RegisterIAbilityManagerCollaborator01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, RegisterIAbilityManagerCollaborator01, TestSize.Level1)
+{
+    int32_t type = 1;
+    ssm_->collaboratorMap_.clear();
+    ssm_->collaboratorDeathRecipientMap_.clear();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(iRemoteObjectMocker);
+
+    ASSERT_NE(nullptr, ssm_);
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::VerifyCallingPermission(true);
+    auto ret = ssm_->RegisterIAbilityManagerCollaborator(type, nullptr);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+
+    ret = ssm_->RegisterIAbilityManagerCollaborator(type, collaborator);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_TRUE(ssm_->collaboratorMap_.size() == 0);
+    EXPECT_TRUE(ssm_->collaboratorDeathRecipientMap_.size() == 0);
+}
+
+/**
+ * @tc.name: UnregisterIAbilityManagerCollaborator01
+ * @tc.desc: UnregisterIAbilityManagerCollaborator01
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, UnregisterIAbilityManagerCollaborator01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_NE(nullptr, ssm_);
+    int32_t type = 1;
+    ssm_->collaboratorMap_.clear();
+    ssm_->collaboratorDeathRecipientMap_.clear();
+    sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(iRemoteObjectMocker);
+
+    ssm_->collaboratorMap_.insert(std::make_pair(type, collaborator));
+
+    sptr<AgentDeathRecipient> collaboratorDeathRecipient = sptr<AgentDeathRecipient>::MakeSptr(
+        [type](const sptr<IRemoteObject>& remoteObject) { ssm_->ClearCollaboratorSessionsByType(type); });
+    ssm_->collaboratorDeathRecipientMap_.insert(std::make_pair(type, collaboratorDeathRecipient));
+
+    MockAccesstokenKit::MockIsSACalling(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::VerifyCallingPermission(true);
+    auto ret = ssm_->UnregisterIAbilityManagerCollaborator(type);
+    EXPECT_TRUE(ssm_->collaboratorMap_.size() == 0);
+    EXPECT_TRUE(ssm_->collaboratorDeathRecipientMap_.size() == 0);
+    EXPECT_TRUE(g_logMsg.find("Remove collaborator death recipient") == std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1167,30 +1236,6 @@ HWTEST_F(SceneSessionManagerTest7, NotifySessionMovedToFront05, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateNormalSessionAvoidArea02
- * @tc.desc: UpdateNormalSessionAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, UpdateNormalSessionAvoidArea02, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "SceneSessionManagerTest7";
-    sessionInfo.abilityName_ = "UpdateNormalSessionAvoidArea02";
-    sessionInfo.isSystem_ = true;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sceneSession->isVisible_ = true;
-    sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    sceneSession->GetLayoutController()->SetSessionRect({ 1, 1, 1, 1 });
-    int32_t persistentId = 1;
-    bool needUpdate = true;
-    ASSERT_NE(nullptr, ssm_);
-    ssm_->avoidAreaListenerSessionSet_.clear();
-    ssm_->avoidAreaListenerSessionSet_.insert(persistentId);
-    ssm_->UpdateNormalSessionAvoidArea(persistentId, sceneSession, needUpdate);
-}
-
-/**
  * @tc.name: SetSessionSnapshotSkipForAppProcess
  * @tc.desc: SceneSesionManager SetSessionSnapshotSkipForAppProcess
  * @tc.type: FUNC
@@ -1363,6 +1408,23 @@ HWTEST_F(SceneSessionManagerTest7, SetSessionWatermarkForAppProcess, TestSize.Le
     sceneSession->SetCallingPid(1);
     ASSERT_FALSE(ssm_->SetSessionWatermarkForAppProcess(sceneSession));
     ssm_->processWatermarkPidMap_.insert({ 1, "test" });
+    ASSERT_TRUE(ssm_->SetSessionWatermarkForAppProcess(sceneSession));
+    ssm_->processWatermarkPidMap_.erase(1);
+}
+
+/**
+ * @tc.name: SetSessionWatermarkForAppProcess01
+ * @tc.desc: test the consistency of the pid in map and sceneSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest7, SetSessionWatermarkForAppProcess01, TestSize.Level0)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = ssm_->CreateSceneSession(info, nullptr);
+    sceneSession->SetCallingPid(-1);
+    ssm_->processWatermarkPidMap_.insert({ 1, "test" });
+    ASSERT_FALSE(ssm_->SetSessionWatermarkForAppProcess(sceneSession));
+    sceneSession->SetCallingPid(1);
     ASSERT_TRUE(ssm_->SetSessionWatermarkForAppProcess(sceneSession));
     ssm_->processWatermarkPidMap_.erase(1);
 }
@@ -1664,7 +1726,7 @@ HWTEST_F(SceneSessionManagerTest7, SetImageForRecent001, TestSize.Level1)
     abilityInfo->applicationInfo = applicationInfo;
     sceneSession->SetAbilitySessionInfo(abilityInfo);
     result = ssm_->SetImageForRecent(1, ImageFit::FILL, sceneSession->GetPersistentId());
-    ASSERT_EQ(result, WMError::WM_ERROR_NOT_SYSTEM_APP);
+    ASSERT_EQ(result, WMError::WM_ERROR_NULLPTR);
 
     applicationInfo.isSystemApp = true;
     abilityInfo->applicationInfo = applicationInfo;

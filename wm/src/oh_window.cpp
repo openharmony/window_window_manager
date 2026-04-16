@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <mutex>
+#include <unordered_map>
 
 #include "image/pixelmap_native.h"
 #include "pixelmap_native_impl.h"
@@ -34,6 +35,19 @@
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 
+struct OH_WindowManager_FrameMetrics {
+    bool firstDrawFrame;
+    uint64_t inputHandlingDuration = 0;
+    uint64_t layoutMeasureDuration = 0;
+    uint64_t vsyncTimestamp = 0;
+};
+
+struct OH_WindowManager_DensityInfo {
+    float defaultDensity = OHOS::Rosen::UNDEFINED_DENSITY;
+    float systemDensity = OHOS::Rosen::UNDEFINED_DENSITY;
+    float customDensity = OHOS::Rosen::UNDEFINED_DENSITY;
+};
+
 using namespace OHOS::Rosen;
 
 namespace OHOS {
@@ -42,6 +56,7 @@ namespace {
 constexpr uint32_t NORMAL_STATE_CHANGE = 0;
 constexpr bool SHOW_WITH_NO_ANIMATION = false;
 constexpr bool SHOW_WITH_FOCUS = true;
+const int32_t MAX_SESSION_LIMIT_ALL_APP = 512;
 std::shared_ptr<OHOS::AppExecFwk::EventHandler> g_eventHandler;
 std::once_flag g_onceFlagForInitEventHandler;
 
@@ -127,6 +142,46 @@ int32_t OH_WindowManager_IsWindowShown(int32_t windowId, bool* isShow)
     return static_cast<int32_t>(OHOS::Rosen::IsWindowShownInner(windowId, isShow));
 }
 
+int32_t OH_WindowManager_FrameMetrics_IsFirstDrawFrame(
+    const OH_WindowManager_FrameMetrics* metrics, bool* isFirstDrawFrame)
+{
+    if (metrics == nullptr || isFirstDrawFrame == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *isFirstDrawFrame = metrics->firstDrawFrame;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetInputHandlingDuration(
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+{
+    if (metrics == nullptr || duration == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *duration = metrics->inputHandlingDuration;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetLayoutMeasureDuration(
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* duration)
+{
+    if (metrics == nullptr || duration == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *duration = metrics->layoutMeasureDuration;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_FrameMetrics_GetVsyncTimestamp(
+    const OH_WindowManager_FrameMetrics* metrics, uint64_t* timestamp)
+{
+    if (metrics == nullptr || timestamp == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *timestamp = metrics->vsyncTimestamp;
+    return WindowManager_ErrorCode::OK;
+}
+
 namespace {
 #define WINDOW_MANAGER_FREE_MEMORY(ptr) \
     do { \
@@ -135,6 +190,105 @@ namespace {
             (ptr) = NULL; \
         } \
     } while (0)
+
+class OHWindowFrameMetricsMeasuredListener : public IFrameMetricsChangedListener {
+public:
+    OHWindowFrameMetricsMeasuredListener(int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
+        : windowId_(windowId), measuredCallback_(callback) {}
+    ~OHWindowFrameMetricsMeasuredListener() override = default;
+
+    void OnFrameMetricsChanged(const FrameMetrics& metrics) override
+    {
+        if (measuredCallback_ == nullptr) {
+            return;
+        }
+        OH_WindowManager_FrameMetrics frameMetrics;
+        frameMetrics.firstDrawFrame = metrics.firstDrawFrame_;
+        frameMetrics.inputHandlingDuration = metrics.inputHandlingDuration_;
+        frameMetrics.layoutMeasureDuration = metrics.layoutMeasureDuration_;
+        frameMetrics.vsyncTimestamp = metrics.vsyncTimestamp_;
+        measuredCallback_(windowId_, &frameMetrics);
+    }
+
+private:
+    int32_t windowId_ = 0;
+    OH_WindowManager_FrameMetricsMeasuredCallback measuredCallback_ = nullptr;
+};
+
+std::unordered_map<int32_t,
+    std::unordered_map<uintptr_t, OHOS::sptr<OHWindowFrameMetricsMeasuredListener>>> g_frameMetricsMeasuredCbMap;
+
+class OHDensityInfoChangeListener : public ISystemDensityChangeListener,
+                                    public IDisplayIdChangeListener,
+                                    public IWindowDensityChangeListener {
+public:
+    OHDensityInfoChangeListener(int32_t windowId, OH_WindowManager_DensityInfoCallback callback)
+        : windowId_(windowId), callback_(callback) {}
+    ~OHDensityInfoChangeListener() override = default;
+
+    void OnSystemDensityChanged(float) override
+    {
+        NotifyDensityInfoChanged();
+    }
+
+    void OnDisplayIdChanged(DisplayId) override
+    {
+        NotifyDensityInfoChanged();
+    }
+
+    void OnWindowDensityChanged(float) override
+    {
+        NotifyDensityInfoChanged();
+    }
+
+private:
+    void NotifyDensityInfoChanged()
+    {
+        if (callback_ == nullptr) {
+            return;
+        }
+        auto window = Window::GetWindowWithId(windowId_);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window is null, windowId:%{public}d", windowId_);
+            return;
+        }
+        WindowDensityInfo densityInfo;
+        if (window->GetWindowDensityInfo(densityInfo) != WMError::WM_OK) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowDensityInfo failed, windowId:%{public}d", windowId_);
+            return;
+        }
+        bool shouldNotify = false;
+        {
+            std::lock_guard<std::mutex> lock(callbackMutex_);
+            if (!hasCallbackDensity_ ||
+                !MathHelper::NearEqual(lastDensityInfo_.defaultDensity, densityInfo.defaultDensity) ||
+                !MathHelper::NearEqual(lastDensityInfo_.systemDensity, densityInfo.systemDensity) ||
+                !MathHelper::NearEqual(lastDensityInfo_.customDensity, densityInfo.customDensity)) {
+                lastDensityInfo_ = densityInfo;
+                hasCallbackDensity_ = true;
+                shouldNotify = true;
+            }
+        }
+        if (!shouldNotify) {
+            return;
+        }
+        OH_WindowManager_DensityInfo densityInfoInner {
+            densityInfo.defaultDensity, densityInfo.systemDensity, densityInfo.customDensity
+        };
+        callback_(windowId_, &densityInfoInner);
+    }
+
+    int32_t windowId_ = 0;
+    OH_WindowManager_DensityInfoCallback callback_ = nullptr;
+    std::mutex callbackMutex_;
+    bool hasCallbackDensity_ = false;
+    WindowDensityInfo lastDensityInfo_;
+};
+
+std::mutex g_densityInfoChangeCallbackMutex;
+std::unordered_map<int32_t, std::unordered_map<uintptr_t, OHOS::sptr<OHDensityInfoChangeListener>>>
+    g_densityInfoChangeCallbackMap;
+
 
 /*
  * Used to map from WMError to WindowManager_ErrorCode.
@@ -159,6 +313,214 @@ const std::unordered_map<WindowType, WindowManager_WindowType> OH_WINDOW_TO_WIND
     { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW,     WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_MAIN   },
     { WindowType::WINDOW_TYPE_FLOAT,               WindowManager_WindowType::WINDOW_MANAGER_WINDOW_TYPE_FLOAT  },
 };
+
+WindowManager_ErrorCode ConvertWMErrorToWindowErrorCode(WMError ret)
+{
+    auto iter = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret);
+    if (iter == OH_WINDOW_TO_ERROR_CODE_MAP.end()) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    return iter->second;
+}
+
+void FillDensityInfoInner(const WindowDensityInfo& src, OH_WindowManager_DensityInfo& dst)
+{
+    dst.defaultDensity = src.defaultDensity;
+    dst.systemDensity = src.systemDensity;
+    dst.customDensity = src.customDensity;
+}
+
+WindowManager_ErrorCode GetDensityInfoInner(int32_t windowId, OH_WindowManager_DensityInfo& densityInfo)
+{
+    auto window = Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    WindowDensityInfo innerDensityInfo;
+    WMError ret = window->GetWindowDensityInfo(innerDensityInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "GetWindowDensityInfo failed, windowId:%{public}d ret:%{public}d",
+            windowId, static_cast<int32_t>(ret));
+        return ConvertWMErrorToWindowErrorCode(ret);
+    }
+    FillDensityInfoInner(innerDensityInfo, densityInfo);
+    return WindowManager_ErrorCode::OK;
+}
+
+bool FindDensityInfoChangeListener(int32_t windowId, uintptr_t callbackId,
+    OHOS::sptr<OHDensityInfoChangeListener>& listener)
+{
+    auto windowIter = g_densityInfoChangeCallbackMap.find(windowId);
+    if (windowIter == g_densityInfoChangeCallbackMap.end()) {
+        return false;
+    }
+    auto callbackIter = windowIter->second.find(callbackId);
+    if (callbackIter == windowIter->second.end()) {
+        return false;
+    }
+    listener = callbackIter->second;
+    return true;
+}
+
+void EraseDensityInfoChangeListener(int32_t windowId, uintptr_t callbackId)
+{
+    auto windowIter = g_densityInfoChangeCallbackMap.find(windowId);
+    if (windowIter == g_densityInfoChangeCallbackMap.end()) {
+        return;
+    }
+    windowIter->second.erase(callbackId);
+    if (windowIter->second.empty()) {
+        g_densityInfoChangeCallbackMap.erase(windowIter);
+    }
+}
+
+WindowManager_ErrorCode RegisterDensityInfoChangeListenerToWindow(const OHOS::sptr<Window>& window,
+    const OHOS::sptr<OHDensityInfoChangeListener>& listener)
+{
+    WMError ret = window->RegisterSystemDensityChangeListener(listener);
+    if (ret != WMError::WM_OK) {
+        return ConvertWMErrorToWindowErrorCode(ret);
+    }
+    IDisplayIdChangeListenerSptr displayIdChangeListener = listener;
+    ret = window->RegisterDisplayIdChangeListener(displayIdChangeListener);
+    if (ret != WMError::WM_OK) {
+        window->UnregisterSystemDensityChangeListener(listener);
+        return ConvertWMErrorToWindowErrorCode(ret);
+    }
+    IWindowDensityChangeListenerSptr windowDensityChangeListener = listener;
+    ret = window->RegisterWindowDensityChangeListener(windowDensityChangeListener);
+    if (ret != WMError::WM_OK) {
+        window->UnregisterSystemDensityChangeListener(listener);
+        window->UnregisterDisplayIdChangeListener(displayIdChangeListener);
+        return ConvertWMErrorToWindowErrorCode(ret);
+    }
+    return WindowManager_ErrorCode::OK;
+}
+
+WindowManager_ErrorCode RegisterDensityInfoChangeCallbackInner(
+    int32_t windowId, OH_WindowManager_DensityInfoCallback callback, uintptr_t callbackId)
+{
+    auto window = Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "window is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
+        OHOS::sptr<OHDensityInfoChangeListener> listener = nullptr;
+        if (FindDensityInfoChangeListener(windowId, callbackId, listener)) {
+            return WindowManager_ErrorCode::OK;
+        }
+    }
+    auto listener = OHOS::sptr<OHDensityInfoChangeListener>::MakeSptr(windowId, callback);
+    if (listener == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    auto ret = RegisterDensityInfoChangeListenerToWindow(window, listener);
+    if (ret != WindowManager_ErrorCode::OK) {
+        return ret;
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
+        g_densityInfoChangeCallbackMap[windowId][callbackId] = listener;
+    }
+    return WindowManager_ErrorCode::OK;
+}
+
+WindowManager_ErrorCode UnregisterDensityInfoChangeCallbackInner(int32_t windowId, uintptr_t callbackId)
+{
+    OHOS::sptr<OHDensityInfoChangeListener> listener = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
+        if (!FindDensityInfoChangeListener(windowId, callbackId, listener)) {
+            return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+        }
+    }
+    auto window = Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
+        EraseDensityInfoChangeListener(windowId, callbackId);
+        return WindowManager_ErrorCode::OK;
+    }
+    WMError retSystem = window->UnregisterSystemDensityChangeListener(listener);
+    if (retSystem != WMError::WM_OK) {
+        return ConvertWMErrorToWindowErrorCode(retSystem);
+    }
+    IDisplayIdChangeListenerSptr displayIdChangeListener = listener;
+    WMError retDisplayId = window->UnregisterDisplayIdChangeListener(displayIdChangeListener);
+    if (retDisplayId != WMError::WM_OK) {
+        return ConvertWMErrorToWindowErrorCode(retDisplayId);
+    }
+    IWindowDensityChangeListenerSptr windowDensityChangeListener = listener;
+    WMError retWindowDensity = window->UnregisterWindowDensityChangeListener(windowDensityChangeListener);
+    if (retWindowDensity != WMError::WM_OK) {
+        return ConvertWMErrorToWindowErrorCode(retWindowDensity);
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
+        EraseDensityInfoChangeListener(windowId, callbackId);
+    }
+    return WindowManager_ErrorCode::OK;
+}
+
+
+bool FindFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId,
+    OHOS::sptr<OHWindowFrameMetricsMeasuredListener>& listener)
+{
+    auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+    if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
+        return false;
+    }
+    auto callbackIter = windowIter->second.find(measuredCallbackId);
+    if (callbackIter == windowIter->second.end()) {
+        return false;
+    }
+    listener = callbackIter->second;
+    return true;
+}
+
+void EraseFrameMetricsMeasuredListener(int32_t windowId, uintptr_t measuredCallbackId)
+{
+    auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+    if (windowIter == g_frameMetricsMeasuredCbMap.end()) {
+        return;
+    }
+    windowIter->second.erase(measuredCallbackId);
+    if (windowIter->second.empty()) {
+        g_frameMetricsMeasuredCbMap.erase(windowIter);
+    }
+}
+
+WindowManager_ErrorCode UnregisterFrameMetricsMeasuredCallbackInner(
+    int32_t windowId, uintptr_t measuredCallbackId, const char* where)
+{
+    auto window = Window::GetWindowWithId(windowId);
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+        EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+
+    OHOS::sptr<OHWindowFrameMetricsMeasuredListener> listener = nullptr;
+    if (!FindFrameMetricsMeasuredListener(windowId, measuredCallbackId, listener)) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+
+    auto ret = window->UnregisterFrameMetricsChangeListener(listener);
+    if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+        EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+        return WindowManager_ErrorCode::OK;
+    }
+    if (ret != WMError::WM_OK) {
+        TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s unregister failed, windowId:%{public}d, ret:%{public}d",
+            where, windowId, static_cast<int32_t>(ret));
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+
+    EraseFrameMetricsMeasuredListener(windowId, measuredCallbackId);
+    return WindowManager_ErrorCode::OK;
+}
 
 void TransformedToWindowManagerRect(const Rect& rect, WindowManager_Rect& wmRect)
 {
@@ -271,11 +633,6 @@ int32_t OH_WindowManager_SetWindowStatusBarEnabled(int32_t windowId, bool enable
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
-        if (window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
-            return;
-        }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.enable_ = enabled;
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
@@ -303,11 +660,6 @@ int32_t OH_WindowManager_SetWindowStatusBarColor(int32_t windowId, int32_t color
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
         }
-        if (window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
-            return;
-        }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
         property.contentColor_ = color;
         property.settingFlag_ = static_cast<SystemBarSettingFlag>(
@@ -332,11 +684,6 @@ int32_t OH_WindowManager_SetWindowNavigationBarEnabled(int32_t windowId, bool en
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is null, windowId:%{public}d", where, windowId);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
-            return;
-        }
-        if (window->IsPcWindow()) {
-            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s device is not support, windowId:%{public}d", where, windowId);
-            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_DEVICE_NOT_SUPPORTED;
             return;
         }
         auto property = window->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_NAVIGATION_BAR);
@@ -505,6 +852,125 @@ int32_t OH_WindowManager_GetWindowProperties(
         uicontent->GetAppPaintSize(drawableRect);
         TransformedToWindowManagerRect(drawableRect, windowProperties->drawableRect);
     }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_DensityInfo_GetDefaultDensity(
+    const OH_WindowManager_DensityInfo* info, float* density)
+{
+    if (info == nullptr || density == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *density = info->defaultDensity;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_DensityInfo_GetSystemDensity(
+    const OH_WindowManager_DensityInfo* info, float* density)
+{
+    if (info == nullptr || density == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *density = info->systemDensity;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_DensityInfo_GetCustomDensity(
+    const OH_WindowManager_DensityInfo* info, float* density)
+{
+    if (info == nullptr || density == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *density = info->customDensity;
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowManager_DensityInfo** info)
+{
+    if (info == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "info is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    if (windowId < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    *info = nullptr;
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    eventHandler->PostSyncTask([windowId, info, &errCode, where = __func__] {
+        auto freeDeleter = [](OH_WindowManager_DensityInfo* ptr) {
+            free(ptr);
+        };
+        auto densityInfoRaw = static_cast<OH_WindowManager_DensityInfo*>(malloc(sizeof(OH_WindowManager_DensityInfo)));
+        std::unique_ptr<OH_WindowManager_DensityInfo, decltype(freeDeleter)> densityInfoInner(
+            densityInfoRaw, freeDeleter);
+        if (densityInfoInner == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE,
+                "%{public}s densityInfoInner is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+            return;
+        }
+        errCode = GetDensityInfoInner(windowId, *densityInfoInner);
+        if (errCode != WindowManager_ErrorCode::OK) {
+            return;
+        }
+        *info = densityInfoInner.release();
+        }, __func__);
+    return errCode;
+}
+
+
+int32_t OH_WindowManager_DensityInfo_Release(const OH_WindowManager_DensityInfo* info)
+{
+    if (info == nullptr) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    WINDOW_MANAGER_FREE_MEMORY(info);
+    return WindowManager_ErrorCode::OK;
+}
+
+int32_t OH_WindowManager_RegisterDensityInfoChangeCallback(
+    int32_t windowId, OH_WindowManager_DensityInfoCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    auto callbackId = reinterpret_cast<uintptr_t>(callback);
+    eventHandler->PostSyncTask([windowId, callback, callbackId, &errCode] {
+        errCode = RegisterDensityInfoChangeCallbackInner(windowId, callback, callbackId);
+        }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
+    int32_t windowId, OH_WindowManager_DensityInfoCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
+    auto callbackId = reinterpret_cast<uintptr_t>(callback);
+    eventHandler->PostSyncTask([windowId, callbackId, &errCode] {
+        errCode = UnregisterDensityInfoChangeCallbackInner(windowId, callbackId);
+        }, __func__);
     return errCode;
 }
 
@@ -695,7 +1161,7 @@ void OH_WindowManager_ReleaseAllMainWindowInfo(WindowManager_MainWindowInfo* inf
 int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t windowIdListSize,
     WindowManager_WindowSnapshotConfig config, OH_WindowManager_WindowSnapshotCallback callback)
 {
-    if (windowIdList == nullptr) {
+    if (windowIdList == nullptr || windowIdListSize <= 0 || windowIdListSize > MAX_SESSION_LIMIT_ALL_APP) {
         TLOGNE(WmsLogTag::WMS_LIFE, "param is nullptr");
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
@@ -722,6 +1188,84 @@ int32_t OH_WindowManager_GetMainWindowSnapshot(int32_t* windowIdList, size_t win
 void OH_WindowManager_ReleaseMainWindowSnapshot(const OH_PixelmapNative* snapshotPixelMapList)
 {
     WINDOW_MANAGER_FREE_MEMORY(snapshotPixelMapList);
+}
+
+int32_t OH_WindowManager_RegisterFrameMetricsMeasuredCallback(
+    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    eventHandler->PostSyncTask([windowId, callback, &errCode, where = __func__] {
+        auto window = Window::GetWindowWithId(windowId);
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s window is null, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
+        auto windowIter = g_frameMetricsMeasuredCbMap.find(windowId);
+        if (windowIter != g_frameMetricsMeasuredCbMap.end() &&
+            windowIter->second.find(measuredCallbackId) != windowIter->second.end()) {
+            errCode = WindowManager_ErrorCode::OK;
+            return;
+        }
+        auto listener = OHOS::sptr<OHWindowFrameMetricsMeasuredListener>::MakeSptr(windowId, callback);
+        if (listener == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s create listener failed, windowId:%{public}d", where, windowId);
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            return;
+        }
+        auto ret = window->RegisterFrameMetricsChangeListener(listener);
+        if (ret == WMError::WM_OK) {
+            errCode = WindowManager_ErrorCode::OK;
+        } else if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+            errCode = WindowManager_ErrorCode::OK;
+            return;
+        } else {
+            errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s register failed, windowId:%{public}d, ret:%{public}d",
+                where, windowId, static_cast<int32_t>(ret));
+            return;
+        }
+        g_frameMetricsMeasuredCbMap[windowId][measuredCallbackId] = listener;
+    }, __func__);
+    return errCode;
+}
+
+int32_t OH_WindowManager_UnregisterFrameMetricsMeasuredCallback(
+    int32_t windowId, OH_WindowManager_FrameMetricsMeasuredCallback callback)
+{
+    if (callback == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    if (windowId <= 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    auto eventHandler = GetMainEventHandler();
+    if (eventHandler == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    }
+    WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+    auto measuredCallbackId = reinterpret_cast<uintptr_t>(callback);
+    eventHandler->PostSyncTask([windowId, measuredCallbackId, &errCode, where = __func__] {
+        errCode = UnregisterFrameMetricsMeasuredCallbackInner(windowId, measuredCallbackId, where);
+    }, __func__);
+    return errCode;
 }
 
 int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovement)

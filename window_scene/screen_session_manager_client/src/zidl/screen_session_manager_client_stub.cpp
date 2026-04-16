@@ -225,6 +225,11 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     if (ReadRotationOrientationMap(data, rotationOrientationMap) != ERR_NONE) {
         return ERR_INVALID_DATA;
     }
+    bool isBooting = false;
+    if (!data.ReadBool(isBooting)) {
+        TLOGE(WmsLogTag::DMS, "Read isBooting failed");
+        return ERR_INVALID_DATA;
+    }
 
     SessionOption option = {
         .rsId_ = rsId,
@@ -236,7 +241,8 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
         .supportsFocus_ = supportsFocus,
         .isRotationLocked_ = rotationOptions.isRotationLocked_,
         .rotation_ = rotationOptions.rotation_,
-        .rotationOrientationMap_ = rotationOrientationMap
+        .rotationOrientationMap_ = rotationOrientationMap,
+        .isBooting_ = isBooting
     };
     TLOGD(WmsLogTag::DMS,
         "ClientStub received callback parameters, isRotationLocked: %{public}d, rotation: %{public}d, "
@@ -288,7 +294,7 @@ int ScreenSessionManagerClientStub::ReadRotationOrientationMap(MessageParcel& da
     std::map<int32_t, int32_t>& rotationOrientationMap)
 {
     uint64_t mapSize = 0;
-    if (!data.ReadUint64(mapSize)) {
+    if (!data.ReadUint64(mapSize) || mapSize > ROTATION_NUM) {
         TLOGE(WmsLogTag::DMS, "Failed to read rotationOrientationMap size");
         return ERR_INVALID_DATA;
     }

@@ -38,6 +38,9 @@ enum class ScreenPropertyChangeReason : uint32_t {
     ACCESS_INFO_CHANGE,
     FOLD_SCREEN_EXPAND_SWITCH_USER,
     FOLD_SCREEN_FOLDING_SWITCH_USER,
+    SCREEN_MODE_CHANGE,
+    ACTIVE_MODE_CHANGE,
+    RESOLUTION_EFFECT_CHANGE,
 };
 class ScreenProperty {
 public:
@@ -101,8 +104,8 @@ public:
     void SetRsId(ScreenId rsId);
     ScreenId GetRsId() const;
 
-    void SetPropertyChangeReason(std::string propertyChangeReason);
-    std::string GetPropertyChangeReason() const;
+    void SetPropertyChangeReason(ScreenPropertyChangeReason propertyChangeReason);
+    ScreenPropertyChangeReason GetPropertyChangeReason() const;
 
     void SetDefaultDeviceRotationOffset(uint32_t defaultRotationOffset);
     uint32_t GetDefaultDeviceRotationOffset() const;
@@ -274,9 +277,9 @@ public:
     void SetCurrentOffScreenRendering(bool enable) { isCurrentOffScreenRendering_ = enable; }
     bool GetCurrentOffScreenRendering() { return isCurrentOffScreenRendering_; }
     void SetScreenRealWidth(uint32_t width) { screenRealWidth_ = width; }
-    uint32_t GetScreenRealWidth() { return screenRealWidth_; }
+    uint32_t GetScreenRealWidth() const { return screenRealWidth_; }
     void SetScreenRealHeight(uint32_t height) { screenRealHeight_ = height; }
-    uint32_t GetScreenRealHeight() { return screenRealHeight_; }
+    uint32_t GetScreenRealHeight() const { return screenRealHeight_; }
     void SetScreenRealPPI() { screenRealPPI_ = CalculatePPI(); }
     float GetScreenRealPPI() { return screenRealPPI_; }
     void SetScreenRealDPI() { screenRealDPI_ = CalculateDPI(); }
@@ -300,6 +303,8 @@ public:
     uint32_t GetScreenAreaWidth() const { return screenAreaWidth_; }
     void SetScreenAreaHeight(uint32_t screenAreaHeight) { screenAreaHeight_ = screenAreaHeight; }
     uint32_t GetScreenAreaHeight() const { return screenAreaHeight_; }
+    void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
+    void SetRogScreenResolution(uint32_t width, uint32_t height);
 
 private:
     SuperFoldStatusChangeEvents changeEvent_ {SuperFoldStatusChangeEvents::UNDEFINED};
@@ -336,7 +341,7 @@ private:
 
     ScreenId rsId_ = SCREEN_ID_INVALID;
 
-    std::string propertyChangeReason_ { "" };
+    ScreenPropertyChangeReason propertyChangeReason_;
 
     float virtualPixelRatio_ { 1.0f };
     float defaultDensity_ { 1.0f };
@@ -378,7 +383,6 @@ private:
 
     void UpdateXDpi();
     void UpdateYDpi();
-    void CalculateXYDpi(uint32_t phyWidth, uint32_t phyHeight);
     DMRect availableArea_;  // can be used for all devices
     DMRect expandAvailableArea_;  // only used for 2in1 device
     DMRect creaseRect_;
@@ -404,6 +408,8 @@ private:
     uint32_t mirrorHeight_ { 0 };
 
     FoldDisplayMode displayMode_;
+    uint32_t rogWidth_{ 0 };
+    uint32_t rogHeight_{ 0 };
 };
 } // namespace OHOS::Rosen
 

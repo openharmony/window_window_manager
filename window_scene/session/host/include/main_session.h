@@ -32,9 +32,10 @@ public:
     WSError ProcessPointDownSession(int32_t posX, int32_t posY) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) override;
-    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
+    void RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics) override;
     WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated() override;
+    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) override;
 
     /*
      * Window Hierarchy
@@ -69,12 +70,14 @@ public:
     /*
      * Window LifeCycle
      */
+    WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
+    void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
     void RegisterSessionLockStateChangeCallback(NotifySessionLockStateChangeCallback&& callback) override;
     void NotifySessionLockStateChange(bool isLockedState) override;
     void SetSessionLockState(bool isLockedState);
     bool GetSessionLockState() const;
-    WSError SetSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon) override;
-    void SetUpdateSessionLabelAndIconListener(NofitySessionLabelAndIconUpdatedFunc&& func) override;
+    void SetSceneSessionDestructNotificationFunc(NotifySceneSessionDestructFunc&& func) override;
+    void SetIsUserRequestedExit(bool isUserRequestedExit) override;
     WMError GetRouterStackInfo(std::string& routerStackInfo) const override;
     void SetRecentSessionState(RecentSessionInfo& info, const SessionState& state) override;
 
@@ -87,12 +90,23 @@ public:
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
     void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) override;
+    void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
+    WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
+    WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WMError NotifySplitRatioChanged(float newRatio) override;
 
     /*
      * Window Pattern
      */
     void RecoverSnapshotPersistence(const SessionInfo& info) override;
     void ClearSnapshotPersistence() override;
+
+    /*
+     * Prelaunch check
+     */
+    void RemovePrelaunchStartingWindow() override;
+    void SetPrelaunch() override;
+    bool IsPrelaunch() const override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
@@ -105,9 +119,12 @@ private:
      * Window LifeCycle
      */
     WSError SetSessionLabelAndIconInner(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon);
-
     NotifySessionLockStateChangeCallback onSessionLockStateChangeCallback_;
     bool isLockedState_ = false;
+    NotifySceneSessionDestructFunc notifySceneSessionDestructFunc_;
+    bool isUserRequestedExit_ = false;
+    bool GetSessionBoundedSystemTray(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey) const;
+
     /*
      * Window Layout
      */
@@ -125,6 +142,13 @@ private:
     std::atomic_bool isFullScreenInForceSplit_ { false };
     CompatibleModeChangeCallback compatibleModeChangeCallback_;
     NotifyForceSplitEnableFunc forceSplitEnableFunc_;
+    PageEnableCallback pageEnableCallback_;
+
+    /*
+     * Prelaunch check
+     */
+    int64_t prelaunchStart_ = 0;
+    bool prelaunchEnable_ = false;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MAIN_SESSION_H

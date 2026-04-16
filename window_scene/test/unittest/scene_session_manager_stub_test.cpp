@@ -932,13 +932,16 @@ HWTEST_F(SceneSessionManagerStubTest, TransIdNotifyDumpInfoResult, TestSize.Leve
     MessageOption option;
 
     data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    auto res = stub_->HandleNotifyDumpInfoResult(data, reply);
-    EXPECT_EQ(res, ERR_INVALID_DATA);
+    uint64_t vectorSize = 1;
+    data.WriteUint64(vectorSize);
+    std::string info = "test";
+    uint64_t curSize = static_cast<uint64_t>(info.size());
+    data.WriteUint64(curSize);
+    data.WriteRawData(info.c_str(), curSize);
 
-    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
-    uint32_t vectorSize = 90;
-    data.WriteUint32(vectorSize);
-    res = stub_->HandleNotifyDumpInfoResult(data, reply);
+    uint32_t code =
+        static_cast<uint32_t>(ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_NOTIFY_DUMP_INFO_RESULT);
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(res, ERR_NONE);
 }
 
@@ -1719,7 +1722,7 @@ HWTEST_F(SceneSessionManagerStubTest, HandleConvertToRelativeCoordinateExtended,
     data1.WriteInt32(rect.width_);
     data1.WriteInt32(rect.height_);
     int res1 = stub_->HandleConvertToRelativeCoordinateExtended(data1, reply);
-    EXPECT_EQ(res1, ERR_NONE);
+    EXPECT_EQ(res1, ERR_TRANSACTION_FAILED);
 
     MessageParcel data2;
     data2.WriteInt32(rect.posX_);
@@ -1918,18 +1921,18 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifyDumpInfoResult, TestSize.Level
     MessageParcel data;
     MessageParcel reply;
 
-    uint32_t vectorSize = 128;
-    data.WriteUint32(vectorSize);
+    uint64_t vectorSize = 128;
+    data.WriteUint64(vectorSize);
     stub_->HandleNotifyDumpInfoResult(data, reply);
 
     std::vector<std::string> info = { "-a", "-b123", "-c3456789", "" };
-    vectorSize = static_cast<uint32_t>(info.size());
-    data.WriteUint32(vectorSize);
-    uint32_t curSize;
+    vectorSize = static_cast<uint64_t>(info.size());
+    data.WriteUint64(vectorSize);
+    uint64_t curSize;
     for (const auto& elem : info) {
         const char* curInfo = elem.c_str();
-        curSize = static_cast<uint32_t>(strlen(curInfo));
-        data.WriteUint32(curSize);
+        curSize = static_cast<uint64_t>(strlen(curInfo));
+        data.WriteUint64(curSize);
         if (curSize != 0) {
             data.WriteRawData(curInfo, curSize);
         }
@@ -2873,6 +2876,22 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetPiPSettingSwitchStatus, Function 
 }
 
 /**
+ *@tc.name: HandleGetIsPipEnabled
+ *@tc.desc: test HandleGetIsPipEnabled
+ *@tc.type: FUNC
+*/
+HWTEST_F(SceneSessionManagerStubTest, HandleGetIsPipEnabled, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    bool isPipEnabled = false;
+    data.WriteBool(isPipEnabled);
+    
+    int res = stub_->HandleGetIsPipEnabled(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleSetScreenPrivacyWindowTagSwitch01
  * @tc.desc: test HandleSetScreenPrivacyWindowTagSwitch
  * @tc.type: FUNC
@@ -3096,6 +3115,46 @@ HWTEST_F(SceneSessionManagerStubTest, ResetSpecificWindowZIndex, Function | Smal
     data.WriteInt32(20);
     ret = stub_->HandleSetSpecificWindowZIndex(data, reply);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleMoveMainWindowToTargetDisplay
+ * @tc.desc: HandleMoveMainWindowToTargetDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleMoveMainWindowToTargetDisplay, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteUint64(0);
+    data.WriteInt32(1);
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+
+    res = stub_->HandleMoveMainWindowToTargetDisplay(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleMoveMainWindowToTargetDisplay1
+ * @tc.desc: HandleMoveMainWindowToTargetDisplay read error
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest, HandleMoveMainWindowToTargetDisplay1, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    int res = stub_->HandleMoveMainWindowToTargetDisplay(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 
 /**

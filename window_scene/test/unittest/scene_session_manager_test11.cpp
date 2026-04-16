@@ -19,12 +19,16 @@
 #include "interfaces/include/ws_common.h"
 #include "iremote_object_mocker.h"
 #include "mock/mock_accesstoken_kit.h"
+#include "mock/mock_collaborator_dll_manager.h"
+#include "pointer_event.h"
+#include "message_parcel.h"
 #include "session_manager/include/scene_session_manager.h"
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session_manager.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/pc_fold_screen_manager.h"
 #include "mock/mock_ibundle_mgr.h"
 #include "common/include/task_scheduler.h"
 #include "session/host/include/multi_instance_manager.h"
@@ -955,6 +959,45 @@ HWTEST_F(SceneSessionManagerTest11, AnimateTo01, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: CheckIfReuseSession06
+ * @tc.desc: Test if CollaboratorType is OTHERS_TYPE and collaboratorMap_ exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, CheckIfReuseSession06, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->bundleMgr_ = ssm_->GetBundleManager();
+    ssm_->currentUserId_ = 123;
+ 
+    SessionInfo sessionInfo;
+    sessionInfo.moduleName_ = "SceneSessionManager";
+    sessionInfo.bundleName_ = "SceneSessionManagerTest11";
+    sessionInfo.abilityName_ = "CheckIfReuseSession06";
+    sessionInfo.want = std::make_shared<AAFwk::Want>();
+ 
+    SceneSessionManager::SessionInfoList list = {
+        .uid_ = 123, .bundleName_ = "SceneSessionManagerTest11",
+        .abilityName_ = "CheckIfReuseSession06", .moduleName_ = "SceneSessionManager"
+    };
+ 
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    ASSERT_NE(abilityInfo, nullptr);
+    abilityInfo->applicationInfo.codePath = std::to_string(CollaboratorType::RESERVE_TYPE);
+    ssm_->abilityInfoMap_[list] = abilityInfo;
+ 
+    sptr<AAFwk::IAbilityManagerCollaborator> collaborator =
+        iface_cast<AAFwk::IAbilityManagerCollaborator>(nullptr);
+    ssm_->collaboratorMap_.insert(std::make_pair(1, collaborator));
+    MockCollaboratorDllManager::MockPreHandleStartAbility(1);
+    auto ret4 = ssm_->CheckIfReuseSession(sessionInfo);
+    EXPECT_EQ((sessionInfo).callerTypeForAnco, 1);
+ 
+    MockCollaboratorDllManager::MockPreHandleStartAbility(0);
+    ssm_->abilityInfoMap_.erase(list);
+    ssm_->collaboratorMap_.erase(1);
+}
+
+/**
  * @tc.name: UpdateHighlightStatus
  * @tc.desc: UpdateHighlightStatus
  * @tc.type: FUNC
@@ -1588,6 +1631,121 @@ HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfo, Function | SmallTes
 }
 
 /**
+ * @tc.name: GetVisibilityWindowInfoDisplayAndGlobalRect
+ * @tc.desc: test displayId and global rect fields in visibility info
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfoDisplayAndGlobalRect, Function | SmallTest | Level2)
+{
+    auto oldVisibleData = ssm_->lastVisibleData_;
+    auto oldSessionMap = ssm_->sceneSessionMap_;
+    SessionInfo info; info.bundleName_ = "bundle"; info.abilityName_ = "ability";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->persistentId_ = 2001;
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->GetSessionProperty()->SetDisplayId(66);
+    Rect expectedGlobalDisplayRect = { 1, 2, 30, 40 };
+    sceneSession->GetSessionProperty()->SetGlobalDisplayRect(expectedGlobalDisplayRect);
+    sceneSession->SetSessionGlobalRect({ 10, 20, 100, 200 });
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    ssm_->sceneSessionMap_ = { { sceneSession->GetPersistentId(), sceneSession } };
+    ssm_->lastVisibleData_ = { { surfaceNode->GetId(), WindowVisibilityState::START } };
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    auto result = ssm_->GetVisibilityWindowInfo(infos);
+    EXPECT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(infos.size(), 1);
+    ASSERT_NE(infos[0], nullptr);
+    EXPECT_EQ(infos[0]->GetDisplayId(), 66);
+    EXPECT_EQ(infos[0]->GetGlobalDisplayRect().width_, expectedGlobalDisplayRect.width_);
+    EXPECT_EQ(infos[0]->GetGlobalDisplayRect().height_, expectedGlobalDisplayRect.height_);
+    EXPECT_EQ(infos[0]->GetGlobalRect().width_, 100);
+    EXPECT_EQ(infos[0]->GetGlobalRect().height_, 200);
+    ssm_->lastVisibleData_ = oldVisibleData;
+    ssm_->sceneSessionMap_ = oldSessionMap;
+}
+
+/**
+ * @tc.name: GetVisibilityWindowInfoDisplayIdHalfFold
+ * @tc.desc: test displayId fallback to clientDisplayId on pc half-fold
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, GetVisibilityWindowInfoDisplayIdHalfFold, Function | SmallTest | Level2)
+{
+    auto oldVisibleData = ssm_->lastVisibleData_;
+    auto oldSessionMap = ssm_->sceneSessionMap_;
+    auto oldFoldStatus = PcFoldScreenManager::GetInstance().GetScreenFoldStatus();
+    auto oldDisplayId = PcFoldScreenManager::GetInstance().GetDisplayId();
+    auto [oldDefaultRect, oldVirtualRect, oldCreaseRect] = PcFoldScreenManager::GetInstance().GetDisplayRects();
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 24 });
+
+    SessionInfo info;
+    info.bundleName_ = "bundle";
+    info.abilityName_ = "ability";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->persistentId_ = 2002;
+    sceneSession->isScbCoreEnabled_ = true;
+    sceneSession->GetSessionProperty()->SetDisplayId(0);
+    sceneSession->SetClientDisplayId(999);
+    sceneSession->SetSessionGlobalRect({ 10, 20, 100, 200 });
+
+    struct RSSurfaceNodeConfig surfaceNodeConfig;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(surfaceNodeConfig, RSSurfaceNodeType::DEFAULT);
+    ASSERT_NE(surfaceNode, nullptr);
+    sceneSession->SetSurfaceNode(surfaceNode);
+    ssm_->sceneSessionMap_ = { { sceneSession->GetPersistentId(), sceneSession } };
+    ssm_->lastVisibleData_ = { { surfaceNode->GetId(), WindowVisibilityState::START } };
+
+    std::vector<sptr<WindowVisibilityInfo>> infos;
+    auto result = ssm_->GetVisibilityWindowInfo(infos);
+    EXPECT_EQ(result, WMError::WM_OK);
+    ASSERT_EQ(infos.size(), 1);
+    ASSERT_NE(infos[0], nullptr);
+    EXPECT_EQ(infos[0]->GetDisplayId(), 999);
+
+    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
+        oldDisplayId, oldFoldStatus, oldDefaultRect, oldVirtualRect, oldCreaseRect);
+    ssm_->lastVisibleData_ = oldVisibleData;
+    ssm_->sceneSessionMap_ = oldSessionMap;
+}
+
+/**
+ * @tc.name: WindowVisibilityInfoMarshallingDisplayAndGlobalRect
+ * @tc.desc: test marshalling and unmarshalling for displayId and globalRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, WindowVisibilityInfoMarshallingDisplayAndGlobalRect, Function | SmallTest | Level2)
+{
+    WindowVisibilityInfo info;
+    info.windowId_ = 101;
+    info.pid_ = 202;
+    info.uid_ = 303;
+    info.visibilityState_ = WindowVisibilityState::START;
+    info.windowType_ = WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+    info.rect_ = { 1, 2, 300, 400 };
+    info.globalDisplayRect_ = { 5, 6, 700, 800 };
+    info.SetDisplayId(66);
+    info.SetGlobalRect({ 10, 20, 100, 200 });
+
+    MessageParcel parcel;
+    ASSERT_TRUE(info.Marshalling(parcel));
+
+    WindowVisibilityInfo* unmarshalled = WindowVisibilityInfo::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalled, nullptr);
+    EXPECT_EQ(unmarshalled->GetDisplayId(), 66);
+    EXPECT_EQ(unmarshalled->GetGlobalRect().posX_, 10);
+    EXPECT_EQ(unmarshalled->GetGlobalRect().posY_, 20);
+    EXPECT_EQ(unmarshalled->GetGlobalRect().width_, 100);
+    EXPECT_EQ(unmarshalled->GetGlobalRect().height_, 200);
+    delete unmarshalled;
+}
+
+/**
  * @tc.name: SendPointerEventForHover
  * @tc.desc: SendPointerEventForHover
  * @tc.type: FUNC
@@ -1775,6 +1933,50 @@ HWTEST_F(SceneSessionManagerTest11, SetSpecificWindowZIndex, TestSize.Level1)
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(value, 20);
     ssm_->SetSpecificWindowZIndexListener(nullptr);
+}
+
+/**
+ * @tc.name: MoveMainWindowToTargetDisplay
+ * @tc.desc: test function : MoveMainWindowToTargetDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest11, MoveMainWindowToTargetDisplay, TestSize.Level1)
+{
+    MockAccesstokenKit::MockIsSystemApp(false);
+    WSError ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_NOT_SYSTEM_APP);
+
+
+    MockAccesstokenKit::MockIsSystemApp(true);
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+
+    sptr<SceneSession> sceneSession = CreateSceneSession("test", WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->SetSessionState(SessionState::STATE_DISCONNECT);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+    ssm_->sceneSessionMap_.clear();
+
+    sceneSession = CreateSceneSession("test", WindowType::WINDOW_TYPE_PIP);
+    ASSERT_NE(sceneSession, nullptr);
+    ssm_->sceneSessionMap_.insert({1, sceneSession});
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_CALLING);
+
+    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sceneSession->property_->SetDisplayId(-1);
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_WINDOW);
+
+    sceneSession->property_->SetDisplayId(DEFAULT_DISPLAY_ID);
+    ret = ssm_->MoveMainWindowToTargetDisplay(999, 1); // 999 不存在
+    EXPECT_EQ(ret, WSError::WS_ERROR_INVALID_DISPLAY);
+
+    ret = ssm_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    ssm_->sceneSessionMap_.clear();
 }
 
 /**

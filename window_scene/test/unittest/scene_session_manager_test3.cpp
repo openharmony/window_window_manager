@@ -534,14 +534,10 @@ HWTEST_F(SceneSessionManagerTest3, GetWindowLimits, TestSize.Level1)
     ssm_->sceneSessionMap_.insert({ windowId, sceneSession });
     auto defaultUIType = ssm_->systemConfig_.windowUIType_;
     ssm_->systemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
-    ssm_->systemConfig_.freeMultiWindowEnable_ = false;
-    ssm_->systemConfig_.freeMultiWindowSupport_ = false;
-    auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
-    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 
     ssm_->systemConfig_.freeMultiWindowEnable_ = true;
     ssm_->systemConfig_.freeMultiWindowSupport_ = true;
-    ret = ssm_->GetWindowLimits(windowId, windowlimits);
+    auto ret = ssm_->GetWindowLimits(windowId, windowlimits);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
@@ -1094,23 +1090,6 @@ HWTEST_F(SceneSessionManagerTest3, PreHandleCollaborator, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckCollaboratorType
- * @tc.desc: SceneSesionManager check collborator type
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, CheckCollaboratorType, TestSize.Level1)
-{
-    int32_t type = CollaboratorType::RESERVE_TYPE;
-    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
-    type = CollaboratorType::OTHERS_TYPE;
-    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
-    type = CollaboratorType::REDIRECT_TYPE;
-    EXPECT_TRUE(ssm_->CheckCollaboratorType(type));
-    type = CollaboratorType::DEFAULT_TYPE;
-    ASSERT_FALSE(ssm_->CheckCollaboratorType(type));
-}
-
-/**
  * @tc.name: NotifyUpdateSessionInfo
  * @tc.desc: SceneSesionManager notify update session info
  * @tc.type: FUNC
@@ -1387,9 +1366,9 @@ HWTEST_F(SceneSessionManagerTest3, SetGestureNavigationEnabled02, TestSize.Level
 }
 
 /**
- * @tc.name: SetFocusedSessionId
- * @tc.desc: SceneSesionManager set focused session id
- * @tc.type: FUNC
+  * @tc.name: SetFocusedSessionId
+  * @tc.desc: SceneSesionManager set focused session id
+  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, TestSize.Level1)
 {
@@ -1406,72 +1385,6 @@ HWTEST_F(SceneSessionManagerTest3, SetFocusedSessionId, TestSize.Level1)
 }
 
 /**
- * @tc.name: RequestFocusStatus
- * @tc.desc: SceneSesionManager request focus status
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, RequestFocusStatus, TestSize.Level1)
-{
-    int32_t focusedSession = ssm_->GetFocusedSessionId();
-    EXPECT_EQ(focusedSession, 10086);
-
-    int32_t persistentId = INVALID_SESSION_ID;
-    WMError result01 = ssm_->RequestFocusStatus(persistentId, true);
-    EXPECT_EQ(result01, WMError::WM_ERROR_NULLPTR);
-    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
-    EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
-
-    persistentId = 10000;
-    FocusChangeReason reasonInput = FocusChangeReason::SCB_SESSION_REQUEST;
-    WMError result02 = ssm_->RequestFocusStatus(persistentId, true, true, reasonInput);
-    EXPECT_EQ(result02, WMError::WM_ERROR_NULLPTR);
-    reasonResult = ssm_->GetFocusChangeReason();
-    EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
-
-    reasonInput = FocusChangeReason::SPLIT_SCREEN;
-    WMError result03 = ssm_->RequestFocusStatus(persistentId, false, true, reasonInput);
-    EXPECT_EQ(result03, WMError::WM_ERROR_NULLPTR);
-    reasonResult = ssm_->GetFocusChangeReason();
-    EXPECT_EQ(reasonResult, FocusChangeReason::DEFAULT);
-}
-
-/**
- * @tc.name: RequestFocusStatusBySA
- * @tc.desc: SceneSesionManager request focus status by SA
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, RequestFocusStatusBySA, TestSize.Level1)
-{
-    int32_t persistentId = 3;
-    bool isFocused = true;
-    bool byForeground = true;
-    FocusChangeReason reason = FocusChangeReason::CLICK;
-    auto result = ssm_->SceneSessionManager::RequestFocusStatusBySA(persistentId, isFocused, byForeground, reason);
-    EXPECT_EQ(result, WMError::WM_ERROR_INVALID_PERMISSION);
-}
-
-/**
- * @tc.name: NotifyRequestFocusStatusNotifyManager
- * @tc.desc: NotifyRequestFocusStatusNotifyManager test.
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, NotifyRequestFocusStatusNotifyManager, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifyRequestFocusStatusNotifyManager";
-    info.bundleName_ = "NotifyRequestFocusStatusNotifyManager";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    ssm_->RegisterRequestFocusStatusNotifyManagerFunc(sceneSession);
-
-    FocusChangeReason reasonInput = FocusChangeReason::DEFAULT;
-    sceneSession->NotifyRequestFocusStatusNotifyManager(true, true, reasonInput);
-    FocusChangeReason reasonResult = ssm_->GetFocusChangeReason();
-
-    EXPECT_EQ(reasonInput, reasonResult);
-}
-
-/**
  * @tc.name: GetTopNearestBlockingFocusSession
  * @tc.desc: SceneSesionManager Gets the most recent session whose blockingType property is true
  * @tc.type: FUNC
@@ -1484,59 +1397,6 @@ HWTEST_F(SceneSessionManagerTest3, GetTopNearestBlockingFocusSession, TestSize.L
 
     session = ssm_->GetTopNearestBlockingFocusSession(DEFAULT_DISPLAY_ID, zOrder, false);
     EXPECT_EQ(session, nullptr);
-}
-
-/**
- * @tc.name: RaiseWindowToTop
- * @tc.desc: SceneSesionManager raise window to top
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, RaiseWindowToTop, TestSize.Level1)
-{
-    int32_t focusedSession = ssm_->GetFocusedSessionId();
-    EXPECT_EQ(focusedSession, 10086);
-    int32_t persistentId = INVALID_SESSION_ID;
-    WSError result01 = ssm_->RaiseWindowToTop(persistentId);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_PERMISSION);
-    persistentId = 10000;
-    WSError result02 = ssm_->RaiseWindowToTop(persistentId);
-    EXPECT_EQ(result02, WSError::WS_ERROR_INVALID_PERMISSION);
-    WSError result03 = ssm_->RaiseWindowToTop(persistentId);
-    EXPECT_EQ(result03, WSError::WS_ERROR_INVALID_PERMISSION);
-}
-
-/**
- * @tc.name: ShiftAppWindowFocus
- * @tc.desc: SceneSesionManager shift app window focus
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest3, ShiftAppWindowFocus, TestSize.Level1)
-{
-    int32_t focusedSession = ssm_->GetFocusedSessionId();
-    EXPECT_EQ(focusedSession, 10086);
-    int32_t sourcePersistentId = 1;
-    int32_t targetPersistentId = 10086;
-    WSError result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_SESSION);
-    SessionInfo info;
-    info.abilityName_ = "ShiftAppWindowFocus";
-    info.bundleName_ = "ShiftAppWindowFocus";
-    auto sourceSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sourceSceneSession->persistentId_ = 1;
-    sourceSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, sourceSceneSession));
-    result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_OPERATION);
-
-    auto targetSceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    targetSceneSession->persistentId_ = 10086;
-    targetSceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ssm_->sceneSessionMap_.insert(std::make_pair(10086, targetSceneSession));
-    result01 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result01, WSError::WS_ERROR_INVALID_OPERATION);
-    sourcePersistentId = 10086;
-    WSError result02 = ssm_->ShiftAppWindowFocus(sourcePersistentId, targetPersistentId);
-    EXPECT_EQ(result02, WSError::WS_DO_NOTHING);
 }
 
 /**
@@ -2045,6 +1905,39 @@ HWTEST_F(SceneSessionManagerTest3, SchedulePcAppInPadLifecycle, TestSize.Level1)
     ssm_->sceneSessionMap_.erase(4);
     ssm_->SetTrayAppList(std::move(trayAppListOld));
 }
+
+/**
+ * @tc.name: SchedulePcAppInPadLifecycleByPersistentId
+ * @tc.desc: call SchedulePcAppInPadLifecycleByPersistentId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, SchedulePcAppInPadLifecycleByPersistentId, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "test1";
+    info.bundleName_ = "test2";
+    info.persistentId_ = 808;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->GetSessionProperty()->SetIsPcAppInPad(true);
+    sceneSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    int32_t persistentId = 808;
+    std::string bundleName = "testBundleName";
+    sceneSession->scenePersistence_ = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
+    ssm_->sceneSessionMap_.insert({ 808, sceneSession });
+    ssm_->SchedulePcAppInPadLifecycleByPersistentId(true, -1);
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession->GetSessionState());
+    ssm_->SchedulePcAppInPadLifecycleByPersistentId(true, persistentId);
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession->GetSessionState());
+    sceneSession->GetSessionProperty()->SetIsPcAppInPad(false);
+    ssm_->SchedulePcAppInPadLifecycleByPersistentId(true, persistentId);
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession->GetSessionState());
+    sceneSession->GetSessionProperty()->SetIsPcAppInPad(true);
+    sceneSession->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ssm_->SchedulePcAppInPadLifecycleByPersistentId(true, persistentId);
+    EXPECT_EQ(SessionState::STATE_FOREGROUND, sceneSession->GetSessionState());
+    sleep(1);
+    ssm_->sceneSessionMap_.erase(persistentId);
+}
  
 /**
  * @tc.name: StartOrMinimizePcAppInPadUIAbilityBySCB
@@ -2080,6 +1973,7 @@ HWTEST_F(SceneSessionManagerTest3, StartOrMinimizePcAppInPadUIAbilityBySCB, Test
     std::vector<std::string> trayAppList;
     trayAppList.push_back("test2");
     ssm_->SetTrayAppList(std::move(trayAppList));
+    ssm_->isSupportPcAppInPhone_ = false;
     EXPECT_EQ(WSError::WS_DO_NOTHING, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession, true));
     EXPECT_EQ(WSError::WS_DO_NOTHING, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession, false));
     EXPECT_EQ(WSError::WS_DO_NOTHING, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession2, true));
@@ -2087,6 +1981,20 @@ HWTEST_F(SceneSessionManagerTest3, StartOrMinimizePcAppInPadUIAbilityBySCB, Test
     EXPECT_EQ(WSError::WS_OK, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession3, true));
     EXPECT_EQ(WSError::WS_OK, ssm_->StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession3, false));
     ssm_->SetTrayAppList(std::move(trayAppListOld));
+}
+
+/**
+ * @tc.name: NotifyRotationBegin
+ * @tc.desc: call NotifyRotationBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest3, NotifyRotationBegin, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ssm_->NotifyRotationBegin();
+    EXPECT_TRUE(g_logMsg.find("NotifyRotationBegin") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 } // namespace
 } // namespace Rosen

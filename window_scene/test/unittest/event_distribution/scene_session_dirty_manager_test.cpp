@@ -107,7 +107,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, NotifyWindowInfoChange, TestSize.Level1)
  */
 HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
 {
-    auto [windowInfoList, pixelMapList] = manager_->GetFullWindowInfoList();
+    auto fullInfoForMMI = manager_->GetFullWindowInfoList();
+    auto windowInfoList = fullInfoForMMI.windowInfoList;
+    auto pixelMapList = fullInfoForMMI.pixelMapList;
     SessionInfo info;
     info.abilityName_ = "TestAbilityName";
     info.bundleName_ = "TestBundleName";
@@ -136,7 +138,9 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetFullWindowInfoList, TestSize.Level0)
         propertyModal1->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
         ssm_->sceneSessionMap_.insert({ sceneSessionModal1->GetPersistentId(), sceneSessionModal1 });
     }
-    auto [windowInfoList1, pixelMapList1] = manager_->GetFullWindowInfoList();
+    auto fullInfoForMMI1 = manager_->GetFullWindowInfoList();
+    auto windowInfoList1 = fullInfoForMMI1.windowInfoList;
+    auto pixelMapList1 = fullInfoForMMI1.pixelMapList;
     ASSERT_EQ(windowInfoList.size() + 3, windowInfoList1.size());
 }
 
@@ -387,18 +391,31 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetHostComponentWindowInfo, TestSize.Leve
     Matrix3f transform;
     MMI::WindowInfo ret;
     MMI::WindowInfo windowInfo;
-    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, transform);
+    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, nullptr, transform);
+    ASSERT_EQ(ret.id, windowInfo.id);
+
+    SessionInfo info;
+    info.abilityName_ = "TestAbilityName";
+    info.bundleName_ = "TestBundleName";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+
+    ret = manager_->GetSecComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
     ASSERT_EQ(ret.id, windowInfo.id);
 
     SecRectInfo secRectInfo;
     secSurfaceInfo.upperNodes.emplace_back(secRectInfo);
     secSurfaceInfo.hostPid = 1;
     windowInfo.pid = 1;
-    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, transform);
+    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
     ASSERT_EQ(ret.pid, windowInfo.pid);
 
-    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, transform);
+    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
     ASSERT_EQ(ret.defaultHotAreas.size(), 1);
+
+    sceneSession->SetIsStartMoving(true);
+    ret = manager_->GetHostComponentWindowInfo(secSurfaceInfo, hostWindowinfo, sceneSession, transform);
+    ASSERT_EQ(ret.agentPid, static_cast<int32_t>(getpid()));
 }
 
 /**
@@ -1097,7 +1114,19 @@ HWTEST_F(SceneSessionDirtyManagerTest, CalTransformTest_01, TestSize.Level1)
     manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ASSERT_EQ(transform, transform.Translate(translate)
         .Scale(scale, sceneSession->GetPivotX(), sceneSession->GetPivotY()).Inverse());
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(screenId);
+
+    sceneSession->sessionInfo_.bundleName_ = "CalTransformTest_SCBScreenLock_01";
+    screenSession->GetScreenProperty().SetPhysicalRotation(180.0f);
+    screenSession->GetScreenProperty().SetScreenComponentRotation(90.0f);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+
+    sceneSession->sessionInfo_.bundleName_ = "CalTransformTest_SCBDesktop_01";
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
+
+    sceneSession->sessionInfo_.bundleName_ = "CalTransformTest_SCBScreenLock_01";
+    screenSession->GetScreenProperty().SetPhysicalRotation(180.0f);
+    screenSession->GetScreenProperty().SetScreenComponentRotation(180.0f);
+    manager_->CalTransform(sceneSession, transform, testSingleHandData);
     ScreenSessionManagerClient::GetInstance().OnUpdateFoldDisplayMode(displayMode);
 }
 
@@ -1483,10 +1512,13 @@ HWTEST_F(SceneSessionDirtyManagerTest, GetWindowInfo, TestSize.Level0)
     ASSERT_EQ(ret.first.id, session->GetWindowId());
     windowSessionProperty->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_HANDWRITING));
     ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
-    ASSERT_EQ(ret.first.flags, static_cast<int32_t>(MMI::WindowInfo::FLAG_BIT_HANDWRITING));
+    ASSERT_EQ(ret.first.flags, static_cast<int32_t>(MMI::WindowInputPolicy::FLAG_HANDWRITING));
     windowSessionProperty->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_MODAL));
     ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.flags, 0);
+    ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
+    ASSERT_EQ(ret.first.id, session->GetWindowId());
+    session->SetSessionInfoExpandInputFlag(MMI::WindowInputPolicy::FLAG_DISABLE_USER_ACTION);
     ret = manager_->GetWindowInfo(session, SceneSessionDirtyManager::WindowAction::WINDOW_ADD);
     ASSERT_EQ(ret.first.id, session->GetWindowId());
 }

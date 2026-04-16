@@ -62,7 +62,7 @@ public:
 
     void NotifyWindowInfoChange(const sptr<SceneSession>& sceneSession,
         const WindowUpdateType& type, const bool startMoving = false);
-    std::pair<std::vector<MMI::WindowInfo>, std::vector<std::shared_ptr<Media::PixelMap>>> GetFullWindowInfoList();
+    FullInfoForMMI GetFullWindowInfoList();
     void RegisterFlushWindowInfoCallback(FlushWindowInfoCallback&& callback);
     void ResetSessionDirty();
     void UpdateSecSurfaceInfo(const std::map<uint64_t, std::vector<SecSurfaceInfo>>& secSurfaceInfoMap);
@@ -109,7 +109,8 @@ private:
         const MMI::WindowInfo& hostWindowinfo, const sptr<SceneSession>& sceneSession,
         const Matrix3f hostTransform) const;
     MMI::WindowInfo GetHostComponentWindowInfo(const SecSurfaceInfo& secSurfaceInfo,
-        const MMI::WindowInfo& hostWindowinfo, const Matrix3f hostTransform) const;
+        const MMI::WindowInfo& hostWindowinfo, const sptr<SceneSession>& sceneSession,
+        const Matrix3f hostTransform) const;
     MMI::WindowInfo MakeWindowInfoFormHostWindow(const MMI::WindowInfo& hostWindowinfo) const;
     void ResetFlushWindowInfoTask();
     void CheckIfUpdatePointAreas(WindowType windowType, const sptr<SceneSession>& sceneSession,

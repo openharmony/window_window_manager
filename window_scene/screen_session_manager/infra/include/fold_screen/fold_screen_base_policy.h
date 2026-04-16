@@ -27,7 +27,7 @@
 
 namespace OHOS::Rosen::DMS {
 namespace {
-    static const uint32_t FOLD_TASK_NUM = 3;
+    static const uint32_t FOLD_TASK_NUM = 4;
     static const uint32_t FOLD_TASK_NUM_ONBOOTANIMATION = 1;
 }
 class FoldScreenBasePolicy {
@@ -38,14 +38,15 @@ public:
 
     void ClearState();
     FoldDisplayMode GetScreenDisplayMode();
-    FoldStatus GetFoldStatus();
+    FoldDisplayMode GetCurrentDisplayMode() const;
+    virtual FoldStatus GetFoldStatus();
     void SetFoldStatus(FoldStatus foldStatus);
     std::chrono::steady_clock::time_point GetStartTimePoint();
     bool GetIsFirstFrameCommitReported();
     void SetIsFirstFrameCommitReported(bool isFirstFrameCommitReported);
 
     // Avoid fold to expand process queues public interface
-    bool GetModeChangeRunningStatus();
+    virtual bool GetModeChangeRunningStatus();
     virtual void SetSecondaryDisplayModeChangeStatus(bool status){};
     bool GetdisplayModeRunningStatus();
     FoldDisplayMode GetLastCacheDisplayMode();
@@ -72,10 +73,11 @@ public:
     virtual void SetIsClearingBootAnimation(bool isClearingBootAnimation);
     virtual void BootAnimationFinishPowerInit() {};
     //fold or expand
-    bool CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce);
+    bool CheckDisplayModeChange(FoldDisplayMode displayMode, bool isForce,
+        DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void ChangeScreenDisplayMode(FoldDisplayMode displayMode, bool isForce,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
-    void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
+    virtual void ChangeScreenDisplayMode(FoldDisplayMode displayMode,
         DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT);
     void SendSensorResult(FoldStatus foldStatus);
     void UpdateDeviceStatus(FoldDisplayMode displayMode);
@@ -95,7 +97,8 @@ public:
     void SetdisplayModeChangeStatus(bool status, bool isOnBootAnimation = false);
     // common
     void LockDisplayStatus(bool locked);
-    FoldDisplayMode GetModeMatchStatus();
+    virtual FoldDisplayMode GetModeMatchStatus();
+    virtual FoldDisplayMode GetModeMatchStatus(FoldStatus targetFoldStatus);
     // FoldCreaseRegion
     sptr<FoldCreaseRegion> GetCurrentFoldCreaseRegion();
     FoldCreaseRegion GetLiveCreaseRegion() const;
@@ -103,6 +106,18 @@ public:
     virtual void SetMainScreenRegion(DMRect& mainScreenRegion) {};
     bool GetLockDisplayStatus() const;
     void SetCurrentDisplayMode(FoldDisplayMode mode);
+    virtual void ChangeScreenPowerOnFold(const std::vector<std::pair<ScreenId,
+        ScreenPowerStatus>>& screenPowerTaskList);
+    // Lock target fold status
+    virtual const std::unordered_set<FoldStatus>& GetSupportedFoldStatus() const;
+    virtual bool GetPhysicalFoldLockFlag() const;
+    virtual FoldStatus GetForceFoldStatus() const;
+    virtual DMError SetFoldStatusAndLockControl(bool isLocked, FoldStatus targetFoldStatus = FoldStatus::UNKNOWN);
+    virtual void SetFoldLockFlagAndFoldStatus(bool physicalFoldLockFlag, FoldStatus targetFoldStatus);
+    virtual FoldStatus GetPhysicalFoldStatus();
+    bool IsFoldStatusSupported(const std::unordered_set<FoldStatus>& supportedFoldStatus,
+        FoldStatus targetFoldStatus) const;
+    virtual float GetSpecialVirtualPixelRatio();
 
 protected:
     FoldScreenBasePolicy();
@@ -116,6 +131,9 @@ protected:
     std::chrono::steady_clock::time_point endTimePoint_ = std::chrono::steady_clock::now();
     void SetLastCacheDisplayMode(FoldDisplayMode mode);
     int64_t getFoldingElapsedMs();
+
+    std::atomic<bool> physicalFoldLockFlag_ = false;
+    std::atomic<FoldStatus> forceFoldStatus_ = FoldStatus::UNKNOWN;
 
     std::mutex coordinationMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;

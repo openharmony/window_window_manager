@@ -95,7 +95,6 @@ void ScreenSessionManagerClientTest::SetUp()
     {
         std::lock_guard<std::mutex> lock(screenSessionManagerClient_->screenSessionMapMutex_);
         screenSessionManagerClient_->screenSessionMap_.clear();
-        screenSessionManagerClient_->extraScreenSessionMap_.clear();
     }
 }
 
@@ -104,7 +103,6 @@ void ScreenSessionManagerClientTest::TearDown()
     {
         std::lock_guard<std::mutex> lock(screenSessionManagerClient_->screenSessionMapMutex_);
         screenSessionManagerClient_->screenSessionMap_.clear();
-        screenSessionManagerClient_->extraScreenSessionMap_.clear();
     }
     screenSessionManagerClient_ = nullptr;
 }
@@ -180,29 +178,6 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSession, TestSize.Level1)
 
     screenSessionManagerClient_->screenSessionMap_.clear();
     screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
-    EXPECT_EQ(screenSession, nullptr);
-}
-
-/**
- * @tc.name: GetScreenSessionExtra
- * @tc.desc: GetScreenSessionExtra test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerClientTest, GetScreenSessionExtra, TestSize.Level1)
-{
-    ScreenId screenId = 0;
-    sptr<ScreenSession> screenSession = nullptr;
-    screenSession = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
-    EXPECT_EQ(screenSession, nullptr);
-
-    screenSession = new ScreenSession(0, ScreenProperty(), 0);
-    screenSessionManagerClient_->extraScreenSessionMap_.emplace(screenId, screenSession);
-
-    auto screenSession2 = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
-    EXPECT_EQ(screenSession2, screenSession);
-
-    screenSessionManagerClient_->extraScreenSessionMap_.clear();
-    screenSession = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
     EXPECT_EQ(screenSession, nullptr);
 }
 
@@ -1823,30 +1798,6 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenCombination, TestSize.Level2)
     EXPECT_NE(client, nullptr);
 }
 
-/**
- * @tc.name: ExtraDestroyScreen
- * @tc.desc: ExtraDestroyScreen test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerClientTest, ExtraDestroyScreen, TestSize.Level2)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-
-    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
-    ASSERT_TRUE(client != nullptr);
-    client->ConnectToServer();
-
-    ScreenId screenId = 1;
-    sptr<ScreenSession> screenSession1 = new ScreenSession(screenId, ScreenProperty(), 0);
-    ASSERT_NE(nullptr, screenSession1);
-    client->extraScreenSessionMap_.emplace(screenId, screenSession1);
-
-    ScreenId screenId11 = 11;
-    client->extraScreenSessionMap_.emplace(screenId11, nullptr);
-    client->ExtraDestroyScreen(screenId11);
-    EXPECT_TRUE(logMsg.find("extra screenSession is null") != std::string::npos);
-}
 
 /**
  * @tc.name: OnDumperClientScreenSessions
@@ -2492,6 +2443,236 @@ HWTEST_F(ScreenSessionManagerClientTest, ProcPropertyChangedForSuperFold, TestSi
 
     logMsg.clear();
     LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPowerStateForAod01
+ * @tc.desc: SetPowerStateForAod test, normal test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPowerStateForAod01, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->SetPowerStateForAod(ScreenPowerState::POWER_DOZE);
+    EXPECT_TRUE(logMsg.find("screenSessionManager is null") == std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode01
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, screen session is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode01, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    screenSessionManagerClient_->screenSessionMap_.clear();
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(100, 200);
+    EXPECT_TRUE(logMsg.find("screensession is null") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode02
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, display node is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode02, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    sptr<ScreenSession> screenSession = new ScreenSession(0, 0, "test", ScreenProperty(), nullptr);
+    ASSERT_NE(screenSession, nullptr);
+    screenSessionManagerClient_->screenSessionMap_[0] = screenSession;
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(100, 200);
+    EXPECT_TRUE(logMsg.find("displaynode is null.") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode03
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, default mask bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = new ScreenSession(0, 0, "test", ScreenProperty(), node);
+    ASSERT_NE(screenSession, nullptr);
+    screenSessionManagerClient_->screenSessionMap_[0] = screenSession;
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(0, 0);
+    EXPECT_TRUE(logMsg.find("set default") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetPhysicalVisibleMaskToDisplayNode04
+ * @tc.desc: SetPhysicalVisibleMaskToDisplayNode test, valid bounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode04, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+    RSDisplayNodeConfig config;
+    std::shared_ptr<RSDisplayNode> node = std::make_shared<RSDisplayNode>(config);
+    sptr<ScreenSession> screenSession = new ScreenSession(0, 0, "test", ScreenProperty(), node);
+    ASSERT_NE(screenSession, nullptr);
+    screenSessionManagerClient_->screenSessionMap_[0] = screenSession;
+
+    screenSessionManagerClient_->SetPhysicalVisibleMaskToDisplayNode(100, 200);
+    EXPECT_TRUE(logMsg.find("screen width") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: OnPropertyChanged03
+ * @tc.desc: OnPropertyChanged03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ScreenProperty property1, property2;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    RRect bounds1, bounds2, bounds3;
+    bounds1.rect_.left_ = 0;
+    bounds1.rect_.top_ = 0;
+    bounds1.rect_.width_ = 100;
+    bounds1.rect_.height_ = 200;
+
+    bounds2.rect_.left_ = 0;
+    bounds2.rect_.top_ = 0;
+    bounds2.rect_.width_ = 200;
+    bounds2.rect_.height_ = 100;
+
+    bounds3.rect_.left_ = 0;
+    bounds3.rect_.top_ = 0;
+    bounds3.rect_.width_ = 100;
+    bounds3.rect_.height_ = 100;
+
+    property2.SetBounds(bounds2);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds3);
+    screenSession->SetScreenProperty(property2);
+    screenSession->SetPropertyNeedNotified(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+}
+
+/**
+ * @tc.name: OnPropertyChanged04
+ * @tc.desc: OnPropertyChanged04 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged04, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ScreenProperty property1, property2;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    RRect bounds1, bounds2;
+    bounds1.rect_.left_ = 0;
+    bounds1.rect_.top_ = 0;
+    bounds1.rect_.width_ = 100;
+    bounds1.rect_.height_ = 200;
+
+    bounds2.rect_.left_ = 0;
+    bounds2.rect_.top_ = 0;
+    bounds2.rect_.width_ = 200;
+    bounds2.rect_.height_ = 100;
+
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds2);
+    screenSession->SetScreenProperty(property1);
+    screenSession->SetPropertyNeedNotified(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds not change") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+}
+
+/**
+ * @tc.name: OnPropertyChanged05
+ * @tc.desc: OnPropertyChanged05 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged05, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ScreenProperty property1, property2;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    RRect bounds1, bounds2;
+    bounds1.rect_.left_ = 0;
+    bounds1.rect_.top_ = 0;
+    bounds1.rect_.width_ = 100;
+    bounds1.rect_.height_ = 200;
+
+    bounds2.rect_.left_ = 0;
+    bounds2.rect_.top_ = 1;
+    bounds2.rect_.width_ = 200;
+    bounds2.rect_.height_ = 100;
+
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds2);
+    screenSession->SetScreenProperty(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+
+    bounds2.rect_.left_ = 1;
+    bounds2.rect_.top_ = 2;
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds2);
+    screenSession->SetScreenProperty(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
 }
 } // namespace Rosen
 } // namespace OHOS

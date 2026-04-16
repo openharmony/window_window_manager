@@ -21,8 +21,11 @@ group("unittest") {
 
   deps = [
     ":snapshot_display_test",
-    ":snapshot_utils_test",
   ]
+
+  if (window_manager_use_sceneboard) {
+    deps += [ ":snapshot_utils_test" ]
+  }
 }
 
 ohos_unittest("snapshot_utils_test") {
@@ -36,6 +39,7 @@ ohos_unittest("snapshot_utils_test") {
     "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "selinux_adapter:librestorecon",
   ]
 }
@@ -51,6 +55,7 @@ ohos_unittest("snapshot_display_test") {
     "cJSON:cjson_static",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "selinux_adapter:librestorecon",
   ]
 }
@@ -78,7 +83,7 @@ ohos_static_library("utils_unittest_common") {
     "../../../resources/config/build:testcase_flags",
   ]
 
-  public_deps = [
+  deps = [
     "../..:libsnapshot_util",
     "../../../dm:libdm",
     "../../../test/common/utils:libtestutil",

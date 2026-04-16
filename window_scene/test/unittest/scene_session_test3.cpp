@@ -291,6 +291,42 @@ HWTEST_F(SceneSessionTest3, GetBlank, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetBlurRadius
+ * @tc.desc: check func SetBlurRadius/GetBlurRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetBlurRadius, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBlurRadius";
+    info.bundleName_ = "SetBlurRadius";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    float blurRadius = 6.5f;
+    sceneSession->SetBlurRadius(blurRadius);
+    EXPECT_FLOAT_EQ(blurRadius, sceneSession->GetBlurRadius());
+}
+
+/**
+ * @tc.name: SetBlurBackgroundColor
+ * @tc.desc: check func SetBlurBackgroundColor/GetBlurBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, SetBlurBackgroundColor, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetBlurBackgroundColor";
+    info.bundleName_ = "SetBlurBackgroundColor";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_NE(nullptr, sceneSession);
+
+    float blurBackgroundColor = 128.0f;
+    sceneSession->SetBlurBackgroundColor(blurBackgroundColor);
+    EXPECT_EQ(static_cast<uint32_t>(blurBackgroundColor), sceneSession->GetBlurBackgroundColor());
+}
+
+/**
  * @tc.name: SetBufferAvailableCallbackEnable
  * @tc.desc: check func SetBufferAvailableCallbackEnable
  * @tc.type: FUNC
@@ -327,38 +363,6 @@ HWTEST_F(SceneSessionTest3, GetBufferAvailableCallbackEnable, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyClientToUpdateAvoidArea
- * @tc.desc: check func NotifyClientToUpdateAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, NotifyClientToUpdateAvoidArea, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifyClientToUpdateAvoidArea";
-    info.bundleName_ = "NotifyClientToUpdateAvoidArea";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-
-    sceneSession->NotifyClientToUpdateAvoidArea();
-    EXPECT_EQ(nullptr, sceneSession->specificCallback_);
-
-    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sceneSession = sptr<SceneSession>::MakeSptr(info, callback);
-    EXPECT_NE(nullptr, sceneSession);
-    sceneSession->persistentId_ = 6;
-    callback->onUpdateAvoidArea_ = nullptr;
-    sceneSession->NotifyClientToUpdateAvoidArea();
-
-    UpdateAvoidAreaCallback callbackFun = [&sceneSession](int32_t persistentId) {
-        sceneSession->RemoveToastSession(persistentId);
-        return;
-    };
-    callback->onUpdateAvoidArea_ = callbackFun;
-    sceneSession->NotifyClientToUpdateAvoidArea();
-    EXPECT_EQ(6, sceneSession->GetPersistentId());
-}
-
-/**
  * @tc.name: UpdateScaleInner
  * @tc.desc: check func UpdateScaleInner
  * @tc.type: FUNC
@@ -373,25 +377,25 @@ HWTEST_F(SceneSessionTest3, UpdateScaleInner, TestSize.Level1)
 
     sceneSession->sessionStage_ = nullptr;
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
-    bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 10.0f);
+    bool res = sceneSession->UpdateScaleInner(10.0f, 10.0f, 10.0f, 9.0f, 10.0f, 10.0f);
     EXPECT_EQ(true, res);
 
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 10.0f);
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 10.0f);
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 10.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 9.0f, 10.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(true, res);
 
     sceneSession->state_ = SessionState::STATE_BACKGROUND;
-    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 9.0f, 9.0f);
+    res = sceneSession->UpdateScaleInner(10.0f, 9.0f, 10.0f, 9.0f, 9.0f, 9.0f);
     EXPECT_EQ(false, res);
 
     sceneSession->state_ = SessionState::STATE_FOREGROUND;
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     ASSERT_NE(mockSessionStage, nullptr);
     sceneSession->sessionStage_ = mockSessionStage;
-    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 10.0f, 9.0f, 3.0f, 4.0f);
     EXPECT_EQ(true, res);
-    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 3.0f, 4.0f);
+    res = sceneSession->UpdateScaleInner(1.0f, 2.0f, 10.0f, 9.0f, 3.0f, 4.0f);
     EXPECT_EQ(false, res);
 }
 
@@ -752,23 +756,6 @@ HWTEST_F(SceneSessionTest3, SetIsStatusBarVisible, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAllAvoidAreas
- * @tc.desc: GetAllAvoidAreas
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest3, GetAllAvoidAreas, TestSize.Level1)
-{
-    std::map<AvoidAreaType, AvoidArea> avoidAreas;
-    SessionInfo info;
-    info.abilityName_ = "GetAllAvoidAreas";
-    info.bundleName_ = "GetAllAvoidAreas";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    auto res = sceneSession->GetAllAvoidAreas(avoidAreas);
-    EXPECT_EQ(res, WSError::WS_OK);
-}
-
-/**
  * @tc.name: NotifyPipWindowSizeChange
  * @tc.desc: NotifyPipWindowSizeChange
  * @tc.type: FUNC
@@ -852,6 +839,28 @@ HWTEST_F(SceneSessionTest3, UpdateFullScreenWaterfallMode, TestSize.Level1)
 
     sceneSession->UpdateFullScreenWaterfallMode(isWaterfallMode);
     EXPECT_NE(sceneSession, nullptr);
+}
+
+/**
+ * @tc.name: OnWaterfallButtonChange
+ * @tc.desc: OnWaterfallButtonChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest3, OnWaterfallButtonChange, TestSize.Level1)
+{
+    bool isShow = true;
+    SessionInfo info;
+    info.abilityName_ = "OnWaterfallButtonChange";
+    info.bundleName_ = "OnWaterfallButtonChange";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->pcFoldScreenController_ = sptr<PcFoldScreenController>::MakeSptr(wptr(sceneSession),
+        sceneSession->GetPersistentId());
+    sceneSession->OnWaterfallButtonChange(isShow);
+    EXPECT_NE(sceneSession, nullptr);
+
+    sceneSession->pcFoldScreenController_ = nullptr;
+    sceneSession->OnWaterfallButtonChange(isShow);
+    EXPECT_EQ(sceneSession->pcFoldScreenController_, nullptr);
 }
 
 /**
@@ -981,6 +990,10 @@ HWTEST_F(SceneSessionTest3, SendContainerModalEvent, TestSize.Level1)
 
     auto res = sceneSession->SendContainerModalEvent(eventName, eventValue);
     EXPECT_EQ(res, sceneSession->sessionStage_->SendContainerModalEvent(eventName, eventValue));
+
+    eventName = "win_change_water_fall_button";
+    eventValue = "win_water_fall_button_show";
+    EXPECT_EQ(WSError::WS_OK, sceneSession->SendContainerModalEvent(eventName, eventValue));
 }
 
 /**
@@ -1092,7 +1105,7 @@ HWTEST_F(SceneSessionTest3, RegisterRequestedOrientationChangeCallback, TestSize
     info.bundleName_ = "RegisterRequestedOrientationChangeCallback";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
 
-    std::function<void(uint32_t orientation, bool needAnimation)> func = [](uint32_t orientation, bool needAnimation) {
+    NotifyReqOrientationChangeFunc func = [](uint32_t orientation, bool needAnimation, uint32_t promiseId) {
         return;
     };
     sceneSession->RegisterRequestedOrientationChangeCallback(std::move(func));

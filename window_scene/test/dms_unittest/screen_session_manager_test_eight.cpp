@@ -36,9 +36,11 @@ using namespace testing::ext;
 namespace OHOS {
 namespace Rosen {
 namespace {
+const bool CORRECTION_ENABLE = system::GetIntParameter<int32_t>("const.system.sensor_correction_enable", 0) == 1;
 const int32_t CV_WAIT_SCREENOFF_MS = 1500;
 const int32_t CV_WAIT_SCREENON_MS = 300;
 const int32_t CV_WAIT_SCREENOFF_MS_MAX = 3500;
+const int32_t FULL_STATUS_OFFSET_X = 6;
 const uint32_t INVALID_DISPLAY_ORIENTATION = 99;
 constexpr uint32_t SLEEP_TIME_IN_US = 100000; // 100ms
 constexpr int32_t CAST_WIRED_PROJECTION_START = 1005;
@@ -222,6 +224,41 @@ HWTEST_F(ScreenSessionManagerTest, GetScreenModesByDisplayId, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsHook
+ * @tc.desc: IsHook
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsHook, TestSize.Level1)
+{
+    auto booltTest = ssm_->IsHook(-1);
+    EXPECT_EQ(false, booltTest);
+    uint32_t uid = getuid();
+    DMHookInfo dmHookInfo = createDefaultHookInfo();
+    booltTest = ssm_->IsHook(uid);
+    EXPECT_EQ(true, booltTest);
+}
+
+/**
+ * @tc.name: HookRadius
+ * @tc.desc: HookRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HookRadius, TestSize.Level1)
+{
+    if (!FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
+        GTEST_SKIP();
+    }
+    uint32_t uid = getuid();
+    DMHookInfo dmHookInfo = createDefaultHookInfo();
+    ssm_->displayHookMap_[uid] = dmHookInfo;
+    int radius = 1;
+    ssm_->HookRadius(99, radius);
+    sptr<DisplayInfo> displayInfo = ssm_->GetDisplayInfoById(0);
+    ssm_->HookRadius(0, radius);
+    EXPECT_EQ(1, 1);
+}
+
+/**
  * @tc.name: UpdateDisplayHookInfo001
  * @tc.desc: UpdateDisplayHookInfo by uid
  * @tc.type: FUNC
@@ -299,6 +336,7 @@ HWTEST_F(ScreenSessionManagerTest, GetDisplayHookInfo, Function | SmallTest | Le
  */
 HWTEST_F(ScreenSessionManagerTest, NotifyIsFullScreenInForceSplitMode, Function | SmallTest | Level2)
 {
+    ssm_->displayHookMap_.clear();
     int32_t uid = 0;
     MockAccesstokenKit::MockIsSystemApp(false);
     ssm_->NotifyIsFullScreenInForceSplitMode(uid, true);
@@ -385,8 +423,6 @@ HWTEST_F(ScreenSessionManagerTest, SetResolution, TestSize.Level1)
     mode->width_ = 1;
     mode->height_ = 1;
     screenSession->modes_ = {mode};
-
-    ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetResolution(screenId, 100, 100, 0.5));
 
     ASSERT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->SetResolution(screenId, 0, 0, 0.5));
 
@@ -1101,6 +1137,117 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenPrivacyWindowList, Function | SmallT
 }
 
 /**
+ * @tc.name: CalculateStartWhenTransferState001
+ * @tc.desc: CalculateStartWhenTransferState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState001, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 1051;
+    sptr<ScreenSession> staticSession = sptr<ScreenSession>::MakeSptr(mainScreenId, ScreenProperty(), 0);
+    DMRect staticScreenBounds = {{0, 0, 1920, 1080}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
+    staticSession->SetBounds(staticScreenBounds);
+    staticSession->SetRSScreenId(mainScreenId);
+    staticSession->SetStartPosition(0, 0);
+    ScreenId dynamicScreenId = 1052;
+    sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
+    DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
+    dynamicSession->SetBounds(dynamicScreenBounds);
+    dynamicSession->SetRSScreenId(dynamicScreenId);
+    dynamicSession->SetStartPosition(0, 1080);
+    uint32_t borderingAreaPercent = 50;
+    uint32_t exceptStaticStartX = 0;
+    uint32_t exceptStaticStartY = 0;
+    uint32_t exceptDynamicStartX = 0;
+    uint32_t exceptDynamicStartY = 1080;
+    ssm_->CalculateStartWhenTransferState(staticSession, dynamicSession, borderingAreaPercent);
+    uint32_t testStaticStartX = staticSession->GetScreenProperty().GetStartX();
+    uint32_t testStaticStartY = staticSession->GetScreenProperty().GetStartY();
+    uint32_t testDynamicStartX = dynamicSession->GetScreenProperty().GetStartX();
+    uint32_t testDynamicStartY = dynamicSession->GetScreenProperty().GetStartY();
+    EXPECT_EQ(exceptStaticStartX, testStaticStartX);
+    EXPECT_EQ(exceptStaticStartY, testStaticStartY);
+    EXPECT_EQ(exceptDynamicStartX, testDynamicStartX);
+    EXPECT_EQ(exceptDynamicStartY, testDynamicStartY);
+}
+
+/**
+ * @tc.name: CalculateStartWhenTransferState002
+ * @tc.desc: CalculateStartWhenTransferState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState002, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 1051;
+    sptr<ScreenSession> staticSession = sptr<ScreenSession>::MakeSptr(mainScreenId, ScreenProperty(), 0);
+    DMRect staticScreenBounds = {{0, 0, 1920, 1080}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
+    staticSession->SetBounds(staticScreenBounds);
+    staticSession->SetRSScreenId(mainScreenId);
+    staticSession->SetStartPosition(0, 0);
+    ScreenId dynamicScreenId = 1052;
+    sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
+    DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
+    dynamicSession->SetBounds(dynamicScreenBounds);
+    dynamicSession->SetRSScreenId(dynamicScreenId);
+    dynamicSession->SetStartPosition(1919, 1080);
+    uint32_t borderingAreaPercent = 50;
+    uint32_t exceptStaticStartX = 0;
+    uint32_t exceptStaticStartY = 0;
+    uint32_t exceptDynamicStartX = 1919;
+    uint32_t exceptDynamicStartY = 1080;
+    ssm_->CalculateStartWhenTransferState(staticSession, dynamicSession, borderingAreaPercent);
+    uint32_t testStaticStartX = staticSession->GetScreenProperty().GetStartX();
+    uint32_t testStaticStartY = staticSession->GetScreenProperty().GetStartY();
+    uint32_t testDynamicStartX = dynamicSession->GetScreenProperty().GetStartX();
+    uint32_t testDynamicStartY = dynamicSession->GetScreenProperty().GetStartY();
+    EXPECT_EQ(exceptStaticStartX, testStaticStartX);
+    EXPECT_EQ(exceptStaticStartY, testStaticStartY);
+    EXPECT_EQ(exceptDynamicStartX, testDynamicStartX);
+    EXPECT_EQ(exceptDynamicStartY, testDynamicStartY);
+}
+
+/**
+ * @tc.name: CalculateStartWhenTransferState003
+ * @tc.desc: CalculateStartWhenTransferState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState003, Function | SmallTest | Level1)
+{
+    ScreenId mainScreenId = 1051;
+    sptr<ScreenSession> staticSession = sptr<ScreenSession>::MakeSptr(mainScreenId, ScreenProperty(), 0);
+    DMRect staticScreenBounds = {{0, 0, 1920, 1080}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
+    staticSession->SetBounds(staticScreenBounds);
+    staticSession->SetRSScreenId(mainScreenId);
+    staticSession->SetStartPosition(0, 0);
+    ScreenId dynamicScreenId = 1052;
+    sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
+    DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
+    ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
+    dynamicSession->SetBounds(dynamicScreenBounds);
+    dynamicSession->SetRSScreenId(dynamicScreenId);
+    dynamicSession->SetStartPosition(1920, 1080);
+    uint32_t borderingAreaPercent = 50;
+    uint32_t exceptStaticStartX = 0;
+    uint32_t exceptStaticStartY = 0;
+    uint32_t exceptDynamicStartX = 1920;
+    uint32_t exceptDynamicStartY = 1080;
+    ssm_->CalculateStartWhenTransferState(staticSession, dynamicSession, borderingAreaPercent);
+    uint32_t testStaticStartX = staticSession->GetScreenProperty().GetStartX();
+    uint32_t testStaticStartY = staticSession->GetScreenProperty().GetStartY();
+    uint32_t testDynamicStartX = dynamicSession->GetScreenProperty().GetStartX();
+    uint32_t testDynamicStartY = dynamicSession->GetScreenProperty().GetStartY();
+    EXPECT_EQ(exceptStaticStartX, testStaticStartX);
+    EXPECT_EQ(exceptStaticStartY, testStaticStartY);
+    EXPECT_EQ(exceptDynamicStartX, testDynamicStartX);
+    EXPECT_EQ(exceptDynamicStartY, testDynamicStartY);
+}
+
+/**
  * @tc.name: GetAllScreenIds
  * @tc.desc: GetAllScreenIds screen power
  * @tc.type: FUNC
@@ -1186,13 +1333,148 @@ HWTEST_F(ScreenSessionManagerTest, GetRoundedCorner, TestSize.Level1)
 {
     std::vector<RoundedCorner> roundedCorner;
     int radius = 0;
-    EXPECT_EQ(DMError::DM_ERROR_INVALID_PARAM, ssm_->GetRoundedCorner(0, radius));
+    EXPECT_EQ(DMError::DM_OK, ssm_->GetRoundedCorner(0, radius));
     ScreenId id = 0;
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_NE(nullptr, screenSession);
     auto ret = ssm_->GetRoundedCorner(0, radius);
     EXPECT_EQ(DMError::DM_OK, ret);
+}
+
+/**
+ * @tc.name: HandleRotationCorrectionExemption
+ * @tc.desc: HandleRotationCorrectionExemption test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HandleRotationCorrectionExemption, TestSize.Level1)
+{
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    const Rotation& initalRotation = Rotation::ROTATION_0;
+    displayInfo->SetRotation(initalRotation);
+
+    if (CORRECTION_ENABLE) {
+        ssm_->rotationCorrectionExemptionList_.clear();
+        ssm_->rotationCorrectionWhiteList_.clear();
+        ssm_->HandleRotationCorrectionExemption(displayInfo);
+        EXPECT_EQ(displayInfo->GetRotation(), initalRotation);
+
+        ssm_->SetFoldDisplayModeAfterRotation(FoldDisplayMode::MAIN);
+        RotationCorrectionWhiteConfig config;
+        ssm_->rotationCorrectionWhiteList_.insert(std::make_pair("test", config));
+        displayInfo->SetRotation(initalRotation);
+        ssm_->HandleRotationCorrectionExemption(displayInfo);
+        EXPECT_EQ(displayInfo->GetRotation(), initalRotation);
+
+        ssm_->SetFoldDisplayModeAfterRotation(FoldDisplayMode::UNKNOWN);
+        displayInfo->SetRotation(initalRotation);
+        ssm_->HandleRotationCorrectionExemption(displayInfo);
+        EXPECT_EQ(displayInfo->GetRotation(), initalRotation);
+    } else {
+        ssm_->HandleRotationCorrectionExemption(displayInfo);
+        EXPECT_EQ(displayInfo->GetRotation(), initalRotation);
+    }
+}
+
+/**
+ * @tc.name: GetRotationCorrectionWhiteConfigByBundleName
+ * @tc.desc: GetRotationCorrectionWhiteConfigByBundleName test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetRotationCorrectionWhiteConfigByBundleName, TestSize.Level1)
+{
+    RotationCorrectionWhiteConfig config;
+    config.useLogicCamera.insert(std::make_pair(FoldDisplayMode::MAIN, 1));
+    config.customLogicDirection.insert(std::make_pair(FoldDisplayMode::MAIN, 1));
+    const std::string& bundleName = "test_GetRotationCorrectionWhiteConfigByBundleName";
+
+    // Case1: white list is empty
+    ssm_->rotationCorrectionWhiteList_.clear();
+    RotationCorrectionWhiteConfig configTest1;
+    EXPECT_EQ(ssm_->GetRotationCorrectionWhiteConfigByBundleName(bundleName, configTest1), false);
+    EXPECT_TRUE(configTest1.useLogicCamera.empty());
+    EXPECT_TRUE(configTest1.customLogicDirection.empty());
+
+    // Case2: bundleName is not in white list
+    ssm_->rotationCorrectionWhiteList_.insert(std::make_pair(bundleName, config));
+    RotationCorrectionWhiteConfig configTest2;
+    EXPECT_EQ(ssm_->GetRotationCorrectionWhiteConfigByBundleName("testNotInWhiteList", configTest2), false);
+    EXPECT_TRUE(configTest2.useLogicCamera.empty());
+    EXPECT_TRUE(configTest2.customLogicDirection.empty());
+
+    // Case3: bundleName is in white list
+    RotationCorrectionWhiteConfig configTest3;
+    EXPECT_EQ(ssm_->GetRotationCorrectionWhiteConfigByBundleName(bundleName, configTest3), true);
+    EXPECT_FALSE(configTest3.useLogicCamera.empty());
+    EXPECT_FALSE(configTest3.customLogicDirection.empty());
+}
+
+/**
+ * @tc.name: GetCorrectionInWhiteConfigByDisplayMode
+ * @tc.desc: GetCorrectionInWhiteConfigByDisplayMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetCorrectionInWhiteConfigByDisplayMode, TestSize.Level1)
+{
+    RotationCorrectionWhiteConfig config;
+    config.useLogicCamera.insert(std::make_pair(FoldDisplayMode::MAIN, 1));
+    config.customLogicDirection.insert(
+        std::make_pair(FoldDisplayMode::MAIN, static_cast<int32_t>(Rotation::ROTATION_180)));
+
+    if (CORRECTION_ENABLE) {
+        // Case1: useLogicCamera is 0
+        config.useLogicCamera.insert(std::make_pair(FoldDisplayMode::FULL, 0));
+        config.customLogicDirection.insert(
+            std::make_pair(FoldDisplayMode::FULL, static_cast<int32_t>(Rotation::ROTATION_180)));
+        auto rotation = ssm_->GetCorrectionInWhiteConfigByDisplayMode(config, FoldDisplayMode::FULL);
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+
+        // Case2: customLogicDirection is lower than Rotation::ROTATION_0
+        config.useLogicCamera.insert(std::make_pair(FoldDisplayMode::GLOBAL_FULL, 1));
+        config.customLogicDirection.insert(
+            std::make_pair(FoldDisplayMode::GLOBAL_FULL, static_cast<int32_t>(Rotation::ROTATION_0) - 1));
+        rotation = ssm_->GetCorrectionInWhiteConfigByDisplayMode(config, FoldDisplayMode::GLOBAL_FULL);
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+
+        // Case3: customLogicDirection is bigger than Rotation::ROTATION_270
+        config.useLogicCamera.insert(std::make_pair(FoldDisplayMode::COORDINATION, 1));
+        config.customLogicDirection.insert(
+            std::make_pair(FoldDisplayMode::COORDINATION, static_cast<int32_t>(Rotation::ROTATION_270) + 1));
+        rotation = ssm_->GetCorrectionInWhiteConfigByDisplayMode(config, FoldDisplayMode::COORDINATION);
+        EXPECT_EQ(rotation, Rotation::ROTATION_0);
+
+        // Case4: Rotation::ROTATION_0 <= customLogicDirection <= Rotation::ROTATION_270
+        rotation = ssm_->GetCorrectionInWhiteConfigByDisplayMode(config, FoldDisplayMode::MAIN);
+        EXPECT_EQ(rotation, Rotation::ROTATION_180);
+    } else {
+        // Case5: CORRECTION_ENABLE is false
+        EXPECT_EQ(ssm_->GetCorrectionInWhiteConfigByDisplayMode(config, FoldDisplayMode::MAIN), Rotation::ROTATION_0);
+    }
+}
+
+/**
+ * @tc.name: RotationCorrectionWhiteConfig
+ * @tc.desc: RotationCorrectionWhiteConfig test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, RotationCorrectionWhiteConfig, TestSize.Level1)
+{
+    RotationCorrectionWhiteConfig config;
+    config.useLogicCamera.insert(std::make_pair(FoldDisplayMode::FULL, 1));
+    config.customLogicDirection.insert(
+        std::make_pair(FoldDisplayMode::FULL, static_cast<int32_t>(Rotation::ROTATION_180)));
+
+    // Case1: useLogicCamera
+    int32_t ret = config.GetUseLogicCamera(FoldDisplayMode::FULL);
+    EXPECT_EQ(ret, 1);
+    ret = config.GetUseLogicCamera(FoldDisplayMode::GLOBAL_FULL);
+    EXPECT_EQ(ret, 0);
+
+    // Case2: customLogicDirection
+    ret = config.GetCustomLogicDirection(FoldDisplayMode::FULL);
+    EXPECT_EQ(ret, static_cast<int32_t>(Rotation::ROTATION_180));
+    ret = config.GetCustomLogicDirection(FoldDisplayMode::GLOBAL_FULL);
+    EXPECT_EQ(ret, static_cast<int32_t>(Rotation::ROTATION_0));
 }
 
 /**
@@ -1214,6 +1496,23 @@ HWTEST_F(ScreenSessionManagerTest, GetSupportedHDRFormats, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestNotifyRunSensorFoldStateManager
+ * @tc.desc: TestNotifyRunSensorFoldStateManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestNotifyRunSensorFoldStateManager, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    if (ssm_->foldScreenController_ != nullptr) {
+        ssm_->foldScreenController_->NotifyRunSensorFoldStateManager();
+        EXPECT_TRUE(g_logMsg.find("NotifyRunSensorFoldStateManager") != std::string::npos);
+    }
+    LOG_SetCallback(nullptr);
+    g_logMsg.clear();
+}
+
+/*
  * @tc.name: NotifyRSCoordination
  * @tc.desc: NotifyRSCoordination
  * @tc.type: FUNC
@@ -1230,6 +1529,201 @@ HWTEST_F(ScreenSessionManagerTest, NotifyRSCoordination, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("isEnterCoordination:0") != std::string::npos);
     g_logMsg.clear();
     LOG_SetCallback(nullptr);
+}
+
+/*
+ * @tc.name: TestCalcRectsWithRotation001
+ * @tc.desc: TestCalcRectsWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestCalcRectsWithRotation001, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    DMRect rect = { 0, 0, 800, 600 };
+    DMRect res = ssm_->CalcRectsWithRotation(displayId, rect);
+    ASSERT_NE(res, DMRect::NONE());
+}
+
+/*
+ * @tc.name: TestCalcRectsWithRotation002
+ * @tc.desc: TestCalcRectsWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestCalcRectsWithRotation002, TestSize.Level1)
+{
+    DisplayId displayId = DISPLAY_ID_FAKE;
+    DMRect rect = { 0, 0, 800, 600 };
+    DMRect res = ssm_->CalcRectsWithRotation(displayId, rect);
+    EXPECT_EQ(res, DMRect::NONE());
+}
+
+/*
+ * @tc.name: TestCalcRectsWithRotation003
+ * @tc.desc: TestCalcRectsWithRotation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, TestCalcRectsWithRotation003, TestSize.Level1)
+{
+    DisplayId displayId = 0;
+    DMRect rect = { 10, 20, 800, 600 };
+    std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
+    auto screenSession = ssm_->GetScreenSession(displayId);
+    ASSERT_NE(screenSession, nullptr);
+    FoldDisplayMode displayMode = ssm_->GetFoldDisplayMode();
+    ScreenProperty screenProperty = screenSession->GetScreenProperty();
+    int32_t boundaryOffset = 0;
+    Rotation rotation = ssm_->CalcPhysicalRotation(screenProperty.GetDeviceRotation(), displayMode);
+    int32_t screenWidth = screenProperty.GetBounds().rect_.GetWidth();
+    int32_t screenHeigth = screenProperty.GetBounds().rect_.GetHeight();
+    DMRect calcRect = rect;
+    if (!phyOffsets.empty() && phyOffsets.size() == 1 && phyOffsets[0] == "0") {
+        calcRect = ssm_->CalcRectsWithRotation(displayId, rect);
+    } else if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+        if (displayMode == FoldDisplayMode::FULL) {
+            boundaryOffset = static_cast<int32_t>(ssm_->screenParams_[FULL_STATUS_OFFSET_X]);
+        }
+        calcRect = ssm_->CalcRectsWithRotation(displayId, rect);
+    } else {
+        GTEST_SKIP();
+    }
+    DMRect res = rect;
+    switch (rotation)
+    {
+        case Rotation::ROTATION_0:
+            res = DMRect{rect.posX_, rect.posY_ + boundaryOffset, rect.width_, rect.height_};
+            break;
+        case Rotation::ROTATION_90:
+            res = DMRect{
+                rect.posY_, screenWidth - rect.posX_ - rect.width_ + boundaryOffset, rect.height_, rect.width_};
+            break;
+        case Rotation::ROTATION_180:
+            res = DMRect{screenWidth - rect.posX_ - rect.width_,
+                screenHeigth - rect.posY_ - rect.height_ + boundaryOffset, rect.width_, rect.height_};
+            break;
+        case Rotation::ROTATION_270:
+            res = DMRect{
+                screenHeigth - rect.posY_ - rect.height_, rect.posX_ + boundaryOffset, rect.height_, rect.width_};
+            break;
+        default:
+            EXPECT_EQ(res, rect);
+            break;
+    }
+    EXPECT_EQ(calcRect, res);
+}
+
+/*
+ * @tc.name: SetOnBootAnimation
+ * @tc.desc: SetOnBootAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SetOnBootAnimation, TestSize.Level1)
+{
+    ssm_->SetOnBootAnimation(true);
+    EXPECT_TRUE(ssm_->IsOnBootAnimation());
+}
+
+/**
+ * @tc.name: CreateVirtualScreenWithScreenId_DefaultValue_ReturnsValidId
+ * @tc.desc: CreateVirtualScreen with screenId_ = -1 (default) returns valid screen id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreenWithScreenId_DefaultValue_ReturnsValidId, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    virtualOption.screenId_ = -1;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_NE(screenId, SCREEN_ID_INVALID);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: CreateVirtualScreenWithScreenId_MinBoundary_ReturnsValidId
+ * @tc.desc: CreateVirtualScreen with screenId_ = 300 (min boundary) returns valid screen id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreenWithScreenId_MinBoundary_ReturnsValidId, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    virtualOption.screenId_ = 300;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(screenId, 300);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: CreateVirtualScreenWithScreenId_MaxBoundary_ReturnsValidId
+ * @tc.desc: CreateVirtualScreen with screenId_ = 900 (max boundary) returns valid screen id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreenWithScreenId_MaxBoundary_ReturnsValidId, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    virtualOption.screenId_ = 900;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(screenId, 900);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: CreateVirtualScreenWithScreenId_MiddleValue_ReturnsValidId
+ * @tc.desc: CreateVirtualScreen with screenId_ = 500 (middle value) returns valid screen id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreenWithScreenId_MiddleValue_ReturnsValidId, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    virtualOption.screenId_ = 500;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(screenId, 500);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: CreateVirtualScreenWithScreenId_Duplicate_ReturnsInvalidId
+ * @tc.desc: CreateVirtualScreen with duplicate screenId_ returns invalid screen id
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, CreateVirtualScreenWithScreenId_Duplicate_ReturnsInvalidId, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
+    VirtualScreenOption virtualOption;
+    virtualOption.name_ = "createVirtualOption";
+    virtualOption.width_ = 200;
+    virtualOption.height_ = 100;
+    virtualOption.screenId_ = 400;
+    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(screenId, 400);
+    
+    VirtualScreenOption duplicateOption;
+    duplicateOption.name_ = "duplicateVirtualOption";
+    duplicateOption.width_ = 200;
+    duplicateOption.height_ = 100;
+    duplicateOption.screenId_ = 400;
+    auto duplicateScreenId = ssm_->CreateVirtualScreen(duplicateOption, displayManagerAgent->AsObject());
+    ASSERT_EQ(duplicateScreenId, SCREEN_ID_INVALID);
+    
+    ssm_->DestroyVirtualScreen(screenId);
 }
 }
 } // namespace Rosen

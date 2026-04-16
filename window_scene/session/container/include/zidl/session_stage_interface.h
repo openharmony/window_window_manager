@@ -136,7 +136,9 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
-    virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; }
+    virtual WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) = 0;
+    virtual WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) = 0;
+    virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; };
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyLifecyclePausedStatus() = 0;
     virtual void NotifyAppUseControlStatus(bool isUseControl) = 0;
@@ -164,6 +166,15 @@ public:
      * @param singleHandTransform transform to change.
      */
     virtual void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) = 0;
+
+    /**
+     * @brief Notify global scaled rect.
+     *
+     * Notify client when global scaled rect changed.
+     *
+     * @param globalScaledRect rect to change.
+     */
+    virtual void NotifyGlobalScaledRectChange(const Rect& globalScaledRect) {}
 
     /**
      * @brief Set pip event to client.
@@ -202,7 +213,6 @@ public:
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
-    virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
     virtual WSError PcAppInPadNormalClose()
     {
         return WSError::WS_OK;
@@ -214,6 +224,7 @@ public:
     virtual void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) = 0;
     virtual void UpdateAnimationSpeed(float speed) = 0;
     virtual void NotifySessionFullScreen(bool fullScreen) {}
+    virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) = 0;
 
     // **Non** IPC interface
     virtual void NotifyBackpressedEvent(bool& isConsumed) {}
@@ -258,6 +269,11 @@ public:
         return WSError::WS_OK;
     }
 
+    virtual WSError SetUIExtensionTransparent()
+    {
+        return WSError::WS_OK;
+    }
+
     virtual WSError LinkKeyFrameNode() = 0;
     virtual WSError SetStageKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) = 0;
 
@@ -273,6 +289,11 @@ public:
     virtual void NotifyWindowCrossAxisChange(CrossAxisState state) = 0;
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
+    virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
+    virtual WSError GetSceneNodeCount(uint32_t& nodeCount) = 0;
+    virtual WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) = 0;
+    
+    virtual WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) = 0;
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& currentInfo)
@@ -284,10 +305,11 @@ public:
     {
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
-    virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated() = 0;
+    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
+        SelectMode selectMode) = 0;
     virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
+    virtual WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
     virtual WSError UpdateBrightness(float brightness) = 0;
 
@@ -329,6 +351,77 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SetSidebarBlurStyleWithType(SidebarBlurType type) { return WSError::WS_DO_NOTHING; }
+
+    /**
+     * @brief Update window UIType when recover.
+     *
+     * Update window UIType when recover.
+     *
+     * @param windowUIType Window UIType.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UpdateWindowUIType(WindowUIType windowUIType)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Update session property when trigger mode.
+     *
+     * Update session property when trigger mode.
+     *
+     * @param property Window session property.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UpdatePropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+    * @brief Notify parent lifecycle event to subwindow.
+    *
+    * Notify subwindow about parent window lifecycle changes (foreground, background, destroy).
+    *
+    * @param eventType Indicates the lifecycle event (foreground/background/destroy).
+    * @return Returns WSError::WS_OK if called success, otherwise failed.
+    */
+    virtual WSError NotifyParentLifecycleEvent(ParentLifeCycleEvent eventType)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * @brief Send fv event to client.
+     *
+     * Send the fv event to client. Such as close events.
+     *
+     * @param action Indicates the action name.
+     * @param reason Indicates the reason for the action.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SendFvActionEvent(const std::string& action, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view window info to client.
+     *
+     * Sync float view window info to client.
+     *
+     * @param windowInfo Indicates the float view window info.
+     * @param reason Indicates the reason string for the sync.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view limits info to client.
+     *
+     * Sync float view limits info to client.
+     *
+     * @param limits Indicates the float view limits info.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvLimits(const FloatViewLimits& limits) = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

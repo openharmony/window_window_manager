@@ -24,7 +24,6 @@
 #include "mock_window_scene_session_impl.h"
 #include "scene_board_judgement.h"
 #include "session/host/include/scene_session.h"
-#include "singleton_mocker.h"
 #include "window_scene_session_impl.h"
 #include "window_session_impl.h"
 
@@ -33,7 +32,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
-using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 
 class MockWindowChangeListener : public IWindowChangeListener {
 public:
@@ -62,7 +60,6 @@ public:
     void TearDown() override;
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_;
-    std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
 
 private:
     RSSurfaceNode::SharedPtr CreateRSSurfaceNode();
@@ -998,6 +995,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, GetGlobalScaledRect, TestSize.Level1)
     hookWindowInfo.widthHookRatio = 0.5f;
     window->SetAppHookWindowInfo(hookWindowInfo);
     Rect globalScaledRect = { 0, 0, 800, 800 };
+    EXPECT_CALL(*session, GetGlobalScaledRect(_)).Times(1).WillOnce(Return(WMError::WM_OK));
     WMError res = window->GetGlobalScaledRect(globalScaledRect);
     EXPECT_EQ(res, WMError::WM_OK);
     EXPECT_NE(globalScaledRect.width_, 800);

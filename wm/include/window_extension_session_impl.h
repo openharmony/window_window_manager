@@ -44,10 +44,10 @@ public:
 
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
-        bool isModuleAbilityHookEnd = false) override;
+        bool isModuleAbilityHookEnd = false, bool isBlockSubwindow = false) override;
     WMError MoveTo(int32_t x, int32_t y, bool isMoveToGlobal = false,
         MoveConfiguration moveConfiguration = {}) override;
-    WMError Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig = {}) override;
+    WMError Resize(uint32_t width, uint32_t height) override;
     WMError TransferAbilityResult(uint32_t resultCode, const AAFwk::Want& want) override;
     WMError TransferExtensionData(const AAFwk::WantParams& wantParams) override;
     WSError NotifyTransferComponentData(const AAFwk::WantParams& wantParams) override;
@@ -175,6 +175,7 @@ public:
     WSError UpdateSessionViewportConfig(const SessionViewportConfig& config) override;
     void NotifyExtensionEventAsync(uint32_t notifyEvent) override;
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    WSError SetUIExtensionTransparent() override;
 
     /*
      * PC Window
@@ -209,8 +210,11 @@ public:
     WMError HandleUnregisterHostRectChangeInGlobalDisplayListener(uint32_t code, int32_t persistentId,
         const AAFwk::Want& data) override;
     uint32_t GetHostStatusBarContentColor() const override;
+    WMError GetWindowStateSnapshot(std::string& winStateSnapshotJsonStr) override;
     WMError SetStatusBarColorForExtension(uint32_t color) override;
     WMError SetStatusBarColorForExtensionInner(uint32_t color);
+    bool IsBlockSubwindow() const override;
+    WMError GetWindowStatus(WindowStatus& windowStatus) override;
 
 protected:
     NotifyTransferComponentDataFunc notifyTransferComponentDataFunc_;
@@ -256,8 +260,8 @@ private:
     WMError OnKeyboardDidHide(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostStatusBarContentColorChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostRectChangeInGlobalDisplay(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    WMError OnRecover(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
     WMError OnHostWindowStatusChange(AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
-    WMError GetWindowStatus(WindowStatus& windowStatus) override;
 
     /*
      * Compatible Mode
@@ -282,13 +286,11 @@ private:
     uint64_t lastDisplayId_ { 0 };
     uint32_t lastTransform_ { 0 };
     AAFwk::WantParams extensionConfig_ {};
-    bool hostGestureBackEnabled_ { true };
-    bool immersiveModeEnabled_ { false };
-    std::mutex hostWindowRectChangeListenerMutex_;
+    std::atomic<bool> hostGestureBackEnabled_ { true };
+    std::atomic<bool> immersiveModeEnabled_ { false };
     std::mutex keyboardDidShowListenerMutex_;
     std::mutex keyboardDidHideListenerMutex_;
     std::mutex occupiedAreaChangeListenerMutex_;
-    std::mutex hostRectChangeInGlobalDisplayListenerMutex_;
     std::vector<sptr<IWindowRectChangeListener>> hostWindowRectChangeListener_;
     std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListenerList_;
     std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
@@ -297,6 +299,8 @@ private:
     WindowStatus hostWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     uint32_t hostStatusBarContentColor_ { 0 };
     int64_t startModalExtensionTimeStamp_ = -1;
+    std::atomic<bool> transparentUIExtensionFlag_ { false };
+    bool isBlockSubwindow_ = false;
 
     /*
      * PC Fold Screen

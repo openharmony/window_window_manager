@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,24 @@ void SensorFoldStateMgrTest::TearDown()
 {
     LOG_SetCallback(nullptr);
     usleep(SLEEP_TIME_US);
+}
+
+/**
+ * @tc.name: SetTaskScheduler
+ * @tc.number: SetTaskScheduler
+ * @tc.desc: taskScheduler_ could be properly set when the input is valid.
+ */
+HWTEST_F(SensorFoldStateMgrTest, SetTaskScheduler, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    SuperFoldSensorManager mgr = SuperFoldSensorManager();
+    auto scheduler = std::make_shared<TaskScheduler>("task_test");
+    ASSERT_NE(scheduler, nullptr);
+    SensorFoldStateMgr::GetInstance()..SetTaskScheduler(scheduler);
+    scheduler = nullptr;
+    SensorFoldStateMgr::GetInstance()..SetTaskScheduler(scheduler);
+    EXPECT_TRUE(g_errLog.find("scheduler is nullptr") != std::string::npos);
 }
 
 /**
@@ -264,6 +282,155 @@ HWTEST_F(SensorFoldStateMgrTest, HandleSensorEventTest10, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("current state: 2, next state: 1.") != std::string::npos);
 }
 
+/**
+ * @tc.name: FinishTaskSequence
+ * @tc.desc: FinishTaskSequence
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, FinishTaskSequence, TestSize.Level0)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    SensorFoldStateMgr::GetInstance().FinishTaskSequence();
+    EXPECT_TRUE(g_logMsg.find("TaskSequenceProcess") != std::string::npos);
+    LOG_SetCallback(nullptr);
+    g_logMsg.clear();
+}
+
+/**
+ * @tc.name: HandleTentChangeTest01
+ * @tc.desc: test function : HandleTentChange with empty axis
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, HandleTentChangeTest01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SensorStatus sensorStatus;
+    sensorStatus.updateSensorType_ = DmsSensorType::SENSOR_TYPE_TENT;
+    sensorStatus.tentSensorInfo_.tentType_ = 1;
+    SensorFoldStateMgr::GetInstance().tentModeType_ = 0;
+    SensorFoldStateMgr::GetInstance().HandleTentChange(sensorStatus);
+    EXPECT_TRUE(g_logMsg.find("axis is empty") != std::string::npos);
+}
+
+/**
+ * @tc.name: HandleTentChangeTest02
+ * @tc.desc: test function : HandleTentChange tent mode from off to on
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, HandleTentChangeTest02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SensorStatus sensorStatus;
+    sensorStatus.updateSensorType_ = DmsSensorType::SENSOR_TYPE_TENT;
+    sensorStatus.tentSensorInfo_.tentType_ = 1;
+    ScreenAxis axis;
+    sensorStatus.axis_.emplace_back(axis);
+    SensorFoldStateMgr::GetInstance().tentModeType_ = 0;
+    SensorFoldStateMgr::GetInstance().HandleTentChange(sensorStatus);
+    EXPECT_TRUE(g_logMsg.find("tent mode:1") != std::string::npos);
+}
+
+/**
+ * *tc.name: HandleTentChangeTest03
+ * @tc.desc: test function : HandleTentChange tent mode from on to off with hall 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, HandleTentChangeTest03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SensorStatus sensorStatus;
+    sensorStatus.updateSensorType_ = DmsSensorType::SENSOR_TYPE_TENT;
+    sensorStatus.tentSensorInfo_.tentType_ = 0;
+    sensorStatus.tentSensorInfo_.hall_ = 0;
+    ScreenAxis axis;
+    sensorStatus.axis_.emplace_back(axis);
+    SensorFoldStateMgr::GetInstance().tentModeType_ = 1;
+    SensorFoldStateMgr::GetInstance().HandleTentChange(sensorStatus);
+    EXPECT_TRUE(g_logMsg.find("tent mode:0") != std::string::npos);
+}
+
+/**
+ * @tc.name: HandleTentChangeTest04
+ * @tc.desc: test function : HandleTentChange tent mode from on to off with hall -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, HandleTentChangeTest04, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SensorStatus sensorStatus;
+    sensorStatus.updateSensorType_ = DmsSensorType::SENSOR_TYPE_TENT;
+    sensorStatus.tentSensorInfo_.tentType_ = 0;
+    sensorStatus.tentSensorInfo_.hall_ = -1;
+    ScreenAxis axis;
+    sensorStatus.axis_.emplace_back(axis);
+    SensorFoldStateMgr::GetInstance().tentModeType_ = 1;
+    SensorFoldStateMgr::GetInstance().HandleTentChange(sensorStatus);
+    EXPECT_TRUE(g_logMsg.find("tent mode:0") != std::string::npos);
+}
+
+/**
+ * @tc.name: TentModeHandleSensorChangeTest01
+ * @tc.desc: test function : TentModeHandleSensorChange with empty axis
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, TentModeHandleSensorChangeTest01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SensorStatus sensorStatus;
+    sensorStatus.updateSensorType_ = DmsSensorType::SENSOR_TYPE_POSTURE;
+    SensorFoldStateMgr::GetInstance().tentModeType_ = 1;
+    SensorFoldStateMgr::GetInstance().TentModeHandleSensorChange(sensorStatus);
+    EXPECT_TRUE(g_logMsg.find("axis is empty") != std::string::npos);
+}
+
+/**
+ * @tc.name: TentModeHandleSensorChangeTest02
+ * @tc.desc: test function : TentModeHandleSensorChange exit due to hall
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, TentModeHandleSensorChangeTest02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SensorStatus sensorStatus;
+    sensorStatus.updateSensorType_ = DmsSensorType::SENSOR_TYPE_POSTURE;
+    ScreenAxis axis = { 90.0, 0 };
+    sensorStatus.axis_.emplace_back(axis);
+    SensorFoldStateMgr::GetInstance().tentModeType_ = 1;
+    SensorFoldStateMgr::GetInstance().TentModeHandleSensorChange(sensorStatus);
+    EXPECT_TRUE(g_logMsg.find("Exit tent mode due to hall sensor report folded") != std::string::npos);
+}
+
+/**
+ * @tc.name: TentModeHandleSensorChangeTest03
+ * @tc.desc: test function : TentModeHandleSensorChange exit due to angle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SensorFoldStateMgrTest, TentModeHandleSensorChangeTest03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    SensorStatus sensorStatus;
+    sensorStatus.updateSensorType_ = DmsSensorType::SENSOR_TYPE_POSTURE;
+    ScreenAxis axis = { 180.0, 1 };
+    sensorStatus.axis_.emplace_back(axis);
+    SensorFoldStateMgr::GetInstance().tentModeType_ = 1;
+    SensorFoldStateMgr::GetInstance().TentModeHandleSensorChange(sensorStatus);
+    EXPECT_TRUE(g_logMsg.find("Exit tent mode due to angle sensor report angle:180") != std::string::npos);
+}
 }
 }
 } // namespace Rosen

@@ -442,22 +442,6 @@ HWTEST_F(WindowSessionTest4, SetFocusable03, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFocused
- * @tc.desc: GetFocused Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionTest4, GetFocused, TestSize.Level1)
-{
-    ASSERT_NE(session_, nullptr);
-    bool result = session_->GetFocused();
-    ASSERT_EQ(result, false);
-
-    session_->isFocused_ = true;
-    bool result2 = session_->GetFocused();
-    ASSERT_EQ(result2, true);
-}
-
-/**
  * @tc.name: UpdatePointerArea
  * @tc.desc: UpdatePointerArea Test
  * @tc.type: FUNC
@@ -468,7 +452,6 @@ HWTEST_F(WindowSessionTest4, UpdatePointerArea, TestSize.Level1)
     WSRect rect = { 0, 0, 0, 0 };
     session_->preRect_ = rect;
     session_->UpdatePointerArea(rect);
-    ASSERT_EQ(session_->GetFocused(), false);
 }
 
 /**
@@ -604,7 +587,8 @@ HWTEST_F(WindowSessionTest4, SetRaiseToAppTopForPointDownFunc, TestSize.Level1)
     session_->SetNotifyUILostFocusFunc(nullptr);
     session_->UnregisterSessionChangeListeners();
 
-    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info, bool shouldBackToCaller) {};
+    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info,
+        bool shouldBackToCaller, LifeCycleChangeReason reason) {};
     session_->pendingSessionToBackgroundForDelegatorFunc_ = func2;
     ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }
@@ -1446,6 +1430,24 @@ HWTEST_F(WindowSessionTest4, SetLifeCycleTaskRunning, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetLastLifeCycleTask
+ * @tc.desc: check func GetLastLifeCycleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, GetLastLifeCycleTask, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->ClearLifeCycleTask();
+    auto ret = session_->GetLastLifeCycleTask();
+    EXPECT_EQ(ret, nullptr);
+
+    auto task1 = [](){};
+    session_->PostLifeCycleTask(task1, "task1", LifeCycleTaskType::START);
+    ret = session_->GetLastLifeCycleTask();
+    EXPECT_NE(ret, nullptr);
+}
+
+/**
  * @tc.name: SetHidingStartingWindow
  * @tc.desc: check func SetHidingStartingWindow
  * @tc.type: FUNC
@@ -1815,6 +1817,40 @@ HWTEST_F(WindowSessionTest4, GetIsMidScene_SubSession, TestSize.Level1)
     result = subSession->GetIsMidScene(isMidScene);
     EXPECT_EQ(result, WSError::WS_OK);
     EXPECT_EQ(isMidScene, true);
+}
+
+/**
+ * @tc.name: SetLayerPartRender001
+ * @tc.desc: Set and get layer part render flag when surface node exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLayerPartRender001, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    EXPECT_FALSE(session_->GetLayerPartRender());
+
+    session_->SetLayerPartRender(true);
+    EXPECT_TRUE(session_->GetLayerPartRender());
+
+    session_->SetLayerPartRender(false);
+    EXPECT_FALSE(session_->GetLayerPartRender());
+}
+
+/**
+ * @tc.name: SetLayerPartRender002
+ * @tc.desc: Set and get layer part render flag when surface node is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, SetLayerPartRender002, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    session_->surfaceNode_ = nullptr;
+
+    session_->SetLayerPartRender(true);
+    EXPECT_TRUE(session_->GetLayerPartRender());
+
+    session_->SetLayerPartRender(false);
+    EXPECT_FALSE(session_->GetLayerPartRender());
 }
 } // namespace
 } // namespace Rosen

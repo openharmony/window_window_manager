@@ -39,11 +39,17 @@ public:
 
     void RegisterApplicationStateObserver();
 
+    void UnRegisterPostureCallback();
+
+    void UnRegisterHallCallback();
+
     void RegisterHallCallback();
 
     void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
 
     void SetSensorFoldStateManager(sptr<SensorFoldStateManager> sensorFoldStateManager);
+
+    void SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler);
 
     void HandlePostureData(const SensorEvent* const event);
 

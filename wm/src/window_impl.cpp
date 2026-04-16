@@ -75,6 +75,24 @@ Ace::ContentInfoType GetAceContentInfoType(BackupAndRestoreType type)
     }
     return contentInfoType;
 }
+
+const std::map<OHOS::AppExecFwk::DisplayOrientation, Orientation> ABILITY_TO_WMS_ORIENTATION_MAP {
+    {OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED, Orientation::UNSPECIFIED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE, Orientation::HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT, Orientation::VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::FOLLOWRECENT, Orientation::LOCKED},
+    {OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE_INVERTED, Orientation::REVERSE_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::PORTRAIT_INVERTED, Orientation::REVERSE_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION, Orientation::SENSOR},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE, Orientation::SENSOR_HORIZONTAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT, Orientation::SENSOR_VERTICAL},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_RESTRICTED, Orientation::AUTO_ROTATION_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,
+        Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,
+        Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED},
+    {OHOS::AppExecFwk::DisplayOrientation::LOCKED, Orientation::LOCKED},
+};
 }
 
 WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
@@ -82,6 +100,14 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ResSchedReport);
 const WindowImpl::ColorSpaceConvertMap WindowImpl::colorSpaceConvertMap[] = {
     { ColorSpace::COLOR_SPACE_DEFAULT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_SRGB },
     { ColorSpace::COLOR_SPACE_WIDE_GAMUT, GraphicColorGamut::GRAPHIC_COLOR_GAMUT_DCI_P3 },
+};
+
+const std::map<DragType, uint32_t> STYLEID_MAP = {
+    {DragType::DRAG_UNDEFINED, MMI::MOUSE_ICON::DEFAULT},
+    {DragType::DRAG_BOTTOM_OR_TOP, MMI::MOUSE_ICON::NORTH_SOUTH},
+    {DragType::DRAG_LEFT_OR_RIGHT, MMI::MOUSE_ICON::WEST_EAST},
+    {DragType::DRAG_LEFT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
+    {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
 };
 
 std::map<std::string, std::pair<uint32_t, sptr<Window>>> WindowImpl::windowMap_;
@@ -115,6 +141,9 @@ WindowImpl::WindowImpl(const sptr<WindowOption>& option)
     auto& sysBarPropMap = option->GetSystemBarProperty();
     for (auto it : sysBarPropMap) {
         property_->SetSystemBarProperty(it.first, it.second);
+        if (it.first == WindowType::WINDOW_TYPE_STATUS_BAR) {
+            windowStatusBarColor_ = it.second.contentColor_;
+        }
     }
     name_ = option->GetWindowName();
 
@@ -601,11 +630,23 @@ WMError WindowImpl::SetWindowFlags(uint32_t flags)
     return ret;
 }
 
+Ace::UIContent* WindowImpl::GetUIContent() const
+{
+    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
+    return uiContent_.get();
+}
+
+std::shared_ptr<Ace::UIContent> WindowImpl::GetUIContentSharedPtr() const
+{
+    std::shared_lock<std::shared_mutex> lock(uiContentMutex_);
+    return uiContent_;
+}
+
 void WindowImpl::OnNewWant(const AAFwk::Want& want)
 {
     WLOGI("Window [name:%{public}s, id:%{public}u]", name_.c_str(), property_->GetWindowId());
-    if (uiContent_ != nullptr) {
-        uiContent_->OnNewWant(want);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->OnNewWant(want);
     }
 }
 
@@ -713,8 +754,8 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WLOGFD("NapiSetUIContent: %{public}s", contentInfo.c_str());
-    if (uiContent_) {
-        uiContent_->Destroy();
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->Destroy();
     }
     std::unique_ptr<Ace::UIContent> uiContent = UIContentCreate(ability, (void*)env, isAni);
     if (uiContent == nullptr) {
@@ -758,18 +799,18 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
     }
     // make uiContent available after Initialize/Restore
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
         uiContent_ = std::move(uiContent);
     }
 
     if (isIgnoreSafeAreaNeedNotify_) {
-        uiContent_->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
+        GetUIContentSharedPtr()->SetIgnoreViewSafeArea(isIgnoreSafeArea_);
     }
     UpdateDecorEnable(true);
 
     if (state_ == WindowState::STATE_SHOWN) {
         // UIContent may be nullptr when show window, need to notify again when window is shown
-        uiContent_->Foreground();
+        GetUIContentSharedPtr()->Foreground();
         UpdateTitleButtonVisibility();
         Ace::ViewportConfig config;
         Rect rect = GetRect();
@@ -790,7 +831,7 @@ WMError WindowImpl::SetUIContentInner(const std::string& contentInfo, void* env,
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
             TLOGI(WmsLogTag::WMS_LIFE, "notify window orientation change end.");
         }
-        uiContent_->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
+        GetUIContentSharedPtr()->UpdateViewportConfig(config, WindowSizeChangeReason::UNDEFINED, nullptr);
         WLOGFD("notify uiContent window size change end");
     }
     if (aceRet != OHOS::Ace::UIContentErrorCode::NO_ERRORS) {
@@ -836,11 +877,6 @@ std::shared_ptr<std::vector<uint8_t>> WindowImpl::GetAbcContent(const std::strin
     return std::make_shared<std::vector<uint8_t>>(abcBytes);
 }
 
-Ace::UIContent* WindowImpl::GetUIContent() const
-{
-    return uiContent_.get();
-}
-
 Ace::UIContent* WindowImpl::GetUIContentWithId(uint32_t winId) const
 {
     return nullptr;
@@ -853,23 +889,24 @@ std::string WindowImpl::GetContentInfo(BackupAndRestoreType type)
         return "";
     }
 
-    if (uiContent_ == nullptr) {
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
         WLOGFE("fail to GetContentInfo id: %{public}u", property_->GetWindowId());
         return "";
     }
-    return uiContent_->GetContentInfo(GetAceContentInfoType(type));
+    return uiContent->GetContentInfo(GetAceContentInfoType(type));
 }
 
 WMError WindowImpl::SetRestoredRouterStack(const std::string& routerStack)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "Set restored router stack.");
+    TLOGI(WmsLogTag::WMS_LIFE, "Set restored router stack.");
     restoredRouterStack_ = routerStack;
     return WMError::WM_OK;
 }
 
 std::string WindowImpl::GetRestoredRouterStack()
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "Get restored router stack.");
+    TLOGI(WmsLogTag::WMS_LIFE, "Get restored router stack.");
     return std::move(restoredRouterStack_);
 }
 
@@ -959,8 +996,8 @@ void WindowImpl::DumpInfo(const std::vector<std::string>& params, std::vector<st
         return;
     }
     WLOGFD("ArkUI:DumpInfo");
-    if (uiContent_ != nullptr) {
-        uiContent_->DumpInfo(params, info);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->DumpInfo(params, info);
     }
     SingletonContainer::Get<WindowAdapter>().NotifyDumpInfoResult(info);
 }
@@ -981,6 +1018,10 @@ WMError WindowImpl::UpdateSystemBarProperties(
             systemBarProperties.at(systemBarType).backgroundColor_ : property.backgroundColor_;
         property.contentColor_ = systemBarPropertyFlag.contentColorFlag ?
             systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
+        if (systemBarType == WindowType::WINDOW_TYPE_STATUS_BAR) {
+            windowStatusBarColor_ = systemBarPropertyFlag.contentColorFlag ?
+                systemBarProperties.at(systemBarType).contentColor_ : property.contentColor_;
+        }
         property.enableAnimation_ = systemBarPropertyFlag.enableAnimationFlag ?
             systemBarProperties.at(systemBarType).enableAnimation_ : property.enableAnimation_;
 
@@ -1031,23 +1072,18 @@ WMError WindowImpl::SetSystemBarProperty(WindowType type, const SystemBarPropert
     return ret;
 }
 
-WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
-    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+WMError WindowImpl::SetStatusBarColorForNavigation(const std::optional<uint32_t> color)
 {
     SystemBarProperty current = GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto flagIter = propertyFlags.find(WindowType::WINDOW_TYPE_STATUS_BAR);
-    auto propertyIter = properties.find(WindowType::WINDOW_TYPE_STATUS_BAR);
-    if ((flagIter != propertyFlags.end() && flagIter->second.contentColorFlag) &&
-        (propertyIter != properties.end() && current.contentColor_ != propertyIter->second.contentColor_)) {
-        current.contentColor_ = propertyIter->second.contentColor_;
+    if (color != std::nullopt) {
+        current.contentColor_ = color.value();
         current.settingFlag_ = static_cast<SystemBarSettingFlag>(
-            static_cast<uint32_t>(propertyIter->second.settingFlag_) |
+            static_cast<uint32_t>(current.settingFlag_) |
             static_cast<uint32_t>(SystemBarSettingFlag::COLOR_SETTING));
-        WLOGI("Window:%{public}u %{public}s set status bar content color %{public}u",
-            GetWindowId(), GetWindowName().c_str(), current.contentColor_);
-        return SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
+    } else {
+        current.contentColor_ = windowStatusBarColor_;
     }
-    return WMError::WM_OK;
+    return SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, current);
 }
 
 WMError WindowImpl::GetSystemBarProperties(std::map<WindowType, SystemBarProperty>& properties)
@@ -1139,8 +1175,8 @@ WMError WindowImpl::SetLayoutFullScreen(bool status)
     isIgnoreSafeArea_ = status;
     // 10 ArkUI new framework support after API10
     if (version >= 10) {
-        if (uiContent_ != nullptr) {
-            uiContent_->SetIgnoreViewSafeArea(status);
+        if (auto uiContent = GetUIContentSharedPtr()) {
+            uiContent->SetIgnoreViewSafeArea(status);
         }
         isIgnoreSafeAreaNeedNotify_ = true;
     } else {
@@ -1352,7 +1388,8 @@ void WindowImpl::GetConfigurationFromAbilityInfo()
 void WindowImpl::UpdateTitleButtonVisibility()
 {
     WLOGFD("[Client] UpdateTitleButtonVisibility");
-    if (uiContent_ == nullptr || !IsDecorEnable()) {
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr || !IsDecorEnable()) {
         return;
     }
     auto windowModeSupportType = GetWindowModeSupportType();
@@ -1363,7 +1400,7 @@ void WindowImpl::UpdateTitleButtonVisibility()
         (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
         GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
     WLOGD("[Client] [hideSplit, hideMaximize]: [%{public}d, %{public}d]", hideSplitButton, hideMaximizeButton);
-    uiContent_->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false, false);
+    uiContent->HideWindowTitleButton(hideSplitButton, hideMaximizeButton, false, false);
 }
 
 bool WindowImpl::IsAppMainOrSubOrFloatingWindow()
@@ -1581,8 +1618,8 @@ WMError WindowImpl::GetWindowTypeForArkUI(WindowType parentWindowType, WindowTyp
 
 bool WindowImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    if (uiContent_ != nullptr) {
-        return uiContent_->ProcessKeyEvent(keyEvent, true);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        return uiContent->ProcessKeyEvent(keyEvent, true);
     }
     return false;
 }
@@ -1771,6 +1808,7 @@ WMError WindowImpl::Destroy(bool needNotifyServer, bool needClearListener, uint3
         std::unique_lock<std::shared_mutex> lock(windowMapMutex_);
         windowMap_.erase(GetWindowName());
     }
+    NotifyAfterDestroy();
     if (needClearListener) {
         ClearListenersById(GetWindowId());
     }
@@ -1834,10 +1872,17 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && !animationTransitionControllers_.empty()) {
+    bool hasTransitionController = false;
+    bool needDefaultAnimation = false;
+    {
+        std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+        hasTransitionController = !animationTransitionControllers_.empty();
+        needDefaultAnimation = needDefaultAnimation_;
+    }
+    if (withAnimation && !isAppWindow && hasTransitionController) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if ((isAppWindow && needDefaultAnimation_) || (withAnimation && animationTransitionControllers_.empty())) {
+    } else if ((isAppWindow && needDefaultAnimation) || (withAnimation && !hasTransitionController)) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else if (winType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -1865,13 +1910,6 @@ WMError WindowImpl::PreProcessShow(uint32_t reason, bool withAnimation)
     // update title button visibility when show
     UpdateTitleButtonVisibility();
     return WMError::WM_OK;
-}
-
-void WindowImpl::NotifyMainWindowDidForeground(uint32_t reason)
-{
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        NotifyAfterDidForeground(reason);
-    }
 }
 
 void WindowImpl::SetShowWithOptions(bool showWithOptions)
@@ -1906,6 +1944,12 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
         static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::TOGGLING) {
         state_ = WindowState::STATE_SHOWN;
         NotifyAfterForeground();
+
+        if (static_cast<WindowStateChangeReason>(reason) == WindowStateChangeReason::KEYGUARD) {
+            if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
+                NotifyAfterDidForeground(reason, true);
+            }
+        }
         return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_SHOWN) {
@@ -1923,7 +1967,6 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
         } else {
             NotifyAfterForeground(true, false);
         }
-        NotifyMainWindowDidForeground(reason);
         return WMError::WM_OK;
     }
     WMError ret = PreProcessShow(reason, withAnimation);
@@ -1937,7 +1980,6 @@ WMError WindowImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bo
     RecordLifeCycleExceptionEvent(LifeCycleEvent::SHOW_EVENT, ret);
     if (ret == WMError::WM_OK) {
         UpdateWindowStateWhenShow();
-        NotifyMainWindowDidForeground(reason);
     } else {
         NotifyForegroundFailed(ret);
         WLOGFE("show window id:%{public}u errCode:%{public}d", property_->GetWindowId(), static_cast<int32_t>(ret));
@@ -1974,6 +2016,11 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
         state_ = stateChangeReason == WindowStateChangeReason::KEYGUARD ?
             WindowState::STATE_FROZEN : WindowState::STATE_HIDDEN;
         NotifyAfterBackground();
+
+        if (WindowHelper::IsMainWindow(property_->GetWindowType()) &&
+            stateChangeReason == WindowStateChangeReason::KEYGUARD) {
+            NotifyAfterDidBackground(reason, true);
+        }
         return WMError::WM_OK;
     }
     if (state_ == WindowState::STATE_HIDDEN || state_ == WindowState::STATE_CREATED) {
@@ -1998,11 +2045,7 @@ WMError WindowImpl::Hide(uint32_t reason, bool withAnimation, bool isFromInnerki
         return ret;
     }
     UpdateWindowStateWhenHide();
-    if (WindowHelper::IsMainWindow(property_->GetWindowType())) {
-        NotifyAfterDidBackground(reason);
-    }
     CustomHideAnimation();
-
     ResetMoveOrDragState();
     escKeyEventTriggered_ = false;
     return ret;
@@ -2056,7 +2099,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
     return UpdateProperty(PropertyChangeAction::ACTION_UPDATE_RECT);
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
     WLOGFD("id:%{public}d Resize %{public}u %{public}u",
           property_->GetWindowId(), width, height);
@@ -2147,8 +2190,8 @@ WMError WindowImpl::SetBackgroundColor(uint32_t color)
             abilityInfo.abilityName_);
     }
 
-    if (uiContent_ != nullptr) {
-        uiContent_->SetBackgroundColor(color);
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SetBackgroundColor(color);
         return WMError::WM_OK;
     }
     WLOGI("ace is null, Id: %{public}u", GetWindowId());
@@ -2162,8 +2205,8 @@ WMError WindowImpl::SetBackgroundColor(uint32_t color)
 
 uint32_t WindowImpl::GetBackgroundColor() const
 {
-    if (uiContent_ != nullptr) {
-        return uiContent_->GetBackgroundColor();
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        return uiContent->GetBackgroundColor();
     }
     WLOGD("uiContent is nullptr, windowId: %{public}u, use FA mode", GetWindowId());
     if (aceAbilityHandler_ != nullptr) {
@@ -2727,8 +2770,8 @@ WMError WindowImpl::RegisterAnimationTransitionController(const sptr<IAnimationT
     }
     wptr<WindowProperty> propertyToken(property_);
     wptr<IAnimationTransitionController> animationTransitionControllerToken(listener);
-    if (uiContent_) {
-        uiContent_->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
+    if (auto uiContent = GetUIContentSharedPtr()) {
+        uiContent->SetNextFrameLayoutCallback([propertyToken, animationTransitionControllerToken]() {
             auto property = propertyToken.promote();
             auto animationTransitionController = animationTransitionControllerToken.promote();
             if (!property || !animationTransitionController) {
@@ -3103,9 +3146,9 @@ void WindowImpl::HandleBackKeyPressedEvent(const std::shared_ptr<MMI::KeyEvent>&
     if (inputEventConsumer != nullptr) {
         WLOGD("Transfer back key event to inputEventConsumer");
         isConsumed = inputEventConsumer->OnInputEvent(keyEvent);
-    } else if (uiContent_ != nullptr) {
+    } else if (auto uiContent = GetUIContentSharedPtr()) {
         WLOGD("Transfer back key event to uiContent");
-        isConsumed = uiContent_->ProcessBackPressed();
+        isConsumed = uiContent->ProcessBackPressed();
     } else {
         WLOGFE("There is no back key event consumer");
     }
@@ -3172,9 +3215,9 @@ void WindowImpl::ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent>& keyEvent)
             WLOGD("Transfer key event to inputEventConsumer");
             (void)inputEventConsumer->OnInputEvent(keyEvent);
             shouldMarkProcess = false;
-        } else if (uiContent_ != nullptr) {
+        } else if (auto uiContent = GetUIContentSharedPtr()) {
             WLOGD("Transfer key event to uiContent");
-            bool handled = static_cast<bool>(uiContent_->ProcessKeyEvent(keyEvent));
+            bool handled = static_cast<bool>(uiContent->ProcessKeyEvent(keyEvent));
             if (!handled && keyCode == MMI::KeyEvent::KEYCODE_ESCAPE &&
                 GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN &&
                 property_->GetMaximizeMode() == MaximizeMode::MODE_FULL_FILL &&
@@ -3485,9 +3528,9 @@ void WindowImpl::TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             WLOGFI("The Input event consumer consumes pointer event failed.");
             pointerEvent->MarkProcessed();
         }
-    } else if (uiContent_ != nullptr) {
+    } else if (auto uiContent = GetUIContentSharedPtr()) {
         WLOGFD("Transfer pointer event to uiContent");
-        if (!(uiContent_->ProcessPointerEvent(pointerEvent))) {
+        if (!(uiContent->ProcessPointerEvent(pointerEvent))) {
             WLOGFI("The UI content consumes pointer event failed.");
             pointerEvent->MarkProcessed();
         }
@@ -3696,10 +3739,10 @@ bool WindowImpl::IsFocused() const
 
 void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    if (uiContent_ != nullptr) {
+    if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
-        uiContent_->UpdateConfiguration(configuration);
+        uiContent->UpdateConfiguration(configuration);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
@@ -3723,10 +3766,10 @@ void WindowImpl::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configura
 void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager)
 {
-    if (uiContent_ != nullptr) {
+    if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
-        uiContent_->UpdateConfiguration(configuration, resourceManager);
+        uiContent->UpdateConfiguration(configuration, resourceManager);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
@@ -3749,10 +3792,10 @@ void WindowImpl::UpdateConfigurationForSpecified(const std::shared_ptr<AppExecFw
 
 void WindowImpl::UpdateConfigurationSync(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
 {
-    if (uiContent_ != nullptr) {
+    if (auto uiContent = GetUIContentSharedPtr()) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify ace impl win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
-        uiContent_->UpdateConfigurationSyncForAll(configuration);
+        uiContent->UpdateConfigurationSyncForAll(configuration);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent null, impl win=%{public}u, display=%{public}" PRIu64,
             GetWindowId(), GetDisplayId());
@@ -3788,8 +3831,7 @@ void WindowImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<AppExecFwk:
 
 void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type %{public}d area %{public}s",
-          property_->GetWindowId(), type, avoidArea->ToString().c_str());
+    WLOGI("Update AvoidArea, id: %{public}u", property_->GetWindowId());
     auto display = SingletonContainer::IsDestroyed() ? nullptr :
         SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
     UpdateViewportConfig(GetRect(), display, WindowSizeChangeReason::AVOID_AREA_CHANGE, nullptr, {{type, *avoidArea}});
@@ -3800,8 +3842,8 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (uiContent_ == nullptr) {
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
         return;
     }
     Ace::ViewportConfig config;
@@ -3817,7 +3859,7 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
             config.SetOrientation(static_cast<int32_t>(displayInfo->GetDisplayOrientation()));
         }
     }
-    uiContent_->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas, occupiedAreaInfo_);
+    uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas, occupiedAreaInfo_);
     WLOGFD("Id:%{public}u, windowRect:[%{public}d, %{public}d, %{public}u, %{public}u]",
         property_->GetWindowId(), rect.posX_, rect.posY_, rect.width_, rect.height_);
 }
@@ -3834,8 +3876,8 @@ void WindowImpl::UpdateDecorEnable(bool needNotify)
         property_->SetDecorEnable(false);
     }
     if (needNotify) {
-        if (uiContent_ != nullptr) {
-            uiContent_->UpdateWindowMode(GetWindowMode(), property_->GetDecorEnable());
+        if (auto uiContent = GetUIContentSharedPtr()) {
+            uiContent->UpdateWindowMode(GetWindowMode(), property_->GetDecorEnable());
             WLOGFD("Notify uiContent window mode change end");
         }
         NotifyModeChange(GetWindowMode(), property_->GetDecorEnable());
@@ -4043,6 +4085,10 @@ void WindowImpl::UpdateOccupiedAreaChangeInfo(const sptr<OccupiedAreaChangeInfo>
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas,
     const std::shared_ptr<RSTransaction>& rsTransaction)
 {
+    if (info == nullptr) {
+        WLOGFE("Occupied area info is null");
+        return;
+    }
     WLOGFD("Update OccupiedArea, id: %{public}u", property_->GetWindowId());
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -4207,10 +4253,10 @@ void WindowImpl::NotifyAfterForeground(bool needNotifyListeners, bool needNotify
     }
 }
 
-void WindowImpl::NotifyAfterDidForeground(uint32_t reason)
+void WindowImpl::NotifyAfterDidForeground(uint32_t reason, bool forceNotify)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
-    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d, need forceNotify:%{public}d", reason, forceNotify);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL) && !forceNotify) {
         TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did foreground", reason);
         return;
     }
@@ -4242,10 +4288,10 @@ void WindowImpl::NotifyAfterBackground(bool needNotifyListeners, bool needNotify
     }
 }
 
-void WindowImpl::NotifyAfterDidBackground(uint32_t reason)
+void WindowImpl::NotifyAfterDidBackground(uint32_t reason, bool forceNotify)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d", reason);
-    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL)) {
+    TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d, need forceNotify:%{public}d", reason, forceNotify);
+    if (reason != static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL) && !forceNotify) {
         TLOGI(WmsLogTag::WMS_LIFE, "reason: %{public}d no need notify did background", reason);
         return;
     }
@@ -4264,6 +4310,12 @@ void WindowImpl::NotifyAfterDidBackground(uint32_t reason)
         auto lifecycleListeners = window->GetListeners<IWindowLifeCycle>();
         CALL_LIFECYCLE_LISTENER(AfterDidBackground, lifecycleListeners);
     }, where, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void WindowImpl::NotifyAfterDestroy()
+{
+    auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
+    CALL_LIFECYCLE_LISTENER(AfterDestroyed, lifecycleListeners);
 }
 
 void WindowImpl::NotifyAfterFocused()
@@ -4297,7 +4349,7 @@ void WindowImpl::NotifyAfterPaused()
 
 void WindowImpl::NotifyBeforeDestroy(std::string windowName)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(uiContentMutex_);
     if (uiContent_ != nullptr) {
         auto uiContent = std::move(uiContent_);
         uiContent_ = nullptr;
@@ -4472,6 +4524,7 @@ void WindowImpl::SetDefaultOption()
         case WindowType::WINDOW_TYPE_SEARCHING_BAR:
         case WindowType::WINDOW_TYPE_SCREENSHOT:
         case WindowType::WINDOW_TYPE_GLOBAL_SEARCH:
+        case WindowType::WINDOW_TYPE_SELECTION:
         case WindowType::WINDOW_TYPE_DIALOG: {
             property_->SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
             break;
@@ -4576,11 +4629,12 @@ void WindowImpl::GetRequestedTouchHotAreas(std::vector<Rect>& rects) const
 
 WMError WindowImpl::SetAPPWindowLabel(const std::string& label)
 {
-    if (uiContent_ == nullptr) {
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent_->SetAppWindowTitle(label);
+    uiContent->SetAppWindowTitle(label);
     WLOGI("Set app window label success, label : %{public}s", label.c_str());
     return WMError::WM_OK;
 }
@@ -4591,11 +4645,12 @@ WMError WindowImpl::SetAPPWindowIcon(const std::shared_ptr<Media::PixelMap>& ico
         WLOGFE("window icon is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    if (uiContent_ == nullptr) {
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
         WLOGFE("uicontent is empty");
         return WMError::WM_ERROR_NULLPTR;
     }
-    uiContent_->SetAppWindowIcon(icon);
+    uiContent->SetAppWindowIcon(icon);
     WLOGI("Set app window icon success");
     return WMError::WM_OK;
 }
@@ -4749,12 +4804,13 @@ WMError WindowImpl::NotifyMemoryLevel(int32_t level)
 {
     WLOGFD("id: %{public}u, notify memory level: %{public}d", property_->GetWindowId(), level);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (uiContent_ == nullptr) {
+    auto uiContent = GetUIContentSharedPtr();
+    if (uiContent == nullptr) {
         WLOGFE("Window %{public}s notify memory level failed, ace is null.", name_.c_str());
         return WMError::WM_ERROR_NULLPTR;
     }
     // notify memory level
-    uiContent_->NotifyMemoryLevel(level);
+    uiContent->NotifyMemoryLevel(level);
     return WMError::WM_OK;
 }
 
@@ -4772,7 +4828,8 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
 
 void WindowImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
-    needDefaultAnimation_= needDefaultAnimation;
+    std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+    needDefaultAnimation_ = needDefaultAnimation;
 }
 
 WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)

@@ -17,9 +17,10 @@
 #include <ipc_types.h>
 
 #include "iremote_object_mocker.h"
+#include "pointer_event.h"
+#include "session_manager/include/zidl/pip_change_listener_stub.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_stub.h"
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
-#include "session_manager/include/zidl/pip_change_listener_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -71,7 +72,8 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WSError::WS_OK;
     }
-    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token, bool shouldBackToCaller) override
+    WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
+        bool shouldBackToCaller, int32_t reason) override
     {
         return WSError::WS_OK;
     }
@@ -106,6 +108,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
         return WSError::WS_OK;
     }
     WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) override
+    {
+        return WSError::WS_OK;
+    }
+    WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId,
+        SessionInfoBean& sessionInfo, AAFwk::DisplayInfo& displayInfo) override
     {
         return WSError::WS_OK;
     }
@@ -285,6 +292,13 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     }
     WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
                                                       const std::vector<std::string>& bundleNameList) override
+    {
+        return WMError::WM_OK;
+    }
+    WMError RegisterSessionLifecycleListenerByAppInstance(const sptr<ISessionLifecycleListener>& listener,
+                                                          const std::string& bundleName,
+                                                          int32_t appIndex,
+                                                          const std::string& appInstanceKey) override
     {
         return WMError::WM_OK;
     }
@@ -503,7 +517,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetAppKeyFramePolicy, TestSize.L
     MessageParcel reply;
     int res = sceneSessionManagerLiteStub_->SceneSessionManagerLiteStub::HandleSetAppKeyFramePolicy(data, reply);
     EXPECT_EQ(res, ERR_INVALID_DATA);
-    
+
     const std::string bundleName = "test";
     KeyFramePolicy keyFramePolicy;
     data.WriteString(bundleName);
@@ -1154,6 +1168,31 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleRegisterWindowPropertyChangeAgen
 }
 
 /**
+ * @tc.name: HandleSetProcessWatermark
+ * @tc.desc: test HandleSetProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleSetProcessWatermark, Function | SmallTest | Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    ASSERT_NE(sceneSessionManagerLiteStub_, nullptr);
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_SET_PROCESS_WATERMARK);
+    auto res = sceneSessionManagerLiteStub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    data.WriteInt32(123);
+    data.WriteString("SetProcessWatermarkName");
+    data.WriteBool(true);
+    res = sceneSessionManagerLiteStub_->HandleSetProcessWatermark(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
  * @tc.name: HandleGetVisibilityWindowInfo
  * @tc.desc: test function : HandleGetVisibilityWindowInfo
  * @tc.type: FUNC
@@ -1347,6 +1386,33 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetRootMainWindowId, TestSize.Le
 }
 
 /**
+ * @tc.name: HandleNotifyAppUseControlDisplay
+ * @tc.desc: test function : HandleNotifyAppUseControlDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleNotifyAppUseControlDisplay, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlDisplay(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    DisplayId displayId = 1000;
+    data.WriteUint64(displayId);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlDisplay(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, res);
+
+    data.WriteUint64(displayId);
+    bool useControl = false;
+    data.WriteBool(useControl);
+    res = sceneSessionManagerLiteStub_->
+        SceneSessionManagerLiteStub::HandleNotifyAppUseControlDisplay(data, reply);
+    EXPECT_EQ(ERR_NONE, res);
+}
+
+/**
  * @tc.name: HandleNotifyAppUseControlList
  * @tc.desc: test function : HandleNotifyAppUseControlList
  * @tc.type: FUNC
@@ -1489,12 +1555,12 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundByPers
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
-    
+
     data.WriteInt32(1);
     res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundByPersistentId(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
- 
+
     MessageParcel data2;
     data2.WriteInt32(1);
     data2.WriteBool(true);

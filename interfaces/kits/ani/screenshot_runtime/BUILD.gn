@@ -40,6 +40,7 @@ ohos_shared_library("screenshotani_kit") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   sources = [
     "screenshot_ani/src/ani_err_utils.cpp",
@@ -74,6 +75,7 @@ ohos_shared_library("screenshotani_kit") {
     "image_framework:image_native",
     "image_framework:image_taihe",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
 
   innerapi_tags = [ "platformsdk" ]

@@ -26,6 +26,17 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void MyLogCallback(const LogType type,
+                       const LogLevel level,
+                       const unsigned int domain,
+                       const char* tag,
+                       const char* msg)
+    {
+        g_logMsg += msg;
+    }
+}
 class SessionStageProxyLayoutTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -90,6 +101,98 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifyLayoutFinishAfterWindowModeChange, T
 }
 
 /**
+ * @tc.name: TestNotifySubWindowAfterParentWindowSizeChange
+ * @tc.desc: Test NotifySubWindowAfterParentWindowSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, TestNotifySubWindowAfterParentWindowSizeChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySubWindowAfterParentWindowSizeChange start";
+    Rect rect = { 10, 20, 100, 200 };
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->NotifySubWindowAfterParentWindowSizeChange(rect));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write rect
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->NotifySubWindowAfterParentWindowSizeChange(rect));
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    // Case 3: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->NotifySubWindowAfterParentWindowSizeChange(rect));
+
+    // Case 5: Failed to send request
+    auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMock->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionStageProxy> failSendProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failSendProxy->NotifySubWindowAfterParentWindowSizeChange(rect));
+
+    // Case 6: Success
+    remoteMock->sendRequestResult_ = ERR_NONE;
+    sptr<SessionStageProxy> successProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+    EXPECT_EQ(WSError::WS_OK, successProxy->NotifySubWindowAfterParentWindowSizeChange(rect));
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySubWindowAfterParentWindowSizeChange end";
+}
+
+/**
+ * @tc.name: NotifySubWindowAfterParentWindowStatusChange
+ * @tc.desc: test function : NotifySubWindowAfterParentWindowStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, NotifySubWindowAfterParentWindowStatusChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySubWindowAfterParentWindowStatusChange start";
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    MockMessageParcel::ClearAllErrorFlag();
+
+    // case1: Failed to write interface token
+    {
+        MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+        auto ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+        MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    }
+
+    // case2: Failed to write WindowMode
+    {
+        MockMessageParcel::SetWriteInt32ErrorFlag(true);
+        auto ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+        MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    }
+
+    // case3: Remote is nullptr
+    {
+        sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+        auto ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    }
+
+    // case4: Failed to send request
+    {
+        auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+        remoteMock->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+        sptr<SessionStageProxy> failSendProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+            failSendProxy->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN));
+    }
+
+    // case 5: Success
+    {
+        auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+        remoteMock->sendRequestResult_ = ERR_NONE;
+        sptr<SessionStageProxy> successProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+        EXPECT_EQ(WSError::WS_OK,
+            successProxy->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN));
+    }
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySubWindowAfterParentWindowStatusChange end";
+}
+
+/**
  * @tc.name: UpdateWindowModeForUITest01
  * @tc.desc: test function : UpdateWindowModeForUITest
  * @tc.type: FUNC
@@ -131,6 +234,54 @@ HWTEST_F(SessionStageProxyLayoutTest, UpdateWindowModeForUITest01, TestSize.Leve
 }
 
 /**
+ * @tc.name: NotifyGlobalScaledRectChange
+ * @tc.desc: test function : NotifyGlobalScaledRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, NotifyGlobalScaledRectChange, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifyGlobalScaledRectChange start";
+    auto remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    auto sessionStageProxyNull = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    Rect globalScaledRect = { 0, 0, 1000, 1000 };
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    sessionStageProxy->NotifyGlobalScaledRectChange(globalScaledRect);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") != std::string::npos);
+    g_logMsg.clear();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    sessionStageProxy->NotifyGlobalScaledRectChange(globalScaledRect);
+    EXPECT_TRUE(g_logMsg.find("write globalScaledRect failed") != std::string::npos);
+    g_logMsg.clear();
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    sessionStageProxyNull->NotifyGlobalScaledRectChange(globalScaledRect);
+    EXPECT_TRUE(g_logMsg.find("remote is null") != std::string::npos);
+    g_logMsg.clear();
+
+    remoteMocker->SetRequestResult(1);
+    sessionStageProxy->NotifyGlobalScaledRectChange(globalScaledRect);
+    EXPECT_TRUE(g_logMsg.find("SendRequest failed") != std::string::npos);
+    g_logMsg.clear();
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    sessionStageProxy->NotifyGlobalScaledRectChange(globalScaledRect);
+    EXPECT_TRUE(g_logMsg.find("WriteInterfaceToken failed") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("write globalScaledRect failed") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("remote is null") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("SendRequest failed") == std::string::npos);
+
+    g_logMsg.clear();
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifyGlobalScaledRectChange end";
+}
+
+/**
  * @tc.name: NotifyAppHookWindowInfoUpdated
  * @tc.desc: test function : NotifyAppHookWindowInfoUpdated
  * @tc.type: FUNC
@@ -166,6 +317,51 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifyAppHookWindowInfoUpdated, TestSize.L
 
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifyAppHookWindowInfoUpdated end";
+}
+
+/**
+ * @tc.name: UpdateAppHookWindowInfo
+ * @tc.desc: test function : UpdateAppHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyLayoutTest, UpdateAppHookWindowInfo, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: UpdateAppHookWindowInfo start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+    HookWindowInfo hookWindowInfo;
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 3: Failed to write hook info
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteParcelableErrorFlag(false);
+
+    // Case 4: Failed to send request
+    remoteMocker->SetRequestResult(ERR_TRANSACTION_FAILED);
+    errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(ERR_NONE);
+
+    // Case 5: Success
+    errCode = sessionStageProxy->UpdateAppHookWindowInfo(hookWindowInfo);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: UpdateAppHookWindowInfo end";
 }
 } // namespace
 } // namespace Rosen

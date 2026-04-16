@@ -16,12 +16,10 @@ import("../../../../windowmanager_aafwk.gni")
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":extension_data_handler_test",
-    ":ws_extension_session_manager_test",
-  ]
   if(window_manager_use_sceneboard) {
-    deps += [
+    deps = [
+      ":extension_data_handler_test",
+      ":ws_extension_session_manager_test",
       ":ws_extension_session_test",
       ":ws_scene_session_manager_extension_test",
     ]
@@ -69,6 +67,7 @@ ohos_unittest("extension_data_handler_test") {
     "googletest:gmock",
     "googletest:gtest",
     "googletest:gtest_main",
+    "hilog:libhilog",
   ]
 }
 
@@ -93,7 +92,10 @@ ohos_unittest("ws_extension_session_test") {
   module_out_path = module_out_path
 
   sources = [ "extension_session_test.cpp" ]
-  include_dirs = [ "${window_base_path}/window_scene/session/host/include" ]
+  include_dirs = [
+    "${window_base_path}/window_scene/session/host/include",
+    "${window_base_path}/window_scene/test/unittest/ui_extension/data_handler",
+  ]
 
   deps = [ ws_unittest_common ]
   defines = [ "ACCESSIBILITY_MOCK" ]

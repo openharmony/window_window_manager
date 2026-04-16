@@ -15,9 +15,12 @@
 
 #include "display_ani.h"
 
+#include <cinttypes>
+
 #include <hitrace_meter.h>
 
 #include "ani.h"
+#include <ani_signature_builder.h>
 #include "ani_err_utils.h"
 #include "display.h"
 #include "display_ani_manager.h"
@@ -36,7 +39,11 @@
 
 namespace OHOS {
 namespace Rosen {
+using namespace arkts::ani_signature;
 
+namespace {
+    static std::map<DisplayId, sptr<DisplayInfo>> localObjs;
+}
 // construct, set registerManager.
 DisplayAni::DisplayAni(const sptr<Display>& display) : display_(display)
 {
@@ -46,19 +53,25 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    ani_long displayInfoRef = 0;
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "displayInfoRef", &displayInfoRef)) {
+        TLOGI(WmsLogTag::DMS, "[ANI] GetCutoutInfo failed");
+    }
+    DisplayInfo* displayInfo = reinterpret_cast<DisplayInfo*>(displayInfoRef);
     if (display == nullptr) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
         return;
     }
-    sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo();
+    sptr<CutoutInfo> cutoutInfo = display->GetCutoutInfo(displayInfo);
     if (cutoutInfo == nullptr) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "");
+        return;
     }
     std::vector<DMRect> rects = cutoutInfo->GetBoundingRects();
     // bounding rects
     ani_ref boundingRects = nullptr;
     ani_status status = env->Object_GetFieldByName_Ref(cutoutInfoObj,
-        "<property>boundingRects", &boundingRects);
+        Builder::BuildPropertyName("boundingRects").c_str(), &boundingRects);
     if (ANI_OK != status) {
         TLOGE(WmsLogTag::DMS, "[ANI] get field bounding rects fail, ani_status = %{public}d", status);
     }
@@ -69,7 +82,7 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     for (int i = 0; i < std::min(int(length), static_cast<int>(rects.size())); i++) {
         ani_ref currentCutoutInfo;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(boundingRects), "$_get",
-            "I:Lstd/core/Object;", &currentCutoutInfo, (ani_int)i)) {
+            "i:Y", &currentCutoutInfo, (ani_int)i)) {
             TLOGE(WmsLogTag::DMS, "[ANI] get ani_array index %{public}u fail", (ani_int)i);
         }
         TLOGI(WmsLogTag::DMS, "current i: %{public}d", i);
@@ -77,7 +90,7 @@ void DisplayAni::GetCutoutInfo(ani_env* env, ani_object obj, ani_object cutoutIn
     }
     // waterfall area
     ani_ref waterfallObj = nullptr;
-    env->Object_GetFieldByName_Ref(cutoutInfoObj, "<property>waterfallDisplayAreaRects",
+    env->Object_GetFieldByName_Ref(cutoutInfoObj, Builder::BuildPropertyName("waterfallDisplayAreaRects").c_str(),
         &waterfallObj);
     auto waterfallDisplayAreaRects = cutoutInfo->GetWaterfallDisplayAreaRects();
     DisplayAniUtils::ConvertWaterArea(waterfallDisplayAreaRects, static_cast<ani_object>(waterfallObj), env);
@@ -90,7 +103,9 @@ void DisplayAni::GetRoundedCorner(ani_env* env, ani_object obj, ani_object round
         TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return;
     }
-    auto display = SingletonContainer::Get<DisplayManager>().GetDefaultDisplay();
+    ani_long id;
+    env->Object_GetFieldByName_Long(obj, Builder::BuildPropertyName("id").c_str(), &id);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_SCREEN, "Invalid display or screen.");
         return;
@@ -102,14 +117,36 @@ void DisplayAni::GetRoundedCorner(ani_env* env, ani_object obj, ani_object round
         AniErrUtils::ThrowBusinessError(env, errCode, "Display get rounded corner failed.");
         return;
     }
-    if (roundedCorner.empty()) {
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL,
-            "This display manager service works abnormally.");
-    } else {
-        DisplayAniUtils::ConvertRoundedCorner(roundedCorner, roundedCornerObj, env);
-    }
+    DisplayAniUtils::ConvertRoundedCorner(roundedCorner, roundedCornerObj, env);
 }
 
+void DisplayAni::GetDisplayInfoRef(ani_env* env, ani_object displayObj)
+{
+    ani_long displayRef = 0;
+    if (env->Object_GetFieldByName_Long(displayObj, "displayRef", &displayRef)) {
+        TLOGI(WmsLogTag::DMS, "[ANI] GetCutoutInfo begin");
+    }
+    DisplayAni* displayAni = reinterpret_cast<DisplayAni*>(displayRef);
+    if (displayAni != nullptr) {
+        ani_status ret = ANI_OK;
+        sptr<DisplayInfo> displayInfo = displayAni->GetDisplay()->GetDisplayInfo();
+        ani_class displayCls = nullptr;
+        if ((ret = env->FindClass("@ohos.display.display.DisplayImpl", &displayCls)) != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] null env %{public}u", ret);
+            return;
+        }
+        ani_method setDisplayInfoRefFunc = nullptr;
+        if ((ret = env->Class_FindMethod(displayCls, "setDisplayInfoRef", "l:", &setDisplayInfoRefFunc)) != ANI_OK) {
+            TLOGE(WmsLogTag::DMS, "[ANI] call setDisplayInfoRef fail %{public}u", ret);
+            return;
+        }
+        env->Object_CallMethod_Void(displayObj, setDisplayInfoRefFunc,
+            reinterpret_cast<ani_long>(displayInfo.GetRefPtr()));
+        localObjs[displayInfo->GetDisplayId()] = displayInfo;
+    } else {
+        TLOGE(WmsLogTag::DMS, "[ANI] displayAni not found");
+    }
+}
 ani_string DisplayAni::GetDisplayCapability(ani_env* env)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] Start");
@@ -139,7 +176,7 @@ void DisplayAni::GetAvailableArea(ani_env* env, ani_object obj, ani_object avail
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_long id;
-    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
+    env->Object_GetFieldByName_Long(obj, Builder::BuildPropertyName("id").c_str(), &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] can not find display.");
@@ -165,7 +202,7 @@ void DisplayAni::GetLiveCreaseRegion(ani_env* env, ani_object obj, ani_object fo
         return;
     }
     ani_long id;
-    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
+    env->Object_GetFieldByName_Long(obj, Builder::BuildPropertyName("id").c_str(), &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI] can not find display.");
@@ -189,7 +226,7 @@ ani_boolean DisplayAni::HasImmersiveWindow(ani_env* env, ani_object obj)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] begin");
     ani_long id;
-    env->Object_GetFieldByName_Long(obj, "<property>id", &id);
+    env->Object_GetFieldByName_Long(obj, Builder::BuildPropertyName("id").c_str(), &id);
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(id);
     if (display == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI]can not find display.");
@@ -261,8 +298,14 @@ void DisplayAni::OnRegisterCallback(ani_env* env, ani_object obj, ani_string typ
         TLOGI(WmsLogTag::DMS, "Callback has already been registered!");
         return;
     }
-    
-    sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env);
+
+    ani_vm* vm = nullptr;
+    ani_status aniRet = env->GetVM(&vm);
+    if (aniRet != ANI_OK || vm == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Get vm failed, aniRet: %{public}u", aniRet);
+        return;
+    }
+    sptr<DisplayAniListener> displayAniListener = new(std::nothrow) DisplayAniListener(env, vm);
     if (displayAniListener == nullptr) {
         TLOGE(WmsLogTag::DMS, "[ANI]displayListener is nullptr");
         env->GlobalReference_Delete(cbRef);
@@ -417,6 +460,7 @@ void DisplayAni::CreateDisplayAni(sptr<Display> display, ani_object displayObj, 
         "displayRef", reinterpret_cast<ani_long>(displayAni.get()))) {
         TLOGE(WmsLogTag::DMS, "[ANI] set displayAni ref fail");
     }
+    display->SetDisplayInfoEnv(static_cast<void*>(env), Display::EnvType::ANI);
 }
 
 ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object input, ani_object displayAniObj)
@@ -437,7 +481,7 @@ ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object 
         TLOGE(WmsLogTag::DMS, "[ANI] jsDisplay is nullptr");
         return false;
     }
-    
+
     sptr<Display> display = jsDisplay->GetDisplay();
     if (DisplayAniUtils::CvtDisplay(display, env, displayAniObj) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] convert display failed");
@@ -446,7 +490,7 @@ ani_boolean DisplayAni::TransferStatic(ani_env* env, ani_object obj, ani_object 
     DisplayAni::CreateDisplayAni(display, displayAniObj, env);
     return true;
 }
- 
+
 ani_object DisplayAni::TransferDynamic(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     TLOGI(WmsLogTag::DMS, "begin");
@@ -460,7 +504,7 @@ ani_object DisplayAni::TransferDynamic(ani_env* env, ani_object obj, ani_long na
         TLOGE(WmsLogTag::DMS, "arkts_napi_scope_open failed");
         return nullptr;
     }
-    
+
     sptr<OHOS::Rosen::Display> display = aniDisplay->GetDisplay();
     napi_value jsDisplay = CreateJsDisplayObject(napiEnv, display);
     hybridgref ref = nullptr;
@@ -480,6 +524,20 @@ ani_object DisplayAni::TransferDynamic(ani_env* env, ani_object obj, ani_long na
         return nullptr;
     }
     return result;
+}
+
+void DisplayAni::CleanDisplayInfoMap(ani_env* env, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] CleanDisplayInfoMap Start");
+    DisplayInfo* displayInfo = reinterpret_cast<DisplayInfo*>(nativeObj);
+    if (displayInfo != nullptr) {
+        auto obj = localObjs.find(displayInfo->GetDisplayId());
+        if (obj != localObjs.end()) {
+            localObjs.erase(obj);
+        }
+    } else {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] displayInfo is nullptr");
+    }
 }
 
 ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
@@ -505,7 +563,7 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
             reinterpret_cast<void *>(DisplayManagerAni::GetDefaultDisplaySyncAni)},
         ani_native_function {"getBrightnessInfoNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::GetBrightnessInfoAni)},
-        ani_native_function {"getAllDisplaysSyncNative", "C{escompat.Array}:",
+        ani_native_function {"getAllDisplaysSyncNative", "C{std.core.Array}:",
             reinterpret_cast<void *>(DisplayManagerAni::GetAllDisplaysAni)},
         ani_native_function {"syncOn", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::RegisterCallback)},
@@ -534,6 +592,11 @@ ani_status DisplayAni::NspBindNativeFunctions(ani_env* env, ani_namespace nsp)
         ani_native_function {"isCaptured", nullptr, reinterpret_cast<void *>(DisplayManagerAni::IsCaptured)},
         ani_native_function {"finalizerDisplayNative", nullptr,
             reinterpret_cast<void *>(DisplayManagerAni::FinalizerDisplay)},
+        ani_native_function {"onChangeWithAttributeNative", nullptr,
+            reinterpret_cast<void *>(DisplayManagerAni::RegisterDisplayAttributeListener)},
+        ani_native_function {"displayInfoFinalizerCallback", nullptr,
+            reinterpret_cast<void *>(DisplayAni::CleanDisplayInfoMap)},
+        
     };
     auto ret = env->Namespace_BindNativeFunctions(nsp, funcs.data(), funcs.size());
     if (ret != ANI_OK) {
@@ -562,6 +625,8 @@ ani_status DisplayAni::ClassBindNativeFunctions(ani_env* env, ani_class displayC
             reinterpret_cast<void *>(DisplayAni::UnRegisterCallback)},
         ani_native_function {"getRoundedCornerInternal", nullptr,
             reinterpret_cast<void *>(DisplayAni::GetRoundedCorner)},
+        ani_native_function {"getDisplayInfoRefInternal", nullptr,
+            reinterpret_cast<void *>(DisplayAni::GetDisplayInfoRef)},
     };
     auto ret = env->Class_BindNativeMethods(displayCls, methods.data(), methods.size());
     if (ret != ANI_OK) {

@@ -36,6 +36,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(ScreenSessionManagerClient)
 
 void ScreenSessionManagerClient::ConnectToServer()
 {
+    std::lock_guard<std::mutex> lock(connectToServerMutex_);
     if (screenSessionManager_) {
         TLOGI(WmsLogTag::DMS, "Success to get screen session manager proxy");
         return;
@@ -207,35 +208,6 @@ void ScreenSessionManagerClient::HandleScreenDisconnectEvent(SessionOption optio
     }
 }
 
-void ScreenSessionManagerClient::ExtraDestroyScreen(ScreenId screenId)
-{
-    sptr<ScreenSession> screenSession = nullptr;
-    {
-        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-        for (const auto& iter : extraScreenSessionMap_) {
-            sptr<ScreenSession> tempScreenSession = iter.second;
-            if (tempScreenSession != nullptr) {
-                if (tempScreenSession->GetScreenId() == screenId) {
-                    screenSession = tempScreenSession;
-                    break;
-                }
-            }
-        }
-    }
-    if (!screenSession) {
-        TLOGE(WmsLogTag::DMS, "extra screenSession is null");
-        return;
-    }
-    TLOGI(WmsLogTag::DMS, "ScreenId:%{public}" PRIu64 ", rsId:%{public}" PRIu64,
-        screenSession->GetScreenId(), screenSession->GetRSScreenId());
-    {
-        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-        screenSession->DestroyScreenScene();
-        extraScreenSessionMap_.erase(screenId);
-    }
-    TLOGI(WmsLogTag::DMS, "end");
-}
-
 void ScreenSessionManagerClient::OnScreenExtendChanged(ScreenId mainScreenId, ScreenId extendScreenId)
 {
     auto screenSession = GetScreenSession(mainScreenId);
@@ -253,21 +225,22 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
     auto iter = screenSessionMap_.find(screenId);
     if (iter == screenSessionMap_.end()) {
-        TLOGE(WmsLogTag::DMS, "Error found screen session with id: %{public}" PRIu64, screenId);
+        TLOGE_LIMITN_MIN(WmsLogTag::DMS, THREE_TIMES, "Error found screen session with id: %{public}" PRIu64, screenId);
         return nullptr;
     }
     return iter->second;
 }
 
-sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSessionExtra(ScreenId screenId) const
+static inline bool IsBoundsChanged(RRect oldBounds, RRect newBounds)
 {
-    std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
-    auto iter = extraScreenSessionMap_.find(screenId);
-    if (iter == extraScreenSessionMap_.end()) {
-        TLOGE(WmsLogTag::DMS, "Error found extra screen session with id: %{public}" PRIu64, screenId);
-        return nullptr;
+    if (oldBounds.rect_.left_ == newBounds.rect_.left_ && newBounds.rect_.top_ == oldBounds.rect_.top_) {
+        if ((oldBounds.rect_.width_ == newBounds.rect_.width_ && oldBounds.rect_.height_ == newBounds.rect_.height_) ||
+            (oldBounds.rect_.height_ == newBounds.rect_.width_ && oldBounds.rect_.width_ == newBounds.rect_.height_)) {
+            return false;
+        }
+        return true;
     }
-    return iter->second;
+    return true;
 }
 
 void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
@@ -276,6 +249,26 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
+    if (reason == ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE) {
+        if (!IsBoundsChanged(screenSession->GetScreenProperty().GetBounds(), property.GetBounds()) &&
+            !IsBoundsChanged(screenSession->GetPropertyNeedNotified().GetBounds(), property.GetBounds())) {
+            TLOGNFI(WmsLogTag::DMS, "bounds not change");
+            return;
+        }
+        TLOGNFI(WmsLogTag::DMS, "bounds change");
+        screenSession->NotifyListenerPropertyChange(property, reason);
+        screenSession->SetPropertyNeedNotified(property);
+        auto oldProperty = screenSession->GetScreenProperty();
+        oldProperty.SetInputOffset(property.GetInputOffsetX(), property.GetInputOffsetY());
+        if (currentstate_ != SuperFoldStatus::KEYBOARD) {
+            oldProperty.SetScreenAreaWidth(property.GetScreenAreaWidth());
+            oldProperty.SetScreenAreaHeight(property.GetScreenAreaHeight());
+            oldProperty.SetMirrorWidth(property.GetMirrorWidth());
+            oldProperty.SetMirrorHeight(property.GetMirrorHeight());
+            screenSession->SetScreenProperty(oldProperty);
+        }
         return;
     }
     screenSession->PropertyChange(property, reason);
@@ -676,6 +669,45 @@ void ScreenSessionManagerClient::NotifyAodOpCompletion(AodOP operation, int32_t 
     screenSessionManager_->NotifyAodOpCompletion(operation, result);
 }
 
+void ScreenSessionManagerClient::SetPhysicalVisibleMaskToDisplayNode(int32_t width, int32_t height)
+{
+    sptr<ScreenSession> screenSession = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
+        auto iter = screenSessionMap_.find(0);
+        if (iter != screenSessionMap_.end() && iter->second != nullptr) {
+            screenSession = iter->second;
+            TLOGW(WmsLogTag::DMS, "screen session has exist.");
+        }
+    }
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screensession is null");
+        return;
+    }
+    Rect MaskBounds = {0, 0, 0, 0};
+    if (width > 0 && height > 0) {
+        MaskBounds = Rect {0, 0, width, height};
+        TLOGNI(WmsLogTag::DMS, "screen width: %{public}d, heigth %{public}d", width, height);
+    } else {
+        TLOGNI(WmsLogTag::DMS, "set default");
+    }
+    auto displayNode = screenSession->GetDisplayNode();
+    if (displayNode != nullptr) {
+        displayNode->SetDisplayContentRect(MaskBounds);
+    } else {
+        TLOGW(WmsLogTag::DMS, "displaynode is null.");
+    }
+}
+
+void ScreenSessionManagerClient::SetPowerStateForAod(ScreenPowerState state)
+{
+    if (!screenSessionManager_) {
+        TLOGE(WmsLogTag::DMS, "screenSessionManager is null");
+        return;
+    }
+    screenSessionManager_->SetPowerStateForAod(state);
+}
+
 void ScreenSessionManagerClient::RecordEventFromScb(std::string description, bool needRecordEvent)
 {
     if (!screenSessionManager_) {
@@ -891,11 +923,16 @@ ScreenId ScreenSessionManagerClient::GetDefaultScreenId()
 
 bool ScreenSessionManagerClient::IsFoldable()
 {
+    if (hasCheckFoldableStatus_.load()) {
+        return isFoldable_.load();
+    }
     if (!screenSessionManager_) {
         TLOGE(WmsLogTag::DMS, "screenSessionManager_ is null");
         return false;
     }
-    return screenSessionManager_->IsFoldable();
+    isFoldable_ = screenSessionManager_->IsFoldable();
+    hasCheckFoldableStatus_ = true;
+    return isFoldable_.load();
 }
 
 void ScreenSessionManagerClient::SetVirtualPixelRatioSystem(ScreenId screenId, float virtualPixelRatio)
@@ -1127,20 +1164,20 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[option.screenId_] = screenSession;
-        extraScreenSessionMap_[option.screenId_] = screenSession;
     }
     screenSession->SetRotationCorrectionMap(option.rotationCorrectionMap_);
     screenSession->SetSupportsFocus(option.supportsFocus_);
     screenSession->SetUniqueRotationLock(option.isRotationLocked_);
     screenSession->SetUniqueRotation(option.rotation_);
+    screenSession->SetBootingConnect(option.isBooting_);
     if (screenSession->GetUniqueRotationOrientationMap().size() != ROTATION_NUM) {
         screenSession->SetUniqueRotationOrientationMap(option.rotationOrientationMap_);
     }
     TLOGD(WmsLogTag::DMS, "Set unique screen rotation property in screenSession,"
           "isUniqueRotationLocked: %{public}d, uniqueRotation: %{public}d"
-          "uniqueRotationOrientationMap: %{public}s",
+          "uniqueRotationOrientationMap: %{public}s, isBooting: %{public}d",
           screenSession->GetUniqueRotationLock(), screenSession->GetUniqueRotation(),
-          MapToString(screenSession->GetUniqueRotationOrientationMap()).c_str());
+          MapToString(screenSession->GetUniqueRotationOrientationMap()).c_str(), option.isBooting_);
 
     NotifyClientScreenConnect(screenSession);
     return true;
@@ -1201,7 +1238,6 @@ bool ScreenSessionManagerClient::OnCreateScreenSessionOnly(ScreenId screenId, Sc
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
         screenSessionMap_[screenId] = screenSession;
-        extraScreenSessionMap_[screenId] = screenSession;
     }
     return true;
 }
@@ -1561,7 +1597,7 @@ void ScreenSessionManagerClient::SetInternalClipToBounds(ScreenId screenId, bool
     auto displayNode = internalSession->GetDisplayNode();
     if (displayNode != nullptr) {
         TLOGI(WmsLogTag::DMS, "Screen %{public}" PRIu64" displayNode cliptobounds set to %{public}d",
-            screenId, clipToBounds);
+            static_cast<uint64_t>(screenId), clipToBounds);
         displayNode->SetClipToBounds(clipToBounds);
         RSTransactionAdapter::FlushImplicitTransaction(displayNode);
     }

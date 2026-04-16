@@ -58,6 +58,7 @@ private:
     int HandleGetAllAvoidAreas(MessageParcel& data, MessageParcel& reply);
     int HandleGetTargetOrientationConfigInfo(MessageParcel& data, MessageParcel& reply);
     int HandleConvertOrientationAndRotation(MessageParcel& data, MessageParcel& reply);
+    int HandleSetPreferredOrientationWithResult(MessageParcel& data, MessageParcel& reply);
     int HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetContentAspectRatio(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowAnimationFlag(MessageParcel& data, MessageParcel& reply);
@@ -86,10 +87,14 @@ private:
     int HandleUpdateColorMode(MessageParcel& data, MessageParcel& reply);
     int HandleTitleAndDockHoverShowChange(MessageParcel& data, MessageParcel& reply);
     int HandleRestoreMainWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreFloatMainWindow(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfig(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppForceLandscapeConfigEnable(MessageParcel& data, MessageParcel& reply);
     int HandleGetAppHookWindowInfoFromServer(MessageParcel& data, MessageParcel& reply);
+    int HandleGetSelectMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyWindowStatusDidChangeAfterShowWindow(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyParentWindowSizeChange(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyParentWindowStatusChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyFrameLayoutFinish(MessageParcel& data, MessageParcel& reply);
     int HandleSetDialogSessionBackGestureEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleGetStatusBarHeight(MessageParcel& data, MessageParcel& reply);
@@ -97,6 +102,7 @@ private:
     int HandleRequestFocus(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateClientRect(MessageParcel& data, MessageParcel& reply);
     int HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel& reply);
+    int HandleSetFloatNavigationAvoidAreaEnabled(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySubModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyMainModalTypeChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetSessionLabelAndIcon(MessageParcel& data, MessageParcel& reply);
@@ -129,6 +135,7 @@ private:
     int HandleSetAutoStartPiP(MessageParcel& data, MessageParcel& reply);
     int HandleUpdatePiPTemplateInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSetPipParentWindowId(MessageParcel& data, MessageParcel& reply);
+    int HandleIsPiPActive(MessageParcel& data, MessageParcel& reply);
 
     // Floating Ball
     int HandleUpdateFloatingBall(MessageParcel& data, MessageParcel& reply);
@@ -162,6 +169,7 @@ private:
     // Window Property
     int HandleSetWindowCornerRadius(MessageParcel& data, MessageParcel& reply);
     int HandleSetWindowShadows(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverWindowEffect(MessageParcel& data, MessageParcel& reply);
     // Layout
     int HandleGetCrossAxisState(MessageParcel& data, MessageParcel& reply);
 
@@ -175,7 +183,7 @@ private:
     int HandleSetWindowAnchorInfo(MessageParcel& data, MessageParcel& reply);
 
     int HandleSetFollowParentWindowLayoutEnabled(MessageParcel& data, MessageParcel& reply);
-
+    
     // Window Transition Animation For PC
     int HandleSetWindowTransitionAnimation(MessageParcel& data, MessageParcel& reply);
 
@@ -189,11 +197,21 @@ private:
     int HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifyPageEnable(MessageParcel& data, MessageParcel& reply);
+    int HandleNotifySplitRatioChanged(MessageParcel& data, MessageParcel& reply);
 
     int HandleRestartApp(MessageParcel& data, MessageParcel& reply);
 
     // Window Event
     int HandleSendCommonEvent(MessageParcel& data, MessageParcel& reply);
+
+    // Prelaunch Starting Window
+    int HandleRemovePrelaunchStartingWindow(MessageParcel& data, MessageParcel& reply);
+
+    // Float View
+    int HandleStopFloatView(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateFloatView(MessageParcel& data, MessageParcel& reply);
+    int HandleRestoreFloatViewMainWindow(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 

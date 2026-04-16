@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,7 +36,7 @@ public:
                                 const sptr<IRemoteObject>& sessionManagerService) override;
 
 private:
-    int32_t userId_;
+    const int32_t userId_;
 };
 
 class SSMDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -45,7 +45,7 @@ public:
     void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 
 private:
-    int32_t userId_;
+    const int32_t userId_;
 };
 
 class FoundationDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -54,16 +54,19 @@ public:
     void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 
 private:
-    int32_t userId_;
+    const int32_t userId_;
 };
 
 class SessionManager : public RefBase {
-    WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
+WM_DECLARE_SINGLE_INSTANCE_BASE(SessionManager);
 
 public:
     static SessionManager& GetInstance(const int32_t userId);
     void ClearSessionManagerProxy();
     void RemoveSSMDeathRecipient();
+    void RemoveMockFoundationDeathRecipient();
+
+    sptr<IMockSessionManagerInterface> GetMockSessionManagerServiceProxy();
 
     sptr<ISceneSessionManager> GetSceneSessionManagerProxy();
     void OnFoundationDied();
@@ -87,6 +90,11 @@ public:
     void RegisterWindowManagerRecoverCallbackFunc(const WindowManagerRecoverCallbackFunc& callbackFunc);
     void RecoverSessionManagerService(const sptr<ISessionManagerService>& sessionManagerService);
 
+    /*
+     * Window Hierarchy
+     */
+    void NotifySetSpecificWindowZIndex();
+
 private:
     friend class sptr<SessionManager>;
     ~SessionManager() override;
@@ -102,9 +110,7 @@ private:
     void RegisterSMSRecoverListener();
     void UnregisterSMSRecoverListener();
 
-    sptr<FoundationDeathRecipient> foundationDeath_ = nullptr;
-    bool isFoundationListenerRegistered_ = false;
-    std::mutex foundationListenerRegisterdMutex_;
+    sptr<FoundationDeathRecipient> mockFoundationDeathRecipient_ = nullptr;
     sptr<IMockSessionManagerInterface> mockSessionManagerServiceProxy_ = nullptr;
     std::mutex mockSessionManagerServiceMutex_;
 
@@ -127,7 +133,7 @@ private:
      */
     void OnWMSConnectionChangedCallback(int32_t userId, int32_t screenId, bool isConnected);
     void OnUserSwitch(const sptr<ISessionManagerService>& sessionManagerService);
-    int32_t userId_;
+    const int32_t userId_;
     static std::unordered_map<int32_t, sptr<SessionManager>> sessionManagerMap_;
     static std::mutex sessionManagerMapMutex_;
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;

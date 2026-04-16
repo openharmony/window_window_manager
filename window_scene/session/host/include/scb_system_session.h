@@ -46,18 +46,21 @@ public:
      */
     bool GetIsUseControlSession() const override;
     void SetIsUseControlSession(bool isUseControlSession) override;
+    int32_t GetMainWindowPersistentId() const override;
+    void SetMainWindowPersistentId(int32_t mainWindowPersistentId) override;
 
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     void NotifyClientToUpdateAvoidArea() override;
 
 private:
-    bool isNeedSyncGlobalPos_ = true; // can only accessed in main thread
+    bool isNeedSyncGlobalPos_ = true; // only accessed in main thread
 
     /*
      * App Use Control
      */
     bool isUseControlSession_ = false; // Indicates whether the session is used for controlling a main session.
+    int32_t mainWindowPersistentId_ = INVALID_SESSION_ID;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SCB_SYSTEM_SESSION_H

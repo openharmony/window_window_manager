@@ -177,6 +177,46 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleRecoverWatermarkImageForApp01, Test
 }
 
 /**
+ * @tc.name: HandleUpdateSessionScreenshotListener
+ * @tc.desc: test HandleUpdateSessionScreenshotListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateSessionScreenshotListener, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(1);
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_UPDATE_SESSION_SCREENSHOT_LISTENER);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_NE(res, ERR_NULL_OBJECT);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = stub_->HandleUpdateSessionScreenshotListener(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MessageParcel data2;
+    data2.WriteInt32(2);
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    res = stub_->HandleUpdateSessionScreenshotListener(data2, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadBoolErrorFlag(false);
+
+    MessageParcel data3;
+    data3.WriteInt32(3);
+    data3.WriteBool(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleUpdateSessionScreenshotListener(data3, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
  * @tc.name: HandleUpdateSessionOcclusionStateListener
  * @tc.desc: test HandleUpdateSessionOcclusionStateListener
  * @tc.type: FUNC
@@ -208,6 +248,133 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateSessionOcclusionStateListener
 }
 
 /**
+ * @tc.name: HandleGetTopNavDestinationName
+ * @tc.desc: test HandleGetTopNavDestinationName
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleGetTopNavDestinationName, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(1);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_TOP_NAV_DEST_NAME);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_NE(res, ERR_NULL_OBJECT);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = stub_->HandleGetTopNavDestinationName(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInt32(2);
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    res = stub_->HandleGetTopNavDestinationName(data2, reply2);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+
+    MessageParcel data4;
+    MessageParcel reply4;
+    data4.WriteInt32(4);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleGetTopNavDestinationName(data4, reply4);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+}
+
+/**
+ * @tc.name: HandleSetWindowSnapshotSkip
+ * @tc.desc: test HandleSetWindowSnapshotSkip
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleSetWindowSnapshotSkip, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(1);
+    data.WriteBool(false);
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_SET_WINDOW_SNAPSHOT_SKIP);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_NE(res, ERR_NULL_OBJECT);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = stub_->HandleSetWindowSnapshotSkip(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MessageParcel data2;
+    data2.WriteInt32(2);
+    MockMessageParcel::SetReadBoolErrorFlag(true);
+    res = stub_->HandleSetWindowSnapshotSkip(data2, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadBoolErrorFlag(false);
+
+    MessageParcel data3;
+    data3.WriteInt32(3);
+    data3.WriteBool(false);
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleSetWindowSnapshotSkip(data3, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    MockMessageParcel::ClearAllErrorFlag();
+}
+
+/**
+ * @tc.name: HandleGetWindowStateSnapshot
+ * @tc.desc: test HandleGetWindowStateSnapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleGetWindowStateSnapshot, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(1);
+    data.WriteString("");
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_WINDOW_STATE_SNAPSHOT);
+    auto res = stub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    res = stub_->HandleGetWindowStateSnapshot(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadInt32ErrorFlag(false);
+
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInt32(2);
+    MockMessageParcel::SetReadStringErrorFlag(true);
+    res = stub_->HandleGetWindowStateSnapshot(data2, reply2);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetReadStringErrorFlag(false);
+
+    MessageParcel data3;
+    MessageParcel reply3;
+    data3.WriteInt32(3);
+    data3.WriteString("{}");
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    res = stub_->HandleGetWindowStateSnapshot(data3, reply3);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+
+    MessageParcel data4;
+    MessageParcel reply4;
+    data4.WriteInt32(4);
+    data4.WriteString("{}");
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    res = stub_->HandleGetWindowStateSnapshot(data4, reply4);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+}
+
+/**
  * @tc.name: HandleGetRootUIContentRemoteObj01
  * @tc.desc: test HandleGetRootUIContentRemoteObj
  * @tc.type: FUNC
@@ -236,46 +403,6 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleGetRootUIContentRemoteObj01, TestSi
     EXPECT_EQ(res, ERR_INVALID_DATA);
     MockMessageParcel::SetReadUint64ErrorFlag(false);
     MockMessageParcel::ClearAllErrorFlag();
-}
-
-/**
- * @tc.name: HandleCreateUIEffectController
- * @tc.desc: test HandleCreateUIEffectController
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest2, HandleCreateUIEffectController, Function | SmallTest | Level2)
-{
-    MockMessageParcel::ClearAllErrorFlag();
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(
-        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER);
-    sptr<IUIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
-    stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(stub_->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    data.WriteRemoteObject(client->AsObject());
-    stub_->HandleCreateUIEffectController(data, reply);
-    sptr<MockSceneSessionManagerStub> stubMock = sptr<MockSceneSessionManagerStub>::MakeSptr();
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(Return(static_cast<WMError>(-1)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(Return(WMError::WM_ERROR_NOT_SYSTEM_APP)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_NONE);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<2>(-1),
-        Return(WMError::WM_OK)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<1>(nullptr),
-        SetArgReferee<2>(0), Return(WMError::WM_OK)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    sptr<UIEffectController> server = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<1>(server),
-        SetArgReferee<2>(0), Return(WMError::WM_OK)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_NONE);
 }
 
 /**
@@ -339,6 +466,34 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateOutline02, TestSize.Level1)
     MockMessageParcel::SetWriteInt32ErrorFlag(false);
     auto ret = stub_->HandleUpdateOutline(data, reply);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetFloatViewLimits
+ * @tc.desc: test HandleGetFloatViewLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleGetFloatViewLimits, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    // WriteInt32 failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    int res = stub_->HandleGetFloatViewLimits(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    
+    // WriteParcelable failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = stub_->HandleGetFloatViewLimits(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    
+    // success
+    MockMessageParcel::ClearAllErrorFlag();
+    res = stub_->HandleGetFloatViewLimits(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

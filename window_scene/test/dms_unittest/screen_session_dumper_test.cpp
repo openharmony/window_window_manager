@@ -209,6 +209,12 @@ HWTEST_F(ScreenSessionDumperTest, ExecuteDumpCmd, TestSize.Level1)
     sptr<ScreenSessionDumper> dumper8 = new ScreenSessionDumper(fd, args);
     dumper8->ExecuteDumpCmd();
     ASSERT_EQ(dumper8->fd_, 1);
+
+    fd = 1;
+    args = {u"-ln,1"};
+    sptr<ScreenSessionDumper> dumper10 = new ScreenSessionDumper(fd, args);
+    dumper10->ExecuteDumpCmd();
+    ASSERT_EQ(dumper10->fd_, 1);
 }
 
 /**
@@ -1112,6 +1118,209 @@ HWTEST_F(ScreenSessionDumperTest, ShowCurrentStatus, TestSize.Level1)
     ASSERT_TRUE(dumper->dumpInfo_.find("status failed") == std::string::npos);
 }
 
+/**
+ * @tc.name: GetPostureAndHall_001
+ * @tc.desc: test the first if branch (no colon in string)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_001, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"invalid_string"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(postures.empty());
+    EXPECT_TRUE(halls.empty());
+}
+
+/**
+ * @tc.name: GetPostureAndHall_002
+ * @tc.desc: test the second if branch (no comma in value)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_002, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"key:invalid_value"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(postures.empty());
+    EXPECT_TRUE(halls.empty());
+}
+
+/**
+ * @tc.name: GetPostureAndHall_003
+ * @tc.desc: test the three float number branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_003, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"key:1.0,2.0,1"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(postures.size(), 3);
+    EXPECT_FLOAT_EQ(postures[0], 1.0f);
+    EXPECT_FLOAT_EQ(postures[1], 2.0f);
+    EXPECT_FLOAT_EQ(postures[2], 1.0f);
+    EXPECT_TRUE(halls.empty());
+}
+
+/**
+ * @tc.name: GetPostureAndHall_004
+ * @tc.desc: test the two integer number branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_004, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"key:123,456"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(postures.empty());
+    EXPECT_EQ(halls.size(), 2);
+    EXPECT_EQ(halls[0], 123);
+    EXPECT_EQ(halls[1], 456);
+}
+
+/**
+ * @tc.name: GetPostureAndHall_005
+ * @tc.desc: test the else branch (invalid size)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_005, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"key:1,2,3,4"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(postures.empty());
+    EXPECT_TRUE(halls.empty());
+}
+
+/**
+ * @tc.name: GetPostureAndHall_006
+ * @tc.desc: test third posture is not 0 or 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_006, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"key:1.0,2.0,2"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(postures.empty());
+    EXPECT_TRUE(halls.empty());
+}
+
+/**
+ * @tc.name: GetPostureAndHall_007
+ * @tc.desc: test invalid float number
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_007, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"key:abc,2.0,1"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(postures.empty());
+    EXPECT_TRUE(halls.empty());
+}
+
+/**
+ * @tc.name: GetPostureAndHall_008
+ * @tc.desc: test invalid integer number
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, GetPostureAndHall_008, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::vector<std::string> strVec = {"key:abc,def"};
+    std::vector<float> postures;
+    std::vector<uint16_t> halls;
+
+    bool result = dumper->GetPostureAndHall(strVec, postures, halls);
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(postures.empty());
+    EXPECT_TRUE(halls.empty());
+}
+
+/**
+ * @tc.name: TriggerSecondarySensor_002
+ * @tc.desc: test when GetPostureAndHall returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor_002, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::string valueStr = "key1:invalid_string";
+    
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    dumper->TriggerSecondarySensor(valueStr);
+    EXPECT_TRUE(g_errLog.find("GetPostureAndHall failed") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: TriggerSecondarySensor_001
+ * @tc.desc: test normal flow when GetPostureAndHall returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor_001, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    std::string valueStr = "key1:1.0,2.0,1/key2:123,456";
+    
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    dumper->TriggerSecondarySensor(valueStr);
+    EXPECT_TRUE(g_errLog.find("mock secondary sensor") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
 #ifdef FOLD_ABILITY_ENABLE
 /**
  * @tc.name: DumpFoldCreaseRegion
@@ -1274,6 +1483,45 @@ HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange06, TestSize.Level1)
     dumper->SetSuperFoldStatusChange("-supertrans,1");
     ASSERT_EQ(dumper->fd_, 1);
 }
+
+
+/**
+ * @tc.name: SetSuperFoldStatusChange07
+ * @tc.desc: test function : SetSuperFoldStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange07, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange("-supertrans,4");
+    ASSERT_EQ(dumper->fd_, 1);
+
+    EXPECT_TRUE(g_errLog.find("set hall value") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SetSuperFoldStatusChange08
+ * @tc.desc: test function : SetSuperFoldStatusChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, SetSuperFoldStatusChange08, TestSize.Level1)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->SetSuperFoldStatusChange("-supertrans,5");
+    ASSERT_EQ(dumper->fd_, 1);
+    EXPECT_TRUE(g_errLog.find("set hall value") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
 
 /**
  * @tc.name: SetSecondaryStatusChange01
@@ -1493,6 +1741,60 @@ HWTEST_F(ScreenSessionDumperTest, SetFoldStatusLocked, TestSize.Level1)
     dumper->params_[0] = "-test";
     ret = dumper->SetFoldStatusLocked();
     ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: ForceSetFoldStatusAndLock
+ * @tc.desc: test function : ForceSetFoldStatusAndLock
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, ForceSetFoldStatusAndLock, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+
+    std::string emptyInput = "";
+    int ret = dumper->ForceSetFoldStatusAndLock(emptyInput);
+    ASSERT_EQ(ret, -1);
+
+    std::string noCommaInput = "-ln1";
+    ret = dumper->ForceSetFoldStatusAndLock(noCommaInput);
+    ASSERT_EQ(ret, -1);
+
+    std::string wrongPrefixInput = "-lx,1";
+    ret = dumper->ForceSetFoldStatusAndLock(wrongPrefixInput);
+    ASSERT_EQ(ret, -1);
+
+    std::string invalidStatusInput = "-ln,999";
+    ret = dumper->ForceSetFoldStatusAndLock(invalidStatusInput);
+    ASSERT_EQ(ret, -1);
+
+    if (!ScreenSessionManager::GetInstance().IsFoldable()) {
+        GTEST_SKIP();
+    }
+    std::vector<std::string> validStatusValues = {
+        "1", "2", "3", "11", "21", "12", "22", "13", "23"};
+    for (const auto& status : validStatusValues) {
+        std::string validInput = "-ln," + status;
+        ret = dumper->ForceSetFoldStatusAndLock(validInput);
+        ASSERT_TRUE(ret == 0 || ret == -1);
+    }
+    dumper->RestorePhysicalFoldStatus();
+}
+
+/**
+ * @tc.name: RestorePhysicalFoldStatus
+ * @tc.desc: test function : RestorePhysicalFoldStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, RestorePhysicalFoldStatus, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u""};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    int ret = dumper->RestorePhysicalFoldStatus();
+    ASSERT_TRUE(ret == 0 || ret == -1);
 }
 
 /**

@@ -13,19 +13,22 @@
  * limitations under the License.
  */
 
+#include "move_drag_controller.h"
+
 #include <gtest/gtest.h>
 #include <memory>
 
-#include <pointer_event.h>
-#include "session/host/include/move_drag_controller.h"
-#include "session/host/include/session.h"
+#include "pointer_event.h"
 #include "ui/rs_surface_node.h"
-#include "window_manager_hilog.h"
-#include "session/host/include/scene_session.h"
-#include "session/screen/include/screen_session.h"
-#include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "screen_manager.h"
+
+#include "mock_vsync_station.h"
 #include "scene_board_judgement.h"
+#include "scene_session.h"
+#include "screen_manager.h"
+#include "screen_session_manager_client/include/screen_session_manager_client.h"
+#include "session.h"
+#include "session/screen/include/screen_session.h"
+#include "window_manager_hilog.h"
 #include "window_scene.h"
 
 using namespace testing;
@@ -41,6 +44,7 @@ public:
     void TearDown() override;
     sptr<MoveDragController> moveDragController;
     sptr<SceneSession> session_;
+    std::shared_ptr<MockVsyncStation> mockVsyncStation_;
 };
 
 void MoveDragControllerTest::SetUpTestCase() {}
@@ -56,6 +60,10 @@ void MoveDragControllerTest::SetUp()
     info.moduleName_ = "testSession2";
     info.bundleName_ = "testSession3";
     session_ = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    mockVsyncStation_ = std::make_shared<MockVsyncStation>();
+    session_->SetVsyncStation(mockVsyncStation_);
+
     moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session_));
 }
 
@@ -63,6 +71,7 @@ void MoveDragControllerTest::TearDown()
 {
     session_ = nullptr;
     moveDragController = nullptr;
+    mockVsyncStation_ = nullptr;
 }
 
 namespace {
@@ -143,17 +152,6 @@ HWTEST_F(MoveDragControllerTest, GetMoveDragEndDisplayId, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetInitParentNodeId
- * @tc.desc: test function : GetInitParentNodeId
- * @tc.type: FUNC
- */
-HWTEST_F(MoveDragControllerTest, GetInitParentNodeId, TestSize.Level1)
-{
-    uint64_t res = moveDragController->GetInitParentNodeId();
-    EXPECT_EQ(-1ULL, res);
-}
-
-/**
  * @tc.name: GetDisplayIdsDuringMoveDrag
  * @tc.desc: test function : GetDisplayIdsDuringMoveDrag
  * @tc.type: FUNC
@@ -194,9 +192,8 @@ HWTEST_F(MoveDragControllerTest, GetTargetRect, TestSize.Level1)
  */
 HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, TestSize.Level0)
 {
-    moveDragController->InitCrossDisplayProperty(1, 2);
+    moveDragController->InitCrossDisplayProperty(1);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
-    ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
     ASSERT_EQ(true,
               moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
                   moveDragController->GetDisplayIdsDuringMoveDrag().end());
@@ -205,9 +202,8 @@ HWTEST_F(MoveDragControllerTest, InitCrossDisplayProperty, TestSize.Level0)
     sptr<ScreenSession> screenSession =
         sptr<ScreenSession>::MakeSptr(config, ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(screenId, screenSession));
-    moveDragController->InitCrossDisplayProperty(1, 2);
+    moveDragController->InitCrossDisplayProperty(1);
     ASSERT_EQ(1, moveDragController->GetMoveDragStartDisplayId());
-    ASSERT_EQ(2, moveDragController->GetInitParentNodeId());
     ASSERT_EQ(true,
               moveDragController->GetDisplayIdsDuringMoveDrag().find(1) !=
                   moveDragController->GetDisplayIdsDuringMoveDrag().end());
@@ -329,7 +325,7 @@ HWTEST_F(MoveDragControllerTest, CalcMoveInputBarRect, TestSize.Level1)
                                                pointerWindowX,
                                                pointerWindowY,
                                                originalRect);
-    moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect);
+    moveDragController->CalcMoveInputBarRect(pointerEvent, originalRect, SizeChangeReason::DRAG_MOVE);
 
     ASSERT_EQ(90, moveDragController->moveDragProperty_.targetRect_.posX_);
     ASSERT_EQ(190, moveDragController->moveDragProperty_.targetRect_.posY_);
@@ -434,6 +430,85 @@ HWTEST_F(MoveDragControllerTest, EventDownInit01, TestSize.Level1)
     session_->SetSessionGlobalRect(originalRect);
     auto res = moveDragController->EventDownInit(pointerEvent);
     EXPECT_EQ(true, res);
+}
+
+/**
+ * @tc.name: EventDownInit02
+ * @tc.desc: test function : EventDownInit
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, EventDownInit02, TestSize.Level1)
+{
+    moveDragController->InitMoveDragProperty();
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_FLOAT;
+    moveDragController->moveDragProperty_.scaleX_ = 1.0;
+    moveDragController->moveDragProperty_.scaleY_ = 1.0;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerItem.SetPointerId(1);
+    pointerItem.SetOriginPointerId(1);
+    pointerItem.SetWindowX(1);
+    pointerItem.SetWindowY(1);
+    pointerEvent->SetPointerId(1);
+    pointerEvent->AddPointerItem(pointerItem);
+    pointerEvent->SetButtonId(MMI::PointerEvent::MOUSE_BUTTON_LEFT);
+    pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    WSRect originalRect = { 100, 100, 1000, 1000 };
+    moveDragController->parentRect_ = { 100, 100, 1000, 1000 };
+    session_->SetSessionRect(originalRect);
+    session_->SetSessionGlobalRect(originalRect);
+    auto res = moveDragController->EventDownInit(pointerEvent);
+    EXPECT_EQ(true, res);
+    EXPECT_EQ(originalRect, moveDragController->moveDragProperty_.originalRect_);
+}
+
+/**
+ * @tc.name: CalcFirstOriginalRectPos
+ * @tc.desc: test function : CalcFirstOriginalRectPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcFirstOriginalRectPos, TestSize.Level1)
+{
+    moveDragController->InitMoveDragProperty();
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_FLOAT;
+    moveDragController->moveDragProperty_.scaleX_ = 2.0;
+    moveDragController->moveDragProperty_.scaleY_ = 2.0;
+    moveDragController->parentRect_ = { 10, 20, 30, 40 };
+    WSRect windowRect = { 50, 60, 70, 80 };
+    WSRect res = moveDragController->CalcFirstOriginalRectPos(windowRect);
+    EXPECT_EQ(windowRect.posX_ / moveDragController->moveDragProperty_.scaleX_, res.posX_);
+    EXPECT_EQ(windowRect.posY_ / moveDragController->moveDragProperty_.scaleY_, res.posY_);
+
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    res = moveDragController->CalcFirstOriginalRectPos(windowRect);
+    const float expectedPosX = (windowRect.posX_ - moveDragController->parentRect_.posX_) /
+                                moveDragController->moveDragProperty_.scaleX_;
+    const float expectedPosY = (windowRect.posY_ - moveDragController->parentRect_.posY_) /
+                                moveDragController->moveDragProperty_.scaleY_;
+    EXPECT_EQ(expectedPosX, res.posX_);
+    EXPECT_EQ(expectedPosY, res.posY_);
+    
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_DIALOG;
+    res = moveDragController->CalcFirstOriginalRectPos(windowRect);
+    EXPECT_EQ(expectedPosX, res.posX_);
+    EXPECT_EQ(expectedPosY, res.posY_);
+}
+
+/**
+ * @tc.name: CalcFirstOriginalRectPos_scaleZero
+ * @tc.desc: test function : CalcFirstOriginalRectPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcFirstOriginalRectPos_scaleZero, TestSize.Level1)
+{
+    moveDragController->InitMoveDragProperty();
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_FLOAT;
+    moveDragController->moveDragProperty_.scaleX_ = 0.0;
+    moveDragController->moveDragProperty_.scaleY_ = 0.0;
+    WSRect windowRect = { 100, 100, 1000, 1000 };
+    WSRect res = moveDragController->CalcFirstOriginalRectPos(windowRect);
+    EXPECT_EQ(windowRect.posX_, res.posX_);
+    EXPECT_EQ(windowRect.posY_, res.posY_);
 }
 
 /**
@@ -929,15 +1004,49 @@ HWTEST_F(MoveDragControllerTest, TestConsumeMoveEventWithStartMove, TestSize.Lev
  */
 HWTEST_F(MoveDragControllerTest, ProcessWindowDragHotAreaFunc, TestSize.Level1)
 {
-    bool isSendHotAreaMessage = true;
-    bool isDragHotAreaFuncCalled = false;
+    bool isCalled = false;
+    DisplayId displayId = 0;
+    uint32_t type = 0;
     SizeChangeReason reason = SizeChangeReason::UNDEFINED;
-    auto dragHotAreaFunc = [&isDragHotAreaFuncCalled](DisplayId displayId, int32_t type, SizeChangeReason reason) {
-        isDragHotAreaFuncCalled = true;
+
+    moveDragController->windowDragHotAreaFunc_ = [&](DisplayId d, uint32_t t, SizeChangeReason r) {
+        isCalled = true;
+        displayId = d;
+        type = t;
+        reason = r;
     };
-    moveDragController->windowDragHotAreaFunc_ = dragHotAreaFunc;
-    moveDragController->ProcessWindowDragHotAreaFunc(isSendHotAreaMessage, reason);
-    EXPECT_TRUE(isDragHotAreaFuncCalled);
+
+    // Test Case 1: Callback should be called when hot area type change
+    moveDragController->windowDragHotAreaType_ = 1;
+    moveDragController->hotAreaDisplayId_ = 100;
+    moveDragController->ProcessWindowDragHotAreaFunc(0, 100, SizeChangeReason::DRAG_MOVE);
+    EXPECT_TRUE(isCalled);
+    EXPECT_EQ(displayId, 100);
+    EXPECT_EQ(type, 1);
+    EXPECT_EQ(reason, SizeChangeReason::DRAG_MOVE);
+
+    // Test Case 2: Callback should be called when display ID changes
+    isCalled = false;
+    moveDragController->windowDragHotAreaType_ = 1;
+    moveDragController->hotAreaDisplayId_ = 200;
+    moveDragController->ProcessWindowDragHotAreaFunc(1, 100, SizeChangeReason::DRAG_END);
+    EXPECT_TRUE(isCalled);
+
+    // Test Case 3: Callback should NOT be called when nothing changes
+    isCalled = false;
+    moveDragController->hotAreaDisplayId_ = 100;
+    moveDragController->windowDragHotAreaType_ = 1;
+    moveDragController->ProcessWindowDragHotAreaFunc(1, 100, SizeChangeReason::DRAG_MOVE);
+    EXPECT_FALSE(isCalled);
+
+    // Test Case 5: Callback with WINDOW_HOT_AREA_TYPE_UNDEFINED
+    isCalled = false;
+    type = 0;
+    moveDragController->windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
+    moveDragController->hotAreaDisplayId_ = 100;
+    moveDragController->ProcessWindowDragHotAreaFunc(1, 100, SizeChangeReason::DRAG_END);
+    EXPECT_TRUE(isCalled);
+    EXPECT_EQ(type, WINDOW_HOT_AREA_TYPE_UNDEFINED);
 }
 
 /**
@@ -1077,6 +1186,7 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect, TestSize.Level1)
     EXPECT_EQ(0, moveDragController->moveDragProperty_.targetRect_.posX_);
     EXPECT_EQ(0, moveDragController->moveDragProperty_.targetRect_.posY_);
 
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
     moveDragController->SetParentRect({10, 10, 10, 10});
     moveDragController->CalcFirstMoveTargetRect(windowRect, false);
     EXPECT_EQ(-10, moveDragController->moveDragProperty_.targetRect_.posX_);
@@ -1119,6 +1229,26 @@ HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect002, TestSize.Level1)
     WSRect targetRect =
         moveDragController->GetTargetRect(MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
     EXPECT_EQ(targetRect.posX_, 0);
+}
+
+/**
+ * @tc.name: CalcFirstMoveTargetRect003
+ * @tc.desc: test function : CalcFirstMoveTargetRect003
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, CalcFirstMoveTargetRect003, TestSize.Level1)
+{
+    WSRect windowRect = { 1, 2, 3, 4 };
+    moveDragController->InitMoveDragProperty();
+    moveDragController->parentRect_ = { 100, 100, 1000, 1000 };
+    moveDragController->moveDragProperty_.scaleX_ = 1.0f;
+    moveDragController->moveDragProperty_.scaleY_ = 1.0f;
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_FLOAT;
+    moveDragController->moveTempProperty_ = { 1, 1, 1, 1, 1, 1, 1, 1 };
+    moveDragController->isStartMove_ = true;
+    moveDragController->isSpecifyMoveStart_ = false;
+    moveDragController->CalcFirstMoveTargetRect(windowRect, false);
+    EXPECT_EQ(windowRect, moveDragController->moveDragProperty_.originalRect_);
 }
 
 /**
@@ -1584,17 +1714,6 @@ HWTEST_F(MoveDragControllerTest, UpdateMoveAvailableArea, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetMoveInputBarStartDisplayId
- * @tc.desc: test function : GetMoveInputBarStartDisplayId
- * @tc.type: FUNC
- */
-HWTEST_F(MoveDragControllerTest, GetMoveInputBarStartDisplayId, TestSize.Level1)
-{
-    auto ret = moveDragController->GetMoveInputBarStartDisplayId();
-    EXPECT_EQ(moveDragController->moveInputBarStartDisplayId_, ret);
-}
-
-/**
  * @tc.name: SetCurrentScreenProperty
  * @tc.desc: test function : SetCurrentScreenProperty
  * @tc.type: FUNC
@@ -1676,14 +1795,14 @@ HWTEST_F(MoveDragControllerTest, TestUpdateTargetRectOnDragEvent, TestSize.Level
     moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
     moveDragController->supportCrossDisplay_ = false;
     moveDragController->moveDragStartDisplayId_ = 1;
-    moveDragController->UpdateTargetRectOnDragEvent(pointerEvent);
+    moveDragController->UpdateTargetRectOnDragEvent(pointerEvent, SizeChangeReason::DRAG);
     EXPECT_EQ(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
 
     // Case 2: Cross-display enabled but aspect ratio is 0
     moveDragController->moveDragProperty_.targetRect_ = WSRect::EMPTY_RECT;
     moveDragController->supportCrossDisplay_ = true;
     moveDragController->aspectRatio_ = 0.0f;
-    moveDragController->UpdateTargetRectOnDragEvent(pointerEvent);
+    moveDragController->UpdateTargetRectOnDragEvent(pointerEvent, SizeChangeReason::DRAG);
     EXPECT_NE(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
 
     // Case 3: PointerEvent‘s displayId equals moveDragStartDisplayId and aspect ratio is not 0
@@ -1691,7 +1810,7 @@ HWTEST_F(MoveDragControllerTest, TestUpdateTargetRectOnDragEvent, TestSize.Level
     pointerEvent->SetTargetDisplayId(0);
     moveDragController->moveDragStartDisplayId_ = 0;
     moveDragController->aspectRatio_ = 1.0f;
-    moveDragController->UpdateTargetRectOnDragEvent(pointerEvent);
+    moveDragController->UpdateTargetRectOnDragEvent(pointerEvent, SizeChangeReason::DRAG);
     EXPECT_NE(moveDragController->moveDragProperty_.targetRect_, WSRect::EMPTY_RECT);
 }
 
@@ -1708,6 +1827,24 @@ HWTEST_F(MoveDragControllerTest, TestGetGravity, TestSize.Level1)
 
     // Case 2: type not in GRAVITY_MAP
     gravity = moveDragController->GetGravity(static_cast<AreaType>(999));
+    EXPECT_EQ(gravity, Gravity::TOP_LEFT);
+}
+
+/**
+ * @tc.name: TestGetDragGravity
+ * @tc.desc: Verify GetDragGravity returns correct value or TOP_LEFT when not found
+ * @tc.type: FUNC
+*/
+HWTEST_F(MoveDragControllerTest, TestGetDragGravity, TestSize.Level1)
+{
+    // Case 1: type in DRAG_GRAVITY_MAP
+    moveDragController->type_ = AreaType::TOP;
+    auto gravity = moveDragController->GetDragGravity();
+    EXPECT_EQ(gravity, Gravity::TOP);
+
+    // Case 2: type not in DRAG_GRAVITY_MAP
+    moveDragController->type_  = AreaType::UNDEFINED;
+    gravity = moveDragController->GetDragGravity();
     EXPECT_EQ(gravity, Gravity::TOP_LEFT);
 }
 
@@ -2008,53 +2145,27 @@ HWTEST_F(MoveDragControllerTest, TestComputeOffsetFromStart, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestShouldResampleMoveEvent
- * @tc.desc: Verify the decision logic for move-event resampling
+ * @tc.name: TestShouldOpenMoveResampleAllBranches
+ * @tc.desc: Verify all decision branches of ShouldOpenMoveResample
  * @tc.type: FUNC
  */
-HWTEST_F(MoveDragControllerTest, TestShouldResampleMoveEvent, TestSize.Level1)
+HWTEST_F(MoveDragControllerTest, TestShouldOpenMoveResampleAllBranches, TestSize.Level1)
 {
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+    // Case 1: Global enable switch disabled → false
+    moveDragController->enableMoveResample_ = false;
+    EXPECT_FALSE(moveDragController->ShouldOpenMoveResample(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN));
+    moveDragController->enableMoveResample_ = true;
 
-    // Case 1: Resample disabled → always false
-    {
-        moveDragController->enableMoveResample_ = false;
-        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+    // Case 2: Pointer type is not touchscreen → false
+    EXPECT_FALSE(moveDragController->ShouldOpenMoveResample(MMI::PointerEvent::SOURCE_TYPE_MOUSE));
 
-        bool ret = moveDragController->ShouldResampleMoveEvent(pointerEvent);
-        EXPECT_FALSE(ret);
-    }
+    // Case 3: Input window does not support move resample → false
+    moveDragController->winType_ = WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+    EXPECT_FALSE(moveDragController->ShouldOpenMoveResample(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN));
 
-    // Case 2: Resample enabled but not touchscreen → false
-    {
-        moveDragController->enableMoveResample_ = true;
-        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_MOUSE);
-        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-
-        bool ret = moveDragController->ShouldResampleMoveEvent(pointerEvent);
-        EXPECT_FALSE(ret);
-    }
-
-    // Case 3: Resample enabled, touchscreen, but action != MOVE → false
-    {
-        moveDragController->enableMoveResample_ = true;
-        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN);
-
-        bool ret = moveDragController->ShouldResampleMoveEvent(pointerEvent);
-        EXPECT_FALSE(ret);
-    }
-
-    // Case 4: Resample enabled, touchscreen, action == MOVE → true
-    {
-        moveDragController->enableMoveResample_ = true;
-        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
-
-        bool ret = moveDragController->ShouldResampleMoveEvent(pointerEvent);
-        EXPECT_TRUE(ret);
-    }
+    // Case 7: All conditions satisfied → true
+    moveDragController->winType_ = WindowType::APP_WINDOW_BASE;
+    EXPECT_TRUE(moveDragController->ShouldOpenMoveResample(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN));
 }
 
 /**
@@ -2097,33 +2208,194 @@ HWTEST_F(MoveDragControllerTest, TestUpdateTargetRectOnMoveEvent, TestSize.Level
         moveDragController->supportCrossDisplay_ = false; // Disable cross-display
         pointerEvent->SetTargetDisplayId(1);              // Different display → block
 
-        auto state = moveDragController->UpdateTargetRectOnMoveEvent(pointerEvent);
-        EXPECT_EQ(state, TargetRectUpdateState::UNCHANGED);
+        auto state = moveDragController->UpdateTargetRectOnMoveEvent(pointerEvent, SizeChangeReason::DRAG_MOVE);
+        EXPECT_EQ(state, TargetRectUpdateMode::NONE);
     }
 
-    // Case 2: Resample required → RESAMPLE_REQUIRED
+    // Case 2: Move resample activated → RESAMPLE_SCHEDULED
     {
         moveDragController->moveDragStartDisplayId_ = 0;
         moveDragController->supportCrossDisplay_ = true; // Not blocked now
         pointerEvent->SetTargetDisplayId(0);             // Same display
-        moveDragController->enableMoveResample_ = true;  // Enable resample
-        pointerEvent->SetSourceType(MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
-        pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_MOVE);
+        moveDragController->moveDragProperty_.isMoveResampleActive_ = true;  // Enable resample
 
-        auto state = moveDragController->UpdateTargetRectOnMoveEvent(pointerEvent);
-        EXPECT_EQ(state, TargetRectUpdateState::RESAMPLE_REQUIRED);
+        auto state = moveDragController->UpdateTargetRectOnMoveEvent(pointerEvent, SizeChangeReason::DRAG_MOVE);
+        EXPECT_EQ(state, TargetRectUpdateMode::RESAMPLE_SCHEDULED);
     }
 
-    // Case 3: Direct update → UPDATED_DIRECTLY
+    // Case 3: Direct update → UPDATED_IMMEDIATELY
     {
         moveDragController->moveDragStartDisplayId_ = 0;
         moveDragController->supportCrossDisplay_ = true; // Allowed
-        moveDragController->enableMoveResample_ = false; // Disable resample
+        moveDragController->moveDragProperty_.isMoveResampleActive_ = false; // Disable resample
         pointerEvent->SetTargetDisplayId(0);             // Same display
 
-        auto state = moveDragController->UpdateTargetRectOnMoveEvent(pointerEvent);
-        EXPECT_EQ(state, TargetRectUpdateState::UPDATED_DIRECTLY);
+        auto state = moveDragController->UpdateTargetRectOnMoveEvent(pointerEvent, SizeChangeReason::DRAG_MOVE);
+        EXPECT_EQ(state, TargetRectUpdateMode::UPDATED_IMMEDIATELY);
+
+        moveDragController->moveDragProperty_.isMoveResampleActive_ = true; // Enable resample but reason is DRAG_END
+        state = moveDragController->UpdateTargetRectOnMoveEvent(pointerEvent, SizeChangeReason::DRAG_END);
+        EXPECT_EQ(state, TargetRectUpdateMode::UPDATED_IMMEDIATELY);
     }
+}
+
+/**
+ * @tc.name: TestResampleTargetRectOnVsyncAllBranches
+ * @tc.desc: Verify ResampleTargetRectOnVsync behavior under different move/resample states
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestResampleTargetRectOnVsyncAllBranches, TestSize.Level1)
+{
+    constexpr int64_t vsyncTime = 1000;
+    auto& prop = moveDragController->moveDragProperty_;
+
+    // Case 1: Drag not started
+    moveDragController->isStartMove_ = false;
+
+    {
+        auto [mode, _] = moveDragController->ResampleTargetRectOnVsync(vsyncTime);
+        EXPECT_EQ(mode, TargetRectUpdateMode::NONE);
+    }
+
+    // Case 2: Drag started but move resample is inactive
+    moveDragController->isStartMove_ = true;
+    prop.isMoveResampleActive_ = false;
+    prop.isResampleFpsRangeChecked_ = true; // Skip FPS logic
+
+    {
+        auto [mode, _] = moveDragController->ResampleTargetRectOnVsync(vsyncTime);
+        EXPECT_EQ(mode, TargetRectUpdateMode::NONE);
+    }
+
+    // Case 3: Drag started and move resample is active
+    prop.isMoveResampleActive_ = true;
+    prop.isResampleFpsRangeChecked_ = true;
+
+    {
+        auto [mode, _] = moveDragController->ResampleTargetRectOnVsync(vsyncTime);
+        EXPECT_EQ(mode, TargetRectUpdateMode::UPDATED_IMMEDIATELY);
+    }
+}
+
+/**
+ * @tc.name: TestUpdateResampleActivationByFpsNoOp
+ * @tc.desc: Verify no-op branches of UpdateResampleActivationByFps
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestUpdateResampleActivationByFpsNoOp, TestSize.Level1)
+{
+    auto& prop = moveDragController->moveDragProperty_;
+
+    // Case 1: move resample not activated → no-op
+    prop.isMoveResampleActive_ = false;
+    prop.isResampleFpsRangeChecked_ = false;
+    moveDragController->UpdateResampleActivationByFps();
+    EXPECT_FALSE(prop.isMoveResampleActive_);
+    EXPECT_FALSE(prop.isResampleFpsRangeChecked_);
+
+    // Case 2: FPS range already checked → no-op
+    prop.isMoveResampleActive_ = true;
+    prop.isResampleFpsRangeChecked_ = true;
+    moveDragController->UpdateResampleActivationByFps();
+    EXPECT_TRUE(prop.isMoveResampleActive_);
+    EXPECT_TRUE(prop.isResampleFpsRangeChecked_);
+}
+
+/**
+ * @tc.name: TestUpdateResampleActivationByFpsRangeCheck
+ * @tc.desc: Verify FPS range validation behavior of UpdateResampleActivationByFps
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestUpdateResampleActivationByFpsRangeCheck, TestSize.Level1)
+{
+    constexpr uint32_t FPS_30  = 30;
+    constexpr uint32_t FPS_60  = 60;
+    constexpr uint32_t FPS_120 = 120;
+
+    std::optional<uint32_t> fps = FPS_60;
+    EXPECT_CALL(*mockVsyncStation_, GetFps())
+        .WillRepeatedly(InvokeWithoutArgs([&fps]() { return fps; }));
+
+    auto& prop = moveDragController->moveDragProperty_;
+
+    // Case 1: failed to get FPS → disable
+    prop.isMoveResampleActive_ = true;
+    prop.isResampleFpsRangeChecked_ = false;
+    fps = std::nullopt;
+    moveDragController->UpdateResampleActivationByFps();
+    EXPECT_FALSE(prop.isMoveResampleActive_);
+    EXPECT_TRUE(prop.isResampleFpsRangeChecked_);
+
+    // Case 2: FPS below minimum threshold → disable
+    prop.isMoveResampleActive_ = true;
+    prop.isResampleFpsRangeChecked_ = false;
+    moveDragController->resampleMinFps_ = FPS_60;
+    fps = FPS_30;
+    moveDragController->UpdateResampleActivationByFps();
+    EXPECT_FALSE(prop.isMoveResampleActive_);
+    EXPECT_TRUE(prop.isResampleFpsRangeChecked_);
+    moveDragController->resampleMinFps_.reset();
+
+    // Case 3: FPS above maximum threshold → disable
+    prop.isMoveResampleActive_ = true;
+    prop.isResampleFpsRangeChecked_ = false;
+    moveDragController->resampleMaxFps_ = FPS_60;
+    fps = FPS_120;
+    moveDragController->UpdateResampleActivationByFps();
+    EXPECT_FALSE(prop.isMoveResampleActive_);
+    EXPECT_TRUE(prop.isResampleFpsRangeChecked_);
+    moveDragController->resampleMaxFps_.reset();
+
+    // Case 4: FPS within range → keep activated
+    prop.isMoveResampleActive_ = true;
+    prop.isResampleFpsRangeChecked_ = false;
+    fps = FPS_60;
+    moveDragController->UpdateResampleActivationByFps();
+    EXPECT_TRUE(prop.isMoveResampleActive_);
+    EXPECT_TRUE(prop.isResampleFpsRangeChecked_);
+
+    // Case 5: explicit min/max range and FPS inside → keep activated
+    prop.isMoveResampleActive_ = true;
+    prop.isResampleFpsRangeChecked_ = false;
+    moveDragController->resampleMinFps_ = FPS_30;
+    moveDragController->resampleMaxFps_ = FPS_120;
+    fps = FPS_60;
+    moveDragController->UpdateResampleActivationByFps();
+    EXPECT_TRUE(prop.isMoveResampleActive_);
+    EXPECT_TRUE(prop.isResampleFpsRangeChecked_);
+}
+
+/**
+ * @tc.name: TestIsWindowCrossScreenOnDragEnd
+ * @tc.desc: Verify IsWindowCrossScreenOnDragEnd under different display id combinations
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestIsWindowCrossScreenOnDragEnd, TestSize.Level1)
+{
+    // Case 1: both start and end display are invalid → false
+    moveDragController->moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
+    moveDragController->moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
+    EXPECT_FALSE(moveDragController->IsWindowCrossScreenOnDragEnd());
+
+    // Case 2: start invalid, end valid → false
+    moveDragController->moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
+    moveDragController->moveDragEndDisplayId_ = 1;
+    EXPECT_FALSE(moveDragController->IsWindowCrossScreenOnDragEnd());
+
+    // Case 3: start valid, end invalid → false
+    moveDragController->moveDragStartDisplayId_ = 1;
+    moveDragController->moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
+    EXPECT_FALSE(moveDragController->IsWindowCrossScreenOnDragEnd());
+
+    // Case 4: both valid but same display → false
+    moveDragController->moveDragStartDisplayId_ = 1;
+    moveDragController->moveDragEndDisplayId_ = 1;
+    EXPECT_FALSE(moveDragController->IsWindowCrossScreenOnDragEnd());
+
+    // Case 5: both valid and different display → true
+    moveDragController->moveDragStartDisplayId_ = 1;
+    moveDragController->moveDragEndDisplayId_ = 2;
+    EXPECT_TRUE(moveDragController->IsWindowCrossScreenOnDragEnd());
 }
 } // namespace
 } // namespace Rosen
