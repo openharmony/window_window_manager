@@ -476,7 +476,7 @@ AllowInMultiThreadGuard::~AllowInMultiThreadGuard()
 bool RSAdapterUtil::IsClientMultiInstanceEnabled()
 {
     static bool enabled = [] {
-        bool value = system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "0") != "0";
+        bool value = system::GetParameter("persist.rosen.rsclientmultiinstance.enabled", "1") != "0";
         TLOGNI(WmsLogTag::WMS_SCB, "RS multi-instance enabled: %{public}d", value);
         return value;
     }();

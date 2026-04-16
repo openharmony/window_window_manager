@@ -752,7 +752,6 @@ public:
     uint32_t GetInstanceCount(const std::string& bundleName);
     std::string GetLastInstanceKey(const std::string& bundleName);
     void RefreshAppInfo(const std::string& bundleName);
-    std::shared_ptr<RSRenderInterface> GetRSRenderInterface();
 
     /*
      * PiP Window
