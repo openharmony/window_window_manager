@@ -17,6 +17,7 @@
 #define OHOS_ROSEN_DMS_PRODUCT_EXT_WRAPPER_H
 
 #include <string>
+#include <mutex>
 
 namespace OHOS {
 namespace Rosen {
@@ -32,7 +33,7 @@ public:
         if (getFuncHandle == nullptr) {
             return nullptr;
         }
- 
+
         return getFuncHandle();
     }
 
