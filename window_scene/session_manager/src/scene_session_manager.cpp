@@ -3412,11 +3412,10 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     int32_t requestId, bool useRequestTaskInfo)
 {
     const auto& sessionInfo = sceneSession->GetSessionInfo();
-    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     auto abilitySessionInfo = sptr<AAFwk::SessionInfo>::MakeSptr();
+    auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
     abilitySessionInfo->sessionToken = sptr<ISession>(sceneSession)->AsObject();
-    sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-    abilitySessionInfo->renderSession = screenSession ? screenSession->GetRenderSession() : nullptr;
+    abilitySessionInfo->renderSession = ScreenSessionManagerClient::GetInstance().GetRenderSessionToken();
     abilitySessionInfo->identityToken = std::to_string(std::chrono::time_point_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now()).time_since_epoch().count());
     abilitySessionInfo->callerToken = sessionInfo.callerToken_;
@@ -4620,11 +4619,8 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
 
         NotifyCreateSpecificSession(newSession, property, type);
         session = newSession;
+        renderSession = ScreenSessionManagerClient::GetInstance().GetRenderSessionToken();
         AddClientDeathRecipient(sessionStage, newSession);
-
-        auto displayId = newSession->GetSessionProperty()->GetDisplayId();
-        sptr<ScreenSession> screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSession(displayId);
-        renderSession = screenSession ? screenSession->GetRenderSession() : nullptr;
 
         if (property->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
             CheckFloatWindowIsAnco(pid, newSession);
