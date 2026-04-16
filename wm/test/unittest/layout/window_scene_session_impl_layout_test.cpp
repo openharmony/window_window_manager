@@ -921,38 +921,6 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, FillWindowLimits_By_PixelUnit, TestSi
 }
 
 /**
- * @tc.name: NotifyAppHookWindowInfoUpdated
- * @tc.desc: NotifyAppHookWindowInfoUpdated
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplLayoutTest, NotifyAppHookWindowInfoUpdated, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyAppHookWindowInfoUpdated");
-    option->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    const int32_t windowId = 2025;
-    window->property_->SetPersistentId(windowId);
-
-    // Case 1: GetAppHookWindowInfoFromServer failed
-    window->hostSession_ = nullptr;
-    WSError res = window->NotifyAppHookWindowInfoUpdated();
-    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
-
-    // Case 2: success
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->hostSession_ = session;
-    res = window->NotifyAppHookWindowInfoUpdated();
-    EXPECT_EQ(res, WSError::WS_OK);
-
-    // Case 3: not mainWindow
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    res = window->NotifyAppHookWindowInfoUpdated();
-    EXPECT_EQ(res, WSError::WS_DO_NOTHING);
-}
-
-/**
  * @tc.name: GetGlobalScaledRect
  * @tc.desc: GetGlobalScaledRect
  * @tc.type: FUNC

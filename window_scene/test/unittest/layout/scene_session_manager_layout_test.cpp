@@ -348,34 +348,6 @@ HWTEST_F(SceneSessionManagerLayoutTest, UpdateWindowModeByIdForUITest01, TestSiz
 }
 
 /**
- * @tc.name: GetAppHookWindowInfo
- * @tc.desc: test function : GetAppHookWindowInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerLayoutTest, GetAppHookWindowInfo, TestSize.Level1)
-{
-    ASSERT_TRUE(ssm_ != nullptr);
-
-    // Case 1: empty bundleName
-    std::string bundleName = "";
-    HookWindowInfo hookWindowInfo = ssm_->GetAppHookWindowInfo(bundleName);
-    EXPECT_EQ(hookWindowInfo.enableHookWindow, false);
-
-    // Case 2: bundleName not found
-    bundleName = "GetAppHookWindowInfo_Test";
-    hookWindowInfo = ssm_->GetAppHookWindowInfo(bundleName);
-    EXPECT_EQ(hookWindowInfo.enableHookWindow, false);
-
-    // Case 3: success
-    HookWindowInfo hookWindowInfo2;
-    hookWindowInfo2.enableHookWindow = true;
-    hookWindowInfo2.widthHookRatio = 0.5f;
-    ssm_->appHookWindowInfoMap_[bundleName] = hookWindowInfo2;
-    hookWindowInfo = ssm_->GetAppHookWindowInfo(bundleName);
-    EXPECT_EQ(hookWindowInfo.enableHookWindow, true);
-}
-
-/**
  * @tc.name: UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow
  * @tc.desc: test function : UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow
  * @tc.type: FUNC
@@ -394,15 +366,15 @@ HWTEST_F(SceneSessionManagerLayoutTest, UpdateAppHookWindowInfoWhenSwitchFreeMul
     HookWindowInfo hookWindowInfo;
     hookWindowInfo.enableHookWindow = true;
     hookWindowInfo.widthHookRatio = 0.5f;
-    ssm_->appHookWindowInfoMap_[bundleName] = hookWindowInfo;
+    sceneSession->GetSessionProperty()->SetHookWindowInfo(hookWindowInfo);
 
     // Case 1: open freeMultiWindow
     ssm_->UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(true);
-    EXPECT_EQ(ssm_->appHookWindowInfoMap_[bundleName].enableHookWindow, false);
+    EXPECT_EQ(sceneSession->GetSessionProperty()->GetHookWindowInfo().enableHookWindow, false);
 
     // Case 2: close freeMultiWindow
     ssm_->UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(false);
-    EXPECT_EQ(ssm_->appHookWindowInfoMap_[bundleName].enableHookWindow, true);
+    EXPECT_EQ(sceneSession->GetSessionProperty()->GetHookWindowInfo().enableHookWindow, true);
 }
 
 /**
@@ -499,7 +471,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, GetAllWindowLayoutInfo, TestSize.Level1)
     HookWindowInfo hookWindowInfo;
     hookWindowInfo.enableHookWindow = true;
     hookWindowInfo.widthHookRatio = 1.0f;
-    ssm_->appHookWindowInfoMap_[bundleName] = hookWindowInfo;
+    sceneSession->GetSessionProperty()->SetHookWindowInfo(hookWindowInfo);
 
     std::vector<sptr<WindowLayoutInfo>> info;
     ssm_->GetAllWindowLayoutInfo(TEST_DISPLAY_ID, info);
@@ -507,7 +479,7 @@ HWTEST_F(SceneSessionManagerLayoutTest, GetAllWindowLayoutInfo, TestSize.Level1)
     EXPECT_EQ(800, info[0]->rect.width_);
 
     hookWindowInfo.widthHookRatio = 0.5f;
-    ssm_->appHookWindowInfoMap_[bundleName] = hookWindowInfo;
+    sceneSession->GetSessionProperty()->SetHookWindowInfo(hookWindowInfo);
     info.clear();
     ssm_->GetAllWindowLayoutInfo(TEST_DISPLAY_ID, info);
     ASSERT_NE(info.size(), 0);

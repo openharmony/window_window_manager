@@ -849,9 +849,6 @@ struct FreeMultiWindowConfig : public Parcelable {
 };
 
 struct AppForceLandscapeConfig : public Parcelable {
-    int32_t mode_ = 0;
-    int32_t supportSplit_ = -1;
-    bool ignoreOrientation_ = false;
     std::string sysConfigJsonStr_ = "";
     std::string appConfigJsonStr_ = "";
     std::string sysHomePage_ = "";
@@ -862,20 +859,15 @@ struct AppForceLandscapeConfig : public Parcelable {
     bool hasChanged_ = true;
     bool configEnable_ = false;
     AppForceLandscapeConfig() {}
-    AppForceLandscapeConfig(int32_t mode, int32_t supportSplit, bool ignoreOrientation,
-        const std::string& sysConfigJsonStr, const std::string& appConfigJsonStr,
+    AppForceLandscapeConfig(const std::string& sysConfigJsonStr, const std::string& appConfigJsonStr,
         const std::string& sysHomePage, bool isSysRouter, bool isAppRouter,
-        bool containsSysConfig, bool containsAppConfig) : mode_(mode), supportSplit_(supportSplit),
-        ignoreOrientation_(ignoreOrientation), sysConfigJsonStr_(sysConfigJsonStr),
+        bool containsSysConfig, bool containsAppConfig) : sysConfigJsonStr_(sysConfigJsonStr),
         appConfigJsonStr_(appConfigJsonStr), sysHomePage_(sysHomePage), isSysRouter_(isSysRouter),
         isAppRouter_(isAppRouter), containsSysConfig_(containsSysConfig), containsAppConfig_(containsAppConfig) {}
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
-        if (!parcel.WriteInt32(mode_) ||
-            !parcel.WriteInt32(supportSplit_) ||
-            !parcel.WriteBool(ignoreOrientation_) ||
-            !parcel.WriteString(sysConfigJsonStr_) ||
+        if (!parcel.WriteString(sysConfigJsonStr_) ||
             !parcel.WriteString(appConfigJsonStr_) ||
             !parcel.WriteString(sysHomePage_) ||
             !parcel.WriteBool(isSysRouter_) ||
@@ -893,10 +885,7 @@ struct AppForceLandscapeConfig : public Parcelable {
         if (config == nullptr) {
             return nullptr;
         }
-        if (!parcel.ReadInt32(config->mode_) ||
-            !parcel.ReadInt32(config->supportSplit_) ||
-            !parcel.ReadBool(config->ignoreOrientation_) ||
-            !parcel.ReadString(config->sysConfigJsonStr_) ||
+        if (!parcel.ReadString(config->sysConfigJsonStr_) ||
             !parcel.ReadString(config->appConfigJsonStr_) ||
             !parcel.ReadString(config->sysHomePage_) ||
             !parcel.ReadBool(config->isSysRouter_) ||
@@ -910,10 +899,7 @@ struct AppForceLandscapeConfig : public Parcelable {
 
     static bool IsSameForceSplitConfig(const AppForceLandscapeConfig& preconfig, const AppForceLandscapeConfig& config)
     {
-        if (preconfig.mode_ != config.mode_ ||
-            preconfig.supportSplit_ != config.supportSplit_ ||
-            preconfig.ignoreOrientation_ != config.ignoreOrientation_ ||
-            preconfig.containsSysConfig_ != config.containsSysConfig_ ||
+        if (preconfig.containsSysConfig_ != config.containsSysConfig_ ||
             preconfig.containsAppConfig_ != config.containsAppConfig_) {
             return false;
         }

@@ -1896,16 +1896,10 @@ HWTEST_F(WindowSessionPropertyTest, GetKeyboardLayoutParamsByScreenId, TestSize.
 HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig01, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = false;
     preconfig.containsAppConfig_ = false;
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = false;
     config.containsAppConfig_ = false;
 
@@ -1915,65 +1909,12 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig01, TestSize.Level1)
 
 /**
  * @tc.name: IsSameForceSplitConfig02
- * @tc.desc: Test IsSameForceSplitConfig when mode differs
+ * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig is true and sys configs match
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig02, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
-    preconfig.containsSysConfig_ = false;
-    preconfig.containsAppConfig_ = false;
-
-    AppForceLandscapeConfig config;
-    config.mode_ = 6;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
-    config.containsSysConfig_ = false;
-    config.containsAppConfig_ = false;
-
-    bool result = AppForceLandscapeConfig::IsSameForceSplitConfig(preconfig, config);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: IsSameForceSplitConfig03
- * @tc.desc: Test IsSameForceSplitConfig when supportSplit differs
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig03, TestSize.Level1)
-{
-    AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
-    preconfig.containsSysConfig_ = false;
-    preconfig.containsAppConfig_ = false;
-
-    AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 2;
-    config.ignoreOrientation_ = false;
-    config.containsSysConfig_ = false;
-    config.containsAppConfig_ = false;
-
-    bool result = AppForceLandscapeConfig::IsSameForceSplitConfig(preconfig, config);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: IsSameForceSplitConfig04
- * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig is true and sys configs match
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
-{
-    AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = true;
     preconfig.isSysRouter_ = true;
     preconfig.sysHomePage_ = "home";
@@ -1981,9 +1922,6 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
     preconfig.containsAppConfig_ = false;
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = true;
     config.isSysRouter_ = true;
     config.sysHomePage_ = "home";
@@ -1995,16 +1933,13 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig05
+ * @tc.name: IsSameForceSplitConfig03
  * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig is true and sysHomePage differs
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig03, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = true;
     preconfig.isSysRouter_ = true;
     preconfig.sysHomePage_ = "home1";
@@ -2012,9 +1947,6 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
     preconfig.containsAppConfig_ = false;
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = true;
     config.isSysRouter_ = true;
     config.sysHomePage_ = "home2";
@@ -2026,25 +1958,19 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig06
+ * @tc.name: IsSameForceSplitConfig04
  * @tc.desc: Test IsSameForceSplitConfig when containsAppConfig is true and app configs match
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig06, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = false;
     preconfig.containsAppConfig_ = true;
     preconfig.isAppRouter_ = true;
     preconfig.appConfigJsonStr_ = "appConfig";
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = false;
     config.containsAppConfig_ = true;
     config.isAppRouter_ = true;
@@ -2055,25 +1981,19 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig06, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig07
+ * @tc.name: IsSameForceSplitConfig05
  * @tc.desc: Test IsSameForceSplitConfig when containsAppConfig is true and appConfigJsonStr differs
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig07, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = false;
     preconfig.containsAppConfig_ = true;
     preconfig.isAppRouter_ = true;
     preconfig.appConfigJsonStr_ = "appConfig1";
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = false;
     config.containsAppConfig_ = true;
     config.isAppRouter_ = true;
@@ -2084,16 +2004,13 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig07, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig08
+ * @tc.name: IsSameForceSplitConfig06
  * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig and containsAppConfig are both true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig08, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig06, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = true;
     preconfig.isSysRouter_ = true;
     preconfig.sysHomePage_ = "home";
@@ -2103,9 +2020,6 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig08, TestSize.Level1)
     preconfig.appConfigJsonStr_ = "appConfig";
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = true;
     config.isSysRouter_ = true;
     config.sysHomePage_ = "home";

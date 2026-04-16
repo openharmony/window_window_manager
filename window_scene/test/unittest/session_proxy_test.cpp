@@ -2306,7 +2306,7 @@ HWTEST_F(SessionProxyTest, TestUpdateGlobalDisplayRectFromClient, Function | Sma
 }
 
 /**
- * @tc.name: GetAppHookWindowInfoFromServer
+ * @tc.name: NotifyWindowStatusDidChangeAfterShowWindow
  * @tc.desc: normal function
  * @tc.type: FUNC
  */

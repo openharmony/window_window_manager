@@ -87,6 +87,7 @@ public:
     void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) override;
     WSError NotifyCompatibleModeChange(CompatibleStyleMode mode) override;
     void RegisterPageEnableCallback(PageEnableCallback&& callback) override;
+    void RegisterSetSelectModeCallback(SetSelectModeCallback&& callback) override;
     WSError NotifyPageEnable(const std::string& action, const std::string& message) override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
     WSError UpdateHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
@@ -140,6 +141,7 @@ private:
     std::atomic_bool isFullScreenInForceSplit_ { false };
     CompatibleModeChangeCallback compatibleModeChangeCallback_;
     PageEnableCallback pageEnableCallback_;
+    SetSelectModeCallback setSelectModeCallback_;
 
     /*
      * Prelaunch check

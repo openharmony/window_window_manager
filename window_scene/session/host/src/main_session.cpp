@@ -677,6 +677,11 @@ void MainSession::RegisterPageEnableCallback(PageEnableCallback&& callback)
     pageEnableCallback_ = std::move(callback);
 }
 
+void MainSession::RegisterSetSelectModeCallback(SetSelectModeCallback&& callback)
+{
+    setSelectModeCallback_ = std::move(callback);
+}
+
 WMError MainSession::NotifySplitRatioChanged(float newRatio)
 {
     return WMError::WM_OK;

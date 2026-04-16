@@ -2169,8 +2169,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig01, TestSize.Lev
     auto res = window->GetAppForceLandscapeConfig(config);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, WMError::WM_OK);
-        EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.supportSplit_, -1);
     }
 }
 
@@ -2190,8 +2188,6 @@ HWTEST_F(WindowSceneSessionImplTest5, GetAppForceLandscapeConfig02, TestSize.Lev
     auto res = window->GetAppForceLandscapeConfig(config);
     if (SceneBoardJudgement::IsSceneBoardEnabled()) {
         ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-        EXPECT_EQ(config.mode_, 0);
-        EXPECT_EQ(config.supportSplit_, -1);
     }
 }
 
