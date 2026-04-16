@@ -3188,10 +3188,11 @@ WMError SceneSessionManagerLiteProxy::UnregisterPipChgListenerByScreenId(int32_t
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerLiteProxy::GetAppWindowShowingInfosByBundleName(const std::string& bundleName,
-    int32_t appIndex, const std::string& appInstanceKey, std::vector<AppWindowShowingInfo>& windowInfos)
+WMError SceneSessionManagerLiteProxy::GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+    std::vector<AppWindowShowingInfo>& windowInfos)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "in, bundleName:%{public}s, appIndex:%{public}d", bundleName.c_str(), appIndex);
+    TLOGD(WmsLogTag::WMS_MAIN, "in, bundleName:%{public}s, appIndex:%{public}d", 
+        appInfo.bundleName.c_str(), appInfo.appIndex);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -3199,15 +3200,15 @@ WMError SceneSessionManagerLiteProxy::GetAppWindowShowingInfosByBundleName(const
         TLOGE(WmsLogTag::WMS_MAIN, "Write interfaceToken failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(bundleName)) {
+    if (!data.WriteString(appInfo.bundleName)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to write bundleName");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteInt32(appIndex)) {
+    if (!data.WriteInt32(appInfo.appIndex)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to write appIndex");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    if (!data.WriteString(appInstanceKey)) {
+    if (!data.WriteString(appInfo.appInstanceKey)) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to write appInstanceKey");
         return WMError::WM_ERROR_IPC_FAILED;
     }

@@ -3070,24 +3070,22 @@ int SceneSessionManagerStub::HandleGetCrossProcessWindowInfo(MessageParcel& data
 
 int SceneSessionManagerStub::HandleGetAppWindowShowingInfosByBundleName(MessageParcel& data, MessageParcel& reply)
 {
-    std::string bundleName;
-    if (!data.ReadString(bundleName)) {
+    ApplicationInfo appInfo;
+    if (!data.ReadString(appInfo.bundleName)) {
         TLOGE(WmsLogTag::WMS_MAIN, "read bundleName failed");
         return ERR_INVALID_DATA;
     }
-    int32_t appIndex = 0;
-    if (!data.ReadInt32(appIndex)) {
+    if (!data.ReadInt32(appInfo.appIndex)) {
         TLOGE(WmsLogTag::WMS_MAIN, "read appIndex failed");
         return ERR_INVALID_DATA;
     }
-    std::string appInstanceKey;
-    if (!data.ReadString(appInstanceKey)) {
+    if (!data.ReadString(appInfo.appInstanceKey)) {
         TLOGE(WmsLogTag::WMS_MAIN, "read appInstanceKey failed");
         return ERR_INVALID_DATA;
     }
     
     std::vector<AppWindowShowingInfo> windowInfos;
-    WMError ret = GetAppWindowShowingInfosByBundleName(bundleName, appIndex, appInstanceKey, windowInfos);
+    WMError ret = GetAppWindowShowingInfosByBundleName(appInfo, windowInfos);
     
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_MAIN, "write ret failed");
