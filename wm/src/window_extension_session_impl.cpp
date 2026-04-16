@@ -2120,8 +2120,7 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
         static_cast<WindowType>(configParam.GetIntParam(Extension::ROOT_HOST_WINDOW_TYPE_FIELD, 0));
     SetRootHostWindowType(rootHostWindowType);
     SetCompatInfo(configParam);
-    auto hostWindowStatus = static_cast<WindowStatus>(
-        configParam.GetIntParam(Extension::HOST_WINDOW_STATUS_FIELD,
+    auto hostWindowStatus = static_cast<WindowStatus>(configParam.GetIntParam(Extension::HOST_WINDOW_STATUS_FIELD,
             static_cast<int32_t>(WindowStatus::WINDOW_STATUS_UNDEFINED)));
     hostWindowStatus_ = hostWindowStatus;
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, "
@@ -2719,10 +2718,6 @@ WMError WindowExtensionSessionImpl::OnHostWindowStatusChange(AAFwk::Want&& data,
         return WMError::WM_OK;
     }
     hostWindowStatus_ = windowStatus;
-    if (auto uiContent = GetUIContentSharedPtr()) {
-        uiContent->SendUIExtProprty(static_cast<uint32_t>(Extension::Businesscode::SYNC_HOST_WINDOW_STATUS),
-            data, static_cast<uint8_t>(SubSystemId::WM_UIEXT));
-    }
     TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowStatus: %{public}u", windowStatus);
     std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
     auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
