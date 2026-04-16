@@ -7655,7 +7655,7 @@ napi_value JsSceneSession::OnSetForceSplitEnable(napi_env env, napi_callback_inf
 napi_value JsSceneSession::OnUpdateHookWindowInfo(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_TWO;
-    napi_value argv[ARG_INDEX_1] = { nullptr };
+    napi_value argv[ARG_INDEX_2] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != ARGC_ONE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "Argc is invalid: %{public}zu", argc);
@@ -7676,7 +7676,7 @@ napi_value JsSceneSession::OnUpdateHookWindowInfo(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->UpdateAppHookWindowInfo(hookWindowInfo);
+    session->UpdateHookWindowInfo(hookWindowInfo);
     return NapiGetUndefined(env);
 }
 

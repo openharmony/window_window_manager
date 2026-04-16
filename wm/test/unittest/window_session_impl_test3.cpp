@@ -177,9 +177,7 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitConfig, TestSize.Level1)
     ASSERT_NE(window_, nullptr);
 
     AppForceLandscapeConfig config = { {}, {}, {}, false, false, false, false };
-    config.hasChanged_ = false;
     window_->SetForceSplitConfig(config);
-
     EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
     LOG_SetCallback(nullptr);
     GTEST_LOG_(INFO) << "WindowSessionImplTest3: SetForceSplitConfig end";
