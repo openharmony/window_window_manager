@@ -2738,7 +2738,7 @@ sptr<Session> Session::GetMainSessionOrLoosenedSession() const
     if (SessionHelper::IsMainWindow(GetWindowType()) || IsLoosenedWithFreeMultiMode()) {
         return const_cast<Session*>(this);
     } else if (parentSession_) {
-        return parentSession_->GetMainSession();
+        return parentSession_->GetMainSessionOrLoosenedSession();
     } else {
         return nullptr;
     }
