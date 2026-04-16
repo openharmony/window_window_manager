@@ -26,13 +26,6 @@ export type CallbackState = (state: int) => void;
 export default namespace floatView {
   static { loadLibrary('fvwindowani_kit.z'); }
   
-  export native function isFloatViewEnabled(): boolean;
-  export native function getFloatViewLimits(): FloatViewLimits;
-  export native function bind(fvController: FloatViewController,
-    fbController: floatingBall.FloatingBallController, fbOption: floatingBall.FloatingBallParams): void;
-  export native function unBind(fvController: FloatViewController,
-    fbController: floatingBall.FloatingBallController): void;
-
   export interface FloatViewController {
     start(): Promise<void>;
     stop(): Promise<void>;
@@ -191,6 +184,38 @@ export default namespace floatView {
     });
   }
 
+  export native function isFloatViewEnabled(): boolean;
+  export native function getFloatViewLimits(): FloatViewLimits;
+
+  export native function bindSync(fvController: FloatViewController,
+    fbController: floatingBall.FloatingBallController, fbOption: floatingBall.FloatingBallParams): void;
+  function bind(fvController: FloatViewController,
+    fbController: floatingBall.FloatingBallController, fbOption: floatingBall.FloatingBallParams): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          bindSync(fvController, fbController, fbOption);
+      }).then((ret: Any) => {
+          resolve(undefined);
+      }).catch((err: Any) => {
+          reject(err as BusinessError);
+      });
+    });
+  }
+
+  export native function unbindSync(fvController: FloatViewController,
+    fbController: floatingBall.FloatingBallController): void;
+  function unbind(fvController: FloatViewController, fbController: floatingBall.FloatingBallController): Promise<void> {
+    return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+      taskpool.execute((): void => {
+          unbindSync(fvController, fbController);
+      }).then((ret: Any) => {
+          resolve(undefined);
+      }).catch((err: Any) => {
+          reject(err as BusinessError);
+      });
+    });
+  }
+
   export native function fvControllerFinalizerCallback(nativeObj: long): void;
   let fvControllerFinalizerRegister = new FinalizationRegistry<long>(fvControllerFinalizerCallback);
 
@@ -206,70 +231,65 @@ export default namespace floatView {
 
     public native startFloatViewNative(nativeObj: long): void;
     public start(): Promise<void> {
-        return new Promise<void>(
-          (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-            try {
-              this.startFloatViewNative(this.nativeObj);
-              resolve(undefined);
-            } catch (err) {
-              reject(err as BusinessError);
-            }
-        });
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.startFloatViewNative(this.nativeObj);
+          resolve(undefined);
+        } catch (err) {
+          reject(err as BusinessError);
+        }
+      });
     }
 
     public native stopFloatViewNative(nativeObj: long): void;
     public stop(): Promise<void> {
-        return new Promise<void>(
-          (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-            taskpool.execute((): void => {
-                this.stopFloatViewNative(this.nativeObj);
-            }).then((ret: Any) :void => {
-                resolve(undefined);
-            }).catch((err: Any) :void => {
-                reject(err as BusinessError);
-            });
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.stopFloatViewNative(this.nativeObj);
+        }).then((ret: Any) :void => {
+          resolve(undefined);
+        }).catch((err: Any) :void => {
+          reject(err as BusinessError);
         });
+      });
     }
 
     public native setUIContextNative(nativeObj: long, path: string, contentStorage?: LocalStorage): void;
     public setUIContext(path: string, contentStorage?: LocalStorage): Promise<void> {
-        return new Promise<void>(
-          (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-            try {
-              this.setUIContextNative(this.nativeObj, path, contentStorage);
-              resolve(undefined);
-            } catch (err) {
-              reject(err as BusinessError);
-            }
-        });
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        try {
+          this.setUIContextNative(this.nativeObj, path, contentStorage);
+          resolve(undefined);
+        } catch (err) {
+          reject(err as BusinessError);
+        }
+      });
     }
 
     public native setFloatViewVisibilityInAppNative(nativeObj: long, visibleInApp: boolean): void;
     public setFloatViewVisibilityInApp(visibleInApp: boolean): Promise<void> {
-        return new Promise<void>(
-          (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-            taskpool.execute((): void => {
-                this.setFloatViewVisibilityInAppNative(this.nativeObj, visibleInApp);
-            }).then((ret: Any) :void => {
-                resolve(undefined);
-            }).catch((err: Any) :void => {
-                reject(err as BusinessError);
-            });
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setFloatViewVisibilityInAppNative(this.nativeObj, visibleInApp);
+        }).then((ret: Any) :void => {
+          resolve(undefined);
+        }).catch((err: Any) :void => {
+          reject(err as BusinessError);
         });
+      });
     }
 
     public native setWindowSizeNative(nativeObj: long, size: window.Size): void;
     public setWindowSize(size: window.Size): Promise<void> {
-        return new Promise<void>(
-          (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-            taskpool.execute((): void => {
-                this.setWindowSizeNative(this.nativeObj, size);
-            }).then((ret: Any) :void => {
-                resolve(undefined);
-            }).catch((err: Any) :void => {
-                reject(err as BusinessError);
-            });
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowSizeNative(this.nativeObj, size);
+        }).then((ret: Any) :void => {
+          resolve(undefined);
+        }).catch((err: Any) :void => {
+          reject(err as BusinessError);
         });
+      });
     }
 
     native getWindowPropertiesNative(nativeObj: long): FloatViewProperties;
@@ -280,16 +300,15 @@ export default namespace floatView {
 
     public native restoreMainWindowNative(nativeObj: long, wantParameters?: Record<string, object>): void;
     public restoreMainWindow(wantParameters?: Record<string, object>): Promise<void> {
-        return new Promise<void>(
-          (resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
-            taskpool.execute((): void => {
-                this.restoreMainWindowNative(this.nativeObj, wantParameters);
-            }).then((ret: Any) :void => {
-                resolve(undefined);
-            }).catch((err: Any) :void => {
-                reject(err as BusinessError);
-            });
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.restoreMainWindowNative(this.nativeObj, wantParameters);
+        }).then((ret: Any) :void => {
+          resolve(undefined);
+        }).catch((err: Any) :void => {
+          reject(err as BusinessError);
         });
+      });
     }
 
     native onStateChangeNative(nativeObj: long, callback: Object): void;
