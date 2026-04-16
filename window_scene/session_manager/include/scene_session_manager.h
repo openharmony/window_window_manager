@@ -813,7 +813,7 @@ public:
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
     WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
-        std::vector<AppWindowShowingInfo>& windowInfos);
+        std::vector<AppWindowShowingInfo>& windowInfos) override;
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
