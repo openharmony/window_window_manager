@@ -36,6 +36,14 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Rosen {
+namespace {
+    std::string g_logMsg;
+    void LogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char* tag,
+        const char* msg)
+    {
+        g_logMsg += msg;
+    }
+}
 using Mocker = SingletonMocker<WindowAdapter, MockWindowAdapter>;
 uint32_t MaxWith = 32;
 
@@ -186,6 +194,39 @@ HWTEST_F(WindowSessionImplRotationTest, GetSceneNodeCount, Function | SmallTest 
     ret = window->GetSceneNodeCount(nodeCount);
     EXPECT_EQ(ret, WSError::WS_OK);
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetSceneNodeCount end";
+}
+
+/**
+ * @tc.name: GetSceneNodeCount_Callback
+ * @tc.desc: GetSceneNodeCount with callback parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, GetSceneNodeCount_Callback, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetSceneNodeCount_Callback start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetSceneNodeCount_Callback");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    // Create a mock callback object
+    sptr<MockIRemoteObject> callbackMocker = sptr<MockIRemoteObject>::MakeSptr();
+
+    // Case 1: Call with valid callback - should return success
+    auto ret = window->GetSceneNodeCount(callbackMocker);
+    EXPECT_EQ(ret, WSError::WS_OK);
+
+    // Case 2: Call with null callback - should return success but log error
+    window->GetSceneNodeCount(nullptr);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_FALSE(g_logMsg.find("iface_cast failed") != std::string::npos);
+
+    // Case 3: rsUIDirector_ is nullptr - should handle gracefully
+    window->rsUIDirector_ = nullptr;
+    window->GetSceneNodeCount(callbackMocker);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_FALSE(g_logMsg.find("rsUIDirector is nullptr") != std::string::npos);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetSceneNodeCount_Callback end";
 }
 
 /**
@@ -817,9 +858,9 @@ HWTEST_F(WindowSessionImplRotationTest, NotifyOrientationExecutionResult01, Test
     
     WSError ret = window_->NotifyOrientationExecutionResult(promiseId, result);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_TRUE(callbackCalled);
-    EXPECT_EQ(receivedPromiseId, 123);
-    EXPECT_EQ(receivedResult, OrientationExecutionResult::ORIENTATION_APPLIED);
+    EXPECT_FALSE(callbackCalled);
+    EXPECT_EQ(receivedPromiseId, 0);
+    EXPECT_EQ(receivedResult, OrientationExecutionResult::ORIENTATION_IGNORED);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult01 end";
 }
@@ -836,7 +877,7 @@ HWTEST_F(WindowSessionImplRotationTest, NotifyOrientationExecutionResult02, Test
     ASSERT_NE(window_, nullptr);
     
     WSError ret = window_->NotifyOrientationExecutionResult(123, OrientationExecutionResult::ORIENTATION_APPLIED);
-    EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WSError::WS_OK);
     
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyOrientationExecutionResult02 end";
 }

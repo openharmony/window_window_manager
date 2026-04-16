@@ -62,6 +62,8 @@ using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTempla
 using NotifyStopFloatingBallFunc = std::function<void()>;
 using NotifyRestoreFloatingBallMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::Want>& want)>;
 using NotifyRestoreFloatMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::WantParams>& wantParameters)>;
+using NotifyStopFloatViewFunc = std::function<void(const std::string& reason)>;
+using NotifyUpdateFloatViewFunc = std::function<void(const FloatViewTemplateInfo& fvTemplateInfo)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyBatchPendingSessionsActivationFunc = std::function<void(std::vector<std::shared_ptr<SessionInfo>>& info,
     const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)>;
@@ -88,7 +90,7 @@ using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInf
 using NotifyPendingSessionToBackgroundFunc = std::function<void(const SessionInfo& info,
     const BackgroundParams& params)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
-    bool shouldBackToCaller)>;
+    bool shouldBackToCaller, LifeCycleChangeReason reason)>;
 using NotifyClickModalWindowOutsideFunc = std::function<void()>;
 using NotifyRaiseMainWindowAboveTargetFunc = std::function<void(int32_t targetId)>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
@@ -230,7 +232,8 @@ public:
     void ResetIsActive();
     WSError PendingSessionToForeground();
     WSError PendingSessionToBackground(const BackgroundParams& params);
-    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
+    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     void SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func);
@@ -1140,6 +1143,8 @@ protected:
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
     GetRsCmdBlockingCountFunc getRsCmdBlockingCountFunc_;
     NotifyRestoreFloatMainWindowFunc restoreFloatMainWindowFunc_;
+    NotifyStopFloatViewFunc stopFloatViewFunc_;
+    NotifyUpdateFloatViewFunc updateFloatViewFunc_;
     sptr<LayoutController> layoutController_ = nullptr;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     std::atomic<uint32_t> crossPlaneState_ = 0;

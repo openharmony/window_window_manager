@@ -147,7 +147,7 @@ public:
         int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) = 0;
     virtual WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-        bool shouldBackToCaller = true) = 0;
+        bool shouldBackToCaller = true, int32_t reason = 0) = 0;
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;

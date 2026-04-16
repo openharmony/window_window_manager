@@ -52,6 +52,7 @@ constexpr float INVALID_SCALE = 0;
 constexpr int32_t MIN_REQUEST_ID_FROM_ABILITY = 1;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
+constexpr uint32_t COMBINED_COMPATIBLE_CONFIG_MAX_SIZE = 5;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
@@ -497,6 +498,7 @@ struct SessionInfo {
     SpecifiedReason specifiedReason_ = SpecifiedReason::DEFAULT;
     // only init when requestSceneSession from SCB
     bool isAncoApplication_ = false;
+    bool isSkipAncoNotifyPreStart = false;
     bool isPrelaunch_ = false;
     int32_t frameNum_ = 0;
     bool isTargetPlugin = false;
@@ -552,7 +554,13 @@ struct SessionInfo {
      * Compatible Mode
      */
     std::string pageConfig = "";
-    std::string logicalDeviceConfig = "";
+    std::vector<std::string> combinedCompatibleConfig;
+
+    /**
+     * Game PreLaunch
+     */
+    bool isGamePrelaunch_ = false;
+    bool reuseSessionInGamePreLaunch_ = false;
 
     AAFwk::Want GetWantSafely() const
     {
@@ -665,6 +673,7 @@ enum class SessionEvent : uint32_t {
     EVENT_MAXIMIZE_FULLSCREEN,
     EVENT_SWITCH_COMPATIBLE_MODE = 200,
     EVENT_NOTIFY_WINDOW_STAGE_CREATE_FINISHED,
+    EVENT_CLEAR_GAME_PRELAUNCH_FLAG,
     EVENT_END
 };
 
@@ -1370,7 +1379,7 @@ enum class LifeCycleChangeReason {
      */
     QUICK_BATCH_BACKGROUND,
 
-    SCREEN_ROTATION,
+    GAME_PRELAUNCH_BACKGROUND,
 
     REASON_END,
 };

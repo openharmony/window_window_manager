@@ -347,12 +347,13 @@ WMError WindowAdapter::ListWindowInfo(const WindowInfoOption& windowInfoOption, 
     return wmsProxy->ListWindowInfo(windowInfoOption, infos);
 }
 
-WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos)
+WMError WindowAdapter::GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+    const WindowInfoOptions& option)
 {
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->GetAllWindowLayoutInfo(displayId, infos);
+    return wmsProxy->GetAllWindowLayoutInfo(displayId, infos, option);
 }
 
 WMError WindowAdapter::GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos)
@@ -386,6 +387,14 @@ WMError WindowAdapter::GetGlobalWindowMode(DisplayId displayId, GlobalWindowMode
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     return wmsProxy->GetGlobalWindowMode(displayId, globalWinMode);
+}
+
+WMError WindowAdapter::GetFloatViewLimits(FloatViewLimits &limits)
+{
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    return wmsProxy->GetFloatViewLimits(limits);
 }
 
 WMError WindowAdapter::GetTopNavDestinationName(int32_t windowId, std::string& topNavDestName)

@@ -85,6 +85,7 @@ const std::map<WindowType, ApiWindowType> NATIVE_JS_TO_WINDOW_TYPE_MAP {
     { WindowType::WINDOW_TYPE_DYNAMIC,                  ApiWindowType::TYPE_DYNAMIC                  },
     { WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION, ApiWindowType::TYPE_MUTISCREEN_COLLABORATION },
     { WindowType::WINDOW_TYPE_FB,                       ApiWindowType::TYPE_FB                       },
+    { WindowType::WINDOW_TYPE_FV,                       ApiWindowType::TYPE_FV                       },
 };
 
 const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
@@ -116,6 +117,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
     { ApiWindowType::TYPE_FB,                       WindowType::WINDOW_TYPE_FB                       },
+    { ApiWindowType::TYPE_FV,                       WindowType::WINDOW_TYPE_FV                       },
 };
 
 const std::map<WindowMode, ApiWindowMode> NATIVE_TO_JS_WINDOW_MODE_MAP {
@@ -1032,6 +1034,7 @@ napi_value CreateJsWindowLayoutInfoObject(napi_env env, const sptr<WindowLayoutI
     napi_value objValue = nullptr;
     CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
     napi_set_named_property(env, objValue, "windowRect", GetRectAndConvertToJsValue(env, info->rect));
+    napi_set_named_property(env, objValue, "windowAlpha", CreateJsValue(env, info->windowAlpha));
     return objValue;
 }
 

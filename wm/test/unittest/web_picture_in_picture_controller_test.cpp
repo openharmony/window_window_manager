@@ -139,6 +139,20 @@ HWTEST_F(WebPictureInPictureControllerTest, StartPictureInPicture, TestSize.Leve
 }
 
 /**
+ * @tc.name: StartPictureInPicture02
+ * @tc.desc: StartPictureInPicture with stop state
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPictureInPictureControllerTest, StartPictureInPicture02, TestSize.Level1)
+{
+    auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
+    StartPipType startType = StartPipType::NATIVE_START;
+    
+    webPipControl->curState_ = PiPWindowState::STATE_STOPPING;
+    EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, webPipControl->StartPictureInPicture(startType));
+}
+
+/**
  * @tc.name: UpdateContentSize
  * @tc.desc: UpdateContentSize
  * @tc.type: FUNC
