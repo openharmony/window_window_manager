@@ -302,11 +302,7 @@ bool SubSession::IsApplicationModal() const
 bool SubSession::IsVisibleForeground() const
 {
     if (IsLoosenedWithFreeMultiMode()) {
-        bool isVisibleForeground = Session::IsVisibleForeground();
-        TLOGD(WmsLogTag::WMS_SUB,
-            "id: %{public}d, IsVisibleForeground: %{public}d",
-            GetPersistentId(), isVisibleForeground);
-        return isVisibleForeground;
+        return Session::IsVisibleForeground();
     }
     const auto& mainOrFloatSession = GetMainOrFloatSession();
     if (mainOrFloatSession) {
@@ -317,6 +313,9 @@ bool SubSession::IsVisibleForeground() const
 
 bool SubSession::IsVisibleNotBackground() const
 {
+    if (IsLoosenedWithFreeMultiMode()) {
+        return Session::IsVisibleNotBackground();
+    }
     const auto& mainOrFloatSession = GetMainOrFloatSession();
     if (mainOrFloatSession) {
         return mainOrFloatSession->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
