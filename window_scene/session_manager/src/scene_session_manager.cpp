@@ -19490,7 +19490,7 @@ WMError SceneSessionManager::GetAppWindowShowingInfosByBundleName(const Applicat
         windowInfos.push_back(info);
     }
     TLOGI(WmsLogTag::WMS_MAIN, "bundleName:%{public}s, appIndex:%{public}d, appInstanceKey:%{public}s, size:%{public}zu",
-        bundleName.c_str(), appIndex, appInstanceKey.c_str(), windowInfos.size());
+        appInfo.bundleName.c_str(), appInfo.appIndex, appInfo.appInstanceKey.c_str(), windowInfos.size());
     return WMError::WM_OK;
 }
 
