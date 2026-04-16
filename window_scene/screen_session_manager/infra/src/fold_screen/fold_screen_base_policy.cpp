@@ -96,7 +96,7 @@ void FoldScreenBasePolicy::SwitchScrollParam(FoldDisplayMode displayMode)
 
 bool FoldScreenBasePolicy::IsInRecoveryProcess()
 {
-    return ScreenSessionManager::GetInstance().IsInRecoveryProcess();
+    return ScreenSessionManager::GetInstance().IsInRecoveringProcess();
 }
 
 void FoldScreenBasePolicy::HandlePowerStateChange(ScreenPowerEvent event, const std::function<void()>& func)
