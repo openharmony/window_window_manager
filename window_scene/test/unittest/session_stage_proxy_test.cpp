@@ -1624,6 +1624,42 @@ HWTEST_F(SessionStageProxyTest, SyncFvLimits, TestSize.Level1)
     
     MockMessageParcel::ClearAllErrorFlag();
 }
+
+/**
+ * @tc.name: SetForceSplitEnable01
+ * @tc.desc: test function : SetForceSplitEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, SetForceSplitEnable01, TestSize.Level1)
+{
+    ASSERT_TRUE(sessionStage_ != nullptr);
+
+    // Case 1: Success
+    MockMessageParcel::ClearAllErrorFlag();
+    ASSERT_EQ(WSError::WS_OK, sessionStage_->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE));
+
+    // Case 2: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 3: Failed to write isForceSplitEnabled
+    MockMessageParcel::SetWriteBoolErrorFlag(true);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionStage_->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE));
+    MockMessageParcel::SetWriteBoolErrorFlag(false);
+
+    // Case 4: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE));
+
+    // Case 5: Failed to send request
+    auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+    remoteMock->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionStageProxy> failSendProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+    ASSERT_EQ(WSError::WS_ERROR_IPC_FAILED, failSendProxy->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE));
+
+    MockMessageParcel::ClearAllErrorFlag();
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
