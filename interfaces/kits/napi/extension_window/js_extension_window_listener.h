@@ -32,17 +32,17 @@
 namespace OHOS {
 namespace Rosen {
 class JsExtensionWindowListener : public IWindowChangeListener,
-                                   public IWindowRectChangeListener,
-                                   public IAvoidAreaChangedListener,
-                                   public IWindowLifeCycle,
-                                   public IOccupiedAreaChangeListener,
-                                   public IDisplayIdChangeListener,
-                                   public ISystemDensityChangeListener,
-                                   public IScreenshotListener,
-                                   public IExtensionSecureLimitChangeListener,
-                                   public IKeyboardDidShowListener,
-                                   public IKeyboardDidHideListener,
-                                   public IWindowStatusChangeListener {
+                                  public IWindowRectChangeListener,
+                                  public IAvoidAreaChangedListener,
+                                  public IWindowLifeCycle,
+                                  public IOccupiedAreaChangeListener,
+                                  public IDisplayIdChangeListener,
+                                  public ISystemDensityChangeListener,
+                                  public IScreenshotListener,
+                                  public IExtensionSecureLimitChangeListener,
+                                  public IKeyboardDidShowListener,
+                                  public IKeyboardDidHideListener,
+                                  public IWindowStatusChangeListener {
 public:
     JsExtensionWindowListener(napi_env env, std::shared_ptr<NativeReference> callback)
         : env_(env), jsCallBack_(callback), weakRef_(wptr<JsExtensionWindowListener> (this)) {
