@@ -3706,5 +3706,117 @@ HWTEST_F(DisplayManagerTest, NotifyDisplayCreateNullPtr, TestSize.Level1)
     
     EXPECT_EQ(mapSizeBefore, mapSizeAfter);
 }
+
+/**
+ * @tc.name: FoldDisplayModeTrans_FullMode
+ * @tc.desc: Test FoldDisplayModeTrans with FULL mode returns FULL
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_FullMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::FULL);
+    EXPECT_EQ(result, FoldDisplayMode::FULL);
+}
+
+/**
+ * @tc.name: FoldDisplayModeTrans_LFullMode
+ * @tc.desc: Test FoldDisplayModeTrans with L_FULL mode returns FULL
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_LFullMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::L_FULL);
+    EXPECT_EQ(result, FoldDisplayMode::FULL);
+}
+
+/**
+ * @tc.name: FoldDisplayModeTrans_NMainMode
+ * @tc.desc: Test FoldDisplayModeTrans with N_MAIN mode returns MAIN
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_NMainMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::N_MAIN);
+    EXPECT_EQ(result, FoldDisplayMode::MAIN);
+}
+
+/**
+ * @tc.name: FoldDisplayModeTrans_VMainMode
+ * @tc.desc: Test FoldDisplayModeTrans with V_MAIN mode returns MAIN
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_VMainMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::V_MAIN);
+    EXPECT_EQ(result, FoldDisplayMode::MAIN);
+}
+
+/**
+ * @tc.name: FoldDisplayModeTrans_MainMode
+ * @tc.desc: Test FoldDisplayModeTrans with MAIN mode returns MAIN
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_MainMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::MAIN);
+    EXPECT_EQ(result, FoldDisplayMode::MAIN);
+}
+
+/**
+ * @tc.name: FoldDisplayModeTrans_GlobalFullMode
+ * @tc.desc: Test FoldDisplayModeTrans with GLOBAL_FULL mode returns GLOBAL_FULL
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_GlobalFullMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::GLOBAL_FULL);
+    EXPECT_EQ(result, FoldDisplayMode::GLOBAL_FULL);
+}
+
+/**
+ * @tc.name: FoldDisplayModeTrans_CoordinationMode
+ * @tc.desc: Test FoldDisplayModeTrans with COORDINATION mode returns COORDINATION
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_CoordinationMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::COORDINATION);
+    EXPECT_EQ(result, FoldDisplayMode::COORDINATION);
+}
+
+/**
+ * @tc.name: FoldDisplayModeTrans_UnknownMode
+ * @tc.desc: Test FoldDisplayModeTrans with UNKNOWN mode returns UNKNOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, FoldDisplayModeTrans_UnknownMode, TestSize.Level1)
+{
+    std::recursive_mutex mutex;
+    DisplayManager::Impl impl(mutex);
+
+    FoldDisplayMode result = impl.FoldDisplayModeTrans(FoldDisplayMode::UNKNOWN);
+    EXPECT_EQ(result, FoldDisplayMode::UNKNOWN);
+}
 } // namespace Rosen
 } // namespace OHOS
