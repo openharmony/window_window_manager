@@ -9284,7 +9284,7 @@ void WindowSessionImpl::GetExtensionConfig(AAFwk::WantParams& want) const
     bool gestureBackEnable = true;
     GetGestureBackEnabled(gestureBackEnable);
     want.SetParam(Extension::GESTURE_BACK_ENABLED, AAFwk::Integer::Box(static_cast<int32_t>(gestureBackEnable)));
-    auto windowStatus = GetWindowStatusInner(GetWindowMode());
+    auto windowStatus = lastWindowStatus_.load();
     want.SetParam(Extension::HOST_WINDOW_STATUS_FIELD,
         AAFwk::Integer::Box(static_cast<int32_t>(windowStatus)));
 }

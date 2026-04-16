@@ -3867,6 +3867,7 @@ HWTEST_F(WindowExtensionSessionImplTest, IsBlockSubwindow, TestSize.Level1)
  */
 HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowStatusChange, TestSize.Level1)
 {
+    window_->property_->SetIsAtomicService(true);
     AAFwk::Want want;
     std::optional<AAFwk::Want> reply;
     want.SetParam(Extension::HOST_WINDOW_STATUS_FIELD,
@@ -3895,6 +3896,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetWindowStatus, TestSize.Level1)
     EXPECT_EQ(WMError::WM_OK, window_->GetWindowStatus(windowStatus));
     EXPECT_EQ(WindowStatus::WINDOW_STATUS_UNDEFINED, windowStatus);
 
+    window_->property_->SetIsAtomicService(true);
     AAFwk::Want want;
     std::optional<AAFwk::Want> reply;
     want.SetParam(Extension::HOST_WINDOW_STATUS_FIELD,
@@ -3911,6 +3913,7 @@ HWTEST_F(WindowExtensionSessionImplTest, GetWindowStatus, TestSize.Level1)
  */
 HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfigWithWindowStatus, TestSize.Level3)
 {
+    window_->property_->SetIsAtomicService(true);
     AAFwk::Want want;
     AAFwk::WantParams configParam;
     configParam.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(0));
