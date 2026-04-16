@@ -493,6 +493,7 @@ HWTEST_F(WindowSessionLifecycleTest, IsVisibleNotBackground01, TestSize.Level1)
     parentSession->isVisible_ = true;
     EXPECT_EQ(subSession->IsVisibleNotBackground(), true);
 
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     subSession->property_->SetZLevelAboveParentLoosened(true);
     subSession->isVisible_ = true;
     EXPECT_EQ(subSession->IsVisibleNotBackground(), true);

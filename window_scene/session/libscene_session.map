@@ -36,6 +36,7 @@
             OHOS::Rosen::SceneSession::SetFrameGravity*;
             OHOS::Rosen::SceneSession::SetSnapshotSkip*;
             OHOS::Rosen::SceneSession::GetMainSessionId*;
+            OHOS::Rosen::SceneSession::GetMainSessionOrLoosenedSessionId*;
             OHOS::Rosen::SceneSession::OnShowWhenLocked*;
             OHOS::Rosen::SceneSession::RemoveSubSession*;
             OHOS::Rosen::SceneSession::SendKeyEventToUI*;

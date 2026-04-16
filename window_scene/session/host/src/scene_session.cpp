@@ -5423,6 +5423,15 @@ int32_t SceneSession::GetMainSessionId()
     return INVALID_SESSION_ID;
 }
 
+int32_t SceneSession::GetMainSessionOrLoosenedSessionId()
+{
+    const auto& mainSession = GetMainSession();
+    if (mainSession) {
+        return mainSession->GetPersistentId();
+    }
+    return INVALID_SESSION_ID;
+}
+
 std::string SceneSession::GetWindowNameAllType() const
 {
     if (GetSessionInfo().isSystem_) {

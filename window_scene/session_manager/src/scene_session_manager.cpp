@@ -9091,8 +9091,7 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
             TLOGND(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }
-        if (preFocusedSessionFound && session->CheckFocusable() &&
-            session->IsVisibleNotBackground() &&
+        if (session->CheckFocusable() && session->IsVisibleNotBackground() &&
             (session->IsLoosenedWithFreeMultiMode() || IsParentSessionVisible(session))) {
             if (!systemConfig_.IsPcWindow() || session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP ||
                 currentSessionDisplayId == displayId) {
