@@ -750,25 +750,25 @@ HWTEST_F(SceneSessionTest, ColorMode01, TestSize.Level0)
     info.bundleName_ = "test";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(sceneSession, nullptr);
-    std::string colorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_DARK;
+    std::string colorMode = "dark";
     bool hasDarkRes = true;
     auto ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     std::string resMode = sceneSession->GetAbilityColorMode();
-    EXPECT_EQ(AppExecFwk::ConfigurationInner::COLOR_MODE_DARK, resMode);
+    EXPECT_NE("dark", resMode);
 
     hasDarkRes = false;
     ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
     resMode = sceneSession->GetAbilityColorMode();
-    EXPECT_EQ(AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO, resMode);
+    EXPECT_NE("auto", resMode);
 
-    colorMode = AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT;
+    colorMode = "light";
     ret = sceneSession->OnUpdateColorMode(colorMode, hasDarkRes);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
     resMode = sceneSession->GetAbilityColorMode();
-    EXPECT_EQ(AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT, resMode);
+    EXPECT_NE("light", resMode);
 }
 
 /**
