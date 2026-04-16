@@ -129,6 +129,7 @@ private:
     napi_value OnInvalidAsyncCall(napi_env env, napi_callback_info info);
     napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarColor(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
 
     static napi_value GetProperties(napi_env env, napi_callback_info info);
 

@@ -33,6 +33,7 @@ const std::string EXTENSION_SECURE_LIMIT_CHANGE_CB = "uiExtensionSecureLimitChan
 const std::string KEYBOARD_DID_SHOW_CB = "keyboardDidShow";
 const std::string KEYBOARD_DID_HIDE_CB = "keyboardDidHide";
 const std::string KEYBOARD_HEIGHT_CHANGE_CB = "keyboardHeightChange";
+const std::string WINDOW_STATUS_CHANGE_CB = "windowStatusChange";
 }
 
 JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
@@ -50,6 +51,7 @@ JsExtensionWindowRegisterManager::JsExtensionWindowRegisterManager()
         {KEYBOARD_DID_SHOW_CB, ListenerType::KEYBOARD_DID_SHOW_CB},
         {KEYBOARD_DID_HIDE_CB, ListenerType::KEYBOARD_DID_HIDE_CB},
         {KEYBOARD_HEIGHT_CHANGE_CB, ListenerType::KEYBOARD_HEIGHT_CHANGE_CB},
+        {WINDOW_STATUS_CHANGE_CB, ListenerType::WINDOW_STATUS_CHANGE_CB},
     };
     // white register list for window stage
     listenerCodeMap_[CaseType::CASE_STAGE] = {
@@ -239,6 +241,23 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessOccupiedAreaChangeRegister(
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterOccupiedAreaChangeListener(thisListener));
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterOccupiedAreaChangeListener(thisListener));
+    }
+    return ret;
+}
+
+WmErrorCode JsExtensionWindowRegisterManager::ProcessWindowStatusChangeRegister(
+    const sptr<JsExtensionWindowListener>& listener, const sptr<Window>& window, bool isRegister)
+{
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "Window is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    sptr<IWindowStatusChangeListener> thisListener(listener);
+    WmErrorCode ret = WmErrorCode::WM_OK;
+    if (isRegister) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RegisterWindowStatusChangeListener(thisListener));
+    } else {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusChangeListener(thisListener));
     }
     return ret;
 }
@@ -454,6 +473,9 @@ WmErrorCode JsExtensionWindowRegisterManager::ProcessRegister(CaseType caseType,
                 break;
             case ListenerType::KEYBOARD_HEIGHT_CHANGE_CB:
                 ret = ProcessOccupiedAreaChangeRegister(listener, window, isRegister);
+                break;
+            case ListenerType::WINDOW_STATUS_CHANGE_CB:
+                ret = ProcessWindowStatusChangeRegister(listener, window, isRegister);
                 break;
             default:
                 break;
