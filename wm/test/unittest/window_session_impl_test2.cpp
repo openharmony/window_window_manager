@@ -305,6 +305,10 @@ HWTEST_F(WindowSessionImplTest2, RecoverSessionListener, TestSize.Level1)
     occlusionStateChangeListeners.push_back(nullptr);
     window->occlusionStateChangeListeners_.clear();
     window->occlusionStateChangeListeners_.insert({ id, occlusionStateChangeListeners });
+    std::vector<sptr<IScreenshotListener>> screenshotListeners;
+    screenshotListeners.push_back(nullptr);
+    window->screenshotListeners_.clear();
+    window->screenshotListeners_.insert({ id, screenshotListeners });
     window->RecoverSessionListener();
     window->occlusionStateChangeListeners_.clear();
     ASSERT_TRUE(window->avoidAreaChangeListeners_.find(id) != window->avoidAreaChangeListeners_.end() &&
@@ -380,6 +384,47 @@ HWTEST_F(WindowSessionImplTest2, NotifyWindowOcclusionState, TestSize.Level1)
         WSError::WS_OK);
     EXPECT_EQ(window->lastVisibilityState_, WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION);
     window->occlusionStateChangeListeners_.clear();
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyWindowOcclusionStateAll
+ * @tc.desc: notify all occlusion state change
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, NotifyWindowOcclusionStateAll, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("NotifyWindowOcclusionStateAll");
+    ASSERT_NE(window, nullptr);
+
+    // default visibility state
+    EXPECT_EQ(window->lastVisibilityState_, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+    WindowVisibilityState state = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+    EXPECT_EQ(window->NotifyWindowOcclusionState(static_cast<WindowVisibilityState>(state + 1)), WSError::WS_OK);
+    EXPECT_EQ(window->lastVisibilityState_, WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION);
+
+    window->occlusionStateChangeListeners_.clear();
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 0);
+    sptr<IOcclusionStateChangedListener> listener = sptr<IOcclusionStateChangedListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterOcclusionStateChangeListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 1);
+
+    // traverse all visibility states verify
+    WindowVisibilityState visibilityStates[] = {
+        WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION,
+        WindowVisibilityState::WINDOW_VISIBILITY_STATE_PARTICALLY_OCCLUSION,
+        WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION
+    };
+
+    for (auto state : visibilityStates) {
+        auto ret = window->NotifyWindowOcclusionState(state);
+        EXPECT_EQ(WSError::WS_OK, ret);
+        EXPECT_EQ(state, window->lastVisibilityState_);
+    }
+
+    window->occlusionStateChangeListeners_.clear();
+    EXPECT_EQ(window->occlusionStateChangeListeners_.size(), 0);
+
     window->Destroy();
 }
 
@@ -558,25 +603,6 @@ HWTEST_F(WindowSessionImplTest2, NotifyUIContentFocusStatus, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyAfterFocused
- * @tc.desc: NotifyAfterFocused
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, NotifyAfterFocused, TestSize.Level1)
-{
-    auto window = GetTestWindowImpl("NotifyAfterFocused");
-    ASSERT_NE(window, nullptr);
-    window->NotifyAfterFocused();
-    ASSERT_TRUE(window->shouldReNotifyFocus_);
-
-    window->shouldReNotifyFocus_ = false;
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
-    window->NotifyAfterFocused();
-    ASSERT_FALSE(window->shouldReNotifyFocus_);
-    window->Destroy();
-}
-
-/**
  * @tc.name: NotifyForegroundFailed
  * @tc.desc: NotifyForegroundFailed
  * @tc.type: FUNC
@@ -601,25 +627,6 @@ HWTEST_F(WindowSessionImplTest2, NotifyTransferComponentDataSync, TestSize.Level
     AAFwk::WantParams wantParams;
     AAFwk::WantParams reWantParams;
     ASSERT_EQ(WSErrorCode::WS_OK, window->NotifyTransferComponentDataSync(wantParams, reWantParams));
-    window->Destroy();
-}
-
-/**
- * @tc.name: UpdateAvoidArea
- * @tc.desc: UpdateAvoidArea
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest2, UpdateAvoidArea, TestSize.Level1)
-{
-    auto window = GetTestWindowImpl("UpdateAvoidArea");
-    ASSERT_NE(window, nullptr);
-    sptr<AvoidArea> avoidArea = sptr<AvoidArea>::MakeSptr();
-    avoidArea->topRect_ = { 1, 0, 0, 0 };
-    avoidArea->leftRect_ = { 0, 1, 0, 0 };
-    avoidArea->rightRect_ = { 0, 0, 1, 0 };
-    avoidArea->bottomRect_ = { 0, 0, 0, 1 };
-    AvoidAreaType type = AvoidAreaType::TYPE_SYSTEM;
-    ASSERT_EQ(WSError::WS_OK, window->UpdateAvoidArea(avoidArea, type));
     window->Destroy();
 }
 
@@ -1951,6 +1958,51 @@ HWTEST_F(WindowSessionImplTest2, NotifyScreenshot02, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterScreenshotListener
+ * @tc.desc: register screenshot change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, RegisterScreenshotListener, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("RegisterScreenshotListener");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
+    window->screenshotListeners_.clear();
+    EXPECT_NE(window->RegisterScreenshotListener(nullptr), WMError::WM_OK);
+    sptr<IScreenshotListener> listener = sptr<IScreenshotListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterScreenshotListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->screenshotListeners_.size(), 1);
+    window->screenshotListeners_[window->GetPersistentId()].push_back(nullptr);
+    sptr<IScreenshotListener> listener2 = sptr<IScreenshotListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterScreenshotListener(listener2), WMError::WM_OK);
+    window->screenshotListeners_.clear();
+    window->Destroy();
+}
+
+/**
+ * @tc.name: UnregisterScreenshotListener
+ * @tc.desc: unregister screenshot change listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest2, UnregisterScreenshotListener, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("UnregisterScreenshotListener");
+    ASSERT_NE(window, nullptr);
+    window->screenshotListeners_.clear();
+    EXPECT_NE(window->UnregisterScreenshotListener(nullptr), WMError::WM_OK);
+    sptr<IScreenshotListener> listener = sptr<IScreenshotListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterScreenshotListener(listener), WMError::WM_OK);
+    sptr<IScreenshotListener> listener2 = sptr<IScreenshotListener>::MakeSptr();
+    EXPECT_EQ(window->RegisterScreenshotListener(listener2), WMError::WM_OK);
+    EXPECT_EQ(window->UnregisterScreenshotListener(listener), WMError::WM_OK);
+    EXPECT_EQ(window->screenshotListeners_.size(), 1);
+    EXPECT_EQ(window->UnregisterScreenshotListener(listener2), WMError::WM_OK);
+    window->screenshotListeners_.clear();
+    EXPECT_EQ(window->screenshotListeners_.size(), 0);
+    window->Destroy();
+}
+
+/**
  * @tc.name: NotifyTouchDialogTarget
  * @tc.desc: NotifyTouchDialogTarget01 hostSession_==nullptr
  * @tc.type: FUNC
@@ -2502,18 +2554,18 @@ HWTEST_F(WindowSessionImplTest2, RegisterAcrossDisplaysChangeListener01, TestSiz
 }
 
 /**
- * @tc.name: UnRegisterAcrossDisplaysChangeListener
- * @tc.desc: UnRegisterAcrossDisplaysChangeListener01
+ * @tc.name: UnregisterAcrossDisplaysChangeListener
+ * @tc.desc: UnregisterAcrossDisplaysChangeListener01
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionImplTest2, UnRegisterAcrossDisplaysChangeListener01, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest2, UnregisterAcrossDisplaysChangeListener01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UnRegisterAcrossDisplaysChangeListener01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
 
     sptr<IAcrossDisplaysChangeListener> listener = nullptr;
-    auto ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    auto ret = window->UnregisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_INVALID_WINDOW);
 
     window->property_->SetPersistentId(1);
@@ -2521,13 +2573,13 @@ HWTEST_F(WindowSessionImplTest2, UnRegisterAcrossDisplaysChangeListener01, TestS
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     ASSERT_NE(nullptr, session);
     window->hostSession_ = session;
-    ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    ret = window->UnregisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     listener = sptr<IAcrossDisplaysChangeListener>::MakeSptr();
     std::vector<sptr<IAcrossDisplaysChangeListener>> holder;
     window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()] = holder;
-    ret = window->UnRegisterAcrossDisplaysChangeListener(listener);
+    ret = window->UnregisterAcrossDisplaysChangeListener(listener);
     EXPECT_EQ(ret, WMError::WM_OK);
 
     holder = window->acrossDisplaysChangeListeners_[window->property_->GetPersistentId()];

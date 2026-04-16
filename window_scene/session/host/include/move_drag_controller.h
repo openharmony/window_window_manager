@@ -52,18 +52,30 @@ enum class MoveDirection : uint32_t {
 };
 
 /**
- * @brief Describes how the targetRect (in MoveDragProperty) was (or will be)
- *        updated in response to a event during dragging or moving.
+ * @brief Defines how the targetRect (in MoveDragProperty) should be updated
+ *        during a drag/move operation.
  */
-enum class TargetRectUpdateState {
-    // No change was applied to the targetRect.
-    UNCHANGED,
+enum class TargetRectUpdateMode {
+    /**
+     * @brief No update is applied.
+     */
+    NONE,
 
-    // The targetRect will be updated later on the next vsync using resampled data.
-    RESAMPLE_REQUIRED,
+    /**
+     * @brief Resampling becomes active starting from now.
+     */
+    RESAMPLE_ACTIVATED,
 
-    // The targetRect has been updated immediately.
-    UPDATED_DIRECTLY
+    /**
+     * @brief An update is required and will be applied on the next vsync
+     *        using resampled data.
+     */
+    RESAMPLE_SCHEDULED,
+
+    /**
+     * @brief The targetRect has been updated immediately.
+     */
+    UPDATED_IMMEDIATELY
 };
 
 class MoveDragController : public ScreenManager::IScreenListener {
@@ -89,7 +101,13 @@ public:
     bool GetMovable() const;
     void SetNotifyWindowPidChangeCallback(const NotifyWindowPidChangeCallback& callback);
 
-    void SetTargetRect(const WSRect& rect);
+    /**
+     * @brief Update targetRectChangeReason_ and optionally targetRect_ (all in MoveDragProperty).
+     *
+     * @param reason   The reason for the size or position change.
+     * @param rectOpt  New rect if provided; std::nullopt keeps the current rect.
+     */
+    void UpdateTargetRect(SizeChangeReason reason, std::optional<WSRect> rectOpt = std::nullopt);
 
     /**
      * @brief Gets the targetRect stored in MoveDragProperty.
@@ -112,50 +130,19 @@ public:
     WSRect GetTargetRectByDisplayId(DisplayId displayId) const;
 
     /**
-     * @brief Map a rectangle from the start display's coordinate space
-     *        into the coordinate space of the target display.
+     * @brief Resample the moving position for the given vsync timestamp and update
+     *        the target rectangle.
      *
-     * The input rect (relativeStartRect) is expressed relative to the top-left
-     * corner of the display where dragging started. This function converts it
-     * into the coordinate system of targetDisplayId by applying the offset
-     * difference between the two displays in the legacy global coordinate system.
+     * If moving is inactive, no update is performed. Otherwise the resampled
+     * position is applied and the resulting rectangle is returned in legacy
+     * global (unified) coordinates.
      *
-     * @param relativeStartRect The rect defined in the start display's coordinate space.
-     * @param targetDisplayId   The display to which the rect should be mapped.
-     * @return WSRect           The mapped rect in the target display's coordinate space.
+     * @param vsyncTimeUs  Timestamp of the vsync event, in microseconds.
+     * @return Pair of update mode and the resulting target rectangle.
      */
-    WSRect MapRectFromStartToTarget(const WSRect& relativeStartRect, DisplayId targetDisplayId) const;
-
-    /**
-     * @brief Map a rectangle from the target display's coordinate space
-     *        back into the coordinate space of the start display.
-     *
-     * The input rect (relativeTargetRect) is expressed relative to the top-left
-     * corner of targetDisplayId. This function converts it into the coordinate
-     * system of the start display using the display offset difference derived
-     * from the legacy global coordinate system.
-     *
-     * @param relativeTargetRect The rect defined in the target display's coordinate space.
-     * @param targetDisplayId    The display where the rect is currently defined.
-     * @return WSRect            The mapped rect in the start display's coordinate space.
-     */
-    WSRect MapRectFromTargetToStart(const WSRect& relativeTargetRect, DisplayId targetDisplayId) const;
-
-    /**
-     * @brief Compute the resampled target rectangle at the given vsync timestamp.
-     *
-     * Performs a move-resample step using the provided vsync time and returns
-     * the resulting update state.
-     *
-     * @param vsyncTimeUs Timestamp of the vsync event, in microseconds.
-     * @return TargetRectUpdateState Resulting state after resample computation.
-     */
-    TargetRectUpdateState ComputeResampledTargetRectOnVsync(int64_t vsyncTimeUs);
+    std::pair<TargetRectUpdateMode, WSRect> ResampleTargetRectOnVsync(int64_t vsyncTimeUs);
 
     void InitMoveDragProperty();
-    void SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
-                                int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
-                                const WSRect& winRect);
 
     /**
      * @brief Handles pointer events related to window movement.
@@ -177,7 +164,6 @@ public:
      */
     bool ConsumeDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-    void ModifyWindowCoordinates(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CalcFirstMoveTargetRect(const WSRect& windowRect, bool useWindowRect);
     WSRect GetFullScreenToFloatingRect(const WSRect& originalRect, const WSRect& windowRect);
     int32_t GetOriginalPointerPosX();
@@ -200,13 +186,7 @@ public:
      */
     Gravity GetGravity() const;
 
-    /**
-     * @brief Get the Gravity based on the AreaType.
-     *
-     * @param type The AreaType indicating the hot area.
-     * @return The corresponding Gravity value.
-     */
-    Gravity GetGravity(AreaType type) const;
+    Gravity GetDragGravity() const;
 
     /**
      * @brief Restore the gravity of the surfaceNode to the pre-drag state.
@@ -221,21 +201,41 @@ public:
      */
     uint64_t GetMoveDragStartDisplayId() const;
     uint64_t GetMoveDragEndDisplayId() const;
-    uint64_t GetInitParentNodeId() const;
     std::set<uint64_t> GetDisplayIdsDuringMoveDrag();
     std::set<uint64_t> GetNewAddedDisplayIdsDuringMoveDrag();
-    void InitCrossDisplayProperty(DisplayId displayId, uint64_t parentNodeId);
-    WSRect GetScreenRectById(DisplayId displayId);
-    DisplayId GetMoveInputBarStartDisplayId();
+    void InitCrossDisplayProperty(DisplayId displayId);
     void ResetCrossMoveDragProperty();
-    void MoveDragInterrupted(bool resetPosition = true);
     void SetMoveAvailableArea(const DMRect& area);
-    void UpdateMoveAvailableArea(DisplayId targetDisplayId);
-    void SetCurrentScreenProperty(DisplayId targetDisplayId);
     void SetMoveInputBarStartDisplayId(DisplayId displayId);
-    void SetInputBarCrossAttr(MoveDirection moveDirection, DisplayId targetDisplayId);
     void SetOriginalPositionZ(float originalPositionZ) { originalPositionZ_ = originalPositionZ; }
     float GetOriginalPositionZ() const { return originalPositionZ_; }
+
+    /**
+     * @brief whether the window has been dragged across monitor boundaries by the user.
+     *
+     * Determines if the window movement resulted in a cross-screen drag operation by
+     * comparing the display ID where the drag started versus where it ended.
+     *
+     * @note This method should only be called in the drag-end processing flow,
+     *       after the drag operation has completed and the final display ID is known.
+     *
+     * @return true if the window was dragged to a different monitor (cross-screen),
+     *         false if the drag operation stayed within the same monitor.
+     */
+    bool IsWindowCrossScreenOnDragEnd() const;
+
+    /**
+     * @brief Decide whether RS commands should be flushed to RS process on drag end.
+     *
+     * - Cross-screen: no flush. RS commands will be submitted together with the
+     *   ArkUI relayout on the next vsync.
+     * - Not cross-screen: flush immediately to ensure pending RS commands are
+     *   committed, avoiding impact on subsequent drag operations.
+     * - Invalid display IDs: return false.
+     *
+     * @return true if RS commands need to be flushed; false otherwise.
+     */
+    bool ShouldFlushOnDragEnd() const;
 
     /*
      * Monitor screen connection status
@@ -257,10 +257,69 @@ public:
     };
     void HandleStartMovingWithCoordinate(const MoveCoordinateProperty& property, bool isMovable = true);
     void SetSpecifyMoveStartDisplay(DisplayId displayId);
-    void ClearSpecifyMoveStartDisplay();
     void StopMoving();
     void SetLastDragEndRect(const WSRect& rect) { lastDragEndRect_ = rect; }
     WSRect GetLastDragEndRect() const { return lastDragEndRect_; }
+
+    /**
+     * @brief Save the move resampling configuration.
+     *
+     * The configuration is persisted in system parameters to allow easy inspection
+     * and quick adjustment at runtime (e.g. for debugging or performance tuning),
+     * without requiring a rebuild or restart.
+     *
+     * Note that this function only updates the persisted configuration values;
+     * the actual resampling behavior is determined by ShouldOpenMoveResample
+     * and UpdateResampleActivationByFps at runtime based on these parameters.
+     *
+     * @param enable  True to enable move resampling, false to disable.
+     * @param minFps  Optional minimum FPS threshold to enable resampling;
+     *                std::nullopt means no minimum limit.
+     * @param maxFps  Optional maximum FPS threshold to enable resampling;
+     *                std::nullopt means no maximum limit.
+     */
+    static void SaveMoveResampleSystemConfig(
+        bool enable, std::optional<uint32_t> minFps, std::optional<uint32_t> maxFps);
+
+    /**
+     * @brief Load the current move resampling configuration.
+     *
+     * Loads the persisted parameters to obtain the configuration setting; actual
+     * behavior during move operations is determined by ShouldOpenMoveResample
+     * and UpdateResampleActivationByFps.
+     *
+     * @return A tuple of (enabled, minFps, maxFps).
+     */
+    static std::tuple<bool, std::optional<uint32_t>, std::optional<uint32_t>> LoadMoveResampleSystemConfig();
+
+    /**
+     * @brief Save the moving event throttle configuration.
+     *
+     * The throttle interval is persisted in system parameters to allow convenient
+     * inspection and dynamic adjustment at runtime (e.g. for debugging or
+     * performance tuning), without requiring a rebuild or restart.
+     *
+     * Note that this function only updates the persisted configuration value;
+     * the actual throttling behavior is applied during the moving phase when
+     * processing pointer events based on this parameter.
+     *
+     * @param throttleIntervalUs Throttle interval for pointer events in the moving
+     *                           phase, in microseconds.
+     */
+    static void SaveMovingEventThrottleSystemConfig(uint32_t throttleIntervalUs);
+
+    /**
+     * @brief Load the current moving event throttle configuration.
+     *
+     * Loads the persisted system parameter to obtain the throttle interval used
+     * for limiting the processing frequency of pointer events during the moving
+     * phase.
+     *
+     * @return Throttle interval for pointer events in the moving phase, in
+     *         microseconds. Returns a default value (0) if the system parameter
+     *         is missing or invalid.
+     */
+    static uint32_t LoadMovingEventThrottleSystemConfig();
 
 private:
     struct MoveDragProperty {
@@ -279,9 +338,47 @@ private:
         WSRect originalRect_ = { 0, 0, 0, 0 };
         WSRect targetRect_ = { 0, 0, 0, 0 };
 
+        /**
+         * @brief The last reason for updating targetRect_.
+         */
+        SizeChangeReason targetRectChangeReason_ = SizeChangeReason::UNDEFINED;
+
+        /**
+         * @brief Indicates whether move resampling is currently active
+         *        for the ongoing drag-move operation.
+         */
+        bool isMoveResampleActive_ = false;
+
+        /**
+         * @brief Indicates whether the resample FPS range has been checked for the
+         *        current drag-move operation.
+         *
+         * The FPS range check is performed only once at the start of a drag-move
+         * and is only meaningful when isMoveResampleActive_ is true. During an
+         * ongoing drag-move, the display refresh rate is assumed to remain unchanged.
+         */
+        bool isResampleFpsRangeChecked_ = false;
+
         bool isEmpty() const
         {
             return (pointerId_ == -1 && originalPointerPosX_ == -1 && originalPointerPosY_ == -1);
+        }
+
+        void Reset()
+        {
+            pointerId_ = -1;
+            pointerType_ = -1;
+            originalPointerPosX_ = -1;
+            originalPointerPosY_ = -1;
+            originalPointerWindowX_ = -1;
+            originalPointerWindowY_ = -1;
+            scaleX_ = 1.0f;
+            scaleY_ = 1.0f;
+            originalRect_ = { 0, 0, 0, 0 };
+            targetRect_ = { 0, 0, 0, 0 };
+            targetRectChangeReason_ = SizeChangeReason::UNDEFINED;
+            isMoveResampleActive_ = false;
+            isResampleFpsRangeChecked_ = false;
         }
     };
 
@@ -298,6 +395,18 @@ private:
         bool isEmpty() const
         {
             return (pointerId_ == -1 && lastDownPointerPosX_ == -1 && lastDownPointerPosY_ == -1);
+        }
+
+        void Reset()
+        {
+            pointerId_ = -1;
+            pointerType_ = -1;
+            lastDownPointerPosX_ = -1;
+            lastDownPointerPosY_ = -1;
+            lastDownPointerWindowX_ = -1;
+            lastDownPointerWindowY_ = -1;
+            lastMovePointerPosX_ = -1;
+            lastMovePointerPosY_ = -1;
         }
     };
 
@@ -356,27 +465,36 @@ private:
      *
      * @param offsetX X offset from the move start.
      * @param offsetY Y offset from the move start.
+     * @param reason  The reason for the position change.
      */
-    void UpdateTargetRectWithOffset(int32_t offsetX, int32_t offsetY);
+    void UpdateTargetRectWithOffset(int32_t offsetX, int32_t offsetY, SizeChangeReason reason);
 
     /**
      * @brief Process a pointer event during window moving and update targetRect accordingly.
      *
-    * @param pointerEvent The current pointer event.
-    * @return TargetRectUpdateState The state indicating how targetRect was (or will be) updated.
+     * @param pointerEvent The current pointer event.
+     * @param reason       The reason for the size or position change.
+     * @return TargetRectUpdateMode The mode indicating how targetRect was (or will be) updated.
      */
-    TargetRectUpdateState UpdateTargetRectOnMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    TargetRectUpdateMode UpdateTargetRectOnMoveEvent(
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SizeChangeReason reason);
 
     /**
      * @brief Process a pointer event during window dragging and update targetRect accordingly.
      *
-    * @param pointerEvent The current pointer event.
-    * @return TargetRectUpdateState The state indicating how targetRect was (or will be) updated.
+     * @param pointerEvent The current pointer event.
+     * @param reason       The reason for the size or position change.
+     * @return TargetRectUpdateMode The mode indicating how targetRect was (or will be) updated.
      */
-    TargetRectUpdateState UpdateTargetRectOnDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    TargetRectUpdateMode UpdateTargetRectOnDragEvent(
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SizeChangeReason reason);
 
     bool EventDownInit(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    bool CalcMoveInputBarRect(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect);
+    float GetVirtualPixelRatio(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    WSRect CalcFirstOriginalRectPos(const WSRect& windowRect) const;
+    bool CalcMoveInputBarRect(
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const WSRect& originalRect, SizeChangeReason reason);
+    void ModifyWindowCoordinates(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void AdjustTargetPositionByAvailableArea(int32_t& moveDragFinalX, int32_t& moveDragFinalY);
     MoveDirection CalcMoveDirection(DisplayId lastDisplayId, DisplayId currentDisplayId);
 
@@ -421,6 +539,17 @@ private:
      * @param reason       The reason for the size or position change.
      */
     void ProcessMoveRectUpdate(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SizeChangeReason reason);
+
+    /**
+     * @brief Determine whether the current moving event should be throttled.
+     *
+     * Compares the timestamp of the current pointer event with that of the last
+     * processed moving event according to the configured throttle interval.
+     *
+     * @param pointerEvent The pointer event to evaluate.
+     * @return true if the event should be throttled; false otherwise.
+     */
+    bool ShouldThrottleMovingEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     /**
      * @brief Handles the moving event (pointer move).
@@ -501,7 +630,7 @@ private:
      * @return Ret          Function result or `defaultValue`
      */
     template <typename Ret, typename Func, typename... Args>
-    Ret CallWithSceneSession(Func func, Ret defaultValue, Args&& ...args) const;
+    Ret CallSceneSession(Func func, Ret defaultValue, Args&& ...args) const;
 
     /**
      * @brief Calls a SceneSession method if available.
@@ -515,48 +644,19 @@ private:
      * @param  args Arguments for the member function
      */
     template <typename Func, typename... Args>
-    void CallVoidFuncWithSceneSession(Func func, Args&& ...args) const;
-
-    /**
-     * @brief Gets the SessionProperty from the SceneSession.
-     *
-     * @return The SessionProperty; nullptr if session is null.
-     */
-    sptr<WindowSessionProperty> GetSessionProperty() const;
-
-    /**
-     * @brief Gets the global or window rect from the SceneSession.
-     *
-     * @return The global or window rect; empty rect if session is null.
-     */
-    WSRect GetGlobalOrWinRect() const;
-
-    /**
-     * @brief Gets the move rectangle for window drag from the SceneSession.
-     *
-     * @return The move rectangle; empty rect if session is null.
-     */
-    WSRect GetMoveRectForWindowDrag() const;
+    void CallSceneSessionVoid(Func func, Args&& ...args) const;
 
     /**
      * @brief Invoked after a move/drag operation updates the target rectangle.
      *
      * The callback provides the reason for the size or position change and the
-     * resulting update state of targetRect (unchanged, resample-required, or updated directly).
+     * resulting update mode of targetRect.
      *
      * @param reason The reason for the size or position change.
-     * @param state  The targetRect update state.
+     * @param mode   The targetRect update mode.
      */
     void OnMoveDragCallback(
-        SizeChangeReason reason, TargetRectUpdateState state = TargetRectUpdateState::UPDATED_DIRECTLY);
-
-    /**
-     * @brief Determines whether resampling operations should be performed for the given event.
-     *
-     * @param pointerEvent MMI input event.
-     * @return True if resampling is allowed; false otherwise.
-     */
-    bool ShouldResampleMoveEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+        SizeChangeReason reason, TargetRectUpdateMode mode = TargetRectUpdateMode::UPDATED_IMMEDIATELY);
 
     /**
      * @brief Check whether the pointer event is an invalid mouse event.
@@ -575,6 +675,85 @@ private:
      * @return true if synchronization is successful; false otherwise.
      */
     bool SyncPropertiesFromSceneSession();
+
+    /**
+     * @brief Determines whether resampling operations should be performed for the given pointer type.
+     *
+     * @param pointerType MMI pointer type.
+     * @return True if resampling is allowed; false otherwise.
+     */
+    bool ShouldOpenMoveResample(int32_t pointerType) const;
+
+    /**
+     * @brief Updates the move resampling activation state based on the current FPS.
+     *
+     * The display refresh rate during a drag-move operation may differ from the
+     * steady-state refresh rate observed under normal conditions. Therefore, the
+     * FPS range check is performed at most once per drag-move operation, during
+     * the first move resampling callback (i.e. the first resampling execution on
+     * vsync), when the effective drag-time FPS can be reliably observed.
+     *
+     * Move resampling is enabled only within a suitable FPS range:
+     * - At low FPS, the benefit of smoothing diminishes while additional filtering
+     *   introduces noticeable latency, hurting drag responsiveness.
+     * - At very high FPS, some devices may not finish rendering within a single
+     *   vsync period. When frames are skipped, resampling (which updates positions
+     *   on every vsync) can advance the target position faster than frames are
+     *   actually presented, amplifying visible jumps.
+     *
+     * If the FPS is outside the configured range, move resampling will be
+     * deactivated. During an ongoing drag-move, the display refresh rate is
+     * assumed to remain unchanged.
+     */
+    void UpdateResampleActivationByFps();
+
+    /**
+     * @brief Map a rectangle from the start display's coordinate space
+     *        into the coordinate space of the target display.
+     *
+     * The input rect (relativeStartRect) is expressed relative to the top-left
+     * corner of the display where dragging started. This function converts it
+     * into the coordinate system of targetDisplayId by applying the offset
+     * difference between the two displays in the legacy global coordinate system.
+     *
+     * @param relativeStartRect The rect defined in the start display's coordinate space.
+     * @param targetDisplayId   The display to which the rect should be mapped.
+     * @return WSRect           The mapped rect in the target display's coordinate space.
+     */
+    WSRect MapRectFromStartToTarget(const WSRect& relativeStartRect, DisplayId targetDisplayId) const;
+
+    /**
+     * @brief Map a rectangle from the target display's coordinate space
+     *        back into the coordinate space of the start display.
+     *
+     * The input rect (relativeTargetRect) is expressed relative to the top-left
+     * corner of targetDisplayId. This function converts it into the coordinate
+     * system of the start display using the display offset difference derived
+     * from the legacy global coordinate system.
+     *
+     * @param relativeTargetRect The rect defined in the target display's coordinate space.
+     * @param targetDisplayId    The display where the rect is currently defined.
+     * @return WSRect            The mapped rect in the start display's coordinate space.
+     */
+    WSRect MapRectFromTargetToStart(const WSRect& relativeTargetRect, DisplayId targetDisplayId) const;
+
+    /**
+     * @brief Get the Gravity based on the AreaType.
+     *
+     * @param type The AreaType indicating the hot area.
+     * @return The corresponding Gravity value.
+     */
+    Gravity GetGravity(AreaType type) const;
+
+    void SetOriginalMoveDragPos(int32_t pointerId, int32_t pointerType, int32_t pointerPosX,
+                                int32_t pointerPosY, int32_t pointerWindowX, int32_t pointerWindowY,
+                                const WSRect& winRect);
+    WSRect GetScreenRectById(DisplayId displayId);
+    void MoveDragInterrupted(bool resetPosition = true);
+    void UpdateMoveAvailableArea(DisplayId targetDisplayId);
+    void SetCurrentScreenProperty(DisplayId targetDisplayId);
+    void SetInputBarCrossAttr(MoveDirection moveDirection, DisplayId targetDisplayId);
+    void ClearSpecifyMoveStartDisplay();
 
     // Weak reference to the owning SceneSession.
     wptr<SceneSession> sceneSession_ = nullptr;
@@ -613,33 +792,17 @@ private:
         DRAG_LEFT_TOP_CORNER,
         DRAG_RIGHT_TOP_CORNER,
     };
-    const std::map<DragType, uint32_t> STYLEID_MAP = {
-        {DragType::DRAG_UNDEFINED,        MMI::MOUSE_ICON::DEFAULT},
-        {DragType::DRAG_BOTTOM_OR_TOP,    MMI::MOUSE_ICON::NORTH_SOUTH},
-        {DragType::DRAG_LEFT_OR_RIGHT,    MMI::MOUSE_ICON::WEST_EAST},
-        {DragType::DRAG_LEFT_TOP_CORNER,  MMI::MOUSE_ICON::NORTH_WEST_SOUTH_EAST},
-        {DragType::DRAG_RIGHT_TOP_CORNER, MMI::MOUSE_ICON::NORTH_EAST_SOUTH_WEST}
-    };
     Rect parentRect_ { 0, 0, 0, 0};
     MoveTempProperty moveTempProperty_;
 
     void UpdateHotAreaType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void ProcessWindowDragHotAreaFunc(bool flag, SizeChangeReason reason);
+    void ProcessWindowDragHotAreaFunc(uint32_t lastWindowDragHotAreaType, DisplayId lastHotAreaDisplayId,
+        SizeChangeReason reason);
     uint32_t windowDragHotAreaType_ = WINDOW_HOT_AREA_TYPE_UNDEFINED;
     NotifyWindowDragHotAreaFunc windowDragHotAreaFunc_;
     NotifyWindowPidChangeCallback pidChangeCallback_;
 
     std::optional<Gravity> preDragGravity_ = std::nullopt;
-    const std::map<AreaType, Gravity> GRAVITY_MAP = {
-        {AreaType::LEFT,          Gravity::TOP_RIGHT},
-        {AreaType::TOP,           Gravity::BOTTOM_LEFT},
-        {AreaType::RIGHT,         Gravity::TOP_LEFT},
-        {AreaType::BOTTOM,        Gravity::TOP_LEFT},
-        {AreaType::LEFT_TOP,      Gravity::BOTTOM_RIGHT},
-        {AreaType::RIGHT_TOP,     Gravity::BOTTOM_LEFT},
-        {AreaType::RIGHT_BOTTOM,  Gravity::TOP_LEFT},
-        {AreaType::LEFT_BOTTOM,   Gravity::TOP_RIGHT}
-    };
 
     /*
      * Cross Display Move Drag
@@ -647,7 +810,6 @@ private:
     bool moveDragIsInterrupted_ = false;
     DisplayId moveDragStartDisplayId_ = DISPLAY_ID_INVALID;
     DisplayId moveDragEndDisplayId_ = DISPLAY_ID_INVALID;
-    uint64_t initParentNodeId_ = -1ULL;
     DisplayId hotAreaDisplayId_ = 0;
     int32_t originalDisplayOffsetX_ = 0;
     int32_t originalDisplayOffsetY_ = 0;
@@ -684,12 +846,52 @@ private:
     MoveResampler moveResampler_;
 
     /**
-     * @brief Whether move-resample is enabled for window moving.
+     * @brief Whether move resampling is enabled for window moving.
      *
      * Note that even when this flag is true, resampling only
-     * occurs if @ref ShouldResampleMoveEvent also returns true.
+     * occurs if ShouldOpenMoveResample also returns true.
      */
     bool enableMoveResample_ = false;
+
+    /**
+     * @brief Optional minimum FPS threshold for move resampling.
+     *
+     * Move resampling is enabled only when the current frame rate is greater
+     * than or equal to this value. std::nullopt means no minimum FPS limit.
+     */
+    std::optional<uint32_t> resampleMinFps_ = std::nullopt;
+
+    /**
+     * @brief Optional maximum FPS threshold for move resampling.
+     *
+     * Move resampling is enabled only when the current frame rate is less
+     * than or equal to this value. std::nullopt means no maximum FPS limit.
+     */
+    std::optional<uint32_t> resampleMaxFps_ = std::nullopt;
+
+    /**
+     * @brief Throttle interval for pointer events in the moving phase (us).
+     *
+     * Defines the minimum time interval between consecutive handling of pointer
+     * events during the moving phase of a drag operation. This is necessary when
+     * the input device reports events at a very high frequency (e.g., gaming
+     * mice at 1000 Hz), to prevent excessively frequent window position updates,
+     * reduce system load, and maintain smooth dragging behavior.
+     *
+     * An empirical value around 1500 us is usually sufficient. A value of 0
+     * disables throttling.
+     */
+    uint32_t movingEventThrottleIntervalUs_ = 0;
+
+    /**
+     * @brief Timestamp of the last processed pointer event in the moving phase (us).
+     *
+     * Records the action time of the most recently handled pointer event during
+     * the moving phase of a drag operation. This is used in combination with
+     * `movingEventThrottleIntervalUs_` to determine whether a new event should
+     * be processed or skipped for throttling purposes.
+     */
+    int64_t lastMovingEventActionTimeUs_ = 0;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_MOVE_DRAG_CONTROLLER_H

@@ -37,8 +37,11 @@ class SecondaryFoldSensorManager : public RefBase {
 public:
     void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
     void SetSensorFoldStateManager(sptr<SensorFoldStateManager> sensorFoldStateManager);
+    void SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler);
     void RegisterPostureCallback();
     void RegisterHallCallback();
+    void UnRegisterPostureCallback();
+    void UnRegisterHallCallback();
     void HandlePostureData(const SensorEvent * const event);
     void HandleHallDataExt(const SensorEvent * const event);
     void PowerKeySetScreenActiveRect();

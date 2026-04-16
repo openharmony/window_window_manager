@@ -28,6 +28,7 @@
 #include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
+#include "mock_window_session_impl.h"
 #include "mock_window_session_property.h"
 #include "parameters.h"
 #include "window_helper.h"
@@ -73,6 +74,7 @@ void WindowSessionImplTest::TearDown()
 {
     usleep(WAIT_SYNC_IN_NS);
     abilityContext_ = nullptr;
+}
 }
 
 namespace {
@@ -581,6 +583,10 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus, TestSize.Level1)
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
 
+    info->isSameCallingPid_ = false;
+    res = window->UpdateFocus(info, false);
+    EXPECT_EQ(res, WSError::WS_OK);
+
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFocus end";
 }
 
@@ -595,15 +601,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus01, TestSize.Level1)
     option->SetWindowName("UpdateFocus01");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
-    window->updateFocusTimeStamp_.store(2);
+    auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr();
     info->isSyncNotify_ = true;
-    info->timeStamp_ = 1;
+    info->timeStamp_ = currentTimeStamp - 1000;
     WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 2);
-    info->timeStamp_ = 3;
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp);
+    info->timeStamp_ = currentTimeStamp + 1000;
     res = window->UpdateFocus(info, false);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 3);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
 }
@@ -623,13 +631,24 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus02, TestSize.Level1)
     ASSERT_NE(window1, nullptr);
     window->property_->SetPersistentId(1);
     window1->property_->SetPersistentId(2);
-    window->updateFocusTimeStamp_.store(2);
-    auto info = sptr<FocusNotifyInfo>::MakeSptr(3, window->GetWindowId(), window1->GetWindowId(), true);
+    auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
+    auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(),
+        window1->GetWindowId(), true);
     WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 3);
-    info->timeStamp_ = 4;
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
+    info->timeStamp_ = currentTimeStamp + 2000;
     res = window->UpdateFocus(info, false);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 4);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
+    info->timeStamp_ = currentTimeStamp + 3000;
+    info->unfocusWindowId_ = 300;
+    res = window->UpdateFocus(info, true);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 3000);
+    info->timeStamp_ = currentTimeStamp + 4000;
+    info->focusWindowId_ = 300;
+    res = window->UpdateFocus(info, false);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 4000);
     EXPECT_EQ(res, WSError::WS_OK);
 }
 
@@ -853,43 +872,6 @@ HWTEST_F(WindowSessionImplTest, SetFocusable, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTouchable
- * @tc.desc: SetTouchable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, SetTouchable, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTouchable start";
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("SetTouchable");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
-    ASSERT_NE(nullptr, session);
-    ASSERT_EQ(WMError::WM_OK, window->Create(nullptr, session));
-    ASSERT_NE(window->property_, nullptr);
-    window->hostSession_ = session;
-    window->property_->SetPersistentId(1);
-    ASSERT_FALSE(window->IsWindowSessionInvalid());
-    WMError res = window->SetTouchable(true);
-    ASSERT_EQ(res, WMError::WM_OK);
-    ASSERT_NE(window->property_, nullptr);
-    ASSERT_TRUE(window->property_->touchable_);
-    ASSERT_EQ(WMError::WM_OK, window->Destroy());
-
-    // session is null
-    window = sptr<WindowSessionImpl>::MakeSptr(option);
-    ASSERT_EQ(WMError::WM_OK, window->Create(abilityContext_, nullptr));
-    res = window->SetTouchable(true);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    res = window->SetTouchable(false);
-    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
-    ASSERT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: SetTouchable end";
-}
-
-/**
  * @tc.name: SetBrightness01
  * @tc.desc: SetBrightness
  * @tc.type: FUNC
@@ -1054,7 +1036,6 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, TestSize.Level1)
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("RegisterListener01");
     sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = new (std::nothrow) SessionMocker(sessionInfo);
     ASSERT_NE(nullptr, session);
@@ -1062,29 +1043,24 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, TestSize.Level1)
     window->hostSession_ = session;
     ASSERT_NE(window->property_, nullptr);
     window->property_->SetPersistentId(1);
-
     sptr<IWindowLifeCycle> listener = nullptr;
     WMError res = window->RegisterLifeCycleListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterLifeCycleListener(listener);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
     sptr<IOccupiedAreaChangeListener> listener1 = nullptr;
     res = window->RegisterOccupiedAreaChangeListener(listener1);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterOccupiedAreaChangeListener(listener1);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
     sptr<IWindowChangeListener> listener2 = nullptr;
     res = window->RegisterWindowChangeListener(listener2);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowChangeListener(listener2);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
-
     sptr<IDialogDeathRecipientListener> listener3 = nullptr;
     window->RegisterDialogDeathRecipientListener(listener3);
     window->UnregisterDialogDeathRecipientListener(listener3);
-
     sptr<IDialogTargetTouchListener> listener4 = nullptr;
     res = window->RegisterDialogTargetTouchListener(listener4);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
@@ -1099,6 +1075,16 @@ HWTEST_F(WindowSessionImplTest, RegisterListener01, TestSize.Level1)
     res = window->RegisterWindowCrossAxisListener(listener6);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     res = window->UnregisterWindowCrossAxisListener(listener6);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    sptr<IParentWindowSizeChangeListener> listener7 = nullptr;
+    res = window->RegisterParentWindowSizeChangeListener(listener7);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterParentWindowSizeChangeListener(listener7);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    sptr<IParentWindowStatusChangeListener> listener8 = nullptr;
+    res = window->RegisterParentWindowStatusChangeListener(listener8);
+    ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
+    res = window->UnregisterParentWindowStatusChangeListener(listener8);
     ASSERT_EQ(res, WMError::WM_ERROR_NULLPTR);
     ASSERT_EQ(WMError::WM_OK, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterListener01 end";
@@ -2400,6 +2386,80 @@ HWTEST_F(WindowSessionImplTest, GetStatusBarHeight, TestSize.Level1)
 
 /**
  * @tc.name: GetWindowStatusInner
+ * @tc.desc: GetStatusBarHeightFunOptimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, GetWindowStatusInner01, TestSize.Level1)
+{
+    WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED;
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetWindowStatusInner");
+    sptr<MockWindowSessionImpl> window = sptr<MockWindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionProperty> property_ = sptr<WindowSessionProperty>::MakeSptr();
+
+    //case:mode == WindowMode::WINDOW_MODE_FLOATING&&property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR
+    window->property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    mode = WindowMode::WINDOW_MODE_FLOATING;
+    auto result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_MAXIMIZE);
+
+    //case:mode == WindowMode::WINDOW_MODE_FLOATING&&property_->GetMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR
+    window->property_->SetMaximizeMode(MaximizeMode::MODE_END);
+    mode = WindowMode::WINDOW_MODE_FLOATING;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_FLOATING);
+
+    //case:mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
+    //case1:mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY
+    mode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_SPLITSCREEN);
+
+    //case2:mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY
+    mode = WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_SPLITSCREEN);
+
+    //case:mode == WindowMode::WINDOW_MODE_FULLSCREEN
+    // case1:!IsPcOrPadFreeMultiWindowMode
+    mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::INVALID_WINDOW;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_FULLSCREEN);
+
+    // case2:!GetTargetAPIVersion() >= 14
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->targetAPIVersion_ = 12;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_FULLSCREEN);
+
+    // case3:IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14
+    EXPECT_CALL(*window, GetImmersiveModeEnabledState())
+    .Times(1)
+    .WillRepeatedly(Return(true));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->targetAPIVersion_ = 14;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_FULLSCREEN);
+
+    // case4:IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14
+    EXPECT_CALL(*window, GetImmersiveModeEnabledState())
+    .Times(1)
+    .WillRepeatedly(Return(false));
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    window->targetAPIVersion_ = 14;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_MAXIMIZE);
+
+    //case:state_ == WindowState::STATE_HIDDEN
+    mode = WindowMode::WINDOW_MODE_UNDEFINED;
+    window->state_ = WindowState::STATE_HIDDEN;
+    result = window->GetWindowStatusInner(mode);
+    EXPECT_EQ(result, WindowStatus::WINDOW_STATUS_MINIMIZE);
+}
+
+/**
+ * @tc.name: GetWindowStatusInner
  * @tc.desc: GetWindowStatusInner test
  * @tc.type: FUNC
  */
@@ -2785,6 +2845,177 @@ HWTEST_F(WindowSessionImplTest, GetAttachStateSyncResult, TestSize.Level1)
     window->GetAttachStateSyncResult(true, false);
     EXPECT_TRUE(g_errLog.find("get attach state sync result") != std::string::npos);
 }
+
+/**
+ * @tc.name: NotifyPrepareCloseFloatView
+ * @tc.desc: NotifyPrepareCloseFloatView Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, NotifyPrepareCloseFloatView, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyPrepareCloseFloatView start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPrepareCloseFloatView");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    
+    SessionInfo sessionInfo = { "NotifyPrepareCloseFloatView", "NotifyPrepareCloseFloatView",
+        "NotifyPrepareCloseFloatView" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    
+    window->property_->SetPersistentId(1);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    
+    window->NotifyPrepareCloseFloatView();
+    
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    EXPECT_CALL(*(session), NotifyFloatViewPrepareClose()).Times(1);
+    window->NotifyPrepareCloseFloatView();
+    WindowSessionImpl::windowSessionMap_.clear();
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: NotifyPrepareCloseFloatView end";
+}
+
+/**
+ * @tc.name: UpdateFloatView
+ * @tc.desc: UpdateFloatView Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateFloatView, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFloatView start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateFloatView");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    
+    SessionInfo sessionInfo = { "UpdateFloatView", "UpdateFloatView", "UpdateFloatView" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    
+    FloatViewTemplateInfo fvTemplateInfo;
+    fvTemplateInfo.template_ = 1;
+    fvTemplateInfo.visibleInApp_ = true;
+    fvTemplateInfo.isBind_ = false;
+    fvTemplateInfo.bindWindowId_ = INVALID_WINDOW_ID;
+    fvTemplateInfo.rect_ = {0, 0, 100, 100};
+    fvTemplateInfo.showWhenCreate_ = true;
+    
+    WMError res = window->UpdateFloatView(fvTemplateInfo);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    window->property_->SetPersistentId(1);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    
+    res = window->UpdateFloatView(fvTemplateInfo);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    EXPECT_CALL(*(session), UpdateFloatView(_)).WillOnce(Return(WMError::WM_OK));
+    res = window->UpdateFloatView(fvTemplateInfo);
+    ASSERT_EQ(res, WMError::WM_OK);
+    
+    EXPECT_CALL(*(session), UpdateFloatView(_)).WillOnce(Return(WMError::WM_ERROR_INVALID_WINDOW));
+    res = window->UpdateFloatView(fvTemplateInfo);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    WindowSessionImpl::windowSessionMap_.clear();
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFloatView end";
+}
+
+/**
+ * @tc.name: RestoreFloatViewMainWindow
+ * @tc.desc: RestoreFloatViewMainWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, RestoreFloatViewMainWindow, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RestoreFloatViewMainWindow start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("RestoreFloatViewMainWindow");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    
+    SessionInfo sessionInfo = { "RestoreFloatViewMainWindow", "RestoreFloatViewMainWindow",
+        "RestoreFloatViewMainWindow" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    
+    std::shared_ptr<AAFwk::WantParams> wantParams = std::make_shared<AAFwk::WantParams>();
+    
+    WMError res = window->RestoreFloatViewMainWindow(wantParams);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    window->property_->SetPersistentId(1);
+    window->property_->SetParentPersistentId(2);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    
+    res = window->RestoreFloatViewMainWindow(wantParams);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    sptr<WindowOption> parentOption = sptr<WindowOption>::MakeSptr();
+    parentOption->SetWindowName("RestoreFloatViewMainWindow_Parent");
+    sptr<WindowSessionImpl> parentWindow = sptr<WindowSessionImpl>::MakeSptr(parentOption);
+    parentWindow->property_->SetPersistentId(2);
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(parentWindow->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(parentWindow->GetWindowId(), parentWindow)));
+    
+    res = window->RestoreFloatViewMainWindow(wantParams);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    EXPECT_CALL(*(session), RestoreFloatViewMainWindow(_)).WillOnce(Return(WMError::WM_OK));
+    res = window->RestoreFloatViewMainWindow(wantParams);
+    ASSERT_EQ(res, WMError::WM_OK);
+    
+    EXPECT_CALL(*(session), RestoreFloatViewMainWindow(_)).WillOnce(Return(WMError::WM_ERROR_INVALID_WINDOW));
+    res = window->RestoreFloatViewMainWindow(wantParams);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    WindowSessionImpl::windowSessionMap_.clear();
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: RestoreFloatViewMainWindow end";
+}
+
+/**
+ * @tc.name: UpdateFloatShowWhenCreate
+ * @tc.desc: UpdateFloatShowWhenCreate Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest, UpdateFloatShowWhenCreate, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFloatShowWhenCreate start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateFloatShowWhenCreate");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    WMError res = window->UpdateFloatShowWhenCreate(true);
+    ASSERT_EQ(res, WMError::WM_ERROR_INVALID_WINDOW);
+    
+    SessionInfo sessionInfo = { "UpdateFloatShowWhenCreate", "UpdateFloatShowWhenCreate", "UpdateFloatShowWhenCreate" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    ASSERT_NE(nullptr, session);
+    
+    window->property_->SetPersistentId(1);
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(window->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(window->GetWindowId(), window)));
+    window->hostSession_ = session;
+    window->state_ = WindowState::STATE_CREATED;
+    
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FB);
+    window->UpdateFloatShowWhenCreate(true);
+    EXPECT_EQ(true, window->property_->GetFbTemplateInfo().showWhenCreate_);
+
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_FV);
+    window->UpdateFloatShowWhenCreate(true);
+    EXPECT_EQ(true, window->property_->GetFvTemplateInfo().showWhenCreate_);
+
+    WindowSessionImpl::windowSessionMap_.clear();
+    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFloatShowWhenCreate end";
 }
 } // namespace
 } // namespace Rosen

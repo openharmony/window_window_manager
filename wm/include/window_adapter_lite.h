@@ -32,7 +32,7 @@ public:
     WMSDeathRecipient(const int32_t userId = INVALID_USER_ID);
     virtual void OnRemoteDied(const wptr<IRemoteObject>& wptrDeath) override;
 private:
-    int32_t userId_;
+    const int32_t userId_;
 };
 
 class WindowAdapterLite : public RefBase {
@@ -55,11 +55,11 @@ public:
     virtual WMError CheckWindowId(int32_t windowId, int32_t& pid);
     virtual WMError GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos);
     virtual WMError UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease);
-    virtual void ClearWindowAdapter();
+    virtual void ClearWMSProxy();
     virtual WMError GetWindowModeType(WindowModeType& windowModeType);
+    virtual WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError GetMainWindowInfos(int32_t topNum, std::vector<MainWindowInfo>& topNInfo);
-    virtual WMError UpdateAnimationSpeedWithPid(pid_t pid, float speed);
     virtual WMError GetCallingWindowInfo(CallingWindowInfo& callingWindowInfo);
     WMError RegisterWMSConnectionChangedListener(const WMSConnectionChangedCallbackFunc& callbackFunc);
     WMError UnregisterWMSConnectionChangedListener();
@@ -68,6 +68,7 @@ public:
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds);
     virtual WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds);
     virtual WMError GetWindowStyleType(WindowStyleType& windowStyleType);
+    virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled);
     virtual WMError TerminateSessionByPersistentId(int32_t persistentId);
     virtual WMError CloseTargetFloatWindow(const std::string& bundleName);
     virtual WMError CloseTargetPiPWindow(const std::string& bundleName);
@@ -82,6 +83,10 @@ public:
     virtual WMError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
        std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap);
+    void RegisterWindowManagerAgentWhenSCBFault(WindowManagerAgentType type,
+        const sptr<IWindowManagerAgent>& windowManagerAgent);
+    bool IsWindowManagerServiceProxyValid();
+    bool IsMockSMSProxyAlive();
 
 private:
     friend class sptr<WindowAdapterLite>;
@@ -101,23 +106,28 @@ private:
     /*
      * Multi user and multi screen
      */
-    int32_t userId_;
+    const int32_t userId_;
     static std::unordered_map<int32_t, sptr<WindowAdapterLite>> windowAdapterLiteMap_;
     static std::mutex windowAdapterLiteMapMutex_;
     void OnUserSwitch();
     void ReregisterWindowManagerLiteAgent();
+    void ReregisterWindowManagerFaultAgent(const sptr<IWindowManagerLite>& proxy);
+    void RegisterUserSwitchCallback();
 
     sptr<IWindowManagerLite> GetWindowManagerServiceProxy() const;
 
-    mutable std::mutex mutex_;
+    mutable std::mutex wmsProxyMutex_;
     sptr<IWindowManagerLite> windowManagerServiceProxy_ = nullptr;
     sptr<WMSDeathRecipient> wmsDeath_ = nullptr;
     bool isProxyValid_ = false;
     bool isRegisteredUserSwitchListener_ = false;
-    // above guarded by mutex_
+    // above guarded by wmsProxyMutex_
 
     std::mutex windowManagerLiteAgentMapMutex_;
     std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerLiteAgentMap_;
+
+    std::mutex windowManagerLiteFaultAgentMapMutex_;
+    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerLiteFaultAgentMap_;
 };
 } // namespace Rosen
 } // namespace OHOS

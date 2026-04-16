@@ -643,21 +643,6 @@ HWTEST_F(WindowSessionPropertyTest, SetFocusable, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTouchable
- * @tc.desc: SetTouchable and GetTouchable to check the value
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, SetTouchable, TestSize.Level1)
-{
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    property->SetTouchable(true);
-    ASSERT_EQ(property->GetTouchable(), true);
-    property->SetTouchable(false);
-    ASSERT_EQ(property->GetTouchable(), false);
-}
-
-/**
  * @tc.name: SetForceHide
  * @tc.desc: SetForceHide and GetForceHide to check the value
  * @tc.type: FUNC
@@ -1626,6 +1611,22 @@ HWTEST_F(WindowSessionPropertyTest, GetIsAtomicService, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetCombinedCompatibleConfig
+ * @tc.desc: SetCombinedCompatibleConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetCombinedCompatibleConfig, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    std::vector<std::string> config = {"logicalDeviceConfig", "arkUIAndWebConfig"};
+    property->SetCombinedCompatibleConfig(config);
+    auto result = property->GetCombinedCompatibleConfig();
+    EXPECT_EQ(result.size(), config.size());
+    bool isEqual = std::equal(result.begin(), result.end(), config.begin());
+    EXPECT_TRUE(isEqual);
+}
+
+/**
  * @tc.name: SetPcAppInpadCompatibleMode
  * @tc.desc: SetPcAppInpadCompatibleMode
  * @tc.type: FUNC
@@ -1683,7 +1684,7 @@ HWTEST_F(WindowSessionPropertyTest, SetMobileAppInPadLayoutFullScreen, TestSize.
 
 /**
  * @tc.name: UnmarshallingFbTemplateInfoTest
- * @tc.desc: UnmarshallingFbTemplateInfoTest
+ * @tc.desc: Test UnmarshallingFbTemplateInfo
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Level1)
@@ -1693,13 +1694,14 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
 
     Parcel parcel;
     std::shared_ptr<Media::PixelMap> icon;
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red"}, icon};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", 0, true, false, 0, true}, icon, "test"};
     property->UnmarshallingFbTemplateInfo(parcel, property);
     ASSERT_NE(property->GetFbTemplateInfo().template_, fbTemplateInfo.template_);
     ASSERT_NE(property->GetFbTemplateInfo().title_, fbTemplateInfo.title_);
     ASSERT_NE(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
     ASSERT_NE(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
+    ASSERT_EQ(property->GetFbTemplateInfo().textUpdateAnimationType_, fbTemplateInfo.textUpdateAnimationType_);
 
     parcel.WriteParcelable(&fbTemplateInfo);
     property->UnmarshallingFbTemplateInfo(parcel, property);
@@ -1708,6 +1710,7 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFbTemplateInfoTest, TestSize.Le
     ASSERT_EQ(property->GetFbTemplateInfo().content_, fbTemplateInfo.content_);
     ASSERT_EQ(property->GetFbTemplateInfo().backgroundColor_, fbTemplateInfo.backgroundColor_);
     ASSERT_EQ(property->GetFbTemplateInfo().icon_, fbTemplateInfo.icon_);
+    ASSERT_EQ(property->GetFbTemplateInfo().textUpdateAnimationType_, fbTemplateInfo.textUpdateAnimationType_);
 }
 
 /**
@@ -1765,6 +1768,30 @@ HWTEST_F(WindowSessionPropertyTest, GetRotationLocked, TestSize.Level0)
     EXPECT_EQ(property->GetRotationLocked(), true);
     property->isRotationLock_ = false;
     EXPECT_EQ(property->GetRotationLocked(), false);
+}
+
+/**
+ * @tc.name: FrameNum
+ * @tc.desc: Test FrameNum
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, FrameNum, TestSize.Level0)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetFrameNum(3);
+    EXPECT_EQ(property->GetFrameNum(), 3);
+}
+
+/**
+ * @tc.name: Prelaunch
+ * @tc.desc: Test Prelaunch
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, Prelaunch, TestSize.Level0)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetPrelaunch(true);
+    EXPECT_TRUE(property->IsPrelaunch());
 }
 
 /**
@@ -2091,6 +2118,104 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig08, TestSize.Level1)
 
     bool result = AppForceLandscapeConfig::IsSameForceSplitConfig(preconfig, config);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SetAppBufferReady
+ * @tc.desc: SetAppBufferReady
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetAppBufferReady, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool appBufferReady = true;
+    property->SetAppBufferReady(appBufferReady);
+    auto result = property->IsAppBufferReady();
+    ASSERT_EQ(result, appBufferReady);
+}
+
+/**
+ * @tc.name: SetZLevelAboveParentLoosened
+ * @tc.desc: test SetZLevelAboveParentLoosened and IsSubWindowZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetZLevelAboveParentLoosened, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetZLevelAboveParentLoosened(true);
+    ASSERT_EQ(true, property->IsSubWindowZLevelAboveParentLoosened());
+    property->SetZLevelAboveParentLoosened(false);
+    ASSERT_EQ(false, property->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: SetZLevelAboveParentLoosenedDefault
+ * @tc.desc: test default value of ZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetZLevelAboveParentLoosenedDefault, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    ASSERT_EQ(false, property->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: CopyFromZLevelAboveParentLoosened
+ * @tc.desc: test CopyFrom with ZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, CopyFromZLevelAboveParentLoosened, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetZLevelAboveParentLoosened(true);
+
+    WindowSessionProperty targetProperty;
+    targetProperty.CopyFrom(property);
+    ASSERT_EQ(true, targetProperty.IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: MarshallingUnmarshallingZLevelAboveParentLoosened
+ * @tc.desc: test Marshalling and Unmarshalling with ZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingUnmarshallingZLevelAboveParentLoosened, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    property->SetZLevelAboveParentLoosened(true);
+    property->SetPersistentId(100);
+
+    Parcel parcel;
+    bool ret = property->Marshalling(parcel);
+    ASSERT_EQ(true, ret);
+
+    sptr<WindowSessionProperty> targetProperty = property->Unmarshalling(parcel);
+    ASSERT_NE(targetProperty, nullptr);
+    ASSERT_EQ(true, targetProperty->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: UnmarshallingFvTemplateInfo
+ * @tc.desc: UnmarshallingFvTemplateInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingFvTemplateInfo, TestSize.Level1)
+{
+    Parcel parcel = Parcel();
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    EXPECT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_FV);
+    EXPECT_EQ(WindowType::WINDOW_TYPE_FV, property->GetWindowType());
+    FloatViewTemplateInfo fvTemplateInfo;
+    fvTemplateInfo.bindWindowId_ = 1;
+    property->SetFvTemplateInfo(fvTemplateInfo);
+    property->MarshallingFvTemplateInfo(parcel);
+    property->UnmarshallingFvTemplateInfo(parcel, property);
+    EXPECT_EQ(property->GetFvTemplateInfo().bindWindowId_, fvTemplateInfo.bindWindowId_);
 }
 } // namespace
 } // namespace Rosen

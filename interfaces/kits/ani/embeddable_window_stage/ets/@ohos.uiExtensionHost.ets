@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
+import image from '@ohos.multimedia.image';
 import { Callback } from '@ohos.base';
 
 /**
@@ -110,6 +111,9 @@ namespace uiExtensionHost {
     public native createSubWindowWithOptions(nativeObj: long, name: string,
       subWindowOptions: window.SubWindowOptions, followCreatorLifecycle: boolean): window.Window;
     public native hideNonSecureWindows(nativeObj: long, shouldHide: boolean): int;
+    public native snapshot(nativeObj: long): image.PixelMap;
+    public native snapshotSync(nativeObj: long): image.PixelMap;
+    public native snapshotIgnorePrivacy(nativeObj: long): image.PixelMap;
 
     get properties(): UIExtensionHostWindowProxyProperties {
       let property = new UIEProperties();
@@ -150,7 +154,7 @@ namespace uiExtensionHost {
 
     public getWindowAvoidArea(type: window.AvoidAreaType): window.AvoidArea {
       let area: window.AvoidArea = new UIEAvoidArea();
-      let ret = this.getWindowAvoidArea(this.nativeObj, type as int, area as object);
+      let ret = this.getWindowAvoidArea(this.nativeObj, type, area as object);
       if (ret !== WmErrorCode.WM_OK) {
         hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `getWindowAvoidArea failed, ret: ${ret}`);
       }
@@ -164,9 +168,9 @@ namespace uiExtensionHost {
           if (ret !== WmErrorCode.WM_OK) {
             hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `setWaterMarkFlag failed, ret: ${ret}`);
           }
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
           resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
           reject(err as BusinessError);
         });
       });
@@ -179,9 +183,9 @@ namespace uiExtensionHost {
           if (ret !== WmErrorCode.WM_OK) {
             hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `hidePrivacyContentForHost failed, ret: ${ret}`);
           }
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
           resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
           reject(err as BusinessError);
         });
       });
@@ -194,9 +198,9 @@ namespace uiExtensionHost {
           if (ret !== WmErrorCode.WM_OK) {
             hilog.error(WMS_UIEXT, WMS_UIEXT_TAG, `hideNonSecureWindows failed, ret: ${ret}`);
           }
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
           resolve(undefined);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
           reject(err as BusinessError);
         });
       });
@@ -206,9 +210,9 @@ namespace uiExtensionHost {
       return new Promise<window.Window>((resolve: (value: window.Window) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): window.Window => {
           return this.createSubWindowWithOptions(this.nativeObj, name, subWindowOptions, false);
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             resolve(ret as window.Window);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             reject(err as BusinessError);
         });
       });
@@ -219,10 +223,40 @@ namespace uiExtensionHost {
       return new Promise<window.Window>((resolve: (value: window.Window) => void, reject: (error: BusinessError) => void) => {
         taskpool.execute((): window.Window => {
           return this.createSubWindowWithOptions(this.nativeObj, name, subWindowConfig, followCreatorLifecycle);
-        }).then((ret: NullishType) => {
-            resolve(ret as window.Window);
-        }).catch((err: NullishType) => {
-            reject(err as BusinessError);
+        }).then((ret: Any) => {
+          resolve(ret as window.Window);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public snapshot(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
+          reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): image.PixelMap => {
+          return this.snapshot(this.nativeObj);
+        }).then((ret: Any) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public snapshotSync(): image.PixelMap {
+      return this.snapshotSync(this.nativeObj);
+    }
+
+    public snapshotIgnorePrivacy(): Promise<image.PixelMap> {
+      return new Promise<image.PixelMap>((resolve: (value: image.PixelMap) => void,
+          reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): image.PixelMap => {
+          return this.snapshotIgnorePrivacy(this.nativeObj);
+        }).then((ret: Any) => {
+          resolve(ret as image.PixelMap);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
         });
       });
     }
@@ -241,6 +275,9 @@ namespace uiExtensionHost {
     setWaterMarkFlag(enable: boolean): Promise<void>;
     hidePrivacyContentForHost(shouldHide: boolean): Promise<void>;
     hideNonSecureWindows(shouldHide: boolean): Promise<void>;
+    snapshot(): Promise<image.PixelMap>;
+    snapshotSync(): image.PixelMap;
+    snapshotIgnorePrivacy(): Promise<image.PixelMap>;
     createSubWindowWithOptions(name: string, subWindowOptions: window.SubWindowOptions): Promise<window.Window>;
     createSubWindowWithOptions(name: string, subWindowConfig: window.SubWindowOptions,
       followCreatorLifecycle: boolean): Promise<window.Window>;

@@ -133,6 +133,15 @@ public:
         std::vector<ScreenId>& mirrorScreenIds, ScreenId& screenGroupId);
 
     /**
+     * @brief Query screens can be jointly recorded
+     *
+     * @param ScreenIdList Capturing display ids.
+     * @param rect Rect which can be recorded.
+     * @return DM_OK means query success, others means query failed.
+     */
+    DMError QueryMultiScreenCapture(const std::vector<ScreenId>& displayIdList, DMRect& rect);
+
+    /**
      * @brief Make screen as mirror-screen for region of main screen.
      *
      * @param mainScreenId Main screen id.
@@ -279,7 +288,7 @@ public:
      * @param screenId Indicates the screen id of the virtual screen.
      * @return DM_OK means destroy success, others means destroy failed.
      */
-    DMError DestroyVirtualScreen(ScreenId screenId);
+    DMError DestroyVirtualScreen(ScreenId screenId, bool isCallingByThirdParty = false);
 
     /**
      * @brief Set surface for the virtual screen.

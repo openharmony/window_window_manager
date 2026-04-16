@@ -233,14 +233,13 @@ HWTEST_F(WindowSceneSessionImplTest2, SetNeedDefaultAnimation01, TestSize.Level1
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetNeedDefaultAnimation01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
-    auto ret = true;
     window->property_->SetPersistentId(1);
 
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
     window->SetNeedDefaultAnimation(false);
-    ASSERT_TRUE(ret);
+    ASSERT_FALSE(window->enableDefaultAnimation_);
 }
 
 /**
@@ -1721,6 +1720,7 @@ HWTEST_F(WindowSceneSessionImplTest2, NotifyPrepareClosePiPWindow01, TestSize.Le
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSession->hostSession_ = session;
     ASSERT_EQ(WMError::WM_OK, windowSceneSession->NotifyPrepareClosePiPWindow());
+    ASSERT_EQ(WMError::WM_OK, windowSceneSession->NotifyPrepareClosePiPWindow(true));
 }
 
 /**
@@ -2460,7 +2460,6 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, TestSize.Level1)
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
     windowSceneSessionImpl->context_ = abilityContext_;
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     EXPECT_CALL(m->Mock(), IsWindowRectAutoSave(_, _, _)).WillRepeatedly(Return(WMError::WM_OK));
     enabled = false;
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
@@ -2478,16 +2477,6 @@ HWTEST_F(WindowSceneSessionImplTest2, IsWindowRectAutoSave, TestSize.Level1)
     windowSceneSessionImpl->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
     ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_CALLING, ret);
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
-    EXPECT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT, ret);
-    windowSceneSessionImpl->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
-    windowSceneSessionImpl->property_->SetPcAppInpadCompatibleMode(true);
-    ret = windowSceneSessionImpl->IsWindowRectAutoSave(enabled);
-    EXPECT_EQ(WMError::WM_OK, ret);
     GTEST_LOG_(INFO) << "WindowSceneSessionImplTest2: IsWindowRectAutoSave end";
 }
 

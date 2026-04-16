@@ -26,8 +26,8 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "pixel_map.h"
 #include "wm_animation_common.h"
+#include "pixel_map.h"
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -48,14 +48,17 @@ using ScreenId = uint64_t;
 constexpr int32_t ROTATE_ANIMATION_DURATION = 400;
 constexpr int32_t INVALID_SESSION_ID = 0;
 constexpr int64_t INVALID_TIME_STAMP = 0;
+constexpr float INVALID_SCALE = 0;
 constexpr int32_t MIN_REQUEST_ID_FROM_ABILITY = 1;
 constexpr int32_t DEFAULT_REQUEST_FROM_SCB_ID = -1;
 constexpr int32_t WINDOW_SUPPORT_MODE_MAX_SIZE = 4;
+constexpr uint32_t COMBINED_COMPATIBLE_CONFIG_MAX_SIZE = 5;
 constexpr int32_t DEFAULT_SCALE_RATIO = 100;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 constexpr uint32_t COLOR_BLACK = 0xff000000;
-const std::string WINDOW_SCREEN_LOCK_PREFIX = "windowLock_";
-const std::string VIEW_SCREEN_LOCK_PREFIX = "viewLock_";
+extern const std::string WINDOW_SCREEN_LOCK_PREFIX;
+extern const std::string VIEW_SCREEN_LOCK_PREFIX;
+constexpr const char* BOUNDS_CHANGED = "OnBoundsChanged";
 constexpr int32_t DEFAULT_INVALID_WINDOW_MODE = 0;
 constexpr uint32_t ICON_MAX_SIZE = 128 * 1024 * 1024;
 
@@ -116,7 +119,6 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_NO_PERMISSION = 201,
     WS_ERROR_INVALID_PARAM = 401,
     WS_ERROR_DEVICE_NOT_SUPPORT = 801,
-    WS_ERROR_TIMEOUT = 901,
     WS_ERROR_NOT_REGISTER_SYNC_CALLBACK = 100011,
     WS_ERROR_TRANSFER_DATA_FAILED       = 100012,
     WS_ERROR_REPEAT_OPERATION = 1300001,
@@ -129,16 +131,27 @@ enum class WSErrorCode : int32_t {
     WS_ERROR_EDM_CONTROLLED = 16000013, // enterprise limit
 };
 
-const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP {
-    { WSError::WS_OK,                    WSErrorCode::WS_OK },
-    { WSError::WS_DO_NOTHING,            WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_INVALID_SESSION, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_INVALID_PARAM, WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_IPC_FAILED,      WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY },
-    { WSError::WS_ERROR_NULLPTR,         WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
-    { WSError::WS_ERROR_EDM_CONTROLLED,  WSErrorCode::WS_ERROR_EDM_CONTROLLED },
-    { WSError::WS_ERROR_INVALID_WINDOW,  WSErrorCode::WS_ERROR_STATE_ABNORMALLY },
+enum class WSErrorReason : int32_t {
+    WS_REASON_WINDOW_ERR = 1000,
+    WS_REASON_WINDOW_MINIMIZE_ERR,
+    WS_REASON_WINDOW_START_ERR,
+    WS_REASON_WINDOW_PRE_TERMINATE_ERR,
+    WS_REASON_WINDOW_STARTUP_EXC_ERR,
+    WS_REASON_WINDOW_CALL_ERR,
+    WS_REASON_WINDOW_CLEAN_ERR,
+    WS_REASON_WINDOW_CLOSE_ERR,
+    WS_REASON_WINDOW_SPECIFIED_ERR,
+
+    WS_REASON_WINDOW_ANCO_ERR = 1200,
+    WS_REASON_WINDOW_ANCO_START_ERR,
+    WS_REASON_WINDOW_ANCO_SESSION_CREATE_ERR,
+    WS_REASON_WINDOW_ANCO_MOVE_SESSION_FOREGROUND_ERR,
+    WS_REASON_WINDOW_ANCO_CLEAR_SESSION_ERR,
 };
+
+extern const std::map<WSError, WSErrorCode> WS_JS_TO_ERROR_CODE_MAP;
+
+bool CheckCollaboratorType(int32_t type);
 
 enum class SessionState : uint32_t {
     STATE_DISCONNECT = 0,
@@ -383,8 +396,8 @@ enum class StartWindowType : uint32_t {
 
 enum class SpecifiedReason : int32_t {
     DEFAULT = 0,
-    BY_SCB,
-    FROM_RENCENT,
+    FROM_ICON,
+    FROM_RECENT,
 };
 
 struct AtomicServiceInfo {
@@ -397,7 +410,9 @@ struct AtomicServiceInfo {
 };
 
 struct PendingSessionActivationConfig {
-    bool forceStart = false; // is compulsion open
+    // is compulsion open
+    bool forceStart = false;
+    // is execute new want callback
     bool forceNewWant = true;
 };
 
@@ -411,7 +426,7 @@ struct SessionInfo {
     uint32_t windowType_ = 1; // WINDOW_TYPE_APP_MAIN_WINDOW
     sptr<IRemoteObject> callerToken_ = nullptr;
     sptr<IRemoteObject> rootToken_ = nullptr;
-    uint64_t screenId_ = -1;
+    uint64_t screenId_ = -1ULL; // -1ULL：SCREEN_ID_INVALID
     bool isPersistentRecover_ = false;
     AtomicServiceInfo atomicServiceInfo_;
 
@@ -426,12 +441,14 @@ struct SessionInfo {
     int32_t requestCode = -1;
     int32_t errorCode = -1;
     std::string errorReason = "";
+    bool shouldSkipKillInStartup = false;
     int32_t persistentId_ = INVALID_SESSION_ID;
     int32_t callerPersistentId_ = INVALID_SESSION_ID;
     std::string callerBundleName_ = "";
     std::string callerAbilityName_ = "";
     uint32_t callState_ = 0;
     uint32_t callingTokenId_ = 0;
+    int32_t callerTypeForAnco = 0;
     bool reuse = false;
     int32_t windowMode = 0;
     StartMethod startMethod = StartMethod::START_NORMAL;
@@ -445,12 +462,15 @@ struct SessionInfo {
     int32_t collaboratorType_ = CollaboratorType::DEFAULT_TYPE;
     SessionState sessionState_ = SessionState::STATE_DISCONNECT;
     uint32_t requestOrientation_ = 0;
+    int32_t specificSessionRequestOrientation_ = -1;
     bool isRotable_ = false;
     bool isSetPointerAreas_ = false;
     bool isCastSession_ = false;
     uint32_t windowInputType_ = 0;
     uint32_t expandInputFlag_ = 0;
     std::bitset<ADVANCED_FEATURE_BIT_MAX> advancedFeatureFlag_ = 0;
+    bool isReceiveDragEventEnabled_ = true;
+    bool isSeparationTouchEnabled_ = true;
     bool cursorDragFlag_ = false;
     int32_t cursorDragCount_ = 0;
     std::string continueSessionId_ = "";
@@ -467,6 +487,7 @@ struct SessionInfo {
     bool disableDelegator = false;
     bool reuseDelegatorWindow = false;
     bool isAbilityHook_ = false;
+    int32_t scenarios = 0;
     bool isRestartApp_ = false;
     bool isRestartInSameProcess_ = true;
     int32_t restartCallerPersistentId_ = INVALID_SESSION_ID;
@@ -476,8 +497,14 @@ struct SessionInfo {
     SpecifiedReason specifiedReason_ = SpecifiedReason::DEFAULT;
     // only init when requestSceneSession from SCB
     bool isAncoApplication_ = false;
-    int32_t scenarios = 0;
+    bool isSkipAncoNotifyPreStart = false;
     bool isPrelaunch_ = false;
+    int32_t frameNum_ = 0;
+    bool isTargetPlugin = false;
+    std::string hostBundleName = "";
+    int32_t hostAppIndex = 0;
+    std::string hostAppInstanceKey = "";
+    std::string hostAbilityName = "";
 
     /*
      * Keyboard
@@ -492,6 +519,8 @@ struct SessionInfo {
      */
     bool isUseControlSession = false; // Indicates whether the session is used for controlling a main session.
     bool hasPrivacyModeControl = false;
+    // The Field has a value in useControlsession
+    int32_t mainWindowPersistentId_ = INVALID_SESSION_ID;
 
     /*
      * UIExtension
@@ -523,7 +552,14 @@ struct SessionInfo {
     /*
      * Compatible Mode
      */
-    std::string compatibleModePage = "";
+    std::string pageConfig = "";
+    std::vector<std::string> combinedCompatibleConfig;
+
+    /**
+     * Game PreLaunch
+     */
+    bool isGamePrelaunch_ = false;
+    bool reuseSessionInGamePreLaunch_ = false;
 
     AAFwk::Want GetWantSafely() const
     {
@@ -544,8 +580,13 @@ struct SessionInfo {
         *want = newWant;
     }
 
-    std::shared_ptr<StartAnimationOptions> startAnimationOptions = nullptr;
-    std::shared_ptr<StartAnimationSystemOptions> startAnimationSystemOptions = nullptr;
+    void SetWantSafely(const std::shared_ptr<AAFwk::Want>& newWant) const
+    {
+        std::lock_guard<std::mutex> lock(*wantMutex_);
+        want = newWant;
+    }
+
+    std::shared_ptr<WindowCreateParams> windowCreateParams = nullptr;
 };
 
 struct RequestTaskInfo {
@@ -570,9 +611,7 @@ enum class SizeChangeReason : uint32_t {
     DRAG_START,
     DRAG_END,
     RESIZE,
-    RESIZE_WITH_ANIMATION,
     MOVE,
-    MOVE_WITH_ANIMATION,
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION_SHOW,
@@ -601,13 +640,14 @@ enum class SizeChangeReason : uint32_t {
     SCREEN_RELATIVE_POSITION_CHANGE,
     SNAPSHOT_ROTATION = 37,
     SCENE_WITH_ANIMATION,
+    LS_STATE_CHANGE,
+    SWITCH_WINDOW_DISPLAY,
     END,
 };
 
 inline bool IsMoveToOrDragMove(SizeChangeReason reason)
 {
-    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE ||
-           reason == SizeChangeReason::MOVE_WITH_ANIMATION;
+    return reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
 }
 
 enum class SessionEvent : uint32_t {
@@ -631,6 +671,8 @@ enum class SessionEvent : uint32_t {
     EVENT_COMPATIBLE_TO_RECOVER,
     EVENT_MAXIMIZE_FULLSCREEN,
     EVENT_SWITCH_COMPATIBLE_MODE = 200,
+    EVENT_NOTIFY_WINDOW_STAGE_CREATE_FINISHED,
+    EVENT_CLEAR_GAME_PRELAUNCH_FLAG,
     EVENT_END
 };
 
@@ -768,6 +810,17 @@ struct WSRectT {
     }
 
     /**
+     * @brief Compare if size is equal, check only width and height
+     *
+     * @param other The other rectangle to intersect with.
+     * @return bool Whether the size is equal
+     */
+    bool IsSizeEqual(const WSRectT<T>& other) const
+    {
+        return width_ == other.width_ && height_ == other.height_;
+    }
+
+    /**
      * @brief Returns a string in the format: [posX posY width height]
      *
      * @note Optimized for performance:
@@ -892,6 +945,33 @@ struct WindowAnimationInfo {
     bool isGravityChanged { false };
 };
 
+/**
+ * @brief Calling Window State
+ */
+enum class CallingWindowState : int32_t {
+    WINDOW_IN_NORMAL = 0,
+    WINDOW_IN_AI = 1
+};
+
+struct KeyboardBaseInfo {
+    uint32_t callingId { 0 };
+    bool isGravityChanged { false };
+    bool isKeyboardShow { false };
+    WSRect keyboardPanelRect { 0, 0, 0, 0 };
+};
+
+struct KeyboardAnimationRectConfig {
+    WSRect beginRect { 0, 0, 0, 0 };
+    WSRect endRect { 0, 0, 0, 0 };
+    bool animated { false };
+};
+
+struct CallingWindowInfoData {
+    CallingWindowState callingWindowState = CallingWindowState::WINDOW_IN_NORMAL;
+    double scaleX = 1;
+    double scaleY = 1;
+};
+
 struct WindowShadowConfig {
     float offsetX_ = 0.0f;
     float offsetY_ = 0.0f;
@@ -990,6 +1070,7 @@ struct WindowImmersive {
 
 struct AppWindowSceneConfig {
     float floatCornerRadius_ = 0.0f;
+    std::string uiType_ = "phone";
     std::string multiWindowUIType_ = "HandsetSmartWindow";
     bool backgroundScreenLock_ = false;
     std::string rotationMode_ = "windowRotation";
@@ -1017,6 +1098,28 @@ struct SingleHandScreenInfo {
     int32_t scalePivotX = 0;
     int32_t scalePivotY = 0;
     SingleHandMode mode = SingleHandMode::MIDDLE;
+};
+
+struct SingleHandBackgroundTextConfig {
+    int32_t posX = 0;
+    int32_t posY = 0;
+    int32_t width = -1;
+    int32_t height = -1;
+    int32_t fontSize = 0;
+    int32_t minFontSize = 0;
+    int32_t maxLines = -1;
+    int32_t textAlign = 1;
+    std::string maxFontScale = "";
+};
+
+struct SingleHandBackgroundLayoutConfig {
+    bool isCustomLayout = false;
+    WSRect settingButtonRect = {0, 0, 0, 0};
+    bool isSettingButtonMirror = false;
+    int32_t textContainerWidth = 0;
+    SingleHandBackgroundTextConfig title;
+    SingleHandBackgroundTextConfig content;
+    SingleHandBackgroundTextConfig issueText;
 };
 
 struct DeviceScreenConfig {
@@ -1109,8 +1212,12 @@ struct SessionEventParam {
     int32_t sessionHeight_ = 0;
     uint32_t dragResizeType = 0;
     uint32_t gravity = 0;
+    uint32_t dragGravity = 0;
     uint32_t waterfallResidentState = 0;
     uint32_t compatibleStyleMode = 0;
+    int32_t windowGlobalPosX_ = 0;
+    int32_t windowGlobalPosY_ = 0;
+    uint32_t titleButtonEventType_ = 0;
 };
 
 struct BackgroundParams {
@@ -1142,14 +1249,6 @@ enum class TerminateType : uint32_t {
     CLOSE_AND_CLEAR_MULTITASK,
     CLOSE_AND_START_CALLER,
     CLOSE_BY_EXCEPTION,
-};
-
-/**
- * @brief window expand flag.
- */
-enum class ExpandInputFlag : uint32_t {
-    EXPAND_INPUT_FLAG_DEFAULT = 0,
-    WINDOW_DISABLE_USER_ACTION = 1 << 2,
 };
 
 /**
@@ -1189,6 +1288,8 @@ struct SessionUIParam {
     WSRect rect_;
     float scaleX_ { 1.0f };
     float scaleY_ { 1.0f };
+    float rsScaleX_ { 1.0f };
+    float rsScaleY_ { 1.0f };
     float pivotX_ { 1.0f };
     float pivotY_ { 1.0f };
     float transX_ { 0.0f }; // global translateX
@@ -1255,12 +1356,9 @@ enum class SnapshotNodeType : uint32_t {
 
 enum class SnapShotRecoverType : uint32_t {
     ROTATE = 0,
-    EXIT_SPLIT_ON_BACKGROUND,
+    EXIT_SPLIT_ON_BACKGROUND = 1,
 };
 
-/**
- * Adding or modifying enumeration values requires corresponding changes on the sceneboard side.
- */
 enum class LifeCycleChangeReason {
     DEFAULT = 0,
 
@@ -1273,8 +1371,6 @@ enum class LifeCycleChangeReason {
 
     SCREEN_LOCK,
 
-    SCREEN_ROTATION,
-
     LAST_SCENE_TRANSFER,
 
     /*
@@ -1282,7 +1378,19 @@ enum class LifeCycleChangeReason {
      */
     QUICK_BATCH_BACKGROUND,
 
+    GAME_PRELAUNCH_BACKGROUND,
+
     REASON_END,
+};
+
+enum class ParentLifeCycleEvent : uint32_t {
+    FOREGROUND = 1,
+    ACTIVE,
+    INACTIVE,
+    BACKGROUND,
+    RESUMED,
+    PAUSED,
+    DESTROYED,
 };
 
 enum class AsyncTraceTaskId: int32_t {
@@ -1338,11 +1446,6 @@ enum class CrossPlaneState : uint32_t {
     CROSS_ALL_PLANE,
 };
 
-enum class SendTouchAction : uint32_t {
-    ACTION_NORMAL = 0,
-    ACTION_NOT_RECEIVE_PULL_CANCEL = 1,
-};
-
 /**
  * @brief Sidebar blur type
  */
@@ -1353,5 +1456,21 @@ enum class SidebarBlurType : uint32_t {
     DEFAULT_MAXIMIZE,
     END,
 };
+
+struct PreWindowProperty {
+    uint32_t rotation = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+
+    PreWindowProperty() {}
+
+    PreWindowProperty(uint32_t rotation, uint32_t width, uint32_t height)
+    {
+        this->rotation = rotation;
+        this->width = width;
+        this->height = height;
+    }
+};
+
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_WS_COMMON_H

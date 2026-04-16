@@ -21,6 +21,17 @@
 namespace OHOS {
 namespace Rosen {
 
+const std::string ANI_EVENT_ADD = "add";
+const std::string ANI_EVENT_REMOVE = "remove";
+const std::string ANI_EVENT_CHANGE = "change";
+const std::string ANI_EVENT_PRIVATE_MODE_CHANGE = "privateModeChange";
+const std::string ANI_EVENT_FOLD_STATUS_CHANGED = "foldStatusChange";
+const std::string ANI_EVENT_FOLD_ANGLE_CHANGED = "foldAngleChange";
+const std::string ANI_EVENT_CAPTURE_STATUS_CHANGED = "captureStatusChange";
+const std::string ANI_EVENT_DISPLAY_MODE_CHANGED = "foldDisplayModeChange";
+const std::string ANI_EVENT_AVAILABLE_AREA_CHANGED = "availableAreaChange";
+const std::string ANI_EVENT_BRIGHTNESS_INFO_CHANGED = "brightnessInfoChange";
+
 DisplayAniListener::~DisplayAniListener()
 {
     TLOGI(WmsLogTag::DMS, "[ANI]~AniDisplayListener");
@@ -75,8 +86,14 @@ void DisplayAniListener::RemoveAllCallback()
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
     for (const auto& [typeString, callbacks] : aniCallback_) {
         for (auto callback : callbacks) {
-            if (env_) {
-                env_->GlobalReference_Delete(callback);
+            if (vm_) {
+                auto aniVm = AniVm(vm_);
+                auto env = aniVm.GetAniEnv();
+                if (env == nullptr) {
+                    TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                    return;
+                }
+                env->GlobalReference_Delete(callback);
             }
         }
     }
@@ -105,17 +122,29 @@ void DisplayAniListener::OnCreate(DisplayId id)
     TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
-        if (env_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "[ANI] null env");
+        if (vm_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] null vm");
+            return;
+        }
+        auto aniVm = AniVm(vm_);
+        auto env = aniVm.GetAniEnv();
+        if (env == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
             return;
         }
         ani_boolean undefRes = 0;
-        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env->Reference_IsUndefined(oneAniCallback, &undefRes);
         if (undefRes) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
-        auto task = [env = env_, oneAniCallback, id] {
+        auto task = [vm = vm_, oneAniCallback, id] {
+            auto aniVm = AniVm(vm);
+            auto env = aniVm.GetAniEnv();
+            if (env == nullptr) {
+                TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                return;
+            }
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
@@ -150,17 +179,29 @@ void DisplayAniListener::OnDestroy(DisplayId id)
     TLOGI(WmsLogTag::DMS, "vec_callback size: %{public}d", vec.size());
     // find callbacks in vector
     for (ani_ref oneAniCallback : vec) {
-        if (env_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "[ANI] null env");
+        if (vm_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] null vm");
+            return;
+        }
+        auto aniVm = AniVm(vm_);
+        auto env = aniVm.GetAniEnv();
+        if (env == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
             return;
         }
         ani_boolean undefRes = 0;
-        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env->Reference_IsUndefined(oneAniCallback, &undefRes);
         if (undefRes) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback is undef");
             continue;
         }
-        auto task = [env = env_, oneAniCallback, id] {
+        auto task = [vm = vm_, oneAniCallback, id] {
+            auto aniVm = AniVm(vm);
+            auto env = aniVm.GetAniEnv();
+            if (env == nullptr) {
+                TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                return;
+            }
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
@@ -192,17 +233,29 @@ void DisplayAniListener::OnChange(DisplayId id)
     }
     std::vector<ani_ref> vec = it->second;
     for (auto oneAniCallback : vec) {
-        if (env_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "[ANI] null env");
+        if (vm_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] null vm");
+            return;
+        }
+        auto aniVm = AniVm(vm_);
+        auto env = aniVm.GetAniEnv();
+        if (env == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
             return;
         }
         ani_boolean undefRes = 0;
-        env_->Reference_IsUndefined(oneAniCallback, &undefRes);
+        env->Reference_IsUndefined(oneAniCallback, &undefRes);
         if (undefRes) {
             TLOGE(WmsLogTag::DMS, "[ANI] oneAniCallback undef, return");
             continue;
         }
-        auto task = [env = env_, oneAniCallback, id] {
+        auto task = [vm = vm_, oneAniCallback, id] {
+            auto aniVm = AniVm(vm);
+            auto env = aniVm.GetAniEnv();
+            if (env == nullptr) {
+                TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                return;
+            }
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "displayEventCallBack",
                 nullptr, oneAniCallback, static_cast<ani_long>(id));
         };
@@ -214,13 +267,100 @@ void DisplayAniListener::OnChange(DisplayId id)
             AppExecFwk::EventQueue::Priority::IMMEDIATE);
     }
 }
+
+void DisplayAniListener::OnAttributeChange(DisplayId displayId, const std::vector<std::string>& attributes)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin, displayId: %{public}" PRIu64, displayId);
+    auto thisListener = weakRef_.promote();
+    if (thisListener == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener is nullptr");
+        return;
+    }
+ 
+    std::lock_guard<std::mutex> lock(aniCallbackMtx_);
+    TLOGD(WmsLogTag::DMS, "called, displayId: %{public}d", static_cast<uint32_t>(displayId));
+    if (aniCallback_.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] OnChange not register!");
+        return;
+    }
+    if (attributes.empty()) {
+        TLOGE(WmsLogTag::DMS, "[ANI] attributes are empty!");
+        return;
+    }
+    if (vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] null vm");
+        return;
+    }
+
+    auto task = [vm = vm_, attributes, displayId, this] {
+        auto aniVm = AniVm(vm);
+        auto env = aniVm.GetAniEnv();
+        if (env == nullptr) {
+            TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+            return;
+        }
+        ProcessAttributeCallbacks(env, attributes, displayId);
+    };
+    if (!eventHandler_) {
+        TLOGE(WmsLogTag::DMS, "[ANI] get main event handler failed!");
+        return;
+    }
+    eventHandler_->PostTask(std::move(task), "dms:AniDisplayListener::AttributeChangeCallBack", 0,
+        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+}
+
+void DisplayAniListener::ProcessAttributeCallbacks(ani_env* env, const std::vector<std::string>& attributes,
+    DisplayId displayId)
+{
+    std::vector<ani_ref> callbacks;
+    for (auto attribute : attributes) {
+        if (aniCallback_.find(attribute) == aniCallback_.end()) {
+            TLOGD(WmsLogTag::DMS, "current listener dose not listen: %{public}s, continue", attribute.c_str());
+            continue;
+        }
+        for (auto& callback : aniCallback_[attribute]) {
+            ani_boolean undefRes = 0;
+            env->Reference_IsUndefined(callback, &undefRes);
+            if (!undefRes) {
+                callbacks.push_back(callback);
+            }
+        }
+    }
+    RemoveDuplicateMethods(env, callbacks);
+    for (auto callback : callbacks) {
+        DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "displayEventCallBack",
+            nullptr, callback, static_cast<ani_long>(displayId));
+    }
+}
+
+void DisplayAniListener::RemoveDuplicateMethods(ani_env* env, std::vector<ani_ref>& callbacks)
+{
+    std::vector<ani_ref> uniqueMethods;
+    
+    for (auto& currentMethod : callbacks) {
+        if (!currentMethod) continue;
+        
+        ani_boolean isDuplicate = false;
+        for (const auto& existingMethod : uniqueMethods) {
+            env->Reference_StrictEquals(currentMethod, existingMethod, &isDuplicate);
+            if (isDuplicate) {
+                break;
+            }
+        }
+        if (!isDuplicate) {
+            uniqueMethods.push_back(std::move(currentMethod));
+        }
+    }
+    callbacks = std::move(uniqueMethods);
+}
+
 void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] called, hasPrivate: %{public}u",
         static_cast<uint32_t>(hasPrivate));
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+    if (thisListener == nullptr || vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or vm is nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
@@ -232,14 +372,16 @@ void DisplayAniListener::OnPrivateWindow(bool hasPrivate)
         TLOGE(WmsLogTag::DMS, "[ANI] OnPrivateWindow not this event, return");
         return;
     }
-    if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
-        return;
-    }
 
     auto it = aniCallback_.find(ANI_EVENT_PRIVATE_MODE_CHANGE);
     for (auto oneAniCallback : it->second) {
-        auto task = [env = env_, oneAniCallback, hasPrivate] () {
+        auto task = [vm = vm_, oneAniCallback, hasPrivate] () {
+            auto aniVm = AniVm(vm);
+            auto env = aniVm.GetAniEnv();
+            if (env == nullptr) {
+                TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                return;
+            }
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
                 nullptr, oneAniCallback, hasPrivate);
         };
@@ -256,8 +398,8 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
     TLOGI(WmsLogTag::DMS, "[ANI] called, foldStatus: %{public}u",
         static_cast<uint32_t>(foldStatus));
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+    if (thisListener == nullptr || vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or vm is nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
@@ -269,13 +411,15 @@ void DisplayAniListener::OnFoldStatusChanged(FoldStatus foldStatus)
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldStatusChanged not this event, return");
         return;
     }
-    if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
-        return;
-    }
     auto it = aniCallback_.find(ANI_EVENT_FOLD_STATUS_CHANGED);
     for (auto oneAniCallback : it->second) {
-        auto task = [env = env_, oneAniCallback, foldStatus] () {
+        auto task = [vm = vm_, oneAniCallback, foldStatus] () {
+            auto aniVm = AniVm(vm);
+            auto env = aniVm.GetAniEnv();
+            if (env == nullptr) {
+                TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                return;
+            }
             DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldStatusCallback",
                 nullptr, oneAniCallback, static_cast<ani_int>(foldStatus));
         };
@@ -291,8 +435,8 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] called");
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+    if (thisListener == nullptr || vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or vm is nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
@@ -304,10 +448,16 @@ void DisplayAniListener::OnFoldAngleChanged(std::vector<float> foldAngles)
         TLOGE(WmsLogTag::DMS, "[ANI] OnFoldAngleChanged not this event, return");
         return;
     }
-    if (env_ != nullptr) {
+    if (vm_ != nullptr) {
         auto it = aniCallback_.find(ANI_EVENT_FOLD_ANGLE_CHANGED);
         for (auto oneAniCallback : it->second) {
-            auto task = [env = env_, oneAniCallback, foldAngles] () {
+            auto task = [vm = vm_, oneAniCallback, foldAngles] () {
+                auto aniVm = AniVm(vm);
+                auto env = aniVm.GetAniEnv();
+                if (env == nullptr) {
+                    TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                    return;
+                }
                 ani_array cbArray;
                 DisplayAniUtils::CreateAniArrayDouble(env, foldAngles.size(), &cbArray, foldAngles);
                 DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldAngleChangeCallback",
@@ -328,8 +478,8 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] called");
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+    if (thisListener == nullptr || vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or vm is nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
@@ -341,10 +491,16 @@ void DisplayAniListener::OnCaptureStatusChanged(bool isCapture)
         TLOGE(WmsLogTag::DMS, "[ANI] OnCaptureStatusChanged not this event, return");
         return;
     }
-    if (env_ != nullptr) {
+    if (vm_ != nullptr) {
         auto it = aniCallback_.find(ANI_EVENT_CAPTURE_STATUS_CHANGED);
         for (auto oneAniCallback : it->second) {
-            auto task = [env = env_, oneAniCallback, isCapture] () {
+            auto task = [vm = vm_, oneAniCallback, isCapture] () {
+                auto aniVm = AniVm(vm);
+                auto env = aniVm.GetAniEnv();
+                if (env == nullptr) {
+                    TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                    return;
+                }
                 DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "captureStatusChangedCallback",
                     nullptr, oneAniCallback, isCapture);
             };
@@ -364,8 +520,8 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
     TLOGI(WmsLogTag::DMS, "[ANI] called, foldDisplayMode: %{public}u",
         static_cast<uint32_t>(foldDisplayMode));
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+    if (thisListener == nullptr || vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or vm is nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
@@ -377,10 +533,16 @@ void DisplayAniListener::OnDisplayModeChanged(FoldDisplayMode foldDisplayMode)
         TLOGE(WmsLogTag::DMS, "[ANI] OnDisplayModeChanged not this event, return");
         return;
     }
-    if (env_ != nullptr) {
+    if (vm_ != nullptr) {
         auto it = aniCallback_.find(ANI_EVENT_DISPLAY_MODE_CHANGED);
         for (auto oneAniCallback : it->second) {
-            auto task = [env = env_, oneAniCallback, foldDisplayMode] () {
+            auto task = [vm = vm_, oneAniCallback, foldDisplayMode] () {
+                auto aniVm = AniVm(vm);
+                auto env = aniVm.GetAniEnv();
+                if (env == nullptr) {
+                    TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                    return;
+                }
                 DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "foldDisplayModeCallback",
                     nullptr, oneAniCallback, static_cast<ani_int>(foldDisplayMode));
             };
@@ -399,8 +561,8 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
 {
     TLOGI(WmsLogTag::DMS, "[ANI] called");
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+    if (thisListener == nullptr || vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or vm is nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
@@ -412,17 +574,23 @@ void DisplayAniListener::OnAvailableAreaChanged(DMRect area)
         TLOGE(WmsLogTag::DMS, "[ANI] OnAvailableAreaChanged not this event, return");
         return;
     }
-    if (env_ != nullptr) {
+    if (vm_ != nullptr) {
         auto it = aniCallback_.find(ANI_EVENT_AVAILABLE_AREA_CHANGED);
         for (auto oneAniCallback : it->second) {
-            auto task = [env = env_, oneAniCallback, area] () {
+            auto task = [vm = vm_, oneAniCallback, area] () {
+                auto aniVm = AniVm(vm);
+                auto env = aniVm.GetAniEnv();
+                if (env == nullptr) {
+                    TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                    return;
+                }
                 ani_object rectObj = DisplayAniUtils::CreateRectObject(env);
                 if (!rectObj) {
                     TLOGE(WmsLogTag::DMS, "[ANI] CreateRectObject failed");
                     return;
                 }
                 DisplayAniUtils::ConvertRect(area, rectObj, env);
-                DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "availableAreaChangedCallback",
+                DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "availableAreaChangedCallback",
                     nullptr, oneAniCallback, rectObj);
             };
             if (!eventHandler_) {
@@ -441,18 +609,28 @@ ani_status DisplayAniListener::CallAniMethodVoid(ani_object object, const char* 
     const char* method, const char* signature, ...)
 {
     ani_class aniClass;
-    ani_status ret = env_->FindClass(cls, &aniClass);
+    if (vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] vm is nullptr");
+        return ANI_ERROR;
+    }
+    auto aniVm = AniVm(vm_);
+    auto env = aniVm.GetAniEnv();
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+        return ANI_ERROR;
+    }
+    ani_status ret = env->FindClass(cls, &aniClass);
     if (ret != ANI_OK) {
         return ret;
     }
     ani_method aniMethod;
-    ret = env_->Class_FindMethod(aniClass, method, signature, &aniMethod);
+    ret = env->Class_FindMethod(aniClass, method, signature, &aniMethod);
     if (ret != ANI_OK) {
         return ret;
     }
     va_list args;
     va_start(args, signature);
-    ret = env_->Object_CallMethod_Void(object, aniMethod, args);
+    ret = env->Object_CallMethod_Void(object, aniMethod, args);
     va_end(args);
     return ret;
 }
@@ -461,17 +639,13 @@ void DisplayAniListener::OnBrightnessInfoChanged(DisplayId id, const ScreenBrigh
 {
     TLOGI(WmsLogTag::DMS, "[ANI] brightnessInfoChange is called, displayId: %{public}" PRIu64"", id);
     auto thisListener = weakRef_.promote();
-    if (thisListener == nullptr || env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] this listener or env is nullptr");
+    if (thisListener == nullptr || vm_ == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] this listener or vm is nullptr");
         return;
     }
     std::lock_guard<std::mutex> lock(aniCallbackMtx_);
     if (aniCallback_.empty()) {
         TLOGE(WmsLogTag::DMS, "[ANI] OnBrightnessInfoChanged not register!");
-        return;
-    }
-    if (env_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
         return;
     }
     auto it = aniCallback_.find(ANI_EVENT_BRIGHTNESS_INFO_CHANGED);
@@ -480,10 +654,16 @@ void DisplayAniListener::OnBrightnessInfoChanged(DisplayId id, const ScreenBrigh
         return;
     }
     for (auto oneAniCallback : it->second) {
-        auto task = [env = env_, oneAniCallback, id, screenBrightness = brightnessInfo] () {
+        auto task = [vm = vm_, oneAniCallback, id, screenBrightness = brightnessInfo] () {
+            auto aniVm = AniVm(vm);
+            auto env = aniVm.GetAniEnv();
+            if (env == nullptr) {
+                TLOGE(WmsLogTag::DMS, "[ANI] env got from vm is nullptr");
+                return;
+            }
             ani_object obj = DisplayAniUtils::CreateBrightnessInfoObject(env);
             DisplayAniUtils::CvtBrightnessInfo(env, obj, screenBrightness);
-            DisplayAniUtils::CallAniFunctionVoid(env, "L@ohos/display/display;", "brightnessInfoChangeCallback",
+            DisplayAniUtils::CallAniFunctionVoid(env, "@ohos.display.display", "brightnessInfoChangeCallback",
                 nullptr, oneAniCallback, id, obj);
         };
         if (!eventHandler_) {

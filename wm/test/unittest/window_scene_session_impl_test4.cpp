@@ -663,7 +663,7 @@ HWTEST_F(WindowSceneSessionImplTest4, IsInMappingRegionForCompatibleMode, TestSi
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     windowSceneSessionImpl->property_->SetPersistentId(1);
     windowSceneSessionImpl->hostSession_ = session;
-    windowSceneSessionImpl->property_->SetWindowRect({ 880, 0, 800, 1600 });
+    windowSceneSessionImpl->globalScaledRect_ = { 880, 0, 800, 1600 };
     int32_t displayX = 400;
     int32_t displayY = 400;
     bool ret = windowSceneSessionImpl->IsInMappingRegionForCompatibleMode(displayX, displayY);
@@ -837,6 +837,36 @@ HWTEST_F(WindowSceneSessionImplTest4, NotifyWindowAttachStateChange, TestSize.Le
     // case3: listener is not nullptr, then attach is false
     ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
     EXPECT_EQ(WSError::WS_OK, ret);
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyWindowAttachStateChangeSubWindow
+ * @tc.desc: NotifyWindowAttachStateChangeSubWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest4, NotifyWindowAttachStateChangeSubWindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyWindowAttachStateChangeSubWindow");
+    option->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sptr<WindowSceneSessionImpl> windowSceneSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    sptr<IWindowAttachStateChangeListner> listener = sptr<IWindowAttachStateChangeListner>::MakeSptr();
+    windowSceneSessionImpl->RegisterWindowAttachStateChangeListener(listener);
+
+    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    windowSceneSessionImpl->state_ = WindowState::STATE_DESTROYED;
+    windowSceneSessionImpl->hostSession_ = session;
+
+    auto ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
+    EXPECT_EQ(WSError::WS_OK, ret);
+    ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(true);
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    windowSceneSessionImpl->handler_ = nullptr;
     ret = windowSceneSessionImpl->NotifyWindowAttachStateChange(false);
     EXPECT_EQ(WSError::WS_OK, ret);
 }
@@ -1048,16 +1078,17 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, TestSize.Level1)
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     window->property_->SetPersistentId(1);
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window->windowSystemConfig_.freeMultiWindowSupport_ = false;
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_INVALID_WINDOW);
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
     window->property_->SetDecorEnable(true);
-    EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_NULLPTR);
-    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_INVALID_WINDOW);
@@ -1065,15 +1096,15 @@ HWTEST_F(WindowSceneSessionImplTest4, SetWindowTitle, TestSize.Level1)
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_ERROR_NULLPTR);
     EXPECT_EQ(window->Create(abilityContext_, session), WMError::WM_OK);
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
-
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     window->windowSystemConfig_.freeMultiWindowSupport_ = true;
     window->windowSystemConfig_.isSystemDecorEnable_ = true;
     window->property_->SetDecorEnable(true);
     EXPECT_EQ(window->SetWindowTitle(title), WMError::WM_OK);
- 
+
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     window->property_->SetPcAppInpadCompatibleMode(true);
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
     window->windowSystemConfig_.freeMultiWindowEnable_ = false;
     window->windowSystemConfig_.isSystemDecorEnable_ = false;
     EXPECT_EQ(WMError::WM_OK, window->SetWindowTitle(title));
@@ -1469,11 +1500,10 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow01, TestSize.Level1)
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
     window->hostSession_ = session;
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
-    Rect originRect = window->GetRect();
     Rect testRect = {10, 20, 100, 200};
     window->GetProperty()->SetRequestRect(testRect);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_EQ(window->GetRect(), originRect);
+    ASSERT_EQ(window->GetRect(), testRect);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_APP_SUB_WINDOW, displayInfo);
     ASSERT_EQ(window->GetRect(), testRect);
 }
@@ -1496,22 +1526,27 @@ HWTEST_F(WindowSceneSessionImplTest4, PreLayoutOnShow02, TestSize.Level1)
 
     window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
     sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
-    displayInfo->name_ = "Cooperation"; // 白名单
 
     KeyboardLayoutParams tmpParams;
-    const Rect expected = {1, 2, 3, 4};
-    tmpParams.LandscapeKeyboardRect_ = expected;
+    const Rect landscapeKeyboardRect = {1, 1, 4, 3};
+    tmpParams.LandscapeKeyboardRect_ = landscapeKeyboardRect;
+    const Rect portraitKeyboardRect = {1, 1, 3, 4};
+    tmpParams.PortraitKeyboardRect_ = portraitKeyboardRect;
 
+    displayInfo->width_ = 10;
+    displayInfo->height_ = 8;
     window->property_->SetRequestRect({0, 0, 0, 0});
     window->property_->SetKeyboardLayoutParams(tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_NE(window->property_->requestRect_, expected);
+    ASSERT_NE(window->property_->requestRect_, landscapeKeyboardRect);
 
     tmpParams.displayId_ = 0;
     displayInfo->screenId_ = 0;
+    displayInfo->width_ = 8;
+    displayInfo->height_ = 10;
     window->property_->AddKeyboardLayoutParams(0, tmpParams);
     window->PreLayoutOnShow(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT, displayInfo);
-    ASSERT_EQ(window->property_->requestRect_, expected);
+    ASSERT_EQ(window->property_->requestRect_, portraitKeyboardRect);
 }
 
 /**
@@ -1878,13 +1913,15 @@ HWTEST_F(WindowSceneSessionImplTest4, OnContainerModalEvent02, TestSize.Level1)
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     EXPECT_NE(nullptr, session);
     window->hostSession_ = session;
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_hover_event", ""));
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_minimize_event", ""));
+    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_close_event", ""));
     ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_2_3_landscape", ""));
     ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_1_1_landscape", ""));
     ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_18_9_landscape", ""));
     ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_default_landscape", ""));
     ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_change_to_split_landscape", ""));
     ASSERT_EQ(WMError::WM_DO_NOTHING, window->OnContainerModalEvent("win_change_to_split_landscape_error", ""));
-    ASSERT_EQ(WMError::WM_OK, window->OnContainerModalEvent("win_hover_event", ""));
 }
 
 /**

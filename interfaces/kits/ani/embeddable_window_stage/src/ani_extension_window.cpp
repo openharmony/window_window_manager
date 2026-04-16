@@ -15,23 +15,27 @@
 
 #include "ani_extension_window.h"
 
+#include <ani_signature_builder.h>
 #include "ani.h"
 #include "ani_extension_window_register_manager.h"
-#include "ani_window_utils.h"
-#include "ani_window_listener.h"
-#include "extension_window_impl.h"
-#include "window_manager_hilog.h"
-#include "permission.h"
 #include "ani_window.h"
+#include "ani_window_listener.h"
+#include "ani_window_utils.h"
+#include "extension_window_impl.h"
+#include "permission.h"
+#include "pixel_map.h"
+#include "pixel_map_taihe_ani.h"
+#include "window_manager_hilog.h"
 
 namespace OHOS {
 namespace Rosen {
+using namespace arkts::ani_signature;
 namespace {
 static std::map<ani_ref, AniExtensionWindow*> localObjs;
 constexpr const char* ETS_UIEXTENSION_HOST_CLASS_DESCRIPTOR =
-    "L@ohos/uiExtensionHost/uiExtensionHost/UIExtensionHostInternal;";
+    "@ohos.uiExtensionHost.uiExtensionHost.UIExtensionHostInternal";
 constexpr const char* ETS_UIEXTENSION_CLASS_DESCRIPTOR =
-    "L@ohos/arkui/uiExtension/uiExtension/UIExtensionInternal;";
+    "@ohos.arkui.uiExtension.uiExtension.UIExtensionInternal";
 }
 AniExtensionWindow::AniExtensionWindow(
     const std::shared_ptr<Rosen::ExtensionWindow> extensionWindow, int32_t hostWindowId)
@@ -61,7 +65,9 @@ void AniExtensionWindow::Finalizer(ani_env* env, ani_long nativeObj)
             delete obj->second;
             localObjs.erase(obj);
         }
-        env->GlobalReference_Delete(extensionWindow->GetAniRef());
+        if (env->GlobalReference_Delete(extensionWindow->GetAniRef()) != ANI_OK) {
+            TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GlobalReference_Delete failed");
+        }
     } else {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] extensionWindow is nullptr");
     }
@@ -94,7 +100,7 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
     }
 
     ani_method initFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":V", &initFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "<ctor>", ":", &initFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find ctor method failed, ret: %{public}u", ret);
         return nullptr;
     }
@@ -104,11 +110,15 @@ ani_object AniExtensionWindow::CreateAniExtensionWindow(ani_env* env, sptr<Rosen
         return nullptr;
     }
     ani_method setObjFunc = nullptr;
-    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "J:V", &setObjFunc)) != ANI_OK) {
+    if ((ret = env->Class_FindMethod(cls, "setNativeObj", "l:", &setObjFunc)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Find method failed, ret: %{public}u", ret);
         return nullptr;
     }
-    env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniExtensionWindow.get()));
+    ret = env->Object_CallMethod_Void(obj, setObjFunc, reinterpret_cast<ani_long>(aniExtensionWindow.get()));
+    if (ret != ANI_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "[ANI] fail to setNativeObj");
+        return nullptr;
+    }
     ani_ref ref = nullptr;
     if (env->GlobalReference_Create(obj, &ref) == ANI_OK) {
         aniExtensionWindow->SetAniRef(ref);
@@ -181,7 +191,10 @@ WmErrorCode AniExtensionWindow::UnregisterListener(ani_env* env, ani_string type
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     std::string cbType;
-    AniWindowUtils::GetStdString(env, type, cbType);
+    if (AniWindowUtils::GetStdString(env, type, cbType) != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI] GetStdString failed");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI] type:%{public}s", cbType.c_str());
     sptr<Rosen::Window> window = extensionWindow_->GetWindow();
     return extensionRegisterManager_->UnregisterListener(window, cbType, CaseType::CASE_WINDOW, env, fn);
@@ -227,6 +240,76 @@ WmErrorCode AniExtensionWindow::OnHideNonSecureWindows(ani_env* env, ani_boolean
     return WmErrorCode::WM_OK;
 }
 
+ani_object AniExtensionWindow::Snapshot(ani_env* env)
+{
+    if (!IsExtensionWindowValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]extension window is invalid");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto window = extensionWindow_->GetWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap = window->Snapshot();
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]pixelMap is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap);
+    if (nativePixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]native pixelMap is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]windowId:%{public}u, WxH=%{public}dx%{public}d",
+        window->GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return nativePixelMap;
+}
+
+ani_object AniExtensionWindow::SnapshotSync(ani_env* env)
+{
+    if (!IsExtensionWindowValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]extension window is invalid");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto window = extensionWindow_->GetWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Snapshot(pixelMap));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]windowId:%{public}u snapshotSync failed, code:%{public}d",
+            window->GetWindowId(), ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap);
+    if (nativePixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]native pixelMap is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]windowId:%{public}u, WxH=%{public}dx%{public}d",
+        window->GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return nativePixelMap;
+}
+
+ani_object AniExtensionWindow::SnapshotIgnorePrivacy(ani_env* env)
+{
+    if (!IsExtensionWindowValid()) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]extension window is invalid");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    auto window = extensionWindow_->GetWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SnapshotIgnorePrivacy(pixelMap));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]windowId:%{public}u snapshotIgnorePrivacy failed, code:%{public}d",
+            window->GetWindowId(), ret);
+        return AniWindowUtils::AniThrowError(env, ret);
+    }
+    auto nativePixelMap = Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap);
+    if (nativePixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]native pixelMap is null");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]windowId:%{public}u, WxH=%{public}dx%{public}d",
+        window->GetWindowId(), pixelMap->GetWidth(), pixelMap->GetHeight());
+    return nativePixelMap;
+}
+
 ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_string name, ani_object subWindowOptions,
     ani_boolean followCreatorLifecycle)
 {
@@ -253,6 +336,11 @@ ani_object AniExtensionWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_st
     if (option->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
+    }
+    auto extWindow = extensionWindow_->GetWindow();
+    if (extWindow != nullptr && extWindow->IsBlockSubwindow()) {
+        TLOGE(WmsLogTag::WMS_SUB, "[ANI]The session is blocking sub window");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_FORBID_SUBWINDOW);
     }
     option->SetParentId(hostWindowId_);
     option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
@@ -325,19 +413,23 @@ WmErrorCode AniExtensionWindow::OnUnRegisterRectChangeCallback(ani_env* env, ani
 static ani_status ExtWindowSetRect(ani_env* env, ani_object obj, OHOS::Rosen::Rect& rect)
 {
     ani_status ret {};
-    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>left", rect.posX_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj,
+        Builder::BuildPropertyName("left").c_str(), rect.posX_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set left field failed, ret: %{public}u", ret);
         return ret;
     }
-    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>top", rect.posY_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj,
+        Builder::BuildPropertyName("top").c_str(), rect.posY_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set top field failed, ret: %{public}u", ret);
         return ret;
     }
-    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>width", rect.width_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj,
+        Builder::BuildPropertyName("width").c_str(), rect.width_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set width field failed, ret: %{public}u", ret);
         return ret;
     }
-    if ((ret = env->Object_SetFieldByName_Int(obj, "<property>height", rect.height_)) != ANI_OK) {
+    if ((ret = env->Object_SetFieldByName_Int(obj,
+        Builder::BuildPropertyName("height").c_str(), rect.height_)) != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set height field failed, ret: %{public}u", ret);
         return ret;
     }
@@ -368,7 +460,8 @@ static ani_int ExtWindowGetProperties(ani_env* env, ani_object obj, ani_long nat
         return static_cast<ani_int>(retCode);
     };
     return static_cast<ani_int>(
-        ExtWindowSetRectMember(env, propertyRef, "<property>uiExtensionHostWindowProxyRect", rect));
+        ExtWindowSetRectMember(env, propertyRef,
+            Builder::BuildPropertyName("uiExtensionHostWindowProxyRect").c_str(), rect));
 }
 
 static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_long win,
@@ -382,8 +475,8 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     }
     AvoidArea avoidArea {};
     ani_status ret {};
-    ret = env->Object_SetFieldByName_Boolean(area, "<property>visible", areaType !=
-        static_cast<int32_t>(AvoidAreaType::TYPE_CUTOUT));
+    ret = env->Object_SetFieldByName_Boolean(
+        area, Builder::BuildPropertyName("visible").c_str(), areaType != (int)AvoidAreaType::TYPE_CUTOUT);
     if (ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]Set visible failed, ret: %{public}u", ret);
         return static_cast<ani_int>(ret);
@@ -397,21 +490,21 @@ static ani_int ExtWindowGetWindowAvoidArea(ani_env* env, ani_object obj, ani_lon
     if (retCode != WMError::WM_OK) {
         return static_cast<ani_int>(AniWindowUtils::ToErrorCode(retCode));
     }
-    ret = ExtWindowSetRectMember(env, area, "<property>leftRect", avoidArea.leftRect_);
+    ret = ExtWindowSetRectMember(env, area, Builder::BuildPropertyName("leftRect").c_str(), avoidArea.leftRect_);
     if (ret != ANI_OK) {
         return static_cast<ani_int>(ret);
     }
-    ret = ExtWindowSetRectMember(env, area, "<property>rightRect", avoidArea.rightRect_);
-    if (ret != ANI_OK) {
-        return static_cast<ani_int>(ret);
+    if ((retCode = (WMError)ExtWindowSetRectMember(
+        env, area, Builder::BuildPropertyName("rightRect").c_str(), avoidArea.rightRect_)) != WMError::WM_OK) {
+        return (ani_int)retCode;
     }
-    ret = ExtWindowSetRectMember(env, area, "<property>topRect", avoidArea.topRect_);
-    if (ret != ANI_OK) {
-        return static_cast<ani_int>(ret);
+    if ((retCode = (WMError)ExtWindowSetRectMember(
+        env, area, Builder::BuildPropertyName("topRect").c_str(), avoidArea.topRect_)) != WMError::WM_OK) {
+        return (ani_int)retCode;
     }
-    ret = ExtWindowSetRectMember(env, area, "<property>bottomRect", avoidArea.bottomRect_);
-    if (ret != ANI_OK) {
-        return static_cast<ani_int>(ret);
+    if ((retCode = (WMError)ExtWindowSetRectMember(
+        env, area, Builder::BuildPropertyName("bottomRect").c_str(), avoidArea.bottomRect_)) != WMError::WM_OK) {
+        return (ani_int)retCode;
     }
     return static_cast<ani_int>(WmErrorCode::WM_OK);
 }
@@ -509,6 +602,36 @@ static void ExtWindowOccupyEvents(ani_env* env, ani_object obj, ani_long nativeO
     aniExtWinPtr->OnOccupyEvents(env, eventFlags);
 }
 
+static ani_object ExtWindowSnapshot(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
+    if (aniExtWinPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniExtWinPtr->Snapshot(env);
+}
+
+static ani_object ExtWindowSnapshotSync(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
+    if (aniExtWinPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniExtWinPtr->SnapshotSync(env);
+}
+
+static ani_object ExtWindowSnapshotIgnorePrivacy(ani_env* env, ani_object obj, ani_long nativeObj)
+{
+    AniExtensionWindow* aniExtWinPtr = reinterpret_cast<AniExtensionWindow*>(nativeObj);
+    if (aniExtWinPtr == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "[ANI]aniExtWinPtr is nullptr");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+    return aniExtWinPtr->SnapshotIgnorePrivacy(env);
+}
+
 static void ExtWindowOnRectChange(ani_env* env, ani_object obj, ani_long nativeObj, ani_int reason, ani_object callback)
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "[ANI]");
@@ -559,39 +682,51 @@ ani_object createExtensionWindow(ani_env* env, ani_long win, ani_int hostId)
 extern "C" {
 using namespace OHOS::Rosen;
 std::array extensionWindowNativeMethods = {
-    ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
-    ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
+    ani_native_function {"getProperties", "lC{std.core.Object}:i", reinterpret_cast<void *>(ExtWindowGetProperties)},
+    ani_native_function {"getWindowAvoidArea", "liC{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-    ani_native_function {"setWaterMarkFlag", "JZ:I",
+    ani_native_function {"setWaterMarkFlag", "lz:i",
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
-    ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
+    ani_native_function {"hideNonSecureWindows", "lz:i", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Z:L@ohos/window/window/Window;",
+        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}z:C{@ohos.window.window.Window}",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
-    ani_native_function {"occupyEvents", "JI:V", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
-    ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"occupyEvents", "li:", reinterpret_cast<void *>(ExtWindowOccupyEvents)},
+    ani_native_function {"snapshot", "l:C{@ohos.multimedia.image.image.PixelMap}",
+        reinterpret_cast<void *>(ExtWindowSnapshot)},
+    ani_native_function {"snapshotSync", "l:C{@ohos.multimedia.image.image.PixelMap}",
+        reinterpret_cast<void *>(ExtWindowSnapshotSync)},
+    ani_native_function {"snapshotIgnorePrivacy", "l:C{@ohos.multimedia.image.image.PixelMap}",
+        reinterpret_cast<void *>(ExtWindowSnapshotIgnorePrivacy)},
+    ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(RegisterExtWindowCallback)},
-    ani_native_function {"offSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(UnregisterExtWindowCallback)},
-    ani_native_function {"onRectChange", "JILstd/core/Object;:V", reinterpret_cast<void *>(ExtWindowOnRectChange)},
-    ani_native_function {"offRectChange", "JLstd/core/Object;:V", reinterpret_cast<void *>(ExtWindowOffRectChange)},
+    ani_native_function {"onRectChange", "liC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOnRectChange)},
+    ani_native_function {"offRectChange", "lC{std.core.Object}:", reinterpret_cast<void *>(ExtWindowOffRectChange)},
     };
 
 std::array extensionWindowHostNativeMethods = {
-    ani_native_function {"getProperties", "JLstd/core/Object;:I", reinterpret_cast<void *>(ExtWindowGetProperties)},
-    ani_native_function {"getWindowAvoidArea", "JILstd/core/Object;:I",
+    ani_native_function {"getProperties", "lC{std.core.Object}:i", reinterpret_cast<void *>(ExtWindowGetProperties)},
+    ani_native_function {"getWindowAvoidArea", "liC{std.core.Object}:i",
         reinterpret_cast<void *>(ExtWindowGetWindowAvoidArea)},
-    ani_native_function {"setWaterMarkFlag", "JZ:I",
+    ani_native_function {"setWaterMarkFlag", "lz:i",
         reinterpret_cast<void *>(ExtWindowSetWaterMarkFlag)},
-    ani_native_function {"hidePrivacyContentForHost", "JZ:I",
+    ani_native_function {"hidePrivacyContentForHost", "lz:i",
         reinterpret_cast<void *>(ExtWindowHidePrivacyContentForHost)},
-    ani_native_function {"hideNonSecureWindows", "JZ:I", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
+    ani_native_function {"hideNonSecureWindows", "lz:i", reinterpret_cast<void *>(ExtWindowHideNonSecureWindows)},
     ani_native_function {"createSubWindowWithOptions",
-        "JLstd/core/String;L@ohos/window/window/SubWindowOptions;Z:L@ohos/window/window/Window;",
+        "lC{std.core.String}C{@ohos.window.window.SubWindowOptions}z:C{@ohos.window.window.Window}",
         reinterpret_cast<void *>(ExtWindowCreateSubWindowWithOptions)},
-    ani_native_function {"onSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"snapshot", "l:C{@ohos.multimedia.image.image.PixelMap}",
+        reinterpret_cast<void *>(ExtWindowSnapshot)},
+    ani_native_function {"snapshotSync", "l:C{@ohos.multimedia.image.image.PixelMap}",
+        reinterpret_cast<void *>(ExtWindowSnapshotSync)},
+    ani_native_function {"snapshotIgnorePrivacy", "l:C{@ohos.multimedia.image.image.PixelMap}",
+        reinterpret_cast<void *>(ExtWindowSnapshotIgnorePrivacy)},
+    ani_native_function {"onSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(RegisterExtWindowCallback)},
-    ani_native_function {"offSync", "JLstd/core/String;Lstd/core/Object;:V",
+    ani_native_function {"offSync", "lC{std.core.String}C{std.core.Object}:",
         reinterpret_cast<void *>(UnregisterExtWindowCallback)},
     };
 

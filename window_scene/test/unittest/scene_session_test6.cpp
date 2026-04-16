@@ -23,6 +23,8 @@
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_accesstoken_kit.h"
+#include "mock/mock_scene_session.h"
+#include "mock_vsync_station.h"
 #include "screen_manager.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/sub_session.h"
@@ -282,6 +284,7 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo01, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     sceneSession->property_ = property;
+
     property->subWindowLevel_ = 100;
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
@@ -324,8 +327,11 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo02, TestSize.Level1)
     // test set isAnchorEnabled_
     sceneSession->windowAnchorInfo_.isAnchorEnabled_ = false;
     WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->parentSession_ = parentSession;
     sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_TRUE(sceneSession->windowAnchorInfo_.isAnchorEnabled_);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
 
     //test after set flag, call func
     std::shared_ptr<bool> isCall = std::make_shared<bool>(false);
@@ -336,6 +342,28 @@ HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo02, TestSize.Level1)
     EXPECT_NE(nullptr, sceneSession->onWindowAnchorInfoChangeFunc_);
     sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
     EXPECT_TRUE(*isCall);
+}
+
+/**
+ * @tc.name: SetWindowAnchorInfo
+ * @tc.desc: SetWindowAnchorInfo03
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, SetWindowAnchorInfo03, TestSize.Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->property_ = property;
+
+    // create windowAnchorInfo
+    WindowAnchorInfo windowAnchorInfo;
+    windowAnchorInfo.isFromAttachOrDetach_ = false;
+    sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = false;
+    WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_DEVICE_NOT_SUPPORT);
 }
 
 /**
@@ -388,6 +416,8 @@ HWTEST_F(SceneSessionTest6, CalcSubWindowRectByAnchor02, TestSize.Level1)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
     sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->parentSession_ = parentSession;
 
     WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::TOP_START, 0, 0 };
     WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
@@ -431,6 +461,8 @@ HWTEST_F(SceneSessionTest6, CalcSubWindowRectByAnchor03, TestSize.Level1)
     property->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     sceneSession->property_ = property;
     sceneSession->systemConfig_.supportFollowRelativePositionToParent_ = true;
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession->parentSession_ = parentSession;
 
     WindowAnchorInfo windowAnchorInfo = { true, WindowAnchor::CENTER, 0, 0 };
     WSError ret = sceneSession->SetWindowAnchorInfo(windowAnchorInfo);
@@ -1502,41 +1534,118 @@ HWTEST_F(SceneSessionTest6, TestGetWindowDecoration, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRunAfterNVsyncs
- * @tc.desc: Test RunAfterNVsyncs and RestoreGravityWhenDragEnd with various conditions
+ * @tc.name: TestRunAfterNVsyncsOnce
+ * @tc.desc: Verify RunAfterNVsyncs executes callback after 1 vsync
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncs, TestSize.Level1)
+HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncsOnce, TestSize.Level1)
 {
     SessionInfo info;
     auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    session->SetVsyncStation(mockVsyncStation);
+
     bool taskExecuted = false;
 
-    // Case 1: vsyncCount = 1
-    session->requestNextVsyncFunc_ = [](const std::shared_ptr<VsyncCallback>& cb) {
-        cb->onCallback(0, 0);
-    };
-    session->RunAfterNVsyncs(1, [&](int64_t, int64_t) { taskExecuted = true; });
-    EXPECT_TRUE(taskExecuted);
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .Times(1)
+        .WillOnce(Invoke([&](const std::shared_ptr<VsyncCallback>& cb) {
+            ASSERT_NE(cb, nullptr);
+            cb->onCallback(0, 0);
+        }));
 
-    // Case 2: vsyncCount = 3
-    taskExecuted = false;
-    session->requestNextVsyncFunc_ = [](const std::shared_ptr<VsyncCallback>& cb) {
-        static int times = 0;
-        if (++times <= 3) cb->onCallback(0, 0);
-    };
-    session->RunAfterNVsyncs(3, [&](int64_t, int64_t) { taskExecuted = true; });
-    EXPECT_TRUE(taskExecuted);
+    session->RunAfterNVsyncs(1, [&](int64_t, int64_t) {
+        taskExecuted = true;
+    });
 
-    // Case 3: requestNextVsyncFunc_ = nullptr
-    taskExecuted = false;
-    session->requestNextVsyncFunc_ = nullptr;
-    session->RunAfterNVsyncs(1, [&](int64_t, int64_t) { taskExecuted = true; });
+    EXPECT_TRUE(taskExecuted);
+}
+
+/**
+ * @tc.name: TestRunAfterNVsyncsThreeTimes
+ * @tc.desc: Verify RunAfterNVsyncs executes callback after 3 vsyncs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncsThreeTimes, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    session->SetVsyncStation(mockVsyncStation);
+
+    bool taskExecuted = false;
+    int vsyncTimes = 0;
+
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .Times(3)
+        .WillRepeatedly(Invoke([&](const std::shared_ptr<VsyncCallback>& cb) {
+            ASSERT_NE(cb, nullptr);
+            if (++vsyncTimes <= 3) {
+                cb->onCallback(0, 0);
+            }
+        }));
+
+    session->RunAfterNVsyncs(3, [&](int64_t, int64_t) {
+        taskExecuted = true;
+    });
+
+    EXPECT_EQ(vsyncTimes, 3);
+    EXPECT_TRUE(taskExecuted);
+}
+
+/**
+ * @tc.name: TestRunAfterNVsyncsWithNullVsyncStation
+ * @tc.desc: Verify RunAfterNVsyncs does nothing when VsyncStation is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestRunAfterNVsyncsWithNullVsyncStation, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    bool taskExecuted = false;
+
+    session->SetVsyncStation(nullptr);
+    session->RunAfterNVsyncs(1, [&](int64_t, int64_t) {
+        taskExecuted = true;
+    });
+
     EXPECT_FALSE(taskExecuted);
+}
 
-    // Case 4: RestoreGravityWhenDragEnd will not crash
+/**
+ * @tc.name: TestRestoreGravityWhenDragEndNormal
+ * @tc.desc: Verify RestoreGravityWhenDragEnd triggers RestoreToPreDragGravity after delayed vsyncs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestRestoreGravityWhenDragEndNormal, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    // Force PostTask to execute immediately
+    session->handler_ = nullptr;
+
+    auto moveDragController = sptr<MoveDragController>::MakeSptr(wptr(session));
+    moveDragController->preDragGravity_ = Gravity::BOTTOM_RIGHT;
+    session->moveDragController_ = moveDragController;
+
+    struct RSSurfaceNodeConfig config;
+    auto surfaceNode = RSSurfaceNode::Create(config);
+    session->surfaceNode_ = surfaceNode;
+
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .WillRepeatedly(Invoke([&](const std::shared_ptr<VsyncCallback>& cb) {
+            ASSERT_NE(cb, nullptr);
+            cb->onCallback(0, 0);
+        }));
+    session->SetVsyncStation(mockVsyncStation);
+
     session->RestoreGravityWhenDragEnd();
-    SUCCEED();
+
+    Gravity gravity = surfaceNode->GetStagingProperties().GetFrameGravity();
+    EXPECT_EQ(gravity, Gravity::BOTTOM_RIGHT);
+    EXPECT_EQ(moveDragController->preDragGravity_, std::nullopt);
 }
 
 /**
@@ -1570,306 +1679,6 @@ HWTEST_F(SceneSessionTest6, DisableUIFirstIfNeed, TestSize.Level1)
     EXPECT_NE(nullptr, session->GetLeashWinShadowSurfaceNode());
     session->DisableUIFirstIfNeed();
     EXPECT_EQ(false, session->isUIFirstEnabled_);
-}
-
-/**
- * @tc.name: RegisterRotationLockChangeCallback
- * @tc.desc: RegisterRotationLockChangeCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, RegisterRotationLockChangeCallback, TestSize.Level0)
-{
-    SessionInfo info;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    sceneSession->specificCallback_ = nullptr;
-    auto task = [] (bool locked) {};
-    sceneSession->RegisterRotationLockChangeCallback(std::move(task));
-    EXPECT_EQ(nullptr, sceneSession->specificCallback_);
-
-    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sceneSession->specificCallback_ = callback;
-    sceneSession->RegisterRotationLockChangeCallback(nullptr);
-    EXPECT_EQ(nullptr, callback->onRotationLockChange_);
-    sceneSession->RegisterRotationLockChangeCallback(std::move(task));
-    EXPECT_NE(nullptr, callback->onRotationLockChange_);
-}
-
-/**
- * @tc.name: HandleActionUpdateRotationLockChange
- * @tc.desc: HandleActionUpdateRotationLockChange
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, HandleActionUpdateRotationLockChange, TestSize.Level0)
-{
-    SessionInfo info;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetRotationLocked(false);
-    sceneSession->specificCallback_ = nullptr;
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_ROTATION_LOCK_CHANGE;
-    WMError ret = sceneSession->HandleActionUpdateRotationLockChange(property, action);
-    EXPECT_EQ(ret, WMError::WM_OK);
-
-    sptr<SceneSession::SpecificSessionCallback> callback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    EXPECT_NE(nullptr, callback);
-    sceneSession->specificCallback_ = callback;
-    ret = sceneSession->HandleActionUpdateRotationLockChange(property, action);
-    EXPECT_EQ(ret, WMError::WM_OK);
-
-    auto task = [] (bool locked) {};
-    callback->onRotationLockChange_ = task;
-    ret = sceneSession->HandleActionUpdateRotationLockChange(property, action);
-    EXPECT_EQ(ret, WMError::WM_OK);
-}
-
-/**
- * @tc.name: NotifyPageRotationIsIgnored
- * @tc.desc: NotifyPageRotationIsIgnored function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, NotifyPageRotationIsIgnored, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "NotifyPageRotationIsIgnored";
-    info.bundleName_ = "NotifyPageRotationIsIgnored";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, session);
-    auto ret = session->NotifyPageRotationIsIgnored();
-    EXPECT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: ConvertOrientationAndRotation
- * @tc.desc: ConvertOrientationAndRotation function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, ConvertOrientationAndRotation, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertOrientationAndRotation";
-    info.bundleName_ = "ConvertOrientationAndRotation";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, session);
-    session->GetSessionProperty()->SetDisplayId(1001);
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
-
-    RotationInfoType from = RotationInfoType::DISPLAY_ORIENTATION;
-    RotationInfoType to = RotationInfoType::DISPLAY_ORIENTATION;
-    int32_t value = -1;
-    int32_t convertedValue = 0;
-    auto ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-
-    value = 4;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-
-    value = 2;
-    from = RotationInfoType::DISPLAY_ROTATION;
-    to = RotationInfoType::DISPLAY_ROTATION;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    from = RotationInfoType::DISPLAY_ROTATION;
-    to = RotationInfoType::WINDOW_ORIENTATION;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    from = RotationInfoType::DISPLAY_ROTATION;
-    to = RotationInfoType::DISPLAY_ORIENTATION;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    from = RotationInfoType::DISPLAY_ORIENTATION;
-    to = RotationInfoType::WINDOW_ORIENTATION;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    from = RotationInfoType::DISPLAY_ORIENTATION;
-    to = RotationInfoType::DISPLAY_ROTATION;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    from = RotationInfoType::WINDOW_ORIENTATION;
-    to = RotationInfoType::DISPLAY_ORIENTATION;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-
-    from = RotationInfoType::WINDOW_ORIENTATION;
-    to = RotationInfoType::DISPLAY_ROTATION;
-    ret = session->ConvertOrientationAndRotation(from, to, value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: ConvertDisplayOrientationToWindowOrientation
- * @tc.desc: ConvertDisplayOrientationToWindowOrientation function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, ConvertDisplayOrientationToWindowOrientation, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertDisplayOrientationToWindowOrientation";
-    info.bundleName_ = "ConvertDisplayOrientationToWindowOrientation";
-    sptr<SceneSession> session = nullptr;
-    int32_t value = 4;
-    int32_t convertedValue = 0;
-
-    auto ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-    value = 5;
-    ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-    value = 2;
-    ret = session->ConvertDisplayOrientationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: ConvertWindowOrientationToDisplayOrientation
- * @tc.desc: ConvertWindowOrientationToDisplayOrientation function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, ConvertWindowOrientationToDisplayOrientation, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertWindowOrientationToDisplayOrientation";
-    info.bundleName_ = "ConvertWindowOrientationToDisplayOrientation";
-    sptr<SceneSession> session = nullptr;
-    int32_t value = 4;
-    int32_t convertedValue = 0;
-    value = 5;
-    auto ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_ERROR_INVALID_PARAM, ret);
-    value = 2;
-    ret = session->ConvertWindowOrientationToDisplayOrientation(value, convertedValue);
-    EXPECT_EQ(WSError::WS_OK, ret);
-}
-
-/**
- * @tc.name: ConvertDisplayRotationToDisplayOrientation
- * @tc.desc: ConvertDisplayRotationToDisplayOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, ConvertDisplayRotationToDisplayOrientation, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertDisplayRotationToDisplayOrientation";
-    info.bundleName_ = "ConvertDisplayRotationToDisplayOrientation";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->GetSessionProperty()->SetDisplayId(1001);
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
-
-    int32_t value = 2;
-    int32_t convertedValue = 0;
-    WSError result = sceneSession->ConvertDisplayRotationToDisplayOrientation(value, convertedValue);
-    EXPECT_EQ(result, WSError::WS_OK);
-    
-    sceneSession->GetSessionProperty()->SetDisplayId(1024);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
-    WSError result1 = sceneSession->ConvertDisplayRotationToDisplayOrientation(value, convertedValue);
-    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
-}
-
-/**
- * @tc.name: ConvertDisplayOrientationToDisplayRotation
- * @tc.desc: ConvertDisplayOrientationToDisplayRotation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, ConvertDisplayOrientationToDisplayRotation, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertDisplayOrientationToDisplayRotation";
-    info.bundleName_ = "ConvertDisplayOrientationToDisplayRotation";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->GetSessionProperty()->SetDisplayId(1001);
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
-
-    int32_t value = 2;
-    int32_t convertedValue = 0;
-    WSError result = sceneSession->ConvertDisplayOrientationToDisplayRotation(value, convertedValue);
-    EXPECT_EQ(result, WSError::WS_OK);
-    
-    sceneSession->GetSessionProperty()->SetDisplayId(1024);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
-    WSError result1 = sceneSession->ConvertDisplayOrientationToDisplayRotation(value, convertedValue);
-    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
-}
-
-/**
- * @tc.name: ConvertDisplayRotationToWindowOrientation
- * @tc.desc: ConvertDisplayRotationToWindowOrientation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, ConvertDisplayRotationToWindowOrientation, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertDisplayRotationToWindowOrientation";
-    info.bundleName_ = "ConvertDisplayRotationToWindowOrientation";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->GetSessionProperty()->SetDisplayId(1001);
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
-
-    int32_t value = 2;
-    int32_t convertedValue = 0;
-    WSError result = sceneSession->ConvertDisplayRotationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(result, WSError::WS_OK);
-    
-    sceneSession->GetSessionProperty()->SetDisplayId(1024);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
-    WSError result1 = sceneSession->ConvertDisplayRotationToWindowOrientation(value, convertedValue);
-    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
-}
-
-/**
- * @tc.name: ConvertWindowOrientationToDisplayRotation
- * @tc.desc: ConvertWindowOrientationToDisplayRotation
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest6, ConvertWindowOrientationToDisplayRotation, Function | SmallTest | Level2)
-{
-    SessionInfo info;
-    info.abilityName_ = "ConvertWindowOrientationToDisplayRotation";
-    info.bundleName_ = "ConvertWindowOrientationToDisplayRotation";
-
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_NE(sceneSession, nullptr);
-    sceneSession->GetSessionProperty()->SetDisplayId(1001);
-    ScreenSessionConfig config;
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
-
-    int32_t value = 2;
-    int32_t convertedValue = 0;
-    WSError result = sceneSession->ConvertWindowOrientationToDisplayRotation(value, convertedValue);
-    EXPECT_EQ(result, WSError::WS_OK);
-    
-    sceneSession->GetSessionProperty()->SetDisplayId(1024);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1024, nullptr);
-    WSError result1 = sceneSession->ConvertWindowOrientationToDisplayRotation(value, convertedValue);
-    EXPECT_EQ(result1, WSError::WS_ERROR_INVALID_DISPLAY);
 }
 
 /*
@@ -1917,25 +1726,17 @@ HWTEST_F(SceneSessionTest6, HandleActionUpdateSnapshotSkip, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifySnapshotUpdate
- * @tc.desc: NotifySnapshotUpdate
+ * @tc.name: NotifyRemovePrelaunchStartingWindow
+ * @tc.desc: NotifyRemovePrelaunchStartingWindow test
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, NotifySnapshotUpdate, TestSize.Level1)
+HWTEST_F(SceneSessionTest6, NotifyRemovePrelaunchStartingWindow, TestSize.Level1)
 {
     SessionInfo info;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     EXPECT_NE(nullptr, sceneSession);
-    sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    WMError ret = sceneSession->NotifySnapshotUpdate();
-    EXPECT_EQ(ret, WMError::WM_OK);
-
     sceneSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    ret = sceneSession->NotifySnapshotUpdate();
-    EXPECT_EQ(ret, WMError::WM_OK);
-
-    sceneSession->collaboratorType_ = static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
-    ret = sceneSession->NotifySnapshotUpdate();
+    WMError ret = sceneSession->NotifyRemovePrelaunchStartingWindow();
     EXPECT_EQ(ret, WMError::WM_OK);
 }
 
@@ -2004,44 +1805,101 @@ HWTEST_F(SceneSessionTest6, TestIsCrossDisplayDragSupported, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRequestMoveResampleOnNextVsync
- * @tc.desc: Covers all branches of RequestMoveResampleOnNextVsync
+ * @tc.name: TestRequestMoveResampleOnNextVsyncNotStartMove
+ * @tc.desc: Skip resample when drag not started
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest6, TestRequestMoveResampleOnNextVsync, TestSize.Level1)
+HWTEST_F(SceneSessionTest6, TestRequestMoveResampleOnNextVsyncNotStartMove, TestSize.Level1)
 {
     SessionInfo info;
-    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
+
+    // Simulate move not started
+    session->moveDragController_->isStartMove_ = false;
+
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    session->SetVsyncStation(mockVsyncStation);
 
     // Force PostTask to execute immediately
     session->handler_ = nullptr;
 
-    bool called = false;
-    session->requestNextVsyncFunc_ = [&](auto cb) {
-        cb->onCallback(100000, 0);
-        called = true;
-    };
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .WillRepeatedly(Invoke([&](const std::shared_ptr<VsyncCallback>& cb) {
+            ASSERT_NE(cb, nullptr);
+            cb->onCallback(0, 0);
+        }));
 
-    // Case 1: Normal call → should run callback
-    session->canRequestMoveResampleVsync_ = true;
-    session->moveDragController_->isStartMove_ = false;
-    session->RequestMoveResampleOnNextVsync(true, true);
-    EXPECT_TRUE(called);
+    EXPECT_CALL(*session, SetSurfaceBounds(_, _, _)).Times(0);
 
-    called = false;
-    session->canRequestMoveResampleVsync_ = true;
+    session->RequestMoveResampleOnNextVsync();
+}
+
+/**
+ * @tc.name: TestRequestMoveResampleOnNextVsyncResampleInactive
+ * @tc.desc: Skip resample when move resample is inactive
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestRequestMoveResampleOnNextVsyncResampleInactive, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
+
+    // Simulate move started but resample inactive
     session->moveDragController_->isStartMove_ = true;
-    session->RequestMoveResampleOnNextVsync(true, true);
-    EXPECT_TRUE(called);
+    session->moveDragController_->moveDragProperty_.isMoveResampleActive_ = false;
 
-    // Case 2: Multiple requests before next vsync → ignored
-    called = false;
-    session->canRequestMoveResampleVsync_ = true;
-    session->requestNextVsyncFunc_ = [&](auto cb) {};
-    session->RequestMoveResampleOnNextVsync(false, false);
-    session->RequestMoveResampleOnNextVsync(false, false);
-    EXPECT_FALSE(called);
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    session->SetVsyncStation(mockVsyncStation);
+    session->handler_ = nullptr;
+
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .WillRepeatedly(Invoke([&](const std::shared_ptr<VsyncCallback>& cb) {
+            ASSERT_NE(cb, nullptr);
+            cb->onCallback(0, 0);
+        }));
+
+    EXPECT_CALL(*session, SetSurfaceBounds(_, _, _)).Times(0);
+
+    session->RequestMoveResampleOnNextVsync();
+}
+
+/**
+ * @tc.name: TestRequestMoveResampleOnNextVsyncResampleActive
+ * @tc.desc: Resample updates target rect and schedules next vsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, TestRequestMoveResampleOnNextVsyncResampleActive, TestSize.Level1)
+{
+    SessionInfo info;
+    auto session = sptr<SceneSessionMocker>::MakeSptr(info, nullptr);
+
+    session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
+    session->moveDragController_->isStartMove_ = true;
+    session->moveDragController_->moveDragProperty_.isMoveResampleActive_ = true;
+    session->moveDragController_->moveDragProperty_.isResampleFpsRangeChecked_ = true;
+
+    auto mockVsyncStation = std::make_shared<MockVsyncStation>();
+    session->SetVsyncStation(mockVsyncStation);
+    session->handler_ = nullptr;
+
+    int vsyncCount = 0;
+    EXPECT_CALL(*mockVsyncStation, RequestVsync(_))
+        .WillRepeatedly(Invoke([&](const std::shared_ptr<VsyncCallback>& cb) {
+            ASSERT_NE(cb, nullptr);
+            if (++vsyncCount <= 2) {
+                cb->onCallback(0, 0);
+            }
+        }));
+
+    EXPECT_CALL(*session, SetSurfaceBounds(_, true, true)).Times(AtLeast(1));
+
+    session->RequestMoveResampleOnNextVsync();
+
+    EXPECT_GE(vsyncCount, 2);
 }
 
 /**
@@ -2143,6 +2001,173 @@ HWTEST_F(SceneSessionTest6, SetSidebarBlurMaximize2, Function | SmallTest | Leve
     session->SetSidebarBlurMaximize(false);
     EXPECT_CALL(*sessionStageMocker, SetSidebarBlurStyleWithType(SidebarBlurType::DEFAULT_MAXIMIZE)).Times(1);
     session->SetSidebarBlurMaximize(true);
+}
+
+/**
+ * @tc.name: NotifyModeSwitchInfo
+ * @tc.desc: NotifyModeSwitchInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, NotifyModeSwitchInfo, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = sessionStageMocker;
+    EXPECT_CALL(*sessionStageMocker, UpdateWindowUIType(session->systemConfig_.windowUIType_)).Times(1);
+    session->NotifyModeSwitchInfo();
+    session->sessionStage_ = nullptr;
+    EXPECT_EQ(session->NotifyModeSwitchInfo(), WSError::WS_ERROR_NULLPTR);
+}
+
+/**
+ * @tc.name: ClearAllModifiers
+ * @tc.desc: ClearAllModifiers
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ClearAllModifiers, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    g_errlog.clear();
+    LOG_SetCallback(ScreenSessionLogCallback);
+    session->ClearAllModifiers();
+    EXPECT_TRUE(g_errlog.find("surfaceNode_ is null") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: ClearAllModifiers1
+ * @tc.desc: ClearAllModifiers
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, ClearAllModifiers1, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    struct RSSurfaceNodeConfig config;
+    std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
+    EXPECT_NE(surfaceNode, nullptr);
+    session->surfaceNode_ = surfaceNode;
+    session->ClearAllModifiers();
+    EXPECT_NE(session->surfaceNode_, nullptr);
+}
+
+/**
+ * @tc.name: UpdatePropertyWhenTriggerMode
+ * @tc.desc: UpdatePropertyWhenTriggerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, UpdatePropertyWhenTriggerMode, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto sessionStageMocker = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = nullptr;
+    EXPECT_CALL(*sessionStageMocker, UpdatePropertyWhenTriggerMode(session->property_)).Times(0);
+    session->UpdatePropertyWhenTriggerMode();
+    session->sessionStage_ = sessionStageMocker;
+    EXPECT_CALL(*sessionStageMocker, UpdatePropertyWhenTriggerMode(session->property_)).Times(1);
+    session->UpdatePropertyWhenTriggerMode();
+}
+
+/**
+ * @tc.name: PreWindowPropertyConstructors
+ * @tc.desc: Test PreWindowProperty constructors and assignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, PreWindowPropertyConstructors, Function | SmallTest | Level1)
+{
+    PreWindowProperty defaultProp;
+    EXPECT_EQ(defaultProp.rotation, 0u);
+    EXPECT_EQ(defaultProp.width, 0u);
+    EXPECT_EQ(defaultProp.height, 0u);
+    
+    PreWindowProperty paramProp(90, 1920, 1080);
+    EXPECT_EQ(paramProp.rotation, 90u);
+    EXPECT_EQ(paramProp.width, 1920u);
+    EXPECT_EQ(paramProp.height, 1080u);
+    
+    PreWindowProperty zeroProp(0, 0, 0);
+    EXPECT_EQ(zeroProp.rotation, 0u);
+    EXPECT_EQ(zeroProp.width, 0u);
+    EXPECT_EQ(zeroProp.height, 0u);
+    
+    std::vector<uint32_t> rotations = {0, 90, 180, 270};
+    for (uint32_t rotation : rotations) {
+        PreWindowProperty rotationProp(rotation, 1920, 1080);
+        EXPECT_EQ(rotationProp.rotation, rotation);
+        EXPECT_EQ(rotationProp.width, 1920u);
+        EXPECT_EQ(rotationProp.height, 1080u);
+    }
+}
+
+/**
+ * @tc.name: PreCalcWindowPropertyBasic
+ * @tc.desc: Test PreCalcWindowProperty basic functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, PreCalcWindowPropertyBasic, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    
+    PreWindowProperty resultWithoutCallback = session->PreCalcWindowProperty();
+    EXPECT_EQ(resultWithoutCallback.rotation, 0u);
+    EXPECT_EQ(resultWithoutCallback.width, 0u);
+    EXPECT_EQ(resultWithoutCallback.height, 0u);
+    
+    bool callbackCalled = false;
+    NotifyPreCalcWindowPropertyFunc callback = [&callbackCalled]() {
+        callbackCalled = true;
+    };
+    
+    session->SetPreCalcWindowPropertyCallback(callback);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    
+    PreWindowProperty resultWithCallback = session->PreCalcWindowProperty();
+    EXPECT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: PreCalcWindowPropertyWithValues
+ * @tc.desc: Test PreCalcWindowProperty with actual values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest6, PreCalcWindowPropertyWithValues, Function | SmallTest | Level1)
+{
+    SessionInfo info;
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+    
+    struct TestCase {
+        uint32_t rotation;
+        uint32_t width;
+        uint32_t height;
+    };
+    
+    std::vector<TestCase> testCases = {
+        {0, 1920, 1080},
+        {90, 1080, 1920},
+        {180, 3840, 2160},
+        {270, 2560, 1440}
+    };
+    
+    for (const auto& testCase : testCases) {
+        NotifyPreCalcWindowPropertyFunc callback = [session, testCase]() {
+            PreWindowProperty prop(testCase.rotation, testCase.width, testCase.height);
+            session->preWindowPropertyFuture_.SetValue(prop);
+        };
+        
+        session->SetPreCalcWindowPropertyCallback(callback);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        
+        PreWindowProperty result = session->PreCalcWindowProperty();
+        EXPECT_EQ(result.rotation, testCase.rotation);
+        EXPECT_EQ(result.width, testCase.width);
+        EXPECT_EQ(result.height, testCase.height);
+    }
 }
 } // namespace
 } // namespace Rosen

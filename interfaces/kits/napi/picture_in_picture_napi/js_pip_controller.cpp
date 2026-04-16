@@ -44,6 +44,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setPiPControlEnabled", moduleName, JsPipController::SetPiPControlEnabled);
     BindNativeFunction(env, object, "getPiPWindowInfo", moduleName, JsPipController::GetPiPWindowInfo);
     BindNativeFunction(env, object, "getPiPSettingSwitch", moduleName, JsPipController::GetPiPSettingSwitch);
+    BindNativeFunction(env, object, "isPiPActive", moduleName, JsPipController::IsPiPActive);
     BindNativeFunction(env, object, "on", moduleName, JsPipController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsPipController::UnregisterCallback);
     // test api
@@ -214,8 +215,9 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         TLOGE(WmsLogTag::WMS_PIP, "Invalid typeNode");
         return NapiThrowInvalidParam(env, "[PiPWindow][updateContentNode]msg: Invalid typeNode");
     }
-    napi_ref typeNodeRef = nullptr;
-    napi_create_reference(env, typeNode, NUMBER_ONE, &typeNodeRef);
+    napi_ref ref = nullptr;
+    napi_create_reference(env, typeNode, NUMBER_ONE, &ref);
+    std::shared_ptr<NativeReference> typeNodeRef(reinterpret_cast<NativeReference*>(ref));
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [env, task = napiAsyncTask, typeNodeRef,
@@ -223,26 +225,18 @@ napi_value JsPipController::OnUpdateContentNode(napi_env env, napi_callback_info
         if (!PictureInPictureManager::IsSupportPiP()) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT),
                 "Capability not supported. Failed to call the API due to limited device capabilities."));
-            napi_delete_reference(env, typeNodeRef);
             return;
         }
         auto pipController = weak.promote();
         if (pipController == nullptr) {
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
                 "PiP internal error."));
-            napi_delete_reference(env, typeNodeRef);
             return;
         }
-        napi_ref oldTypeNodeRef = pipController->GetTypeNode();
         pipController->UpdateContentNodeRef(typeNodeRef);
-        if (oldTypeNodeRef != nullptr) {
-            napi_delete_reference(env, oldTypeNodeRef);
-            oldTypeNodeRef = nullptr;
-        }
         task->Resolve(env, NapiGetUndefined(env));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnUpdateContentNode") != napi_status::napi_ok) {
-        napi_delete_reference(env, typeNodeRef);
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }
@@ -436,6 +430,55 @@ napi_value JsPipController::OnGetPiPSettingSwitch(napi_env env, napi_callback_in
         napiAsyncTask->Reject(env, CreateJsError(env,
             static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
     }
+    return result;
+}
+
+napi_value JsPipController::IsPiPActive(napi_env env, napi_callback_info info)
+{
+    JsPipController* me = CheckParamsAndGetThis<JsPipController>(env, info);
+    return (me != nullptr) ? me->OnIsPiPActive(env, info) : nullptr;
+}
+
+napi_value JsPipController::OnIsPiPActive(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "called");
+    wptr<PictureInPictureController> weakController(pipController_);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    std::shared_ptr<bool> statusPtr = std::make_shared<bool>(false);
+    NapiAsyncTask::ExecuteCallback execute = [weakController, errCodePtr, statusPtr] {
+        if (errCodePtr == nullptr || statusPtr == nullptr) {
+            return;
+        }
+        auto pipController = weakController.promote();
+        if (pipController == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR;
+            return;
+        }
+        bool status = false;
+        *errCodePtr = ConvertErrorToCode(pipController->IsPiPActive(status));
+        if (*errCodePtr == WmErrorCode::WM_OK) {
+            *statusPtr = status;
+        } else {
+            *statusPtr = false;
+        }
+    };
+    NapiAsyncTask::CompleteCallback complete = [errCodePtr, statusPtr]
+        (napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodePtr == nullptr || statusPtr == nullptr) {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
+                    "PiP internal error."));
+                return;
+            }
+            if (*errCodePtr == WmErrorCode::WM_OK) {
+                task.Resolve(env, CreateJsValue(env, *statusPtr));
+            } else {
+                task.Reject(env, CreateJsError(env, static_cast<int32_t>(*errCodePtr),
+                    "JsPipController::OnIsPiPActive failed."));
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsPipController::OnIsPiPActive", env,
+        CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
 

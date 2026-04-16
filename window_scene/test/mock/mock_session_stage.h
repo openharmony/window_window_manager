@@ -51,6 +51,8 @@ public:
     MOCK_METHOD1(UpdateWindowMode, WSError(WindowMode mode));
     MOCK_METHOD1(GetTopNavDestinationName, WSError(std::string& topNavDestName));
     MOCK_METHOD1(NotifyLayoutFinishAfterWindowModeChange, WSError(WindowMode mode));
+    MOCK_METHOD1(NotifySubWindowAfterParentWindowSizeChange, WSError(Rect rect));
+    MOCK_METHOD1(NotifySubWindowAfterParentWindowStatusChange, WSError(WindowMode mode));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
     MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));
@@ -62,6 +64,7 @@ public:
     MOCK_METHOD1(NotifyWindowOcclusionState, WSError(const WindowVisibilityState state));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
     MOCK_METHOD1(NotifySingleHandTransformChange, void(const SingleHandTransform& singleHandTransform));
+    MOCK_METHOD(void, NotifyGlobalScaledRectChange, (const Rect& globalScaledRect), (override));
     MOCK_METHOD1(NotifyDialogStateChange, WSError(bool isForeground));
     MOCK_METHOD1(UpdateDisplayId, WSError(uint64_t displayId));
     MOCK_METHOD2(SetPipActionEvent, WSError(const std::string& action, int32_t status));
@@ -89,11 +92,14 @@ public:
     MOCK_METHOD0(LinkKeyFrameNode, WSError(void));
     MOCK_METHOD1(SetStageKeyFramePolicy, WSError(const KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
+    MOCK_METHOD1(GetSceneNodeCount, WSError(uint32_t& nodeCount));
+    MOCK_METHOD1(GetSceneNodeCount, WSError(const sptr<IRemoteObject>& callback));
+    MOCK_METHOD2(NotifyOrientationExecutionResult, WSError(uint32_t promiseId, OrientationExecutionResult result));
     MOCK_METHOD0(NotifyLifecyclePausedStatus, void(void));
     MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
-    MOCK_METHOD0(NotifyAppForceLandscapeConfigEnableUpdated, WSError(void));
+    MOCK_METHOD2(NotifyAppForceLandscapeConfigEnableUpdated, WSError(bool needUpdateViewport, SelectMode selectMode));
     MOCK_METHOD0(NotifyAppHookWindowInfoUpdated, WSError(void));
     MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
@@ -101,6 +107,12 @@ public:
     MOCK_METHOD1(UpdateBrightness, WSError(float brightness));
     MOCK_METHOD0(AddSidebarBlur, WSError(void));
     MOCK_METHOD1(SetSidebarBlurStyleWithType, WSError(SidebarBlurType type));
+    MOCK_METHOD1(UpdateWindowUIType, WSError(WindowUIType windowUIType));
+    MOCK_METHOD1(UpdatePropertyWhenTriggerMode, WSError(const sptr<WindowSessionProperty>& property));
+    MOCK_METHOD1(UpdateAppHookWindowInfo, WSError(const HookWindowInfo& hookWindowInfo));
+    MOCK_METHOD2(SendFvActionEvent, WSError(const std::string& action, const std::string& reason));
+    MOCK_METHOD2(SyncFvWindowInfo, WSError(const FloatViewWindowInfo& windowInfo, const std::string& reason));
+    MOCK_METHOD1(SyncFvLimits, WSError(const FloatViewLimits& limits));
 };
 } // namespace Rosen
 } // namespace OHOS

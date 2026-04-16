@@ -34,6 +34,7 @@
 #include "screen_group_info.h"
 #include "event_handler.h"
 #include "screen_session_manager/include/screen_rotation_property.h"
+#include "screen_manager/rs_screen_mode_info.h"
 
 namespace OHOS::Rosen {
 using SetScreenSceneDpiFunc = std::function<void(float density)>;
@@ -157,6 +158,7 @@ public:
     void SetFakeScreenSession(sptr<ScreenSession> screenSession);
     sptr<ScreenSession> GetFakeScreenSession() const;
     void UpdatePropertyByActiveMode();
+    void UpdatePropertyByScreenMode(RSScreenModeInfo screenMode);
     void UpdatePropertyByActiveModeChange();
     std::shared_ptr<RSDisplayNode> GetDisplayNode() const;
     void ReleaseDisplayNode();
@@ -170,7 +172,7 @@ public:
     DisplayOrientation CalcDeviceOrientation(Rotation rotation, FoldDisplayMode foldDisplayMode);
     DisplayOrientation CalcDeviceOrientationWithBounds(Rotation rotation,
         FoldDisplayMode foldDisplayMode, const RRect& bounds);
-    RRect CalcBoundsInRotationZero();
+    RRect CalcBoundsInRotationZero(FoldDisplayMode foldDisplayMode);
     RRect CalcBoundsByRotation(Rotation rotation);
     DisplayOrientation GetTargetOrientationWithBounds(
         DisplayOrientation displayRotation, const RRect& boundsInRotationZero, uint32_t rotationOffset);
@@ -178,6 +180,7 @@ public:
     void SetDisplayNodeSecurity();
     void InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startPoint, bool isExtend = false,
         float positionX = 0, float positionY = 0);
+    void ConvertBScreenHeight(uint32_t& height);
 
     DMError GetScreenSupportedColorGamuts(std::vector<ScreenColorGamut>& colorGamuts);
     DMError GetScreenColorGamut(ScreenColorGamut& colorGamut);
@@ -201,6 +204,7 @@ public:
     float ConvertRotationToFloat(Rotation sensorRotation);
 
     void SetDisplayBoundary(const RectF& rect, const uint32_t& offsetY);
+    void SetPhyBounds(const RectF& rect);
     void SetExtendProperty(RRect bounds, bool isCurrentOffScreenRendering);
     void SetScreenRotationLocked(bool isLocked);
     void SetScreenRotationLockedFromJs(bool isLocked);
@@ -221,7 +225,7 @@ public:
     void UpdateRefreshRate(uint32_t refreshRate);
     uint32_t GetRefreshRate();
     void UpdatePropertyByResolution(uint32_t width, uint32_t height);
-    void UpdatePropertyByResolution(const DMRect& rect);
+    ScreenProperty GetPropertyByResolution(const DMRect& rect);
     void UpdatePropertyByFakeBounds(uint32_t width, uint32_t height);
     void SetName(std::string name);
     void SetInnerName(std::string innerName);
@@ -229,12 +233,15 @@ public:
     void SetFrameGravity(Gravity gravity);
 
     void SetHdrFormats(std::vector<uint32_t>&& hdrFormats);
+    void AddHdrFormats(const std::vector<uint32_t>& hdrFormats);
     std::vector<uint32_t> GetHdrFormats();
     void SetColorSpaces(std::vector<uint32_t>&& colorSpaces);
     std::vector<uint32_t> GetColorSpaces();
     void SetSupportedRefreshRate(std::vector<uint32_t>&& supportedRefreshRate);
     std::vector<uint32_t> GetSupportedRefreshRate() const;
     void SetForceCloseHdr(bool isForceCloseHdr);
+    void SetBorderingAreaPercent(uint32_t borderingAreaPercent);
+    uint32_t GetBorderingAreaPercent() const;
 
     VirtualScreenFlag GetVirtualScreenFlag();
     void SetVirtualScreenFlag(VirtualScreenFlag screenFlag);
@@ -269,11 +276,13 @@ public:
     void SetSerialNumber(std::string serialNumber);
     std::string GetSerialNumber() const;
     ScreenShape GetScreenShape() const;
+    void SetPhyWidthAndHeight(uint32_t phyWidth, uint32_t phyHeight);
     void SetValidHeight(uint32_t validHeight);
     void SetValidWidth(uint32_t validWidth);
     uint32_t GetValidHeight() const;
     uint32_t GetValidWidth() const;
     float GetVirtualPixelRatio() const;
+    void SetRogScreenResolution(uint32_t width, uint32_t height) { property_.SetRogScreenResolution(width, height); }
     void SetRealHeight(uint32_t realHeight) { property_.SetScreenRealHeight(realHeight); }
     void SetRealWidth(uint32_t realWidth) { property_.SetScreenRealWidth(realWidth); }
 
@@ -296,6 +305,7 @@ public:
     NodeId nodeId_ {};
 
     int32_t activeIdx_ { 0 };
+    uint32_t borderingAreaPercent_ { 0 };
     std::vector<sptr<SupportedScreenModes>> modes_ = {};
 
     bool isScreenGroup_ { false };
@@ -359,7 +369,7 @@ public:
     bool GetIsEnableRegionRotation();
     void SetIsEnableCanvasRotation(bool isEnableCanvasRotation);
     bool GetIsEnableCanvasRotation();
-    void UpdateDisplayNodeRotation(int rotation);
+    void UpdateDisplayNodeRotation(FoldDisplayMode foldDisplayMode);
     void BeforeScreenPropertyChange(FoldStatus foldStatus);
     void ScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent);
     void FreezeScreen(bool isFreeze);
@@ -379,6 +389,7 @@ public:
 
     void SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode);
     void SetScreenOffScreenRendering();
+    void SetExtendPhysicalScreenResolution(bool offScreenRenderValue);
     void SetScreenOffScreenRenderingInner();
     void SetScreenProperty(ScreenProperty property);
 
@@ -433,12 +444,14 @@ public:
     void SetSupportsFocus(bool focus);
     bool GetSupportsInput() const;
     void SetSupportsInput(bool input);
+    const std::string& GetBundleName() const;
+    void SetBundleName(const std::string& bundleName);
 
     bool GetUniqueRotationLock() const;
     void SetUniqueRotationLock(bool isRotationLocked);
     int32_t GetUniqueRotation() const;
     void SetUniqueRotation(int32_t rotation);
-    const std::map<int32_t, int32_t>& GetUniqueRotationOrientationMap() const;
+    const std::map<int32_t, int32_t> GetUniqueRotationOrientationMap() const;
     bool UpdateRotationOrientationMap(UniqueScreenRotationOptions& rotationOptions, int32_t rotation,
                                             int32_t orientation);
     void SetUniqueRotationOrientationMap(const std::map<int32_t, int32_t>& rotationOrientationMap);
@@ -446,7 +459,13 @@ public:
     void SetVprScaleRatio(float vprScaleRatio);
     float GetVprScaleRatio() const;
     void AddRotationCorrection(Rotation& rotation, FoldDisplayMode displayMode);
+    void ClearPropertyChangeReasonAndEvent();
 
+    void SetBootingConnect(const bool bootingConnect);
+    bool IsBootingConnect() const;
+    void CheckAndNotifyPropertyChange();
+    void SetPropertyNeedNotified(const ScreenProperty& property);
+    ScreenProperty GetPropertyNeedNotified();
 private:
     bool IsVertical(Rotation rotation) const;
     Orientation CalcDisplayOrientationToOrientation(DisplayOrientation displayOrientation) const;
@@ -456,6 +475,7 @@ private:
     ScreenProperty property_;
     mutable std::mutex propertyMutex_; // above guarded by clientProxyMutex_
     std::shared_ptr<RSDisplayNode> displayNode_;
+    std::atomic<int32_t> virtualScreenUserId_ = INVALID_USERID;
     ScreenState screenState_ { ScreenState::INIT };
     std::vector<IScreenChangeListener*> screenChangeListenerList_;
     mutable std::mutex screenChangeListenerListMutex_;
@@ -474,7 +494,7 @@ private:
     std::function<void(float, float)> updateScreenPivotCallback_ = nullptr;
     bool isFold_ = false;
     float currentSensorRotation_ { -1.0f };
-    float currentValidSensorRotation_ { -1.0f };
+    std::atomic<float> currentValidSensorRotation_ { -1.0f };
     mutable std::shared_mutex hdrFormatsMutex_;
     std::vector<uint32_t> hdrFormats_;
     mutable std::shared_mutex colorSpacesMutex_;
@@ -514,8 +534,9 @@ private:
     /*
      * Create Unique Screen Locked Rotation Parameters
      */
-    bool isUniqueRotationLocked_;
-    int32_t uniqueRotation_;
+    bool isUniqueRotationLocked_ { false };
+    int32_t uniqueRotation_ { 0 };
+    mutable std::shared_mutex rotationMapMutex_;
     std::map<int32_t, int32_t> uniqueRotationOrientationMap_;
 
     /*
@@ -526,6 +547,13 @@ private:
     inline static std::atomic<uint64_t> sessionIdGenerator_ { 0 };
     std::atomic<bool> supportsFocus_ { true };
     std::atomic<bool> supportsInput_ { true };
+    std::string bundleName_ = "";
+
+    std::atomic<bool> bootingConnect_ { false };
+
+    mutable std::mutex propertyNeedNotifiedMutex_;
+    ScreenProperty propertyNeedNotified_;
+    bool isNeedNotify = false;
 };
 
 class ScreenSessionGroup : public ScreenSession {

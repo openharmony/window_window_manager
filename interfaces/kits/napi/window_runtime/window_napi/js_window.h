@@ -42,7 +42,7 @@ napi_value NapiThrowError(napi_env env, WmErrorCode errCode);
 napi_value NapiThrowError(napi_env env, WmErrorCode errCode, const std::string& msg);
 class JsWindow final {
 public:
-    explicit JsWindow(const sptr<Window>& window);
+    explicit JsWindow(const sptr<Window>& window, napi_env env);
     ~JsWindow();
     sptr<Window> GetWindow() { return windowToken_; }
     static void Finalizer(napi_env env, void* data, void* hint);
@@ -66,7 +66,6 @@ public:
     static napi_value Resize(napi_env env, napi_callback_info info);
     static napi_value ResizeWindow(napi_env env, napi_callback_info info);
     static napi_value ResizeWindowAsync(napi_env env, napi_callback_info info);
-    static napi_value ResizeWindowWithAnimation(napi_env env, napi_callback_info info);
     static napi_value ClientToGlobalDisplay(napi_env env, napi_callback_info info);
     static napi_value GlobalDisplayToClient(napi_env env, napi_callback_info info);
 
@@ -112,6 +111,7 @@ public:
     static napi_value SetTransparent(napi_env env, napi_callback_info info);
     static napi_value ChangeCallingWindowId(napi_env env, napi_callback_info info);
     static napi_value SetPreferredOrientation(napi_env env, napi_callback_info info);
+    static napi_value SetPreferredOrientationWithResult(napi_env env, napi_callback_info info);
     static napi_value GetPreferredOrientation(napi_env env, napi_callback_info info);
     static napi_value ConvertOrientationAndRotation(napi_env env, napi_callback_info info);
     static napi_value SetSnapshotSkip(napi_env env, napi_callback_info info);
@@ -125,6 +125,8 @@ public:
     static napi_value KeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value GetWindowLimitsVP(napi_env env, napi_callback_info info);
+    static napi_value AttachLayoutToParentWindow(napi_env env, napi_callback_info info);
+    static napi_value DetachLayoutToParentWindow(napi_env env, napi_callback_info info);
     static napi_value SetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetSingleFrameComposerEnabled(napi_env env, napi_callback_info info);
     static napi_value EnableLandscapeMultiWindow(napi_env env, napi_callback_info info);
@@ -139,6 +141,7 @@ public:
     static napi_value EnableDrag(napi_env env, napi_callback_info info);
     static napi_value SetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     static napi_value IsWindowHighlighted(napi_env env, napi_callback_info info);
+    static napi_value RestoreMainWindow(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     static napi_value IsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -196,6 +199,7 @@ public:
      */
     static napi_value GetWindowStatus(napi_env env, napi_callback_info info);
     static napi_value SetWindowMask(napi_env env, napi_callback_info info);
+    static napi_value ClearWindowMask(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
     static napi_value IsInFreeWindowMode(napi_env env, napi_callback_info info);
 
@@ -245,6 +249,7 @@ public:
     static napi_value SetWindowSystemBarProperties(napi_env env, napi_callback_info info);
     static napi_value SetStatusBarColor(napi_env env, napi_callback_info info);
     static napi_value GetStatusBarProperty(napi_env env, napi_callback_info info);
+    static napi_value GetWindowStateSnapshot(napi_env env, napi_callback_info info);
     static napi_value GetAvoidArea(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
     static napi_value GetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
@@ -254,6 +259,8 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value IsImmersiveLayout(napi_env env, napi_callback_info info);
+    static napi_value SetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    static napi_value IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value SetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
     static napi_value SetWindowShadowEnabled(napi_env env, napi_callback_info info);
@@ -272,6 +279,9 @@ private:
     static bool ParseRotateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseTranslateOption(napi_env env, napi_value jsObject, Transform& trans);
     static bool ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits& windowLimits);
+    static bool ParseWindowAnchorInfo(napi_env env, napi_value jsObject, WindowAnchorInfo& windowAnchorInfo);
+    static bool ParseWindowAttachOptions(napi_env env, napi_value jsObject,
+        WindowAnchorInfo::AttachOptions& subWindowAttachOptions);
     void ParseShadowOptionalParameters(WmErrorCode& ret, std::shared_ptr<ShadowsInfo>& shadowsInfo,
         napi_env env, const napi_value* argv, size_t argc);
     bool CheckWindowMaskParams(napi_env env, napi_value jsObject);
@@ -286,6 +296,12 @@ private:
     napi_value OnHide(napi_env env, napi_callback_info info);
     napi_value OnHideWithAnimation(napi_env env, napi_callback_info info);
 
+    static std::atomic<uint32_t> orientationExecutionResultPromiseIdGenerator_;
+    static std::unordered_map<uint32_t,
+        std::shared_ptr<AbilityRuntime::NapiAsyncTask>> orientationExecutionResultPromiseMap_;
+    static std::mutex orientationExecutionResultMapMutex_;
+    static void RemoveOrientationPromiseFromMap(uint32_t promiseId);
+
     /*
      * Window Layout
      */
@@ -298,7 +314,6 @@ private:
     napi_value OnResize(napi_env env, napi_callback_info info);
     napi_value OnResizeWindow(napi_env env, napi_callback_info info);
     napi_value OnResizeWindowAsync(napi_env env, napi_callback_info info);
-    napi_value OnResizeWindowWithAnimation(napi_env env, napi_callback_info info);
     template <typename PositionTransformFunc>
     napi_value HandlePositionTransform(
         napi_env env, napi_callback_info info, PositionTransformFunc transformFunc, const char* caller);
@@ -319,6 +334,10 @@ private:
     napi_value OnIsShowing(napi_env env, napi_callback_info info);
     napi_value OnIsWindowShowingSync(napi_env env, napi_callback_info info);
     napi_value OnSetPreferredOrientation(napi_env env, napi_callback_info info);
+    napi_value OnSetPreferredOrientationWithResult(napi_env env, napi_callback_info info);
+    OrientationParams ValidateOrientationParams(
+        napi_env env, size_t argc, napi_value* argv, const std::string& funcName);
+    void NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult executionResult);
     napi_value OnGetPreferredOrientation(napi_env env, napi_callback_info info);
     napi_value OnConvertOrientationAndRotation(napi_env env, napi_callback_info info);
     napi_value OnRaiseToAppTop(napi_env env, napi_callback_info info);
@@ -326,14 +345,15 @@ private:
     napi_value OnSetContentAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnResetAspectRatio(napi_env env, napi_callback_info info);
     napi_value OnMinimize(napi_env env, napi_callback_info info);
-    WmErrorCode CheckRaiseMainWindowParams(napi_env env, size_t argc, napi_value argv[],
-                                           int32_t sourceId, int32_t& targetId);
+    WmErrorCode CheckRaiseMainWindowParams(napi_env env, size_t argc, napi_value argv[], int32_t& targetId);
     napi_value OnRaiseAboveTarget(napi_env env, napi_callback_info info);
     napi_value OnRaiseMainWindowAboveTarget(napi_env env, napi_callback_info info);
     napi_value OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info);
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimitsVP(napi_env env, napi_callback_info info);
+    napi_value OnAttachToParentWindow(napi_env env, napi_callback_info info);
+    napi_value OnDetachLayoutToParentWindow(napi_env env, napi_callback_info info);
 
     napi_value OnIsFocused(napi_env env, napi_callback_info info);
     napi_value OnRequestFocus(napi_env env, napi_callback_info info);
@@ -342,6 +362,7 @@ private:
     napi_value OnIsMainWindowFullScreenAcrossDisplays(napi_env env, napi_callback_info info);
     napi_value OnSetExclusivelyHighlighted(napi_env env, napi_callback_info info);
     napi_value OnIsWindowHighlighted(napi_env env, napi_callback_info info);
+    napi_value OnRestoreMainWindow(napi_env env, napi_callback_info info);
 
     // colorspace, gamut
     napi_value OnIsSupportWideGamut(napi_env env, napi_callback_info info);
@@ -406,8 +427,8 @@ private:
     napi_value OnSetBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlur(napi_env env, napi_callback_info info);
     napi_value OnSetBackdropBlurStyle(napi_env env, napi_callback_info info);
-    napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetHandwritingFlag(napi_env env, napi_callback_info info);
+    napi_value OnSetWaterMarkFlag(napi_env env, napi_callback_info info);
     napi_value OnSetWindowGrayScale(napi_env env, napi_callback_info info);
     napi_value OnEnableDrag(napi_env env, napi_callback_info info);
     napi_value OnStartMoving(napi_env env, napi_callback_info info);
@@ -433,6 +454,7 @@ private:
      * PC Window
      */
     napi_value OnSetWindowMask(napi_env env, napi_callback_info info);
+    napi_value OnClearWindowMask(napi_env env, napi_callback_info info);
     napi_value OnGetWindowStatus(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentMultiScreenPolicy(napi_env env, napi_callback_info info);
     napi_value OnIsInFreeWindowMode(napi_env env, napi_callback_info info);
@@ -475,6 +497,7 @@ private:
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<JsWindowRegisterManager> registerManager_ = nullptr;
     std::shared_ptr<NativeReference> jsTransControllerObj_ = nullptr;
+    napi_env env_;
 
     /*
      * Window Immersive
@@ -489,6 +512,7 @@ private:
     napi_value OnSetWindowSystemBarProperties(napi_env env, napi_callback_info info);
     napi_value OnSetStatusBarColor(napi_env env, napi_callback_info info);
     napi_value OnGetStatusBarPropertySync(napi_env env, napi_callback_info info);
+    napi_value OnGetWindowStateSnapshot(napi_env env, napi_callback_info info);
     napi_value OnGetAvoidArea(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaSync(napi_env env, napi_callback_info info);
     napi_value OnGetWindowAvoidAreaIgnoringVisibilitySync(napi_env env, napi_callback_info info);
@@ -496,6 +520,8 @@ private:
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnIsImmersiveLayout(napi_env env, napi_callback_info info);
+    napi_value OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    napi_value OnIsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);

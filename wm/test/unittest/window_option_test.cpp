@@ -165,18 +165,6 @@ HWTEST_F(WindowOptionTest, Focusable01, TestSize.Level1)
 }
 
 /**
- * @tc.name: Touchable01
- * @tc.desc: SetTouchable/GetTouchable
- * @tc.type: FUNC
- */
-HWTEST_F(WindowOptionTest, Touchable01, TestSize.Level1)
-{
-    sptr<WindowOption> option = new WindowOption();
-    option->SetTouchable(true);
-    ASSERT_EQ(true, option->GetTouchable());
-}
-
-/**
  * @tc.name: DisplayId01
  * @tc.desc: SetDisplayId/GetDisplayId
  * @tc.type: FUNC
@@ -632,6 +620,48 @@ HWTEST_F(WindowOptionTest, SetConstrainedModal, TestSize.Level1)
     option->SetUIExtensionUsage(static_cast<uint32_t>(UIExtensionUsage::MODAL));
     option->SetConstrainedModal(true);
     ASSERT_EQ(true, option->IsConstrainedModal());
+}
+
+/**
+ * @tc.name: SetIsBlockSubwindow
+ * @tc.desc: test SetIsBlockSubwindow and IsDensityFollowHost
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetIsBlockSubwindow, TestSize.Level1)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetIsBlockSubwindow(true);
+    ASSERT_EQ(true, option->IsBlockSubwindow());
+    option->SetIsBlockSubwindow(false);
+    ASSERT_EQ(false, option->IsBlockSubwindow());
+}
+
+/**
+ * @tc.name: SetZLevelAboveParentLoosened
+ * @tc.desc: test SetZLevelAboveParentLoosened and IsSubWindowZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetZLevelAboveParentLoosened, TestSize.Level1)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    option->SetZLevelAboveParentLoosened(true);
+    ASSERT_EQ(true, option->IsSubWindowZLevelAboveParentLoosened());
+    option->SetZLevelAboveParentLoosened(false);
+    ASSERT_EQ(false, option->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: SetZLevelAboveParentLoosenedDefault
+ * @tc.desc: test default value of ZLevelAboveParentLoosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowOptionTest, SetZLevelAboveParentLoosenedDefault, TestSize.Level1)
+{
+    sptr<WindowOption> option = new WindowOption();
+    ASSERT_NE(nullptr, option);
+    ASSERT_EQ(false, option->IsSubWindowZLevelAboveParentLoosened());
 }
 } // namespace
 } // namespace Rosen

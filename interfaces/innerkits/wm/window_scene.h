@@ -100,7 +100,7 @@ public:
      * @param reason the reason of window to go to foreground, default 0.
      * @return the error code of window
      */
-    WMError GoForeground(uint32_t reason = 0);
+    WMError GoForeground(uint32_t reason = 0, bool isGamePreLaunch = false);
 
     /**
      * Window go background.
@@ -119,7 +119,7 @@ public:
     WMError GoDestroy(uint32_t reason = 0);
 
     /**
-     * Hook Window go distroy.
+     * Hook Window go destroy.
      *
      * @return the error code of window
      */
@@ -130,7 +130,7 @@ public:
      *
      * @return the error code of window
      */
-    WMError GoResume();
+    WMError GoResume(bool isGamePreLaunch = false);
 
     /**
      * Window go pause.

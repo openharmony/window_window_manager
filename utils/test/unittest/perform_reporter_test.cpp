@@ -17,6 +17,7 @@
 #include <thread>
 
 #include "input_manager.h"
+#include "parameters.h"
 #include "perform_reporter.h"
 #include "window_manager_hilog.h"
 #include "wm_common.h"
@@ -547,6 +548,94 @@ HWTEST_F(PerformReporterTest, ReportSpecWindowLifeCycleChange, Function | SmallT
     WindowInfoReporter windowInfoReporter;
     int32_t res = windowInfoReporter.ReportSpecWindowLifeCycleChange(reportInfo);
     ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: ReportWindowIO
+ * @tc.desc: ReportWindowIO test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportWindowIO, Function | SmallTest | Level2)
+{
+    OHOS::system::SetParameter("persist.window.realTimeIoDataOutput", "0");
+    EXPECT_EQ(OHOS::system::GetParameter("persist.window.realTimeIoDataOutput", "0"), "0");
+
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportWindowIO("ASTC", 10.5);
+    windowInfoReporter.ReportWindowIO("ASTC", 10.5);
+
+    EXPECT_TRUE(g_errLog.find("total") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: ReportWindowIOPerDay
+ * @tc.desc: ReportWindowIOPerDay test
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportWindowIOPerDay, Function | SmallTest | Level2)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportWindowIO("ASTC", 10.5);
+    windowInfoReporter.ReportWindowIOPerDay();
+
+    EXPECT_TRUE(g_errLog.find("total") != std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: ReportWindowFrozen_MapExist
+ * @tc.desc: ReportWindowFrozen test - detectionType in map
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportWindowFrozen_MapExist, Function | SmallTest | Level2)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportWindowFrozen(
+        WindowDFXHelperType::WINDOW_KEYBOARD_ANIM_TIMEOUT_CHECK,
+        "test window info");
+
+    EXPECT_TRUE(g_errLog.find("Write HiSysEvent error") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: ReportWindowFrozen_MapNotExist
+ * @tc.desc: ReportWindowFrozen test - detectionType not in map
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, ReportWindowFrozen_MapNotExist, Function | SmallTest | Level2)
+{
+    g_errLog.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    WindowInfoReporter windowInfoReporter;
+    windowInfoReporter.ReportWindowFrozen(
+        static_cast<WindowDFXHelperType>(999),
+        "test window info");
+
+    EXPECT_TRUE(g_errLog.find("Write HiSysEvent error") == std::string::npos);
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: IsKeyboardFrozenEnabled
+ * @tc.desc: Test IsKeyboardFrozenEnabled returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PerformReporterTest, IsKeyboardFrozenEnabled, Function | SmallTest | Level2)
+{
+    bool result = WindowInfoReporter::GetInstance().IsKeyboardFrozenEnabled();
+    EXPECT_TRUE(result == false);
 }
 } // namespace
 } // namespace Rosen

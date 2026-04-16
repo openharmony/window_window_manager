@@ -19,6 +19,7 @@
 #include "ability_context_impl.h"
 #include "floating_ball_controller.h"
 #include "floating_ball_manager.h"
+#include "float_window_manager.h"
 #include "floating_ball_report.h"
 #include "singleton_mocker.h"
 #include "parameters.h"
@@ -154,6 +155,7 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
 {
     sptr<FbOption> nullOption = nullptr;
     EXPECT_EQ(WMError::WM_ERROR_FB_STATE_ABNORMALLY, fbController_->StartFloatingBall(nullOption));
+    
     fbController_->curState_ = FbWindowState::STATE_STARTING;
     EXPECT_EQ(WMError::WM_ERROR_FB_REPEAT_OPERATION, fbController_->StartFloatingBall(option_));
     fbController_->curState_ = FbWindowState::STATE_STARTED;
@@ -175,8 +177,15 @@ HWTEST_F(FloatingBallControllerTest, StartFloatingBall01, TestSize.Level1)
         std::make_unique<AbilityRuntime::AbilityContextImpl>();
     fbController_->contextPtr_ = contextPtr.get();
     EXPECT_NE(WMError::WM_OK, fbController_->StartFloatingBall(option_));
-    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->GetControllerState());
+    EXPECT_EQ(FbWindowState::STATE_UNDEFINED, fbController_->GetCurState());
     fbController_->contextPtr_ = nullptr;
+
+    fbController_->SetBindState(true);
+    EXPECT_NE(WMError::WM_OK, fbController_->StartFloatingBall(option_));
+    fbController_->SetBindState(false);
+
+    fbController_->curState_ = FbWindowState::STATE_STOPPING;
+    EXPECT_EQ(WMError::WM_ERROR_FB_INVALID_STATE, fbController_->StartFloatingBall(option_));
 }
 
 /**
@@ -265,11 +274,23 @@ HWTEST_F(FloatingBallControllerTest, StopFloatingBall01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StopFloatingBall02
+ * @tc.desc: StopFloatingBall with bind state
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatingBallControllerTest, StopFloatingBall02, TestSize.Level1)
+{
+    fbController_->SetBindState(true);
+    EXPECT_NE(WMError::WM_OK, fbController_->StopFloatingBallFromClient());
+    fbController_->SetBindState(false);
+}
+
+/**
  * @tc.name: StopFloatingBall
  * @tc.desc: StopFloatingBall
  * @tc.type: FUNC
  */
-HWTEST_F(FloatingBallControllerTest, StopFloatingBall02, TestSize.Level1)
+HWTEST_F(FloatingBallControllerTest, StopFloatingBall03, TestSize.Level1)
 {
     fbController_->stopFromClient_ = false;
     fbController_->curState_ = FbWindowState::STATE_STOPPING;
@@ -281,7 +302,7 @@ HWTEST_F(FloatingBallControllerTest, StopFloatingBall02, TestSize.Level1)
     EXPECT_CALL(*(mw_), Destroy(_)).Times(1);
     fbController_->window_ = mw_;
     EXPECT_EQ(WMError::WM_OK, fbController_->StopFloatingBall());
-    EXPECT_EQ(FbWindowState::STATE_STOPPED, fbController_->GetControllerState());
+    EXPECT_EQ(FbWindowState::STATE_STOPPED, fbController_->GetCurState());
 
     fbController_->window_ = nullptr;
     fbController_->curState_ = FbWindowState::STATE_STARTED;
@@ -343,6 +364,21 @@ HWTEST_F(FloatingBallControllerTest, CreateFloatingBallController, TestSize.Leve
     const std::string packageName = "FLOATING_BALL_TEST";
     SingletonContainer::Get<FloatingBallReporter>().SetCurrentPackageName(packageName);
     EXPECT_EQ(packageName, SingletonContainer::Get<FloatingBallReporter>().GetPackageName());
+}
+
+/**
+ * @tc.name: SetShowWhenCreate_Test
+ * @tc.desc: SetShowWhenCreate_Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatingBallControllerTest, SetShowWhenCreate_Test, TestSize.Level1)
+{
+    FloatingBallManager::SetActiveController(fbController_);
+    fbController_->option_ = option_;
+    fbController_->SetShowWhenCreate(true);
+    fbController_->window_ = mw_;
+    fbController_->SetShowWhenCreate(true);
+    EXPECT_EQ(true, fbController_->option_->showWhenCreate_);
 }
 
 }

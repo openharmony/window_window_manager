@@ -18,6 +18,8 @@
 #include "display_manager.h"
 #include "input_event.h"
 #include "key_event.h"
+#include "mock/mock_accesstoken_kit.h"
+#include "mock/mock_parameters.h"
 #include "mock/mock_session_stage.h"
 #include "pointer_event.h"
 
@@ -361,10 +363,12 @@ HWTEST_F(SceneSessionTest4, SetSurfaceBounds, TestSize.Level1)
     WSRect rect;
     struct RSSurfaceNodeConfig config;
     std::shared_ptr<RSSurfaceNode> surfaceNode = RSSurfaceNode::Create(config);
-    session->surfaceNode_ = surfaceNode;
-    session->SetSurfaceBounds(rect, false);
+    session->SetSurfaceNode(surfaceNode);
+    session->SetSurfaceBounds(rect, false, false);
+    session->SetSurfaceBounds(rect, false, true);
     session->SetLeashWinSurfaceNode(surfaceNode);
-    session->SetSurfaceBounds(rect, false);
+    session->SetSurfaceBounds(rect, false, false);
+    session->SetSurfaceBounds(rect, false, true);
     EXPECT_NE(nullptr, session->GetLeashWinSurfaceNode());
 }
 
@@ -401,7 +405,7 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, TestSize.Level1)
     session->SetRequestedOrientation(orientation);
     session->onRequestedOrientationChange_ = nullptr;
     session->SetRequestedOrientation(orientation);
-    NotifyReqOrientationChangeFunc func = [](uint32_t orientation, bool needAnimation) {
+    NotifyReqOrientationChangeFunc func = [](uint32_t orientation, bool needAnimation, uint32_t promiseId) {
         return;
     };
     session->onRequestedOrientationChange_ = func;
@@ -416,21 +420,32 @@ HWTEST_F(SceneSessionTest4, SetRequestedOrientation, TestSize.Level1)
  */
 HWTEST_F(SceneSessionTest4, UpdateSessionPropertyByAction, TestSize.Level1)
 {
+    WMError ret;
     SessionInfo info;
     info.abilityName_ = "UpdateSessionPropertyByAction";
     info.bundleName_ = "UpdateSessionPropertyByAction";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    ASSERT_NE(nullptr, property);
-    WSPropertyChangeAction action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
-    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, sceneSession->UpdateSessionPropertyByAction(nullptr, action));
+    auto sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    auto property = sptr<WindowSessionProperty>::MakeSptr();
+    auto action = WSPropertyChangeAction::ACTION_UPDATE_PRIVACY_MODE;
 
+    // branch 1: property is null
+    ret = sceneSession->UpdateSessionPropertyByAction(nullptr, action);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
+
+    // branch 2: action = ACTION_UPDATE_PRIVACY_MODE
     sceneSession->SetSessionProperty(property);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PERMISSION, sceneSession->UpdateSessionPropertyByAction(property, action));
+    ret = sceneSession->UpdateSessionPropertyByAction(property, action);
+    EXPECT_EQ(WMError::WM_OK, ret);
 
+    // branch 3: action = ACTION_UPDATE_TURN_SCREEN_ON
     action = WSPropertyChangeAction::ACTION_UPDATE_TURN_SCREEN_ON;
-    EXPECT_EQ(WMError::WM_OK, sceneSession->UpdateSessionPropertyByAction(property, action));
+    ret = sceneSession->UpdateSessionPropertyByAction(property, action);
+    EXPECT_EQ(WMError::WM_OK, ret);
+
+    // branch 4: action = ACTION_UPDATE_TOUCH_HOT_AREA
+    action = WSPropertyChangeAction::ACTION_UPDATE_TOUCH_HOT_AREA;
+    ret = sceneSession->UpdateSessionPropertyByAction(property, action);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 
 /**
@@ -664,9 +679,6 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, TestSize.Level1)
     WindowType type = WindowType::WINDOW_TYPE_STATUS_BAR;
     sceneSession->HandleSpecificSystemBarProperty(type, property);
 
-    sceneSession->isDisplayStatusBarTemporarily_.store(true);
-    sceneSession->HandleSpecificSystemBarProperty(type, property);
-
     sceneSession->specificCallback_ = nullptr;
     sceneSession->HandleSpecificSystemBarProperty(type, property);
 
@@ -682,51 +694,6 @@ HWTEST_F(SceneSessionTest4, HandleSpecificSystemBarProperty, TestSize.Level1)
     UpdateAvoidAreaCallback onUpdateAvoidArea;
     sceneSession->specificCallback_->onUpdateAvoidArea_ = onUpdateAvoidArea;
     sceneSession->HandleSpecificSystemBarProperty(type, property);
-}
-
-/**
- * @tc.name: HandleLayoutAvoidAreaUpdate
- * @tc.desc: HandleLayoutAvoidAreaUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, HandleLayoutAvoidAreaUpdate, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "HandleLayoutAvoidAreaUpdate";
-    info.bundleName_ = "HandleLayoutAvoidAreaUpdate";
-    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    
-    session->isLastFrameLayoutFinishedFunc_ = nullptr;
-    session->isAINavigationBarAvoidAreaValid_ = nullptr;
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
-
-    session->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
-        isLayoutFinished = false;
-        return WSError::WS_ERROR_NULLPTR;
-    };
-    EXPECT_EQ(WSError::WS_ERROR_NULLPTR, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
-
-    session->isLastFrameLayoutFinishedFunc_ = [](bool& isLayoutFinished) {
-        isLayoutFinished = true;
-        return WSError::WS_OK;
-    };
-    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
-    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_SYSTEM));
-    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
-
-    session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId,
-        const AvoidArea& avoidArea, int32_t sessionBottom) {
-        return true;
-    };
-    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
-    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
-
-    session->isAINavigationBarAvoidAreaValid_ = [](DisplayId displayId,
-        const AvoidArea& avoidArea, int32_t sessionBottom) {
-        return false;
-    };
-    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_END));
-    EXPECT_EQ(WSError::WS_OK, session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
 }
 
 /**
@@ -898,7 +865,7 @@ HWTEST_F(SceneSessionTest4, UnregisterSessionChangeListeners01, TestSize.Level1)
 
     sceneSession->UnregisterSessionChangeListeners();
     NotifyPendingSessionToBackgroundForDelegatorFunc func =[sceneSession](const SessionInfo& info,
-        bool shouldBackToCaller) { return; };
+        bool shouldBackToCaller, LifeCycleChangeReason reason) { return; };
     sceneSession->pendingSessionToBackgroundForDelegatorFunc_ = func;
     ASSERT_EQ(WSError::WS_OK, sceneSession->PendingSessionToBackgroundForDelegator(true));
 }
@@ -1386,46 +1353,6 @@ HWTEST_F(SceneSessionTest4, HandleActionUpdateAvoidAreaOption, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSystemAvoidArea
- * @tc.desc: normal function
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionTest4, GetSystemAvoidArea, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetSystemAvoidArea";
-    info.bundleName_ = "GetSystemAvoidArea";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
-    sceneSession->isActive_ = true;
-    SystemSessionConfig systemConfig;
-    systemConfig.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    sceneSession->SetSystemConfig(systemConfig);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
-    sceneSession->GetSessionProperty()->SetDisplayId(2024);
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert(std::make_pair(2024, screenSession));
-    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    sceneSession->SetSessionProperty(property);
-
-    WSRect rect1({0, 0, 10, 10});
-    AvoidArea avoidArea;
-    sceneSession->GetSystemAvoidArea(rect1, avoidArea);
-    WSRect rect2({0, 0, 10, 10});
-    property->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    sceneSession->SetSessionProperty(property);
-    sceneSession->GetSystemAvoidArea(rect2, avoidArea);
-    ASSERT_EQ(avoidArea.topRect_.posX_, 0);
-
-    property->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
-    property->SetWindowFlags(static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_NEED_AVOID));
-    sceneSession->SetSessionProperty(property);
-    ASSERT_EQ(avoidArea.topRect_.posX_, 0);
-}
-
-/**
  * @tc.name: CheckGetAvoidAreaAvailable
  * @tc.desc: normal function
  * @tc.type: FUNC
@@ -1792,6 +1719,89 @@ HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest002, TestSize.Leve
 }
 
 /**
+ * @tc.name: NotifyFrameLayoutFinishFromAppTest003
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest003, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromAppTest003";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromAppTest003";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Mock 1) anco app; 2) SupportNotifyFrameLayoutFinish; 3) not sa calling
+    session->collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    system::SetBoolParameter("prop_to_param.support.notifyFrameLayoutFinish", true);
+    MockAccesstokenKit::MockIsSACalling(false);
+
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = session->NotifyFrameLayoutFinishFromApp(true, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromAppTest004
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest004, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromAppTest004";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromAppTest004";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Mock 1) anco app; 2) SupportNotifyFrameLayoutFinish; 3) is sa calling
+    session->collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    system::SetBoolParameter("prop_to_param.support.notifyFrameLayoutFinish", true);
+    MockAccesstokenKit::MockIsSACalling(true);
+
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = session->NotifyFrameLayoutFinishFromApp(true, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromAppTest005
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest005, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromAppTest005";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromAppTest005";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Mock 1) anco app; 2) not SupportNotifyFrameLayoutFinish
+    session->collaboratorType_ = CollaboratorType::RESERVE_TYPE;
+    system::SetBoolParameter("prop_to_param.support.notifyFrameLayoutFinish", false);
+
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = session->NotifyFrameLayoutFinishFromApp(true, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: NotifyFrameLayoutFinishFromAppTest006
+ * @tc.desc: NotifyFrameLayoutFinishFromApp test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, NotifyFrameLayoutFinishFromAppTest006, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyFrameLayoutFinishFromAppTest006";
+    info.bundleName_ = "NotifyFrameLayoutFinishFromAppTest006";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+
+    // Mock 1) not anco app
+    WSRect rect = { 200, 200, 200, 200 };
+    WSError res = session->NotifyFrameLayoutFinishFromApp(true, rect);
+    ASSERT_EQ(res, WSError::WS_OK);
+}
+
+/**
  * @tc.name: UpdateWaterfallModeTest
  * @tc.desc: UpdateWaterfallMode test
  * @tc.type: FUNC
@@ -2052,6 +2062,23 @@ HWTEST_F(SceneSessionTest4, SetPipParentWindowIdTest, Function | SmallTest | Lev
     sceneSession->isTerminating_ = true;
     result = sceneSession->SetPipParentWindowId(id);
     ASSERT_EQ(result, WSError::WS_OK);
+}
+
+/**
+ * @tc.name: IsPiPActiveTest
+ * @tc.desc: IsPiPActive function test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, IsPiPActiveTest, Function | SmallTest | Level2)
+{
+    SessionInfo info;
+    info.abilityName_ = "IsPiPActive";
+    info.bundleName_ = "IsPiPActive";
+    sptr<SceneSession> sceneSession = sptr<MainSession>::MakeSptr(info, nullptr);
+    sceneSession->pipActiveStatus_.store(true);
+    bool status = false;
+    ASSERT_EQ(sceneSession->IsPiPActive(status), WMError::WM_OK);
+    ASSERT_EQ(status, true);
 }
 
 /**

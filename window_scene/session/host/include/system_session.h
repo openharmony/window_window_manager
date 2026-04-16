@@ -37,12 +37,12 @@ public:
 
     WSError NotifyClientToUpdateRect(const std::string& updateReason,
         std::shared_ptr<RSTransaction> rsTransaction) override;
-    void RectCheck(uint32_t curWidth, uint32_t curHeight) override;
-    bool IsVisibleForeground() const override;
-    bool IsVisibleNotBackground() const override;
+    void RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics) override;
     WSError SetDialogSessionBackGestureEnabled(bool isEnabled) override;
     int32_t GetSubWindowZLevel() const override;
 
+    bool IsVisibleForeground() const override;
+    bool IsVisibleNotBackground() const override;
     /*
      * Floating Ball Window
      */
@@ -59,6 +59,25 @@ public:
     void SetFloatingBallRestoreMainWindowCallback(NotifyRestoreFloatingBallMainWindowFunc&& func) override;
     void RegisterGetFbPanelWindowIdFunc(GetFbPanelWindowIdFunc&& func) override;
 
+    /**
+     * Float view
+     */
+    void SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo) override;
+    WSError StopFloatView() override;
+    void SetFloatViewStopCallback(NotifyStopFloatViewFunc&& func) override;
+    WSError SendFvActionEvent(const std::string& action, const std::string& reason) override;
+    WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) override;
+    WMError UpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) override;
+    WMError RestoreFloatViewMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters) override;
+    void SetFloatViewUpdateCallback(NotifyUpdateFloatViewFunc&& func) override;
+    WSError SyncFloatViewLimits(const FloatViewLimits &limits) override;
+
+    /*
+     * Float Window
+     */
+    void SetRestoreFloatMainWindowCallback(NotifyRestoreFloatMainWindowFunc&& func) override;
+    void RegisterGetIsRecentStateFunc(GetIsRecentStateFunc&& callback) override;
+    WMError RestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters) override;
 protected:
     bool CheckKeyEventDispatch(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
     void UpdatePointerArea(const WSRect& rect) override;
@@ -71,6 +90,16 @@ protected:
     void NotifyStopFloatingBall() override;
     void NotifyRestoreFloatingBallMainWindow(const std::shared_ptr<AAFwk::Want>& want) override;
 
+    /*
+     * Float View Window
+     */
+    void NotifyStopFloatView() override;
+
+    /*
+     * Float Window
+     */
+    void NotifyRestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters);
+    void NotifyUpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) override;
 private:
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);
@@ -85,7 +114,14 @@ private:
     bool needStopFb_ = false;
     std::shared_ptr<AAFwk::Want> fbWant_ = nullptr;
 
+    /*
+     * Float View Window
+     */
+    bool needStopFv_ = false;
+    bool needUpdateFv_ = false;
+
     GetFbPanelWindowIdFunc getFbPanelWindowIdFunc_;
+    GetIsRecentStateFunc getIsRecentStateFunc_;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SYSTEM_SESSION_H

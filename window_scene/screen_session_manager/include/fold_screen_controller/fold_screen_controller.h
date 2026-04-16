@@ -38,13 +38,15 @@ enum class DisplayDeviceType :uint32_t {
 class FoldScreenController : public DMS::FoldScreenBaseController {
 public:
     FoldScreenController(std::recursive_mutex& displayInfoMutex,
-        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler);
+        std::shared_ptr<TaskScheduler> screenPowerTaskScheduler,
+        std::shared_ptr<TaskScheduler> taskScheduler);
     virtual ~FoldScreenController();
 
     void BootAnimationFinishPowerInit() override;
     void SetDisplayMode(const FoldDisplayMode displayMode) override;
     void RecoverDisplayMode() override;
     FoldDisplayMode GetDisplayMode() override;
+    FoldDisplayMode GetCurrentDisplayMode() const override;
     bool IsFoldable() override;
     FoldStatus GetFoldStatus() override;
     bool GetTentMode() override;
@@ -55,6 +57,10 @@ public:
     FoldCreaseRegion GetLiveCreaseRegion() const override;
     ScreenId GetCurrentScreenId() override;
     void LockDisplayStatus(bool locked) override;
+    DMError ForceSetFoldStatusAndLock(FoldStatus targetFoldStatus) override;
+    DMError RestorePhysicalFoldStatus() override;
+    bool GetPhysicalFoldLockFlag() const override;
+    FoldStatus GetPhysicalFoldStatus() const override;
     void SetOnBootAnimation(bool onBootAnimation) override;
     void UpdateForPhyScreenPropertyChange() override;
     void ExitCoordination() override;
@@ -73,12 +79,15 @@ public:
     void AddOrRemoveDisplayNodeToTree(ScreenId screenId, int32_t command) override;
     void SetIsClearingBootAnimation(bool isClearingBootAnimation) override;
     nlohmann::ordered_json GetFoldCreaseRegionJson() override;
+    void NotifyRunSensorFoldStateManager() override;
+    float GetSpecialVirtualPixelRatio() override;
 private:
     sptr<FoldScreenPolicy> GetFoldScreenPolicy(DisplayDeviceType productType);
     sptr<FoldScreenPolicy> foldScreenPolicy_;
     sptr<SensorFoldStateManager> sensorFoldStateManager_;
     std::recursive_mutex& displayInfoMutex_;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler_;
+    std::shared_ptr<TaskScheduler> taskScheduler_;
     std::vector<FoldCreaseRegionItem> foldCreaseRegionItems_;
 };
 } // namespace OHOS::Rosen

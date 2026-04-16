@@ -36,7 +36,7 @@ public:
     MOCK_METHOD3(Show, WMError(uint32_t reason, bool withAnimation, bool withFocus));
     MOCK_METHOD1(Destroy, WMError(uint32_t reason));
     MOCK_METHOD0(Destroy, WMError());
-    MOCK_METHOD0(NotifyPrepareClosePiPWindow, WMError());
+    MOCK_METHOD1(NotifyPrepareClosePiPWindow, WMError(const bool isWeb));
     MOCK_METHOD4(SetAutoStartPiP, void(bool isAutoStart, uint32_t priority, uint32_t width, uint32_t height));
     MOCK_CONST_METHOD0(GetWindowState, WindowState());
 };
@@ -107,10 +107,10 @@ HWTEST_F(WebPictureInPictureControllerTest, CreatePictureInPictureWindow, TestSi
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, webPipControl->CreatePictureInPictureWindow(startType));
 
     webPipControl->mainWindow_ = mw;
-    EXPECT_CALL(*(mw), GetWindowState()).Times(2).WillOnce(Return(WindowState::STATE_CREATED));
+    EXPECT_CALL(*(mw), GetWindowState()).Times(AtLeast(1)).WillRepeatedly(Return(WindowState::STATE_CREATED));
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, webPipControl->CreatePictureInPictureWindow(startType));
 
-    EXPECT_CALL(*(mw), GetWindowState()).Times(2).WillOnce(Return(WindowState::STATE_SHOWN));
+    EXPECT_CALL(*(mw), GetWindowState()).Times(AtLeast(1)).WillRepeatedly(Return(WindowState::STATE_SHOWN));
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, webPipControl->CreatePictureInPictureWindow(startType));
 }
 
@@ -136,6 +136,20 @@ HWTEST_F(WebPictureInPictureControllerTest, StartPictureInPicture, TestSize.Leve
 
     webPipControl->curState_ = PiPWindowState::STATE_UNDEFINED;
     EXPECT_EQ(WMError::WM_ERROR_PIP_CREATE_FAILED, webPipControl->StartPictureInPicture(startType));
+}
+
+/**
+ * @tc.name: StartPictureInPicture02
+ * @tc.desc: StartPictureInPicture with stop state
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPictureInPictureControllerTest, StartPictureInPicture02, TestSize.Level1)
+{
+    auto webPipControl = sptr<WebPictureInPictureController>::MakeSptr(config);
+    StartPipType startType = StartPipType::NATIVE_START;
+    
+    webPipControl->curState_ = PiPWindowState::STATE_STOPPING;
+    EXPECT_EQ(WMError::WM_ERROR_PIP_REPEAT_OPERATION, webPipControl->StartPictureInPicture(startType));
 }
 
 /**
@@ -252,6 +266,13 @@ HWTEST_F(WebPictureInPictureControllerTest, UpdateWinRectByComponent, TestSize.L
     webPipControl->UpdateWinRectByComponent();
     EXPECT_EQ(webPipControl->windowRect_.posX_, 0);
     EXPECT_EQ(webPipControl->windowRect_.posY_, 0);
+
+    webPipControl->SetPipInitialSurfaceRect(15, 15, 25, 25);
+    webPipControl->UpdateWinRectByComponent();
+    EXPECT_EQ(webPipControl->windowRect_.posX_, 15);
+    EXPECT_EQ(webPipControl->windowRect_.posY_, 15);
+    EXPECT_EQ(webPipControl->windowRect_.width_, 25);
+    EXPECT_EQ(webPipControl->windowRect_.height_, 25);
 }
 
 /**

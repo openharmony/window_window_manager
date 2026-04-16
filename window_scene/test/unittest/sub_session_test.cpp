@@ -19,18 +19,19 @@
 #include "common/include/session_permission.h"
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
+#include "mock_sub_session.h"
+#include "pointer_event.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
-#include "session/host/include/session.h"
 #include "session/host/include/main_session.h"
+#include "session/host/include/session.h"
 #include "session/host/include/system_session.h"
 #include "session/screen/include/screen_session.h"
-#include <ui/rs_surface_node.h>
 #include "window_event_channel_base.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "window_property.h"
 #include "window_session_property.h"
-#include "mock_sub_session.h"
+#include <ui/rs_surface_node.h>
 
 using namespace testing;
 using namespace testing::ext;
@@ -306,23 +307,24 @@ HWTEST_F(SubSessionTest, RectCheck, TestSize.Level1)
     subSession_->parentSession_ = session;
     uint32_t curWidth = 100;
     uint32_t curHeight = 200;
-    subSession_->RectCheck(curWidth, curHeight);
+    ScreenMetrics screenMetrics{1920, 1080, 2.0f};
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 300;
     curHeight = 200;
-    subSession_->RectCheck(curWidth, curHeight);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 1930;
     curHeight = 200;
-    subSession_->RectCheck(curWidth, curHeight);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 200;
-    subSession_->RectCheck(curWidth, curHeight);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 
     curWidth = 330;
     curHeight = 1930;
-    subSession_->RectCheck(curWidth, curHeight);
+    subSession_->RectCheck(curWidth, curHeight, screenMetrics);
 }
 
 /**
@@ -782,6 +784,189 @@ HWTEST_F(SubSessionTest, GetSubWindowZLevel, TestSize.Level1)
     sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
     subSession->property_->zLevel_ = 1;
     EXPECT_EQ(1, subSession->GetSubWindowZLevel());
+}
+
+/**
+ * @tc.name: ProcessPointDownSession01
+ * @tc.desc: ProcessPointDownSession with non-modal window and RaiseEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, ProcessPointDownSession01, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessPointDownSession01";
+    info.bundleName_ = "ProcessPointDownSession01";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+
+    subSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->GetSessionProperty()->SetRaiseEnabled(true);
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    auto ret = subSession->ProcessPointDownSession(100, 200);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: ProcessPointDownSession02
+ * @tc.desc: ProcessPointDownSession with modal window and RaiseEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, ProcessPointDownSession02, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "ProcessPointDownSession02";
+    info.bundleName_ = "ProcessPointDownSession02";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(subSession, nullptr);
+
+    subSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession->GetSessionProperty()->AddWindowFlag(WindowFlag::WINDOW_FLAG_IS_MODAL);
+    subSession->GetSessionProperty()->SetRaiseEnabled(true);
+
+    auto ret = subSession->ProcessPointDownSession(100, 200);
+    EXPECT_EQ(WSError::WS_OK, ret);
+
+    SessionInfo mainInfo;
+    mainInfo.abilityName_ = "ProcessPointDownSession02_main";
+    mainInfo.bundleName_ = "ProcessPointDownSession02_main";
+    sptr<MainSession> mainSession = sptr<MainSession>::MakeSptr(mainInfo, nullptr);
+    subSession->SetParentSession(mainSession);
+
+    ret = subSession->ProcessPointDownSession(100, 200);
+    EXPECT_EQ(WSError::WS_OK, ret);
+}
+
+/**
+ * @tc.name: IsVisibleForeground_LoosenedWithFreeMultiMode
+ * @tc.desc: test IsVisibleForeground when IsLoosenedWithFreeMultiMode is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsVisibleForeground_LoosenedWithFreeMultiMode, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSubSession";
+    info.bundleName_ = "TestBundle";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(subSession, nullptr);
+
+    // Enable ZLevelAboveParentLoosened and PC mode
+    subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(true);
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+
+    // Set session to foreground state
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    // Should return Session::IsVisibleForeground() when loosened
+    bool result = subSession->IsVisibleForeground();
+    EXPECT_EQ(true, result);
+}
+
+/**
+ * @tc.name: IsVisibleForeground_NotLoosened
+ * @tc.desc: test IsVisibleForeground when not loosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsVisibleForeground_NotLoosened, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSubSession";
+    info.bundleName_ = "TestBundle";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(subSession, nullptr);
+
+    // Don't enable ZLevelAboveParentLoosened
+    subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(false);
+
+    // Set session to foreground state
+    subSession->SetSessionState(SessionState::STATE_FOREGROUND);
+
+    // Should check parent session when not loosened
+    // Without parent session, this should return false or default behavior
+    bool result = subSession->IsVisibleForeground();
+    // Result depends on implementation, test verifies no crash
+}
+
+/**
+ * @tc.name: IsVisibleForeground_LoosenedWithFreeMultiMode_False
+ * @tc.desc: test IsVisibleForeground when loosened but session not foreground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsVisibleForeground_LoosenedWithFreeMultiMode_False, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSubSession";
+    info.bundleName_ = "TestBundle";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(subSession, nullptr);
+
+    // Enable ZLevelAboveParentLoosened and FreeMulti mode
+    subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(true);
+    subSession->systemConfig_.freeMultiWindowEnable_ = true;
+    subSession->systemConfig_.freeMultiWindowSupport_ = true;
+
+    // Set session to background state
+    subSession->SetSessionState(SessionState::STATE_BACKGROUND);
+
+    // Should return Session::IsVisibleForeground() which should be false
+    bool result = subSession->IsVisibleForeground();
+    EXPECT_EQ(false, result);
+}
+
+/**
+ * @tc.name: IsSubWindowZLevelAboveParentLoosened_SubSession
+ * @tc.desc: test IsSubWindowZLevelAboveParentLoosened for SubSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsSubWindowZLevelAboveParentLoosened_SubSession, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSubSession";
+    info.bundleName_ = "TestBundle";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(subSession, nullptr);
+
+    // Test default value
+    ASSERT_EQ(false, subSession->IsSubWindowZLevelAboveParentLoosened());
+
+    // Test enabled value
+    subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(true);
+    ASSERT_EQ(true, subSession->IsSubWindowZLevelAboveParentLoosened());
+
+    // Test disabled value
+    subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(false);
+    ASSERT_EQ(false, subSession->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_SubSession
+ * @tc.desc: test IsLoosenedWithFreeMultiMode for SubSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, IsLoosenedWithFreeMultiMode_SubSession, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSubSession";
+    info.bundleName_ = "TestBundle";
+    sptr<SubSession> subSession = sptr<SubSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(subSession, nullptr);
+
+    // Test default value
+    ASSERT_EQ(false, subSession->IsLoosenedWithFreeMultiMode());
+
+    // Test with PC mode enabled
+    subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(true);
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(true, subSession->IsLoosenedWithFreeMultiMode());
+
+    // Test with FreeMulti mode enabled
+    subSession->systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    subSession->systemConfig_.freeMultiWindowEnable_ = true;
+    subSession->systemConfig_.freeMultiWindowSupport_ = true;
+    ASSERT_EQ(true, subSession->IsLoosenedWithFreeMultiMode());
+
+    // Test with zLevel not loosened
+    subSession->GetSessionProperty()->SetZLevelAboveParentLoosened(false);
+    ASSERT_EQ(false, subSession->IsLoosenedWithFreeMultiMode());
 }
 } // namespace
 } // namespace Rosen

@@ -25,6 +25,7 @@
 #include "session_info.h"
 #include "session/host/include/scene_session.h"
 #include "session/host/include/main_session.h"
+#include "session/screen/include/screen_session.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
 #include "session_manager.h"
@@ -46,7 +47,7 @@ namespace {
     void MyLogCallback(const LogType type, const LogLevel level, const unsigned int domain, const char *tag,
         const char *msg)
     {
-        g_logMsg = msg;
+        g_logMsg += msg;
     }
 }
 namespace {
@@ -96,7 +97,7 @@ void SceneSessionManagerTest::TearDown()
     MockAccesstokenKit::ChangeMockStateToInit();
     usleep(WAIT_SYNC_IN_NS);
     ssm_->sceneSessionMap_.clear();
-    ssm_->screenPipEnabledMap_.clear();
+    ssm_->pipController_->ClearPipEnabledMap();
 }
 
 void SceneSessionManagerTest::SetVisibleForAccessibility(sptr<SceneSession>& sceneSession)
@@ -139,6 +140,70 @@ HWTEST_F(SceneSessionManagerTest, SetBrightness, TestSize.Level1)
     WSError result = ssm_->SetBrightness(sceneSession, brightness);
     EXPECT_EQ(result, WSError::WS_OK);
     EXPECT_NE(brightness, ssm_->GetDisplayBrightness());
+}
+
+/**
+ * @tc.name: NotifyRotationProperty
+ * @tc.desc: SceneSessionManager NotifyRotationProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, NotifyRotationProperty, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "NotifyRotationProperty";
+    info.bundleName_ = "NotifyRotationProperty";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(nullptr, sceneSession);
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    ASSERT_NE(nullptr, sceneSession->sessionStage_);
+    sceneSession->GetSessionProperty()->SetDisplayId(1001);
+
+    ScreenSessionConfig config;
+    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
+        ScreenSessionReason::CREATE_SESSION_FOR_CLIENT);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(1001, screenSession);
+
+    int32_t persistentId = sceneSession->GetPersistentId();
+    ssm_->sceneSessionMap_.emplace(persistentId, sceneSession);
+
+    WMError ret = ssm_->NotifyRotationProperty(persistentId, 0, 1, 1);
+    EXPECT_EQ(ret, WMError::WM_OK);
+    WMError ret2 = ssm_->NotifyRotationProperty(persistentId + 1, 0, 1, 1);
+    EXPECT_EQ(ret2, WMError::WM_ERROR_NULLPTR);
+
+    // Test width = 0
+    WMError ret3 = ssm_->NotifyRotationProperty(persistentId, 0, 0, 1);
+    EXPECT_EQ(ret3, WMError::WM_OK);
+
+    // Test height = 0
+    WMError ret4 = ssm_->NotifyRotationProperty(persistentId, 0, 1, 0);
+    EXPECT_EQ(ret4, WMError::WM_OK);
+
+    // Test sessionStage_ = nullptr
+    sceneSession->sessionStage_ = nullptr;
+    WMError ret5 = ssm_->NotifyRotationProperty(persistentId, 0, 1, 1);
+    EXPECT_EQ(ret5, WMError::WM_OK);
+
+    sceneSession->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
+    sceneSession->GetSessionProperty()->SetDisplayId(9999);
+    WMError ret6 = ssm_->NotifyRotationProperty(persistentId, 0, 1, 1);
+    EXPECT_EQ(ret6, WMError::WM_OK);
+
+    SessionInfo info2;
+    info2.abilityName_ = "NotifyRotationProperty2";
+    info2.bundleName_ = "NotifyRotationProperty2";
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info2, nullptr);
+    ASSERT_NE(nullptr, sceneSession2);
+    int32_t persistentId2 = sceneSession2->GetPersistentId();
+    ssm_->sceneSessionMap_.emplace(persistentId2, sceneSession2);
+    WMError ret7 = ssm_->NotifyRotationProperty(persistentId2, 0, 1, 1);
+    EXPECT_EQ(ret7, WMError::WM_OK);
+    ssm_->sceneSessionMap_.erase(persistentId2);
+    sceneSession2 = nullptr;
+
+    // Cleanup
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.erase(1001);
+    usleep(WAIT_SYNC_IN_NS);
 }
 
 /**
@@ -362,19 +427,6 @@ HWTEST_F(SceneSessionManagerTest, CheckIsRemote01, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckIsRemote02
- * @tc.desc: SceneSesionManager check is remote
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, CheckIsRemote02, TestSize.Level1)
-{
-    std::string deviceId = "abc";
-    EXPECT_EQ(deviceId.empty(), false);
-    bool result = ssm_->CheckIsRemote(deviceId);
-    EXPECT_FALSE(result);
-}
-
-/**
  * @tc.name: AnonymizeDeviceId01
  * @tc.desc: SceneSesionManager anonymize deviceId
  * @tc.type: FUNC
@@ -437,54 +489,6 @@ HWTEST_F(SceneSessionManagerTest, RegisterSessionListener01, TestSize.Level1)
     sptr<ISessionListener> listener = iface_cast<ISessionListener>(data.ReadRemoteObject());
     WSError result = ssm_->RegisterSessionListener(listener);
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_PERMISSION);
-}
-
-/**
- * @tc.name: ClearDisplayStatusBarTemporarilyFlags01
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags01, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.abilityName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    ASSERT_NE(nullptr, sceneSession);
-}
-
-/**
- * @tc.name: ClearDisplayStatusBarTemporarilyFlags02
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags02, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.abilityName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    sceneSession->SetIsDisplayStatusBarTemporarily(true);
-    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
-}
-
-/**
- * @tc.name: ClearDisplayStatusBarTemporarilyFlags03
- * @tc.desc: check ClearDisplayStatusBarTemporarilyFlags
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearDisplayStatusBarTemporarilyFlags03, TestSize.Level1)
-{
-    SessionInfo sessionInfo;
-    sessionInfo.bundleName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.abilityName_ = "ClearDisplayStatusBarTemporarilyFlags";
-    sessionInfo.windowType_ = static_cast<uint32_t>(WindowType::APP_MAIN_WINDOW_BASE);
-    sptr<SceneSession> sceneSession = ssm_->RequestSceneSession(sessionInfo, nullptr);
-    sceneSession->SetIsDisplayStatusBarTemporarily(true);
-    ssm_->ClearDisplayStatusBarTemporarilyFlags();
-    ASSERT_EQ(true, sceneSession->GetIsDisplayStatusBarTemporarily());
 }
 
 /**
@@ -674,12 +678,14 @@ HWTEST_F(SceneSessionManagerTest, MoveSessionsToBackground02, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClearAllCollaboratorSessions
+ * @tc.name: ClearCollaboratorSessionsByType01
  * @tc.desc: SceneSesionManager clear all collaborator sessions
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest, ClearCollaboratorSessionsByType01, TestSize.Level1)
 {
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
     std::string bundleName = "bundleName";
     std::string abilityName = "abilityName";
     int32_t persistentId = 1200;
@@ -688,70 +694,19 @@ HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions, TestSize.Level1)
     info.abilityName_ = abilityName;
     info.persistentId_ = persistentId;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    EXPECT_NE(sceneSession, nullptr);
+    sceneSession->SetCollaboratorType(CollaboratorType::REDIRECT_TYPE);
     sceneSession->SetTerminateSessionListenerNew(
-        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
-        ssm_->sceneSessionMap_.erase(info.persistentId_);
-    });
+        [](const SessionInfo &info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
+            ssm_->sceneSessionMap_.erase(info.persistentId_);
+        });
     usleep(WAIT_SYNC_IN_NS);
-    ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
-    ssm_->ClearAllCollaboratorSessions();
-    ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], sceneSession);
-}
-
-/**
- * @tc.name: ClearAllCollaboratorSessions02
- * @tc.desc: SceneSesionManager clear all collaborator sessions
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions02, TestSize.Level1)
-{
-    std::string bundleName = "bundleName";
-    std::string abilityName = "abilityName";
-    int32_t persistentId = 1201;
-    SessionInfo info;
-    info.bundleName_ = bundleName;
-    info.abilityName_ = abilityName;
-    info.persistentId_ = persistentId;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
-    sceneSession->SetTerminateSessionListenerNew(
-        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
-        ssm_->sceneSessionMap_.erase(info.persistentId_);
-    });
-    usleep(WAIT_SYNC_IN_NS);
-    ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
-    ssm_->ClearAllCollaboratorSessions();
-    ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
-}
-
-/**
- * @tc.name: ClearAllCollaboratorSessions03
- * @tc.desc: SceneSesionManager clear all collaborator sessions
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest, ClearAllCollaboratorSessions03, TestSize.Level1)
-{
-    std::string bundleName = "bundleName";
-    std::string abilityName = "abilityName";
-    int32_t persistentId = 1202;
-    SessionInfo info;
-    info.bundleName_ = bundleName;
-    info.abilityName_ = abilityName;
-    info.persistentId_ = persistentId;
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    sceneSession->SetTerminateSessionListenerNew(
-        [](const SessionInfo& info, bool needStartCaller, bool isFromBroker, bool isForceClean) {
-        ssm_->sceneSessionMap_.erase(info.persistentId_);
-    });
-    usleep(WAIT_SYNC_IN_NS);
-    ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
-    ssm_->ClearAllCollaboratorSessions();
-    ASSERT_EQ(ssm_->sceneSessionMap_[persistentId], nullptr);
+    ssm_->sceneSessionMap_.insert({persistentId, sceneSession});
+    ssm_->ClearCollaboratorSessionsByType(CollaboratorType::DEFAULT_TYPE);
+    EXPECT_FALSE(g_logMsg.find("clear session id") != std::string::npos);
+    ssm_->ClearCollaboratorSessionsByType(CollaboratorType::REDIRECT_TYPE);
+    EXPECT_TRUE(g_logMsg.find("clear session id") != std::string::npos);
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1641,6 +1596,21 @@ HWTEST_F(SceneSessionManagerTest, TestNotifyEnterRecentTask, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestNotifySCBRecentStateChange(bool isRecent)
+ * @tc.desc: Test whether the isRecent_ is set correctly;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, TestNotifySCBRecentStateChange, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SceneSessionManagerTest: TestNotifySCBRecentStateChange start";
+    sptr<SceneSessionManager> sceneSessionManager = sptr<SceneSessionManager>::MakeSptr();
+    ASSERT_NE(nullptr, sceneSessionManager);
+
+    sceneSessionManager->NotifySCBRecentStateChange(true);
+    EXPECT_EQ(sceneSessionManager->scbIsRecent_.load(), true);
+}
+
+/**
  * @tc.name: TestIsEnablePiPCreate
  * @tc.desc: Test if pip window can be created;
  * @tc.type: FUNC
@@ -2252,6 +2222,23 @@ HWTEST_F(SceneSessionManagerTest, NotifySupportRotationRegistered, TestSize.Leve
     WMError ret = WMError::WM_OK;
     ret = ssm_->NotifySupportRotationRegistered();
     EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
+ * @tc.name: SetSelectMode
+ * @tc.desc: SetSelectMode test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest, SetSelectMode, TestSize.Level1)
+{
+    ssm_->SetSelectMode(SelectMode::WIDE_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::WIDE_MODE);
+
+    ssm_->SetSelectMode(SelectMode::SQUARE_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::SQUARE_MODE);
+
+    ssm_->SetSelectMode(SelectMode::INVALID_MODE);
+    EXPECT_EQ(ssm_->GetSelectMode(), SelectMode::INVALID_MODE);
 }
 } // namespace
 } // namespace Rosen

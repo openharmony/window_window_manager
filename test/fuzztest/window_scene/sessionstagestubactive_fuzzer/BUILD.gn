@@ -42,7 +42,7 @@ ohos_fuzztest("SessionStageStubActiveFuzzTest") {
     "${window_base_path}/window_scene/intention_event/service:intention_event_anr_manager",
     "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
     "${window_base_path}/window_scene/screen_session_manager_client:screen_session_manager_client",
-    "${window_base_path}/window_scene/session:scene_session",
+    "${window_base_path}/window_scene/session:scene_session_static",
     "${window_base_path}/window_scene/session:screen_session",
     "${window_base_path}/wm:libwm",
   ]
@@ -53,6 +53,8 @@ ohos_fuzztest("SessionStageStubActiveFuzzTest") {
     "ability_base:want",
     "ability_runtime:ability_start_setting",
     "ability_runtime:process_options",
+    "accessibility:accessibility_common",
+    "accessibility:accessibility_interface",
     "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -65,13 +67,9 @@ ohos_fuzztest("SessionStageStubActiveFuzzTest") {
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
+    "input:libmmi-napi",
     "ipc:ipc_single",
     "preferences:native_preferences",
-  ]
-  public_external_deps = [
-    "accessibility:accessibility_common",
-    "accessibility:accessibility_interface",
-    "input:libmmi-napi",
   ]
 }
 

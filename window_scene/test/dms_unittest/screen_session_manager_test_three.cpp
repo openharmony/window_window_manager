@@ -516,6 +516,29 @@ HWTEST_F(ScreenSessionManagerTest, GetPhysicalScreenSession002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnGetHdrFormats
+ * @tc.desc: OnGetHdrFormats
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, OnGetHdrFormats, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ASSERT_EQ(ssm_->clientProxy_, nullptr);
+
+    ScreenId screenId = 123;
+    std::vector<ScreenHDRFormat> rsHdrFormats{ScreenHDRFormat::VIDEO_AIHDR};
+    std::vector<ScreenHDRFormat> rsHdrFormatsEmpty{};
+    ssm_->OnGetHdrFormats(screenId, nullptr, rsHdrFormatsEmpty);
+    ssm_->OnGetHdrFormats(screenId, nullptr, rsHdrFormats);
+
+    sptr<ScreenSession> session = new ScreenSession();
+    ssm_->OnGetHdrFormats(screenId, session, rsHdrFormatsEmpty);
+    ssm_->OnGetHdrFormats(screenId, session, rsHdrFormats);
+    auto hdrFormats = session->hdrFormats_;
+    EXPECT_TRUE(std::find(hdrFormats.begin(), hdrFormats.end(), ScreenHDRFormat::VIDEO_AIHDR) != hdrFormats.end());
+}
+
+/**
  * @tc.name: OnScreenModeChange
  * @tc.desc: OnScreenModeChange
  * @tc.type: FUNC
@@ -819,6 +842,8 @@ HWTEST_F(ScreenSessionManagerTest, NotifyCreatedScreen, TestSize.Level1)
     }
     ssm_->NotifyCreatedScreen(screenSession);
     EXPECT_TRUE(g_logMsg.find("super fold device, change by rotation.") == std::string::npos);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1065,14 +1090,16 @@ HWTEST_F(ScreenSessionManagerTest, OnFoldPropertyChange, TestSize.Level1)
 
     ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
     ssm_->OnFoldPropertyChange(screenId, screenProperty, reason, displayMode);
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
 }
 
 /**
- * @tc.name: SetConfigForInputmethod
- * @tc.desc: SetConfigForInputmethod
+ * @tc.name: SetOptionConfig
+ * @tc.desc: SetOptionConfig
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, SetConfigForInputmethod, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, SetOptionConfig, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
@@ -1082,14 +1109,14 @@ HWTEST_F(ScreenSessionManagerTest, SetConfigForInputmethod, TestSize.Level1)
     VirtualScreenOption option;
     option.supportsFocus_ = false;
     option.supportsInput_ = false;
-    ssm_->SetConfigForInputmethod(screenId, option);
+    ssm_->SetOptionConfig(screenId, option);
     sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
     EXPECT_EQ(screenSession->GetSupportsFocus(), false);
     EXPECT_EQ(screenSession->GetSupportsInput(), false);
 
     option.supportsFocus_ = true;
     option.supportsInput_ = true;
-    ssm_->SetConfigForInputmethod(screenId, option);
+    ssm_->SetOptionConfig(screenId, option);
     screenSession = ssm_->GetScreenSession(screenId);
     EXPECT_EQ(screenSession->GetSupportsFocus(), true);
     EXPECT_EQ(screenSession->GetSupportsInput(), true);
@@ -1097,8 +1124,9 @@ HWTEST_F(ScreenSessionManagerTest, SetConfigForInputmethod, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(MyLogCallback);
     screenId++;
-    ssm_->SetConfigForInputmethod(screenId, option);
+    ssm_->SetOptionConfig(screenId, option);
     EXPECT_TRUE(g_logMsg.find("screenSession is nullptr") != std::string::npos);
+    g_logMsg.clear();
     LOG_SetCallback(nullptr);
 }
 }

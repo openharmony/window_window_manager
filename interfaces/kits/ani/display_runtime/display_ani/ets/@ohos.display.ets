@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,10 +82,7 @@ export interface CutoutInfo {
 
 export class CutoutInfoImpl implements CutoutInfo {
     constructor() {
-        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH);
-        for (let i = 0; i < this.boundingRects.length; i++) {
-            this.boundingRects[i] = new RectImpl();
-        }
+        this.boundingRects = new Array<Rect>(CUTO_ARRAY_LENGTH, () => { return new RectImpl() });
         this.waterfallDisplayAreaRects = new WaterfallDisplayAreaRectsImpl();
     }
 
@@ -122,10 +119,7 @@ export interface FoldCreaseRegion {
 
 export class FoldCreaseRegionImpl implements FoldCreaseRegion {
     constructor() {
-        this.creaseRects = new Array<Rect>(CREASE_RECTS_LENGTH);
-        for (let i = 0; i < this.creaseRects.length; i++) {
-            this.creaseRects[i] = new RectImpl();
-        }
+        this.creaseRects = new Array<Rect>(CREASE_RECTS_LENGTH, () => { return new RectImpl() });
     }
 
     readonly displayId: long;
@@ -171,6 +165,8 @@ export interface VirtualScreenConfig {
     density: double;
  
     surfaceId: string;
+
+    supportsFocus?: boolean;
 }
  
 export class VirtualScreenConfigImpl implements VirtualScreenConfig {
@@ -182,7 +178,9 @@ export class VirtualScreenConfigImpl implements VirtualScreenConfig {
  
     density: double;
  
-    surfaceId: string; 
+    surfaceId: string;
+
+    supportsFocus?: boolean;
 }
 
 export enum FoldDisplayMode {
@@ -348,6 +346,8 @@ export interface Display {
     getDisplayCapability(): string;
 }
 
+export native function displayInfoFinalizerCallback(nativeObj: long): void;
+let displayInfoFinalizerRegister = new FinalizationRegistry<long>(displayInfoFinalizerCallback);
 export class DisplayImpl implements Display {
     static { loadLibraryWithPermissionCheck("displayani_kit.z", "@ohos.display"); }
 
@@ -405,43 +405,52 @@ export class DisplayImpl implements Display {
 
     displayRef: long;
 
+    displayInfoRef: long;
+
     setDisplayRef(nativeObj : long) : void{
         this.displayRef = nativeObj;
     }
 
+    private setDisplayInfoRef(nativeObj : long) : void{
+        if(this.displayInfoRef) {
+            displayInfoFinalizerRegister.unregister(this);
+        }
+        displayInfoFinalizerRegister.register(this, nativeObj, this);
+        this.displayInfoRef = nativeObj;
+    }
+
     getCutoutInfo(callback: AsyncCallback<CutoutInfo>): void {
+        this.getDisplayInfoRefInternal();
         taskpool.execute((): CutoutInfo => {
             let res: CutoutInfo = new CutoutInfoImpl();
             this.getCutoutInfoInternal(res);
             minusRectArray(res.boundingRects);
             return res;
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(null, ret as CutoutInfo);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, new CutoutInfoImpl());
         });
     }
 
     getCutoutInfo(): Promise<CutoutInfo> {
+        this.getDisplayInfoRefInternal();
         return new Promise<CutoutInfo>((resolve: (value: CutoutInfo) => void, reject: (error: BusinessError) => void ) => {
             taskpool.execute((): CutoutInfo => {
                 let res: CutoutInfo = new CutoutInfoImpl()
                 this.getCutoutInfoInternal(res);
                 minusRectArray(res.boundingRects);
                 return res;
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as CutoutInfo);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
     }
 
     getRoundedCorner(): Array<RoundedCorner> {
-        let res: Array<RoundedCorner> = new Array<RoundedCorner>(ROUNDED_CORNER_LENGTH);
-        for (let i = 0; i < res.length; i++) {
-            res[i] = new RoundedCornerImpl();
-        }
+        let res: Array<RoundedCorner> = new Array<RoundedCorner>(ROUNDED_CORNER_LENGTH, () => { return new RoundedCornerImpl() });
         this.getRoundedCornerInternal(res);
         minusRoundedCornerArray(res);
         return res;
@@ -450,9 +459,9 @@ export class DisplayImpl implements Display {
     hasImmersiveWindow(callback: AsyncCallback<boolean>): void {
         taskpool.execute((): boolean => {
             return this.hasImmersiveWindowInternal();
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             callback(null, ret as boolean);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             callback(err as BusinessError, false);
         });
     }
@@ -461,9 +470,9 @@ export class DisplayImpl implements Display {
         return new Promise<boolean>((resolve: (value: boolean) => void, reject: (error: BusinessError) => void ) => {
             taskpool.execute((): boolean => {
                 return this.hasImmersiveWindowInternal();
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as boolean);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -475,9 +484,9 @@ export class DisplayImpl implements Display {
                 let res: Rect = new RectImpl();
                 this.getAvailableAreaInternal(res);
                 return res;
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as Rect);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         })
@@ -536,6 +545,7 @@ export class DisplayImpl implements Display {
     native getRoundedCornerInternal(roundedCorner: Array<RoundedCorner>): void;
     native getDisplayCapabilityInternal(): string;
     native hasImmersiveWindowInternal(): boolean;
+    native getDisplayInfoRefInternal(): void;
 
     native static nativeTransferStatic(input: ESValue, display: Object): boolean;
     native static nativeTransferDynamic(nativeObj: long): ESValue;
@@ -563,17 +573,17 @@ export native function isCaptured(): boolean;
 
 export function getFoldDisplayMode(): FoldDisplayMode {
     let res = getFoldDisplayModeNative();
-    return res as FoldDisplayMode;
+    return FoldDisplayMode.fromValue(res);
 }
 
 export native function getFoldDisplayModeNative(): int;
 
 export function setFoldDisplayMode(mode: FoldDisplayMode, reason: string): void {
-    setFoldDisplayModeReasonNative(mode as int, reason, displayMgrRef);
+    setFoldDisplayModeReasonNative(mode, reason, displayMgrRef);
 }
 
 export function setFoldDisplayMode(mode: FoldDisplayMode): void {
-    setFoldDisplayModeNative(mode as int, displayMgrRef);
+    setFoldDisplayModeNative(mode, displayMgrRef);
 }
 
 export native function setFoldDisplayModeReasonNative(mode: int, reason: string, nativeObj: long): void;
@@ -581,7 +591,7 @@ export native function setFoldDisplayModeNative(mode: int, nativeObj: long): voi
 
 export function getFoldStatus(): FoldStatus{
     let res = getFoldStatusNative();
-    return res as FoldStatus;
+    return FoldStatus.fromValue(res);
 }
 
 export native function getFoldStatusNative(): int;
@@ -636,10 +646,7 @@ export native function getDefaultDisplaySyncNative(obj: object): void;
 export native function getAllDisplaysSyncNative(displayArray: Array<Display>): void;
 
 export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
-    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
-    for (let i = 0; i < res.length; i++) {
-        res[i] = new DisplayImpl();
-    }
+    let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH, () => { return new DisplayImpl() });
     try {
         getAllDisplaysSyncNative(res);
         minusDisplayArray(res);
@@ -650,19 +657,20 @@ export function getAllDisplays(callback: AsyncCallback<Array<Display>>): void {
     }
     return;
 }
+
 export function getAllDisplays(): Promise<Array<Display>> {
     return new Promise<Array<Display>>((resolve: (value: Array<Display>) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): Array<Display> => {
-            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH);
+            let res: Array<Display> = new Array<Display>(DISPLAY_ARRAY_LENGTH,  () => { return new DisplayImpl() });
             for (let i = 0; i < res.length; i++) {
                 res[i] = new DisplayImpl();
             }
             getAllDisplaysSyncNative(res);
             minusDisplayArray(res)
             return res;
-        }).then((ret: NullishType) => {
+        }).then((ret: Any) => {
             resolve(ret as Array<Display>);
-        }).catch((err: NullishType) => {
+        }).catch((err: Any) => {
             reject(err as BusinessError);
         });
     });
@@ -775,12 +783,12 @@ export function displayEventCallBack(cb: object, cbArg: long): void {
 
 export function foldStatusCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: FoldStatus) => void;
-    func(cbArg as FoldStatus);
+    func(FoldStatus.fromValue(cbArg));
 }
 
 export function foldDisplayModeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: FoldDisplayMode) => void;
-    func(cbArg as FoldDisplayMode);
+    func(FoldDisplayMode.fromValue(cbArg));
 }
 
 export function foldAngleChangeCallback(cb: object, cbArg: object): void {
@@ -805,16 +813,13 @@ export function getAllDisplayPhysicalResolution(): Promise<Array<DisplayPhysical
         reject: (error: BusinessError) => void ) => {
             taskpool.execute((): Array<DisplayPhysicalResolution> => {
                 let res: Array<DisplayPhysicalResolution> =
-                    new Array<DisplayPhysicalResolution>(DISPLAY_PHYSICAL_RESOLUTION_LENGTH);
-                for (let i = 0; i < res.length; i++) {
-                    res[i] = new DisplayPhysicalResolutionImpl();
-                }
+                    new Array<DisplayPhysicalResolution>(DISPLAY_PHYSICAL_RESOLUTION_LENGTH, () => { return new DisplayPhysicalResolutionImpl() });
                 getAllDisplayPhysicalResolutionNative(res, displayMgrRef);
                 minusResolutionArray(res);
                 return res;
-            }).then((ret: NullishType) => {
+            }).then((ret: Any) => {
                 resolve(ret as Array<DisplayPhysicalResolution>);
-            }).catch((err: NullishType) => {
+            }).catch((err: Any) => {
                 reject(err as BusinessError);
             });
         });
@@ -828,7 +833,7 @@ function minusResolutionArray(resolutions: Array<DisplayPhysicalResolution>): vo
             break;
         }
         let resolution = resolutions[index] as DisplayPhysicalResolutionImpl;
-        resolution.foldDisplayMode = resolution.foldDisplayMode_ as FoldDisplayMode;
+        resolution.foldDisplayMode = FoldDisplayMode.fromValue(resolution.foldDisplayMode_);
     }
 }
 
@@ -876,9 +881,9 @@ export function makeUnique(screenId: long): Promise<void> {
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
             makeUniqueNative(screenId, displayMgrRef);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
             reject(err as BusinessError);
         });
     });
@@ -890,9 +895,9 @@ export function addVirtualScreenBlocklist(windowIds: Array<int>): Promise<void> 
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
             addVirtualScreenBlocklistNative(windowIds, displayMgrRef);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
             resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
             reject(err as BusinessError);
         });
     });
@@ -902,9 +907,9 @@ export function removeVirtualScreenBlocklist(windowIds: Array<int>): Promise<voi
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
             removeVirtualScreenBlocklistNative(windowIds, displayMgrRef);
-        }).then((ret: NullishType): void => {
+        }).then((ret: Any): void => {
             resolve(undefined);
-        }).catch((err: NullishType): void => {
+        }).catch((err: Any): void => {
             reject(err as BusinessError);
         });
     });
@@ -925,9 +930,9 @@ export function createVirtualScreen(config: VirtualScreenConfig): Promise<long> 
             let screenId: long;
             screenId = createVirtualScreenNative(config as object, displayMgrRef);
             return screenId;
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
             resolve(ret as long);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
             reject(err as BusinessError);
         });
     });  
@@ -942,9 +947,9 @@ export function destroyVirtualScreen(screenId: long): Promise<void> {
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
             destroyVirtualScreenNative(screenId, displayMgrRef);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
             reject(err as BusinessError);
         });
     });
@@ -959,9 +964,9 @@ export function setVirtualScreenSurface(screenId: long, surfaceId: string): Prom
     return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void ) :void => {
         taskpool.execute((): void => {
             setVirtualScreenSurfaceNative(screenId, surfaceId, displayMgrRef);
-        }).then((ret: NullishType) :void => {
+        }).then((ret: Any) :void => {
             resolve(undefined);
-        }).catch((err: NullishType) :void => {
+        }).catch((err: Any) :void => {
             reject(err as BusinessError);
         });
     });
@@ -1003,4 +1008,11 @@ export let displayMgrRef: long;
 export function setDisplayMgrRef(nativeObj : long) : void{
     displayMgrRef = nativeObj;
 }
+
+export function onChangeWithAttribute(displayAttributeOption: Array<string>, callback: Callback<long>): void {
+    onChangeWithAttributeNative(displayAttributeOption, callback, displayMgrRef);
+}
+
+export native function onChangeWithAttributeNative(displayAttributeOption: Array<string>, callback: Callback<long>,
+    nativeObj: long): void;
 }

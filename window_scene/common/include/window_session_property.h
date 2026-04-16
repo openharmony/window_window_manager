@@ -27,6 +27,7 @@
 #include <cfloat>
 #include "pixel_map.h"
 #include "floating_ball_template_info.h"
+#include "float_view_template_info.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -36,6 +37,7 @@ using HandlWritePropertyFunc = bool (WindowSessionProperty::*)(Parcel& parcel);
 using HandlReadPropertyFunc = void (WindowSessionProperty::*)(Parcel& parcel);
 using TransitionAnimationMapType = std::unordered_map<WindowTransitionType, std::shared_ptr<TransitionAnimation>>;
 constexpr float WINDOW_CORNER_RADIUS_INVALID = -1.0f;
+constexpr float WINDOW_SHADOW_RADIUS_INVALID = -1.0f;
 
 class WindowSessionProperty : public Parcelable {
 public:
@@ -48,7 +50,6 @@ public:
     void SetSessionInfo(const SessionInfo& info);
     void SetTransitionAnimationConfig(WindowTransitionType transitionType, const TransitionAnimation& animation);
     void SetRequestRect(const struct Rect& rect);
-    void SetRectAnimationConfig(const RectAnimationConfig& rectAnimationConfig);
     void SetWindowRect(const struct Rect& rect);
     void SetFocusable(bool isFocusable);
     void SetFocusableOnShow(bool isFocusableOnShow);
@@ -67,6 +68,7 @@ public:
     void SetRequestedOrientation(Orientation orientation, bool needAnimation = true);
     void SetDefaultRequestedOrientation(Orientation orientation);
     void SetUserRequestedOrientation(Orientation orientation);
+    void SetIsSpecificSessionRequestOrientation(bool isSpecificSessionRequestOrientation);
     void SetPrivacyMode(bool isPrivate);
     void SetSystemPrivacyMode(bool isSystemPrivate);
     void SetSnapshotSkip(bool isSkip);
@@ -108,10 +110,11 @@ public:
     void SetCallingSessionId(uint32_t sessionId);
     void SetPiPTemplateInfo(const PiPTemplateInfo& pipTemplateInfo);
     void SetFbTemplateInfo(const FloatingBallTemplateInfo& fbTemplateInfo);
+    void SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo);
     void SetWindowMask(const std::shared_ptr<Media::PixelMap>& windowMask);
     void SetIsShaped(bool isShaped);
     void SetIsAppSupportPhoneInPc(bool isSupportPhone);
-    void SetIsPcAppInPad(bool isPcAppInLargeScreenDevice);
+    void SetIsPcAppInPad(bool isPcAppInPad);
     void SetIsAtomicService(bool isAtomicService);
 
     /*
@@ -127,7 +130,6 @@ public:
     SessionInfo& EditSessionInfo();
     Rect GetWindowRect() const;
     Rect GetRequestRect() const;
-    RectAnimationConfig GetRectAnimationConfig() const;
     WindowType GetWindowType() const;
     bool GetDragEnabled() const;
     bool GetTouchable() const;
@@ -145,6 +147,7 @@ public:
     bool GetRequestedAnimation() const;
     Orientation GetDefaultRequestedOrientation() const;
     Orientation GetUserRequestedOrientation() const;
+    bool GetIsSpecificSessionRequestOrientation() const;
     bool GetPrivacyMode() const;
     bool GetSystemPrivacyMode() const;
     bool GetSnapshotSkip() const;
@@ -176,6 +179,7 @@ public:
     uint32_t GetCallingSessionId() const;
     PiPTemplateInfo GetPiPTemplateInfo() const;
     FloatingBallTemplateInfo GetFbTemplateInfo() const;
+    FloatViewTemplateInfo GetFvTemplateInfo() const;
     std::shared_ptr<Media::PixelMap> GetWindowMask() const;
     bool GetIsShaped() const;
     KeyboardLayoutParams GetKeyboardLayoutParams() const;
@@ -193,6 +197,8 @@ public:
     static void UnmarshallingPiPTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingFbTemplateInfo(Parcel& parcel) const;
     static void UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingFvTemplateInfo(Parcel& parcel) const;
+    static void UnmarshallingFvTemplateInfo(Parcel& parcel, WindowSessionProperty* property);
     bool Marshalling(Parcel& parcel) const override;
     static WindowSessionProperty* Unmarshalling(Parcel& parcel);
     bool MarshallingWindowMask(Parcel& parcel) const;
@@ -219,7 +225,6 @@ public:
 
     double GetTextFieldPositionY() const;
     double GetTextFieldHeight() const;
-
     void SetSessionPropertyChangeCallback(std::function<void()>&& callback);
     bool IsLayoutFullScreen() const;
     void SetIsLayoutFullScreen(bool isLayoutFullScreen);
@@ -247,6 +252,8 @@ public:
     uint32_t GetSubWindowLevel() const;
     void SetSubWindowOutlineEnabled(bool subWindowOutlineEnabled);
     bool IsSubWindowOutlineEnabled() const;
+    void SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened);
+    bool IsSubWindowZLevelAboveParentLoosened() const;
     void SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
     WindowAnchorInfo GetWindowAnchorInfo() const;
 
@@ -329,6 +336,8 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
+    void SetIsWindowLimitsForcible(bool isWindowLimitsForcible) { isWindowLimitsForcible_ = isWindowLimitsForcible; }
+    bool GetIsWindowLimitsForcible() const { return isWindowLimitsForcible_; }
 
     /*
      * Compatible mode
@@ -354,10 +363,10 @@ public:
     void SetIsFullScreenInForceSplitMode(bool isFullScreenInForceSplitMode);
     bool IsFullScreenInForceSplitMode() const;
     RealTimeSwitchInfo GetRealTimeSwitchInfo() const;
-    void SetCompatibleModePage(const std::string& compatibleModePage);
-    std::string GetCompatibleModePage() const;
     void SetPageCompatibleMode(CompatibleStyleMode compatibleMode);
     CompatibleStyleMode GetPageCompatibleMode() const;
+    void SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig);
+    std::vector<std::string> GetCombinedCompatibleConfig() const;
 
     /*
      * Keyboard
@@ -385,6 +394,19 @@ public:
      */
     void SetAspectRatio(float ratio);
     float GetAspectRatio() const;
+
+    /*
+     * Prelaunch Starting Window
+     */
+    void SetPrelaunch(bool isPrelaunch);
+    bool IsPrelaunch() const;
+    void SetFrameNum(int32_t frameNum);
+    int32_t GetFrameNum() const;
+    void SetAppBufferReady(bool isAppBufferReady);
+    bool IsAppBufferReady() const;
+
+    void SetIsCrossProcessWindow(bool isCrossProcess);
+    bool GetIsCrossProcessWindow() const;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -464,12 +486,10 @@ private:
     void ReadActionUpdateRotationLockChange(Parcel& parcel);
     std::string windowName_;
     SessionInfo sessionInfo_;
-    mutable std::mutex windowRectMutex_;
-    Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     mutable std::mutex requestRectMutex_;
     Rect requestRect_ { 0, 0, 0, 0 }; // window rect requested by the client (without decoration size)
-    mutable std::mutex rectAnimationConfigMutex_;
-    RectAnimationConfig rectAnimationConfig_ { 0, 0.0f, 0.0f, 0.0f, 0.0f };
+    mutable std::mutex windowRectMutex_;
+    Rect windowRect_ { 0, 0, 0, 0 }; // actual window rect
     WindowType type_ { WindowType::WINDOW_TYPE_APP_MAIN_WINDOW }; // type main window
     bool touchable_ { true };
     bool dragEnabled_ = { true };
@@ -486,6 +506,7 @@ private:
     bool needRotateAnimation_ = true;
     Orientation defaultRequestedOrientation_ = Orientation::UNSPECIFIED; // only accessed on SSM thread
     Orientation userRequestedOrientation_ = Orientation::UNSPECIFIED;
+    bool isSpecificSessionRequestOrientation_ = false;
     bool isPrivacyMode_ { false };
     bool isSystemPrivacyMode_ { false };
     bool isSnapshotSkip_ { false };
@@ -509,6 +530,8 @@ private:
     PiPTemplateInfo pipTemplateInfo_ = {};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
     mutable std::mutex fbTemplateMutex_;
+    FloatViewTemplateInfo fvTemplateInfo_ = {};
+    mutable std::mutex fvTemplateMutex_;
     KeyboardLayoutParams keyboardLayoutParams_;
     std::map<uint64_t, KeyboardLayoutParams> keyboardLayoutParamsMap_;
     uint32_t windowModeSupportType_ {WindowModeSupport::WINDOW_MODE_SUPPORT_ALL};
@@ -535,6 +558,7 @@ private:
 
     double textFieldPositionY_ = 0.0;
     double textFieldHeight_ = 0.0;
+
     bool isNeedUpdateWindowMode_ = false;
     std::function<void()> touchHotAreasChangeCallback_;
     bool isLayoutFullScreen_ = false;
@@ -546,11 +570,13 @@ private:
     static const std::map<uint64_t, HandlWritePropertyFunc> writeFuncMap_;
     static const std::map<uint64_t, HandlReadPropertyFunc> readFuncMap_;
     bool isAppSupportPhoneInPc_ = false;
-    bool isPcAppInLargeScreenDevice_ = false;
+    bool isPcAppInPad_ = false;
+    sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
     mutable std::mutex compatibleModeMutex_;
     bool isFullScreenInForceSplitMode_ = false;
-    std::string compatibleModePage_ = "";
     CompatibleStyleMode pageCompatibleMode_ = CompatibleStyleMode::INVALID_VALUE;
+    std::vector<std::string> combinedCompatibleConfig_;
+    mutable std::mutex combinedCompatibleConfigMutex_;
     uint8_t backgroundAlpha_ = 0xff; // default alpha is opaque.
     mutable std::mutex atomicServiceMutex_;
     bool isAtomicService_ = false;
@@ -563,6 +589,7 @@ private:
      */
     uint32_t subWindowLevel_ = 0;
     bool subWindowOutlineEnabled_ = false;
+    bool zLevelAboveParentLoosened_ = false;
     WindowAnchorInfo windowAnchorInfo_;
 
     /*
@@ -601,6 +628,11 @@ private:
     WindowSizeLimits windowSizeLimits_;
     bool isFullScreenWaterfallMode_ = false;
 
+    /**
+     * @brief Whether application-defined window size limits are allowed to exceed system limits.
+     */
+    bool isWindowLimitsForcible_ = false;
+
     /*
      * Keyboard
      */
@@ -613,13 +645,6 @@ private:
     uint32_t avoidAreaOption_ = 0;
 
     int32_t statusBarHeightInImmersive_ = 0;
-    
-    /*
-     * Window Focus
-     */
-    bool focusable_ { true };
-    bool focusableOnShow_ { true };
-    bool isExclusivelyHighlighted_ { true };
 
     /*
      * Window Lifecycle
@@ -627,9 +652,10 @@ private:
     mutable std::mutex lifecycleUseControlMutex_;
     bool isUseControlState_ = false;
     std::string ancoRealBundleName_  = "";
+
     MissionInfo missionInfo_;
     mutable std::mutex missionInfoMutex_;
-
+    
     /*
      * Window Property
      */
@@ -645,8 +671,12 @@ private:
     bool isMobileAppInPadLayoutFullScreen_ = false;
     bool isRotationLock_ = false;
 
-    sptr<CompatibleModeProperty> compatibleModeProperty_ = nullptr;
-
+    /*
+     * Window Focus
+     */
+    bool focusable_ { true };
+    bool focusableOnShow_ { true };
+    bool isExclusivelyHighlighted_ { true };
     /**
      * Window Transition Animation For PC
      */
@@ -658,6 +688,14 @@ private:
      * Window Layout
      */
     float aspectRatio_ { 0.0f };
+
+    /*
+     * Prelaunch Starting Window
+     */
+    bool isPrelaunch_ = false;
+    int32_t frameNum_ = 0;
+    bool isAppBufferReady_ = false;
+    bool isCrossProcessWindow_ = false;
 };
 
 class CompatibleModeProperty : public Parcelable {
@@ -715,8 +753,6 @@ public:
 
     bool Marshalling(Parcel& parcel) const override;
     static CompatibleModeProperty* Unmarshalling(Parcel& parcel);
-
-    void CopyFrom(const sptr<CompatibleModeProperty>& property);
 
     std::string ToString() const
     {
@@ -932,8 +968,10 @@ struct SystemSessionConfig : public Parcelable {
     bool supportCreateFloatWindow_ = false;
     float defaultCornerRadius_ = 0.0f; // default corner radius of window set by system config
     bool supportUIExtensionSubWindow_ = false;
+    bool supportCreateFloatView_ = false;
 
     void ConvertSupportUIExtensionSubWindow(const std::string& itemValue);
+    void ConvertSupportCreateFloatView(const std::string& itemValue);
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -949,9 +987,9 @@ struct SystemSessionConfig : public Parcelable {
         }
 
         bool parcelWriteFail = !parcel.WriteUint32(miniWidthOfMainWindow_) ||
-                !parcel.WriteUint32(miniHeightOfMainWindow_) || !parcel.WriteUint32(miniWidthOfSubWindow_) ||
-                !parcel.WriteUint32(miniHeightOfSubWindow_) || !parcel.WriteUint32(miniWidthOfDialogWindow_) ||
-                !parcel.WriteUint32(miniHeightOfDialogWindow_);
+            !parcel.WriteUint32(miniHeightOfMainWindow_) || !parcel.WriteUint32(miniWidthOfSubWindow_) ||
+            !parcel.WriteUint32(miniHeightOfSubWindow_) || !parcel.WriteUint32(miniWidthOfDialogWindow_) ||
+            !parcel.WriteUint32(miniHeightOfDialogWindow_);
         if (parcelWriteFail) {
             return false;
         }
@@ -976,7 +1014,7 @@ struct SystemSessionConfig : public Parcelable {
         if (!parcel.WriteBool(supportTypeFloatWindow_)) {
             return false;
         }
-        if (!parcel.WriteBool(maxMidSceneNum_)) {
+        if (!parcel.WriteUint32(maxMidSceneNum_)) {
             return false;
         }
         if (!parcel.WriteBool(supportFollowParentWindowLayout_)) {
@@ -1002,6 +1040,9 @@ struct SystemSessionConfig : public Parcelable {
             return false;
         }
         if (!parcel.WriteFloat(defaultCornerRadius_)) {
+            return false;
+        }
+        if (!parcel.WriteBool(supportCreateFloatView_)) {
             return false;
         }
         return true;
@@ -1061,9 +1102,10 @@ struct SystemSessionConfig : public Parcelable {
             delete config;
             return nullptr;
         }
+        config->supportCreateFloatView_ = parcel.ReadBool();
         return config;
     }
-
+        
     bool IsFreeMultiWindowMode() const
     {
         return freeMultiWindowEnable_ && freeMultiWindowSupport_;
@@ -1089,7 +1131,7 @@ struct SystemSessionConfig : public Parcelable {
         return IsPcWindow() || (IsPadWindow() && IsFreeMultiWindowMode());
     }
 
-    bool isSupportPCMode() const
+    bool IsSupportPCMode() const
     {
         return IsPcWindow() || IsFreeMultiWindowMode();
     }

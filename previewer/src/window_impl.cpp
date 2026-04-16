@@ -446,6 +446,18 @@ WMError WindowImpl::SetSpecificBarProperty(WindowType type, const SystemBarPrope
     return WMError::WM_OK;
 }
 
+WMError WindowImpl::SetFloatNavigationAvoidAreaEnabled(bool enable)
+{
+    floatNavigationAvoidAreaEnabled_ = enable;
+    return WMError::WM_OK;
+}
+
+WMError WindowImpl::GetFloatNavigationAvoidAreaEnabled(bool& enable) const
+{
+    enable = floatNavigationAvoidAreaEnabled_;
+    return WMError::WM_OK;
+}
+
 WMError WindowImpl::UpdateSystemBarProperty(bool status)
 {
     bool enable = !status;
@@ -470,8 +482,7 @@ WMError WindowImpl::UpdateSystemBarProperty(bool status)
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::SetSystemBarProperties(const std::map<WindowType, SystemBarProperty>& properties,
-    const std::map<WindowType, SystemBarPropertyFlag>& propertyFlags)
+WMError WindowImpl::SetStatusBarColorForNavigation(const std::optional<uint32_t> color)
 {
     return WMError::WM_OK;
 }
@@ -591,7 +602,7 @@ WMError WindowImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal, MoveConfig
     return WMError::WM_OK;
 }
 
-WMError WindowImpl::Resize(uint32_t width, uint32_t height, const RectAnimationConfig& rectAnimationConfig)
+WMError WindowImpl::Resize(uint32_t width, uint32_t height)
 {
     return WMError::WM_OK;
 }
@@ -975,7 +986,11 @@ void WindowImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType
         WLOGFE("invalid avoidArea");
         return;
     }
-
+    bool floatNavigationAvoidAreaEnabled_ = false;
+    GetFloatNavigationAvoidAreaEnabled(floatNavigationAvoidAreaEnabled_);
+    if (!floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+        return;
+    }
     WLOGFI("type:%{public}d, top:{%{public}d,%{public}d,%{public}d,%{public}d}, "
         "left:{%{public}d,%{public}d,%{public}d,%{public}d}, right:{%{public}d,%{public}d,%{public}d,%{public}d}, "
         "bottom:{%{public}d,%{public}d,%{public}d,%{public}d}",

@@ -24,6 +24,7 @@
 #include "window_manager_hilog.h"
 #include "window_session_impl.h"
 #include "wm_common.h"
+#include "mock_session_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -408,13 +409,8 @@ HWTEST_F(WindowSessionImplTest3, RegisterMainWindowCloseListeners, TestSize.Leve
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
 
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     ret = window_->RegisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
-
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = window_->RegisterMainWindowCloseListeners(listener);
-    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: RegisterMainWindowCloseListeners end";
 }
 
@@ -436,7 +432,6 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, TestSize.Le
 
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
     window_->property_->SetPersistentId(1);
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window_->state_ = WindowState::STATE_CREATED;
     ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
@@ -444,10 +439,6 @@ HWTEST_F(WindowSessionImplTest3, UnregisterMainWindowCloseListeners, TestSize.Le
     window_->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
     ret = window_->UnregisterMainWindowCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_OK);
-
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = window_->UnregisterMainWindowCloseListeners(listener);
-    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
     GTEST_LOG_(INFO) << "WindowSessionImplTest: UnregisterMainWindowCloseListeners end";
 }
 
@@ -468,11 +459,6 @@ HWTEST_F(WindowSessionImplTest3, RegisterWindowWillCloseListeners, TestSize.Leve
 
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = window_->RegisterWindowWillCloseListeners(listener);
-    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = window_->RegisterWindowWillCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
@@ -500,11 +486,6 @@ HWTEST_F(WindowSessionImplTest3, UnRegisterWindowWillCloseListeners, TestSize.Le
 
     window_->property_->SetPersistentId(1);
     window_->state_ = WindowState::STATE_CREATED;
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    ret = window_->UnRegisterWindowWillCloseListeners(listener);
-    ASSERT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
-
-    window_->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     window_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);
     ret = window_->UnRegisterWindowWillCloseListeners(listener);
     ASSERT_EQ(ret, WMError::WM_ERROR_INVALID_CALLING);
@@ -694,11 +675,24 @@ HWTEST_F(WindowSessionImplTest3, UpdateRectForOtherReasonTask, TestSize.Level1)
     window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
     ASSERT_EQ(window_->postTaskDone_, true);
     WindowType windowType = window_->GetType();
+    Rect requestRect = { 0, 0, 50, 50 };
+    Rect windowRect = { 0, 0, 0, 0 };
     window_->postTaskDone_ = true;
+    window_->property_->SetWindowRect(windowRect);
+    window_->property_->SetRequestRect(requestRect);
     window_->property_->SetWindowType(WindowType::WINDOW_TYPE_FLOAT_NAVIGATION);
     window_->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window_->notifySizeChangeFlag_, true);
     window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
-    ASSERT_EQ(window_->postTaskDone_, true);
+    ASSERT_EQ(window_->notifySizeChangeFlag_, false);
+    window_->postTaskDone_ = true;
+    window_->property_->SetWindowRect(windowRect);
+    window_->property_->SetRequestRect(requestRect);
+    window_->property_->SetWindowType(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
+    window_->SetNotifySizeChangeFlag(true);
+    ASSERT_EQ(window_->notifySizeChangeFlag_, true);
+    window_->UpdateRectForOtherReasonTask(wmRect, preRect, wmReason, rsTransaction);
+    ASSERT_EQ(window_->notifySizeChangeFlag_, false);
     window_->property_->SetWindowType(windowType);
     window_->handler_ = nullptr;
     window_->UpdateRectForOtherReason(wmRect, preRect, wmReason, rsTransaction);
@@ -1642,6 +1636,232 @@ HWTEST_F(WindowSessionImplTest3, UpdateSubWindowStateWithOptions, Function | Sma
     subwindow3->state_ = WindowState::STATE_HIDDEN;
     window_->UpdateSubWindowStateWithOptions(option);
     ASSERT_EQ(subwindow3->state_, WindowState::STATE_SHOWN);
+}
+
+/**
+ * @tc.name: NeedShowDecorInOtherDisplay
+ * @tc.desc: NeedShowDecorInOtherDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NeedShowDecorInOtherDisplay, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NeedShowDecorInOtherDisplay");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(PERSISTENT_ID_ONE);
+    ASSERT_NE(window, nullptr);
+    window->UpdateDisplayId(0);
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(window->property_->GetDisplayId());
+    ASSERT_NE(display, nullptr);
+    sptr<DisplayInfo> displayInfo = display->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+
+    displayInfo->name_ = "HiCar";
+    bool decorVisible = true;
+    decorVisible = window->NeedShowDecorInOtherDisplay(decorVisible);
+    EXPECT_FALSE(decorVisible);
+ 
+    displayInfo->name_ = "SuperLauncher";
+    decorVisible = true;
+    decorVisible = window->NeedShowDecorInOtherDisplay(decorVisible);
+    EXPECT_FALSE(decorVisible);
+ 
+    displayInfo->name_ = "PadWithCar";
+    decorVisible = true;
+    decorVisible = window->NeedShowDecorInOtherDisplay(decorVisible);
+    EXPECT_FALSE(decorVisible);
+    window->Destroy();
+}
+
+/**
+ * @tc.name: NotifyPrepareCloseFloatView
+ * @tc.desc: NotifyPrepareCloseFloatView
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, NotifyPrepareCloseFloatView, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyPrepareCloseFloatView");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    // branch: hostSession is null => return
+    window->hostSession_ = nullptr;
+    window->NotifyPrepareCloseFloatView();
+
+    // branch: session invalid => return
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    EXPECT_TRUE(window->IsWindowSessionInvalid());
+    window->NotifyPrepareCloseFloatView();
+
+    // branch: normal => hostSession->NotifyFloatViewPrepareClose
+    window->property_->persistentId_ = 1234;
+    EXPECT_FALSE(window->IsWindowSessionInvalid());
+    EXPECT_CALL(*session, NotifyFloatViewPrepareClose()).Times(1);
+    window->NotifyPrepareCloseFloatView();
+}
+
+/**
+ * @tc.name: UpdateFloatView
+ * @tc.desc: UpdateFloatView
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, UpdateFloatView, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateFloatView");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    FloatViewTemplateInfo fvTemplateInfo {};
+
+    // branch: invalid session => WM_ERROR_INVALID_WINDOW
+    window->hostSession_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UpdateFloatView(fvTemplateInfo));
+
+    // branch: hostSession null when persistentId valid => WM_ERROR_INVALID_WINDOW
+    window->property_->persistentId_ = 1234;
+    window->hostSession_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->UpdateFloatView(fvTemplateInfo));
+
+    // branch: normal => forward to hostSession
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    window->hostSession_ = session;
+    EXPECT_CALL(*session, UpdateFloatView(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, window->UpdateFloatView(fvTemplateInfo));
+}
+
+/**
+ * @tc.name: RestoreFloatViewMainWindow
+ * @tc.desc: RestoreFloatViewMainWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, RestoreFloatViewMainWindow, TestSize.Level1)
+{
+    // prepare parent window (must be found by FindWindowById)
+    auto parent = GetTestWindowImpl("RestoreFloatViewMainWindow_parent");
+    ASSERT_NE(parent, nullptr);
+    parent->property_->SetPersistentId(200);
+
+    auto fvWin = GetTestWindowImpl("RestoreFloatViewMainWindow");
+    ASSERT_NE(fvWin, nullptr);
+    fvWin->property_->SetParentPersistentId(200);
+
+    // branch: parentWindow invalid
+    fvWin->property_->SetParentPersistentId(999);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvWin->RestoreFloatViewMainWindow(nullptr));
+
+    // insert parent into map
+    WindowSessionImpl::windowSessionMap_.clear();
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair(fvWin->GetWindowName(),
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(parent->GetWindowId(), parent)));
+
+    // branch: session invalid
+    fvWin->property_->SetParentPersistentId(200);
+    fvWin->property_->persistentId_ = INVALID_WINDOW_ID;
+    fvWin->hostSession_ = sptr<SessionStubMocker>::MakeSptr();
+    EXPECT_TRUE(fvWin->IsWindowSessionInvalid());
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvWin->RestoreFloatViewMainWindow(nullptr));
+
+    // branch: hostSession null when session valid
+    fvWin->property_->persistentId_ = 1234;
+    fvWin->hostSession_ = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvWin->RestoreFloatViewMainWindow(nullptr));
+
+    // branch: hostSession returns error => propagate
+    auto session = sptr<SessionStubMocker>::MakeSptr();
+    fvWin->hostSession_ = session;
+    EXPECT_CALL(*session, RestoreFloatViewMainWindow(_)).Times(1)
+        .WillOnce(Return(WMError::WM_ERROR_INVALID_OPERATION));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_OPERATION, fvWin->RestoreFloatViewMainWindow(nullptr));
+
+    // branch: hostSession OK
+    EXPECT_CALL(*session, RestoreFloatViewMainWindow(_)).Times(1).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, fvWin->RestoreFloatViewMainWindow(nullptr));
+
+    parent->Destroy();
+    fvWin->Destroy();
+    WindowSessionImpl::windowSessionMap_.clear();
+}
+
+/**
+ * @tc.name: SendFvActionEvent
+ * @tc.desc: SendFvActionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SendFvActionEvent, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SendFvActionEvent");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    std::string action = "click";
+    std::string reason = "ut";
+
+    EXPECT_EQ(WSError::WS_OK, window->SendFvActionEvent(action, reason));
+}
+
+/**
+ * @tc.name: SyncFvWindowInfo
+ * @tc.desc: SyncFvWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SyncFvWindowInfo, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SyncFvWindowInfo");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    FloatViewWindowInfo windowInfo;
+    std::string reason = "ut";
+
+    EXPECT_EQ(WSError::WS_OK, window->SyncFvWindowInfo(windowInfo, reason));
+}
+
+/**
+ * @tc.name: SyncFvLimits
+ * @tc.desc: SyncFvLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, SyncFvLimits, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SyncFvLimits");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    FloatViewLimits limits;
+    EXPECT_EQ(WSError::WS_OK, window->SyncFvLimits(limits));
+}
+
+/**
+ * @tc.name: IsAnyWindowMatchState
+ * @tc.desc: IsAnyWindowMatchState test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, IsAnyWindowMatchState, TestSize.Level1)
+{
+    WindowSessionImpl::windowSessionMap_.clear();
+    EXPECT_FALSE(WindowSessionImpl::IsAnyWindowMatchState(WindowState::STATE_SHOWN));
+
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("test",
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(1, nullptr)));
+    EXPECT_FALSE(WindowSessionImpl::IsAnyWindowMatchState(WindowState::STATE_SHOWN));
+
+    WindowSessionImpl::windowSessionMap_.clear();
+    sptr<WindowOption> windowOption = sptr<WindowOption>::MakeSptr();
+    windowOption->SetWindowName("IsAnyWindowMatchState");
+    sptr<WindowSessionImpl> windowSession = sptr<WindowSessionImpl>::MakeSptr(windowOption);
+    WindowSessionImpl::windowSessionMap_.insert(std::make_pair("test",
+        std::pair<uint64_t, sptr<WindowSessionImpl>>(1, windowSession)));
+    windowSession->state_ = WindowState::STATE_CREATED;
+    EXPECT_FALSE(WindowSessionImpl::IsAnyWindowMatchState(WindowState::STATE_SHOWN));
+
+    windowSession->state_ = WindowState::STATE_SHOWN;
+    EXPECT_TRUE(WindowSessionImpl::IsAnyWindowMatchState(WindowState::STATE_SHOWN));
 }
 } // namespace
 } // namespace Rosen

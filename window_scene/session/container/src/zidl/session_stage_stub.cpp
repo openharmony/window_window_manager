@@ -136,6 +136,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetTopNavDestinationName(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE):
             return HandleNotifyLayoutFinishAfterWindowModeChange(data, reply);
+        case static_cast<uint32_t>
+            (SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUB_WINDOW_AFTER_PARENT_WINDOW_SIZE_CHANGE):
+            return HandleNotifySubWindowAfterParentWindowSizeChange(data, reply);
+        case static_cast<uint32_t>
+            (SessionStageInterfaceCode::TRANS_ID_NOTIFY_SUB_WINDOW_AFTER_PARENT_WINDOW_STATUS_CHANGE):
+            return HandleNotifySubWindowAfterParentWindowStatusChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS):
             return HandleNotifyForegroundInteractiveStatus(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_MAXIMIZE_MODE_CHANGE):
@@ -158,6 +164,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyTransformChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SINGLE_HAND_TRANSFORM):
             return HandleNotifySingleHandTransformChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_GLOBAL_SCALED_RECT):
+            return HandleNotifyGlobalScaledRectChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE):
             return HandleNotifyDialogStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT):
@@ -174,16 +182,18 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
             return HandleNotifyKeyboardPanelInfoChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
+            return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_PCAPPINPADNORMAL_CLOSE):
             return HandlePcAppInPadNormalClose(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_PROPERTY_CHANGE):
             return HandleNotifyCompatibleModePropertyChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DENSITY_UNIQUE):
-            return HandleSetUniqueVirtualPixelRatio(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SESSION_FULLSCREEN):
             return HandleNotifySessionFullScreen(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DUMP_INFO):
             return HandleNotifyDumpInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_UIEXTENSION_TRANSPARENT):
+            return HandleSetUIExtensionTransparent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SPLIT_BUTTON_VISIBLE):
             return HandleSetSplitButtonVisible(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_ENABLE_DRAG_BY_SYSTEM):
@@ -202,18 +212,20 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSendContainerModalEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_DRAG_ACTIVATED):
             return HandleSetDragActivated(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
+            return HandleNotifyPipSizeChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HIGHLIGHT_CHANGE):
             return HandleNotifyHighlightChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_CROSS_AXIS):
             return HandleNotifyWindowCrossAxisChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PIPSIZE_CHANGE):
-            return HandleNotifyPipSizeChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_ACTIVE_STATUS_CHANGE):
             return HandleNotifyPiPActiveStatusChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_ATTACH_STATE_CHANGE):
             return HandleNotifyWindowAttachStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_COMPLETED):
             return HandleNotifyKeyboardAnimationCompleted(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
+            return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_ANIMATION_WILLBEGIN):
             return HandleNotifyKeyboardAnimationWillBegin(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_PROPERTY):
@@ -222,8 +234,6 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyPageRotationIsIgnored(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ROTATION_CHANGE):
             return HandleNotifyRotationChange(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_CURRENT_ROTATION):
-            return HandleSetCurrentRotation(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_ENABLE_UPDATED):
@@ -238,6 +248,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleCloseSpecificScene(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_ROUTER_STACK_INFO):
             return HandleGetRouterStackInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT):
+            return HandleGetSceneNodeCount(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCENE_NODE_COUNT_WITH_CALLBACK):
+            return HandleGetSceneNodeCountWithCallback(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ORIENTATION_EXECUTION_RESULT):
+            return HandleNotifyOrientationExecutionResult(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
             return HandleUpdateWindowModeForUITest(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_GLOBAL_DISPLAY_RECT):
@@ -254,6 +270,20 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleAddSidebarBlur(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_SIDEBAR_BLUR_STYLE):
             return HandleSetSidebarBlurStyleWithType(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_UI_TYPE):
+            return HandleUpdateWindowUIType(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_PROPERTY_WHEN_TRIGGER_MODE):
+            return HandleUpdatePropertyWhenTriggerMode(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PARENT_LIFECYCLE_EVENT):
+            return HandleNotifyParentLifecycleEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO):
+            return HandleUpdateAppHookWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FV_ACTION_EVENT):
+            return HandleSendFvActionEvent(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_WINDOW_INFO):
+            return HandleSyncFvWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_LIMITS):
+            return HandleSyncFvLimits(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -642,6 +672,39 @@ int SessionStageStub::HandleNotifyLayoutFinishAfterWindowModeChange(MessageParce
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifySubWindowAfterParentWindowSizeChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    Rect rect = {0, 0, 0, 0};
+    if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
+        !data.ReadUint32(rect.width_) ||!data.ReadUint32(rect.height_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read rect failed");
+        return ERR_INVALID_VALUE;
+    }
+    WSError errCode = NotifySubWindowAfterParentWindowSizeChange(rect);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write stage error code failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifySubWindowAfterParentWindowStatusChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    uint32_t mode = static_cast<uint32_t>(WindowMode::WINDOW_MODE_UNDEFINED);
+    if (!data.ReadUint32(mode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read mode");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifySubWindowAfterParentWindowStatusChange(static_cast<WindowMode>(mode));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write stage error code failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleUpdateWindowModeForUITest(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -777,6 +840,15 @@ int SessionStageStub::HandleNotifySingleHandTransformChange(MessageParcel& data,
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyGlobalScaledRectChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    Rect globalScaledRect;
+    globalScaledRect.Unmarshalling(data);
+    NotifyGlobalScaledRectChange(globalScaledRect);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyDensityFollowHost(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifyDensityFollowHost");
@@ -820,6 +892,66 @@ int SessionStageStub::HandleSendFbActionEvent(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     auto error = SendFbActionEvent(action);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSendFvActionEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSendFvActionEvent");
+    std::string action;
+    if (!data.ReadString(action)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read action failed.");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    std::string reason;
+    if (!data.ReadString(reason)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read reason failed.");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SendFvActionEvent(action, reason);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSyncFvWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSyncFvWindowInfo");
+    sptr<FloatViewWindowInfo> windowInfo = data.ReadParcelable<FloatViewWindowInfo>();
+    if (windowInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read windowInfo failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    std::string reason = "";
+    if (!data.ReadString(reason)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read reason failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SyncFvWindowInfo(*windowInfo, reason);
+    if (!reply.WriteInt32(static_cast<int32_t>(error))) {
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSyncFvLimits(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleSyncFvLimits");
+    sptr<FloatViewLimits> limits = data.ReadParcelable<FloatViewLimits>();
+    if (limits == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Read limits failed");
+        reply.WriteInt32(static_cast<int32_t>(WSError::WS_ERROR_IPC_FAILED));
+        return ERR_INVALID_VALUE;
+    }
+    auto error = SyncFvLimits(*limits);
     if (!reply.WriteInt32(static_cast<int32_t>(error))) {
         return ERR_INVALID_VALUE;
     }
@@ -891,26 +1023,18 @@ int SessionStageStub::HandleNotifyKeyboardPanelInfoChange(MessageParcel& data, M
     return ERR_NONE;
 }
 
-int SessionStageStub::HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply)
-{
-    WSError errCode = PcAppInPadNormalClose();
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleNotifyCompatibleModePropertyChange(MessageParcel& data, MessageParcel& reply)
-{
-    sptr<CompatibleModeProperty> property = data.ReadParcelable<CompatibleModeProperty>();
-    WSError errCode = NotifyCompatibleModePropertyChange(property);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
-    return ERR_NONE;
-}
-
 int SessionStageStub::HandleSetUniqueVirtualPixelRatio(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ATTRIBUTE, "HandleSetUniqueVirtualPixelRatio!");
     bool useUniqueDensity = data.ReadBool();
     float densityValue = data.ReadFloat();
     SetUniqueVirtualPixelRatio(useUniqueDensity, densityValue);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandlePcAppInPadNormalClose(MessageParcel& data, MessageParcel& reply)
+{
+    WSError errCode = PcAppInPadNormalClose();
     return ERR_NONE;
 }
 
@@ -923,6 +1047,14 @@ int SessionStageStub::HandleUpdateAnimationSpeed(MessageParcel& data, MessagePar
         return ERR_INVALID_DATA;
     }
     UpdateAnimationSpeed(speed);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyCompatibleModePropertyChange(MessageParcel& data, MessageParcel& reply)
+{
+    sptr<CompatibleModeProperty> property = data.ReadParcelable<CompatibleModeProperty>();
+    WSError errCode = NotifyCompatibleModePropertyChange(property);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
 
@@ -1017,6 +1149,13 @@ int SessionStageStub::HandleNotifyDumpInfo(MessageParcel& data, MessageParcel& r
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleSetUIExtensionTransparent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_UIEXT, "entry");
+    SetUIExtensionTransparent();
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleExtensionHostData(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "in");
@@ -1060,6 +1199,25 @@ int SessionStageStub::HandleSendContainerModalEvent(MessageParcel& data, Message
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_PIP, "in");
+    double width;
+    if (!data.ReadDouble(width)) {
+        return ERR_INVALID_VALUE;
+    }
+    double height;
+    if (!data.ReadDouble(height)) {
+        return ERR_INVALID_VALUE;
+    }
+    double scale;
+    if (!data.ReadDouble(scale)) {
+        return ERR_INVALID_VALUE;
+    }
+    NotifyPipWindowSizeChange(width, height, scale);
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyHighlightChange(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "called!");
@@ -1090,25 +1248,6 @@ int SessionStageStub::HandleNotifyWindowCrossAxisChange(MessageParcel& data, Mes
         return ERR_INVALID_DATA;
     }
     NotifyWindowCrossAxisChange(static_cast<CrossAxisState>(state));
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleNotifyPipSizeChange(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_PIP, "in");
-    double width;
-    if (!data.ReadDouble(width)) {
-        return ERR_INVALID_VALUE;
-    }
-    double height;
-    if (!data.ReadDouble(height)) {
-        return ERR_INVALID_VALUE;
-    }
-    double scale;
-    if (!data.ReadDouble(scale)) {
-        return ERR_INVALID_VALUE;
-    }
-    NotifyPipWindowSizeChange(width, height, scale);
     return ERR_NONE;
 }
 
@@ -1147,15 +1286,79 @@ int SessionStageStub::HandleNotifyKeyboardAnimationCompleted(MessageParcel& data
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    int32_t currentRotation;
+    if (!data.ReadInt32(currentRotation)) {
+        return ERR_INVALID_VALUE;
+    }
+    SetCurrentRotation(currentRotation);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetSceneNodeCount(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t nodeCount = 0;
+    WSError ret = GetSceneNodeCount(nodeCount);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteUint32(nodeCount)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write nodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    sptr<IRemoteObject> callbackObj = data.ReadRemoteObject();
+    if (callbackObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Read callback failed");
+        return ERR_INVALID_VALUE;
+    }
+    WSError ret = GetSceneNodeCount(callbackObj);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write error code failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyOrientationExecutionResult(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t promiseId = 0;
+    if (!data.ReadUint32(promiseId)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read promiseId failed");
+        return ERR_INVALID_VALUE;
+    }
+    uint32_t result = 0;
+    if (!data.ReadUint32(result)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read result failed");
+        return ERR_INVALID_VALUE;
+    }
+    NotifyOrientationExecutionResult(promiseId, static_cast<OrientationExecutionResult>(result));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_ROTATION, "in");
     uint32_t rotation = 0;
     if (!data.ReadUint32(rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "read rotation failed");
         return ERR_INVALID_VALUE;
     }
-
+ 
     Rect rect = {0, 0, 0, 0};
     if (!data.ReadInt32(rect.posX_) || !data.ReadInt32(rect.posY_) ||
         !data.ReadUint32(rect.width_) ||!data.ReadUint32(rect.height_)) {
@@ -1237,7 +1440,7 @@ int SessionStageStub::HandleNotifyRotationProperty(MessageParcel& data, MessageP
 
 int SessionStageStub::HandleNotifyPageRotationIsIgnored(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    TLOGI(WmsLogTag::WMS_ROTATION, "in");
     NotifyPageRotationIsIgnored();
     return ERR_NONE;
 }
@@ -1290,17 +1493,6 @@ int SessionStageStub::HandleNotifyRotationChange(MessageParcel& data, MessagePar
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleSetCurrentRotation(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_ROTATION, "in");
-    int32_t currentRotation;
-    if (!data.ReadInt32(currentRotation)) {
-        return ERR_INVALID_VALUE;
-    }
-    SetCurrentRotation(currentRotation);
-    return ERR_NONE;
-}
-
 int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::DEFAULT, "in");
@@ -1310,14 +1502,36 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& 
 
 int SessionStageStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
 {
-    TLOGD(WmsLogTag::DEFAULT, "in");
-    NotifyAppForceLandscapeConfigEnableUpdated();
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    bool needUpdateViewport = false;
+    if (!data.ReadBool(needUpdateViewport)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
+        return ERR_INVALID_DATA;
+    }
+    uint32_t selectModeValue = 0;
+    if (!data.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read selectMode failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, static_cast<SelectMode>(selectModeValue));
     return ERR_NONE;
 }
 int SessionStageStub::HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     NotifyAppHookWindowInfoUpdated();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdateAppHookWindowInfo(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    sptr<HookWindowInfo> hookInfo = data.ReadParcelable<HookWindowInfo>();
+    if (hookInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "hookInfo is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    UpdateAppHookWindowInfo(*hookInfo);
     return ERR_NONE;
 }
 
@@ -1335,6 +1549,13 @@ int SessionStageStub::HandleNotifyKeyboardAnimationWillBegin(MessageParcel& data
     return ERR_NONE;
 }
 
+int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "in");
+    CloseSpecificScene();
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply)
 {
     std::string routerStackInfo;
@@ -1345,13 +1566,6 @@ int SessionStageStub::HandleGetRouterStackInfo(MessageParcel& data, MessageParce
     if (!reply.WriteString(routerStackInfo)) {
         return ERR_INVALID_DATA;
     }
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleCloseSpecificScene(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_EVENT, "in");
-    CloseSpecificScene();
     return ERR_NONE;
 }
 
@@ -1405,4 +1619,45 @@ int SessionStageStub::HandleSetSidebarBlurStyleWithType(MessageParcel& data, Mes
     SetSidebarBlurStyleWithType(type);
     return ERR_NONE;
 }
+
+int SessionStageStub::HandleUpdateWindowUIType(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_RECOVER, "called!");
+    uint8_t typeValue;
+    if (!data.ReadUint8(typeValue)) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "typeValue is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    UpdateWindowUIType(static_cast<WindowUIType>(typeValue));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleUpdatePropertyWhenTriggerMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "called!");
+    sptr<WindowSessionProperty> property = data.ReadParcelable<WindowSessionProperty>();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    UpdatePropertyWhenTriggerMode(property);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleNotifyParentLifecycleEvent(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "HandleNotifyParentLifecycleEvent called!");
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read evet failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = NotifyParentLifecycleEvent(static_cast<ParentLifeCycleEvent>(event));
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "NotifyParentLifecycleEvent failed, ret: %{public}d", ret);
+        return static_cast<int32_t>(ret);
+    }
+    return ERR_NONE;
+}
+//
 } // namespace OHOS::Rosen

@@ -24,6 +24,39 @@ namespace SessionUtils {
 constexpr const char* SESSION_NAME_MARK_HEAD = "#";
 constexpr const char* SESSION_NAME_SEPARATOR = ":";
 
+inline float ToLayoutWidth(const int32_t winWidth, float vpr)
+{
+    return winWidth - 2 * WINDOW_FRAME_WIDTH * vpr; // 2: left and right edge
+}
+
+inline float ToLayoutHeight(const int32_t winHeight, float vpr)
+{
+    return winHeight - (WINDOW_FRAME_WIDTH + WINDOW_TITLE_BAR_HEIGHT) * vpr;
+}
+
+inline float ToWinWidth(const int32_t layoutWidth, float vpr)
+{
+    return layoutWidth + 2 * WINDOW_FRAME_WIDTH * vpr; // 2: left and right edge
+}
+
+inline float ToWinHeight(const int32_t layoutHeight, float vpr)
+{
+    return layoutHeight + (WINDOW_FRAME_WIDTH + WINDOW_TITLE_BAR_HEIGHT) * vpr;
+}
+
+inline void CalcFloatWindowRectLimits(const WindowLimits& limits, uint32_t maxFloatingWindowSize, float vpr,
+    int32_t& minWidth, int32_t& maxWidth, int32_t& minHeight, int32_t& maxHeight)
+{
+    minWidth = limits.minWidth_;
+    maxWidth = (limits.maxWidth_ == 0 || limits.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits.maxWidth_;
+    minHeight = limits.minHeight_;
+    maxHeight = (limits.maxHeight_ == 0 || limits.maxHeight_ >= INT32_MAX) ? INT32_MAX : limits.maxHeight_;
+    minWidth = std::max(minWidth, static_cast<int32_t>(MIN_FLOATING_WIDTH * vpr));
+    maxWidth = std::min(maxWidth, static_cast<int32_t>(maxFloatingWindowSize * vpr));
+    minHeight = std::max(minHeight, static_cast<int32_t>(MIN_FLOATING_HEIGHT * vpr));
+    maxHeight = std::min(maxHeight, static_cast<int32_t>(maxFloatingWindowSize * vpr));
+}
+
 inline void CalcFloatWindowRectLimits(uint32_t maxFloatingWindowSize, float vpr, WindowLimits& limits)
 {
     uint32_t maxWidth = (limits.maxWidth_ == 0 || limits.maxWidth_ >= INT32_MAX) ? INT32_MAX : limits.maxWidth_;
@@ -104,28 +137,6 @@ WSRect AdjustRectByAspectRatio(const WSRect& rect,
                                const WindowDecoration& decoration,
                                float aspectRatio,
                                int tolerancePx = 2);
-
-/**
- * @brief Enable or disable move event resampling.
- *
- * Updates the persisted parameter `persist.windowlayout.enablemoveresample`
- * to indicate whether resampling is enabled; actual behavior is decided by
- * MoveDragController.
- *
- * @param enable True to enable resampling, false to disable.
- */
-void SetMoveResampleEnabled(bool enable);
-
-/**
- * @brief Check if move event resampling is enabled.
- *
- * Reads the persisted parameter `persist.windowlayout.enablemoveresample`
- * to get the configuration setting; actual behavior during move operations
- * is determined by MoveDragController.
- *
- * @return True if resampling is enabled, false otherwise.
- */
-bool IsMoveResampleEnabled();
 } // namespace SessionUtils
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_SESSION_UTILS_H

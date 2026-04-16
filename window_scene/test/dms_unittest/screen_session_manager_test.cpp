@@ -745,15 +745,15 @@ HWTEST_F(ScreenSessionManagerTest, ScreenChange, TestSize.Level1)
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ssm_->OnVirtualScreenChange(DEFAULT_SCREEN_ID, screenEvent);
     ssm_->OnVirtualScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChange(DEFAULT_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChangeInner(DEFAULT_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChangeInner(VIRTUAL_SCREEN_ID, screenEvent);
     EXPECT_TRUE(1);
 
     screenEvent = ScreenEvent::DISCONNECTED;
     ssm_->OnVirtualScreenChange(DEFAULT_SCREEN_ID, screenEvent);
     ssm_->OnVirtualScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChange(DEFAULT_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChangeInner(DEFAULT_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChangeInner(VIRTUAL_SCREEN_ID, screenEvent);
     EXPECT_TRUE(1);
 }
 
@@ -843,27 +843,6 @@ HWTEST_F(ScreenSessionManagerTest, IsScreenRotationLocked, TestSize.Level1)
     sptr<ScreenSession> screenSession = new (std::nothrow) ScreenSession(id, ScreenProperty(), 0);
     ssm_->screenSessionMap_[id] = screenSession;
     ASSERT_EQ(DMError::DM_OK, ssm_->IsScreenRotationLocked(isLocked));
-}
-
-/**
- * @tc.name: CreateScreenProperty
- * @tc.desc: CreateScreenProperty test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, CreateScreenProperty, Function | SmallTest | Level3)
-{
-    ASSERT_NE(ssm_, nullptr);
-    sptr<IDisplayManagerAgent> displayManagerAgent = new DisplayManagerAgentDefault();
-    VirtualScreenOption virtualOption;
-    virtualOption.name_ = "testVirtualOption";
-    auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
-    sptr<ScreenSession> screenSession = ssm_->GetScreenSession(screenId);
-    ScreenProperty property;
-    ssm_->isDensityDpiLoad_ = false;
-    ssm_->CreateScreenProperty(screenId, property);
-    ssm_->isDensityDpiLoad_ = true;
-    ASSERT_EQ(0, screenSession->GetScreenProperty().GetRefreshRate());
-    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**
@@ -1274,6 +1253,41 @@ HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid03, TestSize.Level1)
     EXPECT_EQ(displayInfo->GetVirtualPixelRatio(), dmHookInfo.density_);
     EXPECT_EQ(static_cast<uint32_t>(displayInfo->GetRotation()), dmHookInfo.rotation_);
     EXPECT_NE(static_cast<uint32_t>(displayInfo->GetDisplayOrientation()), dmHookInfo.displayOrientation_);
+    ssm_->displayHookMap_.erase(uid);
+    ssm_->DestroyVirtualScreen(screenId);
+}
+
+/**
+ * @tc.name: HookDisplayInfoByUid04
+ * @tc.desc: HookDisplayInfo by uid with isFullScreenInForceSplit_ condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, HookDisplayInfoByUid04, TestSize.Level1)
+{
+    ScreenId screenId;
+    sptr<ScreenSession> screenSession = InitTestScreenSession("HookDisplayInfoByUid04", screenId);
+    ASSERT_NE(ssm_->GetScreenSession(screenId), nullptr);
+    sptr<DisplayInfo> displayInfo = ssm_->GetDefaultDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    uint32_t uid = getuid();
+    
+    uint32_t originalWidth = displayInfo->GetWidth();
+    uint32_t originalHeight = displayInfo->GetHeight();
+    
+    DMHookInfo dmHookInfo = CreateDefaultHookInfo();
+    dmHookInfo.isFullScreenInForceSplit_ = true;
+    ssm_->displayHookMap_[uid] = dmHookInfo;
+    EXPECT_NE(ssm_->displayHookMap_.find(uid), ssm_->displayHookMap_.end());
+    displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
+    EXPECT_EQ(displayInfo->GetWidth(), originalWidth);
+    EXPECT_EQ(displayInfo->GetHeight(), originalHeight);
+    ssm_->displayHookMap_.erase(uid);
+    
+    dmHookInfo.isFullScreenInForceSplit_ = false;
+    ssm_->displayHookMap_[uid] = dmHookInfo;
+    displayInfo = ssm_->HookDisplayInfoByUid(displayInfo, screenSession);
+    EXPECT_EQ(displayInfo->GetWidth(), dmHookInfo.width_);
+    EXPECT_EQ(displayInfo->GetHeight(), dmHookInfo.height_);
     ssm_->displayHookMap_.erase(uid);
     ssm_->DestroyVirtualScreen(screenId);
 }
