@@ -1736,7 +1736,6 @@ private:
     bool singleHandModeEnable_ = true;
     SingleHandBackgroundLayoutConfig singleHandBackgroundLayoutConfig_;
     std::unordered_set<std::string> appsWithDeduplicatedWindowStatus_;
-    std::shared_mutex fullScreenInForceSplitUidSetMutex_;
     void InitVsyncStation();
     void BindVsyncStation(const sptr<SceneSession>& sceneSession);
     bool GetDisplaySizeById(DisplayId displayId, int32_t& displayWidth, int32_t& displayHeight);
@@ -2041,6 +2040,7 @@ private:
      */
     void NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen);
     std::unordered_set<uint32_t> fullScreenInForceSplitUidSet_;
+    std::shared_mutex fullScreenInForceSplitUidSetMutex_;
     PageEnableFunc pageEnableFunc_;
     WSError NotifyPageEnableFunc(const std::string& bundleName, int32_t windowId,
         const std::string& action, const std::string& message);

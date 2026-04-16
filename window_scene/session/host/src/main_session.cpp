@@ -747,19 +747,30 @@ WSError MainSession::UpdateHookWindowInfo(const HookWindowInfo& hookWindowInfo)
     newInfo.enableHookWindow = hookWindowInfo.enableHookWindow;
     newInfo.widthHookRatio = hookWindowInfo.widthHookRatio;
     newInfo.notifyWindowChange = false;
+    newInfo.drawableRectHook = hookWindowInfo.drawableRectHook;
     property->SetHookWindowInfo(newInfo);
     if (preInfo.enableHookWindow != hookWindowInfo.enableHookWindow ||
-        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio)) {
+        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio) ||
+        preInfo.drawableRectHook != hookWindowInfo.drawableRectHook) {
         // Notify the client of the info change
-        UpdateAppHookWindowInfo(hookWindowInfo);
+        auto ret = UpdateAppHookWindowInfo(hookWindowInfo);
+        if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "UpdateAppHookWindowInfo failed, ret: %{public}d", ret);
+            return ret;
+        }
     }
     return WSError::WS_OK;
 }
 
 WSError MainSession::SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "isForceSplitEnabled:%{public}d, needUpdateViewport:%{public}d, selectMode:%{public}u",
-        isForceSplitEnabled, needUpdateViewport, selectMode);
+    TLOGI(WmsLogTag::WMS_COMPAT, "isForceSplitEnabled: %{public}d, needUpdateViewport: %{public}d, "
+        "selectMode: %{public}u", isForceSplitEnabled, needUpdateViewport, selectMode);
+    if (!setSelectModeCallback_) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "setSelectModeCallback_ is nullptr");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    setSelectModeCallback_(selectMode);
     auto property = GetSessionProperty();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_COMPAT, "id: %{public}d property is nullptr", persistentId_);

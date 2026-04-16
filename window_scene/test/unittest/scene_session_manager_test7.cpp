@@ -1324,7 +1324,7 @@ HWTEST_F(SceneSessionManagerTest7, TestReportIncompleteScreenFoldStatusChangeEve
 HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig, TestSize.Level1)
 {
     std::string bundleName = "SetAppForceLandscapeConfig";
-    AppForceLandscapeConfig config = { 0, false, false, {}, {}, {}, false, false, false, false };
+    AppForceLandscapeConfig config = { {}, {}, {}, false, false, false, false };
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     ASSERT_EQ(result, WSError::WS_OK);
 }
@@ -1371,17 +1371,6 @@ HWTEST_F(SceneSessionManagerTest7, SetAppForceLandscapeConfig03, TestSize.Level1
 
     WSError result = ssm_->SetAppForceLandscapeConfig(bundleName, config);
     EXPECT_EQ(result, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetAppForceLandscapeConfig
- * @tc.desc: SceneSesionManager GetAppForceLandscapeConfig
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerTest7, GetAppForceLandscapeConfig, TestSize.Level1)
-{
-    std::string bundleName = "GetAppForceLandscapeConfig";
-    AppForceLandscapeConfig config = ssm_->GetAppForceLandscapeConfig(bundleName);
 }
 
 /**
