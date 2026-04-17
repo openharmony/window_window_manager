@@ -27,6 +27,7 @@
 #include <ui/rs_ui_context.h>
 #include <ui/rs_ui_director.h>
 #include <event_handler.h>
+#include "iremote_object.h"
 
 #define RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(...)      \
     do {                                                      \

@@ -133,6 +133,7 @@ private:
     WMError IsLandscape(uint64_t screenId, bool& isLandscape);
     void PrintRectsInfo(const std::vector<Rect>& rects, const std::string& infoTag);
     CallingWindowInfoData callingWindowInfoData_;
+    std::shared_ptr<RSUIContext> syncTransRSUIContext_ = nullptr;
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_ROSEN_WINDOW_SCENE_KEYBOARD_SESSION_H
