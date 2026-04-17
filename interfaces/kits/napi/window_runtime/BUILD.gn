@@ -242,6 +242,7 @@ ohos_shared_library("windowstage_kit") {
   external_deps = [
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
+    "api_metrics:histogrammanager",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",

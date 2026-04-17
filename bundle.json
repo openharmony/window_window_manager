@@ -92,7 +92,8 @@
           "runtime_core",
           "zlib",
           "screenlock_mgr",
-          "os_account"
+          "os_account",
+          "api_metrics"
         ],
         "third_party": [
         ]
