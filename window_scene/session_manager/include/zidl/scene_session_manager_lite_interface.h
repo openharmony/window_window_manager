@@ -105,6 +105,7 @@ public:
         TRANS_ID_GET_CALLING_WINDOW_INFO,
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_IDS,
         TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES,
+        TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_APP_INSTANCE,
         TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER,
         TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST,
         TRANS_ID_PENDING_SESSION_TO_BACKGROUND_BY_PERSISTENTID,
@@ -131,6 +132,7 @@ public:
         TRANS_ID_SET_SESSION_ICON_FOR_THIRD_PARTY,
         TRANS_ID_GET_MAIN_WINDOW_INFO_BY_TOKEN,
         TRANS_ID_NOTIFY_APP_USE_CONTROL_DISPLAY,
+        TRANS_ID_GET_SESSION_INFO_WITH_DISPLAY,
     };
 
     /*
@@ -145,7 +147,7 @@ public:
         int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) = 0;
     virtual WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params) = 0;
     virtual WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
-        bool shouldBackToCaller = true) = 0;
+        bool shouldBackToCaller = true, int32_t reason = 0) = 0;
     virtual WSError MoveSessionsToForeground(const std::vector<std::int32_t>& sessionIds, int32_t topSessionId) = 0;
     virtual WSError MoveSessionsToBackground(const std::vector<std::int32_t>& sessionIds,
         std::vector<std::int32_t>& result) = 0;
@@ -166,6 +168,8 @@ public:
     virtual WSError GetSessionInfos(const std::string& deviceId,
                                     int32_t numMax, std::vector<SessionInfoBean>& sessionInfos) = 0;
     virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo) = 0;
+    virtual WSError GetSessionInfo(const std::string& deviceId, int32_t persistentId, SessionInfoBean& sessionInfo,
+        AAFwk::DisplayInfo& displayInfo) = 0;
     virtual WSError GetSessionInfoByContinueSessionId(const std::string& continueSessionId,
         SessionInfoBean& sessionInfo) = 0;
     virtual WSError SetSessionContinueState(const sptr<IRemoteObject>& token, const ContinueState& continueState) = 0;
@@ -290,6 +294,28 @@ public:
      */
     virtual WMError RegisterSessionLifecycleListenerByBundles(const sptr<ISessionLifecycleListener>& listener,
         const std::vector<std::string>& bundleNameList) = 0;
+
+    /**
+     * @brief Register a session lifecycle listener for specific bundle with appIndex and appInstanceKey
+     *
+     * This function is used to register a session lifecycle listener
+     * for a specific bundle with appIndex and appInstanceKey.
+     *
+     * The listener will be notified when registered and lifecycle events occur
+     * for the specified bundle with appIndex and appInstanceKey.
+     *
+     * @caller SA
+     * @permission SA permission
+     *
+     * @param listener The session lifecycle listener to be registered
+     * @param bundleName The bundle name for which the listener should be registered
+     * @param appIndex The app index for which the listener should be registered
+     * @param appInstanceKey The app instance key for which the listener should be registered
+     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
+     */
+    virtual WMError RegisterSessionLifecycleListenerByAppInstance(const sptr<ISessionLifecycleListener>& listener,
+        const std::string& bundleName, int32_t appIndex,
+        const std::string& appInstanceKey = "") { return WMError::WM_OK; }
 
     /**
      * @brief Unregister a session lifecycle listener

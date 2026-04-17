@@ -70,6 +70,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetMainWindowStatesByPid(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_MISSION_INFO_BY_ID):
             return HandleGetSessionInfo(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_WITH_DISPLAY):
+            return HandleGetSessionInfoWithDisplay(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_SESSION_INFO_BY_CONTINUE_SESSION_ID):
             return HandleGetSessionInfoByContinueSessionId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_NEW):
@@ -178,6 +180,9 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
         case static_cast<uint32_t>(
             SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_BUNDLES):
             return HandleRegisterSessionLifecycleListenerByBundles(data, reply);
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_REGISTER_SESSION_LIFECYCLE_LISTENER_BY_APP_INSTANCE):
+            return HandleRegisterSessionLifecycleListenerByAppInstance(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UNREGISTER_SESSION_LIFECYCLE_LISTENER):
             return HandleUnregisterSessionLifecycleListener(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_RECENT_MAIN_SESSION_INFO_LIST):
@@ -343,7 +348,12 @@ int SceneSessionManagerLiteStub::HandlePendingSessionToBackgroundForDelegator(Me
         TLOGE(WmsLogTag::WMS_LIFE, "Read shouldBackToCaller failed");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller);
+    int32_t reason = static_cast<int32_t>(LifeCycleChangeReason::DEFAULT);
+    if (!data.ReadInt32(reason)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read reason failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = PendingSessionToBackgroundForDelegator(token, shouldBackToCaller, reason);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }
@@ -450,6 +460,38 @@ int SceneSessionManagerLiteStub::HandleGetSessionInfo(MessageParcel& data, Messa
         return ERR_INVALID_DATA;
     }
 
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo result fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleGetSessionInfoWithDisplay(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "In!");
+    SessionInfoBean info;
+    AAFwk::DisplayInfo displayInfo;
+    std::u16string deviceIdU16;
+    if (!data.ReadString16(deviceIdU16)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read deviceId fail");
+        return ERR_TRANSACTION_FAILED;
+    }
+    std::string deviceId = Str16ToStr8(deviceIdU16);
+    int32_t persistentId = 0;
+    if (!data.ReadInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read persistentId fail");
+        return ERR_TRANSACTION_FAILED;
+    }
+    WSError errCode = GetSessionInfo(deviceId, persistentId, info, displayInfo);
+    if (!reply.WriteParcelable(&info)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo fail");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteParcelable(&displayInfo)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write displayInfo fail");
+        return ERR_INVALID_DATA;
+    }
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write sessionInfo result fail");
         return ERR_INVALID_DATA;
@@ -1598,6 +1640,42 @@ int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByBundles
         return ERR_INVALID_DATA;
     }
     WMError ret = RegisterSessionLifecycleListenerByBundles(listener, bundleNameList);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRegisterSessionLifecycleListenerByAppInstance(
+    MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    sptr<IRemoteObject> listenerObject = data.ReadRemoteObject();
+    if (listenerObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote object is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(listenerObject);
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "listener is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read bundleName");
+        return ERR_INVALID_DATA;
+    }
+    int32_t appIndex;
+    if (!data.ReadInt32(appIndex)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appIndex");
+        return ERR_INVALID_DATA;
+    }
+    std::string appInstanceKey;
+    if (!data.ReadString(appInstanceKey)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to read appInstanceKey");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = RegisterSessionLifecycleListenerByAppInstance(listener, bundleName, appIndex, appInstanceKey);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         return ERR_INVALID_DATA;
     }

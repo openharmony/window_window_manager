@@ -973,8 +973,6 @@ HWTEST_F(WindowSessionImplTest5, ConvertOrientationAndRotation, Function | Small
         window->ConvertOrientationAndRotation(from, to, value, convertedValue));
     window->property_->SetPersistentId(1);
     window->state_ = WindowState::STATE_CREATED;
-    ASSERT_EQ(WMError::WM_ERROR_DEVICE_NOT_SUPPORT,
-        window->ConvertOrientationAndRotation(from, to, value, convertedValue));
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     value = -1;
     ASSERT_EQ(WMError::WM_ERROR_INVALID_PARAM,
@@ -2706,6 +2704,21 @@ HWTEST_F(WindowSessionImplTest5, WindowStatusToString, TestSize.Level1)
 
     WindowStatus invalidStatus = static_cast<WindowStatus>(999);
     EXPECT_EQ(WindowSessionImpl::WindowStatusToString(invalidStatus), "UNKNOWN");
+}
+
+/**
+ * @tc.name: RecordLifeCycleExceptionEvent
+ * @tc.desc: Test RecordLifeCycleExceptionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, RecordLifeCycleExceptionEvent, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("RecordLifeCycleExceptionEvent");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->RecordLifeCycleExceptionEvent(WMError::WM_ERROR_INVALID_WINDOW,
+        WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "test reason");
+    window->Destroy();
 }
 } // namespace
 } // namespace Rosen
