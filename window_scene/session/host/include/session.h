@@ -388,17 +388,23 @@ public:
     /*
      * Window Scene Snapshot
      */
+    struct SnapshotOptions {
+        bool runInFfrt = false;
+        float scaleParam = 0.0f;
+        bool useCurWindow = false;
+        bool disableBlur = false;
+    };
+
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> GetPreloadSnapshot() const;
     /**
      * @brief Get the snapshot pixelMap.
      *
-     * @param disableBlur Only for SceneBoard UI animation, cannot use with privacy window.
+     * @param options Snapshot capture options.
      *
      * @return PixelMap of this window.
      */
-    std::shared_ptr<Media::PixelMap> Snapshot(
-        bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false, bool disableBlur = false) const;
+    std::shared_ptr<Media::PixelMap> Snapshot(const SnapshotOptions& options = SnapshotOptions()) const;
     void ResetSnapshot();
     void RenameSnapshotFromOldPersistentId(int32_t oldPersistentId);
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
