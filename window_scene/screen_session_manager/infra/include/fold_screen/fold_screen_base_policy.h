@@ -142,6 +142,7 @@ public:
         FoldStatus targetFoldStatus) const;
     virtual float GetSpecialVirtualPixelRatio();
     virtual void PowerkeySetScreenActiveRect() {};
+    std::map<FoldDisplayMode, RRect> GetScreenActiveModeRectMap() const;
 
 protected:
     FoldScreenBasePolicy();
