@@ -3146,6 +3146,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const SnapshotOptions& option
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = options.useCurWindow,
+        .isSync = options.windowSync,
         .backGroundColor = GetBackgroundColor(),
     };
     bool ret = false;
@@ -3504,6 +3505,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         Session::SnapshotOptions options;
         options.runInFfrt = runInFfrt;
         options.useCurWindow = updateSnapshot;
+        options.windowSync = true;
         auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(options);
         if (pixelMap == nullptr) {
             return;

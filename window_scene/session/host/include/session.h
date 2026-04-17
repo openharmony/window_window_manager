@@ -389,10 +389,18 @@ public:
      * Window Scene Snapshot
      */
     struct SnapshotOptions {
-        bool runInFfrt = false;
-        float scaleParam = 0.0f;
-        bool useCurWindow = false;
-        bool disableBlur = false;
+        SnapshotOptions(bool runInFfrtValue = false, float scaleParamValue = 0.0f,
+            bool useCurWindowValue = false, bool windowSyncValue = false, bool disableBlurValue = false)
+            : runInFfrt(runInFfrtValue), scaleParam(scaleParamValue), useCurWindow(useCurWindowValue),
+            windowSync(windowSyncValue), disableBlur(disableBlurValue)
+        {
+        }
+
+        bool runInFfrt;
+        float scaleParam;
+        bool useCurWindow;
+        bool windowSync;
+        bool disableBlur;
     };
 
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
