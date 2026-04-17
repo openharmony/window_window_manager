@@ -4333,13 +4333,39 @@ void WindowSceneSessionImpl::ApplyMaximizePresentation(MaximizePresentation pres
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, WaterfallResidentState state)
 {
+    return MaximizeWithOptions(presentation, state, { -1, -1 });
+}
+
+WMError WindowSceneSessionImpl::ValidateSnapshotAnimationConfig(const SnapshotAnimationConfig& config)
+{
+    constexpr int64_t MAX_DURATION = 400;
+    constexpr int64_t MAX_DELAY = 350;
+    if ((config.duration != -1 && (config.duration < 0 || config.duration > MAX_DURATION)) ||
+        (config.delay != -1 && (config.delay < 0 || config.delay > MAX_DELAY))) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Invalid animation config: duration=%{public}" PRId64
+            ", delay=%{public}" PRId64 " (valid: duration [0,%{public}" PRId64
+            "], delay [0,%{public}" PRId64 "], or -1)",
+            config.duration, config.delay, MAX_DURATION, MAX_DELAY);
+        return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    return WMError::WM_OK;
+}
+
+WMError WindowSceneSessionImpl::MaximizeWithOptions(MaximizePresentation presentation,
+    WaterfallResidentState state, SnapshotAnimationConfig snapshotAnimationConfig)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, presentation: %{public}u, state: %{public}u, "
+        "duration: %{public}" PRId64 ", delay: %{public}" PRId64, GetPersistentId(),
+        static_cast<uint32_t>(presentation), static_cast<uint32_t>(state),
+        snapshotAnimationConfig.duration, snapshotAnimationConfig.delay);
+
+    WMError validateRet = ValidateSnapshotAnimationConfig(snapshotAnimationConfig);
+    if (validateRet != WMError::WM_OK) {
+        return validateRet;
+    }
+
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    if (property_->GetWindowAnchorInfo().isFromAttachOrDetach_ &&
-        property_->GetWindowAnchorInfo().isAnchoredByAttach_) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Cannot maximize due to in ancor enabled mode.");
-        return WMError::WM_OK;
     }
     if (!CheckWaterfallResidentState(state)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid waterfallResidentState. windowId: %{public}u, state: %{public}u",
@@ -4354,7 +4380,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    // The device is not supported
+    // The device is not supported - silent success
     if (!IsPcOrPadFreeMultiWindowMode() || property_->IsFullScreenDisabled()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
@@ -4374,6 +4400,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
         presentation, enableImmersiveMode_.load());
     SessionEventParam param;
     param.waterfallResidentState = static_cast<uint32_t>(state);
+    param.snapshotAnimationConfig_ = snapshotAnimationConfig;
     hostSession->OnSessionEvent(SessionEvent::EVENT_MAXIMIZE, param);
     return SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
 }
@@ -4528,7 +4555,20 @@ WMError WindowSceneSessionImpl::Restore()
 
 WMError WindowSceneSessionImpl::Recover(uint32_t reason)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT_PC, "id: %{public}d, reason: %{public}u", GetPersistentId(), reason);
+    return Recover(reason, { -1, -1 });
+}
+
+WMError WindowSceneSessionImpl::Recover(uint32_t reason, SnapshotAnimationConfig snapshotAnimationConfig)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, reason: %{public}u, duration: %{public}" PRId64
+        ", delay: %{public}" PRId64, GetPersistentId(), reason,
+        snapshotAnimationConfig.duration, snapshotAnimationConfig.delay);
+
+    WMError validateRet = ValidateSnapshotAnimationConfig(snapshotAnimationConfig);
+    if (validateRet != WMError::WM_OK) {
+        return validateRet;
+    }
+
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
@@ -4558,7 +4598,9 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
             property_->SetIsLayoutFullScreen(enableImmersiveMode_);
             hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
         }
-        hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
+        SessionEventParam param;
+        param.snapshotAnimationConfig_ = snapshotAnimationConfig;
+        hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER, param);
         // need notify arkui maximize mode change
         if (reason == REASON_MAXIMIZE_MODE_CHANGE &&
             property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
