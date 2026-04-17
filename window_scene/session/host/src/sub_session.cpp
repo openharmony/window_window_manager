@@ -211,8 +211,12 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
         if (!isModal) {
             RaiseToAppTopForPointDown();
-        } else if (auto mainSession = GetMainSession()) {
-            mainSession->NotifyClick(false);
+        } else if (auto mainSession = GetMainSessionOrLoosenedSession()) {
+            if (mainSession->IsLoosenedWithFreeMultiMode()) {
+                mainSession->RaiseToAppTopForPointDown();
+            } else {
+                mainSession->NotifyClick(false);
+            }
         }
     }
     auto ret = SceneSession::ProcessPointDownSession(posX, posY);
@@ -302,11 +306,7 @@ bool SubSession::IsApplicationModal() const
 bool SubSession::IsVisibleForeground() const
 {
     if (IsLoosenedWithFreeMultiMode()) {
-        bool isVisibleForeground = Session::IsVisibleForeground();
-        TLOGD(WmsLogTag::WMS_SUB,
-            "id: %{public}d, IsVisibleForeground: %{public}d",
-            GetPersistentId(), isVisibleForeground);
-        return isVisibleForeground;
+        return Session::IsVisibleForeground();
     }
     const auto& mainOrFloatSession = GetMainOrFloatSession();
     if (mainOrFloatSession) {
@@ -317,6 +317,9 @@ bool SubSession::IsVisibleForeground() const
 
 bool SubSession::IsVisibleNotBackground() const
 {
+    if (IsLoosenedWithFreeMultiMode()) {
+        return Session::IsVisibleNotBackground();
+    }
     const auto& mainOrFloatSession = GetMainOrFloatSession();
     if (mainOrFloatSession) {
         return mainOrFloatSession->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
