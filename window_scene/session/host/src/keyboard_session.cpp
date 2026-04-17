@@ -882,7 +882,7 @@ void KeyboardSession::CloseRSTransaction()
         TLOGI(WmsLogTag::WMS_KEYBOARD, "cancelled");
         handler->RemoveTask(KEYBOARD_ANIM_SYNC_EVENT_NAME);
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, screenId: %{public}" PRLu64, GetScreenId());
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, screenId: %{public}" PRIu64, GetScreenId());
     RSSyncTransactionAdapter::CloseSyncTransaction(syncTransRSUIContext_, handler);
     syncTransRSUIContext_ = nullptr;
     
