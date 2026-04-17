@@ -344,6 +344,7 @@ ohos_shared_library("scene_session") {
     "image_framework:image_native",
     "init:libbegetutil",
     "input:libmmi-client",
+    "input:libmmi-napi",
     "ipc:ipc_single",
     "samgr:samgr_proxy",
     "zlib:shared_libz",
@@ -353,7 +354,6 @@ ohos_shared_library("scene_session") {
   }
   public_external_deps = [
     "ability_base:session_info",
-    "input:libmmi-napi",
   ]
   defines = []
 
