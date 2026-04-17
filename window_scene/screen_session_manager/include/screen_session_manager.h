@@ -639,6 +639,7 @@ public:
         MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t staticHeight,
             uint32_t staticWidth, uint32_t dynamicHeight);
     void GetStaticAndDynamicSession();
+    std::map<FoldDisplayMode, RRect> GetScreenActiveModeRectMap();
 
     static bool GetScreenSessionMngSystemAbility();
     void RunFinishTask();
@@ -1229,6 +1230,7 @@ private:
     void SetOptionConfig(ScreenId screenId, VirtualScreenOption option);
     void DoSetScreenPowerStatus(ScreenId rsScreenId, ScreenPowerStatus status);
     void ClearScreenPowerStatus(ScreenId rsScreenId);
+    void InitScreenActiveModeRectMap();
 
     std::map<ScreenId, ScreenPowerStatus> screenPowerStatusMap_;
     std::mutex screenPowerStatusMapMutex_;
