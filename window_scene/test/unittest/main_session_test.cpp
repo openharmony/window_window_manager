@@ -1390,7 +1390,7 @@ HWTEST_F(MainSessionTest, SetForceSplitEnable01, TestSize.Level1)
     ASSERT_NE(session, nullptr);
     session->setSelectModeCallback_ = nullptr;
 
-    auto ret = session->SetForceSplitEnable(true, false, SelectMode::FOLLOW);
+    auto ret = session->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1407,14 +1407,14 @@ HWTEST_F(MainSessionTest, SetForceSplitEnable02, TestSize.Level1)
     sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
     ASSERT_NE(session, nullptr);
 
-    SelectMode receivedSelectMode = SelectMode::INVALID_MODE;
+    SelectMode receivedSelectMode = SelectMode::WIDE_MODE;
     session->RegisterSetSelectModeCallback([&receivedSelectMode](SelectMode selectMode) {
         receivedSelectMode = selectMode;
     });
     session->property_ = nullptr;
 
-    auto ret = session->SetForceSplitEnable(true, false, SelectMode::FOLLOW);
-    EXPECT_EQ(receivedSelectMode, SelectMode::FOLLOW);
+    auto ret = session->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE);
+    EXPECT_EQ(receivedSelectMode, SelectMode::WIDE_MODE);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1434,14 +1434,14 @@ HWTEST_F(MainSessionTest, SetForceSplitEnable03, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     session->SetSessionProperty(property);
 
-    SelectMode receivedSelectMode = SelectMode::INVALID_MODE;
+    SelectMode receivedSelectMode = SelectMode::WIDE_MODE;
     session->RegisterSetSelectModeCallback([&receivedSelectMode](SelectMode selectMode) {
         receivedSelectMode = selectMode;
     });
     session->sessionStage_ = nullptr;
 
-    auto ret = session->SetForceSplitEnable(true, false, SelectMode::PRIMARY);
-    EXPECT_EQ(receivedSelectMode, SelectMode::PRIMARY);
+    auto ret = session->SetForceSplitEnable(true, false, SelectMode::SQUARE_MODE);
+    EXPECT_EQ(receivedSelectMode, SelectMode::SQUARE_MODE);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -1462,13 +1462,13 @@ HWTEST_F(MainSessionTest, SetForceSplitEnable04, TestSize.Level1)
     session->SetSessionProperty(property);
     session->sessionStage_ = sptr<SessionStageMocker>::MakeSptr();
 
-    SelectMode receivedSelectMode = SelectMode::INVALID_MODE;
+    SelectMode receivedSelectMode = SelectMode::WIDE_MODE;
     session->RegisterSetSelectModeCallback([&receivedSelectMode](SelectMode selectMode) {
         receivedSelectMode = selectMode;
     });
 
-    auto ret = session->SetForceSplitEnable(true, true, SelectMode::SECONDARY);
-    EXPECT_EQ(receivedSelectMode, SelectMode::SECONDARY);
+    auto ret = session->SetForceSplitEnable(true, true, SelectMode::SQUARE_MODE);
+    EXPECT_EQ(receivedSelectMode, SelectMode::SQUARE_MODE);
     EXPECT_EQ(ret, WSError::WS_OK);
     EXPECT_EQ(property->GetForceSplitEnable(), true);
 }
@@ -1494,7 +1494,7 @@ HWTEST_F(MainSessionTest, RegisterSetSelectModeCallback01, TestSize.Level1)
     });
 
     EXPECT_NE(session->setSelectModeCallback_, nullptr);
-    session->setSelectModeCallback_(SelectMode::FOLLOW);
+    session->setSelectModeCallback_(SelectMode::WIDE_MODE);
     EXPECT_TRUE(callbackCalled);
 }
 } // namespace
