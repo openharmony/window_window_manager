@@ -470,10 +470,6 @@ WSError SceneSession::Foreground(
             TLOGW(WmsLogTag::WMS_LIFE,
                 "screen is locked, session %{public}d %{public}s start below lock screen permission verified",
                 GetPersistentId(), sessionInfo_.bundleName_.c_str());
-        } else if (sessionInfo_.isGamePrelaunch_) {
-            TLOGW(WmsLogTag::WMS_LIFE,
-                "[gameprelaunch]screen is locked, session %{public}d %{public}s start below game prelaunch",
-                GetPersistentId(), sessionInfo_.bundleName_.c_str());
         } else {
             TLOGW(WmsLogTag::WMS_LIFE,
                 "failed: screen is locked, session %{public}d %{public}s show without ShowWhenLocked flag",
