@@ -8201,7 +8201,7 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         if (rsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
             if(auto rsUIContext = window->GetRSUIContext()){
-                rsTransaction->SetRSTransactionHandler(rsUIContext->GetRSUIContext());
+                rsTransaction->SetTransactionHandler(rsUIContext->GetRSTransaction());
             }
             rsTransaction->Begin();
         }
