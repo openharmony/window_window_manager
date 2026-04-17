@@ -232,8 +232,11 @@ public:
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Maximize(MaximizePresentation presentation, WaterfallResidentState state) override;
+    WMError MaximizeWithOptions(MaximizePresentation presentation, WaterfallResidentState state,
+        SnapshotAnimationConfig snapshotAnimationConfig) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
+    WMError Recover(uint32_t reason, SnapshotAnimationConfig snapshotAnimationConfig) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
         bool grayOutMaximizeButton = false) override;
@@ -527,6 +530,7 @@ private:
     WindowLimits ConvertBaseLimitsToTargetUnit(const WindowLimits& srcLimits, PixelUnit targetPixelUnit);
     void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     void PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
+    WMError ValidateSnapshotAnimationConfig(const SnapshotAnimationConfig& config);
     void maximizeWhenSwitchMultiWindowIfOnlySupportFullScreen();
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);

@@ -1112,6 +1112,10 @@ void SceneSession::ApplySessionEventParam(SessionEvent event, const SessionEvent
         case SessionEvent::EVENT_MAXIMIZE:
             sessionEventParam_.waterfallResidentState = param.waterfallResidentState;
             sessionEventParam_.titleButtonEventType_ = param.titleButtonEventType_;
+            sessionEventParam_.snapshotAnimationConfig_ = param.snapshotAnimationConfig_;
+            break;
+        case SessionEvent::EVENT_RECOVER:
+            sessionEventParam_.snapshotAnimationConfig_ = param.snapshotAnimationConfig_;
             break;
         case SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE:
             sessionEventParam_.compatibleStyleMode = param.compatibleStyleMode;

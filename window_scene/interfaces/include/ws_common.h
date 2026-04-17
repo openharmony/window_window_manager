@@ -1213,6 +1213,14 @@ struct RotateAnimationConfig {
     int32_t duration_ = ROTATE_ANIMATION_DURATION;
 };
 
+#ifndef OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
+struct SnapshotAnimationConfig {
+    int64_t duration = -1;  // -1 means use system default
+    int64_t delay = -1;     // -1 means use system default
+};
+#define OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
+#endif
+
 struct SessionEventParam {
     int32_t pointerX_ = 0;
     int32_t pointerY_ = 0;
@@ -1226,6 +1234,7 @@ struct SessionEventParam {
     int32_t windowGlobalPosX_ = 0;
     int32_t windowGlobalPosY_ = 0;
     uint32_t titleButtonEventType_ = 0;
+    SnapshotAnimationConfig snapshotAnimationConfig_;
 };
 
 struct BackgroundParams {
