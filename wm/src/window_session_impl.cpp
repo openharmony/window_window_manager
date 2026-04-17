@@ -1532,6 +1532,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         bool ifNeedCommitRsTransaction = window->CheckIfNeedCommitRsTransaction(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
+            RSAdapterUtil::SetRSTransactionHandler(rsTransaction, window->GetRSUIContext());
             rsTransaction->Begin();
         }
         if (wmReason == WindowSizeChangeReason::DRAG) {
@@ -8199,6 +8200,9 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         }
         if (rsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
+            if(auto rsUIContext = window->GetRSUIContext()){
+                rsTransaction->SetRSTransactionHandler(rsUIContext->GetRSUIContext());
+            }
             rsTransaction->Begin();
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
@@ -8364,7 +8368,8 @@ void WindowSessionImpl::NotifyKeyboardAnimationWillBegin(const KeyboardAnimation
         }
 
         if (rsTransaction != nullptr) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
+            RSAdapterUtil::SetRSTransactionHandler(rsTransaction, window->GetRSUIContext());
             rsTransaction->Begin();
         }
         if (keyboardAnimationInfo.isShow) {

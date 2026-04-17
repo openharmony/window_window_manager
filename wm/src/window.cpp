@@ -28,6 +28,7 @@
 #include "wm_common.h"
 #include "floating_ball_template_info.h"
 #include "transaction/rs_interfaces.h"
+#include <ui/rs_ui_context.h>
 
 namespace OHOS {
 namespace Rosen {
@@ -47,7 +48,7 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
         windowSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option, rsUiContext, renderSession);
     } else if (sessionType == WindowSessionType::EXTENSION_SESSION) {
         option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
-        windowSessionImpl = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+        windowSessionImpl = sptr<WindowExtensionSessionImpl>::MakeSptr(option, renderSession);
     }
     if (windowSessionImpl == nullptr) {
         WLOGFE("malloc windowSessionImpl failed");

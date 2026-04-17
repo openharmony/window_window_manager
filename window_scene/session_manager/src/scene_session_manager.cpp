@@ -9826,9 +9826,11 @@ void SceneSessionManager::RegisterSingleHandContainerNode(const std::string& str
     TLOGI(WmsLogTag::WMS_LAYOUT, "get OneHandModeBox node, id: %{public}" PRIu64, rsNode->GetId());
     setTopWindowBoundaryByIDFunc_(stringId);
     auto rsUICtx = rsNode->GetRSUIContext();
-    if (rsUICtx != nullptr && rsUICtx->GetRSRenderInterface() != nullptr) {
-        rsUICtx->GetRSRenderInterface()->SetWindowContainer(rsNode->GetId(), true);
+    if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "rsUIContext is null");
+        return;
     }
+    rsUICtx->GetRSRenderInterface()->SetWindowContainer(rsNode->GetId(), true);
 }
 
 const SingleHandCompatibleModeConfig& SceneSessionManager::GetSingleHandCompatibleModeConfig() const
