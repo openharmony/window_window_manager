@@ -8541,15 +8541,12 @@ WMError WindowSessionImpl::RestoreFloatViewMainWindow(const std::shared_ptr<AAFw
     return WMError::WM_OK;
 }
 
-WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode, bool isGetParentStatus, MaximizeMode maximizeMode,
-    bool isLayoutFullScreen)
+WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
 {
-    auto maximizeModeValue = isGetParentStatus ? maximizeMode : property_->GetMaximizeMode();
-    auto immersiveModeEnabled = isGetParentStatus ? isLayoutFullScreen : GetImmersiveModeEnabledState();
     auto windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         windowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
-        if (maximizeModeValue == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             windowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -8557,7 +8554,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode, bool isGet
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         if (IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14) { // 14: isolated version
-            windowStatus = immersiveModeEnabled ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
+            windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
                 WindowStatus::WINDOW_STATUS_MAXIMIZE;
         } else {
             windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
@@ -8664,10 +8661,9 @@ void WindowSessionImpl::NotifyParentWindowSizeChange(Rect rect)
 }
 
 /** @note @window.layout */
-void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
-    bool isLayoutFullScreen)
+void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode)
 {
-    auto windowStatus = GetWindowStatusInner(mode, true, maximizeMode, isLayoutFullScreen);
+    auto windowStatus = GetWindowStatusInner(mode);
     TLOGI(WmsLogTag::WMS_LAYOUT, " id:%{public}d, windowStatus:%{public}u, windowMode:%{public}u",
         GetPersistentId(), windowStatus,  mode);
     auto lastStatus = lastStatusWhenNotifyParentStatusChange_.load();

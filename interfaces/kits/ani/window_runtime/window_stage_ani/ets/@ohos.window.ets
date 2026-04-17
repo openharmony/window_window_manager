@@ -566,8 +566,8 @@ namespace window {
 
   export interface SubWindowAttachOptions {
     currentLayoutMode?: string;
-    parentWindowSizeChangeCallback? :Callback<Size>;
-    parentWindowStatusChangeCallback? :Callback<WindowStatusType>;
+    parentWindowSizeChangeCallBack?:Callback<Size>;
+    parentWindowStatusChangeCallBack?:Callback<WindowStatusType>;
   }
 
   export interface Rect {

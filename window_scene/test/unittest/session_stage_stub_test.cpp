@@ -697,28 +697,11 @@ HWTEST_F(SessionStageStubTest, HandleHandleNotifySubWindowAfterParentWindowStatu
         int32_t ret = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
         EXPECT_EQ(ERR_INVALID_DATA, ret);
     }
-    // Case3: Failed to read maximizeMode
-    {
-        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-        data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
-        int32_t ret = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
-        EXPECT_EQ(ERR_INVALID_DATA, ret);
-    }
-    // Case4: Failed to read isLayoutFullScreen
-    {
-        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-        data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
-        data.WriteUint32(static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR));
-        int32_t ret = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
-        EXPECT_EQ(ERR_INVALID_DATA, ret);
-    }
 
-    // Case5: Success with calid windowMode
+    // Case3: Success with calid windowMode
     {
         data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
         data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
-        data.WriteUint32(static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR));
-        data.WriteBool(true);
         EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
         int32_t ret = reply.ReadInt32();
         EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));

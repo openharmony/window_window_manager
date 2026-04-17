@@ -9002,9 +9002,7 @@ WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorIn
             Rect parentRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
             if (session->sessionStage_) {
                 session->sessionStage_->NotifySubWindowAfterParentWindowSizeChange(parentRect);
-                auto parentProperty = parentSession->GetSessionProperty();
-                session->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(parentSession->GetWindowMode(),
-                    parentProperty->GetMaximizeMode(), session->IsLayoutFullScreen());
+                session->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(parentSession->GetWindowMode());
             }
         } else {
             TLOGI(WmsLogTag::WMS_SUB, "func is null");
@@ -10548,14 +10546,10 @@ void SceneSession::NotifySubSessionParentSizeChange(Rect rect)
 
 void SceneSession::NotifySubSessionParentStatusChange(WindowMode mode)
 {
-    auto property = GetSessionProperty();
-    MaximizeMode maximizeMode = property->GetMaximizeMode();
-    bool isLayoutFullScreen = IsLayoutFullScreen();
     TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}zu", GetSubSession().size());
     for(const auto& subSession : GetSubSession()) {
         if (subSession && subSession->sessionStage_ && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
-            subSession->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(mode, maximizeMode,
-                isLayoutFullScreen);
+            subSession->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(mode);
         }
     }
 }

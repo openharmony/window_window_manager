@@ -147,49 +147,47 @@ HWTEST_F(SessionStageProxyLayoutTest, NotifySubWindowAfterParentWindowStatusChan
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySubWindowAfterParentWindowStatusChange start";
     ASSERT_TRUE((sessionStage_ != nullptr));
     MockMessageParcel::ClearAllErrorFlag();
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    auto ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN,
-        MaximizeMode::MODE_AVOID_SYSTEM_BAR, true);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
-    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
-    MockMessageParcel::SetWriteInt32ErrorFlag(true);
-    ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN,
-        MaximizeMode::MODE_AVOID_SYSTEM_BAR, true);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
-    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    // case1: Failed to write interface token
+    {
+        MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+        auto ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+        MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+    }
 
-    MockMessageParcel::SetWriteUint32ErrorFlag(true);
-    ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN,
-        MaximizeMode::MODE_AVOID_SYSTEM_BAR, true);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
-    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+    // case2: Failed to write WindowMode
+    {
+        MockMessageParcel::SetWriteInt32ErrorFlag(true);
+        auto ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+        MockMessageParcel::SetWriteInt32ErrorFlag(false);
+    }
 
-    MockMessageParcel::SetWriteBoolErrorFlag(true);
-    ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN,
-        MaximizeMode::MODE_AVOID_SYSTEM_BAR, true);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
-    MockMessageParcel::SetWriteBoolErrorFlag(false);
+    // case3: Remote is nullptr
+    {
+        sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+        auto ret = sessionStage_->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, ret);
+    }
 
-    // Case 3: remote is nullptr
-    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
-        nullProxy->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN,
-            MaximizeMode::MODE_AVOID_SYSTEM_BAR, true));
+    // case4: Failed to send request
+    {
+        auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+        remoteMock->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+        sptr<SessionStageProxy> failSendProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+        EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
+            failSendProxy->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN));
+    }
 
-    auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
-    remoteMock->sendRequestResult_ = ERR_TRANSACTION_FAILED;
-    sptr<SessionStageProxy> failSendProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
-    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED,
-        failSendProxy->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN,
-        MaximizeMode::MODE_AVOID_SYSTEM_BAR, true));
-
-    remoteMock->sendRequestResult_ = ERROR_NONE;
-    sptr<SessionStageProxy> successProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
-    EXPECT_EQ(WSError::WS_OK,
-        successProxy->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN,
-        MaximizeMode::MODE_AVOID_SYSTEM_BAR, true));
-
+    // case 5: Success
+    {
+        auto remoteMock = sptr<MockIRemoteObject>::MakeSptr();
+        remoteMock->sendRequestResult_ = ERR_NONE;
+        sptr<SessionStageProxy> successProxy = sptr<SessionStageProxy>::MakeSptr(remoteMock);
+        EXPECT_EQ(WSError::WS_OK,
+            successProxy->NotifySubWindowAfterParentWindowStatusChange(WindowMode::WINDOW_MODE_FULLSCREEN));
+    }
     MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionStageProxyLayoutTest: NotifySubWindowAfterParentWindowStatusChange end";
 }

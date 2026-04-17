@@ -424,7 +424,7 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyParentWindowStatusChange, TestSize.L
     EXPECT_NE(listeners.size(), 0);
     listeners.insert(listeners.begin(), nullptr);
     window->parentWindowStatusChangeListeners_.insert({ window->GetPersistentId(), listeners });
-    window->NotifyParentWindowStatusChange(WindowMode::WINDOW_MODE_FLOATING, MaximizeMode::MODE_AVOID_SYSTEM_BAR, true);
+    window->NotifyParentWindowStatusChange(WindowMode::WINDOW_MODE_FLOATING);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyParentWindowStatusChange end";
 }
@@ -442,7 +442,7 @@ HWTEST_F(WindowSessionImplLayoutTest, NotifyParentWindowStatusChange_Test_Undefi
     EXPECT_NE(listeners.size(), 0);
     window->parentWindowStatusChangelisteners_.insert({ window->GetPersistentId(), listeners });
     window->lastStatusWhenNotifyParentStatusChange_.store(WindowStatus::WINDOW_STATUS_FULLSCREEN);
-    window->NotifyParentWindowStatusChange(WindowMode::WINDOW_MODE_UNDEFINED, MaximizeMode::MODE_FULL_FILL, true);
+    window->NotifyParentWindowStatusChange(WindowMode::WINDOW_MODE_UNDEFINED);
     EXPECT_EQ(window->lastStatusWhenNotifyParentStatusChange_, WindowStatus::WINDOW_STATUS_UNDEFINED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, window->Destroy());
     GTEST_LOG_(INFO) << "WindowSessionImplLayoutTest: NotifyWindowStatusDidChange_Test_Undefined end";
