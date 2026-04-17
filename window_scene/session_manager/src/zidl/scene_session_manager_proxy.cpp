@@ -95,7 +95,7 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     if (renderSessionObject == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "ReadRemoteObject failed");
         return WSError::WS_ERROR_IPC_FAILED;
-    } 
+    }
     renderSession = renderSessionObject;
     uint32_t level = 0;
     if (!reply.ReadUint32(level)) {

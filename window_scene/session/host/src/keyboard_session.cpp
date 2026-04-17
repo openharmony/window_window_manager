@@ -885,7 +885,6 @@ void KeyboardSession::CloseRSTransaction()
     TLOGI(WmsLogTag::WMS_KEYBOARD, "Close keyboard sync, screenId: %{public}" PRIu64, GetScreenId());
     RSSyncTransactionAdapter::CloseSyncTransaction(syncTransRSUIContext_, handler);
     syncTransRSUIContext_ = nullptr;
-    
 }
 
 std::shared_ptr<RSTransaction> KeyboardSession::GetRSTransaction()
