@@ -237,7 +237,7 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     if (data.ReadBool(hasRemoteObj)) {
         if (hasRemoteObj) {
             connectToRenderToken = data.ReadRemoteObject();
-        } 
+        }
     }
 
     SessionOption option = {
