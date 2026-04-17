@@ -587,7 +587,8 @@ HWTEST_F(WindowSessionTest4, SetRaiseToAppTopForPointDownFunc, TestSize.Level1)
     session_->SetNotifyUILostFocusFunc(nullptr);
     session_->UnregisterSessionChangeListeners();
 
-    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info, bool shouldBackToCaller) {};
+    NotifyPendingSessionToBackgroundForDelegatorFunc func2 = [](const SessionInfo& info,
+        bool shouldBackToCaller, LifeCycleChangeReason reason) {};
     session_->pendingSessionToBackgroundForDelegatorFunc_ = func2;
     ASSERT_EQ(WSError::WS_OK, session_->PendingSessionToBackgroundForDelegator(true));
 }

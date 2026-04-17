@@ -924,6 +924,18 @@ FloatingBallTemplateInfo WindowSessionProperty::GetFbTemplateInfo() const
     return fbTemplateInfo_;
 }
 
+void WindowSessionProperty::SetFvTemplateInfo(const FloatViewTemplateInfo& fvTemplateInfo)
+{
+    std::lock_guard<std::mutex> lock(fvTemplateMutex_);
+    fvTemplateInfo_ = fvTemplateInfo;
+}
+
+FloatViewTemplateInfo WindowSessionProperty::GetFvTemplateInfo() const
+{
+    std::lock_guard<std::mutex> lock(fvTemplateMutex_);
+    return fvTemplateInfo_;
+}
+
 void WindowSessionProperty::SetIsNeedUpdateWindowMode(bool isNeedUpdateWindowMode)
 {
     isNeedUpdateWindowMode_ = isNeedUpdateWindowMode;
@@ -1083,6 +1095,7 @@ bool WindowSessionProperty::MarshallingTouchHotAreas(Parcel& parcel) const
 
 bool WindowSessionProperty::MarshallingKeyboardTouchHotAreas(Parcel& parcel) const
 {
+    std::lock_guard lock(touchHotAreasMutex_);
     return MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapeKeyboardHotAreas_, parcel) &&
            MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.portraitKeyboardHotAreas_, parcel) &&
            MarshallingTouchHotAreasInner(keyboardTouchHotAreas_.landscapePanelHotAreas_, parcel) &&
@@ -1109,6 +1122,7 @@ void WindowSessionProperty::UnmarshallingTouchHotAreas(Parcel& parcel, WindowSes
 
 void WindowSessionProperty::UnmarshallingKeyboardTouchHotAreas(Parcel& parcel, WindowSessionProperty* property)
 {
+    std::lock_guard lock(property->touchHotAreasMutex_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapeKeyboardHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.portraitKeyboardHotAreas_);
     UnmarshallingTouchHotAreasInner(parcel, property->keyboardTouchHotAreas_.landscapePanelHotAreas_);
@@ -1154,6 +1168,26 @@ void WindowSessionProperty::UnmarshallingFbTemplateInfo(Parcel& parcel, WindowSe
         return;
     }
     property->SetFbTemplateInfo(*fbTemplateInfo);
+}
+
+bool WindowSessionProperty::MarshallingFvTemplateInfo(Parcel& parcel) const
+{
+    if (!WindowHelper::IsFvWindow(type_)) {
+        return true;
+    }
+    return parcel.WriteParcelable(&fvTemplateInfo_);
+}
+
+void WindowSessionProperty::UnmarshallingFvTemplateInfo(Parcel& parcel, WindowSessionProperty* property)
+{
+    if (!WindowHelper::IsFvWindow(property->GetWindowType())) {
+        return;
+    }
+    sptr<FloatViewTemplateInfo> fvTemplateInfo = parcel.ReadParcelable<FloatViewTemplateInfo>();
+    if (fvTemplateInfo == nullptr) {
+        return;
+    }
+    property->SetFvTemplateInfo(*fvTemplateInfo);
 }
 
 bool WindowSessionProperty::MarshallingWindowMask(Parcel& parcel) const
@@ -1417,6 +1451,16 @@ bool WindowSessionProperty::IsSubWindowOutlineEnabled() const
     return subWindowOutlineEnabled_;
 }
 
+void WindowSessionProperty::SetZLevelAboveParentLoosened(bool zLevelAboveParentLoosened)
+{
+    zLevelAboveParentLoosened_ = zLevelAboveParentLoosened;
+}
+ 
+bool WindowSessionProperty::IsSubWindowZLevelAboveParentLoosened() const
+{
+    return zLevelAboveParentLoosened_;
+}
+
 bool WindowSessionProperty::Marshalling(Parcel& parcel) const
 {
     auto globalDisplayRect = GetGlobalDisplayRect();
@@ -1477,6 +1521,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isAbilityHook_) &&
         parcel.WriteParcelable(compatibleModeProperty_) && parcel.WriteBool(isFollowScreenChange_) &&
         parcel.WriteBool(subWindowOutlineEnabled_) &&
+        parcel.WriteBool(zLevelAboveParentLoosened_) &&
         parcel.WriteUint32(windowModeSupportType_) &&
         MarshallingShadowsInfo(parcel) &&
         MarshallingWindowAnchorInfo(parcel) &&
@@ -1493,7 +1538,10 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isRotationLock_) &&
         parcel.WriteInt32(frameNum_) &&
         parcel.WriteBool(isPrelaunch_) &&
-        parcel.WriteBool(isAppBufferReady_);
+        parcel.WriteBool(isAppBufferReady_) &&
+        parcel.WriteBool(isFollowParentLayout_) &&
+        parcel.WriteBool(isCrossProcessWindow_) &&
+        MarshallingFvTemplateInfo(parcel);
 }
 
 WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
@@ -1600,6 +1648,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetCompatibleModeProperty(parcel.ReadParcelable<CompatibleModeProperty>());
     property->SetFollowScreenChange(parcel.ReadBool());
     property->SetSubWindowOutlineEnabled(parcel.ReadBool());
+    property->SetZLevelAboveParentLoosened(parcel.ReadBool());
     property->SetWindowModeSupportType(parcel.ReadUint32());
     UnmarshallingShadowsInfo(parcel, property);
     UnmarshallingWindowAnchorInfo(parcel, property);
@@ -1617,6 +1666,8 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFrameNum(parcel.ReadInt32());
     property->SetPrelaunch(parcel.ReadBool());
     property->SetAppBufferReady(parcel.ReadBool());
+    property->SetIsCrossProcessWindow(parcel.ReadBool());
+    UnmarshallingFvTemplateInfo(parcel, property);
     return property;
 }
 
@@ -1721,6 +1772,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     shadowsInfo_ = property->shadowsInfo_;
     windowAnchorInfo_ = property->windowAnchorInfo_;
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
+    zLevelAboveParentLoosened_ = property->zLevelAboveParentLoosened_;
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
     isPcAppInpadOrientationLandscape_ = property->isPcAppInpadOrientationLandscape_;
     isPcAppInpadCompatibleMode_ = property->isPcAppInpadCompatibleMode_;
@@ -1735,6 +1787,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isRotationLock_ = property->isRotationLock_;
     statusBarHeightInImmersive_ = property->statusBarHeightInImmersive_;
     pageCompatibleMode_ = property->pageCompatibleMode_;
+    isCrossProcessWindow_ = property->isCrossProcessWindow_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -2516,14 +2569,16 @@ CompatibleStyleMode WindowSessionProperty::GetPageCompatibleMode() const
     return pageCompatibleMode_;
 }
 
-void WindowSessionProperty::SetLogicalDeviceConfig(const std::string& logicalDeviceConfig)
+void WindowSessionProperty::SetCombinedCompatibleConfig(const std::vector<std::string>& combinedCompatibleConfig)
 {
-    logicalDeviceConfig_ = logicalDeviceConfig;
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
+    combinedCompatibleConfig_ = combinedCompatibleConfig;
 }
 
-std::string WindowSessionProperty::GetLogicalDeviceConfig() const
+std::vector<std::string> WindowSessionProperty::GetCombinedCompatibleConfig() const
 {
-    return logicalDeviceConfig_;
+    std::lock_guard<std::mutex> lock(combinedCompatibleConfigMutex_);
+    return combinedCompatibleConfig_;
 }
 
 void WindowSessionProperty::SetPcAppInpadCompatibleMode(bool enabled)
@@ -2874,6 +2929,11 @@ void SystemSessionConfig::ConvertSupportUIExtensionSubWindow(const std::string& 
     supportUIExtensionSubWindow_ = StringUtil::ConvertStringToBool(itemValue);
 }
 
+void SystemSessionConfig::ConvertSupportCreateFloatView(const std::string& itemValue)
+{
+    supportCreateFloatView_ = StringUtil::ConvertStringToBool(itemValue);
+}
+
 void WindowSessionProperty::SetPrelaunch(bool isPrelaunch)
 {
     isPrelaunch_ = isPrelaunch;
@@ -2902,6 +2962,26 @@ void WindowSessionProperty::SetAppBufferReady(bool isAppBufferReady)
 bool WindowSessionProperty::IsAppBufferReady() const
 {
     return isAppBufferReady_;
+}
+
+void WindowSessionProperty::SetFollowParentLayout(bool isFollowParentLayout)
+{
+    isFollowParentLayout_ = isFollowParentLayout;
+}
+
+bool WindowSessionProperty::IsFollowParentLayout() const
+{
+    return isFollowParentLayout_;
+}
+
+void WindowSessionProperty::SetIsCrossProcessWindow(bool isCrossProcess)
+{
+    isCrossProcessWindow_ = isCrossProcess;
+}
+
+bool WindowSessionProperty::GetIsCrossProcessWindow() const
+{
+    return isCrossProcessWindow_;
 }
 } // namespace Rosen
 } // namespace OHOS

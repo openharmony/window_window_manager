@@ -219,6 +219,8 @@ void JsExtensionWindow::RegisterUnsupportFuncs(napi_env env, napi_value objValue
     BindNativeFunction(env, objValue, "showWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "destroyWindow", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setPreferredOrientation", moduleName, JsExtensionWindow::EmptyAsyncCall);
+    BindNativeFunction(env, objValue, "setPreferredOrientationWithResult", moduleName,
+        JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setWindowFocusable", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setExclusivelyHighlighted", moduleName, JsExtensionWindow::EmptyAsyncCall);
     BindNativeFunction(env, objValue, "setWindowTouchable", moduleName, JsExtensionWindow::EmptyAsyncCall);
@@ -1419,6 +1421,13 @@ napi_value JsExtensionWindow::OnCreateSubWindowWithOptions(napi_env env, napi_ca
         !ConvertFromJsValue(env, argv[INDEX_TWO], followCreatorLifecycle)) {
         TLOGE(WmsLogTag::WMS_SUB, "Failed to convert followCreatorLifecycle parameter to bool");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM)));
+        return NapiGetUndefined(env);
+    }
+    auto extWindow = extensionWindow_->GetWindow();
+    if (extWindow != nullptr && extWindow->IsBlockSubwindow()) {
+        TLOGE(WmsLogTag::WMS_SUB, "The session is blocking sub window");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_FORBID_SUBWINDOW,
+            "[window][createSubWindowWithOptions]msg: The session is blocking sub window"));
         return NapiGetUndefined(env);
     }
     option->SetFollowCreatorLifecycle(followCreatorLifecycle);

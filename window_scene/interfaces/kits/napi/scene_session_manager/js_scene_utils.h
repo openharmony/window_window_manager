@@ -102,6 +102,7 @@ enum class JsSessionType : uint32_t {
     TYPE_MAGNIFICATION_MENU = 43,
     TYPE_SELECTION = 44,
     TYPE_FLOATING_BALL = 45,
+    TYPE_FLOAT_VIEW = 46,
 };
 
 extern const std::map<WindowType, JsSessionType> WINDOW_TO_JS_SESSION_TYPE_MAP;
@@ -143,6 +144,7 @@ napi_value CreateJsSessionSizeChangeReason(napi_env env);
 napi_value CreateJsRSUIFirstSwitch(napi_env env);
 napi_value CreateJsSessionPiPControlType(napi_env env);
 napi_value CreateJsSessionPiPControlStatus(napi_env env);
+napi_value CreateJsSessionFbTextUpdateAnimationType(napi_env env);
 napi_value CreateJsSessionGravity(napi_env env);
 napi_value CreateJsSessionDragResizeType(napi_env env);
 void CreatePiPSizeChangeReason(napi_env env, napi_value objValue);
@@ -185,6 +187,7 @@ napi_value ConvertWindowAnimationPropertyToJsValue(napi_env env,
 napi_value ConvertKeyboardEffectOptionToJsValue(napi_env env, const KeyboardEffectOption& effectOption);
 napi_value CreateWaterfallResidentState(napi_env env);
 napi_value CreateCompatibleStyleMode(napi_env env);
+napi_value CreateTitleButtonEventType(napi_env env);
 bool NapiIsCallable(napi_env env, napi_value value);
 bool ConvertRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
 bool ConvertSessionRectInfoFromJs(napi_env env, napi_value jsObject, WSRect& rect);
@@ -206,6 +209,8 @@ bool convertAnimConfigFromJs(napi_env env, napi_value value, SceneAnimationConfi
 bool ConvertSupportRotationInfoFromJsValue(napi_env env, napi_value jsObject,
     SupportRotationInfo& suppoortRotationInfo);
 bool ParseBoolArrayValueFromJsValue(napi_env env, napi_value array, std::vector<bool>& vector);
+bool ConvertFloatViewLimitsFromJs(napi_env env, napi_value jsLimits, FloatViewLimits& limits);
+bool ConvertRatioLimitsFromJs(napi_env env, napi_value jsLimits, FloatViewLimits& limits);
 template<class T>
 bool ParseJsValue(napi_env env, napi_value jsObject, const std::string& name, T& data)
 {

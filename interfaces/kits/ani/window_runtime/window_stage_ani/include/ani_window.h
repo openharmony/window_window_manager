@@ -34,7 +34,7 @@ namespace Rosen {
 
 class AniWindow {
 public:
-    explicit AniWindow(const sptr<Window>& window);
+    explicit AniWindow(const sptr<Window>& window, ani_env* env);
     explicit AniWindow(const std::shared_ptr<OHOS::Rosen::Window>& window);
     ~AniWindow();
     sptr<Window> GetWindow() { return windowToken_; }
@@ -50,6 +50,8 @@ public:
 
     static void SetWindowColorSpace(ani_env* env, ani_object obj, ani_long nativeObj, ani_int colorSpace);
     static void SetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj, ani_int orientation);
+    static void SetPreferredOrientationWithResult(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_int orientation, ani_int promiseId);
     static ani_int GetPreferredOrientation(ani_env* env, ani_object obj, ani_long nativeObj);
     static ani_int ConvertOrientationAndRotation(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_int from, ani_int to, ani_int value);
@@ -148,6 +150,9 @@ public:
     static ani_string GetWindowStateSnapshot(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetRelativePositionToParentWindowEnabled(ani_env* env, ani_object obj, ani_long nativeObj,
         ani_boolean enabled, ani_object anchor, ani_object offsetX, ani_object offsetY);
+    static void AttachLayoutToParentWindow(ani_env* env, ani_object obj, ani_long nativeObj,
+        ani_object anchorInfo, ani_object attachOptions);
+    static void DetachLayoutToParentWindow(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetWindowDelayRaiseOnDrag(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean isEnabled);
     static void SetDefaultDensityEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
     static void SetWindowContainerColor(ani_env* env, ani_object obj, ani_long nativeObj,
@@ -216,6 +221,8 @@ public:
     ani_object GetWindowSystemBarProperties(ani_env* env);
     ani_boolean IsGestureBackEnabled(ani_env* env);
     void SetGestureBackEnabled(ani_env* env, ani_boolean enabled);
+    ani_boolean IsFloatNavigationAvoidAreaEnabled(ani_env* env);
+    void SetFloatNavigationAvoidAreaEnabled(ani_env* env, ani_boolean enabled);
     void SetSingleFrameComposerEnabled(ani_env* env, ani_boolean enabled);
     void ResizeAsync(ani_env* env, ani_int width, ani_int height);
     ani_object SetWindowLimits(ani_env* env, ani_object inWindowLimits, ani_object forcible);
@@ -247,6 +254,8 @@ private:
     void OnHide(ani_env* env);
     void OnSetWindowColorSpace(ani_env* env, ani_int colorSpace);
     void OnSetPreferredOrientation(ani_env* env, ani_int orientation);
+    void NotifyOrientationExecutionResultResult(uint32_t promiseId, uint32_t result);
+    void OnSetPreferredOrientationWithResult(ani_env* env, ani_int orientation, ani_int promiseId);
     ani_int OnGetPreferredOrientation(ani_env* env);
     ani_int OnConvertOrientationAndRotation(ani_env* env, ani_int from, ani_int to, ani_int value);
     void OnSetWindowPrivacyMode(ani_env* env, ani_boolean isPrivacyMode);
@@ -330,6 +339,8 @@ private:
     void OnSetWindowDelayRaiseOnDrag(ani_env* env, ani_boolean isEnabled);
     void OnSetRelativePositionToParentWindowEnabled(ani_env* env, ani_boolean enabled,
         ani_object anchor, ani_object offsetX, ani_object offsetY);
+    void OnAttachToParentWindow(ani_env* env, ani_object anchorInfo, ani_object attachOptions);
+    void OnDetachLayoutToParentWindow(ani_env* env);
     void OnSetDefaultDensityEnabled(ani_env* env, ani_boolean enabled);
     void OnSetWindowContainerColor(ani_env* env, ani_string activeColor, ani_string inactiveColor);
     void OnSetWindowContainerModalColor(ani_env* env, ani_string activeColor, ani_string inactiveColor);
@@ -367,6 +378,7 @@ private:
 
     sptr<Window> windowToken_ = nullptr;
     std::unique_ptr<AniWindowRegisterManager> registerManager_ = nullptr;
+    ani_env* env_;
     ani_ref aniRef_ = nullptr;
     ani_object aniTransControllerObj_ = nullptr;
 };

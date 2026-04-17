@@ -72,6 +72,10 @@ public:
     MOCK_METHOD1(SetIsShowDecorInFreeMultiWindow, WSError(bool isShow));
     MOCK_METHOD(WSError, SetContentAspectRatio, (float ratio, bool isPersistent, bool needUpdateRect), (override));
     MOCK_METHOD1(GetGlobalScaledRect, WMError(Rect& globalScaledRect));
+    MOCK_METHOD2(NotifyPageEnable, WSError(const std::string& action, const std::string& message));
+    MOCK_METHOD0(NotifyFloatViewPrepareClose, void(void));
+    MOCK_METHOD1(UpdateFloatView, WMError(const FloatViewTemplateInfo& fvTemplateInfo));
+    MOCK_METHOD1(RestoreFloatViewMainWindow, WMError(const std::shared_ptr<AAFwk::WantParams>& wantParams));
 };
 } // namespace Rosen
 } // namespace OHOS

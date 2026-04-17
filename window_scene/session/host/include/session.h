@@ -62,6 +62,8 @@ using NotifyUpdateFloatingBallFunc = std::function<void(const FloatingBallTempla
 using NotifyStopFloatingBallFunc = std::function<void()>;
 using NotifyRestoreFloatingBallMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::Want>& want)>;
 using NotifyRestoreFloatMainWindowFunc = std::function<void(const std::shared_ptr<AAFwk::WantParams>& wantParameters)>;
+using NotifyStopFloatViewFunc = std::function<void(const std::string& reason)>;
+using NotifyUpdateFloatViewFunc = std::function<void(const FloatViewTemplateInfo& fvTemplateInfo)>;
 using NotifyPendingSessionActivationFunc = std::function<void(SessionInfo& info)>;
 using NotifyBatchPendingSessionsActivationFunc = std::function<void(std::vector<std::shared_ptr<SessionInfo>>& info,
     const std::vector<std::shared_ptr<PendingSessionActivationConfig>>& configs)>;
@@ -88,7 +90,7 @@ using NotifyPendingSessionToForegroundFunc = std::function<void(const SessionInf
 using NotifyPendingSessionToBackgroundFunc = std::function<void(const SessionInfo& info,
     const BackgroundParams& params)>;
 using NotifyPendingSessionToBackgroundForDelegatorFunc = std::function<void(const SessionInfo& info,
-    bool shouldBackToCaller)>;
+    bool shouldBackToCaller, LifeCycleChangeReason reason)>;
 using NotifyClickModalWindowOutsideFunc = std::function<void()>;
 using NotifyRaiseMainWindowAboveTargetFunc = std::function<void(int32_t targetId)>;
 using NotifyRaiseToTopForPointDownFunc = std::function<void()>;
@@ -179,6 +181,12 @@ struct ControlInfo {
     bool isControlRecentOnly;
 };
 
+struct ScreenMetrics {
+    uint32_t widthPx;
+    uint32_t heightPx;
+    float density;
+};
+
 extern const std::string ATTACH_EVENT_NAME;
 extern const std::string DETACH_EVENT_NAME;
 
@@ -224,7 +232,8 @@ public:
     void ResetIsActive();
     WSError PendingSessionToForeground();
     WSError PendingSessionToBackground(const BackgroundParams& params);
-    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller);
+    WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller,
+        LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
     bool RegisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     bool UnregisterLifecycleListener(const std::shared_ptr<ILifecycleListener>& listener);
     void SetPendingSessionActivationEventListener(NotifyPendingSessionActivationFunc&& func);
@@ -242,12 +251,18 @@ public:
     WSError TerminateSessionTotal(const sptr<AAFwk::SessionInfo> info, TerminateType terminateType);
     std::string GetSessionLabel() const;
     void SetRestartAppListener(NotifyRestartAppFunc&& func);
+    virtual void NotifyCrossProcessChildrenLifecycle(ParentLifeCycleEvent event) {}
+    virtual PreWindowProperty PreCalcWindowProperty() { return PreWindowProperty(); }
+    bool IsSubWindowZLevelAboveParentLoosened() const;
+    bool IsLoosenedWithFreeMultiMode() const;
 
     /*
      * App Use Control
      */
     virtual bool GetIsUseControlSession() const { return false; }
     virtual void SetIsUseControlSession(bool isUseControlSession) {}
+    virtual int32_t GetMainWindowPersistentId() const { return INVALID_SESSION_ID; }
+    virtual void SetMainWindowPersistentId(int32_t mainWindowPersistentId) {}
     virtual void NotifyUpdateAppUseControl(ControlAppType type, const ControlInfo& controlInfo) {}
 
     /*
@@ -287,11 +302,6 @@ public:
     virtual bool IsInLSState() const { return false; }
     virtual WSError GetScaleInLSState(float& scaleX, float& scaleY) const { return WSError::WS_DO_NOTHING; }
 
-    /*
-     * Cross Display Move Drag
-     */
-    std::shared_ptr<RSSurfaceNode> GetSurfaceNodeForMoveDrag() const;
-
     virtual WSError TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool needNotifyClient = true, bool isExecuteDelayRaise = false);
     virtual WSError TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
@@ -311,8 +321,57 @@ public:
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode() const;
     std::shared_ptr<RSSurfaceNode> GetSurfaceNode(bool isUpdateContextBeforeGet);
     std::optional<NodeId> GetSurfaceNodeId() const;
+    std::shared_ptr<RSSurfaceNode> GetShadowSurfaceNode() const;
+
+    /**
+     * @brief Ensures the shadow surface node used for window move-drag operations.
+     *
+     * If RS client multi-instance mode is disabled, the original surface node
+     * is returned directly. Otherwise a shadow node is lazily created from the
+     * original node. The shadow node copies RSBoundsModifier and RSFrameModifier
+     * required for drag updates.
+     *
+     * @return The shadow surface node, the original node if shadow creation is
+     *         skipped or fails, or nullptr if the original node does not exist.
+     */
+    std::shared_ptr<RSSurfaceNode> EnsureMoveDragShadowSurfaceNode();
+
     void SetLeashWinSurfaceNode(std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode);
     std::shared_ptr<RSSurfaceNode> GetLeashWinSurfaceNode() const;
+    std::shared_ptr<RSSurfaceNode> GetLeashWinShadowSurfaceNode() const;
+
+    /**
+     * @brief Ensure the shadow surface node used for leash window move-drag operations.
+     *
+     * If RS client multi-instance mode is disabled, the original leash window
+     * surface node is returned directly. Otherwise a shadow node is lazily created
+     * from the original node. The shadow node copies RSBoundsModifier and RSFrameModifier
+     * required for drag updates.
+     *
+     * @return The shadow surface node, the original node if shadow creation is
+     *         skipped or fails, or nullptr if the original node does not exist.
+     */
+    std::shared_ptr<RSSurfaceNode> EnsureMoveDragLeashWinShadowSurfaceNode();
+
+    /**
+     * @brief Get the target surface node for window move-drag operations.
+     *
+     * If a leash window surface node exists, it will be used as the drag target.
+     * Otherwise, the original surface node is returned.
+     *
+     * @return The surface node used as the move-drag target.
+     */
+    std::shared_ptr<RSSurfaceNode> GetMoveDragTargetSurfaceNode() const;
+
+    /**
+     * @brief Get the target shadow surface node for window move-drag operations.
+     *
+     * If a leash window shadow surface node exists, it will be used as the drag target.
+     * Otherwise, the original shadow surface node is returned.
+     *
+     * @return The shadow surface node used as the move-drag target.
+     */
+    std::shared_ptr<RSSurfaceNode> GetMoveDragTargetShadowSurfaceNode();
 
     /*
      * Window Scene Snapshot
@@ -347,6 +406,10 @@ public:
     {
         controlInfo = { .isNeedControl = false, .isControlRecentOnly = false };
         return false;
+    };
+    virtual ControlAppType GetControlAppType() const
+    {
+        return ControlAppType::CONTROL_APP_TYPE_BEGIN;
     };
     bool GetAppLockControl() const { return isAppLockControl_.load(); };
     void SetAppLockControl(bool control) { isAppLockControl_.store(control); };
@@ -416,8 +479,10 @@ public:
     WSError SetSessionPropertyForReconnect(const sptr<WindowSessionProperty>& property);
     const sptr<WindowSessionProperty>& GetSessionProperty() const { return property_; }
     void SetSessionRect(const WSRect& rect);
+    void SetLastClientParentSize(const WSRect& rect);
     WSRect GetSessionRect() const;
     WSRect GetSessionGlobalRect() const;
+    WSRect GetLastClientParentSize() const;
     WSRect GetSessionScreenRelativeRect() const;
     WSRect GetSessionGlobalRectInMultiScreen() const;
     WMError GetGlobalScaledRect(Rect& globalScaledRect) override;
@@ -447,6 +512,9 @@ public:
     virtual WSError UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason reason,
         const std::string& updateReason, const std::shared_ptr<RSTransaction>& rsTransaction = nullptr,
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
+    void IsNeedNotifySubSessionParentSizeChange(const WSRect& rect);
+    virtual void NotifySubSessionParentSizeChange(Rect rect){};
+    virtual void NotifySubSessionParentStatusChange(WindowMode mode){};
     WSError UpdateDensity();
     WSError UpdateOrientation();
     virtual bool IsDragMoving() const { return false; }
@@ -713,9 +781,9 @@ public:
 
     SystemSessionConfig GetSystemConfig() const;
     void RectCheckProcess();
-    virtual void RectCheck(uint32_t curWidth, uint32_t curHeight) {};
-    void RectSizeCheckProcess(uint32_t curWidth, uint32_t curHeight, uint32_t minWidth,
-        uint32_t minHeight, uint32_t maxFloatingWindowSize);
+    virtual void RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics) {};
+    void RectSizeCheckProcess(float curWidth, float curHeight, uint32_t minWidth,
+        uint32_t minHeight, const ScreenMetrics& screenMetrics);
     DetectTaskInfo GetDetectTaskInfo() const;
     void SetDetectTaskInfo(const DetectTaskInfo& detectTaskInfo);
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
@@ -791,6 +859,7 @@ public:
     WSError NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeChangeReason reason);
     const sptr<LayoutController>& GetLayoutController() const { return layoutController_; }
     WSError NotifyAppHookWindowInfoUpdated();
+    virtual WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) { return WSError::WS_OK; }
     void NotifyWindowStatusDidChangeIfNeedWhenUpdateRect(SizeChangeReason reason);
     void SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func);
     WSError UpdateClientRectInfo(const WSRect& rect, SizeChangeReason reason,
@@ -819,6 +888,7 @@ public:
      * PC Window
      */
     sptr<Session> GetMainSession() const;
+    sptr<Session> GetMainSessionOrLoosenedSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
     bool IsAncestorsSession(int32_t ancestorsId) const;
@@ -836,6 +906,9 @@ public:
     void AddPropertyDirtyFlags(uint32_t dirtyFlags) { propertyDirtyFlags_ |= dirtyFlags; }
     WSError NotifyScreenshotAppEvent(ScreenshotEventType type);
     WSError UpdateBrightness(float brightness);
+    SessionState GetRealSessionState();
+
+    std::atomic<bool> isSkipSelfWhenShowOnVirtualScreen_ { false };
 
     /*
      * Window Pattern
@@ -879,6 +952,8 @@ public:
     void GetPreloadStartingWindow(std::shared_ptr<Media::PixelMap>& pixelMap,
         std::pair<std::shared_ptr<uint8_t[]>, size_t>& bufferInfo);
     void ResetPreloadStartingWindow();
+    void InitPersistentScaledSnapshotParam(bool enabled);
+    bool IsPersistentScaledSnapshotEnabled() { return enablePersistentScaledSnapshot_; };
     std::atomic<bool> freeMultiWindow_ { false };
     std::atomic<bool> isPersistentImageFit_ { false };
     std::atomic<int32_t> persistentImageFit_ = 0;
@@ -954,8 +1029,6 @@ protected:
     /*
      * Window shadow surfaceNode
      */
-    std::shared_ptr<RSSurfaceNode> GetShadowSurfaceNode() const;
-    std::shared_ptr<RSSurfaceNode> GetLeashWinShadowSurfaceNode() const;
     std::shared_ptr<RSUIContext> GetRSShadowContext();
     std::shared_ptr<RSUIContext> GetRSLeashWinShadowContext();
 
@@ -964,9 +1037,21 @@ protected:
     std::atomic<SessionState> state_ = SessionState::STATE_DISCONNECT;
     SessionInfo sessionInfo_;
     std::recursive_mutex sessionInfoMutex_;
+
     mutable std::mutex surfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::shared_ptr<RSSurfaceNode> shadowSurfaceNode_;
+
+    /**
+     * @brief Shadow surface node used during window move-drag.
+     *
+     * This node is lazily initialized when the window is dragged for the first time.
+     * It copies the necessary RSBoundsModifier and RSFrameModifier from the original
+     * surface node to support drag updates.
+     */
+    std::shared_ptr<RSSurfaceNode> moveDragShadowSurfaceNode_;
+    // guarded by surfaceNodeMutex_
+
     mutable std::mutex preloadSnapshotMutex_;
     std::shared_ptr<Media::PixelMap> preloadSnapshot_;
     mutable std::mutex snapshotMutex_;
@@ -1040,6 +1125,7 @@ protected:
     SystemSessionConfig systemConfig_;
     bool needSnapshot_ = false;
     float snapshotScale_ = 0.5;
+    bool enablePersistentScaledSnapshot_ = false;
     sptr<ScenePersistence> scenePersistence_ = nullptr;
 
     /**
@@ -1058,6 +1144,8 @@ protected:
     NotifyRestoreFloatingBallMainWindowFunc restoreFloatingBallMainWindowFunc_;
     GetRsCmdBlockingCountFunc getRsCmdBlockingCountFunc_;
     NotifyRestoreFloatMainWindowFunc restoreFloatMainWindowFunc_;
+    NotifyStopFloatViewFunc stopFloatViewFunc_;
+    NotifyUpdateFloatViewFunc updateFloatViewFunc_;
     sptr<LayoutController> layoutController_ = nullptr;
     void SetClientScale(float scaleX, float scaleY, float pivotX, float pivotY);
     std::atomic<uint32_t> crossPlaneState_ = 0;
@@ -1251,9 +1339,20 @@ private:
     std::atomic<bool> isPendingToBackgroundState_ { false };
     sptr<IPatternDetachCallback> detachCallback_ = nullptr;
 
+    mutable std::mutex leashWinSurfaceNodeMutex_;
     std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode_;
     std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode_;
-    mutable std::mutex leashWinSurfaceNodeMutex_;
+
+    /**
+     * @brief Shadow surface node used during window move-drag for the leash window.
+     *
+     * This node is lazily initialized when the window is dragged for the first time.
+     * Initialization occurs only if `leashWinSurfaceNode_` exists, and copies the
+     * necessary RSBoundsModifier and RSFrameModifier from it to support drag updates.
+     */
+    std::shared_ptr<RSSurfaceNode> moveDragLeashWinShadowSurfaceNode_;
+    // guarded by leashWinSurfaceNodeMutex_
+
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
     bool needBackgroundAfterConnect_ { false };
