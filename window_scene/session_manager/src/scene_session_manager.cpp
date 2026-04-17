@@ -11770,7 +11770,9 @@ WMError SceneSessionManager::GetSessionSnapshotById(int32_t persistentId, Sessio
         snapshot.topAbility.SetModuleName(sessionInfo.moduleName_.c_str());
         snapshot.topAbility.SetAbilityName(sessionInfo.abilityName_.c_str());
         float snapShotScale = sceneSession->GetFloatingScale() > 1.0f ? 1.0f : sceneSession->GetFloatingScale();
-        if (auto oriSnapshot = sceneSession->Snapshot(false, snapShotScale, false)) {
+        Session::SnapshotOptions options;
+        options.scaleParam = snapShotScale;
+        if (auto oriSnapshot = sceneSession->Snapshot(options)) {
             if (sceneSession->GetFloatingScale() > 1.0f) {
                 oriSnapshot->scale(sceneSession->GetFloatingScale(), sceneSession->GetFloatingScale());
             }
@@ -15976,7 +15978,12 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
         isPc : (snapshotNode == SnapshotNodeType::LEASH_NODE) ? false : true;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     if (needSnapshot && !sceneSession->IsPersistentImageFit()) {
-        pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow, disableBlur);
+        Session::SnapshotOptions options;
+        options.runInFfrt = true;
+        options.scaleParam = scaleParam;
+        options.useCurWindow = useCurWindow;
+        options.disableBlur = disableBlur;
+        pixelMap = sceneSession->Snapshot(options);
     }
     if (!pixelMap) {
         TLOGI(WmsLogTag::WMS_MAIN, "get local snapshot pixelmap start");
