@@ -66,6 +66,8 @@ public:
     WMError UnregisterKeyboardDidShowListener(const sptr<IKeyboardDidShowListener>& listener) override;
     WMError RegisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
     WMError UnregisterKeyboardDidHideListener(const sptr<IKeyboardDidHideListener>& listener) override;
+    WMError RegisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
+    WMError UnregisterWindowStatusChangeListener(const sptr<IWindowStatusChangeListener>& listener) override;
     void TriggerBindModalUIExtension() override;
     std::shared_ptr<IDataHandler> GetExtensionDataHandler() const override;
     WSError SendExtensionData(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
@@ -291,11 +293,13 @@ private:
     std::mutex keyboardDidShowListenerMutex_;
     std::mutex keyboardDidHideListenerMutex_;
     std::mutex occupiedAreaChangeListenerMutex_;
+    std::mutex windowStatusChangeListenerMutex_;
     std::vector<sptr<IWindowRectChangeListener>> hostWindowRectChangeListener_;
     std::vector<sptr<IKeyboardDidShowListener>> keyboardDidShowListenerList_;
     std::vector<sptr<IKeyboardDidHideListener>> keyboardDidHideListenerList_;
     std::vector<sptr<IOccupiedAreaChangeListener>> occupiedAreaChangeListenerList_;
     std::vector<sptr<IRectChangeInGlobalDisplayListener>> hostRectChangeInGlobalDisplayListenerList_;
+    std::vector<sptr<IWindowStatusChangeListener>> windowStatusChangeListenerList_;
     WindowStatus hostWindowStatus_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     uint32_t hostStatusBarContentColor_ { 0 };
     int64_t startModalExtensionTimeStamp_ = -1;

@@ -2723,9 +2723,8 @@ WMError WindowExtensionSessionImpl::OnHostWindowStatusChange(AAFwk::Want&& data,
     }
     hostWindowStatus_ = windowStatus;
     TLOGI(WmsLogTag::WMS_UIEXT, "hostWindowStatus: %{public}u", windowStatus);
-    std::lock_guard<std::recursive_mutex> lockListener(windowStatusChangeListenerMutex_);
-    auto windowStatusChangeListeners = GetListeners<IWindowStatusChangeListener>();
-    for (const auto& listener : windowStatusChangeListeners) {
+    std::lock_guard<std::mutex> lockListener(windowStatusChangeListenerMutex_);
+    for (const auto& listener : windowStatusChangeListenerList_) {
         if (listener != nullptr) {
             listener->OnWindowStatusChange(hostWindowStatus_);
         }
@@ -2738,6 +2737,42 @@ WMError WindowExtensionSessionImpl::GetWindowStatus(WindowStatus& windowStatus)
     windowStatus = hostWindowStatus_;
     TLOGD(WmsLogTag::WMS_UIEXT, "windowStatus: %{public}u", windowStatus);
     return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::RegisterWindowStatusChangeListener(
+    const sptr<IWindowStatusChangeListener>& listener)
+{
+    if (listener == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "listener is nullptr");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> lock(windowStatusChangeListenerMutex_);
+    windowStatusChangeListenerList_.push_back(listener);
+    TLOGI(WmsLogTag::WMS_UIEXT, "register windowStatus listener, size: %{public}zu",
+        windowStatusChangeListenerList_.size());
+    return WMError::WM_OK;
+}
+
+WMError WindowExtensionSessionImpl::UnregisterWindowStatusChangeListener(
+    const sptr<IWindowStatusChangeListener>& listener)
+{
+    std::lock_guard<std::mutex> lock(windowStatusChangeListenerMutex_);
+    if (listener == nullptr) {
+        TLOGI(WmsLogTag::WMS_UIEXT, "unregister all windowStatus listeners, size: %{public}zu",
+            windowStatusChangeListenerList_.size());
+        windowStatusChangeListenerList_.clear();
+        return WMError::WM_OK;
+    }
+    for (auto it = windowStatusChangeListenerList_.begin(); it != windowStatusChangeListenerList_.end(); ++it) {
+        if (*it == listener) {
+            windowStatusChangeListenerList_.erase(it);
+            TLOGI(WmsLogTag::WMS_UIEXT, "unregister windowStatus listener, size: %{public}zu",
+                windowStatusChangeListenerList_.size());
+            return WMError::WM_OK;
+        }
+    }
+    TLOGW(WmsLogTag::WMS_UIEXT, "windowStatus listener not found");
+    return WMError::WM_ERROR_INVALID_PARAM;
 }
 
 void WindowExtensionSessionImpl::NotifyOccupiedAreaChange(sptr<OccupiedAreaChangeInfo> info)
