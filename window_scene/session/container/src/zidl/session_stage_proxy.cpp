@@ -1018,8 +1018,7 @@ WSError SessionStageProxy::NotifySubWindowAfterParentWindowSizeChange(Rect rect)
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
-    bool isLayoutFullScreen)
+WSError SessionStageProxy::NotifySubWindowAfterParentWindowStatusChange(WindowMode mode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
     MessageParcel data;
@@ -1032,14 +1031,6 @@ WSError SessionStageProxy::NotifySubWindowAfterParentWindowStatusChange(WindowMo
 
     if (!data.WriteInt32(static_cast<uint32_t>(mode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write mode failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(maximizeMode))) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "write maximizeMode failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(isLayoutFullScreen)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "write isLayoutFullScreen failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

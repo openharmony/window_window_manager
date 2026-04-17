@@ -352,8 +352,6 @@ private:
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimitsVP(napi_env env, napi_callback_info info);
-    WmErrorCode RegisterParentWindowCallback(napi_env env, napi_ref callbackRef, const char* callbackName);
-    void CleanUpCallbackReferences(napi_env env, napi_ref sizeChangeCallbackRef, napi_ref statusChangeCallbackRef);
     napi_value OnAttachToParentWindow(napi_env env, napi_callback_info info);
     napi_value OnDetachLayoutToParentWindow(napi_env env, napi_callback_info info);
 

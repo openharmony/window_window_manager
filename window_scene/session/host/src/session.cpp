@@ -4610,11 +4610,12 @@ void Session::SetSessionRect(const WSRect& rect)
 /** @note @window.layout */
 void Session::SetLastClientParentSize(const WSRect& rect)
 {
-    if (GetLastClientParentSize() == rect) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
+    if (GetSessionRect() == rect) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
         return;
     }
     layoutController_->SetLastClientParentSize(rect);
+    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
 }
 
 /** @note @window.layout */

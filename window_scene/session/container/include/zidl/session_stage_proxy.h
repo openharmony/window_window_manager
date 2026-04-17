@@ -61,8 +61,7 @@ public:
     WSError GetTopNavDestinationName(std::string& topNavDestName) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override;
-    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
-        bool isLayoutFullScreen) override;
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
