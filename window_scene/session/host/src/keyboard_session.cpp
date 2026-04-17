@@ -797,7 +797,7 @@ void KeyboardSession::OpenKeyboardSyncTransaction()
             TLOGNI(WmsLogTag::WMS_KEYBOARD, "Keyboard sync transaction is already open");
             return WSError::WS_OK;
         }
-        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync, screenId:%{public}" PRLu64, session->GetScreenId());
+        TLOGNI(WmsLogTag::WMS_KEYBOARD, "Open keyboard sync, screenId:%{public}" PRIu64, session->GetScreenId());
         session->isKeyboardSyncTransactionOpen_ = true;
         session->syncTransRSUIContext_ = session->GetRSUIContext();
         RSSyncTransactionAdapter::OpenSyncTransaction(session->syncTransRSUIContext_, session->GetEventHandler());
