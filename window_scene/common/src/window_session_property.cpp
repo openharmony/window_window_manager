@@ -1666,6 +1666,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFrameNum(parcel.ReadInt32());
     property->SetPrelaunch(parcel.ReadBool());
     property->SetAppBufferReady(parcel.ReadBool());
+    property->SetFollowParentLayout(parcel.ReadBool());
     property->SetIsCrossProcessWindow(parcel.ReadBool());
     UnmarshallingFvTemplateInfo(parcel, property);
     return property;
