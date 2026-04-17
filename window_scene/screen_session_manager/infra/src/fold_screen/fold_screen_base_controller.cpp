@@ -262,4 +262,9 @@ void FoldScreenBaseController::PowerkeySetScreenActiveRect()
 {
     FoldScreenBasePolicy::GetInstance().PowerkeySetScreenActiveRect();
 }
+
+std::map<FoldDisplayMode, RRect> FoldScreenBaseController::GetScreenActiveModeRectMap() const
+{
+    return FoldScreenBasePolicy::GetInstance().GetScreenActiveModeRectMap();
+}
 } // namespace OHOS::Rosen

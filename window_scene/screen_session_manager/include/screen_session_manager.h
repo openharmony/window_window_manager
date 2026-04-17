@@ -1239,6 +1239,8 @@ private:
     std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;
     std::atomic<bool> onBootAnimation_ = false;
     bool isBoot_ = false;
+    std::mutex screenActiveModeRectMapMutex_;
+    std::map<FoldDisplayMode, RRect> screenActiveModeRectMap_ = {};
 
 private:
     class ScbClientListenerDeathRecipient : public IRemoteObject::DeathRecipient {
