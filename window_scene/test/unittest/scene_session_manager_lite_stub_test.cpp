@@ -361,6 +361,11 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override { return WMError::WM_OK; }
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
         std::unordered_map<uint64_t, DisplayId>& windowDisplayIdMap) override { return WMError::WM_OK; }
+    WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+        std::vector<AppWindowShowingInfo>& windowInfos) override
+    {
+        return WMError::WM_OK;
+    }
 };
 
 class SceneSessionManagerLiteStubTest : public testing::Test {

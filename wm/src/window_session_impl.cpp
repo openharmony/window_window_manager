@@ -2406,8 +2406,17 @@ WMError WindowSessionImpl::InitUIContent(const std::string& contentInfo, void* e
                 uiContent->SetIntentParam(intentParam_, std::move(loadPageCallback_), isIntentColdStart_);
                 intentParam_ = "";
             }
+            {
+                auto routerStack = GetRestoredRouterStack();
+                auto type = GetAceContentInfoType(BackupAndRestoreType::RESOURCESCHEDULE_RECOVERY);
+                if (!routerStack.empty() && UIContentRestore(uiContent.get(), routerStack, storage, type,
+                    isAni) == Ace::UIContentErrorCode::NO_ERRORS) {
+                    TLOGI(WmsLogTag::WMS_LIFE, "[ywj]Restore router stack succeed.");
+                }
+            }
             if (!navDestinationInfo_.empty()) {
                 uiContent->RestoreNavDestinationInfo(navDestinationInfo_, true);
+                TLOGI(WmsLogTag::WMS_LIFE, "[ywj]Restore navDestinationinfo succeed.");
             }
             aceRet = UIContentInitByName(uiContent.get(), contentInfo, storage, isAni);
             navDestinationInfo_ = "";
