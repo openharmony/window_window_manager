@@ -178,6 +178,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDisplayMove(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW):
             return HandleSwitchFreeMultiWindow(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CONFIG_DOCK_AUTO_HIDE):
+            return HandleConfigDockAutoHide(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ):
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
@@ -1012,6 +1014,18 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
     bool enable = data.ReadBool();
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleConfigDockAutoHide(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called!");
+    bool isDockAutoHide = data.ReadBool();
+    WSError errCode = ConfigDockAutoHide(isDockAutoHide);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "reply write failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 

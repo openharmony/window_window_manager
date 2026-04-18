@@ -1021,6 +1021,23 @@ HWTEST_F(SessionStageStubTest, HandleSwitchFreeMultiWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleConfigDockAutoHide
+ * @tc.desc: test function : HandleConfigDockAutoHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleConfigDockAutoHide, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CONFIG_DOCK_AUTO_HIDE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
  * @tc.name: HandleGetUIContentRemoteObj
  * @tc.desc: test function : HandleGetUIContentRemoteObj
  * @tc.type: FUNC

@@ -9632,6 +9632,32 @@ WindowDecoration SceneSession::GetWindowDecoration() const
     return decoration;
 }
 
+WSError SceneSession::ConfigDockAutoHide(bool isDockAutoHide)
+{
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sessionInfo_.abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "abilityInfo is nullptr!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    systemConfig_.isDockAutoHide_ = isDockAutoHide;
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d isDockAutoHide: %{public}d",
+        GetPersistentId(), isDockAutoHide);
+    return sessionStage_->ConfigDockAutoHide(isDockAutoHide);
+}
+
 void SceneSession::SetNeedSyncSessionRect(bool needSync)
 {
     PostTask([weakThis = wptr(this), needSync, where = __func__] {
