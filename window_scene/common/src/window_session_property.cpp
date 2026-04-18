@@ -2619,11 +2619,13 @@ bool WindowSessionProperty::GetForceSplitEnable() const
 
 void WindowSessionProperty::SetHookWindowInfo(const HookWindowInfo& hookWindowInfo)
 {
+    std::lock_guard<std::mutex> lock(hookWindowInfoMutex_);
     hookWindowInfo_ = hookWindowInfo;
 }
 
-const HookWindowInfo& WindowSessionProperty::GetHookWindowInfo() const
+HookWindowInfo WindowSessionProperty::GetHookWindowInfo() const
 {
+    std::lock_guard<std::mutex> lock(hookWindowInfoMutex_);
     return hookWindowInfo_;
 }
 
