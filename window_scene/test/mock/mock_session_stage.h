@@ -52,7 +52,8 @@ public:
     MOCK_METHOD1(GetTopNavDestinationName, WSError(std::string& topNavDestName));
     MOCK_METHOD1(NotifyLayoutFinishAfterWindowModeChange, WSError(WindowMode mode));
     MOCK_METHOD1(NotifySubWindowAfterParentWindowSizeChange, WSError(Rect rect));
-    MOCK_METHOD1(NotifySubWindowAfterParentWindowStatusChange, WSError(WindowMode mode));
+    MOCK_METHOD3(NotifySubWindowAfterParentWindowStatusChange, WSError(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
     MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));
@@ -71,6 +72,7 @@ public:
     MOCK_METHOD2(SetPiPControlEvent, WSError(WsPiPControlType controlType, WsPiPControlStatus status));
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
+    MOCK_METHOD1(ConfigDockAutoHide, WSError(bool isDockAutoHide));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
     MOCK_METHOD1(UpdateAnimationSpeed, void(float speed));
     MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));

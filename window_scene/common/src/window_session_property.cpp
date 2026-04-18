@@ -1539,6 +1539,7 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteInt32(frameNum_) &&
         parcel.WriteBool(isPrelaunch_) &&
         parcel.WriteBool(isAppBufferReady_) &&
+        parcel.WriteBool(isFollowParentLayout_) &&
         parcel.WriteBool(isCrossProcessWindow_) &&
         MarshallingFvTemplateInfo(parcel);
 }
@@ -1665,6 +1666,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFrameNum(parcel.ReadInt32());
     property->SetPrelaunch(parcel.ReadBool());
     property->SetAppBufferReady(parcel.ReadBool());
+    property->SetFollowParentLayout(parcel.ReadBool());
     property->SetIsCrossProcessWindow(parcel.ReadBool());
     UnmarshallingFvTemplateInfo(parcel, property);
     return property;
@@ -2961,6 +2963,16 @@ void WindowSessionProperty::SetAppBufferReady(bool isAppBufferReady)
 bool WindowSessionProperty::IsAppBufferReady() const
 {
     return isAppBufferReady_;
+}
+
+void WindowSessionProperty::SetFollowParentLayout(bool isFollowParentLayout)
+{
+    isFollowParentLayout_ = isFollowParentLayout;
+}
+
+bool WindowSessionProperty::IsFollowParentLayout() const
+{
+    return isFollowParentLayout_;
 }
 
 void WindowSessionProperty::SetIsCrossProcessWindow(bool isCrossProcess)

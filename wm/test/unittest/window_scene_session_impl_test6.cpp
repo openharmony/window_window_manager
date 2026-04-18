@@ -1353,6 +1353,23 @@ HWTEST_F(WindowSceneSessionImplTest6, PostInitSurfaceNode05, TestSize.Level1)
     window->PostInitSurfaceNode(renderSession);
     EXPECT_NE(window->rsUIDirector_, nullptr);
 }
+
+**
+ * @tc.name: ConfigDockAutoHide
+ * @tc.desc: ConfigDockAutoHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest6, ConfigDockAutoHide, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConfigDockAutoHide");
+    option->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    ASSERT_NE(window, nullptr);
+
+    WSError res = window->ConfigDockAutoHide(true);
+    EXPECT_EQ(res, WSError::WS_OK);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

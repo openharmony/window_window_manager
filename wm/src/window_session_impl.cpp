@@ -2811,6 +2811,10 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
             decorVisible = false;
         }
+        decorVisible = updateDecorWhenDockAutoHide(decorVisible);
+        TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, isDockAutoHide:%{public}d, "
+            "isDecorHiddenByApp:%{public}d, isMaximizeInvoked:%{public}d, id:%{public}d", decorVisible,
+            windowSystemConfig_.isDockAutoHide_, isDecorHiddenByApp_, isMaximizeInvoked_, GetPersistentId());
         decorVisible = NeedShowDecorInOtherDisplay(decorVisible);
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
@@ -2846,13 +2850,26 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
                 decorVisible = false;
             }
+            decorVisible = updateDecorWhenDockAutoHide(decorVisible);
             decorVisible = NeedShowDecorInOtherDisplay(decorVisible);
-            TLOGI(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, id: %{public}d", decorVisible, GetPersistentId());
+            TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, isDockAutoHide:%{public}d, "
+                "isDecorHiddenByApp:%{public}d, isMaximizeInvoked:%{public}d, id:%{public}d", decorVisible,
+                windowSystemConfig_.isDockAutoHide_, isDecorHiddenByApp_, isMaximizeInvoked_, GetPersistentId());
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
             uiContent->NotifyWindowMode(mode);
         }
         NotifyModeChange(mode, IsDecorEnable());
     }
+}
+
+bool WindowSessionImpl::updateDecorWhenDockAutoHide(bool decorVisible)
+{
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    if (isPcMode && windowSystemConfig_.isDockAutoHide_ && !isDecorHiddenByApp_ && !isMaximizeInvoked_ && !IsAnco() &&
+        GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        decorVisible = false;
+    }
+    return decorVisible;
 }
 
 bool WindowSessionImpl::NeedShowDecorInOtherDisplay(bool decorVisible)
@@ -4191,6 +4208,7 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetContainerModalTitleVisible(isVisible, true);
+    isDecorHiddenByApp_ = !isVisible;
     handler_->PostTask([weakWindow = wptr(this), isVisible, where = __func__] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
@@ -8425,6 +8443,11 @@ WSError WindowSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::ConfigDockAutoHide(bool isDockAutoHide)
+{
+    return WSError::WS_OK;
+}
+
 WSError WindowSessionImpl::NotifyDialogStateChange(bool isForeground)
 {
     return WSError::WS_OK;
@@ -8602,12 +8625,15 @@ WMError WindowSessionImpl::RestoreFloatViewMainWindow(const std::shared_ptr<AAFw
     return WMError::WM_OK;
 }
 
-WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
+WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode, bool isGetParentStatus, MaximizeMode maximizeMode,
+    bool isLayoutFullScreen)
 {
+    auto maximizeModeValue = isGetParentStatus ? maximizeMode : property_->GetMaximizeMode();
+    auto immersiveModeEnabled = isGetParentStatus ? isLayoutFullScreen : GetImmersiveModeEnabledState();
     auto windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         windowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
-        if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        if (maximizeModeValue == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             windowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -8615,7 +8641,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         if (IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14) { // 14: isolated version
-            windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
+            windowStatus = immersiveModeEnabled ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
                 WindowStatus::WINDOW_STATUS_MAXIMIZE;
         } else {
             windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
@@ -8722,9 +8748,10 @@ void WindowSessionImpl::NotifyParentWindowSizeChange(Rect rect)
 }
 
 /** @note @window.layout */
-void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode)
+void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+    bool isLayoutFullScreen)
 {
-    auto windowStatus = GetWindowStatusInner(mode);
+    auto windowStatus = GetWindowStatusInner(mode, true, maximizeMode, isLayoutFullScreen);
     TLOGI(WmsLogTag::WMS_LAYOUT, " id:%{public}d, windowStatus:%{public}u, windowMode:%{public}u",
         GetPersistentId(), windowStatus,  mode);
     auto lastStatus = lastStatusWhenNotifyParentStatusChange_.load();

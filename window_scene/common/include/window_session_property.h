@@ -336,6 +336,8 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
+    void SetFollowParentLayout(bool isFollowParentLayout);
+    bool IsFollowParentLayout() const;
     void SetIsWindowLimitsForcible(bool isWindowLimitsForcible) { isWindowLimitsForcible_ = isWindowLimitsForcible; }
     bool GetIsWindowLimitsForcible() const { return isWindowLimitsForcible_; }
 
@@ -627,6 +629,7 @@ private:
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
     bool isFullScreenWaterfallMode_ = false;
+    bool isFollowParentLayout_ = false;
 
     /**
      * @brief Whether application-defined window size limits are allowed to exceed system limits.
