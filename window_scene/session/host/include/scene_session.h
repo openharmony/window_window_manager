@@ -538,6 +538,12 @@ public:
     WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
+     * Sub Window zLevel above parent loosened
+     */
+    virtual WSError HideSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+    virtual WSError ShowSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+
+    /*
      * Window Event
      */
     bool CheckParameters(const std::vector<int32_t>& parameters, const int32_t length);

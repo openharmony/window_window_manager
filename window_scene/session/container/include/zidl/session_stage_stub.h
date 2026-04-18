@@ -128,6 +128,8 @@ private:
     int HandleSendFvActionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSyncFvWindowInfo(MessageParcel& data, MessageParcel& reply);
     int HandleSyncFvLimits(MessageParcel& data, MessageParcel& reply);
+    int HandleHideSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply);
+    int HandleShowSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

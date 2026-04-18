@@ -988,6 +988,10 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
         TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d new parent window type invalid", subWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
+    if (IsZLevelAboveParentLoosened() && !WindowHelper::IsMainWindow(newWindowType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d new parent window type invalid", subWindowId);
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
     return SetParentWindowInner(oldParentWindowId, newParentWindow);
 }
 
@@ -8656,6 +8660,20 @@ void WindowSceneSessionImpl::ModifySidebarBlurProperty(bool isDark, SidebarBlurT
 bool WindowSceneSessionImpl::IsInFreeWindowMode() const
 {
     return IsPcOrPadFreeMultiWindowMode();
+}
+
+WSError WindowSceneSessionImpl::HideSubWindowZLevelAboveParentLoosened()
+{
+    TLOGI(WmsLogTag::WMS_SUB, "persistentId: %{public}d", GetPersistentId());
+    Hide(0, false, false, true);
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::ShowSubWindowZLevelAboveParentLoosened()
+{
+    TLOGI(WmsLogTag::WMS_SUB, "persistentId: %{public}d", GetPersistentId());
+    Show(0, false, true);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
