@@ -10073,7 +10073,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
 void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
     std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles)
 {
-	std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr) {
             TLOGE(WmsLogTag::WMS_MAIN, "scene session is nullptr, wid=%{public}d.", persistentId);
@@ -10088,7 +10088,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         }
         auto sessionState = GetSessionStateForPrivacy(sceneSession);
         bool isForeground = sessionState == SessionState::STATE_FOREGROUND ||
-                            sceneState() == SessionState::STATE_ACTIVE;
+                            sessionState == SessionState::STATE_ACTIVE;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "found privacy win=[%{public}d, %{public}s], display=%{public}" PRIu64,
