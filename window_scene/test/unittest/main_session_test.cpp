@@ -1474,6 +1474,39 @@ HWTEST_F(MainSessionTest, SetForceSplitEnable04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetForceSplitEnable05
+ * @tc.desc: Test SetForceSplitEnable when sessionStage SetForceSplitEnable fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainSessionTest, SetForceSplitEnable05, TestSize.Level1)
+{
+    SessionInfo info;
+    info.bundleName_ = "SetForceSplitEnable05";
+    info.abilityName_ = "SetForceSplitEnable05";
+    sptr<MainSession> session = sptr<MainSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(session, nullptr);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    session->SetSessionProperty(property);
+
+    auto sessionStageMock = sptr<SessionStageMocker>::MakeSptr();
+    session->sessionStage_ = sessionStageMock;
+
+    SelectMode receivedSelectMode = SelectMode::WIDE_MODE;
+    session->RegisterSetSelectModeCallback([&receivedSelectMode](SelectMode selectMode) {
+        receivedSelectMode = selectMode;
+    });
+
+    // Mock sessionStage SetForceSplitEnable to return error
+    EXPECT_CALL(*sessionStageMock, SetForceSplitEnable(true, false, SelectMode::WIDE_MODE))
+        .WillOnce(::testing::Return(WSError::WS_ERROR_IPC_FAILED));
+
+    auto ret = session->SetForceSplitEnable(true, false, SelectMode::WIDE_MODE);
+    EXPECT_EQ(receivedSelectMode, SelectMode::WIDE_MODE);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+}
+
+/**
  * @tc.name: RegisterSetSelectModeCallback01
  * @tc.desc: Test RegisterSetSelectModeCallback
  * @tc.type: FUNC
