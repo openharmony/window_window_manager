@@ -2608,6 +2608,18 @@ WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& win
 
 void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ConfigDockAutoHide: isDockAutoHide %{public}d", isDockAutoHide);
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        if (isPcMode) {
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession == nullptr || !WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                    continue;
+                }
+                sceneSession->ConfigDockAutoHide(isDockAutoHide);
+            }
+        }
+    }
     auto task = [this, isDockAutoHide] {
         systemConfig_.isDockAutoHide_ = isDockAutoHide;
     };

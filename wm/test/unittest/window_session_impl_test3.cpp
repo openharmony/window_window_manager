@@ -1674,6 +1674,63 @@ HWTEST_F(WindowSessionImplTest3, NeedShowDecorInOtherDisplay, Function | SmallTe
 }
 
 /**
+ * @tc.name: updateDecorWhenDockAutoHide
+ * @tc.desc: updateDecorWhenDockAutoHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest3, updateDecorWhenDockAutoHide, Function | SmallTest | Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("updateDecorWhenDockAutoHide");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(PERSISTENT_ID_ONE);
+    ASSERT_NE(window, nullptr);
+
+    window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+    bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    window->windowSystemConfig_.isDockAutoHide_ = true;
+    window->isDecorHiddenByApp_ = false;
+    window->isMaximizeInvoked_ = false;
+    bool decorVisible = true;
+    decorVisible = window->updateDecorWhenDockAutoHide(decorVisible);
+    if (isPcMode) {
+        EXPECT_FALSE(decorVisible);
+    } else {
+        EXPECT_TRUE(decorVisible);
+    }
+
+    window->windowSystemConfig_.isDockAutoHide_ = true;
+    window->isDecorHiddenByApp_ = true;
+    window->isMaximizeInvoked_ = false;
+    decorVisible = true;
+    decorVisible = window->updateDecorWhenDockAutoHide(decorVisible);
+    EXPECT_TRUE(decorVisible);
+
+    window->windowSystemConfig_.isDockAutoHide_ = true;
+    window->isDecorHiddenByApp_ = false;
+    window->isMaximizeInvoked_ = true;
+    decorVisible = true;
+    decorVisible = window->updateDecorWhenDockAutoHide(decorVisible);
+    EXPECT_TRUE(decorVisible);
+
+    window->windowSystemConfig_.isDockAutoHide_ = false;
+    window->isDecorHiddenByApp_ = false;
+    window->isMaximizeInvoked_ = true;
+    decorVisible = true;
+    decorVisible = window->updateDecorWhenDockAutoHide(decorVisible);
+    EXPECT_TRUE(decorVisible);
+
+    window->windowSystemConfig_.isDockAutoHide_ = false;
+    window->isDecorHiddenByApp_ = true;
+    window->isMaximizeInvoked_ = false;
+    decorVisible = true;
+    decorVisible = window->updateDecorWhenDockAutoHide(decorVisible);
+    EXPECT_TRUE(decorVisible);
+    window->Destroy();
+}
+
+/**
  * @tc.name: NotifyPrepareCloseFloatView
  * @tc.desc: NotifyPrepareCloseFloatView
  * @tc.type: FUNC
