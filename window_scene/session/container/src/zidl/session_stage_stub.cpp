@@ -284,6 +284,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSyncFvWindowInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_LIMITS):
             return HandleSyncFvLimits(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HIDE_SUBWINDOW_ZLEVEL_ABOVE_PARENT_LOOSENED):
+            return HandleHideSubWindowZLevelAboveParentLoosened(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SHOW_SUBWINDOW_ZLEVEL_ABOVE_PARENT_LOOSENED):
+            return HandleShowSubWindowZLevelAboveParentLoosened(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1668,6 +1672,20 @@ int SessionStageStub::HandleNotifyParentLifecycleEvent(MessageParcel& data, Mess
         TLOGE(WmsLogTag::WMS_LIFE, "NotifyParentLifecycleEvent failed, ret: %{public}d", ret);
         return static_cast<int32_t>(ret);
     }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleHideSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "in");
+    HideSubWindowZLevelAboveParentLoosened();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleShowSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "in");
+    ShowSubWindowZLevelAboveParentLoosened();
     return ERR_NONE;
 }
 //
