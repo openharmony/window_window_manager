@@ -922,6 +922,7 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowMan
         }
         errCode = GetDensityInfoInner(windowId, *densityInfoInner);
         if (errCode != WindowManager_ErrorCode::OK) {
+            *info = nullptr;
             return;
         }
         *info = densityInfoInner.release();
