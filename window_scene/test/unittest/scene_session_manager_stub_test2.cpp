@@ -406,46 +406,6 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleGetRootUIContentRemoteObj01, TestSi
 }
 
 /**
- * @tc.name: HandleCreateUIEffectController
- * @tc.desc: test HandleCreateUIEffectController
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest2, HandleCreateUIEffectController, Function | SmallTest | Level2)
-{
-    MockMessageParcel::ClearAllErrorFlag();
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(
-        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_CREATE_UI_EFFECT_CONTROLLER);
-    sptr<IUIEffectControllerClient> client = sptr<UIEffectControllerClient>::MakeSptr();
-    stub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(stub_->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    data.WriteRemoteObject(client->AsObject());
-    stub_->HandleCreateUIEffectController(data, reply);
-    sptr<MockSceneSessionManagerStub> stubMock = sptr<MockSceneSessionManagerStub>::MakeSptr();
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(Return(static_cast<WMError>(-1)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(Return(WMError::WM_ERROR_NOT_SYSTEM_APP)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_NONE);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<2>(-1),
-        Return(WMError::WM_OK)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<1>(nullptr),
-        SetArgReferee<2>(0), Return(WMError::WM_OK)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_INVALID_DATA);
-    sptr<UIEffectController> server = sptr<UIEffectController>::MakeSptr(0, nullptr, nullptr);
-    EXPECT_CALL(*stubMock, CreateUIEffectController(_, _, _)).WillOnce(DoAll(SetArgReferee<1>(server),
-        SetArgReferee<2>(0), Return(WMError::WM_OK)));
-    data.RewindRead(0);
-    EXPECT_EQ(stubMock->HandleCreateUIEffectController(data, reply), ERR_NONE);
-}
-
-/**
  * @tc.name: HandleUpdateOutline
  * @tc.desc: test HandleUpdateOutline
  * @tc.type: FUNC
@@ -506,6 +466,34 @@ HWTEST_F(SceneSessionManagerStubTest2, HandleUpdateOutline02, TestSize.Level1)
     MockMessageParcel::SetWriteInt32ErrorFlag(false);
     auto ret = stub_->HandleUpdateOutline(data, reply);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: HandleGetFloatViewLimits
+ * @tc.desc: test HandleGetFloatViewLimits
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerStubTest2, HandleGetFloatViewLimits, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    
+    // WriteInt32 failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    int res = stub_->HandleGetFloatViewLimits(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    
+    // WriteParcelable failed
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteParcelableErrorFlag(true);
+    res = stub_->HandleGetFloatViewLimits(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+    
+    // success
+    MockMessageParcel::ClearAllErrorFlag();
+    res = stub_->HandleGetFloatViewLimits(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

@@ -54,7 +54,8 @@ static sptr<Window> CreateWindowWithSession(sptr<WindowOption>& option,
     }
 
     windowSessionImpl->SetWindowType(option->GetWindowType());
-    WMError error = windowSessionImpl->Create(context, iSession, identityToken, isModuleAbilityHookEnd);
+    WMError error = windowSessionImpl->Create(context, iSession, identityToken, isModuleAbilityHookEnd,
+        option->IsBlockSubwindow());
     if (error != WMError::WM_OK) {
         errCode = error;
         WLOGFE("error: %{public}u", static_cast<uint32_t>(errCode));
@@ -217,6 +218,48 @@ sptr<Window> Window::CreateFb(sptr<WindowOption>& option, const FloatingBallTemp
         return nullptr;
     }
     return windowSessionImpl;
+}
+
+sptr<Window> Window::CreateFv(sptr<WindowOption>& option, const FloatViewTemplateInfo& fvTemplateInfo,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, WMError& errCode)
+{
+    if (!SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return nullptr;
+    }
+    if (!option) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "option is null.");
+        return nullptr;
+    }
+    if (option->GetWindowName().empty()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "the window name of option is empty.");
+        return nullptr;
+    }
+    if (!WindowHelper::IsFvWindow(option->GetWindowType())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "window type is not fv window.");
+        return nullptr;
+    }
+    sptr<WindowSessionImpl> windowSessionImpl = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    if (windowSessionImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "malloc windowSessionImpl failed.");
+        return nullptr;
+    }
+    windowSessionImpl->GetProperty()->SetFvTemplateInfo(fvTemplateInfo);
+    WMError error = windowSessionImpl->Create(context, nullptr);
+    if (error != WMError::WM_OK) {
+        errCode = error;
+        TLOGW(WmsLogTag::WMS_SYSTEM, "Create fv window, error: %{public}u", static_cast<uint32_t>(errCode));
+        return nullptr;
+    }
+    return windowSessionImpl;
+}
+
+bool Window::IsAnyWindowMatchState(const WindowState& state)
+{
+    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return WindowSessionImpl::IsAnyWindowMatchState(state);
+    } else {
+        return false;
+    }
 }
 
 sptr<Window> Window::Find(const std::string& windowName)
