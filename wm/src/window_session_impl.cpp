@@ -2041,7 +2041,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         for (const auto& [type, avoidArea] : avoidAreas) {
             TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
                 type, avoidArea.ToString().c_str());
-            if (!GetFloatNavigationAvoidAreaEnabled()) {
+            if (!GetFloatNavigationAvoidAreaEnabled() && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
                 return;
             }
             if ((lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() && type != AvoidAreaType::TYPE_CUTOUT) ||
@@ -6698,7 +6698,7 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
         if (!window) {
             return;
         }
-        if (!window->GetFloatNavigationAvoidAreaEnabled()) {
+        if (!window->GetFloatNavigationAvoidAreaEnabled() && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
             return;
         }
         if ((window->lastAvoidAreaMap_.find(type) == window->lastAvoidAreaMap_.end() &&
