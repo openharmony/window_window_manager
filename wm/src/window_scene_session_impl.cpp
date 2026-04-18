@@ -3258,6 +3258,10 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!GetFloatNavigationAvoidAreaEnabled() && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
+        return WMError::WM_DO_NOTHING;
+    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
@@ -3277,6 +3281,10 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaTy
     }
     if (type == AvoidAreaType::TYPE_KEYBOARD) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (!GetFloatNavigationAvoidAreaEnabled() && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
+        return WMError::WM_DO_NOTHING;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);

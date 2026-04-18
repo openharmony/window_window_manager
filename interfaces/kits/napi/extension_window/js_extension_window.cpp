@@ -1048,7 +1048,6 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
     }
 }
 
-// tanhong
 napi_value JsWindow::OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
