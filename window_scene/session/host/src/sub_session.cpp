@@ -588,4 +588,38 @@ int32_t SubSession::GetSubWindowZLevel() const
     TLOGI(WmsLogTag::WMS_HIERARCHY, "zLevel: %{public}d", zLevel);
     return zLevel;
 }
+
+WSError SubSession::HideSubWindowZLevelAboveParentLoosened()
+{
+    PostTask([weakThis = wptr(this), funcName = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: session is null", funcName);
+            return;
+        }
+        if (session->sessionStage_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: sessionStage_ is nullptr", funcName);
+            return;
+        }
+        session->sessionStage_->HideSubWindowZLevelAboveParentLoosened();
+        }, __func__);
+    return WSError::WS_OK;
+}
+
+WSError SubSession::ShowSubWindowZLevelAboveParentLoosened()
+{
+    PostTask([weakThis = wptr(this), funcName = __func__]() {
+        auto session = weakThis.promote();
+        if (!session) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: session is null", funcName);
+            return;
+        }
+        if (session->sessionStage_ == nullptr) {
+            TLOGNE(WmsLogTag::WMS_SUB, "%{public}s: sessionStage_ is nullptr", funcName);
+            return;
+        }
+        session->sessionStage_->ShowSubWindowZLevelAboveParentLoosened();
+        }, __func__);
+    return WSError::WS_OK;
+}
 } // namespace OHOS::Rosen
