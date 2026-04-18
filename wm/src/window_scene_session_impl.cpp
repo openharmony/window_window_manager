@@ -4305,6 +4305,14 @@ bool WindowSceneSessionImpl::CheckWaterfallResidentState(WaterfallResidentState 
     return true;
 }
 
+bool WindowSceneSessionImpl::CheckAcrossDisplayPresentation(AcrossDisplayPresentation state) const
+{
+    if (WindowHelper::IsSubWindow(GetType())) {
+        return state == AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING;
+    }
+    return true;
+}
+
 void WindowSceneSessionImpl::ApplyMaximizePresentation(MaximizePresentation presentation)
 {
     titleHoverShowEnabled_ = true;
@@ -4333,7 +4341,9 @@ void WindowSceneSessionImpl::ApplyMaximizePresentation(MaximizePresentation pres
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, WaterfallResidentState state)
 {
-    return MaximizeWithOptions(presentation, state, { -1, -1 });
+    // Convert WaterfallResidentState to AcrossDisplayPresentation
+    auto acrossDisplay = static_cast<AcrossDisplayPresentation>(static_cast<uint32_t>(state));
+    return MaximizeWithOptions(presentation, acrossDisplay, { -1, -1 });
 }
 
 WMError WindowSceneSessionImpl::ValidateSnapshotAnimationConfig(const SnapshotAnimationConfig& config)
@@ -4352,7 +4362,7 @@ WMError WindowSceneSessionImpl::ValidateSnapshotAnimationConfig(const SnapshotAn
 }
 
 WMError WindowSceneSessionImpl::MaximizeWithOptions(MaximizePresentation presentation,
-    WaterfallResidentState state, SnapshotAnimationConfig snapshotAnimationConfig)
+    AcrossDisplayPresentation state, SnapshotAnimationConfig snapshotAnimationConfig)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, presentation: %{public}u, state: %{public}u, "
         "duration: %{public}" PRId64 ", delay: %{public}" PRId64, GetPersistentId(),
@@ -4367,8 +4377,8 @@ WMError WindowSceneSessionImpl::MaximizeWithOptions(MaximizePresentation present
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!CheckWaterfallResidentState(state)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid waterfallResidentState. windowId: %{public}u, state: %{public}u",
+    if (!CheckAcrossDisplayPresentation(state)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid acrossDisplayPresentation. windowId: %{public}u, state: %{public}u",
               GetWindowId(), static_cast<uint32_t>(state));
         return WMError::WM_ERROR_INVALID_CALLING;
     }

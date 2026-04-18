@@ -232,7 +232,7 @@ public:
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Maximize(MaximizePresentation presentation, WaterfallResidentState state) override;
-    WMError MaximizeWithOptions(MaximizePresentation presentation, WaterfallResidentState state,
+    WMError MaximizeWithOptions(MaximizePresentation presentation, AcrossDisplayPresentation state,
         SnapshotAnimationConfig snapshotAnimationConfig) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
@@ -601,6 +601,7 @@ private:
      * PC Window Layout
      */
     bool CheckWaterfallResidentState(WaterfallResidentState state) const;
+    bool CheckAcrossDisplayPresentation(AcrossDisplayPresentation state) const;
     void ApplyMaximizePresentation(MaximizePresentation presentation);
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
     bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);

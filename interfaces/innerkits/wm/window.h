@@ -2859,15 +2859,15 @@ public:
     }
 
     /**
-     * @brief Maximize window with presentation, waterfall resident state, and snapshot animation config.
+     * @brief Maximize window with presentation, across-display presentation, and snapshot animation config.
      *
      * @param presentation The presentation mode used for window layout when maximizing.
-     * @param waterfallState The waterfall resident state to apply when maximizing.
+     * @param acrossDisplayPresentation The across-display presentation to apply when maximizing.
      * @param snapshotAnimationConfig The snapshot animation configuration.
      * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
     virtual WMError MaximizeWithOptions(MaximizePresentation presentation,
-        WaterfallResidentState waterfallState, SnapshotAnimationConfig snapshotAnimationConfig)
+        AcrossDisplayPresentation acrossDisplayPresentation, SnapshotAnimationConfig snapshotAnimationConfig)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
