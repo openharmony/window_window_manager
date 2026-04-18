@@ -287,7 +287,7 @@ public:
     void SetForceSplitEnable(bool isForceSplitEnabled);
     bool GetForceSplitEnable() const;
     void SetHookWindowInfo(const HookWindowInfo& hookWindowInfo);
-    const HookWindowInfo& GetHookWindowInfo() const;
+    HookWindowInfo GetHookWindowInfo() const;
     void SetRotationLocked(bool locked);
     bool GetRotationLocked() const;
 
@@ -671,6 +671,7 @@ private:
     mutable std::mutex shadowsInfoMutex_;
     mutable std::mutex globalDisplayRectMutex_;
     Rect globalDisplayRect_ { 0, 0, 0, 0 };
+    mutable std::mutex hookWindowInfoMutex_;
     HookWindowInfo hookWindowInfo_;
     bool isPcAppInpadCompatibleMode_ = false;
     bool isPcAppInpadSpecificSystemBarInvisible_ = false;
