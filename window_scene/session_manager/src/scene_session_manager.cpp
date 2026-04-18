@@ -10132,9 +10132,9 @@ SessionState SceneSessionManager::GetSessionStateForPrivacy(const sptr<SceneSess
             session->GetWindowId(), session->GetWindowName().c_str(), state, winType, parent->GetWindowId());
     }
     if (WindowHelper::IsSubWindow(winType) || WindowHelper::IsDialogWindow(winType)) {
-        auto parent = GetSceneSessionNoLock(session->GetParentPersistentId());
+        auto parent = GetSceneSessionNoLock(session->GetSessionProperty()->GetParentPersistentId());
         while (parent != nullptr && parent->IsSessionForeground()) {
-            parent = GetSceneSessionNoLock(parent->GetParentPersistentId());
+            parent = GetSceneSessionNoLock(parent->GetSessionProperty()->GetParentPersistentId());
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], parentId=%{public}d",
                 session->GetWindowId(), session->GetWindowName().c_str(), parent->GetWindowId());
         }
