@@ -431,17 +431,22 @@ WindowManager_ErrorCode RegisterDensityInfoChangeCallbackInner(
 WindowManager_ErrorCode UnregisterDensityInfoChangeCallbackInner(int32_t windowId, uintptr_t callbackId)
 {
     OHOS::sptr<OHDensityInfoChangeListener> listener = nullptr;
+    bool hasRegisteredListener = false;
     {
         std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
-        if (!FindDensityInfoChangeListener(windowId, callbackId, listener)) {
-            return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
-        }
+        hasRegisteredListener = FindDensityInfoChangeListener(windowId, callbackId, listener);
     }
     auto window = Window::GetWindowWithId(windowId);
     if (window == nullptr) {
+        if (!hasRegisteredListener) {
+            return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+        }
         std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
         EraseDensityInfoChangeListener(windowId, callbackId);
         return WindowManager_ErrorCode::OK;
+    }
+    if (!hasRegisteredListener) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     WMError retSystem = window->UnregisterSystemDensityChangeListener(listener);
     if (retSystem != WMError::WM_OK) {
