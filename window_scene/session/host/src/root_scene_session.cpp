@@ -193,7 +193,7 @@ AvoidArea RootSceneSession::GetAvoidAreaByTypeInner(AvoidAreaType type, bool ign
             }
             case AvoidAreaType::TYPE_FLOAT_NAVIGATION: {
                 session->GetFloatNavigationAvoidAreaForRoot(sessionRect, avoidArea, ignoreVisibility);
-                return session->GetFloatNavigationAvoidAreaEnabled() ? avoidArea : AvoidArea();
+                return avoidArea;
             }
             default: {
                 TLOGNE(WmsLogTag::WMS_IMMS, "cannot find type %{public}u, id %{public}d",

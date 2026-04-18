@@ -434,7 +434,7 @@ HWTEST_F(WindowSceneSessionImplImmersiveTest, UpdateSystemBarProperties, TestSiz
 HWTEST_F(WindowSceneSessionImplImmersiveTest, SetFloatNavigationAvoidAreaEnabled, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
     window->property_ = sptr<WindowSessionProperty>::MakeSptr();
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };

@@ -3691,9 +3691,6 @@ AvoidArea SceneSession::GetAvoidAreaByType(AvoidAreaType type, const WSRect& rec
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
             return {};
         }
-        if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
-            return {};
-        }
         return session->GetAvoidAreaByTypeInner(type, rect);
     }, __func__);
 }
@@ -3704,9 +3701,6 @@ AvoidArea SceneSession::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType type,
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is null", where);
-            return {};
-        }
-        if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
             return {};
         }
         return session->GetAvoidAreaByTypeInner(type, rect, true);
@@ -3731,9 +3725,6 @@ WSError SceneSession::GetAllAvoidAreas(std::map<AvoidAreaType, AvoidArea>& avoid
         for (T avoidType = static_cast<T>(AvoidAreaType::TYPE_START);
             avoidType < static_cast<T>(AvoidAreaType::TYPE_END); avoidType++) {
             auto type = static_cast<AvoidAreaType>(avoidType);
-            if (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && !session->GetFloatNavigationAvoidAreaEnabled()) {
-                continue;
-            }
             auto area = session->GetAvoidAreaByTypeInner(type);
             // code below aims to check if ai bar avoid area reaches window rect's bottom
             // it should not be removed until unexpected window rect update issues were solved
@@ -6873,10 +6864,20 @@ bool SceneSession::GetEnableGestureBackHadSet()
     return isEnableGestureBackHadSet_;
 }
 
-WMError SceneSession::SetFloatNavigationAvoidAreaEnabled(bool isEnabled)
+WMError SceneSession::UpdateNavigationAvoidArea(bool isEnabled)
 {
-    isFloatNavigationAvoidAreaEnabled_ = isEnabled;
-    return WMError::WM_OK;
+    return PostSyncTask([weakThis = wptr(this), isEnabled, where = __func__] {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s session is nullptr", where);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        if (isEnabled) {
+            TLOGI(WMS_IMMS, "id: %{public}d, first", GetPersistentId());
+            HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_FLOAT_NAVIGATION);
+        }
+        return WMError::WM_OK;
+    }, __func__);
 }
 
 void SceneSession::UpdateFullScreenWaterfallMode(bool isWaterfallMode)

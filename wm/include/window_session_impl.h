@@ -594,6 +594,8 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
+    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
 
     /*
      * Window Property
@@ -986,6 +988,8 @@ protected:
     uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
     SystemBarSettingFlag systemBarSettingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
+    std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
+    std::atomic<bool> isFirstSetFloatNavigationAvoidAreaEnabled_ = true;
 
     /*
      * PC Fold Screen
