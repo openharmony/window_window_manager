@@ -77,6 +77,12 @@ protected:
      */
     NotifySetParentSessionFunc setParentSessionFunc_;
 
+    /*
+     * Sub Window zLevel above parent loosened
+     */
+    WSError HideSubWindowZLevelAboveParentLoosened() override;
+    WSError ShowSubWindowZLevelAboveParentLoosened() override;
+
 private:
     /*
      * Window Layout

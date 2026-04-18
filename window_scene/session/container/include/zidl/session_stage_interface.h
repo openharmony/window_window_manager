@@ -137,7 +137,8 @@ public:
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
     virtual WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) = 0;
-    virtual WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) = 0;
+    virtual WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen) = 0;
     virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; };
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyLifecyclePausedStatus() = 0;
@@ -213,6 +214,7 @@ public:
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
+    virtual WSError ConfigDockAutoHide(bool isDockAutoHide) = 0;
     virtual WSError PcAppInPadNormalClose()
     {
         return WSError::WS_OK;
@@ -422,6 +424,24 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SyncFvLimits(const FloatViewLimits& limits) = 0;
+
+    /**
+     * @brief Hide SubWindow whose zLevel above parent loosened.
+     *
+     * Hide SubWindow whose zLevel above parent loosened.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError HideSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+
+    /**
+     * @brief Show SubWindow whose zLevel above parent loosened.
+     *
+     * Show SubWindow whose zLevel above parent loosened.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError ShowSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
