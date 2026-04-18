@@ -211,8 +211,12 @@ WSError SubSession::ProcessPointDownSession(int32_t posX, int32_t posY)
     if (sessionProperty && sessionProperty->GetRaiseEnabled()) {
         if (!isModal) {
             RaiseToAppTopForPointDown();
-        } else if (auto mainSession = GetMainSession()) {
-            mainSession->NotifyClick(false);
+        } else if (auto mainSession = GetMainSessionOrLoosenedSession()) {
+            if (mainSession->IsLoosenedWithFreeMultiMode()) {
+                mainSession->RaiseToAppTopForPointDown();
+            } else {
+                mainSession->NotifyClick(false);
+            }
         }
     }
     auto ret = SceneSession::ProcessPointDownSession(posX, posY);
@@ -269,12 +273,11 @@ bool SubSession::CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEve
     return true;
 }
 
-void SubSession::RectCheck(uint32_t curWidth, uint32_t curHeight)
+void SubSession::RectCheck(float curWidth, float curHeight, const ScreenMetrics& screenMetrics)
 {
     uint32_t minWidth = GetSystemConfig().miniWidthOfSubWindow_;
     uint32_t minHeight = GetSystemConfig().miniHeightOfSubWindow_;
-    uint32_t maxFloatingWindowSize = GetSystemConfig().maxFloatingWindowSize_;
-    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, maxFloatingWindowSize);
+    RectSizeCheckProcess(curWidth, curHeight, minWidth, minHeight, screenMetrics);
 }
 
 bool SubSession::IsTopmost() const
@@ -302,6 +305,9 @@ bool SubSession::IsApplicationModal() const
 
 bool SubSession::IsVisibleForeground() const
 {
+    if (IsLoosenedWithFreeMultiMode()) {
+        return Session::IsVisibleForeground();
+    }
     const auto& mainOrFloatSession = GetMainOrFloatSession();
     if (mainOrFloatSession) {
         return mainOrFloatSession->IsVisibleForeground() && Session::IsVisibleForeground();
@@ -311,6 +317,9 @@ bool SubSession::IsVisibleForeground() const
 
 bool SubSession::IsVisibleNotBackground() const
 {
+    if (IsLoosenedWithFreeMultiMode()) {
+        return Session::IsVisibleNotBackground();
+    }
     const auto& mainOrFloatSession = GetMainOrFloatSession();
     if (mainOrFloatSession) {
         return mainOrFloatSession->IsVisibleNotBackground() && Session::IsVisibleNotBackground();
@@ -372,7 +381,7 @@ WMError SubSession::NotifySetParentSession(int32_t oldParentWindowId, int32_t ne
 
 void SubSession::HandleCrossMoveToSurfaceNode(WSRect& globalRect)
 {
-    auto movedSurfaceNode = GetSurfaceNodeForMoveDrag();
+    auto movedSurfaceNode = GetMoveDragTargetSurfaceNode();
     if (movedSurfaceNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
@@ -440,7 +449,7 @@ std::set<uint64_t> SubSession::GetNewDisplayIdsDuringMoveTo(WSRect& newRect)
 
 void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayId)
 {
-    auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
+    auto currSurfacedNode = GetMoveDragTargetSurfaceNode();
     if (currSurfacedNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
@@ -482,7 +491,7 @@ void SubSession::AddSurfaceNodeToScreen(DisplayId draggingOrMovingParentDisplayI
 
 void SubSession::RemoveSurfaceNodeFromScreen()
 {
-    auto currSurfacedNode = GetSurfaceNodeForMoveDrag();
+    auto currSurfacedNode = GetMoveDragTargetSurfaceNode();
     if (currSurfacedNode == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "SurfaceNode is null");
         return;
@@ -514,7 +523,7 @@ void SubSession::RemoveSurfaceNodeFromScreen()
 
 void SubSession::HandleCrossSurfaceNodeByWindowAnchor(SizeChangeReason reason, DisplayId displayId)
 {
-    auto surfaceNode = GetSurfaceNodeForMoveDrag();
+    auto surfaceNode = GetMoveDragTargetSurfaceNode();
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, SurfaceNode is null", GetPersistentId());
         return;

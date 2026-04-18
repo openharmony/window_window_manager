@@ -93,6 +93,7 @@ enum class ApiWindowType : uint32_t {
     TYPE_DYNAMIC,
     TYPE_MUTISCREEN_COLLABORATION,
     TYPE_FB,
+    TYPE_FV,
     TYPE_END
 };
 
@@ -267,6 +268,7 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     napi_value WindowOcclusionStateInit(napi_env env);
     napi_value ColorSpaceInit(napi_env env);
     napi_value OrientationInit(napi_env env);
+    napi_value OrientationExecutionResultInit(napi_env env);
     napi_value WindowStageEventTypeInit(napi_env env);
     napi_value WindowStageLifecycleEventTypeInit(napi_env env);
     napi_value WindowAnchorInit(napi_env env);

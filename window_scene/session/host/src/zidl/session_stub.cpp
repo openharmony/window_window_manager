@@ -153,6 +153,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetTargetOrientationConfigInfo(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_CONVERT_ORIENTATION_AND_ROTATION):
             return HandleConvertOrientationAndRotation(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_PREFERRED_ORIENTATION_WITH_RESULT):
+            return HandleSetPreferredOrientationWithResult(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_ASPECT_RATIO):
             return HandleSetAspectRatio(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_CONTENT_ASPECT_RATIO):
@@ -257,6 +259,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetAppForceLandscapeConfigEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO):
             return HandleGetAppHookWindowInfoFromServer(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_SELECT_MODE):
+            return HandleGetSelectMode(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_WINDOW_STATUS_AFTER_SHOW_WINDOW):
             return HandleNotifyWindowStatusDidChangeAfterShowWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DIALOG_SESSION_BACKGESTURE_ENABLE):
@@ -273,6 +277,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleRequestFocus(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FLOAT_NAVIGATION_AVOID_AREA_ENABLED):
+            return HandleSetFloatNavigationAvoidAreaEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
             return HandleNotifySubModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_MODAL_TYPE_CHANGE):
@@ -349,8 +355,12 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSetFrameRectForPartialZoomIn(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_IS_FULL_SCREEN_IN_FORCE_SPLIT):
             return HandleNotifyIsFullScreenInForceSplitMode(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_SPLIT_RATIO_CHANGED):
+            return HandleNotifySplitRatioChanged(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE):
             return HandleNotifyCompatibleModeChange(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PAGE_ENABLE):
+            return HandleNotifyPageEnable(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
             return HandleRestartApp(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT):
@@ -359,6 +369,12 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleRemovePrelaunchStartingWindow(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RECOVER_WINDOW_EFFECT):
             return HandleRecoverWindowEffect(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_FLOAT_VIEW_PREPARE_CLOSE):
+            return HandleStopFloatView(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOAT_VIEW):
+            return HandleUpdateFloatView(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTORE_FLOAT_VIEW_MAIN_WINDOW):
+            return HandleRestoreFloatViewMainWindow(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -452,6 +468,35 @@ int SessionStub::HandleHide(MessageParcel& data, MessageParcel& reply)
     return ERR_NONE;
 }
 
+int WriteCombinedCompatibleConfig(MessageParcel& reply, sptr<WindowSessionProperty> property)
+{
+    if (!property) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "property is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    auto combinedCompatibleConfig = property->GetCombinedCompatibleConfig();
+    auto combinedSize = combinedCompatibleConfig.size();
+    if (combinedSize > 0 && combinedSize <= COMBINED_COMPATIBLE_CONFIG_MAX_SIZE) {
+        if (!reply.WriteUint32(static_cast<uint32_t>(combinedSize))) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Write combinedSize failed!");
+            return ERR_INVALID_DATA;
+        }
+        for (decltype(combinedSize) i = 0; i < combinedSize; i++) {
+            if (!reply.WriteString(combinedCompatibleConfig[i])) {
+                TLOGE(WmsLogTag::WMS_COMPAT, "Write config failed!");
+                return ERR_INVALID_DATA;
+            }
+        }
+    } else {
+        if (!reply.WriteUint32(0)) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Write combinedSize failed!");
+            return ERR_INVALID_DATA;
+        }
+        TLOGE(WmsLogTag::WMS_COMPAT, "combinedSize: %{public}zu fail to meet the conditions", combinedSize);
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "In");
@@ -529,6 +574,7 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteUint32(windowSizeLimits.minWindowWidth);
         reply.WriteUint32(windowSizeLimits.maxWindowHeight);
         reply.WriteUint32(windowSizeLimits.minWindowHeight);
+        reply.WriteBool(property->GetIsWindowLimitsForcible());
         reply.WriteBool(property->GetIsAppSupportPhoneInPc());
         reply.WriteBool(property->GetIsPcAppInPad());
         reply.WriteUint32(static_cast<uint32_t>(property->GetRequestedOrientation()));
@@ -546,7 +592,11 @@ int SessionStub::HandleConnect(MessageParcel& data, MessageParcel& reply)
         reply.WriteBool(property->GetUseControlState());
         reply.WriteString(property->GetAncoRealBundleName());
         reply.WriteBool(property->GetIsShowDecorInFreeMultiWindow());
-        reply.WriteString(property->GetLogicalDeviceConfig());
+        auto ret = WriteCombinedCompatibleConfig(reply, property);
+        if (ret != ERR_NONE) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Write combined compatible config error, ret:%{public}d", ret);
+            return ret;
+        }
         MissionInfo missionInfo = property->GetMissionInfo();
         reply.WriteParcelable(&missionInfo);
         reply.WriteBool(property->IsPrelaunch());
@@ -610,6 +660,10 @@ bool ReadEventParam(MessageParcel& data, SessionEvent event, SessionEventParam& 
     if (event == SessionEvent::EVENT_MAXIMIZE) {
         if (!data.ReadUint32(param.waterfallResidentState)) {
             TLOGE(WmsLogTag::WMS_EVENT, "Failed to read waterfallResidentState");
+            return false;
+        }
+        if (!data.ReadUint32(param.titleButtonEventType_)) {
+            TLOGE(WmsLogTag::WMS_EVENT, "Failed to read titleButtonEventType_");
             return false;
         }
     } else if (event == SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE) {
@@ -735,7 +789,7 @@ int SessionStub::HandleRestoreFloatMainWindow(MessageParcel& data, MessageParcel
         return ERR_INVALID_VALUE;
     }
     WMError ret = RestoreFloatMainWindow(wantParams);
-    if (!reply.WriteUint32(static_cast<uint32_t>(ret))) {
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_LIFE, "write errCode fail.");
         return ERR_INVALID_DATA;
     }
@@ -1464,6 +1518,25 @@ int SessionStub::HandleConvertOrientationAndRotation(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
+int SessionStub::HandleSetPreferredOrientationWithResult(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    uint32_t orientation;
+    uint32_t promiseId;
+    bool needAnimation;
+    if (!data.ReadUint32(orientation) || !data.ReadUint32(promiseId) || !data.ReadBool(needAnimation)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "read value failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode =
+        SetPreferredOrientationWithResult(static_cast<Orientation>(orientation), promiseId, needAnimation);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 /** @note @window.layout */
 int SessionStub::HandleSetAspectRatio(MessageParcel& data, MessageParcel& reply)
 {
@@ -1823,6 +1896,49 @@ int SessionStub::HandleGetFloatingBallWindowId(MessageParcel& data, MessageParce
 }
 // LCOV_EXCL_STOP
 
+int SessionStub::HandleStopFloatView(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "HandleStopFloatView");
+    WSError errCode = StopFloatView();
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleUpdateFloatView(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleUpdateFloatView");
+    sptr<FloatViewTemplateInfo> fvTemplateInfo = data.ReadParcelable<FloatViewTemplateInfo>();
+    if (fvTemplateInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "read fvTemplateInfo failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = UpdateFloatView(*fvTemplateInfo);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+int SessionStub::HandleRestoreFloatViewMainWindow(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SYSTEM, "HandleRestoreFloatViewMainWindow In");
+    std::shared_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
+    if (wantParams == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "wantParams is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    WMError ret = RestoreFloatViewMainWindow(wantParams);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleSetSystemEnableDrag(MessageParcel& data, MessageParcel& reply)
 {
     bool enableDrag = false;
@@ -2016,6 +2132,22 @@ int SessionStub::HandleGetAppHookWindowInfoFromServer(MessageParcel& data, Messa
     return ERR_NONE;
 }
 
+int SessionStub::HandleGetSelectMode(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
+    SelectMode selectMode = SelectMode::INVALID_MODE;
+    WMError ret = GetSelectMode(selectMode);
+    if (!reply.WriteUint32(static_cast<uint32_t>(selectMode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write selectMode failed");
+        return ERR_INVALID_DATA;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write ret failed");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleNotifyWindowStatusDidChangeAfterShowWindow(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
@@ -2085,6 +2217,18 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
         return ERR_INVALID_DATA;
     }
     WMError ret = SetGestureBackEnabled(isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(ret));
+    return ERR_NONE;
+}
+
+int SessionStub::HandleSetFloatNavigationAvoidAreaEnabled(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "in");
+    bool isEnabled;
+    if (!data.ReadBool(isEnabled)) {
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = SetFloatNavigationAvoidAreaEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }
@@ -2681,6 +2825,21 @@ int SessionStub::HandleNotifyIsFullScreenInForceSplitMode(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifySplitRatioChanged(MessageParcel& data, MessageParcel& reply)
+{
+    float newRatio = 0.0f;
+    if (!data.ReadFloat(newRatio)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read newRatio failed.");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = NotifySplitRatioChanged(newRatio);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessageParcel& reply)
 {
     int32_t mode = 0;
@@ -2696,6 +2855,27 @@ int SessionStub::HandleNotifyCompatibleModeChange(MessageParcel& data, MessagePa
     return ERR_NONE;
 }
 
+int SessionStub::HandleNotifyPageEnable(MessageParcel& data, MessageParcel& reply)
+{
+    std::string action;
+    std::string message;
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    if (!data.ReadString(action)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read action failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.ReadString(message)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Read message failed.");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyPageEnable(action, message);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
 int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "in");
@@ -2704,7 +2884,12 @@ int SessionStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel&
         TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
         return ERR_INVALID_DATA;
     }
-    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport);
+    uint32_t selectModeValue = 0;
+    if (!data.ReadUint32(selectModeValue)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read selectModeValue failed");
+        return ERR_INVALID_DATA;
+    }
+    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, static_cast<SelectMode>(selectModeValue));
     return ERR_NONE;
 }
 

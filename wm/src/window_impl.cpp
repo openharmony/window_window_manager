@@ -1872,10 +1872,17 @@ void WindowImpl::AdjustWindowAnimationFlag(bool withAnimation)
     // use custom animation when transitionController exists; else use default animation
     WindowType winType = property_->GetWindowType();
     bool isAppWindow = WindowHelper::IsAppWindow(winType);
-    if (withAnimation && !isAppWindow && !animationTransitionControllers_.empty()) {
+    bool hasTransitionController = false;
+    bool needDefaultAnimation = false;
+    {
+        std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+        hasTransitionController = !animationTransitionControllers_.empty();
+        needDefaultAnimation = needDefaultAnimation_;
+    }
+    if (withAnimation && !isAppWindow && hasTransitionController) {
         // use custom animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
-    } else if ((isAppWindow && needDefaultAnimation_) || (withAnimation && animationTransitionControllers_.empty())) {
+    } else if ((isAppWindow && needDefaultAnimation) || (withAnimation && !hasTransitionController)) {
         // use default animation
         property_->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::DEFAULT));
     } else if (winType == WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
@@ -3835,7 +3842,6 @@ void WindowImpl::UpdateViewportConfig(const Rect& rect, const sptr<Display>& dis
     const std::shared_ptr<RSTransaction>& rsTransaction,
     const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
 {
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
     auto uiContent = GetUIContentSharedPtr();
     if (uiContent == nullptr) {
         return;
@@ -4822,7 +4828,8 @@ bool WindowImpl::IsAllowHaveSystemSubWindow()
 
 void WindowImpl::SetNeedDefaultAnimation(bool needDefaultAnimation)
 {
-    needDefaultAnimation_= needDefaultAnimation;
+    std::lock_guard<std::mutex> lockListener(transitionControllerMutex_);
+    needDefaultAnimation_ = needDefaultAnimation;
 }
 
 WMError WindowImpl::SetTextFieldAvoidInfo(double textFieldPositionY, double textFieldHeight)

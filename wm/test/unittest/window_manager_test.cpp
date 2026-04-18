@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "iremote_object_mocker.h"
+#include "parameters.h"
 #include "scene_board_judgement.h"
 #include "window_manager.cpp"
 #include "window_manager.h"
@@ -68,6 +69,11 @@ public:
         return WMError::WM_OK;
     }
 
+    WMError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId) override
+    {
+        return WMError::WM_OK;
+    }
+
     WMError SetStartWindowBackgroundColor(
         const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid) override
     {
@@ -75,6 +81,19 @@ public:
         lastAbilityName_ = abilityName;
         lastColor_ = color;
         lastUid_ = uid;
+        return WMError::WM_OK;
+    }
+
+    WMError GetSnapshotByWindowId(int32_t windowId, std::shared_ptr<Media::PixelMap>& pixelMap) override
+    {
+        pixelMap = nullptr;
+        return WMError::WM_OK;
+    }
+
+    WMError Snapshot(
+        std::shared_ptr<Media::PixelMap>& pixelMap, int32_t windowId, const SnapshotConfig& config) override
+    {
+        pixelMap = nullptr;
         return WMError::WM_OK;
     }
 
@@ -163,7 +182,7 @@ class TestApplicationFocusChangedListener : public IApplicationFocusChangedListe
 public:
     void OnApplicationFocusUpdate(bool isFocused) override
     {
-        TLOGI(WmslogtaG::WMS_FOCUS, "TestApplicationFocusChangedListener");
+        TLOGI(WmsLogTag::WMS_FOCUS, "TestApplicationFocusChangedListener");
     };
 };
 
@@ -305,6 +324,7 @@ private:
     int32_t mockUserId_ = 200;
     sptr<WindowManager> mockInstance_ = nullptr;
     sptr<MockWindowAdapter> mockAdapter_ = nullptr;
+    std::string isConcurrentuser_;
 };
 
 void WindowManagerTest::SetUpTestCase() {}
@@ -313,6 +333,8 @@ void WindowManagerTest::TearDownTestCase() {}
 
 void WindowManagerTest::SetUp()
 {
+    isConcurrentuser_ = OHOS::system::GetParameter("persist.dms.concurrentuser", "");
+    OHOS::system::SetParameter("persist.dms.concurrentuser", "true");
     instance_ = &WindowManager::GetInstance(userId_);
     windowAdapter = &WindowAdapter::GetInstance(userId_);
 
@@ -330,6 +352,8 @@ void WindowManagerTest::TearDown()
     WindowManager::RemoveInstanceByUserId(mockUserId_);
 
     WindowAdapter::windowAdapterMap_.clear();
+    OHOS::system::SetParameter("persist.dms.concurrentuser", isConcurrentuser_);
+    LOG_SetCallback(nullptr);
 }
 
 namespace {
@@ -346,7 +370,6 @@ HWTEST_F(WindowManagerTest, NotifyApplicationFocusChangedResult, TestSize.Level1
     WindowManager::GetInstance().NotifyApplicationFocusChangedResult(isFocus);
     EXPECT_FALSE(g_errLog.find("Camera float window, accessTokenId=%{private}u, isShowing=%{public}u")
                  != std::string::npos);
-    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -488,12 +511,48 @@ HWTEST_F(WindowManagerTest, GetSnapshotByWindowId01, TestSize.Level1)
         windowAdapter->windowManagerServiceProxy_ = nullptr;
     }
     WMError ret = instance_->GetSnapshotByWindowId(windowId, pixelMap);
-    if (SceneBoardJudgement::IsSceneBoardEnabled()) {
-        ASSERT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
-    } else {
-        ASSERT_EQ(WMError::WM_ERROR_NULLPTR, ret);
-    }
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, ret);
     windowAdapter->windowManagerServiceProxy_ = tempProxy;
+}
+
+/**
+ * @tc.name: GetSnapshotByWindowId02
+ * @tc.desc: Check GetSnapshotByWindowId02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, GetSnapshotByWindowId02, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, mockInstance_);
+    int32_t windowId = 1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    WMError ret = mockInstance_->GetSnapshotByWindowId(windowId, pixelMap);
+    EXPECT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(nullptr, pixelMap);
+}
+
+/**
+ * @tc.name: Snapshot
+ * @tc.desc: Check Snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, Snapshot, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, instance_);
+    int32_t windowId = -1;
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    SnapshotConfig config;
+    windowAdapter->isProxyValid_ = true;
+    auto tempProxy = windowAdapter->windowManagerServiceProxy_;
+    if (windowAdapter->windowManagerServiceProxy_ != nullptr) {
+        windowAdapter->windowManagerServiceProxy_ = nullptr;
+    }
+    WMError ret = instance_->Snapshot(pixelMap, windowId, config);
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, ret);
+    windowAdapter->windowManagerServiceProxy_ = tempProxy;
+
+    ret = mockInstance_->Snapshot(pixelMap, 1, config);
+    ASSERT_EQ(WMError::WM_OK, ret);
+    ASSERT_EQ(nullptr, pixelMap);
 }
 
 /**
@@ -585,7 +644,7 @@ HWTEST_F(WindowManagerTest, UnregisterCameraFloatWindowChangedListener01, TestSi
     ASSERT_EQ(0, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
     ASSERT_EQ(nullptr, instance_->pImpl_->cameraFloatWindowChangedListenerAgent_);
 
-    instance_->pImpl_->cameraFloatWindowChangedListeners_.emplace_back(listener1);
+    instance_->pImpl_->cameraFloatWindowChangedListeners_.insert(listener1);
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterCameraFloatWindowChangedListener(listener1));
     ASSERT_EQ(0, instance_->pImpl_->cameraFloatWindowChangedListeners_.size());
 
@@ -612,7 +671,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibilityChangedListener, TestSize.Level1)
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterVisibilityChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: return failed due to send ipc failed.
     windowAdapter->isProxyValid_ = false;
@@ -694,7 +753,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowUpdateListener01, TestSize.Level1)
     ASSERT_EQ(0, instance_->pImpl_->windowUpdateListeners_.size());
     ASSERT_EQ(nullptr, instance_->pImpl_->windowUpdateListenerAgent_);
 
-    instance_->pImpl_->windowUpdateListeners_.emplace_back(listener1);
+    instance_->pImpl_->windowUpdateListeners_.insert(listener1);
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWindowUpdateListener(listener1));
     ASSERT_EQ(0, instance_->pImpl_->windowUpdateListeners_.size());
 
@@ -728,7 +787,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowModeChangedListener01, TestSize.Leve
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWindowModeChangedListener(listener2));
     ASSERT_EQ(nullptr, instance_->pImpl_->windowModeListenerAgent_);
 
-    instance_->pImpl_->windowModeListeners_.emplace_back(listener1);
+    instance_->pImpl_->windowModeListeners_.insert(listener1);
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWindowModeChangedListener(listener1));
     ASSERT_EQ(0, instance_->pImpl_->windowModeListeners_.size());
 
@@ -789,7 +848,7 @@ HWTEST_F(WindowManagerTest, UnregisterWaterMarkFlagChangedListener01, TestSize.L
     ASSERT_EQ(0, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
 
     // if agent == nullptr, it can not be crashed.
-    instance_->pImpl_->waterMarkFlagChangeListeners_.push_back(listener1);
+    instance_->pImpl_->waterMarkFlagChangeListeners_.insert(listener1);
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterWaterMarkFlagChangedListener(listener1));
     ASSERT_EQ(0, instance_->pImpl_->waterMarkFlagChangeListeners_.size());
 }
@@ -854,7 +913,7 @@ HWTEST_F(WindowManagerTest, UnregisterGestureNavigationEnabledChangedListener, T
     ASSERT_EQ(nullptr, instance_->pImpl_->gestureNavigationEnabledAgent_);
 
     // if agent == nullptr, it can not be crashed.
-    instance_->pImpl_->gestureNavigationEnabledListeners_.push_back(listener1);
+    instance_->pImpl_->gestureNavigationEnabledListeners_.insert(listener1);
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterGestureNavigationEnabledChangedListener(listener1));
     ASSERT_EQ(0, instance_->pImpl_->gestureNavigationEnabledListeners_.size());
 }
@@ -960,7 +1019,6 @@ HWTEST_F(WindowManagerTest, UpdateCameraFloatWindowStatus, TestSize.Level1)
     WindowManager::GetInstance().UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
     EXPECT_FALSE(g_errLog.find("Camera float window, accessTokenId=%{private}u, isShowing=%{public}u")
         != std::string::npos);
-    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -976,7 +1034,6 @@ HWTEST_F(WindowManagerTest, NotifyWaterMarkFlagChangedResult, TestSize.Level1)
     WindowManager::GetInstance().NotifyWaterMarkFlagChangedResult(showwatermark);
     EXPECT_FALSE(g_errLog.find("Camera float window, accessTokenId=%{private}u, isShowing=%{public}u")
         != std::string::npos);
-    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -992,7 +1049,6 @@ HWTEST_F(WindowManagerTest, NotifyGestureNavigationEnabledResult, TestSize.Level
     WindowManager::GetInstance().NotifyGestureNavigationEnabledResult(enable);
     EXPECT_FALSE(g_errLog.find("Notify gesture navigation enable result, enable=%{public}d")
         != std::string::npos);
-    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1084,7 +1140,7 @@ HWTEST_F(WindowManagerTest, UnregisterVisibleWindowNumChangedListener, TestSize.
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterVisibleWindowNumChangedListener(listener2));
 
     // if agent == nullptr, it can not be crashed.
-    instance_->pImpl_->visibleWindowNumChangedListeners_.push_back(listener1);
+    instance_->pImpl_->visibleWindowNumChangedListeners_.insert(listener1);
     ASSERT_EQ(WMError::WM_OK, instance_->UnregisterVisibleWindowNumChangedListener(listener1));
 }
 
@@ -1393,7 +1449,7 @@ HWTEST_F(WindowManagerTest, RegisterFocusChangedListener, TestSize.Level1)
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterFocusChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: return failed, not use ActiveFaultAgentReregister
     windowAdapter->isProxyValid_ = false;
@@ -1507,13 +1563,13 @@ HWTEST_F(WindowManagerTest, NotifyVisibleWindowNumChanged01, TestSize.Level1)
 {
     std::vector<VisibleWindowNumInfo> visibleWindowNumInfo;
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
-    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(nullptr);
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.insert(nullptr);
     WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 
     sptr<IVisibleWindowNumChangedListener> listener = sptr<TestVisibleWindowNumChangedListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
     WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.clear();
-    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.push_back(listener);
+    WindowManager::GetInstance().pImpl_->visibleWindowNumChangedListeners_.insert(listener);
     WindowManager::GetInstance().pImpl_->NotifyVisibleWindowNumChanged(visibleWindowNumInfo);
 }
 
@@ -1744,8 +1800,6 @@ HWTEST_F(WindowManagerTest, NotifyWMSConnected, TestSize.Level1)
     instance_->pImpl_->wmsConnectionChangedListener_ = listener;
     instance_->pImpl_->NotifyWMSConnected(userId, screenId);
     EXPECT_TRUE(g_errLog.find("WMS on connected") != std::string::npos);
-
-    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1770,8 +1824,6 @@ HWTEST_F(WindowManagerTest, NotifyWMSDisconnected, TestSize.Level1)
     instance_->pImpl_->wmsConnectionChangedListener_ = listener;
     instance_->pImpl_->NotifyWMSDisconnected(userId, screenId);
     EXPECT_TRUE(g_errLog.find("WMS on disconnected") != std::string::npos);
-
-    LOG_SetCallback(nullptr);
 }
 
 /**
@@ -1946,7 +1998,7 @@ HWTEST_F(WindowManagerTest, ProcessUnregisterWindowInfoChangeCallback01, Functio
     sptr<IWindowInfoChangedListener> listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
     WindowInfoKey observedInfo = WindowInfoKey::VISIBILITY_STATE;
     auto ret = instance_->ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
     observedInfo = WindowInfoKey::DISPLAY_ID;
     ret = WindowManager::GetInstance().ProcessUnregisterWindowInfoChangeCallback(observedInfo, listener);
     EXPECT_EQ(WMError::WM_OK, ret);
@@ -2037,7 +2089,7 @@ HWTEST_F(WindowManagerTest, RegisterVisibilityStateChangedListener, Function | S
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterVisibilityStateChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: use mock and return ok
     ret = mockInstance_->RegisterVisibilityStateChangedListener(listener);
@@ -2091,7 +2143,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowVisibilityStateChanged, TestSize.Level1)
     ASSERT_NE(nullptr, listener);
     listener->AddInterestInfo(WindowInfoKey::WINDOW_ID);
     listener->AddInterestInfo(WindowInfoKey::VISIBILITY_STATE);
-    instance_->pImpl_->windowVisibilityStateListeners_.push_back(listener);
+    instance_->pImpl_->windowVisibilityStateListeners_.insert(listener);
 
     std::vector<sptr<WindowVisibilityInfo>> windowVisibilityInfos;
     sptr<WindowVisibilityInfo> info = sptr<WindowVisibilityInfo>::MakeSptr();
@@ -2129,7 +2181,7 @@ HWTEST_F(WindowManagerTest, RegisterDisplayIdChangedListener, Function | SmallTe
     windowAdapter->isProxyValid_ = true; // skip InitSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterDisplayIdChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: use mock and return ok
     ret = mockInstance_->RegisterDisplayIdChangedListener(listener);
@@ -2163,7 +2215,7 @@ HWTEST_F(WindowManagerTest, UnregisterDisplayIdChangedListener01, Function | Sma
     EXPECT_EQ(WMError::WM_OK, instance_->UnregisterDisplayIdChangedListener(listener2));
     EXPECT_EQ(0, instance_->pImpl_->windowDisplayIdChangeListeners_.size());
 
-    instance_->pImpl_->windowDisplayIdChangeListeners_.emplace_back(listener1);
+    instance_->pImpl_->windowDisplayIdChangeListeners_.insert(listener1);
     EXPECT_EQ(WMError::WM_OK, instance_->UnregisterDisplayIdChangedListener(listener1));
     EXPECT_EQ(0, instance_->pImpl_->windowDisplayIdChangeListeners_.size());
 
@@ -2190,7 +2242,7 @@ HWTEST_F(WindowManagerTest, RegisterFloatingScaleChangedListener, Function | Sma
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterFloatingScaleChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: use mock and return ok.
     ret = mockInstance_->RegisterFloatingScaleChangedListener(listener);
@@ -2244,7 +2296,7 @@ HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
     windowManager.pImpl_->floatingScaleChangeListeners_.clear();
     windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
 
-    windowManager.pImpl_->floatingScaleChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->floatingScaleChangeListeners_.insert(nullptr);
     windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
 
     auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
@@ -2252,7 +2304,7 @@ HWTEST_F(WindowManagerTest, NotifyFloatingScaleChange, TestSize.Level1)
     windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
 
-    windowManager.pImpl_->floatingScaleChangeListeners_.push_back(listener);
+    windowManager.pImpl_->floatingScaleChangeListeners_.insert(listener);
     windowManager.pImpl_->NotifyFloatingScaleChange(windowInfoList);
     EXPECT_EQ(listener->count_, 1);
 
@@ -2280,7 +2332,7 @@ HWTEST_F(WindowManagerTest, RegisterMidSceneChangedListener, Function | SmallTes
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterMidSceneChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: use mock and return ok.
     ret = mockInstance_->RegisterMidSceneChangedListener(listener);
@@ -2334,7 +2386,7 @@ HWTEST_F(WindowManagerTest, NotifyMidSceneStatusChange01, TestSize.Level1)
     windowManager.pImpl_->midSceneStatusChangeListeners_.clear();
     windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
 
-    windowManager.pImpl_->midSceneStatusChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->midSceneStatusChangeListeners_.insert(nullptr);
     windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
 
     auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
@@ -2342,7 +2394,7 @@ HWTEST_F(WindowManagerTest, NotifyMidSceneStatusChange01, TestSize.Level1)
     windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
 
-    windowManager.pImpl_->midSceneStatusChangeListeners_.push_back(listener);
+    windowManager.pImpl_->midSceneStatusChangeListeners_.insert(listener);
     windowManager.pImpl_->NotifyMidSceneStatusChange(windowInfoList);
     EXPECT_EQ(listener->count_, 1);
 
@@ -2370,7 +2422,7 @@ HWTEST_F(WindowManagerTest, RegisterWindowModeChangedListenerForPropertyChange, 
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterWindowModeChangedListenerForPropertyChange(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: use mock and return ok.
     ret = mockInstance_->RegisterWindowModeChangedListenerForPropertyChange(listener);
@@ -2422,7 +2474,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Le
     windowManager.pImpl_->windowModeChangeListeners_.clear();
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
  
-    windowManager.pImpl_->windowModeChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->windowModeChangeListeners_.insert(nullptr);
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
 
     auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
@@ -2430,7 +2482,7 @@ HWTEST_F(WindowManagerTest, NotifyWindowModeChangeForPropertyChange, TestSize.Le
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
 
-    windowManager.pImpl_->windowModeChangeListeners_.push_back(listener);
+    windowManager.pImpl_->windowModeChangeListeners_.insert(listener);
     windowManager.pImpl_->NotifyWindowModeChangeForPropertyChange(windowInfoList);
     EXPECT_EQ(listener->count_, 1);
 
@@ -2456,7 +2508,7 @@ HWTEST_F(WindowManagerTest, NotifyDisplayIdChange, TestSize.Level1)
     windowManager.pImpl_->windowDisplayIdChangeListeners_.clear();
     windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
  
-    windowManager.pImpl_->windowDisplayIdChangeListeners_.push_back(nullptr);
+    windowManager.pImpl_->windowDisplayIdChangeListeners_.insert(nullptr);
     windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
 
     auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
@@ -2464,7 +2516,7 @@ HWTEST_F(WindowManagerTest, NotifyDisplayIdChange, TestSize.Level1)
     windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
     EXPECT_EQ(listener->count_, 0);
 
-    windowManager.pImpl_->windowDisplayIdChangeListeners_.push_back(listener);
+    windowManager.pImpl_->windowDisplayIdChangeListeners_.insert(listener);
     windowManager.pImpl_->NotifyDisplayIdChange(windowInfoList);
     EXPECT_EQ(listener->count_, 1);
 
@@ -2492,7 +2544,7 @@ HWTEST_F(WindowManagerTest, RegisterRectChangedListener, Function | SmallTest | 
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterRectChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: use mock and return ok.
     ret = mockInstance_->RegisterRectChangedListener(listener);
@@ -2546,7 +2598,7 @@ HWTEST_F(WindowManagerTest, RegisterGlobalRectChangedListener, Function | SmallT
     windowAdapter->isProxyValid_ = true; // skip iniSSMProxy
     windowAdapter->windowManagerServiceProxy_ = nullptr;
     ret = instance_->RegisterGlobalRectChangedListener(listener);
-    EXPECT_EQ(WMError::WM_OK, ret);
+    EXPECT_NE(WMError::WM_OK, ret);
 
     // branch 3: use mock and return ok.
     ret = mockInstance_->RegisterGlobalRectChangedListener(listener);
@@ -2968,7 +3020,7 @@ HWTEST_F(WindowManagerTest, UnregisterWindowSupportRotationListener, Function | 
     EXPECT_EQ(0, instance_->pImpl_->windowSupportRotationListeners_.size());
     EXPECT_EQ(nullptr, instance_->pImpl_->windowSupportRotationListenerAgent_);
 
-    instance_->pImpl_->windowSupportRotationListeners_.emplace_back(listener1);
+    instance_->pImpl_->windowSupportRotationListeners_.insert(listener1);
     EXPECT_EQ(WMError::WM_OK, instance_->UnregisterWindowSupportRotationListener(listener1));
     EXPECT_EQ(0, instance_->pImpl_->windowSupportRotationListeners_.size());
 
@@ -3055,7 +3107,95 @@ HWTEST_F(WindowManagerTest, NotifySupportRotationChange, Function | SmallTest | 
     EXPECT_EQ(supportRotationInfo.persistentId_, listener->listenerSupportRotationInfo.persistentId_);
     EXPECT_EQ(supportRotationInfo.supportRotationChangeReason_,
         listener->listenerSupportRotationInfo.supportRotationChangeReason_);
+    }
 }
+
+/**
+ * @tc.name: NotifyWindowRectChange
+ * @tc.desc: check NotifyWindowRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowRectChange, TestSize.Level1)
+{
+    WindowInfoList windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->windowRectChangeListeners_.clear();
+    windowManager.pImpl_->NotifyWindowRectChange(windowInfoList);
+
+    windowManager.pImpl_->windowRectChangeListeners_.insert(nullptr);
+    windowManager.pImpl_->NotifyWindowRectChange(windowInfoList);
+
+    auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
+
+    windowManager.pImpl_->NotifyWindowRectChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->windowRectChangeListeners_.insert(listener);
+    windowManager.pImpl_->NotifyWindowRectChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+
+    auto listener2 = sptr<MockWindowInfoChangedListener>::MakeSptr();
+    windowManager.pImpl_->windowRectChangeListeners_.insert(listener2);
+    windowManager.pImpl_->NotifyWindowRectChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 2);
+    EXPECT_EQ(listener2->count_, 1);
+}
+
+/**
+ * @tc.name: NotifyWindowGlobalRectChange
+ * @tc.desc: check NotifyWindowGlobalRectChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, NotifyWindowGlobalRectChange, TestSize.Level1)
+{
+    WindowInfoList windowInfoList;
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(1)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(2)}});
+    windowInfoList.push_back({{WindowInfoKey::WINDOW_ID, static_cast<uint32_t>(3)}});
+
+    auto& windowManager = WindowManager::GetInstance();
+    windowManager.pImpl_->windowGlobalRectChangeListeners_.clear();
+    windowManager.pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
+
+    windowManager.pImpl_->windowGlobalRectChangeListeners_.insert(nullptr);
+    windowManager.pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
+
+    auto listener = sptr<MockWindowInfoChangedListener>::MakeSptr();
+
+    windowManager.pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 0);
+
+    windowManager.pImpl_->windowGlobalRectChangeListeners_.insert(listener);
+    windowManager.pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 1);
+
+    auto listener2 = sptr<MockWindowInfoChangedListener>::MakeSptr();
+    windowManager.pImpl_->windowGlobalRectChangeListeners_.insert(listener2);
+    windowManager.pImpl_->NotifyWindowGlobalRectChange(windowInfoList);
+    EXPECT_EQ(listener->count_, 2);
+    EXPECT_EQ(listener2->count_, 1);
+}
+
+/**
+ * @tc.name: MoveMainWindowToTargetDisplay
+ * @tc.desc: MoveMainWindowToTargetDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowManagerTest, MoveMainWindowToTargetDisplay, TestSize.Level1)
+{
+    WMError ret;
+
+    windowAdapter->isProxyValid_ = true;
+    windowAdapter->windowManagerServiceProxy_ = nullptr;
+    ret = instance_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_NE(WMError::WM_OK, ret);
+
+    ret = mockInstance_->MoveMainWindowToTargetDisplay(0, 1);
+    EXPECT_EQ(WMError::WM_OK, ret);
 }
 } // namespace
 } // namespace Rosen

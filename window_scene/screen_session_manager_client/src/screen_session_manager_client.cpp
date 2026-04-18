@@ -231,12 +231,44 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     return iter->second;
 }
 
+static inline bool IsBoundsChanged(RRect oldBounds, RRect newBounds)
+{
+    if (oldBounds.rect_.left_ == newBounds.rect_.left_ && newBounds.rect_.top_ == oldBounds.rect_.top_) {
+        if ((oldBounds.rect_.width_ == newBounds.rect_.width_ && oldBounds.rect_.height_ == newBounds.rect_.height_) ||
+            (oldBounds.rect_.height_ == newBounds.rect_.width_ && oldBounds.rect_.width_ == newBounds.rect_.height_)) {
+            return false;
+        }
+        return true;
+    }
+    return true;
+}
+
 void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
     const ScreenProperty& property, ScreenPropertyChangeReason reason)
 {
     auto screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return;
+    }
+    if (reason == ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE) {
+        if (!IsBoundsChanged(screenSession->GetScreenProperty().GetBounds(), property.GetBounds()) &&
+            !IsBoundsChanged(screenSession->GetPropertyNeedNotified().GetBounds(), property.GetBounds())) {
+            TLOGNFI(WmsLogTag::DMS, "bounds not change");
+            return;
+        }
+        TLOGNFI(WmsLogTag::DMS, "bounds change");
+        screenSession->NotifyListenerPropertyChange(property, reason);
+        screenSession->SetPropertyNeedNotified(property);
+        auto oldProperty = screenSession->GetScreenProperty();
+        oldProperty.SetInputOffset(property.GetInputOffsetX(), property.GetInputOffsetY());
+        if (currentstate_ != SuperFoldStatus::KEYBOARD) {
+            oldProperty.SetScreenAreaWidth(property.GetScreenAreaWidth());
+            oldProperty.SetScreenAreaHeight(property.GetScreenAreaHeight());
+            oldProperty.SetMirrorWidth(property.GetMirrorWidth());
+            oldProperty.SetMirrorHeight(property.GetMirrorHeight());
+            screenSession->SetScreenProperty(oldProperty);
+        }
         return;
     }
     screenSession->PropertyChange(property, reason);
@@ -1565,7 +1597,7 @@ void ScreenSessionManagerClient::SetInternalClipToBounds(ScreenId screenId, bool
     auto displayNode = internalSession->GetDisplayNode();
     if (displayNode != nullptr) {
         TLOGI(WmsLogTag::DMS, "Screen %{public}" PRIu64" displayNode cliptobounds set to %{public}d",
-            screenId, clipToBounds);
+            static_cast<uint64_t>(screenId), clipToBounds);
         displayNode->SetClipToBounds(clipToBounds);
         RSTransactionAdapter::FlushImplicitTransaction(displayNode);
     }

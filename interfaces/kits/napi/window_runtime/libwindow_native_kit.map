@@ -244,6 +244,7 @@
             OHOS::Rosen::JsWindow::SetSystemBarProperties*;
             OHOS::Rosen::JsWindow::SetTitleAndDockHoverShown*;
             OHOS::Rosen::JsWindow::SetTitleButtonVisible*;
+            OHOS::Rosen::JsWindow::SetPreferredOrientationWithResult*;
             OHOS::Rosen::JsWindow::SetTopmost*;
             OHOS::Rosen::JsWindow::SetTouchable*;
             OHOS::Rosen::JsWindow::SetTouchableAreas*;
@@ -337,6 +338,8 @@
             OHOS::Rosen::JsWindowListener::OnWindowNoInteractionCallback*;
             OHOS::Rosen::JsWindowListener::OnWindowStatusChange*;
             OHOS::Rosen::JsWindowListener::OnWindowStatusDidChange*;
+            OHOS::Rosen::JsWindowListener::OnParentWindowSizeChange*;
+            OHOS::Rosen::JsWindowListener::OnParentWindowStatusChange*;
             OHOS::Rosen::JsWindowListener::OnWindowTitleButtonRectChanged*;
             OHOS::Rosen::JsWindowListener::OnWindowVisibilityChangedCallback*;
             OHOS::Rosen::JsWindowListener::OnWindowWillClose*;
@@ -352,6 +355,7 @@
             OHOS::Rosen::NapiIsCallable*;
             OHOS::Rosen::NapiThrowError*;
             OHOS::Rosen::OrientationInit*;
+            OHOS::Rosen::OrientationExecutionResultInit*;
             OHOS::Rosen::ParseAndCheckRect*;
             OHOS::Rosen::ParseColorMetrics*;
             OHOS::Rosen::ParseJsValue*;
@@ -396,6 +400,7 @@
             OHOS::Rosen::EXTENSION_SECURE_LIMIT_CHANGE_CB;
             OHOS::Rosen::FRAME_METRICS_MEASURED_CHANGE_CB;
             OHOS::Rosen::FREE_WINDOW_MODE_CHANGE_CB;
+            OHOS::Rosen::PARENT_LIFECYCLE_EVENT_CB;
             OHOS::Rosen::GESTURE_NAVIGATION_ENABLED_CHANGE_CB;
             OHOS::Rosen::JS_SIZE_CHANGE_REASON;
             OHOS::Rosen::JS_TO_NATIVE_ORIENTATION_MAP;
@@ -436,6 +441,8 @@
             OHOS::Rosen::WINDOW_TITLE_BUTTON_RECT_CHANGE_CB;
             OHOS::Rosen::WINDOW_VISIBILITY_CHANGE_CB;
             OHOS::Rosen::WINDOW_WILL_CLOSE_CB;
+            OHOS::Rosen::PARENT_WINDOW_SIZE_CHANGE_CB;
+            OHOS::Rosen::PARENT_WINDOW_STATUS_CHANGE_CB;
         };
     local:
     *;

@@ -1366,7 +1366,8 @@ WMError WindowManagerService::UpdateProperty(sptr<WindowProperty>& windowPropert
     }
 
     if ((windowProperty->GetWindowFlags() == static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_FORBID_SPLIT_MOVE) ||
-        action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY) &&
+        action == PropertyChangeAction::ACTION_UPDATE_TRANSFORM_PROPERTY ||
+        action == PropertyChangeAction::ACTION_UPDATE_SNAPSHOT_SKIP) &&
         !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         WLOGFE("SetForbidSplitMove or SetShowWhenLocked or SetTranform or SetTurnScreenOn permission denied!");
         return WMError::WM_ERROR_INVALID_PERMISSION;
