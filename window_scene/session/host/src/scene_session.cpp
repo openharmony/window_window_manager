@@ -3308,7 +3308,12 @@ void SceneSession::GetFloatNavigationAvoidArea(WSRect& rect, AvoidArea& avoidAre
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
         auto [visibleFromTuple, portraitRect, landspaceRect] = floatNavagationInfo;
         visible = visibleFromTuple;
-        floatNavigationArea = rect.width_ > rect.height_ ? landspaceRect : portraitRect;
+        auto display = DisplayManager::GetInstance().GetDisplayById(GetDisplayId());
+        if (!display) {
+            TLOGE(WmsLogTag::WMS_IMMS, "win %{public}d display is null", GetPersistentId());
+            return;
+        }
+        floatNavigationArea = display->GetWidth() > display->GetHeight() ? landspaceRect : portraitRect;
     }
     if (!visible && !ignoreVisibility) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}d float navigation not visible", GetPersistentId());

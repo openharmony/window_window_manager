@@ -717,6 +717,21 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavagationInfo, TestSize.Level1)
     ssm_->floatNavagationInfoMap_[0] = info;
     EXPECT_EQ(ssm_->GetFloatNavagationInfo(0, info), WSError::WS_OK);
 }
+
+/*
+ * @tc.name: UpdateNavigationAvoidArea
+ * @tc.desc: UpdateNavigationAvoidArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, UpdateNavigationAvoidArea, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateNavigationAvoidArea";
+    info.bundleName_ = "UpdateNavigationAvoidArea";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(session->UpdateNavigationAvoidArea(true), WMError::WM_OK);
+    EXPECT_EQ(session->UpdateNavigationAvoidArea(false), WMError::WM_OK);
+}
 }
 }
 }
