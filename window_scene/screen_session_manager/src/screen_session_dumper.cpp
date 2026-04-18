@@ -500,10 +500,37 @@ void ScreenSessionDumper::DumpFoldCreaseRegion()
         TLOGE(WmsLogTag::DMS, "current crease region is null");
         return;
     }
-    oss << std::left << std::setw(LINE_WIDTH) << "CurrentCreaseRects<X, Y, W, H>: "
-        << creaseRects[0].posX_ << ", " << creaseRects[0].posY_ << ", "
-        << creaseRects[0].width_ << ", " << creaseRects[0].height_ << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "CurrentCreaseRects<X, Y, W, H>: ";
+    for (size_t i = 0; i < creaseRects.size(); i++) {
+        if (i != 0) {
+            oss << std::left << std::setw(LINE_WIDTH) << "";
+        }
+        oss << "[" << creaseRects[i].posX_ << ", " << creaseRects[i].posY_ << ", "
+            << creaseRects[i].width_ << ", " << creaseRects[i].height_ << "]" << std::endl;
+    }
     dumpInfo_.append(oss.str());
+
+    // Dump LiveCreaseRegion
+    FoldCreaseRegion liveRegion;
+    DMError ret = ScreenSessionManager::GetInstance().GetLiveCreaseRegion(liveRegion);
+    if (ret == DMError::DM_OK) {
+        std::ostringstream liveOss;
+        auto liveRects = liveRegion.GetCreaseRects();
+        if (liveRects.empty()) {
+            liveOss << std::left << std::setw(LINE_WIDTH) << "LiveCreaseRects<X, Y, W, H>: "
+                << "empty" << std::endl;
+        } else {
+            liveOss << std::left << std::setw(LINE_WIDTH) << "LiveCreaseRects<X, Y, W, H>: ";
+            for (size_t i = 0; i < liveRects.size(); i++) {
+                if (i != 0) {
+                    liveOss << std::left << std::setw(LINE_WIDTH) << "";
+                }
+                liveOss << "[" << liveRects[i].posX_ << ", " << liveRects[i].posY_ << ", "
+                    << liveRects[i].width_ << ", " << liveRects[i].height_ << "]" << std::endl;
+            }
+        }
+        dumpInfo_.append(liveOss.str());
+    }
 }
 
 void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
@@ -541,8 +568,6 @@ void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
         << static_cast<int32_t>(screenSession->GetSourceMode()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenCombination: "
         << static_cast<int32_t>(screenSession->GetScreenCombination()) << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "Orientation: "
-        << static_cast<int32_t>(screenSession->GetOrientation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "Rotation: "
         << static_cast<int32_t>(screenSession->GetRotation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ScreenRequestedOrientation: "
@@ -737,6 +762,8 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         <<  static_cast<int32_t>(screenProperty.GetOrientation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "DisplayOrientation: "
         << static_cast<int32_t>(screenProperty.GetDisplayOrientation()) << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DeviceOriention: "
+        << static_cast<int32_t>(screenProperty.GetDeviceOrientation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "GetScreenType: "
         << static_cast<int32_t>(screenProperty.GetScreenType()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ReqOrientation: "
