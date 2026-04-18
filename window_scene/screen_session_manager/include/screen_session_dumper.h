@@ -93,6 +93,10 @@ private:
     void TriggerSecondarySensor(const std::string &valueStr);
     void TriggerSecondaryFoldStatus(const std::string &valueStr);
     void SetDuringCallState(std::string input);
+    void SetMultiScreenRelativePositionCmd(std::string input);
+    bool ExtractPositionGroups(const std::string& valueStr,
+        std::string& firstGroup, std::string& secondGroup);
+    bool ParsePositionGroup(const std::string& group, MultiScreenPositionOptions& opts);
     bool IsDeveloperModeCommand();
     void ShowCurrentLcdStatus(ScreenId screenId);
 private:
