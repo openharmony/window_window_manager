@@ -3657,6 +3657,11 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             TLOGNE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) && sceneSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGNI(WmsLogTag::WMS_SUB, "No-parent subWindow show, id: %{public}d", sceneSession->GetPersistentId());
+            sceneSession->ShowSubWindowZLevelAboveParentLoosened();
+            return WSError::WS_OK;
+        }
         if (!Session::IsScbCoreEnabled()) {
             sceneSession->SetForegroundInteractiveStatus(true);
         }
@@ -4244,6 +4249,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         TLOGNI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Request background, isDelegator:%{public}d "
             "isToDesktop:%{public}d isSaveSnapshot:%{public}d",
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) && sceneSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGNI(WmsLogTag::WMS_SUB, "No-parent subWindow background, id: %{public}d", sceneSession->GetPersistentId());
+            sceneSession->HideSubWindowZLevelAboveParentLoosened();
+            return WSError::WS_OK;
+        }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
         TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", sceneSession->GetPersistentId());
         sceneSession->UpdateLifecyclePausedInner();

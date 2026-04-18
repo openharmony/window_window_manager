@@ -197,6 +197,12 @@ public:
     WMError GetParentWindow(sptr<Window>& parentWindow) override;
 
     /*
+     * Sub Window zLevel above parent loosened
+     */
+    WSError HideSubWindowZLevelAboveParentLoosened() override;
+    WSError ShowSubWindowZLevelAboveParentLoosened() override;
+
+    /*
      * PC Window
      */
     WMError SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask) override;

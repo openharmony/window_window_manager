@@ -423,6 +423,24 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError SyncFvLimits(const FloatViewLimits& limits) = 0;
+
+    /**
+     * @brief Hide SubWindow whose zLevel above parent loosened.
+     *
+     * Hide SubWindow whose zLevel above parent loosened.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError HideSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+
+    /**
+     * @brief Show SubWindow whose zLevel above parent loosened.
+     *
+     * Show SubWindow whose zLevel above parent loosened.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError ShowSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
