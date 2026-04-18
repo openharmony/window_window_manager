@@ -7707,7 +7707,7 @@ std::optional<MaximizeOptions> ParseMaximizeOptions(napi_env env, napi_value jsO
 
     MaximizeOptions options;
     napi_value jsPresentation = nullptr;
-    napi_value jsAcrossDisplay = nullptr;
+    napi_value jsAcrossDisplayPresentation = nullptr;
     napi_value jsSnapshotAnimationConfig = nullptr;
 
     // Get presentation
@@ -7721,15 +7721,20 @@ std::optional<MaximizeOptions> ParseMaximizeOptions(napi_env env, napi_value jsO
         options.presentation = *presentationOpt;
     }
 
-    // Get acrossDisplay
-    if (napi_get_named_property(env, jsOptions, "acrossDisplay", &jsAcrossDisplay) == napi_ok &&
-        jsAcrossDisplay != nullptr && GetType(env, jsAcrossDisplay) != napi_undefined) {
-        auto acrossDisplayOpt = ParseWaterfallResidentState(env, jsAcrossDisplay);
-        if (!acrossDisplayOpt) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid acrossDisplay in MaximizeOptions");
+    // Get acrossDisplayPresentation
+    if (napi_get_named_property(env, jsOptions, "acrossDisplayPresentation",
+        &jsAcrossDisplayPresentation) == napi_ok &&
+        jsAcrossDisplayPresentation != nullptr &&
+        GetType(env, jsAcrossDisplayPresentation) != napi_undefined) {
+        using T = std::underlying_type_t<AcrossDisplayPresentation>;
+        T value = static_cast<T>(AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING);
+        if (!ConvertFromJsValue(env, jsAcrossDisplayPresentation, value) ||
+            value < static_cast<T>(AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING) ||
+            value > static_cast<T>(AcrossDisplayPresentation::EXIT_ACROSS_DISPLAY_MODE)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid acrossDisplayPresentation in MaximizeOptions");
             return std::nullopt;
         }
-        options.acrossDisplay = *acrossDisplayOpt;
+        options.acrossDisplayPresentation = static_cast<AcrossDisplayPresentation>(value);
     }
 
     // Get snapshotAnimationConfig
@@ -7781,7 +7786,7 @@ napi_value JsWindow::OnMaximizeWithOptions(napi_env env, napi_callback_info info
             return;
         }
         WMError ret = window->MaximizeWithOptions(
-            options.presentation, options.acrossDisplay, options.snapshotAnimationConfig);
+            options.presentation, options.acrossDisplayPresentation, options.snapshotAnimationConfig);
         if (ret == WMError::WM_OK) {
             napiAsyncTask->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -7789,9 +7794,9 @@ napi_value JsWindow::OnMaximizeWithOptions(napi_env env, napi_callback_info info
                 WM_JS_TO_ERROR_CODE_MAP.at(ret), "[window][maximizeWithOptions]msg: Failed"));
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT,
-            "%{public}s: windowId: %{public}u, present: %{public}d, acrossDisplay: %{public}u",
+            "%{public}s: windowId: %{public}u, present: %{public}d, acrossDisplayPresentation: %{public}u",
             where, window->GetWindowId(), static_cast<int32_t>(options.presentation),
-            static_cast<uint32_t>(options.acrossDisplay));
+            static_cast<uint32_t>(options.acrossDisplayPresentation));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximizeWithOptions") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env,

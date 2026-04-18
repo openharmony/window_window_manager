@@ -394,6 +394,8 @@
             OHOS::Rosen::WsNapiAsyncTask::Reject*;
             OHOS::Rosen::WsNapiAsyncTask::Resolve*;
 
+            OHOS::Rosen::AcrossDisplayPresentationInit*;
+
             OHOS::Rosen::ACROSS_DISPLAYS_CHANGE_CB;
             OHOS::Rosen::AVOID_AREA_CHANGE_CB;
             OHOS::Rosen::DIALOG_DEATH_RECIPIENT_CB;
