@@ -75,6 +75,7 @@ public:
     MOCK_METHOD0(NotifyFloatViewPrepareClose, void(void));
     MOCK_METHOD1(UpdateFloatView, WMError(const FloatViewTemplateInfo& fvTemplateInfo));
     MOCK_METHOD1(RestoreFloatViewMainWindow, WMError(const std::shared_ptr<AAFwk::WantParams>& wantParams));
+    MOCK_METHOD1(GetSelectMode, WMError(SelectMode& selectMode));
 };
 } // namespace Rosen
 } // namespace OHOS

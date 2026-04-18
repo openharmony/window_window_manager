@@ -2212,6 +2212,34 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingHookWindowInfo001, TestSize.Lev
 }
 
 /**
+ * @tc.name: UnmarshallingHookWindowInfo002
+ * @tc.desc: test UnmarshallingHookWindowInfo with nullptr hookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingHookWindowInfo002, TestSize.Level1)
+{
+    Parcel parcel;
+    // Do not write any HookWindowInfo, ReadParcelable will return nullptr
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    // Set initial value
+    HookWindowInfo initialInfo;
+    initialInfo.enableHookWindow = true;
+    initialInfo.widthHookRatio = 0.5f;
+    property->SetHookWindowInfo(initialInfo);
+
+    // Call UnmarshallingHookWindowInfo with empty parcel
+    WindowSessionProperty::UnmarshallingHookWindowInfo(parcel, property);
+
+    // Property should remain unchanged when ReadParcelable returns nullptr
+    auto retInfo = property->GetHookWindowInfo();
+    ASSERT_EQ(retInfo.enableHookWindow, true);
+    ASSERT_EQ(retInfo.widthHookRatio, 0.5f);
+}
+
+/**
  * @tc.name: MarshallingUnmarshallingWithHookWindowInfo
  * @tc.desc: test Marshalling and Unmarshalling with HookWindowInfo
  * @tc.type: FUNC
