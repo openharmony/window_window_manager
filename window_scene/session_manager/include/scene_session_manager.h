@@ -1887,12 +1887,6 @@ private:
     sptr<AppExecFwk::IAppMgr> appMgrClient_ = nullptr;
     sptr<AppStateObserver> appStateObserver_ = nullptr;
     void RegisterAppStateObserver();
-SessionState Session::GetRealSessionState()
-    std::unordered_map<std::string, std::unordered_set<std::string>> bundleRSBlackListConfigMap_;
-    inline static const std::string WMS_DEFAULT = "WMS_DEFAULT";
-    sptr<AppExecFwk::IAppMgr> appMgrClient_ = nullptr;
-    sptr<AppStateObserver> appStateObserver_ = nullptr;
-    void RegisterAppStateObserver();
 
     struct SessionBlackListInfo {
         int32_t windowId = INVALID_SESSION_ID;
