@@ -1292,7 +1292,7 @@ HWTEST_F(MainSessionTest, UpdateHookWindowInfo01, TestSize.Level1)
     initialInfo.enableHookWindow = true;
     initialInfo.widthHookRatio = 0.5f;
     initialInfo.drawableRectHook = false;
-    property->SetHookWindowInfo(initialInfo);
+    session->GetSessionProperty()->SetHookWindowInfo(initialInfo);
 
     HookWindowInfo newInfo;
     newInfo.enableHookWindow = true;
@@ -1301,7 +1301,7 @@ HWTEST_F(MainSessionTest, UpdateHookWindowInfo01, TestSize.Level1)
 
     auto ret = session->UpdateHookWindowInfo(newInfo);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_EQ(property->GetHookWindowInfo().drawableRectHook, true);
+    EXPECT_EQ(session->GetSessionProperty()->GetHookWindowInfo().drawableRectHook, true);
 }
 
 /**
@@ -1324,7 +1324,7 @@ HWTEST_F(MainSessionTest, UpdateHookWindowInfo02, TestSize.Level1)
     initialInfo.enableHookWindow = true;
     initialInfo.widthHookRatio = 0.5f;
     initialInfo.drawableRectHook = true;
-    property->SetHookWindowInfo(initialInfo);
+    session->GetSessionProperty()->SetHookWindowInfo(initialInfo);
 
     HookWindowInfo newInfo;
     newInfo.enableHookWindow = true;
@@ -1470,7 +1470,7 @@ HWTEST_F(MainSessionTest, SetForceSplitEnable04, TestSize.Level1)
     auto ret = session->SetForceSplitEnable(true, true, SelectMode::SQUARE_MODE);
     EXPECT_EQ(receivedSelectMode, SelectMode::SQUARE_MODE);
     EXPECT_EQ(ret, WSError::WS_OK);
-    EXPECT_EQ(property->GetForceSplitEnable(), true);
+    EXPECT_EQ(session->GetSessionProperty()->GetForceSplitEnable(), true);
 }
 
 /**

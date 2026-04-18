@@ -2609,11 +2609,13 @@ void WindowSessionProperty::SetMobileAppInPadLayoutFullScreen(bool isMobileAppIn
 
 void WindowSessionProperty::SetForceSplitEnable(bool isForceSplitEnabled)
 {
+    std::lock_guard<std::mutex> lock(isForceSplitEnabledMutex_);
     isForceSplitEnabled_ = isForceSplitEnabled;
 }
 
 bool WindowSessionProperty::GetForceSplitEnable() const
 {
+    std::lock_guard<std::mutex> lock(isForceSplitEnabledMutex_);
     return isForceSplitEnabled_;
 }
 
