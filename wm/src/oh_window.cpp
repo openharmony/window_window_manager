@@ -966,6 +966,10 @@ int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
+    if (windowId < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "eventHandler is null, windowId:%{public}d", windowId);
