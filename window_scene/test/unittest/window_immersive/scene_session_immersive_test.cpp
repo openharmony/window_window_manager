@@ -671,7 +671,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
     session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAllAvoidAreas(avoidAreas);
 
-    session->SetFloatNavigationAvoidAreaEnabled(true);
+    session->UpdateNavigationAvoidArea(true);
     session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
