@@ -308,6 +308,7 @@
             OHOS::Rosen::ScreenSession::SetVprScaleRatio*;
             OHOS::Rosen::ScreenSession::SetXYPosition*;
             OHOS::Rosen::ScreenSession::SetPropertyNeedNotified*;
+            OHOS::Rosen::ScreenSession::GetPropertyNeedNotified*;
             OHOS::Rosen::ScreenSession::SuperFoldStatusChange*;
             OHOS::Rosen::ScreenSession::UnregisterScreenChangeListener*;
             OHOS::Rosen::ScreenSession::UpdateAvailableArea*;

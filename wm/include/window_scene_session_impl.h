@@ -76,7 +76,8 @@ public:
     WMError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override;
-    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override;
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen) override;
     WMError SetFrameRectForPartialZoomIn(const Rect& frameRect) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
@@ -194,6 +195,12 @@ public:
      */
     WMError SetParentWindow(int32_t newParentWindowId) override;
     WMError GetParentWindow(sptr<Window>& parentWindow) override;
+
+    /*
+     * Sub Window zLevel above parent loosened
+     */
+    WSError HideSubWindowZLevelAboveParentLoosened() override;
+    WSError ShowSubWindowZLevelAboveParentLoosened() override;
 
     /*
      * PC Window
@@ -315,6 +322,7 @@ public:
     bool IsDecorEnable() const override;
     WMError Close() override;
     WMError CloseDirectly() override;
+    WSError ConfigDockAutoHide(bool isDockAutoHide) override;
 
     /*
      * Starting Window

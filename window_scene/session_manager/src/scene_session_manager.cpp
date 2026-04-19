@@ -365,20 +365,6 @@ public:
     };
 #endif
 
-bool CheckAvoidAreaForAINavigationBar(bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
-{
-    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
-        !avoidArea.rightRect_.IsUninitializedRect()) {
-        return false;
-    }
-    if (avoidArea.bottomRect_.IsUninitializedRect()) {
-        return true;
-    }
-    auto diff =
-        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
-    return isVisible && diff <= 1;
-}
-
 void FillWindowDisplayName(WindowDisplayInfo& windowDisplayInfo)
 {
     auto display = DisplayManager::GetInstance().GetDisplayById(windowDisplayInfo.displayId);
@@ -2622,6 +2608,18 @@ WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& win
 
 void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ConfigDockAutoHide: isDockAutoHide %{public}d", isDockAutoHide);
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        if (isPcMode) {
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession == nullptr || !WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                    continue;
+                }
+                sceneSession->ConfigDockAutoHide(isDockAutoHide);
+            }
+        }
+    }
     auto task = [this, isDockAutoHide] {
         systemConfig_.isDockAutoHide_ = isDockAutoHide;
     };
@@ -3008,7 +3006,7 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
         sceneSession->SetIsAINavigationBarAvoidAreaValidFunc([this](DisplayId displayId,
                 const AvoidArea& avoidArea, int32_t sessionBottom) {
-            return CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
+            return this->CheckAvoidAreaForAINavigationBar(isAINavigationBarVisible_[displayId], avoidArea, sessionBottom);
         });
         sceneSession->RegisterGetStatusBarAvoidHeightFunc([this](DisplayId displayId, WSRect& barArea) {
             return this->GetStatusBarAvoidHeight(displayId, barArea);
@@ -3671,6 +3669,11 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             TLOGNE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) && sceneSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGNI(WmsLogTag::WMS_SUB, "No-parent subWindow show, id: %{public}d", sceneSession->GetPersistentId());
+            sceneSession->ShowSubWindowZLevelAboveParentLoosened();
+            return WSError::WS_OK;
+        }
         if (!Session::IsScbCoreEnabled()) {
             sceneSession->SetForegroundInteractiveStatus(true);
         }
@@ -4258,6 +4261,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         TLOGNI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Request background, isDelegator:%{public}d "
             "isToDesktop:%{public}d isSaveSnapshot:%{public}d",
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) && sceneSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGNI(WmsLogTag::WMS_SUB, "No-parent subWindow background, id: %{public}d", sceneSession->GetPersistentId());
+            sceneSession->HideSubWindowZLevelAboveParentLoosened();
+            return WSError::WS_OK;
+        }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
         TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", sceneSession->GetPersistentId());
         sceneSession->UpdateLifecyclePausedInner();
@@ -9123,8 +9131,8 @@ sptr<SceneSession> SceneSessionManager::GetNextFocusableSession(DisplayId displa
             TLOGND(WmsLogTag::WMS_FOCUS, "the window hide id: %{public}d", persistentId);
             return false;
         }
-        if (preFocusedSessionFound && session->CheckFocusable() &&
-            session->IsVisibleNotBackground() && IsParentSessionVisible(session)) {
+        if (session->CheckFocusable() && session->IsVisibleNotBackground() &&
+            (session->IsLoosenedWithFreeMultiMode() || IsParentSessionVisible(session))) {
             if (!systemConfig_.IsPcWindow() || session->GetWindowType() != WindowType::WINDOW_TYPE_DESKTOP ||
                 currentSessionDisplayId == displayId) {
                 nextFocusableSession = session;
@@ -14032,6 +14040,21 @@ void SceneSessionManager::GetStatusBarConstantlyShow(DisplayId displayId, bool& 
     } else {
         isVisible = false;
     }
+}
+
+bool SceneSessionManager::CheckAvoidAreaForAINavigationBar(
+    bool isVisible, const AvoidArea& avoidArea, int32_t sessionBottom)
+{
+    if (!avoidArea.topRect_.IsUninitializedRect() || !avoidArea.leftRect_.IsUninitializedRect() ||
+        !avoidArea.rightRect_.IsUninitializedRect()) {
+        return false;
+    }
+    if (avoidArea.bottomRect_.IsUninitializedRect()) {
+        return true;
+    }
+    auto diff =
+        std::abs(avoidArea.bottomRect_.posY_ + static_cast<int32_t>(avoidArea.bottomRect_.height_) - sessionBottom);
+    return isVisible && ((diff <= 1 && !GetLSState()) || (diff <= 5 && GetLSState()));
 }
 
 WSError SceneSessionManager::NotifyAINavigationBarShowStatus(bool isVisible, WSRect barArea, uint64_t displayId)

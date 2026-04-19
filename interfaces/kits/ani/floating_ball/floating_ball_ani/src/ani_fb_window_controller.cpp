@@ -176,6 +176,24 @@ void OptionSetBackgroundColor(ani_env* env, ani_object paramsInterface, FbOption
     }
 }
 
+void OptionSetIcon(ani_env* env, ani_object paramsInterface, FbOption& option)
+{
+    ani_ref iconValue;
+    env->Object_GetPropertyByName_Ref(paramsInterface, "icon", &iconValue);
+    ani_boolean isiconValueUndefined = false;
+    env->Reference_IsUndefined(iconValue, &isiconValueUndefined);
+    if (!isiconValueUndefined) {
+        std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+        ani_object iconValueObject = static_cast<ani_object>(iconValue);
+        pixelMap = Media::PixelMapTaiheAni::GetNativePixelMap(env, iconValueObject);
+        if (pixelMap == nullptr) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]failed to extract icon: invalid PixelMap");
+            return;
+        }
+        option.SetIcon(pixelMap);
+    }
+}
+
 bool OptionSetTextUpdateAnimationType(ani_env* env, ani_object paramsInterface, FbOption& option)
 {
     ani_ref textUpdateAnimationTypeValue;
@@ -203,25 +221,7 @@ bool OptionSetTextUpdateAnimationType(ani_env* env, ani_object paramsInterface, 
     return true;
 }
 
-void OptionSetIcon(ani_env* env, ani_object paramsInterface, FbOption& option)
-{
-    ani_ref iconValue;
-    env->Object_GetPropertyByName_Ref(paramsInterface, "icon", &iconValue);
-    ani_boolean isiconValueUndefined = false;
-    env->Reference_IsUndefined(iconValue, &isiconValueUndefined);
-    if (!isiconValueUndefined) {
-        std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
-        ani_object iconValueObject = static_cast<ani_object>(iconValue);
-        pixelMap = Media::PixelMapTaiheAni::GetNativePixelMap(env, iconValueObject);
-        if (pixelMap == nullptr) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]failed to extract icon: invalid PixelMap");
-            return;
-        }
-        option.SetIcon(pixelMap);
-    }
-}
-
-bool GetFbOption(ani_env* env, ani_object paramsInterface, FbOption& option)
+bool AniFbController::GetFbOption(ani_env* env, ani_object paramsInterface, FbOption& option)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]start");
     if (!CheckParamsInterface(env, paramsInterface)) {return false;}
@@ -838,6 +838,11 @@ WMError AniFbController::UnRegisterListener(FbListenerType fbListenerType, sptr<
         default:
             return WMError::WM_ERROR_FB_PARAM_INVALID;
     }
+}
+
+sptr<FloatingBallController> AniFbController::GetController() const
+{
+    return fbController_;
 }
 } // namespace Rosen
 } // namespace OHOS

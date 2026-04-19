@@ -36,6 +36,7 @@
             OHOS::Rosen::SceneSession::SetFrameGravity*;
             OHOS::Rosen::SceneSession::SetSnapshotSkip*;
             OHOS::Rosen::SceneSession::GetMainSessionId*;
+            OHOS::Rosen::SceneSession::GetMainSessionOrLoosenedSessionId*;
             OHOS::Rosen::SceneSession::OnShowWhenLocked*;
             OHOS::Rosen::SceneSession::RemoveSubSession*;
             OHOS::Rosen::SceneSession::SendKeyEventToUI*;
@@ -156,6 +157,7 @@
             OHOS::Rosen::SceneSession::RegisterAppHookWindowInfoFunc*;
             OHOS::Rosen::SceneSession::RegisterSelectModeFunc*;
             OHOS::Rosen::SceneSession::RegisterGetIsDockAutoHideFunc*;
+            OHOS::Rosen::SceneSession::ConfigDockAutoHide*;
             OHOS::Rosen::SceneSession::RemoveFingerPointerDownStatus*;
             OHOS::Rosen::SceneSession::SetGetAllAppUseControlMapFunc*;
             OHOS::Rosen::SceneSession::SetShouldHideNonSecureWindows*;

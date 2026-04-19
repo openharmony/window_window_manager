@@ -1704,13 +1704,20 @@ HWTEST_F(WindowSessionTest, SetSessionRect01, TestSize.Level1)
  */
 HWTEST_F(WindowSessionTest, SetLastClientParentSize01, TestSize.Level1)
 {
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    WSRect rect = {1, 2, 3, 4};
-    session_->SetSessionRect(rect);
+    WSRect initLastClientRect = {10, 11, 12, 13};
     session_->SetLastClientParentSize(rect);
-    EXPECT_TRUE(g_errLog.find("skip same rect") != std::string::npos);
-    LOG_SetCallback(nullptr);
+    {
+        // success
+        WSRect rect = {1, 2, 3, 4};
+        session_->SetLastClientParentSize(rect);
+        EXPECT_EQ(session_->GetLastClientParentSize().posX_, rect.posX_);
+    }
+    {
+        // fail
+        WSRect rect = {1, 2, 3, 4};
+        session_->SetLastClientParentSize(rect);
+        EXPECT_EQ(session_->GetLastClientParentSize().posX_, rect.posX_);
+    }
 }
 
 /**

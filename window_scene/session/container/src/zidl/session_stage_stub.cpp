@@ -178,6 +178,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDisplayMove(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW):
             return HandleSwitchFreeMultiWindow(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CONFIG_DOCK_AUTO_HIDE):
+            return HandleConfigDockAutoHide(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ):
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
@@ -284,6 +286,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSyncFvWindowInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_LIMITS):
             return HandleSyncFvLimits(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HIDE_SUBWINDOW_ZLEVEL_ABOVE_PARENT_LOOSENED):
+            return HandleHideSubWindowZLevelAboveParentLoosened(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SHOW_SUBWINDOW_ZLEVEL_ABOVE_PARENT_LOOSENED):
+            return HandleShowSubWindowZLevelAboveParentLoosened(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -697,7 +703,18 @@ int SessionStageStub::HandleNotifySubWindowAfterParentWindowStatusChange(Message
         TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read mode");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = NotifySubWindowAfterParentWindowStatusChange(static_cast<WindowMode>(mode));
+    uint32_t maximizeMode = static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    if (!data.ReadUint32(maximizeMode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read maximizeMode");
+        return ERR_INVALID_DATA;
+    }
+    bool isLayoutFullScreen = false;
+    if (!data.ReadBool(isLayoutFullScreen)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read isLayoutFullScreen");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifySubWindowAfterParentWindowStatusChange(static_cast<WindowMode>(mode),
+        static_cast<MaximizeMode>(maximizeMode), isLayoutFullScreen);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write stage error code failed");
         return ERR_INVALID_DATA;
@@ -997,6 +1014,18 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
     bool enable = data.ReadBool();
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleConfigDockAutoHide(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called!");
+    bool isDockAutoHide = data.ReadBool();
+    WSError errCode = ConfigDockAutoHide(isDockAutoHide);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "reply write failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1657,6 +1686,20 @@ int SessionStageStub::HandleNotifyParentLifecycleEvent(MessageParcel& data, Mess
         TLOGE(WmsLogTag::WMS_LIFE, "NotifyParentLifecycleEvent failed, ret: %{public}d", ret);
         return static_cast<int32_t>(ret);
     }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleHideSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "in");
+    HideSubWindowZLevelAboveParentLoosened();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleShowSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "in");
+    ShowSubWindowZLevelAboveParentLoosened();
     return ERR_NONE;
 }
 //

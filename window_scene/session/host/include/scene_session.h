@@ -538,6 +538,12 @@ public:
     WSError SetSubWindowSource(SubWindowSource source) override;
 
     /*
+     * Sub Window zLevel above parent loosened
+     */
+    virtual WSError HideSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+    virtual WSError ShowSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+
+    /*
      * Window Event
      */
     bool CheckParameters(const std::vector<int32_t>& parameters, const int32_t length);
@@ -611,6 +617,7 @@ public:
     std::string GetUpdatedIconPath() const;
     int32_t GetParentPersistentId() const;
     int32_t GetMainSessionId();
+    int32_t GetMainSessionOrLoosenedSessionId();
     virtual int32_t GetMissionId() const { return persistentId_; };
     Orientation GetRequestedOrientation() const;
     std::vector<sptr<SceneSession>> GetSubSession() const;
@@ -813,6 +820,7 @@ public:
     WSError SetDecorVisible(bool isVisible) override;
     bool IsDecorVisible() const;
     WindowDecoration GetWindowDecoration() const;
+    WSError ConfigDockAutoHide(bool isDockAutoHide);
 
     WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) override;

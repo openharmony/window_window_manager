@@ -181,6 +181,9 @@ std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> WindowSessionImpl::
 std::mutex WindowSessionImpl::systemDensityChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>>
     WindowSessionImpl::systemDensityChangeListeners_;
+std::mutex WindowSessionImpl::windowDensityChangeListenerMutex_;
+std::unordered_map<int32_t, std::vector<IWindowDensityChangeListenerSptr>>
+    WindowSessionImpl::windowDensityChangeListeners_;
 std::recursive_mutex WindowSessionImpl::acrossDisplaysChangeListenerMutex_;
 std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
     WindowSessionImpl::acrossDisplaysChangeListeners_;
@@ -1688,6 +1691,7 @@ void WindowSessionImpl::SetUniqueVirtualPixelRatio(bool useUniqueDensity, float 
             virtualPixelRatio_ = virtualPixelRatio;
         }
         if (!MathHelper::NearZero(oldVirtualPixelRatio - virtualPixelRatio)) {
+            NotifyWindowDensityChange(virtualPixelRatio);
             UpdateDensity();
             SetUniqueVirtualPixelRatioForSub(useUniqueDensity, virtualPixelRatio);
         }
@@ -2071,9 +2075,13 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     float density = GetVirtualPixelRatio(displayInfo);
     UpdateCurrentWindowOrientation(displayInfo->GetDisplayOrientation());
     int32_t orientation = static_cast<int32_t>(displayInfo->GetDisplayOrientation());
+    float oldDensity = virtualPixelRatio_;
     {
         std::lock_guard<std::mutex> lock(virtualPixelRatioMutex_);
         virtualPixelRatio_ = density;
+    }
+    if (!MathHelper::NearZero(oldDensity - density)) {
+        NotifyWindowDensityChange(density);
     }
     auto config = FillViewportConfig(rect, density, orientation, transformHint, GetDisplayId());
     if (reason == WindowSizeChangeReason::DRAG_END && keyFramePolicy_.stopping_) {
@@ -2788,6 +2796,10 @@ void WindowSessionImpl::UpdateDecorEnableToAce(bool isDecorEnable)
         if (mode == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
             decorVisible = false;
         }
+        decorVisible = updateDecorWhenDockAutoHide(decorVisible);
+        TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, isDockAutoHide:%{public}d, "
+            "isDecorHiddenByApp:%{public}d, isMaximizeInvoked:%{public}d, id:%{public}d", decorVisible,
+            windowSystemConfig_.isDockAutoHide_, isDecorHiddenByApp_, isMaximizeInvoked_, GetPersistentId());
         decorVisible = NeedShowDecorInOtherDisplay(decorVisible);
         uiContent->UpdateDecorVisible(decorVisible, isDecorEnable);
         return;
@@ -2823,13 +2835,26 @@ void WindowSessionImpl::UpdateDecorEnable(bool needNotify, WindowMode mode)
             if (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN && property_->IsDecorFullscreenDisabled()) {
                 decorVisible = false;
             }
+            decorVisible = updateDecorWhenDockAutoHide(decorVisible);
             decorVisible = NeedShowDecorInOtherDisplay(decorVisible);
-            TLOGI(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, id: %{public}d", decorVisible, GetPersistentId());
+            TLOGD(WmsLogTag::WMS_DECOR, "decorVisible:%{public}d, isDockAutoHide:%{public}d, "
+                "isDecorHiddenByApp:%{public}d, isMaximizeInvoked:%{public}d, id:%{public}d", decorVisible,
+                windowSystemConfig_.isDockAutoHide_, isDecorHiddenByApp_, isMaximizeInvoked_, GetPersistentId());
             uiContent->UpdateDecorVisible(decorVisible, IsDecorEnable());
             uiContent->NotifyWindowMode(mode);
         }
         NotifyModeChange(mode, IsDecorEnable());
     }
+}
+
+bool WindowSessionImpl::updateDecorWhenDockAutoHide(bool decorVisible)
+{
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    if (isPcMode && windowSystemConfig_.isDockAutoHide_ && !isDecorHiddenByApp_ && !isMaximizeInvoked_ && !IsAnco() &&
+        GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        decorVisible = false;
+    }
+    return decorVisible;
 }
 
 bool WindowSessionImpl::NeedShowDecorInOtherDisplay(bool decorVisible)
@@ -4126,6 +4151,7 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
         return WMError::WM_ERROR_NULLPTR;
     }
     uiContent->SetContainerModalTitleVisible(isVisible, true);
+    isDecorHiddenByApp_ = !isVisible;
     handler_->PostTask([weakWindow = wptr(this), isVisible, where = __func__] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
@@ -4936,6 +4962,50 @@ void WindowSessionImpl::RecoverSessionListener()
             }
         }
     }
+    RecoverDensityChangeListener();
+}
+
+void WindowSessionImpl::RecoverDensityChangeListener()
+{
+    auto persistentId = GetPersistentId();
+    bool hasDisplayIdListener = false;
+    bool hasSystemDensityListener = false;
+    bool hasWindowDensityListener = false;
+    {
+        std::lock_guard<std::mutex> lockListener(displayIdChangeListenerMutex_);
+        auto iter = displayIdChangeListeners_.find(persistentId);
+        hasDisplayIdListener = iter != displayIdChangeListeners_.end() && !iter->second.empty();
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
+        auto iter = systemDensityChangeListeners_.find(persistentId);
+        hasSystemDensityListener = iter != systemDensityChangeListeners_.end() && !iter->second.empty();
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowDensityChangeListenerMutex_);
+        auto iter = windowDensityChangeListeners_.find(persistentId);
+        hasWindowDensityListener = iter != windowDensityChangeListeners_.end() && !iter->second.empty();
+    }
+    if (!hasDisplayIdListener && !hasSystemDensityListener && !hasWindowDensityListener) {
+        return;
+    }
+
+    WindowDensityInfo densityInfo {};
+    WMError ret = GetWindowDensityInfo(densityInfo);
+    if (ret != WMError::WM_OK) {
+        TLOGW(WmsLogTag::WMS_RECOVER, "recover density listener failed, persistentId:%{public}d, ret:%{public}d",
+            persistentId, static_cast<int32_t>(ret));
+        return;
+    }
+    if (hasDisplayIdListener) {
+        NotifyDisplayIdChange(GetDisplayId());
+    }
+    if (hasSystemDensityListener) {
+        NotifySystemDensityChange(densityInfo.systemDensity);
+    }
+    if (hasWindowDensityListener) {
+        NotifyWindowDensityChange(GetVirtualPixelRatio());
+    }
 }
 
 template<typename T>
@@ -5297,6 +5367,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::mutex> lockListener(systemDensityChangeListenerMutex_);
         ClearUselessListeners(systemDensityChangeListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::mutex> lockListener(windowDensityChangeListenerMutex_);
+        ClearUselessListeners(windowDensityChangeListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(acrossDisplaysChangeListenerMutex_);
@@ -7084,6 +7158,20 @@ WMError WindowSessionImpl::UnregisterSystemDensityChangeListener(const ISystemDe
     return UnregisterListenerInMap(systemDensityChangeListeners_, GetPersistentId(), listener);
 }
 
+WMError WindowSessionImpl::RegisterWindowDensityChangeListener(const IWindowDensityChangeListenerSptr& listener)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}d", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(windowDensityChangeListenerMutex_);
+    return RegisterListener(windowDensityChangeListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterWindowDensityChangeListener(const IWindowDensityChangeListenerSptr& listener)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "name=%{public}s, id=%{public}d", GetWindowName().c_str(), GetPersistentId());
+    std::lock_guard<std::mutex> lockListener(windowDensityChangeListenerMutex_);
+    return UnregisterListener(windowDensityChangeListeners_[GetPersistentId()], listener);
+}
+
 WMError WindowSessionImpl::RegisterAcrossDisplaysChangeListener(
     const IAcrossDisplaysChangeListenerSptr& listener)
 {
@@ -7252,6 +7340,12 @@ EnableIfSame<T, ISystemDensityChangeListener,
 }
 
 template<typename T>
+EnableIfSame<T, IWindowDensityChangeListener, std::vector<IWindowDensityChangeListenerSptr>> WindowSessionImpl::GetListeners()
+{
+    return windowDensityChangeListeners_[GetPersistentId()];
+}
+
+template<typename T>
 EnableIfSame<T, IAcrossDisplaysChangeListener, std::vector<IAcrossDisplaysChangeListenerSptr>> WindowSessionImpl::GetListeners()
 {
     return acrossDisplaysChangeListeners_[GetPersistentId()];
@@ -7308,6 +7402,18 @@ WSError WindowSessionImpl::NotifySystemDensityChange(float density)
     for (const auto& listener : systemDensityChangeListeners) {
         if (listener != nullptr) {
             listener->OnSystemDensityChanged(density);
+        }
+    }
+    return WSError::WS_OK;
+}
+
+WSError WindowSessionImpl::NotifyWindowDensityChange(float density)
+{
+    std::lock_guard<std::mutex> lock(windowDensityChangeListenerMutex_);
+    const auto& windowDensityChangeListeners = GetListeners<IWindowDensityChangeListener>();
+    for (const auto& listener : windowDensityChangeListeners) {
+        if (listener != nullptr) {
+            listener->OnWindowDensityChanged(density);
         }
     }
     return WSError::WS_OK;
@@ -8276,6 +8382,11 @@ WSError WindowSessionImpl::SwitchFreeMultiWindow(bool enable)
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::ConfigDockAutoHide(bool isDockAutoHide)
+{
+    return WSError::WS_OK;
+}
+
 WSError WindowSessionImpl::NotifyDialogStateChange(bool isForeground)
 {
     return WSError::WS_OK;
@@ -8453,12 +8564,15 @@ WMError WindowSessionImpl::RestoreFloatViewMainWindow(const std::shared_ptr<AAFw
     return WMError::WM_OK;
 }
 
-WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
+WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode, bool isGetParentStatus, MaximizeMode maximizeMode,
+    bool isLayoutFullScreen)
 {
+    auto maximizeModeValue = isGetParentStatus ? maximizeMode : property_->GetMaximizeMode();
+    auto immersiveModeEnabled = isGetParentStatus ? isLayoutFullScreen : GetImmersiveModeEnabledState();
     auto windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
     if (mode == WindowMode::WINDOW_MODE_FLOATING) {
         windowStatus = WindowStatus::WINDOW_STATUS_FLOATING;
-        if (property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        if (maximizeModeValue == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
             windowStatus = WindowStatus::WINDOW_STATUS_MAXIMIZE;
         }
     } else if (mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
@@ -8466,7 +8580,7 @@ WindowStatus WindowSessionImpl::GetWindowStatusInner(WindowMode mode)
     }
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
         if (IsPcOrPadFreeMultiWindowMode() && GetTargetAPIVersion() >= 14) { // 14: isolated version
-            windowStatus = GetImmersiveModeEnabledState() ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
+            windowStatus = immersiveModeEnabled ? WindowStatus::WINDOW_STATUS_FULLSCREEN :
                 WindowStatus::WINDOW_STATUS_MAXIMIZE;
         } else {
             windowStatus = WindowStatus::WINDOW_STATUS_FULLSCREEN;
@@ -8573,9 +8687,10 @@ void WindowSessionImpl::NotifyParentWindowSizeChange(Rect rect)
 }
 
 /** @note @window.layout */
-void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode)
+void WindowSessionImpl::NotifyParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+    bool isLayoutFullScreen)
 {
-    auto windowStatus = GetWindowStatusInner(mode);
+    auto windowStatus = GetWindowStatusInner(mode, true, maximizeMode, isLayoutFullScreen);
     TLOGI(WmsLogTag::WMS_LAYOUT, " id:%{public}d, windowStatus:%{public}u, windowMode:%{public}u",
         GetPersistentId(), windowStatus,  mode);
     auto lastStatus = lastStatusWhenNotifyParentStatusChange_.load();

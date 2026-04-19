@@ -327,6 +327,8 @@ public:
     WMError UnregisterDisplayIdChangeListener(const IDisplayIdChangeListenerSptr& listener) override;
     WMError RegisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
     WMError UnregisterSystemDensityChangeListener(const ISystemDensityChangeListenerSptr& listener) override;
+    WMError RegisterWindowDensityChangeListener(const IWindowDensityChangeListenerSptr& listener) override;
+    WMError UnregisterWindowDensityChangeListener(const IWindowDensityChangeListenerSptr& listener) override;
     WMError RegisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
     WMError UnregisterAcrossDisplaysChangeListener(const IAcrossDisplaysChangeListenerSptr& listener) override;
     WMError RegisterWindowNoInteractionListener(const IWindowNoInteractionListenerSptr& listener) override;
@@ -473,6 +475,10 @@ public:
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
+    void SetDockAutoHide(bool isDockAutoHide)
+    {
+        windowSystemConfig_.isDockAutoHide_ = isDockAutoHide;
+    }
 
     /*
      * Window Decor listener
@@ -494,6 +500,7 @@ public:
 
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void RecoverSessionListener();
+    void RecoverDensityChangeListener();
     void SetDefaultDisplayIdIfNeed();
     WMError RegisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
     WMError UnregisterWindowRectChangeListener(const sptr<IWindowRectChangeListener>& listener) override;
@@ -553,7 +560,8 @@ public:
         override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override { return WSError::WS_OK; }
     WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override { return WSError::WS_OK; }
-    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override { return WSError::WS_OK; }
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
     WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override { return WSError::WS_DO_NOTHING; }
@@ -722,6 +730,10 @@ protected:
     WMError UnregisterListenerInMap(std::map<int32_t, std::vector<sptr<T>>>& listenerMap,
         int32_t persistentId, const sptr<T>& listener)
     {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
+            return WMError::WM_ERROR_NULLPTR;
+        }
         auto it = listenerMap.find(persistentId);
         if (it == listenerMap.end()) {
             return WMError::WM_OK;
@@ -755,6 +767,7 @@ protected:
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
     bool NeedShowDecorInOtherDisplay(bool decorVisible);
+    bool updateDecorWhenDockAutoHide(bool decorVisible);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     void NotifyFreeWindowModeChange(bool isInFreeWindowMode);
     WMError UpdateProperty(WSPropertyChangeAction action);
@@ -773,7 +786,7 @@ protected:
     static sptr<Window> FindWindowById(uint32_t winId);
     void NotifyWindowStatusChange(WindowMode mode);
     void NotifyParentWindowSizeChange(Rect rect);
-    void NotifyParentWindowStatusChange(WindowMode mode);
+    void NotifyParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode, bool isLayoutFullScreen);
     void NotifyTransformChange(const Transform& transForm) override;
     void NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform) override;
     bool IsKeyboardEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const;
@@ -789,7 +802,9 @@ protected:
     WMError UnregisterExtensionAvoidAreaChangeListener(const sptr<IAvoidAreaChangedListener>& listener);
 
     void RefreshNoInteractionTimeoutMonitor();
-    WindowStatus GetWindowStatusInner(WindowMode mode);
+    WindowStatus GetWindowStatusInner(WindowMode mode, bool isGetParentStatus = false,
+        MaximizeMode maximizeMode = MaximizeMode::MODE_AVOID_SYSTEM_BAR,
+        bool isLayoutFullScreen = false);
 
     /*
      * PC Event Filter
@@ -876,6 +891,7 @@ protected:
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     WSError SwitchFreeMultiWindow(bool enable) override;
+    WSError ConfigDockAutoHide(bool isDockAutoHide) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
     bool IsFreeMultiWindowMode() const
@@ -1006,6 +1022,7 @@ protected:
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<bool> defaultDensityEnabledStageConfig_ = false;
     WSError NotifySystemDensityChange(float density);
+    WSError NotifyWindowDensityChange(float density);
     void RegisterWindowInspectorCallback();
     uint32_t GetTargetAPIVersionByApplicationInfo() const;
 
@@ -1033,6 +1050,8 @@ protected:
      */
     bool grayOutMaximizeButton_ = false;
     void NotifyTitleChange(bool isShow, int32_t height);
+    bool isDecorHiddenByApp_ = false;
+    bool isMaximizeInvoked_ = false;
 
     /**
      * Game Prelaunch flag
@@ -1078,6 +1097,8 @@ private:
     EnableIfSame<T, IDisplayIdChangeListener, std::vector<IDisplayIdChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, ISystemDensityChangeListener, std::vector<ISystemDensityChangeListenerSptr>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowDensityChangeListener, std::vector<IWindowDensityChangeListenerSptr>> GetListeners();
     template<typename T>
     EnableIfSame<T, IAcrossDisplaysChangeListener, std::vector<IAcrossDisplaysChangeListenerSptr>> GetListeners();
     template<typename T>
@@ -1262,6 +1283,8 @@ private:
     static std::map<int32_t, std::vector<IDisplayIdChangeListenerSptr>> displayIdChangeListeners_;
     static std::mutex systemDensityChangeListenerMutex_;
     static std::unordered_map<int32_t, std::vector<ISystemDensityChangeListenerSptr>> systemDensityChangeListeners_;
+    static std::mutex windowDensityChangeListenerMutex_;
+    static std::unordered_map<int32_t, std::vector<IWindowDensityChangeListenerSptr>> windowDensityChangeListeners_;
     static std::recursive_mutex acrossDisplaysChangeListenerMutex_;
     static std::unordered_map<int32_t, std::vector<IAcrossDisplaysChangeListenerSptr>>
         acrossDisplaysChangeListeners_;

@@ -683,6 +683,20 @@ public:
 };
 using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
 
+/**
+ * @class IWindowDensityChangeListener
+ *
+ * @brief Listener to observe window density changed.
+ */
+class IWindowDensityChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window density changed.
+     */
+    virtual void OnWindowDensityChanged(float density) {}
+};
+using IWindowDensityChangeListenerSptr = sptr<IWindowDensityChangeListener>;
+
 class IAcrossDisplaysChangeListener : virtual public RefBase {
 public:
     /**
@@ -3375,6 +3389,24 @@ public:
      */
     virtual WMError UnregisterSystemDensityChangeListener(
         const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Register window density change listener.
+     *
+     * @param listener IWindowDensityChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowDensityChangeListener(
+        const IWindowDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window density change listener.
+     *
+     * @param listener IWindowDensityChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowDensityChangeListener(
+        const IWindowDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
      * @brief Register main window full screen across multi display change listener.

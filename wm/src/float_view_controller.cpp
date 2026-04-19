@@ -163,7 +163,7 @@ WMError FloatViewController::PrepareStartFloatView(bool showWhenCreate)
         return WMError::WM_ERROR_FV_START_FAILED;
     }
 
-    if (curState_ == FvWindowState::FV_STATE_STARTING || curState_ == FvWindowState::FV_STATE_STARTED) {
+    if (curState_ == FvWindowState::FV_STATE_STARTING || IsStateWithWindow(curState_)) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "fvWindow state is: %{public}u, id: %{public}u, mainWindow: %{public}u",
             curState_, (window_ == nullptr) ? INVALID_WINDOW_ID : window_->GetWindowId(), mainWindowId_);
         return WMError::WM_ERROR_FV_REPEAT_OPERATION;
@@ -279,6 +279,10 @@ WMError FloatViewController::StopFloatViewFromClientSingle()
             TLOGE(WmsLogTag::WMS_SYSTEM, "Repeat stop request, curState: %{public}u", curState_);
             return WMError::WM_ERROR_FV_REPEAT_OPERATION;
         }
+        if (!IsStateWithWindow(curState_)) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "curState cannot stop: %{public}u", curState_);
+            return WMError::WM_ERROR_FV_INVALID_STATE;
+        }
         if (window_ == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when stop fv");
             return WMError::WM_ERROR_INVALID_WINDOW;
@@ -360,14 +364,6 @@ WMError FloatViewController::SetUIContext(const std::string &contextUrl,
     std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetUIPath(contextUrl);
     option_.SetStorage(contentStorage);
-    if (window_ == nullptr) {
-        if (IsStateWithWindow(curState_)) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
-            return WMError::WM_ERROR_INVALID_WINDOW;
-        }
-        TLOGI(WmsLogTag::WMS_SYSTEM, "SetUIContext when window not created, save info");
-        return WMError::WM_OK;
-    }
     return SetUIContextInner();
 }
 
@@ -381,19 +377,18 @@ WMError FloatViewController::SetUIContext(const std::string &contextUrl, const a
     std::lock_guard<std::mutex> lock(controllerMutex_);
     option_.SetUIPath(contextUrl);
     option_.SetStorage(contentStorage);
-    if (window_ == nullptr) {
-        if (IsStateWithWindow(curState_)) {
-            TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
-            return WMError::WM_ERROR_INVALID_WINDOW;
-        }
-        TLOGI(WmsLogTag::WMS_SYSTEM, "SetUIContext when window not created, save info");
-        return WMError::WM_OK;
-    }
     return SetUIContextInner();
 }
 
 WMError FloatViewController::SetUIContextInner()
 {
+    if (window_ == nullptr) {
+        if (IsStateWithWindow(curState_)) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when SetUIContext");
+            return WMError::WM_ERROR_INVALID_WINDOW;
+        }
+        return WMError::WM_OK;
+    }
     if (type_ == APIType::NAPI) {
         napi_value storage = nullptr;
         auto contentStorage = option_.GetStorage();
