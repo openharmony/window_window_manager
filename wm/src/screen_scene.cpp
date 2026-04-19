@@ -171,7 +171,7 @@ void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
         auto rsUICtx = GetRSUIContext();
         if (rsUICtx == nullptr) {
             TLOGE(WmsLogTag::DMS, "no rsUICtx");
-            continue;
+            return;
         }
         if (auto rsInterface = rsUICtx->GetRSRenderInterface()) {
             bool ret = rsInterface->SetGlobalDarkColorMode(isDark);
