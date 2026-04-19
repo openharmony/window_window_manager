@@ -562,7 +562,7 @@ bool SurfaceDraw::GetSurfaceSnapshot(const std::shared_ptr<RSSurfaceNode> surfac
     std::shared_ptr<Media::PixelMap>&pixelMap, int32_t timeoutMs, float scaleW, float scaleH)
 {
     if (surfaceNode == nullptr) {
-        WLOGFE("surfaceNode is null");
+        WLOGFE("surfaceNode or rsUIContext is null");
         return false;
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "SurfaceDraw:GetSurfaceSnapshot(%llu)", surfaceNode->GetId());
