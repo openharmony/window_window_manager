@@ -233,6 +233,7 @@ public:
     void SetRootSceneContext(const std::weak_ptr<AbilityRuntime::Context>& contextWeak);
     sptr<RootSceneSession> GetRootSceneSession();
     sptr<SceneSession> GetSceneSession(int32_t persistentId);
+    sptr<SceneSession> GetSceneSessionNoLock(int32_t persistentId);
     bool CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want, AppExecFwk::AbilityInfo& abilityInfo);
     sptr<SceneSession> GetMainParentSceneSession(int32_t persistentId,
         const std::map<int32_t, sptr<SceneSession>>& sessionMap);
@@ -1880,6 +1881,7 @@ private:
     WMError FlushSessionBlackListInfoMapWhenRemove(ScreenId screenId);
     void UpdateVirtualScreenBlackList(ScreenId screenId);
     void AddSkipSurfaceNodeWhenAttach(int32_t windowId, const std::string& bundleName, uint64_t surfaceNodeId);
+    SessionState GetSessionStateForPrivacy(const sptr<SceneSession>& session);
     std::unordered_map<std::string, std::unordered_set<std::string>> bundleRSBlackListConfigMap_;
     inline static const std::string WMS_DEFAULT = "WMS_DEFAULT";
     sptr<AppExecFwk::IAppMgr> appMgrClient_ = nullptr;

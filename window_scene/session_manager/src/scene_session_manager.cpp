@@ -2052,6 +2052,15 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return nullptr;
 }
 
+sptr<SceneSession> SceneSessionManager::GetSceneSessionNoLock(int32_t persistentId)
+{
+    if (auto it = sceneSessionMap_.find(persistentId); it != sceneSessionMap_.end()) {
+        return it->second;
+    }
+    TLOGD(WmsLogTag::DEFAULT, "no scene session with id=%{public}d", persistentId);
+    return nullptr;
+}
+
 bool SceneSessionManager::CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
     AppExecFwk::AbilityInfo& abilityInfo)
 {
@@ -10072,13 +10081,14 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         }
         auto sessionProperty = sceneSession->GetSessionProperty();
         auto currentDisplayId = sessionProperty->GetDisplayId();
-        if (displayId != currentDisplayId) {
-            continue;
-        }
-        bool isForeground = sceneSession->GetRealSessionState() == SessionState::STATE_FOREGROUND ||
-                            sceneSession->GetRealSessionState() == SessionState::STATE_ACTIVE;
         bool isPrivate = sessionProperty->GetPrivacyMode() ||
             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
+        if (displayId != currentDisplayId || !isPrivate) {
+            continue;
+        }
+        auto sessionState = GetSessionStateForPrivacy(sceneSession);
+        bool isForeground = sessionState == SessionState::STATE_FOREGROUND ||
+                            sessionState == SessionState::STATE_ACTIVE;
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "found privacy win=[%{public}d, %{public}s], display=%{public}" PRIu64,
@@ -10099,6 +10109,43 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
     if (privacyBundles.empty()) {
         privacyBundles[displayId] = std::unordered_set<std::string>();
     }
+}
+
+SessionState SceneSessionManager::GetSessionStateForPrivacy(const sptr<SceneSession>& session)
+{
+    auto state = SessionState::STATE_DISCONNECT;
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_MAIN, "session is null");
+        return state;
+    }
+    state = session->GetSessionState();
+    auto winType = session->GetWindowType();
+    if (!session->IsSessionForeground()) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}u",
+            session->GetWindowId(), session->GetWindowName().c_str(), state, winType);
+        return state;
+    }
+    if (auto parent = session->GetParentSession()) {
+        state = parent->GetSessionState();
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}u, parentId=%{public}d",
+            session->GetWindowId(), session->GetWindowName().c_str(), state, winType, parent->GetWindowId());
+    }
+    if (WindowHelper::IsSubWindow(winType) || WindowHelper::IsDialogWindow(winType)) {
+        auto parent = GetSceneSessionNoLock(session->GetSessionProperty()->GetParentPersistentId());
+        while (parent != nullptr && parent->IsSessionForeground()) {
+            parent = GetSceneSessionNoLock(parent->GetSessionProperty()->GetParentPersistentId());
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], parentId=%{public}d",
+                session->GetWindowId(), session->GetWindowName().c_str(), parent->GetWindowId());
+        }
+        if (parent != nullptr) {
+            state = parent->GetSessionState();
+            TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+                "win=[%{public}d, %{public}s], finalState=%{public}u, parentId=%{public}d",
+                session->GetWindowId(), session->GetWindowName().c_str(), state, parent->GetWindowId());
+        }
+    }
+    return state;
 }
 
 void SceneSessionManager::UpdateSessionPrivacyForSuperFold(const sptr<SceneSession>& sceneSession, DisplayId displayId,

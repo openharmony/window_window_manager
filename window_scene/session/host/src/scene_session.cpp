@@ -7731,6 +7731,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
         {
             std::lock_guard<std::recursive_mutex> lock(session->sessionInfoMutex_);
             session->sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+            session->sessionInfo_.closeAbilityWant->CloseAllFd();
             session->sessionInfo_.errorCode = abilitySessionInfo->errorCode;
             session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
         }
