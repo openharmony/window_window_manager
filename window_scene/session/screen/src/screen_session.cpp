@@ -844,6 +844,12 @@ void ScreenSession::SetPropertyNeedNotified(const ScreenProperty& property)
     isNeedNotify = true;
 }
 
+ScreenProperty ScreenSession::GetPropertyNeedNotified()
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    return propertyNeedNotified_;
+}
+
 void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty,
     const ScreenProperty& eventPara)
 {
@@ -1798,7 +1804,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
+        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) {
         isVerticalScreen = true;
     }
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||

@@ -61,7 +61,8 @@ public:
     WSError GetTopNavDestinationName(std::string& topNavDestName) override;
     WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) override;
     WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) override;
-    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode) override;
+    WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen) override;
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     void NotifyForegroundInteractiveStatus(bool interactive) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
@@ -80,6 +81,7 @@ public:
     WSError UpdateDisplayId(uint64_t displayId) override;
     void NotifyDisplayMove(DisplayId from, DisplayId to) override;
     WSError SwitchFreeMultiWindow(bool enable) override;
+    WSError ConfigDockAutoHide(bool isDockAutoHide) override;
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
     void NotifyKeyboardPanelInfoChange(const KeyboardPanelInfo& keyboardPanelInfo) override;
     void SetUniqueVirtualPixelRatio(bool useUniqueDensity, float virtualPixelRatio) override;
@@ -90,6 +92,8 @@ public:
     WSError NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& currentInfo) override;
     WSError NotifyPageRotationIsIgnored() override;
     RotationChangeResult NotifyRotationChange(const RotationChangeInfo& rotationChangeInfo) override;
+    WSError HideSubWindowZLevelAboveParentLoosened() override;
+    WSError ShowSubWindowZLevelAboveParentLoosened() override;
 
     // UIExtension
     WSError NotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;

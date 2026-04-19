@@ -5499,6 +5499,15 @@ int32_t SceneSession::GetMainSessionId()
     return INVALID_SESSION_ID;
 }
 
+int32_t SceneSession::GetMainSessionOrLoosenedSessionId()
+{
+    const auto& mainSession = GetMainSessionOrLoosenedSession();
+    if (mainSession) {
+        return mainSession->GetPersistentId();
+    }
+    return INVALID_SESSION_ID;
+}
+
 std::string SceneSession::GetWindowNameAllType() const
 {
     if (GetSessionInfo().isSystem_) {
@@ -7722,6 +7731,7 @@ WSError SceneSession::NotifySessionExceptionInner(const sptr<AAFwk::SessionInfo>
         {
             std::lock_guard<std::recursive_mutex> lock(session->sessionInfoMutex_);
             session->sessionInfo_.closeAbilityWant = std::make_shared<AAFwk::Want>(abilitySessionInfo->want);
+            session->sessionInfo_.closeAbilityWant->CloseAllFd();
             session->sessionInfo_.errorCode = abilitySessionInfo->errorCode;
             session->sessionInfo_.errorReason = abilitySessionInfo->errorReason;
         }
@@ -8993,7 +9003,9 @@ WSError SceneSession::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorIn
             Rect parentRect = {rect.posX_, rect.posY_, rect.width_, rect.height_};
             if (session->sessionStage_) {
                 session->sessionStage_->NotifySubWindowAfterParentWindowSizeChange(parentRect);
-                session->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(parentSession->GetWindowMode());
+                auto parentProperty = parentSession->GetSessionProperty();
+                session->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(parentSession->GetWindowMode(),
+                    parentProperty->GetMaximizeMode(), session->IsLayoutFullScreen());
             }
         } else {
             TLOGI(WmsLogTag::WMS_SUB, "func is null");
@@ -9618,6 +9630,32 @@ WindowDecoration SceneSession::GetWindowDecoration() const
     WindowDecoration decoration{0, getTopDecorInPx(), 0, 0};
     TLOGD(WmsLogTag::WMS_DECOR, "decoration: %{public}s", decoration.ToString().c_str());
     return decoration;
+}
+
+WSError SceneSession::ConfigDockAutoHide(bool isDockAutoHide)
+{
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    auto property = GetSessionProperty();
+    if (property == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "property is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    if (sessionInfo_.abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::DEFAULT, "abilityInfo is nullptr!");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    systemConfig_.isDockAutoHide_ = isDockAutoHide;
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "windowId: %{public}d isDockAutoHide: %{public}d",
+        GetPersistentId(), isDockAutoHide);
+    return sessionStage_->ConfigDockAutoHide(isDockAutoHide);
 }
 
 void SceneSession::SetNeedSyncSessionRect(bool needSync)
@@ -10537,10 +10575,14 @@ void SceneSession::NotifySubSessionParentSizeChange(Rect rect)
 
 void SceneSession::NotifySubSessionParentStatusChange(WindowMode mode)
 {
+    auto property = GetSessionProperty();
+    MaximizeMode maximizeMode = property->GetMaximizeMode();
+    bool isLayoutFullScreen = IsLayoutFullScreen();
     TLOGI(WmsLogTag::WMS_LAYOUT, "subSessionSize: %{public}zu", GetSubSession().size());
     for(const auto& subSession : GetSubSession()) {
         if (subSession && subSession->sessionStage_ && subSession->GetWindowAnchorInfo().isAnchoredByAttach_) {
-            subSession->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(mode);
+            subSession->sessionStage_->NotifySubWindowAfterParentWindowStatusChange(mode, maximizeMode,
+                isLayoutFullScreen);
         }
     }
 }

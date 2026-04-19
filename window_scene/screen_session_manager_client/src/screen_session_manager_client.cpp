@@ -231,6 +231,18 @@ sptr<ScreenSession> ScreenSessionManagerClient::GetScreenSession(ScreenId screen
     return iter->second;
 }
 
+static inline bool IsBoundsChanged(RRect oldBounds, RRect newBounds)
+{
+    if (oldBounds.rect_.left_ == newBounds.rect_.left_ && newBounds.rect_.top_ == oldBounds.rect_.top_) {
+        if ((oldBounds.rect_.width_ == newBounds.rect_.width_ && oldBounds.rect_.height_ == newBounds.rect_.height_) ||
+            (oldBounds.rect_.height_ == newBounds.rect_.width_ && oldBounds.rect_.width_ == newBounds.rect_.height_)) {
+            return false;
+        }
+        return true;
+    }
+    return true;
+}
+
 void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
     const ScreenProperty& property, ScreenPropertyChangeReason reason)
 {
@@ -240,6 +252,12 @@ void ScreenSessionManagerClient::OnPropertyChanged(ScreenId screenId,
         return;
     }
     if (reason == ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE) {
+        if (!IsBoundsChanged(screenSession->GetScreenProperty().GetBounds(), property.GetBounds()) &&
+            !IsBoundsChanged(screenSession->GetPropertyNeedNotified().GetBounds(), property.GetBounds())) {
+            TLOGNFI(WmsLogTag::DMS, "bounds not change");
+            return;
+        }
+        TLOGNFI(WmsLogTag::DMS, "bounds change");
         screenSession->NotifyListenerPropertyChange(property, reason);
         screenSession->SetPropertyNeedNotified(property);
         auto oldProperty = screenSession->GetScreenProperty();

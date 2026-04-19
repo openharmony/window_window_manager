@@ -661,30 +661,6 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnPropertyChanged03
- * @tc.desc: OnPropertyChanged03 test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
-{
-    ScreenId screenId = 0;
-    ScreenProperty property;
-
-    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
-    sptr<ScreenSession> screenSession = new ScreenSession(0, property, 0);
-    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
-    property.SetMirrorWidth(100);
-    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->currentstate_ = SuperFoldStatus::KEYBOARD;
-    screenSessionManagerClient_->OnPropertyChanged(screenId, property, reason);
-    EXPECT_NE(screenSession->GetScreenProperty().GetMirrorWidth(), 100);
-
-    screenSessionManagerClient_->currentstate_ = SuperFoldStatus::UNKNOWN;
-    screenSessionManagerClient_->OnPropertyChanged(screenId, property, reason);
-    EXPECT_EQ(screenSession->GetScreenProperty().GetMirrorWidth(), 100);
-}
-
-/**
  * @tc.name: OnFoldPropertyChanged
  * @tc.desc: OnFoldPropertyChanged test
  * @tc.type: FUNC
@@ -2578,6 +2554,138 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPhysicalVisibleMaskToDisplayNode04, 
     EXPECT_TRUE(logMsg.find("screen width") != std::string::npos);
     logMsg.clear();
     LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: OnPropertyChanged03
+ * @tc.desc: OnPropertyChanged03 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged03, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ScreenProperty property1, property2;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    RRect bounds1, bounds2, bounds3;
+    bounds1.rect_.left_ = 0;
+    bounds1.rect_.top_ = 0;
+    bounds1.rect_.width_ = 100;
+    bounds1.rect_.height_ = 200;
+
+    bounds2.rect_.left_ = 0;
+    bounds2.rect_.top_ = 0;
+    bounds2.rect_.width_ = 200;
+    bounds2.rect_.height_ = 100;
+
+    bounds3.rect_.left_ = 0;
+    bounds3.rect_.top_ = 0;
+    bounds3.rect_.width_ = 100;
+    bounds3.rect_.height_ = 100;
+
+    property2.SetBounds(bounds2);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds3);
+    screenSession->SetScreenProperty(property2);
+    screenSession->SetPropertyNeedNotified(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+}
+
+/**
+ * @tc.name: OnPropertyChanged04
+ * @tc.desc: OnPropertyChanged04 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged04, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ScreenProperty property1, property2;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    RRect bounds1, bounds2;
+    bounds1.rect_.left_ = 0;
+    bounds1.rect_.top_ = 0;
+    bounds1.rect_.width_ = 100;
+    bounds1.rect_.height_ = 200;
+
+    bounds2.rect_.left_ = 0;
+    bounds2.rect_.top_ = 0;
+    bounds2.rect_.width_ = 200;
+    bounds2.rect_.height_ = 100;
+
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds2);
+    screenSession->SetScreenProperty(property1);
+    screenSession->SetPropertyNeedNotified(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds not change") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
+}
+
+/**
+ * @tc.name: OnPropertyChanged05
+ * @tc.desc: OnPropertyChanged05 test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged05, TestSize.Level1)
+{
+    logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+    ScreenId screenId = 0;
+    ScreenProperty property1, property2;
+    ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE;
+    sptr<ScreenSession> screenSession = new ScreenSession(0, property1, 0);
+    screenSessionManagerClient_->screenSessionMap_.emplace(screenId, screenSession);
+    ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
+
+    RRect bounds1, bounds2;
+    bounds1.rect_.left_ = 0;
+    bounds1.rect_.top_ = 0;
+    bounds1.rect_.width_ = 100;
+    bounds1.rect_.height_ = 200;
+
+    bounds2.rect_.left_ = 0;
+    bounds2.rect_.top_ = 1;
+    bounds2.rect_.width_ = 200;
+    bounds2.rect_.height_ = 100;
+
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds2);
+    screenSession->SetScreenProperty(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+
+    bounds2.rect_.left_ = 1;
+    bounds2.rect_.top_ = 2;
+    property1.SetBounds(bounds1);
+    property2.SetBounds(bounds2);
+    screenSession->SetScreenProperty(property1);
+    screenSessionManagerClient_->OnPropertyChanged(screenId, property2, reason);
+    EXPECT_TRUE(logMsg.find("bounds change") != std::string::npos);
+    logMsg.clear();
+    LOG_SetCallback(nullptr);
+    screenSessionManagerClient_->screenSessionMap_.erase(screenId);
 }
 
 /**

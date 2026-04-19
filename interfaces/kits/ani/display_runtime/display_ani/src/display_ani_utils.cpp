@@ -263,7 +263,7 @@ void DisplayAniUtils::CvtDisplayHelper(sptr<Display> display, ani_env* env, ani_
     }
     if (supportedRefreshRates.size() != 0) {
         ani_array supportedRefreshRatesAni;
-        CreateAniArrayInt(env, hdrFormats.size(), &supportedRefreshRatesAni, supportedRefreshRates);
+        CreateAniArrayInt(env, supportedRefreshRates.size(), &supportedRefreshRatesAni, supportedRefreshRates);
         env->Object_SetFieldByName_Ref(obj, propName("supportedRefreshRates").c_str(),
             static_cast<ani_ref>(supportedRefreshRatesAni));
     }
