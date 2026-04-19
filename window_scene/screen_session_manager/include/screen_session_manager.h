@@ -307,8 +307,9 @@ public:
 
     void DisablePowerOffRenderControl(ScreenId screenId) override;
     bool SetVirtualScreenStatus(ScreenId screenId, VirtualScreenStatus screenStatus) override;
-    sptr<ScreenSession> GetOrCreateFakeScreenSession(sptr<ScreenSession> screenSession);
-    void InitFakeScreenSession(sptr<ScreenSession> screenSession);
+    sptr<ScreenSession> GetOrCreateFakeScreenSession(sptr<ScreenSession> screenSession,
+        sptr<IRemoteObject> connectToRenderToken = nullptr);
+    void InitFakeScreenSession(sptr<ScreenSession> screenSession, sptr<IRemoteObject> connectToRenderToken = nullptr);
 
     // Fold Screen
     void SetFoldDisplayMode(const FoldDisplayMode displayMode) override;
@@ -742,10 +743,11 @@ private:
         ScreenProperty property, sptr<IRemoteObject> connectToRenderToken = nullptr);
     std::shared_ptr<RSUIContext> GetRsUIContextByScreenId(ScreenId screenId);
 
-    /* physical screen session */
+/* physical screen session */
     sptr<ScreenSession> CreateFakePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
-        ScreenProperty property);
-    sptr<ScreenSession> GetFakePhysicalScreenSession(ScreenId screenId, ScreenId defScreenId, ScreenProperty property);
+        ScreenProperty property, sptr<IRemoteObject> connectToRenderToken = nullptr);
+    sptr<ScreenSession> GetFakePhysicalScreenSession(ScreenId screenId, ScreenId defScreenId, ScreenProperty property,
+        sptr<IRemoteObject> connectToRenderToken = nullptr);
     virtual void FreeDisplayMirrorNodeInner(const sptr<ScreenSession> mirrorSession);
     void MirrorSwitchNotify(ScreenId screenId);
     ScreenId GetDefaultScreenId();

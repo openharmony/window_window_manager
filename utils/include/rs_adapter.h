@@ -175,9 +175,8 @@ private:
 class RSAdapterUtil {
 public:
     static bool IsClientMultiInstanceEnabled();
-    static void InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector,
-                                 sptr<IRemoteObject> connectToRenderToken,
-                                 const std::shared_ptr<RSUIContext>& rsUiContext = nullptr);
+    static void InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector, sptr<IRemoteObject> connectToRenderToken,
+        const std::shared_ptr<RSUIContext>& rsUiContext = nullptr);
     static void SetRSUIContext(const std::shared_ptr<RSNode>& rsNode,
                                const std::shared_ptr<RSUIContext>& rsUIContext,
                                bool skipCheckInMultiInstance = false);

@@ -484,8 +484,7 @@ bool RSAdapterUtil::IsClientMultiInstanceEnabled()
 }
 
 void RSAdapterUtil::InitRSUIDirector(std::shared_ptr<RSUIDirector>& rsUIDirector,
-                                     sptr<IRemoteObject> connectToRenderToken,
-                                     const std::shared_ptr<RSUIContext>& rsUiContext)
+    sptr<IRemoteObject> connectToRenderToken, const std::shared_ptr<RSUIContext>& rsUiContext)
 {
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED();
     if (rsUIDirector) {

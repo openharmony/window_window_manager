@@ -544,10 +544,13 @@ std::shared_ptr<RSUIContext> AbstractScreen::GetRSUIContext() const
     return rsUIContext;
 }
 
-AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenController, ScreenId dmsId, ScreenId rsId,
-    std::string name, ScreenCombination combination, sptr<IRemoteObject> connectToRenderToken)
-    : AbstractScreen(screenController, name, dmsId, rsId, connectToRenderToken),
-    combination_(combination)
+AbstractScreenGroup::AbstractScreenGroup(sptr<AbstractScreenController> screenController, 
+                                         ScreenId dmsId, 
+                                         ScreenId rsId,
+                                         std::string name, 
+                                         ScreenCombination combination, 
+                                         sptr<IRemoteObject> connectToRenderToken)
+    : AbstractScreen(screenController, name, dmsId, rsId, connectToRenderToken), combination_(combination)
 {
     type_ = ScreenType::UNDEFINED;
     isScreenGroup_ = true;

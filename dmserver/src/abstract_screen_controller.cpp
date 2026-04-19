@@ -66,7 +66,8 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
         [this](ScreenId rsScreenId,
                ScreenEvent screenEvent,
                ScreenChangeReason reason,
-               sptr<IRemoteObject> connectToRenderToken) {
+               sptr<IRemoteObject> 
+                connectToRenderToken) {
             if (reason == ScreenChangeReason::HWCDEAD) {
                 TLOGE(WmsLogTag::DMS, "hwcdead, ignore");
                 return;
@@ -243,8 +244,8 @@ void AbstractScreenController::RegisterAbstractScreenCallback(sptr<AbstractScree
     }
 }
 
-void AbstractScreenController::OnRsScreenConnectionChange(ScreenId rsScreenId, ScreenEvent screenEvent,
-    sptr<IRemoteObject> connectToRenderToken)
+void AbstractScreenController::OnRsScreenConnectionChange(
+    ScreenId rsScreenId, ScreenEvent screenEvent, sptr<IRemoteObject> connectToRenderToken)
 {
     TLOGI(WmsLogTag::DMS, "RS screen event. rsScreenId:%{public}" PRIu64", defaultRsScreenId_:%{public}" PRIu64", "
         "event:%{public}u", rsScreenId, static_cast<uint64_t>(defaultRsScreenId_), static_cast<uint32_t>(screenEvent));
@@ -358,16 +359,16 @@ void AbstractScreenController::ProcessScreenConnected(ScreenId rsScreenId, sptr<
     }
 }
 
-sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(ScreenId rsScreenId,
-    sptr<IRemoteObject> connectToRenderToken)
+sptr<AbstractScreen> AbstractScreenController::InitAndGetScreen(
+    ScreenId rsScreenId, sptr<IRemoteObject> connectToRenderToken)
 {
     ScreenId dmsScreenId = screenIdManager_.CreateAndGetNewScreenId(rsScreenId);
     RSScreenCapability screenCapability = rsInterface_.GetScreenCapability(rsScreenId);
     TLOGI(WmsLogTag::DMS, "Screen name is %{public}s, phyWidth is %{public}u, phyHeight is %{public}u",
         screenCapability.GetName().c_str(), screenCapability.GetPhyWidth(), screenCapability.GetPhyHeight());
 
-    sptr<AbstractScreen> absScreen = new(std::nothrow) AbstractScreen(this, screenCapability.GetName(), dmsScreenId,
-        rsScreenId, connectToRenderToken);
+    sptr<AbstractScreen> absScreen = new(std::nothrow) AbstractScreen(this, screenCapability.GetName(), 
+        dmsScreenId, rsScreenId, connectToRenderToken);
     if (absScreen == nullptr) {
         TLOGE(WmsLogTag::DMS, "new AbstractScreen failed.");
         screenIdManager_.DeleteScreenId(dmsScreenId);

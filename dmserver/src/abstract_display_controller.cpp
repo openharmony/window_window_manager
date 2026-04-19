@@ -121,9 +121,8 @@ std::shared_ptr<Media::PixelMap> AbstractDisplayController::GetScreenSnapshot(Di
     }
     ScreenId dmsScreenId = abstractDisplay->GetAbstractScreenId();
     std::shared_ptr<RSDisplayNode> displayNode = abstractScreenController_->GetRSDisplayNodeByScreenId(dmsScreenId);
-    if (displayNode == nullptr || displayNode->GetRSUIContext() == nullptr ||
-        displayNode->GetRSUIContext()->GetRSRenderInterface() == nullptr) {
-        TLOGE(WmsLogTag::DMS, "displayNode or rsUIContext is nullptr");
+    if (displayNode == nullptr || displayNode->GetRSUIContext() == nullptr) {
+        TLOGE(WmsLogTag::DMS, "GetScreenSnapshot: displayNode or rsUIContext is nullptr");
         return nullptr;
     }
 
