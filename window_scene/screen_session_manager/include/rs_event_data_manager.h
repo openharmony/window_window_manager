@@ -32,6 +32,7 @@ public:
 
 class RSExtScreenUnsupportEventData : public RSEventDataBase {
 public:
+    ~RSExtScreenUnsupportEventData() override = default;
     RSExposedEventType GetEventType() const override;
     bool Marshalling(Parcel& parcel) const override;
     bool Unmarshalling(Parcel& parcel) override;
