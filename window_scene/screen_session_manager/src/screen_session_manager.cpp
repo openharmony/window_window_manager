@@ -2195,14 +2195,14 @@ void ScreenSessionManager::HandlePhysicalMirrorColorSpace(GraphicCM_ColorSpaceTy
         int32_t ret = RSInterfaces::GetInstance().SetScreenColorSpace(screenId, colorSpace);
         if (ret != StatusCode::SUCCESS) {
             TLOGE(WmsLogTag::DMS,
-                  "SetMirrorColorSpace fail! ret:%{public}d, screenId:%{public}llu, colorSpace:%{public}d",
+                  "SetMirrorColorSpace fail! ret:%{public}d, screenId:%{public}" PRIu64", colorSpace:%{public}d",
                   ret,
                   screenId,
                   colorSpace);
             return;
         }
         TLOGI(WmsLogTag::DMS,
-              "SetMirrorColorSpace success, screenId:%{public}llu, colorSpace:%{public}d",
+              "SetMirrorColorSpace success, screenId:%{public}" PRIu64", colorSpace:%{public}d",
               screenId,
               colorSpace);
     }
@@ -8016,7 +8016,7 @@ DMError ScreenSessionManager::MakeMirrorForRecord(const std::vector<ScreenId>& m
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
     auto realScreenId = SuperFoldPolicy::GetInstance().GetRealScreenId(mainScreenIds);
-    TLOGNFI(WmsLogTag::DMS, "realScreenId: %{public}llu", static_cast<uint64_t>(realScreenId));
+    TLOGNFI(WmsLogTag::DMS, "realScreenId: %{public}" PRIu64, static_cast<uint64_t>(realScreenId));
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice() && realScreenId != SCREEN_ID_INVALID) {
         DMRect mainScreenRect = SuperFoldPolicy::GetInstance().GetRecordRect(mainScreenIds);
         std::ostringstream oss;
