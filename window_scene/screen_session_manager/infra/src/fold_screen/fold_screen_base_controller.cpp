@@ -263,7 +263,7 @@ void FoldScreenBaseController::PowerkeySetScreenActiveRect()
     FoldScreenBasePolicy::GetInstance().PowerkeySetScreenActiveRect();
 }
 
-cosnt std::map<FoldDisplayMode, RRect>& FoldScreenBaseController::GetScreenActiveModeRectMap() const
+const std::map<FoldDisplayMode, RRect>& FoldScreenBaseController::GetScreenActiveModeRectMap() const
 {
     return FoldScreenBasePolicy::GetInstance().GetScreenActiveModeRectMap();
 }

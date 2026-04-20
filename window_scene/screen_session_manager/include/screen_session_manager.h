@@ -639,7 +639,7 @@ public:
         MultiScreenPositionOptions& dynamicScreenOptions, uint32_t adjacentPercentage, uint32_t staticHeight,
             uint32_t staticWidth, uint32_t dynamicHeight);
     void GetStaticAndDynamicSession();
-    const std::map<FoldDisplayMode, RRect>& GetScreenActiveModeRectMap() const;
+    const std::map<FoldDisplayMode, RRect>& GetScreenActiveModeRectMap();
 
     static bool GetScreenSessionMngSystemAbility();
     void RunFinishTask();

@@ -1011,7 +1011,7 @@ FoldDisplayMode FoldScreenBasePolicy::GetCurrentDisplayMode() const
     return currentDisplayMode_;
 }
 
-cosnt std::map<FoldDisplayMode, RRect>& FoldScreenBasePolicy::GetScreenActiveModeRectMap() const
+const std::map<FoldDisplayMode, RRect>& FoldScreenBasePolicy::GetScreenActiveModeRectMap() const
 {
     return screenActiveModeRectMap_;
 }

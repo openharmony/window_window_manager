@@ -502,7 +502,7 @@ void ScreenSessionManager::InitScreenActiveModeRectMap()
     screenActiveModeRectMap_ = foldScreenController_->GetScreenActiveModeRectMap();
 }
 
-const std::map<FoldDisplayMode, RRect>& ScreenSessionManager::GetScreenActiveModeRectMap() const
+const std::map<FoldDisplayMode, RRect>& ScreenSessionManager::GetScreenActiveModeRectMap()
 {
     std::lock_guard<std::mutex> lock(screenActiveModeRectMapMutex_);
     return screenActiveModeRectMap_;
