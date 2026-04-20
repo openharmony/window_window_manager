@@ -1651,6 +1651,9 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInnerGetSelectModeFail, Function | 
     EXPECT_CALL(*hostSession, GetSelectMode(::testing::_))
         .WillOnce(::testing::Return(WMError::WM_ERROR_NULLPTR));
 
+    // Set context to allow InitUIContent to proceed
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
+
     window->SetUIContentInner("info", nullptr, nullptr,
         WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
     EXPECT_TRUE(g_errLog.find("get selectMode fail") != std::string::npos);
@@ -1689,6 +1692,9 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInnerGetSelectModeSuccess, Function
     // Mock GetSelectMode to succeed
     EXPECT_CALL(*hostSession, GetSelectMode(::testing::_))
         .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(SelectMode::WIDE_MODE), ::testing::Return(WMError::WM_OK)));
+
+    // Set context to allow InitUIContent to proceed
+    window->context_ = std::make_shared<AbilityRuntime::AbilityContextImpl>();
 
     window->SetUIContentInner("info", nullptr, nullptr,
         WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
