@@ -531,7 +531,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateWindowSizeLimits_Test_By_WinTyp
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> sessionMocker = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = sessionMocker;
-    EXPECT_CALL(*window, GetVirtualPixelRatio(_))
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<const sptr<DisplayInfo>&>()))
         .Times(3)
         .WillRepeatedly(Return(3.25f));
 
@@ -2312,6 +2312,441 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, SyncAllAttachedLimitsToChild04, Funct
             EXPECT_EQ(limits.pixelUnit_, PixelUnit::VP);
         }
     }
+}
+
+/**
+ * @tc.name: HasIntersectedAttachLimits01
+ * @tc.desc: Test HasIntersectedAttachLimits with no attach relation
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, HasIntersectedAttachLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HasIntersectedAttachLimits01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    EXPECT_FALSE(window->HasIntersectedAttachLimits());
+}
+
+/**
+ * @tc.name: HasIntersectedAttachLimits02
+ * @tc.desc: Test HasIntersectedAttachLimits with main window having attached sub with intersected limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, HasIntersectedAttachLimits02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HasIntersectedAttachLimits02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    WindowLimits attachedLimits = { 1800, 1000, 250, 350, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    window->property_->SetAttachedWindowLimits(1, attachedLimits);
+    AttachLimitOptions limitOptions{ false, true };
+    window->property_->SetAttachedLimitOptions(1, limitOptions);
+    EXPECT_TRUE(window->HasIntersectedAttachLimits());
+}
+
+/**
+ * @tc.name: HasIntersectedAttachLimits03
+ * @tc.desc: Test HasIntersectedAttachLimits with sub window anchored by attach with intersected limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, HasIntersectedAttachLimits03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HasIntersectedAttachLimits03");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+
+    WindowAnchorInfo anchorInfo;
+    anchorInfo.isAnchoredByAttach_ = true;
+    anchorInfo.attachOptions = { "", true, false };
+    window->property_->SetWindowAnchorInfo(anchorInfo);
+    EXPECT_TRUE(window->HasIntersectedAttachLimits());
+}
+
+/**
+ * @tc.name: HasIntersectedAttachLimits04
+ * @tc.desc: Test HasIntersectedAttachLimits with attach but no intersection flags
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, HasIntersectedAttachLimits04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("HasIntersectedAttachLimits04");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    WindowLimits attachedLimits = { 1800, 1000, 250, 350, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    window->property_->SetAttachedWindowLimits(1, attachedLimits);
+    AttachLimitOptions limitOptions{ false, false };
+    window->property_->SetAttachedLimitOptions(1, limitOptions);
+    EXPECT_FALSE(window->HasIntersectedAttachLimits());
+}
+
+/**
+ * @tc.name: GetCustomizedLimitsForSetWindowLimits01
+ * @tc.desc: Test without attach relation, returns GetWindowLimits/GetWindowLimitsVP
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, GetCustomizedLimitsForSetWindowLimits01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetCustomizedLimitsForSetWindowLimits01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    WindowLimits pxLimits = { 3000, 2000, 300, 400, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    window->property_->SetWindowLimits(pxLimits);
+    WindowLimits vpLimits = { 1500, 1000, 150, 200, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    window->property_->SetWindowLimitsVP(vpLimits);
+
+    WindowLimits requestPx = { 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits result = window->GetCustomizedLimitsForSetWindowLimits(requestPx);
+    EXPECT_EQ(result.maxWidth_, 3000);
+    EXPECT_EQ(result.pixelUnit_, PixelUnit::PX);
+
+    WindowLimits requestVp = { 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    result = window->GetCustomizedLimitsForSetWindowLimits(requestVp);
+    EXPECT_EQ(result.maxWidth_, 1500);
+    EXPECT_EQ(result.pixelUnit_, PixelUnit::VP);
+}
+
+/**
+ * @tc.name: GetCustomizedLimitsForSetWindowLimits02
+ * @tc.desc: Test with intersected attach, same PX unit, returns base (not intersected)
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, GetCustomizedLimitsForSetWindowLimits02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetCustomizedLimitsForSetWindowLimits02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    // GetWindowLimits = intersected (maxWidth clipped to 2000)
+    WindowLimits intersectedLimits = { 2000, 1500, 300, 400, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    window->property_->SetWindowLimits(intersectedLimits);
+    // GetLimitsForAttachedWindows = base before intersection (maxWidth = 5000)
+    WindowLimits baseLimits = { 5000, 3000, 300, 400, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    window->property_->SetLimitsForAttachedWindows(baseLimits);
+    // Set up intersected attach
+    window->property_->SetAttachedWindowLimits(1, intersectedLimits);
+    window->property_->SetAttachedLimitOptions(1, AttachLimitOptions{ true, true });
+
+    WindowLimits requestPx = { 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, PixelUnit::PX };
+    WindowLimits result = window->GetCustomizedLimitsForSetWindowLimits(requestPx);
+    EXPECT_EQ(result.maxWidth_, 5000); // base, not 2000
+    EXPECT_EQ(result.maxHeight_, 3000); // base, not 1500
+}
+
+/**
+ * @tc.name: GetCustomizedLimitsForSetWindowLimits03
+ * @tc.desc: Test with intersected attach, same VP unit, returns base (not intersected)
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, GetCustomizedLimitsForSetWindowLimits03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetCustomizedLimitsForSetWindowLimits03");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+
+    // GetWindowLimitsVP = intersected
+    WindowLimits intersectedVP = { 1000, 750, 150, 200, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    window->property_->SetWindowLimitsVP(intersectedVP);
+    // GetLimitsForAttachedWindows = base VP before intersection
+    WindowLimits baseVP = { 1500, 1000, 150, 200, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    window->property_->SetLimitsForAttachedWindows(baseVP);
+    // Set up intersected attach
+    window->property_->SetAttachedWindowLimits(1, intersectedVP);
+    window->property_->SetAttachedLimitOptions(1, AttachLimitOptions{ true, true });
+
+    WindowLimits requestVp = { 0, 0, 0, 0, 0.0f, 0.0f, 0.0f, PixelUnit::VP };
+    WindowLimits result = window->GetCustomizedLimitsForSetWindowLimits(requestVp);
+    EXPECT_EQ(result.maxWidth_, 1500); // base, not 1000
+    EXPECT_EQ(result.maxHeight_, 1000); // base, not 750
+}
+
+/**
+ * @tc.name: SetWindowLimits_AttachPreserveBase01
+ * @tc.desc: Sub window first SetWindowLimits after attach intersection preserves base values
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits_AttachPreserveBase01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowLimits_AttachPreserveBase01");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    window->state_ = WindowState::STATE_FROZEN;
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 2.0;
+
+    // Simulate: sub window limits intersected by main window
+    WindowLimits intersectedLimits = { 2000, 1500, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetWindowLimits(intersectedLimits);
+    // Base before intersection (stored in LimitsForAttachedWindows)
+    WindowLimits baseLimits = { 5000, 3000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetLimitsForAttachedWindows(baseLimits);
+    // Set up intersected attach
+    window->property_->SetAttachedWindowLimits(100, intersectedLimits);
+    window->property_->SetAttachedLimitOptions(100, AttachLimitOptions{ true, true });
+    WindowAnchorInfo anchorInfo;
+    anchorInfo.isAnchoredByAttach_ = true;
+    anchorInfo.attachOptions = { "", true, true };
+    window->property_->SetWindowAnchorInfo(anchorInfo);
+
+    // First call: maxWidth=0 should use base 5000, not intersected 2000
+    WindowLimits userLimits = { 0, 0, 500, 500, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(userLimits, false));
+
+    WindowLimits stored = window->property_->GetUserWindowLimits();
+    EXPECT_EQ(stored.maxWidth_, 5000); // base preserved, not intersected 2000
+    EXPECT_EQ(stored.maxHeight_, 3000); // base preserved
+    EXPECT_EQ(stored.minWidth_, 500); // user's explicit value
+    EXPECT_EQ(stored.minHeight_, 500); // user's explicit value
+}
+
+/**
+ * @tc.name: SetWindowLimits_AttachPreserveBase02
+ * @tc.desc: Main window second SetWindowLimits preserves base through GetLimitsForAttachedWindows
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, SetWindowLimits_AttachPreserveBase02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetWindowLimits_AttachPreserveBase02");
+    option->SetDisplayId(0);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->property_->SetPersistentId(1);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_FROZEN;
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->useUniqueDensity_ = true;
+    window->virtualPixelRatio_ = 2.0;
+
+    // Set up intersected attach
+    WindowLimits attachedLimits = { 2000, 1500, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetAttachedWindowLimits(1, attachedLimits);
+    window->property_->SetAttachedLimitOptions(1, AttachLimitOptions{ true, true });
+    // Base before intersection
+    WindowLimits baseLimits = { 3000, 2000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetLimitsForAttachedWindows(baseLimits);
+    // Intersected limits (simulating what UpdateWindowSizeLimits would produce)
+    window->property_->SetWindowLimits(attachedLimits);
+
+    // Second call with maxWidth=0, minWidth=500 — should use base 3000
+    WindowLimits userLimits = { 0, 0, 500, 500, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    EXPECT_EQ(WMError::WM_OK, window->SetWindowLimits(userLimits, false));
+
+    WindowLimits stored = window->property_->GetUserWindowLimits();
+    EXPECT_EQ(stored.maxWidth_, 3000); // base preserved, not intersected 2000
+    EXPECT_EQ(stored.maxHeight_, 2000); // base preserved
+    EXPECT_EQ(stored.minWidth_, 500); // user's explicit value
+    EXPECT_EQ(stored.minHeight_, 500); // user's explicit value
+}
+
+/**
+ * @tc.name: UpdateDensityInner_PXAttach01
+ * @tc.desc: PX user with intersected attach uses base PX path in UpdateDensityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateDensityInner_PXAttach01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDensityInner_PXAttach01");
+    option->SetDisplayId(0);
+    sptr<MockWindowSceneSessionImpl> window = sptr<MockWindowSceneSessionImpl>::MakeSptr(option);
+    window->GetProperty()->SetPersistentId(1);
+    window->GetProperty()->SetDisplayId(0);
+    window->GetProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->state_ = WindowState::STATE_FROZEN;
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
+    window->hostSession_ = session;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+
+    // Set user limits as PX
+    WindowLimits userLimits = { 3000, 2000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetUserWindowLimits(userLimits);
+    // Set base PX (before intersection)
+    WindowLimits baseLimits = { 3000, 2000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetLimitsForAttachedWindows(baseLimits);
+    // Set intersected limits
+    WindowLimits intersectedLimits = { 2000, 1500, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetWindowLimits(intersectedLimits);
+    WindowLimits intersectedLimitsVP = { 1000, 750, 150, 200, 0.0f, 0.0f, 2.0f, PixelUnit::VP };
+    window->property_->SetWindowLimitsVP(intersectedLimitsVP);
+    // Set up intersected attach
+    window->property_->SetAttachedWindowLimits(1, intersectedLimits);
+    window->property_->SetAttachedLimitOptions(1, AttachLimitOptions{ true, true });
+
+    // Mock GetVirtualPixelRatio(float&) to set vpr=2.0f and return WM_OK
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(2.0f), ::testing::Return(WMError::WM_OK)));
+
+    // Call UpdateDensityInner to trigger PX + intersected attach branch
+    window->UpdateDensityInner(nullptr);
+
+    // Verify: base PX (3000) was used, recalculated VP, then intersected
+    WindowLimits resultPx = window->property_->GetWindowLimits();
+    WindowLimits resultVp = window->property_->GetWindowLimitsVP();
+    EXPECT_EQ(resultPx.vpRatio_, 2.0f);
+    EXPECT_EQ(resultVp.vpRatio_, 2.0f);
+    // After intersection with attached maxWidth=2000, result should be clipped
+    EXPECT_EQ(resultPx.maxWidth_, 2000);
+    EXPECT_EQ(resultPx.maxHeight_, 1500);
+    EXPECT_EQ(resultPx.minWidth_, 300);
+    EXPECT_EQ(resultPx.minHeight_, 400);
+}
+
+/**
+ * @tc.name: ConvertBaseLimitsToTargetUnit01
+ * @tc.desc: PX→VP conversion with valid vpr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, ConvertBaseLimitsToTargetUnit01, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConvertBaseLimitsToTargetUnit01");
+    sptr<MockWindowSceneSessionImpl> window = sptr<MockWindowSceneSessionImpl>::MakeSptr(option);
+    window->GetProperty()->SetPersistentId(1);
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    WindowLimits srcPx = { 3000, 2000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(2.0f), ::testing::Return(WMError::WM_OK)));
+
+    WindowLimits result = window->ConvertBaseLimitsToTargetUnit(srcPx, PixelUnit::VP);
+
+    EXPECT_EQ(result.pixelUnit_, PixelUnit::VP);
+    EXPECT_EQ(result.vpRatio_, 2.0f);
+    EXPECT_EQ(result.maxWidth_, 1500);  // 3000 / 2.0
+    EXPECT_EQ(result.maxHeight_, 1000); // 2000 / 2.0
+    EXPECT_EQ(result.minWidth_, 150);   // 300 / 2.0
+    EXPECT_EQ(result.minHeight_, 200);  // 400 / 2.0
+    EXPECT_EQ(result.maxRatio_, 0.0f);
+    EXPECT_EQ(result.minRatio_, 0.0f);
+}
+
+/**
+ * @tc.name: ConvertBaseLimitsToTargetUnit02
+ * @tc.desc: VP→PX conversion with valid vpr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, ConvertBaseLimitsToTargetUnit02, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConvertBaseLimitsToTargetUnit02");
+    sptr<MockWindowSceneSessionImpl> window = sptr<MockWindowSceneSessionImpl>::MakeSptr(option);
+    window->GetProperty()->SetPersistentId(1);
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    WindowLimits srcVp = { 1500, 1000, 150, 200, 0.0f, 0.0f, 2.0f, PixelUnit::VP };
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(2.0f), ::testing::Return(WMError::WM_OK)));
+
+    WindowLimits result = window->ConvertBaseLimitsToTargetUnit(srcVp, PixelUnit::PX);
+
+    EXPECT_EQ(result.pixelUnit_, PixelUnit::PX);
+    EXPECT_EQ(result.vpRatio_, 2.0f);
+    EXPECT_EQ(result.maxWidth_, 3000);  // 1500 * 2.0
+    EXPECT_EQ(result.maxHeight_, 2000); // 1000 * 2.0
+    EXPECT_EQ(result.minWidth_, 300);   // 150 * 2.0
+    EXPECT_EQ(result.minHeight_, 400);  // 200 * 2.0
+}
+
+/**
+ * @tc.name: ConvertBaseLimitsToTargetUnit03
+ * @tc.desc: GetVirtualPixelRatio fails, target=VP returns stored VP limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, ConvertBaseLimitsToTargetUnit03, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConvertBaseLimitsToTargetUnit03");
+    sptr<MockWindowSceneSessionImpl> window = sptr<MockWindowSceneSessionImpl>::MakeSptr(option);
+    window->GetProperty()->SetPersistentId(1);
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    WindowLimits storedVp = { 1500, 1000, 150, 200, 0.0f, 0.0f, 2.0f, PixelUnit::VP };
+    window->property_->SetWindowLimitsVP(storedVp);
+
+    WindowLimits srcPx = { 3000, 2000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::Return(WMError::WM_ERROR_NULLPTR));
+
+    WindowLimits result = window->ConvertBaseLimitsToTargetUnit(srcPx, PixelUnit::VP);
+
+    EXPECT_EQ(result.maxWidth_, 1500);
+    EXPECT_EQ(result.maxHeight_, 1000);
+}
+
+/**
+ * @tc.name: ConvertBaseLimitsToTargetUnit04
+ * @tc.desc: GetVirtualPixelRatio fails, target=PX returns stored PX limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, ConvertBaseLimitsToTargetUnit04, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConvertBaseLimitsToTargetUnit04");
+    sptr<MockWindowSceneSessionImpl> window = sptr<MockWindowSceneSessionImpl>::MakeSptr(option);
+    window->GetProperty()->SetPersistentId(1);
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    WindowLimits storedPx = { 3000, 2000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    window->property_->SetWindowLimits(storedPx);
+
+    WindowLimits srcVp = { 1500, 1000, 150, 200, 0.0f, 0.0f, 2.0f, PixelUnit::VP };
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::Return(WMError::WM_ERROR_NULLPTR));
+
+    WindowLimits result = window->ConvertBaseLimitsToTargetUnit(srcVp, PixelUnit::PX);
+
+    EXPECT_EQ(result.maxWidth_, 3000);
+    EXPECT_EQ(result.maxHeight_, 2000);
+}
+
+/**
+ * @tc.name: ConvertBaseLimitsToTargetUnit05
+ * @tc.desc: vpr is near zero, fallback to stored VP limits
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, ConvertBaseLimitsToTargetUnit05, Function | SmallTest | Level2)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ConvertBaseLimitsToTargetUnit05");
+    sptr<MockWindowSceneSessionImpl> window = sptr<MockWindowSceneSessionImpl>::MakeSptr(option);
+    window->GetProperty()->SetPersistentId(1);
+    SessionInfo sessionInfo = { "TestBundle", "TestModule", "TestAbility" };
+    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
+
+    WindowLimits storedVp = { 1500, 1000, 150, 200, 0.0f, 0.0f, 2.0f, PixelUnit::VP };
+    window->property_->SetWindowLimitsVP(storedVp);
+
+    WindowLimits srcPx = { 3000, 2000, 300, 400, 0.0f, 0.0f, 2.0f, PixelUnit::PX };
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(0.0f), ::testing::Return(WMError::WM_OK)));
+
+    WindowLimits result = window->ConvertBaseLimitsToTargetUnit(srcPx, PixelUnit::VP);
+
+    EXPECT_EQ(result.maxWidth_, 1500);
+    EXPECT_EQ(result.maxHeight_, 1000);
 }
 
 } // namespace

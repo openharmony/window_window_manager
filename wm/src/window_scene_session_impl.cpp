@@ -1976,6 +1976,7 @@ WindowSceneSessionImpl::WinIntersectResult WindowSceneSessionImpl::CalcSingleWin
 void WindowSceneSessionImpl::NotifySessionSideLimitsChanged(const WindowLimits& limitsToNotify)
 {
     if (GetHostSession() == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Id:%{public}u hostSession is null", GetWindowId());
         return;
     }
 
@@ -2008,8 +2009,10 @@ void WindowSceneSessionImpl::NotifySessionSideLimitsChanged(const WindowLimits& 
 
     GetHostSession()->NotifyAttachedWindowsLimitsChanged(limitsToNotify);
     TLOGI(WmsLogTag::WMS_LAYOUT, "Notified session side about window limits change for window "
-        "id=%{public}u with attach relationship and intersected limits, pixelUnit=%{public}u",
-        GetWindowId(), static_cast<uint32_t>(property_->GetUserWindowLimits().pixelUnit_));
+        "id=%{public}u, limitsToNotify: maxW=%{public}u, maxH=%{public}u, minW=%{public}u, minH=%{public}u, "
+        "pixelUnit=%{public}u", GetWindowId(), limitsToNotify.maxWidth_, limitsToNotify.maxHeight_,
+        limitsToNotify.minWidth_, limitsToNotify.minHeight_,
+        static_cast<uint32_t>(limitsToNotify.pixelUnit_));
 }
 
 void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info)
@@ -6825,6 +6828,64 @@ void WindowSceneSessionImpl::UpdateNewSize()
     }
 }
 
+/** @note @window.layout */
+bool WindowSceneSessionImpl::HasIntersectedAttachLimits() const
+{
+    auto anchorInfo = property_->GetWindowAnchorInfo();
+    if (anchorInfo.isAnchoredByAttach_) {
+        if (anchorInfo.attachOptions.isIntersectedWidthLimit ||
+            anchorInfo.attachOptions.isIntersectedHeightLimit) {
+            return true;
+        }
+    }
+    for (const auto& [id, options] : property_->GetAttachedLimitOptionsList()) {
+        if (options.isIntersectedWidthLimit || options.isIntersectedHeightLimit) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** @note @window.layout */
+WindowLimits WindowSceneSessionImpl::ConvertBaseLimitsToTargetUnit(
+    const WindowLimits& srcLimits, PixelUnit targetPixelUnit)
+{
+    float vpr = 1.0f;
+    WMError ret = GetVirtualPixelRatio(vpr);
+    if (ret != WMError::WM_OK || MathHelper::NearZero(vpr)) {
+        return (targetPixelUnit == PixelUnit::VP) ?
+            property_->GetWindowLimitsVP() : property_->GetWindowLimits();
+    }
+    WindowLimits result;
+    if (targetPixelUnit == PixelUnit::VP) {
+        RecalculateVpLimitsByPx(srcLimits, result, vpr);
+    } else {
+        RecalculatePxLimitsByVp(srcLimits, result, vpr);
+    }
+    result.maxRatio_ = srcLimits.maxRatio_;
+    result.minRatio_ = srcLimits.minRatio_;
+    result.vpRatio_ = vpr;
+    result.pixelUnit_ = targetPixelUnit;
+    return result;
+}
+
+/** @note @window.layout */
+WindowLimits WindowSceneSessionImpl::GetCustomizedLimitsForSetWindowLimits(
+    const WindowLimits& windowLimits)
+{
+    if (HasIntersectedAttachLimits()) {
+        WindowLimits baseLimits = property_->GetLimitsForAttachedWindows();
+        if (baseLimits.pixelUnit_ == windowLimits.pixelUnit_) {
+            return baseLimits;
+        }
+        return ConvertBaseLimitsToTargetUnit(baseLimits, windowLimits.pixelUnit_);
+    }
+    if (windowLimits.pixelUnit_ == PixelUnit::VP) {
+        return property_->GetWindowLimitsVP();
+    }
+    return property_->GetWindowLimits();
+}
+
 WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool isForcible)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, minW:%{public}u, minH:%{public}u, "
@@ -6845,14 +6906,8 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool
         return WMError::WM_ERROR_INVALID_CALLING;
     }
 
-    WindowLimits customizedLimits;
-    if (windowLimits.pixelUnit_ == PixelUnit::VP) {
-        customizedLimits = property_->GetWindowLimitsVP();
-        forceLimits_ = false;
-    } else {
-        customizedLimits = property_->GetWindowLimits();
-        forceLimits_ = isForcible;
-    }
+    WindowLimits customizedLimits = GetCustomizedLimitsForSetWindowLimits(windowLimits);
+    forceLimits_ = (windowLimits.pixelUnit_ != PixelUnit::VP) ? isForcible : false;
     userLimitsSet_ = true;
 
     uint32_t minWidth = windowLimits.minWidth_ ? windowLimits.minWidth_ : customizedLimits.minWidth_;
@@ -7199,20 +7254,28 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
         UpdateWindowSizeLimits();
         UpdateNewSize();
     } else {
-        WindowLimits limitsPx = property_->GetWindowLimits();
-        WindowLimits limitsVp = WindowLimits::DEFAULT_VP_LIMITS();
         float vpr = 1.0f;
-        WMError ret = WindowSessionImpl::GetVirtualPixelRatio(vpr);
+        WMError ret = GetVirtualPixelRatio(vpr);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::DEFAULT, "Id:%{public}d, get vpr failed", GetPersistentId());
             return;
         }
+        bool hasIntersectedLimits = HasIntersectedAttachLimits();
+        WindowLimits limitsPx = hasIntersectedLimits ?
+            property_->GetLimitsForAttachedWindows() : property_->GetWindowLimits();
+        WindowLimits limitsVp = WindowLimits::DEFAULT_VP_LIMITS();
         RecalculateVpLimitsByPx(limitsPx, limitsVp, vpr);
         limitsPx.vpRatio_ = vpr;
         limitsVp.vpRatio_ = vpr;
+        if (hasIntersectedLimits) {
+            CalculateAttachedWindowLimitsIntersection(limitsPx, limitsVp, vpr);
+        }
         property_->SetWindowLimits(limitsPx);
         property_->SetWindowLimitsVP(limitsVp);
         property_->SetLastLimitsVpr(vpr);
+        if (hasIntersectedLimits) {
+            UpdateNewSize();
+        }
     }
     WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     if (ret != WMError::WM_OK) {

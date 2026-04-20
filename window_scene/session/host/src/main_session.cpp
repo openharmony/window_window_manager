@@ -776,7 +776,7 @@ WSError MainSession::RequestUpdateAttachedWindowLimits(int32_t sourcePersistentI
             continue;
         }
 
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d requesting child id=%{public}d to update limits "
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d requesting child id=%{public}d to update limits "
             "from source id=%{public}d", winId, subSession->GetPersistentId(), sourcePersistentId);
         // All notifications use the input parameter values
         subSession->RequestUpdateAttachedWindowLimits(sourcePersistentId, attachedWindowLimits,
@@ -820,7 +820,7 @@ WSError MainSession::RequestRemoveAttachedWindowLimits(int32_t sourcePersistentI
             continue;
         }
 
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d requesting child id=%{public}d to remove limits "
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d requesting child id=%{public}d to remove limits "
             "from source id=%{public}d", winId, subSession->GetPersistentId(), sourcePersistentId);
         subSession->RequestRemoveAttachedWindowLimits(sourcePersistentId);
     }

@@ -31,6 +31,7 @@ using OwnSystemBarPropertyPair = std::pair<SystemBarPropertyOwner, PartialSystem
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
+    using WindowSessionImpl::GetVirtualPixelRatio;
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option,
         const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSceneSessionImpl();
@@ -526,6 +527,9 @@ private:
     void UpdateWindowState();
     void UpdateNewSize();
     void FillWindowLimits(WindowLimits& windowLimits, PixelUnit pixelUnit);
+    bool HasIntersectedAttachLimits() const;
+    WindowLimits GetCustomizedLimitsForSetWindowLimits(const WindowLimits& windowLimits);
+    WindowLimits ConvertBaseLimitsToTargetUnit(const WindowLimits& srcLimits, PixelUnit targetPixelUnit);
     void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     void PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
     void maximizeWhenSwitchMultiWindowIfOnlySupportFullScreen();
