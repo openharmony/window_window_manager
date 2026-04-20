@@ -2337,16 +2337,10 @@ HWTEST_F(WindowSessionPropertyTest, GetKeyboardLayoutParamsByScreenId, TestSize.
 HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig01, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = false;
     preconfig.containsAppConfig_ = false;
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = false;
     config.containsAppConfig_ = false;
 
@@ -2356,65 +2350,12 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig01, TestSize.Level1)
 
 /**
  * @tc.name: IsSameForceSplitConfig02
- * @tc.desc: Test IsSameForceSplitConfig when mode differs
+ * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig is true and sys configs match
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig02, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
-    preconfig.containsSysConfig_ = false;
-    preconfig.containsAppConfig_ = false;
-
-    AppForceLandscapeConfig config;
-    config.mode_ = 6;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
-    config.containsSysConfig_ = false;
-    config.containsAppConfig_ = false;
-
-    bool result = AppForceLandscapeConfig::IsSameForceSplitConfig(preconfig, config);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: IsSameForceSplitConfig03
- * @tc.desc: Test IsSameForceSplitConfig when supportSplit differs
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig03, TestSize.Level1)
-{
-    AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
-    preconfig.containsSysConfig_ = false;
-    preconfig.containsAppConfig_ = false;
-
-    AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 2;
-    config.ignoreOrientation_ = false;
-    config.containsSysConfig_ = false;
-    config.containsAppConfig_ = false;
-
-    bool result = AppForceLandscapeConfig::IsSameForceSplitConfig(preconfig, config);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.name: IsSameForceSplitConfig04
- * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig is true and sys configs match
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
-{
-    AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = true;
     preconfig.isSysRouter_ = true;
     preconfig.sysHomePage_ = "home";
@@ -2422,9 +2363,6 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
     preconfig.containsAppConfig_ = false;
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = true;
     config.isSysRouter_ = true;
     config.sysHomePage_ = "home";
@@ -2436,16 +2374,13 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig05
+ * @tc.name: IsSameForceSplitConfig03
  * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig is true and sysHomePage differs
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig03, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = true;
     preconfig.isSysRouter_ = true;
     preconfig.sysHomePage_ = "home1";
@@ -2453,9 +2388,6 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
     preconfig.containsAppConfig_ = false;
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = true;
     config.isSysRouter_ = true;
     config.sysHomePage_ = "home2";
@@ -2467,25 +2399,19 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig06
+ * @tc.name: IsSameForceSplitConfig04
  * @tc.desc: Test IsSameForceSplitConfig when containsAppConfig is true and app configs match
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig06, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig04, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = false;
     preconfig.containsAppConfig_ = true;
     preconfig.isAppRouter_ = true;
     preconfig.appConfigJsonStr_ = "appConfig";
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = false;
     config.containsAppConfig_ = true;
     config.isAppRouter_ = true;
@@ -2496,25 +2422,19 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig06, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig07
+ * @tc.name: IsSameForceSplitConfig05
  * @tc.desc: Test IsSameForceSplitConfig when containsAppConfig is true and appConfigJsonStr differs
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig07, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig05, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = false;
     preconfig.containsAppConfig_ = true;
     preconfig.isAppRouter_ = true;
     preconfig.appConfigJsonStr_ = "appConfig1";
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = false;
     config.containsAppConfig_ = true;
     config.isAppRouter_ = true;
@@ -2525,16 +2445,13 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig07, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsSameForceSplitConfig08
+ * @tc.name: IsSameForceSplitConfig06
  * @tc.desc: Test IsSameForceSplitConfig when containsSysConfig and containsAppConfig are both true
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig08, TestSize.Level1)
+HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig06, TestSize.Level1)
 {
     AppForceLandscapeConfig preconfig;
-    preconfig.mode_ = 5;
-    preconfig.supportSplit_ = 1;
-    preconfig.ignoreOrientation_ = false;
     preconfig.containsSysConfig_ = true;
     preconfig.isSysRouter_ = true;
     preconfig.sysHomePage_ = "home";
@@ -2544,9 +2461,6 @@ HWTEST_F(WindowSessionPropertyTest, IsSameForceSplitConfig08, TestSize.Level1)
     preconfig.appConfigJsonStr_ = "appConfig";
 
     AppForceLandscapeConfig config;
-    config.mode_ = 5;
-    config.supportSplit_ = 1;
-    config.ignoreOrientation_ = false;
     config.containsSysConfig_ = true;
     config.isSysRouter_ = true;
     config.sysHomePage_ = "home";
@@ -2655,6 +2569,145 @@ HWTEST_F(WindowSessionPropertyTest, UnmarshallingFvTemplateInfo, TestSize.Level1
     property->MarshallingFvTemplateInfo(parcel);
     property->UnmarshallingFvTemplateInfo(parcel, property);
     EXPECT_EQ(property->GetFvTemplateInfo().bindWindowId_, fvTemplateInfo.bindWindowId_);
+}
+
+/**
+ * @tc.name: SetForceSplitEnable001
+ * @tc.desc: SetForceSplitEnable and GetForceSplitEnable test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetForceSplitEnable001, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    property->SetForceSplitEnable(true);
+    ASSERT_EQ(property->GetForceSplitEnable(), true);
+
+    property->SetForceSplitEnable(false);
+    ASSERT_EQ(property->GetForceSplitEnable(), false);
+}
+
+/**
+ * @tc.name: SetHookWindowInfo001
+ * @tc.desc: SetHookWindowInfo and GetHookWindowInfo test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, SetHookWindowInfo001, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.5f;
+    hookInfo.drawableRectHook = true;
+
+    property->SetHookWindowInfo(hookInfo);
+    auto retInfo = property->GetHookWindowInfo();
+    ASSERT_EQ(retInfo.enableHookWindow, true);
+    ASSERT_EQ(retInfo.widthHookRatio, 0.5f);
+    ASSERT_EQ(retInfo.drawableRectHook, true);
+}
+
+/**
+ * @tc.name: MarshallingHookWindowInfo001
+ * @tc.desc: test MarshallingHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingHookWindowInfo001, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.6f;
+    property->SetHookWindowInfo(hookInfo);
+
+    Parcel parcel;
+    bool ret = property->MarshallingHookWindowInfo(parcel);
+    ASSERT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: UnmarshallingHookWindowInfo001
+ * @tc.desc: test UnmarshallingHookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingHookWindowInfo001, TestSize.Level1)
+{
+    Parcel parcel;
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.7f;
+    parcel.WriteParcelable(&hookInfo);
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    WindowSessionProperty::UnmarshallingHookWindowInfo(parcel, property);
+    auto retInfo = property->GetHookWindowInfo();
+    ASSERT_EQ(retInfo.enableHookWindow, true);
+    ASSERT_EQ(retInfo.widthHookRatio, 0.7f);
+}
+
+/**
+ * @tc.name: UnmarshallingHookWindowInfo002
+ * @tc.desc: test UnmarshallingHookWindowInfo with nullptr hookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnmarshallingHookWindowInfo002, TestSize.Level1)
+{
+    Parcel parcel;
+    // Do not write any HookWindowInfo, ReadParcelable will return nullptr
+
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+
+    // Set initial value
+    HookWindowInfo initialInfo;
+    initialInfo.enableHookWindow = true;
+    initialInfo.widthHookRatio = 0.5f;
+    property->SetHookWindowInfo(initialInfo);
+
+    // Call UnmarshallingHookWindowInfo with empty parcel
+    WindowSessionProperty::UnmarshallingHookWindowInfo(parcel, property);
+
+    // Property should remain unchanged when ReadParcelable returns nullptr
+    auto retInfo = property->GetHookWindowInfo();
+    ASSERT_EQ(retInfo.enableHookWindow, true);
+    ASSERT_EQ(retInfo.widthHookRatio, 0.5f);
+}
+
+/**
+ * @tc.name: MarshallingUnmarshallingWithHookWindowInfo
+ * @tc.desc: test Marshalling and Unmarshalling with HookWindowInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, MarshallingUnmarshallingWithHookWindowInfo, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(nullptr, property);
+    property->SetPersistentId(100);
+
+    HookWindowInfo hookInfo;
+    hookInfo.enableHookWindow = true;
+    hookInfo.widthHookRatio = 0.8f;
+    hookInfo.drawableRectHook = true;
+    property->SetHookWindowInfo(hookInfo);
+    property->SetForceSplitEnable(true);
+
+    Parcel parcel;
+    bool ret = property->Marshalling(parcel);
+    ASSERT_EQ(true, ret);
+
+    sptr<WindowSessionProperty> targetProperty = property->Unmarshalling(parcel);
+    ASSERT_NE(targetProperty, nullptr);
+    ASSERT_EQ(targetProperty->GetHookWindowInfo().enableHookWindow, true);
+    ASSERT_EQ(targetProperty->GetHookWindowInfo().widthHookRatio, 0.8f);
+    ASSERT_EQ(targetProperty->GetHookWindowInfo().drawableRectHook, true);
+    ASSERT_EQ(targetProperty->GetForceSplitEnable(), true);
 }
 } // namespace
 } // namespace Rosen

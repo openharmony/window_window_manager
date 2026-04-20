@@ -8768,15 +8768,6 @@ void SceneSession::RegisterForceSplitListener(const NotifyForceSplitFunc& func)
     forceSplitFunc_ = func;
 }
 
-void SceneSession::RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func)
-{
-    if (!func) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", GetPersistentId());
-        return;
-    }
-    getHookWindowInfoFunc_ = std::move(func);
-}
-
 void SceneSession::RegisterSelectModeFunc(GetSelectModeFunc&& func)
 {
     if (!func) {
@@ -8849,23 +8840,6 @@ WMError SceneSession::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     }
     config = forceSplitFunc_(sessionInfo_.bundleName_);
     return WMError::WM_OK;
-}
-
-WMError SceneSession::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
-{
-    return PostSyncTask([weakThis = wptr(this), &hookWindowInfo, where = __func__]() -> WMError {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
-            return WMError::WM_ERROR_INVALID_SESSION;
-        }
-        if (!session->getHookWindowInfoFunc_) {
-            TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, func is null", session->GetPersistentId());
-            return WMError::WM_ERROR_NULLPTR;
-        }
-        hookWindowInfo = session->getHookWindowInfoFunc_(session->GetSessionInfo().bundleName_);
-        return WMError::WM_OK;
-    }, __func__);
 }
 
 WMError SceneSession::GetSelectMode(SelectMode& selectMode)
