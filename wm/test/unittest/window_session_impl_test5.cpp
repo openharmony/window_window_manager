@@ -1687,8 +1687,8 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInnerGetSelectModeSuccess, Function
         .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(config), ::testing::Return(WMError::WM_OK)));
 
     // Mock GetSelectMode to succeed
-    EXPECT_CALL(*hostSession, GetSelectMode(::testing::_))
-        .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(SelectMode::WIDE_MODE), ::testing::Return(WMError::WM_OK)));
+    EXPECT_CALL(*hostSession, GetSelectMode(::testing::_)).WillOnce(
+        ::testing::DoAll(::testing::SetArgReferee<0>(SelectMode::WIDE_MODE), ::testing::Return(WMError::WM_OK)));
 
     window->SetUIContentInner("info", nullptr, nullptr,
         WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
