@@ -6807,10 +6807,6 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         TLOGD(WmsLogTag::WMS_PATTERN, "not supported");
         return;
     }
-    if (IsSyncLoadStartingWindow()) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "sync load starting window");
-        return;
-    }
     const char* const where = __func__;
     auto loadTask = [this, weakSceneSession = wptr(sceneSession), where]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:PreLoadStartingWindow");
@@ -6829,6 +6825,10 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
             TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d change to preloadSnapshot",
                 where, sceneSession->GetPersistentId());
             sceneSession->PreloadSnapshot();
+            return;
+        }
+        if (IsSyncLoadStartingWindow()) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "sync load starting window");
             return;
         }
         StartingWindowInfo startingWindowInfo;
