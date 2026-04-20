@@ -563,7 +563,7 @@ WMError WindowAdapterLite::SetProcessWatermark(int32_t pid, const std::string& w
             processWatermarkName_ = "";
         }
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, watermarkName=%{public}s, isEnabled=%{public}u, err=%{public}d",
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, watermarkName=%{public}s, isEnabled=%{public}d, err=%{public}d",
         pid, watermarkName.c_str(), isEnabled, static_cast<int32_t>(errCode));
     return errCode;
 }

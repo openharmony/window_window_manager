@@ -968,8 +968,8 @@ HWTEST_F(WindowAdapterTest, SetProcessWatermark, TestSize.Level1)
 HWTEST_F(WindowAdapterTest, RecoverProcessWatermark, TestSize.Level1)
 {
     WindowAdapter windowAdapter;
-    windowAdapter.processWatermarkPid_ = 0;
-    windowAdapter.processWatermarkName_ = "";
+    windowAdapter.processWatermarkPid_ = 10;
+    windowAdapter.processWatermarkName_ = "test";
     auto err = windowAdapter.RecoverProcessWatermark();
     EXPECT_EQ(err, WMError::WM_OK);
 }
