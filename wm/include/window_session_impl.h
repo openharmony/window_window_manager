@@ -610,6 +610,8 @@ public:
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
     bool IsAnco() const override;
+    bool GetIsAtomicService() const override;
+    int32_t GetWindowPersistentId() const override;
 
     /*
      * Window Input Event

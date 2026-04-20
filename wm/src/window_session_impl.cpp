@@ -9712,6 +9712,16 @@ bool WindowSessionImpl::IsAnco() const
     return property_->GetCollaboratorType() == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
 }
 
+bool WindowSessionImpl::GetIsAtomicService() const
+{
+    return property_->GetIsAtomicService();
+}
+
+int32_t WindowSessionImpl::GetWindowPersistentId() const
+{
+    return GetPersistentId();
+}
+
 bool WindowSessionImpl::OnPointDown(int32_t eventId, int32_t posX, int32_t posY)
 {
     auto hostSession = GetHostSession();

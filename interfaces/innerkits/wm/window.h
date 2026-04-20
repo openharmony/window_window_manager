@@ -5442,6 +5442,20 @@ public:
     }
 
     /**
+     * @brief Get Window PersistentId.
+     *
+     * @return Window PersistentId.
+     */
+    virtual int32_t GetWindowPersistentId() const { return INVALID_WINDOW_ID; };
+
+    /**
+     * @brief Get whether this window is AtomicService.
+     *
+     * @return True means the window is AtomicService, false means the window is not AtomicService.
+     */
+    virtual bool GetIsAtomicService() const { return false; };
+
+    /**
      * @brief notify split ratio changed
      *
      * @param newRatio new ratio
