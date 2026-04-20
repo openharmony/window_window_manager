@@ -19936,6 +19936,11 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
                 mainSession ? mainSession->IsSessionForeground() : false);
             continue;
         }
+        if (!curSession->IsSessionForeground()) {
+            TLOGD(WmsLogTag::DEFAULT,
+                "skip background session, id: %{public}d", curSession->GetPersistentId());
+            continue;
+        }
         activeSession.push_back(curSession);
     }
     TLOGD(WmsLogTag::DEFAULT, "total: %{public}zu, active: %{public}zu",
