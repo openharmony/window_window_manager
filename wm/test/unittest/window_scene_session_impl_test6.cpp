@@ -1354,7 +1354,7 @@ HWTEST_F(WindowSceneSessionImplTest6, PostInitSurfaceNode05, TestSize.Level1)
     EXPECT_NE(window->rsUIDirector_, nullptr);
 }
 
-**
+/**
  * @tc.name: ConfigDockAutoHide
  * @tc.desc: ConfigDockAutoHide
  * @tc.type: FUNC
