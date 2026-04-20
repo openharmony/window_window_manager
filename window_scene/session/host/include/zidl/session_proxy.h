@@ -207,6 +207,7 @@ public:
     WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     WMError GetSelectMode(SelectMode& selectMode) override;
     void NotifyWindowStatusDidChangeAfterShowWindow() override;
+    WSError NotifyAttachedWindowsLimitsChanged(const WindowLimits& newLimits) override;
 
     /**
      * Window Transition Animation For PC

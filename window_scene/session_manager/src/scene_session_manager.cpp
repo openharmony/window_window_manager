@@ -2617,6 +2617,18 @@ WMError SceneSessionManager::GetWindowLimits(int32_t windowId, WindowLimits& win
 
 void SceneSessionManager::ConfigDockAutoHide(bool isDockAutoHide) {
     TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ConfigDockAutoHide: isDockAutoHide %{public}d", isDockAutoHide);
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        if (isPcMode) {
+            for (const auto& [_, sceneSession] : sceneSessionMap_) {
+                if (sceneSession == nullptr || !WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
+                    continue;
+                }
+                sceneSession->ConfigDockAutoHide(isDockAutoHide);
+            }
+        }
+    }
     auto task = [this, isDockAutoHide] {
         systemConfig_.isDockAutoHide_ = isDockAutoHide;
     };
@@ -3666,6 +3678,11 @@ WSError SceneSessionManager::RequestSceneSessionActivation(const sptr<SceneSessi
             TLOGNE(WmsLogTag::WMS_MAIN, "Request active session is nullptr");
             return WSError::WS_ERROR_NULLPTR;
         }
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) && sceneSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGNI(WmsLogTag::WMS_SUB, "No-parent subWindow show, id: %{public}d", sceneSession->GetPersistentId());
+            sceneSession->ShowSubWindowZLevelAboveParentLoosened();
+            return WSError::WS_OK;
+        }
         if (!Session::IsScbCoreEnabled()) {
             sceneSession->SetForegroundInteractiveStatus(true);
         }
@@ -4253,6 +4270,11 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         TLOGNI(WmsLogTag::WMS_MAIN, "[id: %{public}d] Request background, isDelegator:%{public}d "
             "isToDesktop:%{public}d isSaveSnapshot:%{public}d",
             persistentId, isDelegator, isToDesktop, isSaveSnapshot);
+        if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) && sceneSession->IsLoosenedWithFreeMultiMode()) {
+            TLOGNI(WmsLogTag::WMS_SUB, "No-parent subWindow background, id: %{public}d", sceneSession->GetPersistentId());
+            sceneSession->HideSubWindowZLevelAboveParentLoosened();
+            return WSError::WS_OK;
+        }
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSessionBackground (%d )", persistentId);
         TLOGNI(WmsLogTag::WMS_LIFE, "Notify scene session id: %{public}d paused", sceneSession->GetPersistentId());
         sceneSession->UpdateLifecyclePausedInner();
@@ -13086,6 +13108,7 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
         windowId, session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType());
     windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
     windowVisibilityInfo->SetBundleName(session->GetSessionInfo().bundleName_);
+    windowVisibilityInfo->SetModuleName(session->GetSessionInfo().moduleName_);
     windowVisibilityInfo->SetAbilityName(session->GetSessionInfo().abilityName_);
     windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
     windowVisibilityInfo->SetZOrder(session->GetZOrder());
@@ -13543,6 +13566,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
             WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType());
         windowVisibilityInfo->SetAppIndex(sceneSession->GetSessionInfo().appIndex_);
         windowVisibilityInfo->SetBundleName(sceneSession->GetSessionInfo().bundleName_);
+        windowVisibilityInfo->SetModuleName(sceneSession->GetSessionInfo().moduleName_);
         windowVisibilityInfo->SetAbilityName(sceneSession->GetSessionInfo().abilityName_);
         windowVisibilityInfo->SetIsSystem(sceneSession->GetSessionInfo().isSystem_);
         windowVisibilityInfo->SetZOrder(sceneSession->GetZOrder());
@@ -16370,6 +16394,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                 session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType(), windowStatus, rect,
                 session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_,
                 session->IsFocused());
+            windowVisibilityInfo->SetModuleName(session->GetSessionInfo().moduleName_);
             windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
             windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
             windowVisibilityInfo->SetZOrder(session->GetZOrder());

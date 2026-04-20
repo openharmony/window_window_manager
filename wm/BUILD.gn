@@ -476,7 +476,7 @@ ohos_shared_library("libwm_ndk") {
 
   include_dirs = [
     "${window_base_path}/interfaces/kits/ndk/wm",
-    "${window_base_path}/interfaces/inner_kits/wm",
+    "${window_base_path}/interfaces/innerkits/wm",
   ]
 
   sources = [
@@ -630,7 +630,7 @@ ohos_shared_library("libpip_ndk") {
   include_dirs = [
     "//foundation/window/window_manager",
     "//foundation/window/window_manager/interfaces/innerkits",
-    "//foundation/window/window_manager/interfaces/inner_kits/wm",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/interfaces/kits/ndk/wm",
     "//foundation/window/window_manager/wm/include",
   ]
