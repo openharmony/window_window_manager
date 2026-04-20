@@ -10601,6 +10601,34 @@ bool ScreenSessionManager::IsCaptured()
     }
 }
 
+bool ScreenSessionManager::IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList)
+{
+    if (bundleNameList.empty()) {
+        return false;
+    }
+
+    std::unordered_set<std::string> bundleNameSet(bundleNameList.begin(), bundleNameList.end());
+
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    for (auto& sessionItem : screenSessionMap_) {
+        auto screenSession = sessionItem.second;
+        if (screenSession == nullptr) {
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::VIRTUAL) {
+            continue;
+        }
+
+        const std::string& bundleName = screenSession->GetBundleName();
+        if (bundleNameSet.count(bundleName)) {
+            TLOGI(WmsLogTag::DMS, "Found capturing app: %{public}s", bundleName.c_str());
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool ScreenSessionManager::IsMultiScreenCollaboration()
 {
     return isMultiScreenCollaboration_;
@@ -15857,6 +15885,12 @@ void ScreenSessionManager::SetOptionConfig(ScreenId screenId, VirtualScreenOptio
     } else {
         screenSession->SetSupportsInput(false);
     }
+
+    if (option.caller_ != VirtualScreenCaller::NATIVE_SCREEN_MANAGER) {
+        option.bundleName_ = SysCapUtil::GetBundleName();
+    }
+    TLOGNFI(WmsLogTag::DMS, "The caller : %{public}u, the bundleName of option: %{public}s",
+        option.caller_, option.bundleName_.c_str());
     screenSession->SetBundleName(option.bundleName_);
 }
 
