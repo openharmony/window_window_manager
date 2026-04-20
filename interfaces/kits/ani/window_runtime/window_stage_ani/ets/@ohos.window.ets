@@ -568,6 +568,8 @@ namespace window {
     currentLayoutMode?: string;
     parentWindowSizeChangeCallback? :Callback<Size>;
     parentWindowStatusChangeCallback? :Callback<WindowStatusType>;
+    isIntersectedHeightLimit?: boolean;
+    isIntersectedWidthLimit?: boolean;
   }
 
   export interface Rect {

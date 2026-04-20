@@ -56,6 +56,7 @@ public:
     MOCK_METHOD1(OnNeedAvoid, WSError(bool status));
     MOCK_METHOD1(SetGlobalMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD1(NotifyExtensionTimeout, void(int32_t errorCode));
+    MOCK_METHOD1(NotifyAttachedWindowsLimitsChanged, WSError(const WindowLimits& limits));
     MOCK_METHOD1(GetAppForceLandscapeConfig, WMError(AppForceLandscapeConfig& config));
     MOCK_METHOD1(GetAppHookWindowInfoFromServer, WMError(HookWindowInfo& hookWindowInfo));
     MOCK_METHOD1(SetDialogSessionBackGestureEnabled, WSError(bool isEnabled));

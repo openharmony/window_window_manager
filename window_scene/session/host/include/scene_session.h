@@ -980,6 +980,11 @@ public:
     WSError SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo) override;
     WindowAnchorInfo GetWindowAnchorInfo() const { return windowAnchorInfo_; }
     void CalcSubWindowRectByAnchor(const WSRect& parentRect, WSRect& subRect);
+    void NotifyRelatedWindowsAttachStateChange(const sptr<Session>& parentSession,
+        bool wasAttached, bool isAttached, bool oldIsIntersectedWidthLimit, bool oldIsIntersectedHeightLimit);
+    void SyncAllAttachedLimitsToAttachingChild(const sptr<Session>& parentSession);
+    WSError NotifyAttachedWindowsLimitsChanged(const WindowLimits& newLimits) override;
+    void NotifyRelatedWindowsOnDestruction();
 
     bool IsAnyParentSessionDragMoving() const override;
     bool IsAnyParentSessionDragZooming() const override;
@@ -1242,6 +1247,7 @@ protected:
     void SetShouldFollowParentWhenShow(bool shouldFollow) { shouldFollowParentWhenShow_ = shouldFollow; }
     bool GetShouldFollowParentWhenShow() const { return shouldFollowParentWhenShow_; }
     void CheckSubSessionShouldFollowParent(uint64_t displayId);
+    bool ShouldNotifyAttachedWindow(const sptr<SceneSession>& subSession) const;
     bool IsNeedConvertToRelativeRect(SizeChangeReason reason = SizeChangeReason::UNDEFINED) const override;
     void SetRequestMoveConfiguration(const MoveConfiguration& config) { requestMoveConfiguration_ = config; }
     MoveConfiguration GetRequestMoveConfiguration() const { return requestMoveConfiguration_; }
@@ -1568,6 +1574,8 @@ private:
     WindowLimits GetWindowLimits() const;
     bool ShouldSkipUpdateRect(const WSRect& rect);
     bool ShouldSkipUpdateRectNotify(const WSRect& rect);
+    bool ShouldProcessAttachStateChange(bool wasAttached, bool isAttached,
+        bool oldIsIntersectedWidthLimit, bool oldIsIntersectedHeightLimit, bool& isDetaching);
 
     /**
      * @brief Set surface bounds via the original surface node.

@@ -590,6 +590,18 @@ public:
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
 
     /**
+     * Notify related windows about limits change.
+     * Called when a window's limits change via setWindowLimits.
+     *
+     * @param newLimits The new window limits.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyAttachedWindowsLimitsChanged(const WindowLimits& newLimits)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
      * @brief Notify when disableDelegator change to true
      *
      * This function is used to notify disableDelegator change.

@@ -361,6 +361,8 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyCompatibleModeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_PAGE_ENABLE):
             return HandleNotifyPageEnable(data, reply);
+        case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_RELATED_WINDOWS_LIMITS_CHANGED):
+            return HandleNotifyAttachedWindowsLimitsChanged(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_RESTART_APP):
             return HandleRestartApp(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SEND_COMMAND_EVENT):
@@ -2835,6 +2837,22 @@ int SessionStub::HandleNotifySplitRatioChanged(MessageParcel& data, MessageParce
     WMError errCode = NotifySplitRatioChanged(newRatio);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_COMPAT, "write errCode fail.");
+        return ERR_INVALID_DATA;
+    }
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStub::HandleNotifyAttachedWindowsLimitsChanged(MessageParcel& data, MessageParcel& reply)
+{
+    auto newLimits = std::shared_ptr<WindowLimits>(WindowLimits::Unmarshalling(data));
+    if (newLimits == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read newLimits failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifyAttachedWindowsLimitsChanged(*newLimits);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "write errCode fail");
         return ERR_INVALID_DATA;
     }
     return ERR_NONE;
