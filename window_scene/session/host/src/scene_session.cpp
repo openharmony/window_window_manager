@@ -6878,8 +6878,8 @@ WMError SceneSession::UpdateNavigationAvoidArea(bool isEnabled)
             return WMError::WM_ERROR_NULLPTR;
         }
         if (isEnabled) {
-            TLOGI(WMS_IMMS, "id: %{public}d, first", GetPersistentId());
-            HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_FLOAT_NAVIGATION);
+            TLOGNI(WmsLogTag::WMS_IMMS, "id: %{public}d, first", session->GetPersistentId());
+            session->HandleLayoutAvoidAreaUpdate(AvoidAreaType::TYPE_FLOAT_NAVIGATION);
         }
         return WMError::WM_OK;
     }, __func__);
