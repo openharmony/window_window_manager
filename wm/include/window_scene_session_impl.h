@@ -82,6 +82,13 @@ public:
     WMError UpdateWindowModeForUITest(int32_t updateMode) override;
     WSError NotifyAppHookWindowInfoUpdated() override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WSError UpdateAttachedWindowLimits(int32_t sourcePersistentId,
+        const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit,
+        bool isIntersectedWidthLimit) override;
+    WSError RemoveAttachedWindowLimits(int32_t sourcePersistentId) override;
+    WSError SyncAllAttachedLimitsToChild(
+        const std::vector<std::pair<int32_t, WindowLimits>>& limitsList,
+        const std::vector<std::pair<int32_t, AttachLimitOptions>>& optionsList) override;
 
     /*
      * Window Hierarchy
@@ -430,7 +437,45 @@ protected:
      *      may exceed system limits and is clamped to min(system limits, 40vp);
      *      other cases remain constrained by system limits.
      */
-    void UpdateWindowSizeLimits();
+    void UpdateWindowSizeLimits(bool needNotifySession = false);
+
+    /**
+     * @brief Calculate window limits intersection with attached windows.
+     * @param newLimits Reference to WindowLimits (PX unit) to be updated with intersected values.
+     * @param newLimitsVP Reference to WindowLimits (VP unit) to be updated with intersected values.
+     * @param virtualPixelRatio Virtual pixel ratio for unit conversion.
+     */
+    void CalculateAttachedWindowLimitsIntersection(WindowLimits& newLimits, WindowLimits& newLimitsVP,
+        float virtualPixelRatio);
+
+    /**
+     * @brief Result of calculating intersection with a single attached window.
+     */
+    struct WinIntersectResult {
+        bool pxValid;           // PX intersection is valid
+        bool vpValid;           // VP intersection is valid
+        WindowLimits pxLimits;  // PX intersection result
+        WindowLimits vpLimits;  // VP intersection result
+    };
+
+    /**
+     * @brief Calculate intersection with a single attached window.
+     * @param currentLimits Current PX limits.
+     * @param currentLimitsVP Current VP limits.
+     * @param attachedLimits Attached window limits (may be PX or VP).
+     * @param limitOptions Options for which limits (height/width) to intersect.
+     * @param virtualPixelRatio Virtual pixel ratio for conversion.
+     * @return Intersection result containing validity and calculated limits.
+     */
+    WinIntersectResult CalcSingleWinIntersect(
+        const WindowLimits& currentLimits, const WindowLimits& currentLimitsVP, const WindowLimits& attachedLimits,
+        const AttachLimitOptions& limitOptions, float virtualPixelRatio);
+
+    /**
+     * @brief Notify session side about window limits change.
+     * @param limitsToNotify The window limits to notify (already selected based on pixelUnit).
+     */
+    void NotifySessionSideLimitsChanged(const WindowLimits& limitsToNotify);
 
     // Checker to determine whether the caller has system permission.
     using SystemPermissionChecker = std::function<bool()>;
