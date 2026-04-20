@@ -523,10 +523,15 @@ public:
      */
     virtual WSError RecoverWindowEffect(bool recoverCorner, bool recoverShadow) { return WSError::WS_OK; }
 
-    /**
+    /*
      *  Gesture Back
      */
     virtual WMError SetGestureBackEnabled(bool isEnabled) { return WMError::WM_OK; }
+
+    /**
+     *  Float Navigation Avoid Area
+     */
+    virtual WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) { return WMError::WM_OK; }
 
     /**
      * @brief Get waterfall mode.
@@ -581,6 +586,18 @@ public:
     virtual WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) { return WMError::WM_OK; }
     virtual WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) { return WMError::WM_OK; }
     virtual WSError GetIsHighlighted(bool& isHighlighted) { return WSError::WS_OK; }
+
+    /**
+     * Notify related windows about limits change.
+     * Called when a window's limits change via setWindowLimits.
+     *
+     * @param newLimits The new window limits.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError NotifyAttachedWindowsLimitsChanged(const WindowLimits& newLimits)
+    {
+        return WSError::WS_OK;
+    }
 
     /**
      * @brief Notify when disableDelegator change to true

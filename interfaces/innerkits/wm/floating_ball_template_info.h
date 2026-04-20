@@ -26,17 +26,12 @@ class FloatingBallTemplateInfo : public FloatingBallTemplateBaseInfo,
                                  public Parcelable {
 public:
     FloatingBallTemplateInfo() = default;
-    // LCOV_EXCL_START
     FloatingBallTemplateInfo(const FloatingBallTemplateBaseInfo& baseInfo,
-        const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(baseInfo.template_,
-        baseInfo.title_, baseInfo.content_, baseInfo.backgroundColor_, baseInfo.isBind_, baseInfo.bindWindowId_,
-        baseInfo.showWhenCreate_, baseInfo.id_), icon_(icon) {};
-    // LCOV_EXCL_STOP
+        const std::shared_ptr<Media::PixelMap>& icon) : FloatingBallTemplateBaseInfo(baseInfo), icon_(icon) {};
     ~FloatingBallTemplateInfo() override = default;
 
     std::shared_ptr<Media::PixelMap> icon_ {};
 
-    // LCOV_EXCL_START
     bool Marshalling(Parcel& parcel) const override
     {
         if (!parcel.WriteUint32(template_) || !parcel.WriteString(title_) ||
@@ -51,9 +46,11 @@ public:
         if (hasIcon && !parcel.WriteParcelable(icon_.get())) {
             return false;
         }
+        if (!parcel.WriteUint32(textUpdateAnimationType_)) {
+            return false;
+        }
         return true;
     }
-    // LCOV_EXCL_STOP
 
     static FloatingBallTemplateInfo* Unmarshalling(Parcel& parcel)
     {
@@ -73,6 +70,9 @@ public:
             if (!fbTemplateInfo->icon_) {
                 return nullptr;
             }
+        }
+        if (!parcel.ReadUint32(fbTemplateInfo->textUpdateAnimationType_)) {
+            return nullptr;
         }
         return fbTemplateInfo.release();
     }

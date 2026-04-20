@@ -24,21 +24,24 @@ class FbOption : public RefBase {
 public:
     explicit FbOption();
     virtual ~FbOption() = default;
- 
+
     void SetTemplate(const uint32_t& type);
     void SetTitle(const std::string& title);
     void SetContent(const std::string& content);
     void SetBackgroundColor(const std::string& color);
     void SetIcon(const std::shared_ptr<Media::PixelMap>& icon);
+    void SetTextUpdateAnimationType(const uint32_t& type);
     void SetShowWhenCreate(bool showWhenCreate);
- 
+
     uint32_t GetTemplate() const;
     std::string GetTitle() const;
     std::string GetContent() const;
     std::string GetBackgroundColor() const;
     std::shared_ptr<Media::PixelMap> GetIcon() const;
+    uint32_t GetTextUpdateAnimationType() const;
+
     bool GetShowWhenCreate() const;
- 
+
     void GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBaseInfo);
     bool IsValid(std::string &errMsg) const;
 private:
@@ -47,6 +50,7 @@ private:
     std::string content_ {};
     std::string backgroundColor_ {};
     std::shared_ptr<Media::PixelMap> icon_ {};
+    uint32_t textUpdateAnimationType_ {0};
     bool showWhenCreate_ {true};
 };
 }

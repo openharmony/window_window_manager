@@ -849,6 +849,17 @@ public:
     bool SessionIsSingleHandMode();
     void SetClientDisplayId(DisplayId displayId);
     DisplayId GetClientDisplayId() const;
+    virtual WSError RequestUpdateAttachedWindowLimits(int32_t sourcePersistentId,
+        const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit = true,
+        bool isIntersectedWidthLimit = true, int32_t excludePersistentId = INVALID_SESSION_ID)
+    {
+        return WSError::WS_OK;
+    }
+    virtual WSError RequestRemoveAttachedWindowLimits(int32_t sourcePersistentId,
+        int32_t excludePersistentId = INVALID_SESSION_ID)
+    {
+        return WSError::WS_OK;
+    }
     virtual void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) {};
     virtual void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) {};
     virtual bool IsAnyParentSessionDragMoving() const { return false; }
@@ -890,6 +901,7 @@ public:
      * PC Window
      */
     sptr<Session> GetMainSession() const;
+    sptr<Session> GetMainSessionOrLoosenedSession() const;
     sptr<Session> GetMainOrFloatSession() const;
     bool IsPcWindow() const;
     bool IsAncestorsSession(int32_t ancestorsId) const;

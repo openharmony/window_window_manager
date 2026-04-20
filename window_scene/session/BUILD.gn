@@ -130,6 +130,7 @@ ohos_static_library("scene_session_static") {
     "host/src/pc_fold_screen_manager.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scb_system_session.cpp",
+    "host/src/scene_node_count_callback.cpp",
     "host/src/scene_persistence.cpp",
     "host/src/scene_persistent_storage.cpp",
     "host/src/scene_session.cpp",
@@ -144,6 +145,8 @@ ohos_static_library("scene_session_static") {
     "host/src/ws_snapshot_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
+    "host/src/zidl/scene_node_count_callback_proxy.cpp",
+    "host/src/zidl/scene_node_count_callback_stub.cpp",
   ]
 
   if (window_manager_feature_asbng_path_enable) {
@@ -276,6 +279,7 @@ ohos_shared_library("scene_session") {
     "host/src/pc_fold_screen_manager.cpp",
     "host/src/root_scene_session.cpp",
     "host/src/scb_system_session.cpp",
+    "host/src/scene_node_count_callback.cpp",
     "host/src/scene_persistence.cpp",
     "host/src/scene_persistent_storage.cpp",
     "host/src/scene_session.cpp",
@@ -290,6 +294,8 @@ ohos_shared_library("scene_session") {
     "host/src/ws_snapshot_helper.cpp",
     "host/src/zidl/session_proxy.cpp",
     "host/src/zidl/session_stub.cpp",
+    "host/src/zidl/scene_node_count_callback_proxy.cpp",
+    "host/src/zidl/scene_node_count_callback_stub.cpp",
   ]
 
   if (window_manager_feature_asbng_path_enable) {

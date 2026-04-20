@@ -20,6 +20,7 @@
 #include <message_option.h>
 #include <message_parcel.h>
 
+#include "iremote_object_mocker.h"
 #include "mock/mock_session_stage.h"
 #include "session_manager/include/zidl/scene_session_manager_interface.h"
 #include "session/container/include/zidl/session_stage_stub.h"
@@ -108,6 +109,41 @@ HWTEST_F(SessionStageStubRotationTest, HandleGetSceneNodeCount, TestSize.Level1)
     }
 
     GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCount end";
+}
+
+/**
+ * @tc.name: HandleGetSceneNodeCountWithCallback
+ * @tc.desc: test function : HandleGetSceneNodeCountWithCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubRotationTest, HandleGetSceneNodeCountWithCallback, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCountWithCallback start";
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCENE_NODE_COUNT_WITH_CALLBACK);
+    ASSERT_TRUE(sessionStageStub_ != nullptr);
+
+    // Case 1: Failed to read callback object (no valid interface token)
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->HandleGetSceneNodeCountWithCallback(data, reply));
+
+    // Case 2: Write valid interface token but no callback
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    auto result = sessionStageStub_->HandleGetSceneNodeCountWithCallback(data, reply);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+
+    // Case 3: Write valid callback object
+    MessageParcel data2;
+    MessageParcel reply2;
+    data2.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    sptr<MockIRemoteObject> callbackMocker = sptr<MockIRemoteObject>::MakeSptr();
+    data2.WriteRemoteObject(callbackMocker);
+    result = sessionStageStub_->HandleGetSceneNodeCountWithCallback(data2, reply2);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+
+    GTEST_LOG_(INFO) << "SessionStageStubRotationTest: HandleGetSceneNodeCountWithCallback end";
 }
 
 /**

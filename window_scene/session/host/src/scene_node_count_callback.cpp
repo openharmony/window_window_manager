@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,25 @@
  * limitations under the License.
  */
 
-#include "screen_session_manager.h"
-#include "../include/screen_session_manager_pc_extension.h"
+#include "scene_node_count_callback.h"
 
-using namespace OHOS::Rosen;
-using namespace PCExtension;
+namespace OHOS {
+namespace Rosen {
 
-extern "C" __attribute__((constructor)) void PCScreenSessionManagerRegisterFunc()
+void SceneNodeCountCallback::OnSceneNodeCount(uint32_t nodeCount)
 {
-    TLOGI(WmsLogTag::DMS, "startpc");
-    ScreenSessionManager::SetInstance(static_cast<ScreenSessionManager*>(&ScreenSessionManagerExt::GetInstance()));
-    TLOGI(WmsLogTag::DMS, "pcScreenSessionManagerExt registered successfully");
+    TLOGI(WmsLogTag::WMS_ROTATION, "received, count: %{public}u", nodeCount);
+    future_.SetValue(nodeCount);
 }
+
+uint32_t SceneNodeCountCallback::GetResult(long timeoutMs)
+{
+    return future_.GetResult(timeoutMs);
+}
+
+void SceneNodeCountCallback::ResetResult()
+{
+    future_.ResetLock(0);
+}
+} // namespace Rosen
+} // namespace OHOS

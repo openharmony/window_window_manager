@@ -802,6 +802,97 @@ bool MainSession::RestoreAspectRatio(float ratio)
     return true;
 }
 
+/** @note @window.layout */
+WSError MainSession::RequestUpdateAttachedWindowLimits(int32_t sourcePersistentId,
+    const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit, bool isIntersectedWidthLimit,
+    int32_t excludePersistentId)
+{
+    int32_t winId = GetPersistentId();
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null for main window id=%{public}d", winId);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    // Update own limits first (skip if excluded - i.e., when propagating from/to self)
+    if (excludePersistentId != winId) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d updating limits from source id=%{public}d",
+            winId, sourcePersistentId);
+        const auto& property = GetSessionProperty();
+        property->SetAttachedWindowLimits(sourcePersistentId, attachedWindowLimits);
+        AttachLimitOptions limitOptions;
+        limitOptions.isIntersectedHeightLimit = isIntersectedHeightLimit;
+        limitOptions.isIntersectedWidthLimit = isIntersectedWidthLimit;
+        property->SetAttachedLimitOptions(sourcePersistentId, limitOptions);
+        WSError ret = sessionStage_->UpdateAttachedWindowLimits(sourcePersistentId, attachedWindowLimits,
+            isIntersectedHeightLimit, isIntersectedWidthLimit);
+        if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d failed to update own limits", winId);
+            return ret;
+        }
+    }
+
+    // Propagate to children (excluding specified one)
+    std::vector<sptr<SceneSession>> subSessions = GetSubSession();
+    for (auto& subSession : subSessions) {
+        if (!ShouldNotifyAttachedWindow(subSession)) {
+            continue;
+        }
+        // Skip excluded child
+        if (subSession->GetPersistentId() == excludePersistentId) {
+            continue;
+        }
+
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d requesting child id=%{public}d to update limits "
+            "from source id=%{public}d", winId, subSession->GetPersistentId(), sourcePersistentId);
+        // All notifications use the input parameter values
+        subSession->RequestUpdateAttachedWindowLimits(sourcePersistentId, attachedWindowLimits,
+            isIntersectedHeightLimit, isIntersectedWidthLimit);
+    }
+    return WSError::WS_OK;
+}
+
+/** @note @window.layout */
+WSError MainSession::RequestRemoveAttachedWindowLimits(int32_t sourcePersistentId,
+    int32_t excludePersistentId)
+{
+    int32_t winId = GetPersistentId();
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null for main window id=%{public}d", winId);
+        return WSError::WS_ERROR_NULLPTR;
+    }
+
+    // Remove own limits first (skip if excluded - i.e., when propagating from/to self)
+    if (excludePersistentId != winId) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d removing limits from source id=%{public}d",
+            winId, sourcePersistentId);
+        const auto& property = GetSessionProperty();
+        property->RemoveAttachedWindowLimits(sourcePersistentId);
+        property->RemoveAttachedLimitOptions(sourcePersistentId);
+        WSError ret = sessionStage_->RemoveAttachedWindowLimits(sourcePersistentId);
+        if (ret != WSError::WS_OK) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d failed to remove own limits", winId);
+            return ret;
+        }
+    }
+
+    // Propagate to children (excluding specified one)
+    std::vector<sptr<SceneSession>> subSessions = GetSubSession();
+    for (auto& subSession : subSessions) {
+        if (!ShouldNotifyAttachedWindow(subSession)) {
+            continue;
+        }
+        // Skip excluded child
+        if (subSession->GetPersistentId() == excludePersistentId) {
+            continue;
+        }
+
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Main window id=%{public}d requesting child id=%{public}d to remove limits "
+            "from source id=%{public}d", winId, subSession->GetPersistentId(), sourcePersistentId);
+        subSession->RequestRemoveAttachedWindowLimits(sourcePersistentId);
+    }
+    return WSError::WS_OK;
+}
+
 bool MainSession::GetSessionBoundedSystemTray(
     int32_t callingPid, uint32_t callingToken, const std::string &instanceKey) const
 {

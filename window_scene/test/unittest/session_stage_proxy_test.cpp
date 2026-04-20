@@ -224,6 +224,22 @@ HWTEST_F(SessionStageProxyTest, SwitchFreeMultiWindow, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConfigDockAutoHide
+ * @tc.desc: test function : ConfigDockAutoHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyTest, ConfigDockAutoHide, TestSize.Level1)
+{
+    ASSERT_TRUE((sessionStage_ != nullptr));
+    bool isDockAutoHide = true;
+    WSError res = sessionStage_->ConfigDockAutoHide(isDockAutoHide);
+    ASSERT_EQ(WSError::WS_OK, res);
+    isDockAutoHide = false;
+    res = sessionStage_->ConfigDockAutoHide(isDockAutoHide);
+    ASSERT_EQ(WSError::WS_OK, res);
+}
+
+/**
  * @tc.name: GetUIContentRemoteObj
  * @tc.desc: test function : GetUIContentRemoteObj
  * @tc.type: FUNC

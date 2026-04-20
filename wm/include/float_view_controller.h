@@ -30,7 +30,13 @@ namespace OHOS {
 namespace Rosen {
 class FloatViewController : public RefBase {
 public:
+    enum class APIType : uint32_t {
+        NONE,
+        NAPI,
+        ANI,
+    };
     FloatViewController(const FvOption &option, napi_env env);
+    FloatViewController(const FvOption &option, ani_env* env);
     virtual ~FloatViewController();
     WMError StartFloatView();
     WMError StartFloatViewSingle(bool showWhenCreate = true);
@@ -39,6 +45,7 @@ public:
     WMError StopFloatView(const std::string& reason);
     WMError RestoreMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParams);
     WMError SetUIContext(const std::string &contextUrl, const std::shared_ptr<NativeReference>& contentStorage);
+    WMError SetUIContext(const std::string &contextUrl, const ani_object& contentStorage);
     WMError SetVisibilityInApp(bool visibleInApp);
     WMError SetWindowSize(const Rect &rect);
     void SyncWindowInfo(uint32_t windowId, const FloatViewWindowInfo& windowInfo, const std::string& reason);
@@ -66,6 +73,7 @@ private:
     WMError SetFloatViewContext();
     WMError DestroyFloatViewWindow(const std::string& reason);
     WMError SetUIContextInner();
+    ani_env* GetEnv() const;
 
     std::mutex listenerMutex_;
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -83,6 +91,8 @@ private:
     bool stopFromClient_ = false;
     FvOption option_;
     napi_env env_ = nullptr;
+    ani_vm* vm_ = nullptr;
+    APIType type_;
     bool bindState_ = false;
     uint32_t bindWindowId_ = INVALID_WINDOW_ID;
     std::string id_;

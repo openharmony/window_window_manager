@@ -107,6 +107,52 @@ HWTEST_F(SessionStageProxyRotationTest, GetSceneNodeCount, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetSceneNodeCount_Callback
+ * @tc.desc: test function : GetSceneNodeCount with callback parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageProxyRotationTest, GetSceneNodeCount_Callback, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetSceneNodeCount_Callback start";
+    MockMessageParcel::ClearAllErrorFlag();
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    sptr<SessionStageProxy> sessionStageProxy = sptr<SessionStageProxy>::MakeSptr(remoteMocker);
+
+    // Create a mock callback object
+    sptr<MockIRemoteObject> callbackMocker = sptr<MockIRemoteObject>::MakeSptr();
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    WSError errCode = sessionStageProxy->GetSceneNodeCount(callbackMocker);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write callback object
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(true);
+    errCode = sessionStageProxy->GetSceneNodeCount(callbackMocker);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(false);
+
+    // Case 3: remote is nullptr
+    sptr<SessionStageProxy> nullProxy = sptr<SessionStageProxy>::MakeSptr(nullptr);
+    errCode = nullProxy->GetSceneNodeCount(callbackMocker);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+
+    // Case 4: Failed to send request
+    remoteMocker->SetRequestResult(1);
+    errCode = sessionStageProxy->GetSceneNodeCount(callbackMocker);
+    EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
+    remoteMocker->SetRequestResult(0);
+
+    // Case 5: Success
+    errCode = sessionStageProxy->GetSceneNodeCount(callbackMocker);
+    EXPECT_EQ(errCode, WSError::WS_OK);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: GetSceneNodeCount_Callback end";
+}
+
+/**
  * @tc.name: NotifyRotationChange
  * @tc.desc: test function : NotifyRotationChange
  * @tc.type: FUNC

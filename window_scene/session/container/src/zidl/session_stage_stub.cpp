@@ -166,6 +166,12 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifySingleHandTransformChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_GLOBAL_SCALED_RECT):
             return HandleNotifyGlobalScaledRectChange(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_ATTACHED_WINDOW_LIMITS):
+            return HandleUpdateAttachedWindowLimits(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_REMOVE_ATTACHED_WINDOW_LIMITS):
+            return HandleRemoveAttachedWindowLimits(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_ALL_ATTACHED_LIMITS_TO_CHILD):
+            return HandleSyncAllAttachedLimitsToChild(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DIALOG_STATE_CHANGE):
             return HandleNotifyDialogStateChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_PIP_ACTION_EVENT):
@@ -178,6 +184,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyDisplayMove(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW):
             return HandleSwitchFreeMultiWindow(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CONFIG_DOCK_AUTO_HIDE):
+            return HandleConfigDockAutoHide(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ):
             return HandleGetUIContentRemoteObj(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_KEYBOARD_INFO_CHANGE):
@@ -246,6 +254,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleGetRouterStackInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCREEN_NODE_COUNT):
             return HandleGetSceneNodeCount(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_SCENE_NODE_COUNT_WITH_CALLBACK):
+            return HandleGetSceneNodeCountWithCallback(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_ORIENTATION_EXECUTION_RESULT):
             return HandleNotifyOrientationExecutionResult(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_WINDOW_MODE_FOR_UI_TEST):
@@ -280,6 +290,10 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleSyncFvWindowInfo(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_LIMITS):
             return HandleSyncFvLimits(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_HIDE_SUBWINDOW_ZLEVEL_ABOVE_PARENT_LOOSENED):
+            return HandleHideSubWindowZLevelAboveParentLoosened(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SHOW_SUBWINDOW_ZLEVEL_ABOVE_PARENT_LOOSENED):
+            return HandleShowSubWindowZLevelAboveParentLoosened(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -693,7 +707,18 @@ int SessionStageStub::HandleNotifySubWindowAfterParentWindowStatusChange(Message
         TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read mode");
         return ERR_INVALID_DATA;
     }
-    WSError errCode = NotifySubWindowAfterParentWindowStatusChange(static_cast<WindowMode>(mode));
+    uint32_t maximizeMode = static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
+    if (!data.ReadUint32(maximizeMode)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read maximizeMode");
+        return ERR_INVALID_DATA;
+    }
+    bool isLayoutFullScreen = false;
+    if (!data.ReadBool(isLayoutFullScreen)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "Failed to read isLayoutFullScreen");
+        return ERR_INVALID_DATA;
+    }
+    WSError errCode = NotifySubWindowAfterParentWindowStatusChange(static_cast<WindowMode>(mode),
+        static_cast<MaximizeMode>(maximizeMode), isLayoutFullScreen);
     if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "write stage error code failed");
         return ERR_INVALID_DATA;
@@ -845,6 +870,105 @@ int SessionStageStub::HandleNotifyGlobalScaledRectChange(MessageParcel& data, Me
     return ERR_NONE;
 }
 
+/** @note @window.layout */
+int SessionStageStub::HandleUpdateAttachedWindowLimits(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Called");
+    int32_t sourcePersistentId;
+    if (!data.ReadInt32(sourcePersistentId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read sourcePersistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    auto attachedWindowLimits = std::unique_ptr<WindowLimits>(WindowLimits::Unmarshalling(data));
+    if (attachedWindowLimits == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read attachedWindowLimits failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isIntersectedHeightLimit = false;
+    if (!data.ReadBool(isIntersectedHeightLimit)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isIntersectedHeightLimit failed");
+        return ERR_INVALID_DATA;
+    }
+    bool isIntersectedWidthLimit = false;
+    if (!data.ReadBool(isIntersectedWidthLimit)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read isIntersectedWidthLimit failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = UpdateAttachedWindowLimits(sourcePersistentId, *attachedWindowLimits,
+        isIntersectedHeightLimit, isIntersectedWidthLimit);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "UpdateAttachedWindowLimits failed, ret: %{public}d", ret);
+        return static_cast<int32_t>(ret);
+    }
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStageStub::HandleRemoveAttachedWindowLimits(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Called");
+    int32_t sourcePersistentId;
+    if (!data.ReadInt32(sourcePersistentId)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read sourcePersistentId failed");
+        return ERR_INVALID_DATA;
+    }
+    WSError ret = RemoveAttachedWindowLimits(sourcePersistentId);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "RemoveAttachedWindowLimits failed, ret: %{public}d", ret);
+        return static_cast<int32_t>(ret);
+    }
+    return ERR_NONE;
+}
+
+/** @note @window.layout */
+int SessionStageStub::HandleSyncAllAttachedLimitsToChild(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "Called");
+    uint32_t limitsCount = 0;
+    if (!data.ReadUint32(limitsCount)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read limitsList size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<std::pair<int32_t, WindowLimits>> limitsList;
+    limitsList.reserve(limitsCount);
+    for (uint32_t i = 0; i < limitsCount; ++i) {
+        int32_t sourceId = 0;
+        if (!data.ReadInt32(sourceId)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "read sourceId failed at index %{public}u", i);
+            return ERR_INVALID_DATA;
+        }
+        auto limits = std::unique_ptr<WindowLimits>(WindowLimits::Unmarshalling(data));
+        if (limits == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "read WindowLimits failed at index %{public}u", i);
+            return ERR_INVALID_DATA;
+        }
+        limitsList.emplace_back(sourceId, *limits);
+    }
+    uint32_t optionsCount = 0;
+    if (!data.ReadUint32(optionsCount)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "read optionsList size failed");
+        return ERR_INVALID_DATA;
+    }
+    std::vector<std::pair<int32_t, AttachLimitOptions>> optionsList;
+    optionsList.reserve(optionsCount);
+    for (uint32_t i = 0; i < optionsCount; ++i) {
+        int32_t sourceId = 0;
+        bool heightLimit = false;
+        bool widthLimit = false;
+        if (!data.ReadInt32(sourceId) || !data.ReadBool(heightLimit) || !data.ReadBool(widthLimit)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "read options entry failed at index %{public}u", i);
+            return ERR_INVALID_DATA;
+        }
+        optionsList.emplace_back(sourceId, AttachLimitOptions{heightLimit, widthLimit});
+    }
+    WSError ret = SyncAllAttachedLimitsToChild(limitsList, optionsList);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SyncAllAttachedLimitsToChild failed, ret: %{public}d", ret);
+        return static_cast<int32_t>(ret);
+    }
+    return ERR_NONE;
+}
+
 int SessionStageStub::HandleNotifyDensityFollowHost(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_UIEXT, "HandleNotifyDensityFollowHost");
@@ -993,6 +1117,18 @@ int SessionStageStub::HandleSwitchFreeMultiWindow(MessageParcel& data, MessagePa
     bool enable = data.ReadBool();
     WSError errCode = SwitchFreeMultiWindow(enable);
     reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleConfigDockAutoHide(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "called!");
+    bool isDockAutoHide = data.ReadBool();
+    WSError errCode = ConfigDockAutoHide(isDockAutoHide);
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "reply write failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
@@ -1304,6 +1440,26 @@ int SessionStageStub::HandleGetSceneNodeCount(MessageParcel& data, MessageParcel
     }
     if (!reply.WriteUint32(nodeCount)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Write nodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_ROTATION, "in");
+    sptr<IRemoteObject> callbackObj = data.ReadRemoteObject();
+    if (callbackObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Read callback failed");
+        return ERR_INVALID_VALUE;
+    }
+    WSError ret = GetSceneNodeCount(callbackObj);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "GetSceneNodeCount failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Write error code failed");
         return ERR_INVALID_VALUE;
     }
     return ERR_NONE;
@@ -1632,6 +1788,20 @@ int SessionStageStub::HandleNotifyParentLifecycleEvent(MessageParcel& data, Mess
         TLOGE(WmsLogTag::WMS_LIFE, "NotifyParentLifecycleEvent failed, ret: %{public}d", ret);
         return static_cast<int32_t>(ret);
     }
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleHideSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "in");
+    HideSubWindowZLevelAboveParentLoosened();
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleShowSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_SUB, "in");
+    ShowSubWindowZLevelAboveParentLoosened();
     return ERR_NONE;
 }
 //

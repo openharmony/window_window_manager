@@ -87,6 +87,7 @@ public:
     void SetWindowLimitsVP(const WindowLimits& windowLimits);
     void SetUserWindowLimits(const WindowLimits& windowLimits);
     void SetConfigWindowLimitsVP(const WindowLimits& windowLimitsVP);
+    void SetLimitsForAttachedWindows(const WindowLimits& windowLimits);
     void SetLastLimitsVpr(float vpr);
     void SetSystemBarProperty(WindowType type, const SystemBarProperty& property);
     void SetKeyboardLayoutParams(const KeyboardLayoutParams& params);
@@ -166,6 +167,7 @@ public:
     WindowLimits GetWindowLimitsVP() const;
     WindowLimits GetUserWindowLimits() const;
     WindowLimits GetConfigWindowLimitsVP() const;
+    WindowLimits GetLimitsForAttachedWindows() const;
     float GetLastLimitsVpr() const;
     uint32_t GetWindowModeSupportType() const;
     std::unordered_map<WindowType, SystemBarProperty> GetSystemBarProperty() const;
@@ -258,6 +260,22 @@ public:
     bool IsSubWindowZLevelAboveParentLoosened() const;
     void SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo);
     WindowAnchorInfo GetWindowAnchorInfo() const;
+    // Set attached window limits from a specific source window (by persistentId)
+    void SetAttachedWindowLimits(int32_t sourcePersistentId, const WindowLimits& attachedWindowLimits);
+    // Remove attached window limits from a specific source window
+    void RemoveAttachedWindowLimits(int32_t sourcePersistentId);
+    // Get all attached window limits (preserving insertion order)
+    std::vector<std::pair<int32_t, WindowLimits>> GetAttachedWindowLimitsList() const;
+    void ClearAttachedWindowLimitsList();
+    // Set limit options for a specific attached window
+    void SetAttachedLimitOptions(int32_t sourcePersistentId, const AttachLimitOptions& options);
+    // Get limit options for a specific attached window
+    AttachLimitOptions GetAttachedLimitOptions(int32_t sourcePersistentId) const;
+    // Remove limit options for a specific attached window
+    void RemoveAttachedLimitOptions(int32_t sourcePersistentId);
+    // Get all attached limit options (preserving insertion order)
+    std::vector<std::pair<int32_t, AttachLimitOptions>> GetAttachedLimitOptionsList() const;
+    void ClearAttachedLimitOptionsList();
 
     /*
      * Window Hierarchy
@@ -342,6 +360,8 @@ public:
     WindowSizeLimits GetWindowSizeLimits() const;
     void SetIsFullScreenWaterfallMode(bool isFullScreenWaterfallMode);
     bool GetIsFullScreenWaterfallMode() const;
+    void SetFollowParentLayout(bool isFollowParentLayout);
+    bool IsFollowParentLayout() const;
     void SetIsWindowLimitsForcible(bool isWindowLimitsForcible) { isWindowLimitsForcible_ = isWindowLimitsForcible; }
     bool GetIsWindowLimitsForcible() const { return isWindowLimitsForcible_; }
 
@@ -532,6 +552,7 @@ private:
     WindowLimits limitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
     WindowLimits userLimits_ = WindowLimits::DEFAULT_VP_LIMITS();
     WindowLimits configLimitsVP_ = WindowLimits::DEFAULT_VP_LIMITS();
+    WindowLimits limitsForAttachedWindows_ = WindowLimits::DEFAULT_VP_LIMITS();
     float lastVpr_ = 0.0f;
     PiPTemplateInfo pipTemplateInfo_ = {};
     FloatingBallTemplateInfo fbTemplateInfo_ = {};
@@ -597,6 +618,14 @@ private:
     bool subWindowOutlineEnabled_ = false;
     bool zLevelAboveParentLoosened_ = false;
     WindowAnchorInfo windowAnchorInfo_;
+    // Store window limits from attached windows (preserving insertion order for priority)
+    // Parent window stores limits from its sub windows, sub window stores limits from its parent
+    // Earlier attached windows have higher priority in intersection calculation
+    std::vector<std::pair<int32_t, WindowLimits>> attachedWindowLimitsList_;
+    // Store limit options for each attached window (preserving insertion order to match limits list)
+    // Parent window stores options from its sub windows (which limits to intersect)
+    // Each pair contains: <sourceWindowId, AttachLimitOptions>
+    std::vector<std::pair<int32_t, AttachLimitOptions>> attachedLimitOptionsList_;
 
     /*
      * Window Hierarchy
@@ -633,6 +662,7 @@ private:
     bool isWindowDelayRaiseEnabled_ = false;
     WindowSizeLimits windowSizeLimits_;
     bool isFullScreenWaterfallMode_ = false;
+    bool isFollowParentLayout_ = false;
 
     /**
      * @brief Whether application-defined window size limits are allowed to exceed system limits.

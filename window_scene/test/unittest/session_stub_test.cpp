@@ -435,7 +435,7 @@ HWTEST_F(SessionStubTest, ProcessRemoteRequestTest08, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_SYNC };
-    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", true, false, 0, true, "test"}, nullptr};
+    FloatingBallTemplateInfo fbTemplateInfo {{1, "fb", "fb_content", "red", 0, false, 0, true, "test"}, nullptr};
     data.WriteParcelable(&fbTemplateInfo);
     auto res = session_->ProcessRemoteRequest(
         static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_FLOATING_BALL), data, reply, option);
@@ -2305,6 +2305,39 @@ HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
         EXPECT_CALL(*session, SetDecorVisible(isVisible)).Times(1);
         EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
     }
+}
+
+/*
+ * @tc.name: HandleSetFloatNavigationAvoidAreaEnabled
+ * @tc.desc: Verify HandleSetFloatNavigationAvoidAreaEnabled with invalid and valid inputs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetFloatNavigationAvoidAreaEnabled, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FLOAT_NAVIGATION_AVOID_AREA_ENABLED);
+    MessageOption option;
+
+    // Case 1: Missing enable
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
+    }
+
+    // Case 2: Success
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        bool enable = true;
+        data.WriteBool(enable);
+        EXPECT_CALL(*session, SetFloatNavigationAvoidAreaEnabled(enable)).Times(1);
+        EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_DECOR_VISIBLE);
+    session->ProcessRemoteRequest(code, data, reply, option);
 }
 
 /**

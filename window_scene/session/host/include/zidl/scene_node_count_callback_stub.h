@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef SCREEN_SESSION_MANAGER_PHONE_EXTENSION_H
-#define SCREEN_SESSION_MANAGER_PHONE_EXTENSION_H
+#ifndef OHOS_WINDOW_SCENE_SCENE_NODE_COUNT_CALLBACK_STUB_H
+#define OHOS_WINDOW_SCENE_SCENE_NODE_COUNT_CALLBACK_STUB_H
 
-#include "screen_property.h"
-#include "screen_session.h"
-#include "screen_session_manager.h"
+#include <iremote_stub.h>
+#include "scene_node_count_callback_interface.h"
 
 namespace OHOS {
 namespace Rosen {
-namespace PhoneExtension {
-class ScreenSessionManagerExt : virtual public ScreenSessionManager {
-    WM_DECLARE_SINGLE_INSTANCE(ScreenSessionManagerExt)
+class SceneNodeCountCallbackStub : public IRemoteStub<ISceneNodeCountCallback> {
+public:
+    SceneNodeCountCallbackStub() = default;
+    ~SceneNodeCountCallbackStub() = default;
+    
+    virtual int OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option) override;
 };
-}
 } // namespace Rosen
 } // namespace OHOS
-#endif
+#endif // OHOS_WINDOW_SCENE_SCENE_NODE_COUNT_CALLBACK_STUB_H

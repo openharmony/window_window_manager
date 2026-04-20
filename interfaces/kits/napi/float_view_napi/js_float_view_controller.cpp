@@ -317,8 +317,8 @@ napi_value JsFloatViewController::OnSetWindowSize(napi_env env, napi_callback_in
     napi_value jsWidth = nullptr;
     napi_value jsHeight = nullptr;
 
-    uint32_t width = 0;
-    uint32_t height = 0;
+    int32_t width = 0;
+    int32_t height = 0;
     bool hasProperty = false;
     napi_has_named_property(env, jsSize, "width", &hasProperty);
     if (hasProperty) {
@@ -330,15 +330,14 @@ napi_value JsFloatViewController::OnSetWindowSize(napi_env env, napi_callback_in
         napi_get_named_property(env, jsSize, "height", &jsHeight);
         ConvertFromJsValue(env, jsHeight, height);
     }
-    Rect rect = {0, 0, width, height};
-    return OnSetWindowSizeTask(env, rect);
+    return OnSetWindowSizeTask(env, width, height);
 }
 
-napi_value JsFloatViewController::OnSetWindowSizeTask(napi_env env, const Rect &rect)
+napi_value JsFloatViewController::OnSetWindowSizeTask(napi_env env, int32_t width, int32_t height)
 {
     wptr<FloatViewController> weakController(fvController_);
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
-    NapiAsyncTask::ExecuteCallback execute = [weakController, errCodePtr, rect] {
+    NapiAsyncTask::ExecuteCallback execute = [weakController, errCodePtr, width, height] {
         if (errCodePtr == nullptr) {
             return;
         }
@@ -347,10 +346,11 @@ napi_value JsFloatViewController::OnSetWindowSizeTask(napi_env env, const Rect &
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
-        if (rect.width_ <= 0 || rect.height_ <= 0) {
+        if (width <= 0 || height <= 0) {
             *errCodePtr = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
             return;
         }
+        Rect rect = {0, 0, static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
         *errCodePtr = ConvertErrorToCode(fvController->SetWindowSize(rect));
     };
     NapiAsyncTask::CompleteCallback complete =

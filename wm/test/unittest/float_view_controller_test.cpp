@@ -44,6 +44,8 @@ public:
     MOCK_METHOD1(RestoreFloatViewMainWindow, WMError(const std::shared_ptr<AAFwk::WantParams>& wantParams));
     MOCK_METHOD6(NapiSetUIContent, WMError(const std::string& contentUrl, napi_env env, napi_value storage,
         BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability));
+    MOCK_METHOD6(AniSetUIContent, WMError(const std::string& contentUrl, ani_env* env, ani_object storage,
+        BackupAndRestoreType type, sptr<IRemoteObject> token, AppExecFwk::Ability* ability));
     MOCK_METHOD1(RegisterLifeCycleListener, WMError(const sptr<IWindowLifeCycle>& listener));
     MOCK_METHOD1(UnregisterLifeCycleListener, WMError(const sptr<IWindowLifeCycle>& listener));
     uint32_t GetWindowId() const override
@@ -114,7 +116,7 @@ void FloatViewControllerTest::SetUp()
     ASSERT_NE(nullptr, mw_);
     option_ = sptr<FvOption>::MakeSptr();
     ASSERT_NE(nullptr, option_);
-    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     ASSERT_NE(nullptr, fvController_);
 }
 
@@ -208,7 +210,7 @@ HWTEST_F(FloatViewControllerTest, StartFloatViewSingle, TestSize.Level1)
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPING);
     EXPECT_EQ(WMError::WM_ERROR_FV_INVALID_STATE, fvController_->StartFloatViewSingle());
 
-    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    auto otherController = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     FloatViewManager::SetActiveController(otherController);
     EXPECT_EQ(WMError::WM_ERROR_FV_START_FAILED, fvController_->StartFloatViewSingle());
     FloatViewManager::SetActiveController(fvController_);
@@ -227,7 +229,7 @@ HWTEST_F(FloatViewControllerTest, CreateFloatViewWindow, TestSize.Level1)
 {
     void* invalidContext = nullptr;
     option_->SetContext(invalidContext);
-    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->CreateFloatViewWindow());
 
     std::shared_ptr<AbilityRuntime::Context> context = std::make_shared<AbilityRuntime::AbilityContextImpl>();
@@ -278,6 +280,9 @@ HWTEST_F(FloatViewControllerTest, StopFloatViewFromClientSingle, TestSize.Level1
 
     fvController_->ChangeState(FvWindowState::FV_STATE_STOPPING);
     EXPECT_EQ(WMError::WM_ERROR_FV_REPEAT_OPERATION, fvController_->StopFloatViewFromClientSingle());
+
+    fvController_->ChangeState(FvWindowState::FV_STATE_UNDEFINED);
+    EXPECT_EQ(WMError::WM_ERROR_FV_INVALID_STATE, fvController_->StopFloatViewFromClientSingle());
 
     fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
     EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->StopFloatViewFromClientSingle());
@@ -343,36 +348,100 @@ HWTEST_F(FloatViewControllerTest, RestoreMainWindow, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetUIContext
- * @tc.desc: SetUIContext with various states
+ * @tc.name: SetFloatViewContext
+ * @tc.desc: SetFloatViewContext
  * @tc.type: FUNC
  */
-HWTEST_F(FloatViewControllerTest, SetUIContext, TestSize.Level1)
+HWTEST_F(FloatViewControllerTest, SetFloatViewContext, TestSize.Level1)
 {
-    std::string contextUrl = "test_url";
-    std::shared_ptr<NativeReference> contentStorage = nullptr;
-    EXPECT_EQ(WMError::WM_OK, fvController_->SetUIContext(contextUrl, contentStorage));
-
-    fvController_->ChangeState(FvWindowState::FV_STATE_STARTED);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
-
-    fvController_->ChangeState(FvWindowState::FV_STATE_HIDDEN);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
-
-    fvController_->ChangeState(FvWindowState::FV_STATE_IN_SIDEBAR);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
-
-    fvController_->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, fvController_->SetUIContext(contextUrl, contentStorage));
-
     fvController_->window_ = nullptr;
     EXPECT_EQ(WMError::WM_OK, fvController_->SetFloatViewContext());
     fvController_->window_ = mw_;
-    EXPECT_EQ(WMError::WM_OK, fvController_->SetUIContext(contextUrl, contentStorage));
     option_->SetUIPath("");
     EXPECT_EQ(WMError::WM_OK, fvController_->SetFloatViewContext());
     option_->SetUIPath("testPath");
     EXPECT_EQ(WMError::WM_OK, fvController_->SetFloatViewContext());
+}
+
+/**
+ * @tc.name: NoneTypeSetUIContext
+ * @tc.desc: SetUIContext is not napi and ani
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewControllerTest, NoneTypeSetUIContext, TestSize.Level1)
+{
+    sptr<FloatViewController> controller =
+        sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
+    controller->type_ = FloatViewController::APIType::NONE;
+    EXPECT_EQ(WMError::WM_OK, controller->SetUIContextInner());
+}
+
+/**
+ * @tc.name: NAPISetUIContext
+ * @tc.desc: SetUIContext with various states
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewControllerTest, NAPISetUIContext, TestSize.Level1)
+{
+    sptr<FloatViewController> napiController =
+        sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
+    std::string contextUrl = "test_url";
+    std::shared_ptr<NativeReference> contentStorage = nullptr;
+
+    ani_object fakeStorage = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, napiController->SetUIContext(contextUrl, fakeStorage));
+
+    napiController->window_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, napiController->SetUIContext(contextUrl, contentStorage));
+
+    napiController->ChangeState(FvWindowState::FV_STATE_STARTED);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, napiController->SetUIContext(contextUrl, contentStorage));
+    napiController->ChangeState(FvWindowState::FV_STATE_HIDDEN);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, napiController->SetUIContext(contextUrl, contentStorage));
+    napiController->ChangeState(FvWindowState::FV_STATE_IN_SIDEBAR);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, napiController->SetUIContext(contextUrl, contentStorage));
+    napiController->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, napiController->SetUIContext(contextUrl, contentStorage));
+
+    napiController->window_ = mw_;
+    EXPECT_CALL(*mw_, NapiSetUIContent(_, _, _, _, _, _)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, napiController->SetUIContext(contextUrl, contentStorage));
+    EXPECT_CALL(*mw_, NapiSetUIContent(_, _, _, _, _, _)).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, napiController->SetUIContext(contextUrl, contentStorage));
+}
+
+/**
+ * @tc.name: ANISetUIContext
+ * @tc.desc: SetUIContext with various states
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewControllerTest, ANISetUIContext, TestSize.Level1)
+{
+    sptr<FloatViewController> aniController =
+        sptr<FloatViewController>::MakeSptr(*option_, static_cast<ani_env*>(nullptr));
+    std::string contextUrl = "test_url";
+    ani_object contentStorage = nullptr;
+
+    std::shared_ptr<NativeReference> fakeStorage = nullptr;
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, aniController->SetUIContext(contextUrl, fakeStorage));
+
+    aniController->window_ = nullptr;
+    EXPECT_EQ(WMError::WM_OK, aniController->SetUIContext(contextUrl, contentStorage));
+
+    aniController->ChangeState(FvWindowState::FV_STATE_STARTED);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, aniController->SetUIContext(contextUrl, contentStorage));
+    aniController->ChangeState(FvWindowState::FV_STATE_HIDDEN);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, aniController->SetUIContext(contextUrl, contentStorage));
+    aniController->ChangeState(FvWindowState::FV_STATE_IN_SIDEBAR);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, aniController->SetUIContext(contextUrl, contentStorage));
+    aniController->ChangeState(FvWindowState::FV_STATE_IN_FLOATING_BALL);
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, aniController->SetUIContext(contextUrl, contentStorage));
+
+    aniController->window_ = mw_;
+    EXPECT_CALL(*mw_, AniSetUIContent(_, _, _, _, _, _)).WillOnce(Return(WMError::WM_OK));
+    EXPECT_EQ(WMError::WM_OK, aniController->SetUIContext(contextUrl, contentStorage));
+    EXPECT_CALL(*mw_, AniSetUIContent(_, _, _, _, _, _)).WillOnce(Return(WMError::WM_DO_NOTHING));
+    EXPECT_EQ(WMError::WM_ERROR_INVALID_WINDOW, aniController->SetUIContext(contextUrl, contentStorage));
 }
 
 /**
@@ -573,8 +642,22 @@ HWTEST_F(FloatViewControllerTest, StartFloatViewInner, TestSize.Level1)
 {
     void* invalidContext = nullptr;
     option_->SetContext(invalidContext);
-    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     EXPECT_NE(WMError::WM_OK, fvController_->StartFloatViewInner());
+}
+
+/**
+ * @tc.name: AfterDestroy_Test
+ * @tc.desc: AfterDestroy_Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(FloatViewControllerTest, AfterDestroy_Test, TestSize.Level1)
+{
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
+    FloatViewManager::SetActiveController(fvController_);
+    fvController_->mainWindowLifeCycleListener_ = sptr<FloatViewController::WindowLifeCycleListener>::MakeSptr();
+    fvController_->mainWindowLifeCycleListener_->AfterDestroyed();
+    EXPECT_EQ(FvWindowState::FV_STATE_UNDEFINED, fvController_->curState_);
 }
 
 /**
@@ -584,7 +667,7 @@ HWTEST_F(FloatViewControllerTest, StartFloatViewInner, TestSize.Level1)
  */
 HWTEST_F(FloatViewControllerTest, SetShowWhenCreate_Test, TestSize.Level1)
 {
-    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, nullptr);
+    fvController_ = sptr<FloatViewController>::MakeSptr(*option_, static_cast<napi_env>(nullptr));
     FloatViewManager::SetActiveController(fvController_);
     fvController_->SetShowWhenCreate(true);
     fvController_->window_ = mw_;
