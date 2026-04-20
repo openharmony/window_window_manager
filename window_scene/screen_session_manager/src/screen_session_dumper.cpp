@@ -784,8 +784,6 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         <<  static_cast<int32_t>(screenProperty.GetOrientation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "DisplayOrientation: "
         << static_cast<int32_t>(screenProperty.GetDisplayOrientation()) << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "DeviceOriention: "
-        << static_cast<int32_t>(screenProperty.GetDeviceOrientation()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "GetScreenType: "
         << static_cast<int32_t>(screenProperty.GetScreenType()) << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "ReqOrientation: "
