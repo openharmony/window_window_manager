@@ -479,7 +479,7 @@ HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByType, TestSize.Level
 HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByType, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowExtensionSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     window->property_ = sptr<WindowSessionProperty>::MakeSptr();
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
