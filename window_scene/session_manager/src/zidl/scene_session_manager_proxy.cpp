@@ -3743,7 +3743,12 @@ WMError SceneSessionManagerProxy::RecoverProcessWatermark(int32_t pid, const std
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
-    return static_cast<WMError>(reply.ReadInt32());
+    int32_t errCode = 0;
+    if (!reply.ReadInt32(errCode)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "read errcode failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(errCode);
 }
 
 WMError SceneSessionManagerProxy::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
