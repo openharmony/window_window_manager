@@ -475,6 +475,10 @@ public:
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
     void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
+    void SetDockAutoHide(bool isDockAutoHide)
+    {
+        windowSystemConfig_.isDockAutoHide_ = isDockAutoHide;
+    }
 
     /*
      * Window Decor listener
@@ -606,6 +610,8 @@ public:
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
     bool IsAnco() const override;
+    bool GetIsAtomicService() const override;
+    int32_t GetWindowPersistentId() const override;
 
     /*
      * Window Input Event
@@ -763,6 +769,7 @@ protected:
     WMError WindowSessionCreateCheck();
     void UpdateDecorEnableToAce(bool isDecorEnable);
     bool NeedShowDecorInOtherDisplay(bool decorVisible);
+    bool updateDecorWhenDockAutoHide(bool decorVisible);
     void NotifyModeChange(WindowMode mode, bool hasDeco = true);
     void NotifyFreeWindowModeChange(bool isInFreeWindowMode);
     WMError UpdateProperty(WSPropertyChangeAction action);
@@ -886,6 +893,7 @@ protected:
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     WSError SwitchFreeMultiWindow(bool enable) override;
+    WSError ConfigDockAutoHide(bool isDockAutoHide) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
     bool IsFreeMultiWindowMode() const
@@ -1044,6 +1052,8 @@ protected:
      */
     bool grayOutMaximizeButton_ = false;
     void NotifyTitleChange(bool isShow, int32_t height);
+    bool isDecorHiddenByApp_ = false;
+    bool isMaximizeInvoked_ = false;
 
     /**
      * Game Prelaunch flag

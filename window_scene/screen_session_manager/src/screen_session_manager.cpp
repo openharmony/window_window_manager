@@ -474,6 +474,9 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
         TLOGNFE(WmsLogTag::DMS, "foldScreenController_ is nullptr");
         return;
     }
+    if (FoldScreenStateInternel::IsLoadDmsExt()) {
+        InitScreenActiveModeRectMap();
+    }
     foldScreenController_->SetOnBootAnimation(true);
     if (FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice()) {
         SetFoldScreenPowerInit([&]() {
@@ -487,6 +490,22 @@ void ScreenSessionManager::HandleFoldScreenPowerInit()
         FoldScreenPowerInit();
     }
 #endif
+}
+
+void ScreenSessionManager::InitScreenActiveModeRectMap()
+{
+    if (foldScreenController_ == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "foldScreenController is nullptr");
+        return;
+    }
+    std::lock_guard<std::mutex> lock(screenActiveModeRectMapMutex_);
+    screenActiveModeRectMap_ = foldScreenController_->GetScreenActiveModeRectMap();
+}
+
+const std::map<FoldDisplayMode, RRect>& ScreenSessionManager::GetScreenActiveModeRectMap()
+{
+    std::lock_guard<std::mutex> lock(screenActiveModeRectMapMutex_);
+    return screenActiveModeRectMap_;
 }
 
 bool ScreenSessionManager::IsSupportCoordination()
@@ -10133,7 +10152,7 @@ DMError ScreenSessionManager::SetFoldDisplayModeInner(const FoldDisplayMode disp
     if (reason.compare("backSelfie") == 0) {
         UpdateCameraBackSelfie(true);
     }
-    if (reason.compare("exitCoordinationMode")) {
+    if (reason == "exitCoordinationMode" || reason == "exitBackSelfie") {
         ExitCoordinationAndRecoverDisplayMode();
         return DMError::DM_OK;
     }
@@ -11180,7 +11199,7 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     TLOGNFI(WmsLogTag::DMS, "screenId: %{public}" PRIu64 " reason: %{public}d", screenId, static_cast<int>(reason));
     // Update display orientation when boot animation
     if (IsOnBootAnimation()) {
-        UpdateDisplayOrientationWhenBootAnimation(screenId);
+        UpdateDisplayOrientationWhenBootAnimation(screenId, newProperty);
     }
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
@@ -11195,18 +11214,25 @@ void ScreenSessionManager::OnPropertyChange(const ScreenProperty& newProperty, S
     clientProxy->OnPropertyChanged(screenId, newProperty, reason);
 }
 
-void ScreenSessionManager::UpdateDisplayOrientationWhenBootAnimation(ScreenId screenId)
+void ScreenSessionManager::UpdateDisplayOrientationWhenBootAnimation(ScreenId screenId,
+    const ScreenProperty& screenProperty)
 {
     sptr<ScreenSession> screenSession = GetScreenSession(screenId);
     if (!screenSession) {
         TLOGNFE(WmsLogTag::DMS, "Get screen session failed, screenId: %{public}" PRIu64, screenId);
         return;
     }
+    auto displayOrientation = screenSession->CalcDisplayOrientation(screenProperty.GetScreenRotation(),
+        screenProperty.GetDisplayMode());
+    auto deviceOrientation = screenSession->CalcDeviceOrientationWithBounds(screenProperty.GetDeviceRotation(),
+        screenProperty.GetDisplayMode(), screenProperty.GetBounds());
     auto currProperty = screenSession->GetScreenProperty();
-    currProperty.CalcDefaultDisplayOrientation();
+    currProperty.SetDisplayOrientation(displayOrientation);
+    currProperty.SetDeviceOrientation(deviceOrientation);
     screenSession->SetScreenProperty(currProperty);
-    TLOGNFI(WmsLogTag::DMS, "DisplayOrientation is: %{public}d",
-        screenSession->GetScreenProperty().GetDisplayOrientation());
+    TLOGNFI(WmsLogTag::DMS, "DisplayOrientation is: %{public}d, deviceOrientation is: %{public}d",
+        screenSession->GetScreenProperty().GetDisplayOrientation(),
+        screenSession->GetScreenProperty().GetDeviceOrientation());
 }
 
 void ScreenSessionManager::OnFoldPropertyChange(ScreenId screenId, const ScreenProperty& newProperty,
@@ -14911,7 +14937,9 @@ DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, co
             displayAreaFixed.posY_ += screenRegion.height_ - displayRegion.height_;
         }
         displayRegion.height_ = screenRegion.height_;
-    } else if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() && GetFoldDisplayMode() == FoldDisplayMode::FULL) {
+    } else if ((FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) &&
+        GetFoldDisplayMode() == FoldDisplayMode::FULL) {
         SetDisplayRegionAndAreaFixed(displayInfo->GetRotation(), displayRegion, displayAreaFixed);
     }
     CalculateRotatedDisplay(displayInfo->GetRotation(), screenRegion, displayRegion, displayAreaFixed);
@@ -14923,7 +14951,16 @@ DMError ScreenSessionManager::GetScreenAreaOfDisplayArea(DisplayId displayId, co
 void ScreenSessionManager::SetDisplayRegionAndAreaFixed(Rotation rotation, DMRect& displayRegion,
     DMRect& displayAreaFixed)
 {
-    int32_t offsetX = static_cast<int32_t>(screenParams_[FULL_STATUS_OFFSET_X]);
+    int32_t offsetX = 0;
+    auto screenActiveModeRectMap = GetScreenActiveModeRectMap();
+    auto screenActiveModeRectIter = screenActiveModeRectMap.find(FoldDisplayMode::FULL);
+    if (FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice() &&
+        screenActiveModeRectIter != screenActiveModeRectMap.end()) {
+        RRect bounds = screenActiveModeRectIter->second;
+        offsetX = bounds.rect_.GetTop();
+    } else if (screenParams_.size() > FULL_STATUS_OFFSET_X) {
+        offsetX = static_cast<int32_t>(screenParams_[FULL_STATUS_OFFSET_X]);
+    }
     switch (rotation) {
         case Rotation::ROTATION_0:
             displayRegion.posX_ = offsetX;
@@ -14943,8 +14980,7 @@ void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRe
 {
     std::vector<std::string> phyOffsets = FoldScreenStateInternel::GetPhyRotationOffset();
     int32_t phyOffset = 0;
-    if (phyOffsets.size() > 1 &&
-        (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() || GetFoldStatus() != FoldStatus::FOLDED)) {
+    if (phyOffsets.size() > 1 && !FoldScreenStateInternel::IsOuterScreen(GetFoldDisplayMode())) {
         if (!ScreenSettingHelper::ConvertStrToInt32(phyOffsets[1], phyOffset)) {
             TLOGNFE(WmsLogTag::DMS, "transfer phyOffset1 failed.");
             return;
@@ -15004,7 +15040,8 @@ void ScreenSessionManager::CalculateRotatedDisplay(Rotation rotation, const DMRe
 void ScreenSessionManager::CalculateScreenArea(const DMRect& displayRegion, const DMRect& displayArea,
     const DMRect& screenRegion, DMRect& screenArea)
 {
-    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice()) {
+    if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) {
        screenArea = displayArea;
        return;
     }

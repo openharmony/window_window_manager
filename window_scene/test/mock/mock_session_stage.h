@@ -63,6 +63,13 @@ public:
     MOCK_METHOD2(NotifyDensityFollowHost, WSError(bool isFollowHost, float densityValue));
     MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
     MOCK_METHOD1(NotifyWindowOcclusionState, WSError(const WindowVisibilityState state));
+    MOCK_METHOD4(UpdateAttachedWindowLimits, WSError(int32_t sourcePersistentId,
+        const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit,
+        bool isIntersectedWidthLimit));
+    MOCK_METHOD1(RemoveAttachedWindowLimits, WSError(int32_t sourcePersistentId));
+    MOCK_METHOD2(SyncAllAttachedLimitsToChild, WSError(
+        const std::vector<std::pair<int32_t, WindowLimits>>& limitsList,
+        const std::vector<std::pair<int32_t, AttachLimitOptions>>& optionsList));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
     MOCK_METHOD1(NotifySingleHandTransformChange, void(const SingleHandTransform& singleHandTransform));
     MOCK_METHOD(void, NotifyGlobalScaledRectChange, (const Rect& globalScaledRect), (override));
@@ -72,6 +79,7 @@ public:
     MOCK_METHOD2(SetPiPControlEvent, WSError(WsPiPControlType controlType, WsPiPControlStatus status));
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
+    MOCK_METHOD1(ConfigDockAutoHide, WSError(bool isDockAutoHide));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
     MOCK_METHOD1(UpdateAnimationSpeed, void(float speed));
     MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));

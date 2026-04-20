@@ -108,6 +108,39 @@ public:
     void SetPrelaunch() override;
     bool IsPrelaunch() const override;
 
+    /*
+     * Window Layout
+     */
+    /**
+     * @brief Main window implementation: update own limits and propagate to all children
+     *
+     * Main window updates its own attached window limits and then requests all attached
+     * child windows to update their limits as well. This ensures limits are propagated
+     * throughout the window hierarchy.
+     *
+     * @param sourcePersistentId the persistentId of the window providing the limits
+     * @param attachedWindowLimits the other window's limits
+     * @param isIntersectedHeightLimit whether to limit height with attached window's limits
+     * @param isIntersectedWidthLimit whether to limit width with attached window's limits
+     * @return Returns WSError::WS_OK if success, otherwise failed.
+     */
+    WSError RequestUpdateAttachedWindowLimits(int32_t sourcePersistentId,
+        const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit = true,
+        bool isIntersectedWidthLimit = true, int32_t excludePersistentId = INVALID_SESSION_ID) override;
+
+    /**
+     * @brief Main window implementation: remove own limits and propagate to all children
+     *
+     * Main window removes its own attached window limits and then requests all attached
+     * child windows to remove their limits as well.
+     *
+     * @param sourcePersistentId the persistentId of the source window whose limits should be removed
+     * @param excludePersistentId the persistentId of child window to exclude from notification
+     * @return Returns WSError::WS_OK if success, otherwise failed.
+     */
+    WSError RequestRemoveAttachedWindowLimits(int32_t sourcePersistentId,
+        int32_t excludePersistentId = INVALID_SESSION_ID) override;
+
 protected:
     void UpdatePointerArea(const WSRect& rect) override;
     bool CheckPointerEventDispatch(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const override;
