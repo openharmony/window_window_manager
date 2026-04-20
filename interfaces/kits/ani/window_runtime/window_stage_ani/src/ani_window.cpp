@@ -47,6 +47,12 @@ using OHOS::Rosen::WindowScene;
 
 namespace OHOS {
 namespace Rosen {
+std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfigANI(
+    ani_env* env, ani_object aniConfig);
+std::optional<AcrossDisplayPresentation> ParseAcrossDisplayPresentation(
+    ani_env* env, ani_object aniAcrossDisplay);
+std::optional<MaximizeOptions> ParseMaximizeOptionsANI(ani_env* env, ani_object aniOptions);
+
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
