@@ -15,7 +15,6 @@
 
 #include "screen_session_manager/include/screen_session_manager.h"
 
-#include <inttypes.h>
 #include <csignal>
 #include <cstdint>
 #include <ctime>
