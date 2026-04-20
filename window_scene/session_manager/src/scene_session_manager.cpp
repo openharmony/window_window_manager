@@ -19923,12 +19923,23 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
             TLOGW(WmsLogTag::DEFAULT, "curSession nullptr");
             continue;
         }
-        if (curSession->GetSessionInfo().isSystem_ ||
-            (!curSession->IsSessionForeground())) {
-             continue;
-         }
+        if (curSession->GetSessionInfo().isSystem_) {
+            TLOGD(WmsLogTag::DEFAULT, "skip system session, id: %{public}d", curSession->GetPersistentId());
+            continue;
+        }
+        auto mainSession = curSession->GetMainSession();
+        if (mainSession == nullptr || !mainSession->IsSessionForeground()) {
+            TLOGD(WmsLogTag::DEFAULT,
+                "skip, id: %{public}d, mainId: %{public}d, foreground: %{public}d",
+                curSession->GetPersistentId(),
+                mainSession ? mainSession->GetPersistentId() : INVALID_SESSION_ID,
+                mainSession ? mainSession->IsSessionForeground() : false);
+            continue;
+        }
         activeSession.push_back(curSession);
     }
+    TLOGD(WmsLogTag::DEFAULT, "total: %{public}zu, active: %{public}zu",
+        sceneSessionMapCopy.size(), activeSession.size());
     return activeSession;
 }
 
