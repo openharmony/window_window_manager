@@ -42,7 +42,7 @@ public:
     static void RegisterUnsupportFuncs(napi_env env, napi_value objValue, const char *moduleName);
     static napi_value GetWindowAvoidArea(napi_env env, napi_callback_info info);
     static napi_value SetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
- 	static napi_value IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    static napi_value IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value RegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
     static napi_value UnRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
     static napi_value AtomicRegisterExtensionWindowCallback(napi_env env, napi_callback_info info);
