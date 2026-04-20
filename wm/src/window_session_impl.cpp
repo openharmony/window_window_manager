@@ -2042,7 +2042,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
             TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
                 type, avoidArea.ToString().c_str());
             if (!floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
-                return;
+                continue;
             }
             if ((lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() && type != AvoidAreaType::TYPE_CUTOUT) ||
                 lastAvoidAreaMap_[type] != avoidArea) {

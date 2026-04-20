@@ -293,17 +293,17 @@ napi_value JsExtensionWindow::GetWindowAvoidArea(napi_env env, napi_callback_inf
     return (me != nullptr) ? me->OnGetWindowAvoidArea(env, info) : nullptr;
 }
 
-napi_value JsWindow::SetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+napi_value JsExtensionWindow::SetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
-    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnSetFloatNavigationAvoidAreaEnabled(env, info) : nullptr;
 }
 
-napi_value JsWindow::IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+napi_value JsExtensionWindow::IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
-    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
     return (me != nullptr) ? me->OnIsFloatNavigationAvoidAreaEnabled(env, info) : nullptr;
 }
 
@@ -1048,7 +1048,7 @@ napi_value JsExtensionWindow::OnGetWindowAvoidArea(napi_env env, napi_callback_i
     }
 }
 
-napi_value JsWindow::OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+napi_value JsExtensionWindow::OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
@@ -1094,7 +1094,7 @@ napi_value JsWindow::OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_cal
     return result;
 }
     
-napi_value JsWindow::OnIsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+napi_value JsExtensionWindow::OnIsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
