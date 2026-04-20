@@ -436,6 +436,18 @@ HWTEST_F(SceneSessionManagerAttributeTest, RecoverScreenWatermarkImage004, TestS
 }
 
 /**
+ * @tc.name: RecoverProcessWatermark001
+ * @tc.desc: test RecoverProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, RecoverProcessWatermark001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto ret = ssm_->RecoverProcessWatermark(123, "RecoverProcessWatermarkName");
+    EXPECT_EQ(ret, WMError::WM_OK);
+}
+
+/**
  * @tc.name: FilterForGetAllWindowLayoutInfo001
  * @tc.desc: test FilterForGetAllWindowLayoutInfo with empty sessions
  * @tc.type: FUNC

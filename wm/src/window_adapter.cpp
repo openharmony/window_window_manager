@@ -676,6 +676,7 @@ void WindowAdapter::WindowManagerAndSessionRecover()
     RecoverWindowPropertyChangeFlag();
     RecoverWatermarkImageForApp();
     RecoverScreenWatermarkImage();
+    RecoverProcessWatermark();
     RecoverSpecificZIndexSetByApp();
 
     // Avoid directly copying maps to improve performance and thread lock problem.
@@ -1510,7 +1511,33 @@ WMError WindowAdapter::SetProcessWatermark(int32_t pid, const std::string& water
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    return wmsProxy->SetProcessWatermark(pid, watermarkName, isEnabled);
+    auto errCode = wmsProxy->SetProcessWatermark(pid, watermarkName, isEnabled);
+    if (errCode == WMError::WM_OK) {
+        if (isEnabled) {
+            processWatermarkPid_ = pid;
+            processWatermarkName_ = watermarkName;
+        } else {
+            processWatermarkPid_ = 0;
+            processWatermarkName_ = "";
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, watermarkName=%{public}s, isEnabled=%{public}u, err=%{public}d",
+        pid, watermarkName.c_str(), isEnabled, static_cast<int32_t>(errCode));
+    return errCode;
+}
+
+WMError WindowAdapter::RecoverProcessWatermark()
+{
+    if (processWatermarkPid_ == 0 || processWatermarkName_.empty()) {
+        return WMError::WM_OK;
+    }
+    INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
+    auto wmsProxy = GetWindowManagerServiceProxy();
+    CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
+    auto errCode = wmsProxy->RecoverProcessWatermark(processWatermarkPid_, processWatermarkName_);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, watermarkName=%{public}s, err=%{public}d",
+        processWatermarkPid_, processWatermarkName_.c_str(), static_cast<int32_t>(errCode));
+    return errCode;
 }
 
 WMError WindowAdapter::UpdateScreenLockStatusForApp(const std::string& bundleName, bool isRelease)
