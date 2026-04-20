@@ -16,6 +16,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <algorithm>
+#include <queue>
 #include <regex>
 #include <string>
 #include <sys/stat.h>
@@ -243,6 +244,26 @@ std::string GetCurrentTime()
     return std::to_string(uTime);
 }
 
+std::string ResolveAppInstanceKeyFromParent(const sptr<Session>& session)
+{
+    if (!session) {
+        return "";
+    }
+    const auto& ownKey = session->GetSessionInfo().appInstanceKey_;
+    if (!ownKey.empty()) {
+        return ownKey;
+    }
+    sptr<Session> parent = session->GetParentSession();
+    while (parent != nullptr) {
+        const auto& parentKey = parent->GetSessionInfo().appInstanceKey_;
+        if (!parentKey.empty()) {
+            return parentKey;
+        }
+        parent = parent->GetParentSession();
+    }
+    return "";
+}
+
 void ConstructBatchLifecyclePayload(
     std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
     const std::vector<sptr<SceneSession>>& sessions)
@@ -260,10 +281,9 @@ void ConstructBatchLifecyclePayload(
         payload.windowName_ = session->GetWindowName();
         payload.appIndex_ = info.appIndex_;
         payload.persistentId_ = info.persistentId_;
-        payload.appInstanceKey_ = info.appInstanceKey_;
+        payload.appInstanceKey_ = ResolveAppInstanceKeyFromParent(session);
         payload.screenId_ = info.screenId_;
         payload.sessionState_ = session->GetSessionState();
-
         payloads.emplace_back(std::move(payload));
     }
     TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: end, payloadCount:%{public}zu", __func__, payloads.size());
@@ -2123,6 +2143,25 @@ void SceneSessionManager::GetSceneSessionsByAppInstance(const std::string& bundl
             continue;
         }
         sceneSessions.push_back(sceneSession);
+    }
+    if (!appInstanceKey.empty()) {
+        std::queue<sptr<SceneSession>> pendingQueue;
+        for (const auto& session : sceneSessions) {
+            if (session) {
+                pendingQueue.push(session);
+            }
+        }
+        while (!pendingQueue.empty()) {
+            auto current = pendingQueue.front();
+            pendingQueue.pop();
+            auto subs = current->GetSubSession();
+            for (auto& sub : subs) {
+                if (sub) {
+                    sceneSessions.push_back(sub);
+                    pendingQueue.push(sub);
+                }
+            }
+        }
     }
     TLOGI(WmsLogTag::WMS_LIFE, "end, matched sessions:%{public}zu", sceneSessions.size());
 }
@@ -10287,7 +10326,11 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         return;
     }
     if (state >= SessionState::STATE_DISCONNECT && state < SessionState::STATE_END) {
-        listenerController_->NotifyAppInstanceLifecycleEvent(state, sceneSession->GetSessionInfo());
+        if (listenerController_) {
+            auto sessionInfo = sceneSession->GetSessionInfo();
+            sessionInfo.appInstanceKey_ = ResolveAppInstanceKeyFromParent(sceneSession);
+            listenerController_->NotifyAppInstanceLifecycleEvent(state, sessionInfo);
+        }
     }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
