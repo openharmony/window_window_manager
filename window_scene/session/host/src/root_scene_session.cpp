@@ -148,7 +148,7 @@ void RootSceneSession::GetFloatNavigationAvoidAreaForRoot(
     if (specificCallback_ != nullptr && specificCallback_->onGetFloatNavagationInfo_ &&
         specificCallback_->onGetFloatNavagationInfo_(
             GetSessionProperty()->GetDisplayId(), floatNavagationInfo) == WSError::WS_OK) {
-        auto [visibleFromTuple, floatNavigationArea, landspaceRect] = floatNavagationInfo;
+        auto [visibleFromTuple, portraitRect, landspaceRect] = floatNavagationInfo;
         visible = visibleFromTuple;
         auto display = DisplayManager::GetInstance().GetDisplayById(GetDisplayId());
         if (!display) {
