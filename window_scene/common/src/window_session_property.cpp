@@ -1858,6 +1858,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isFollowScreenChange_ = property->isFollowScreenChange_;
     shadowsInfo_ = property->shadowsInfo_;
     windowAnchorInfo_ = property->windowAnchorInfo_;
+    limitsForAttachedWindows_ = property->GetLimitsForAttachedWindows();
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
     zLevelAboveParentLoosened_ = property->zLevelAboveParentLoosened_;
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
