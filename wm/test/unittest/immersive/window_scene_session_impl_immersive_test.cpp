@@ -449,11 +449,11 @@ HWTEST_F(WindowSceneSessionImplImmersiveTest, SetFloatNavigationAvoidAreaEnabled
 }
 
 /*
- * @tc.name: GetAvoidAreaByType
- * @tc.desc: GetAvoidAreaByType
+ * @tc.name: GetAvoidAreaByType1
+ * @tc.desc: GetAvoidAreaByType1
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByType, TestSize.Level1)
+HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByType1, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
