@@ -2054,7 +2054,7 @@ void WindowSceneSessionImpl::Pause(bool isGamePreLaunch)
     NotifyAfterLifecyclePaused();
     auto hostSession = GetHostSession();
     if (isGamePreLaunch && hostSession) {
-        hostSession->OnSessionEvent(SessionEvent::EVENT_CLEAR_GAME_PRELAUNCH_FLAG); 
+        hostSession->OnSessionEvent(SessionEvent::EVENT_CLEAR_GAME_PRELAUNCH_FLAG);
     }
 }
 
