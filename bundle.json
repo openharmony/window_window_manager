@@ -94,7 +94,8 @@
           "zlib",
           "screenlock_mgr",
           "os_account",
-          "api_metrics"
+          "api_metrics",
+          "json"
         ],
         "third_party": [
         ]
