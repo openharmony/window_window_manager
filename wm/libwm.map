@@ -21,11 +21,13 @@
             OHOS::Rosen::FbOption::GetIcon*;
             OHOS::Rosen::FbOption::GetTemplate*;
             OHOS::Rosen::FbOption::GetTitle*;
+            OHOS::Rosen::FbOption::GetTextUpdateAnimationType*;
             OHOS::Rosen::FbOption::SetBackgroundColor*;
             OHOS::Rosen::FbOption::SetContent*;
             OHOS::Rosen::FbOption::SetIcon*;
             OHOS::Rosen::FbOption::SetTemplate*;
             OHOS::Rosen::FbOption::SetTitle*;
+            OHOS::Rosen::FbOption::SetTextUpdateAnimationType*;
             OHOS::Rosen::FbOption::IsValid*;
             OHOS::Rosen::FloatingBallController::CreateFloatingBallWindow*;
             OHOS::Rosen::FloatingBallController::DestroyFloatingBallWindow*;
@@ -486,6 +488,12 @@
             VTT?for?OHOS::Rosen::PatternDetachCallback;
             VTT?for?OHOS::Rosen::WindowManagerProxy;
         };
+    extern "C" {
+        SetGtxTouchEventStatus*;
+        GetGtxTouchEvent*;
+        RegisterInputEventScale*;
+        UnRegisterInputEventScale*;
+    }
     local:
     *;
 };

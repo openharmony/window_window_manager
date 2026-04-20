@@ -259,6 +259,8 @@ public:
     static napi_value SetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value GetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     static napi_value IsImmersiveLayout(napi_env env, napi_callback_info info);
+    static napi_value SetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    static napi_value IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
     static napi_value SetRelativePositionToParentWindowEnabled(napi_env env, napi_callback_info info);
     static napi_value SetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);
     static napi_value SetWindowShadowEnabled(napi_env env, napi_callback_info info);
@@ -350,6 +352,8 @@ private:
     napi_value OnSetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimits(napi_env env, napi_callback_info info);
     napi_value OnGetWindowLimitsVP(napi_env env, napi_callback_info info);
+    WmErrorCode RegisterParentWindowCallback(napi_env env, napi_ref callbackRef, const char* callbackName);
+    void CleanUpCallbackReferences(napi_env env, napi_ref sizeChangeCallbackRef, napi_ref statusChangeCallbackRef);
     napi_value OnAttachToParentWindow(napi_env env, napi_callback_info info);
     napi_value OnDetachLayoutToParentWindow(napi_env env, napi_callback_info info);
 
@@ -518,6 +522,8 @@ private:
     napi_value OnSetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnGetImmersiveModeEnabledState(napi_env env, napi_callback_info info);
     napi_value OnIsImmersiveLayout(napi_env env, napi_callback_info info);
+    napi_value OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
+    napi_value OnIsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnIsSystemAvoidAreaEnabled(napi_env env, napi_callback_info info);
     napi_value OnSetFollowParentWindowLayoutEnabled(napi_env env, napi_callback_info info);

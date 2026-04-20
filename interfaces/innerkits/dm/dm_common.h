@@ -492,6 +492,9 @@ enum class FoldDisplayMode: uint32_t {
     SUB = 3,
     COORDINATION = 4,
     GLOBAL_FULL = 5,
+    V_MAIN = 6,
+    N_MAIN = 7,
+    L_FULL = 8,
 };
 
 struct RotationCorrectionWhiteConfig {

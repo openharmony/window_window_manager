@@ -683,6 +683,20 @@ public:
 };
 using ISystemDensityChangeListenerSptr = sptr<ISystemDensityChangeListener>;
 
+/**
+ * @class IWindowDensityChangeListener
+ *
+ * @brief Listener to observe window density changed.
+ */
+class IWindowDensityChangeListener : virtual public RefBase {
+public:
+    /**
+     * @brief Notify caller when window density changed.
+     */
+    virtual void OnWindowDensityChanged(float density) {}
+};
+using IWindowDensityChangeListenerSptr = sptr<IWindowDensityChangeListener>;
+
 class IAcrossDisplaysChangeListener : virtual public RefBase {
 public:
     /**
@@ -3377,6 +3391,24 @@ public:
         const ISystemDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
 
     /**
+     * @brief Register window density change listener.
+     *
+     * @param listener IWindowDensityChangeListener.
+     * @return WM_OK means register success, others means register failed.
+     */
+    virtual WMError RegisterWindowDensityChangeListener(
+        const IWindowDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
+     * @brief Unregister window density change listener.
+     *
+     * @param listener IWindowDensityChangeListener.
+     * @return WM_OK means unregister success, others means unregister failed.
+     */
+    virtual WMError UnregisterWindowDensityChangeListener(
+        const IWindowDensityChangeListenerSptr& listener) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
+
+    /**
      * @brief Register main window full screen across multi display change listener.
      *
      * @param listener IAcrossDisplaysChangeListener.
@@ -4475,12 +4507,26 @@ public:
      */
     virtual WMError SetGestureBackEnabled(bool enable) { return WMError::WM_OK; }
 
-    /**
+    /**	 
      * @brief Get whether to enable gesture back.
      * @param enable the value true means to enable gesture back, and false means the opposite.
      * @return WM_OK means get success, others means get failed.
      */
     virtual WMError GetGestureBackEnabled(bool& enable) const { return WMError::WM_OK; }
+
+    /*
+     * @brief Set whether to enable float navigation avoid area.
+     * @param enable value true means to enable float navigation avoid area, and false means to opposite.
+     * @return WM_OK means set success, others means set failed.
+     */
+    virtual WMError SetFloatNavigationAvoidAreaEnabled(bool enable) { return WMError::WM_OK; }
+
+    /*
+     * @brief Get whether to enable float navigation avoid area.
+     * @param enable value true means to enable float navigation avoid area, and false means to opposite.
+     * @return WM_OK means get success, others means get failed.
+     */
+    virtual WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const { return WMError::WM_OK; }
 
     /**
      * @brief this interface is invoked by the ACE to the native host.

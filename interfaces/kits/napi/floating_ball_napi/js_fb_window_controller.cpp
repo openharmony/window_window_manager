@@ -114,6 +114,7 @@ napi_value JsFbController::OnStartFloatingBall(napi_env env, napi_callback_info 
         return NapiGetUndefined(env);
     }
 
+    option.SetTextUpdateAnimationType(static_cast<uint32_t>(FloatingBallTextUpdateAnimationType::ANIMATION_NONE));
     return StartFloatingBallTask(env, option);
 }
 
@@ -329,11 +330,13 @@ napi_value JsFbController::GetFloatingBallOptionFromJs(napi_env env, napi_value 
     napi_value titleValue = nullptr;
     napi_value contentValue = nullptr;
     napi_value colorValue = nullptr;
+    napi_value textUpdateAnimationTypeValue = nullptr;
 
     uint32_t templateType = 0;
     std::string title = "";
     std::string content = "";
     std::string color = "";
+    uint32_t textUpdateAnimationType = 0;
     bool hasProperty = false;
     napi_has_named_property(env, optionObject, "template", &hasProperty);
     if (hasProperty) {
@@ -358,6 +361,12 @@ napi_value JsFbController::GetFloatingBallOptionFromJs(napi_env env, napi_value 
         napi_get_named_property(env, optionObject, "backgroundColor", &colorValue);
         ConvertFromJsValue(env, colorValue, color);
         option.SetBackgroundColor(color);
+    }
+    napi_has_named_property(env, optionObject, "textUpdateAnimationType", &hasProperty);
+    if (hasProperty) {
+        napi_get_named_property(env, optionObject, "textUpdateAnimationType", &textUpdateAnimationTypeValue);
+        ConvertFromJsValue(env, textUpdateAnimationTypeValue, textUpdateAnimationType);
+        option.SetTextUpdateAnimationType(textUpdateAnimationType);
     }
     if (GetIcon(env, optionObject, option) == nullptr) {
         napi_throw(env, AbilityRuntime::CreateJsError(env,

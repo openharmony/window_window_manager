@@ -497,7 +497,8 @@ public:
         ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
     void OnScreenChangeInner(ScreenId screenId, ScreenEvent screenEvent,
         ScreenChangeReason reason = ScreenChangeReason::DEFAULT);
-    virtual void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
+    void OnScreenChangeDefault(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
+    void OnScreenChangeForPC(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason);
     void OnFoldScreenChange(sptr<ScreenSession>& screenSession);
     void OnFoldStatusChange(bool isSwitching);
     void SetCoordinationFlag(bool isCoordinationFlag);
@@ -554,8 +555,9 @@ public:
     virtual DMError SetSystemKeyboardStatus(bool isTpKeyboardOn = false) override;
 
     sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId) const;
-    virtual sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId,
+    sptr<ScreenSession> GetPhysicalScreenSession(ScreenId screenId,
         ScreenId defScreenId, ScreenProperty property);
+    sptr<ScreenSession> GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property);
     sptr<ScreenSession> GetScreenSessionByRsId(ScreenId rsScreenId);
     void NotifyExtendScreenCreateFinish() override;
     void NotifyExtendScreenDestroyFinish() override;
@@ -567,7 +569,7 @@ public:
     bool SetRSScreenPowerStatusExt(ScreenId screenId, ScreenPowerStatus status);
     void NotifyScreenMaskAppear() override;
     bool IsSystemSleep();
-    virtual bool IsNeedAddInputServiceAbility();
+    bool IsNeedAddInputServiceAbility();
     bool GetKeyboardState() override;
     DMError GetScreenAreaOfDisplayArea(DisplayId displayId, const DMRect& displayArea,
         ScreenId& screenId, DMRect& screenArea) override;
@@ -673,8 +675,6 @@ protected:
     EventTracker screenEventTracker_;
     sptr<ScreenSession> GetInternalScreenSession();
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property);
-    sptr<ScreenSession> GetPhysicalScreenSessionInner(ScreenId screenId, ScreenProperty property);
-    virtual void NotifyCaptureStatusChangedGlobal();
     std::mutex screenChangeMutex_;
     std::mutex hasPrivateWindowForegroundMutex_;
     sptr<ScreenSession> GetOrCreateScreenSession(ScreenId screenId);
@@ -683,9 +683,9 @@ protected:
     void DestroyExtendVirtualScreen();
     void HandleScreenDisconnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
     void HandleScreenConnectEvent(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
-    virtual void ScreenConnectionChanged(sptr<ScreenSession>& screenSession, ScreenId screenId,
+    void ScreenConnectionChanged(sptr<ScreenSession>& screenSession, ScreenId screenId,
         ScreenEvent screenEvent, bool phyMirrorEnable);
-    virtual void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession);
+    void GetAndMergeEdidInfo(sptr<ScreenSession> screenSession);
     static bool IsConcurrentUser();
     void NotifyUserClientProxy(sptr<ScreenSession> screenSession, ScreenId screenId, ScreenEvent screenEvent);
 
@@ -783,6 +783,12 @@ private:
     std::string TransferTypeToString(ScreenType type) const;
     std::string TransferPropertyChangeTypeToString(ScreenPropertyChangeType type) const;
     void CheckAndSendHiSysEvent(const std::string& eventName, const std::string& bundleName) const;
+    void ReportMultScreenChange(ScreenId mainScreenId, ScreenId secondaryScreenId, MultiScreenMode screenMode) const;
+    void ReportCreateVirtualScreen(ScreenId ScreenId) const;
+    void ReportDestoryVirtualScreen(ScreenId ScreenId) const;
+    void ReportDestoryVirtualScreenDeath(ScreenId ScreenId) const;
+    void ReportModeChange(bool isPcDevice) const;
+    void ReportUserSwitch(int32_t userId) const;
     void HandlerSensor(ScreenPowerStatus status, PowerStateChangeReason reason);
     void UnregisterInHandlerSensorWithPowerOff(PowerStateChangeReason reason);
     bool GetPowerStatus(ScreenPowerState state, PowerStateChangeReason reason, ScreenPowerStatus& status);
@@ -1200,6 +1206,9 @@ private:
     FoldDisplayMode GetCurrentDisplayMode();
 
     void SetLockDisplayModeWhenShutDown(PowerStateChangeReason reason, bool isLock);
+
+    void AddSecondaryDisplaySuperCapability(std::vector<std::string> specialOrientation,
+        nlohmann::ordered_json& jsonDisplayCapabilityList);
 
     // mirror screen
     bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);

@@ -697,11 +697,28 @@ HWTEST_F(SessionStageStubTest, HandleHandleNotifySubWindowAfterParentWindowStatu
         int32_t ret = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
         EXPECT_EQ(ERR_INVALID_DATA, ret);
     }
-
-    // Case3: Success with calid windowMode
+    // Case3: Failed to read maximizeMode
     {
         data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
         data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
+        int32_t ret = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ERR_INVALID_DATA, ret);
+    }
+    // Case4: Failed to read isLayoutFullScreen
+    {
+        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+        data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
+        data.WriteUint32(static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR));
+        int32_t ret = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ERR_INVALID_DATA, ret);
+    }
+
+    // Case5: Success with calid windowMode
+    {
+        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+        data.WriteUint32(static_cast<uint32_t>(WindowMode::WINDOW_MODE_FULLSCREEN));
+        data.WriteUint32(static_cast<uint32_t>(MaximizeMode::MODE_AVOID_SYSTEM_BAR));
+        data.WriteBool(true);
         EXPECT_EQ(ERR_NONE, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
         int32_t ret = reply.ReadInt32();
         EXPECT_EQ(ret, static_cast<int32_t>(WSError::WS_OK));
@@ -999,6 +1016,23 @@ HWTEST_F(SessionStageStubTest, HandleSwitchFreeMultiWindow, TestSize.Level1)
     uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_SWITCH_FREEMULTIWINDOW);
     data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
     data.WriteBool(true); // enable
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
+}
+
+/**
+ * @tc.name: HandleConfigDockAutoHide
+ * @tc.desc: test function : HandleConfigDockAutoHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleConfigDockAutoHide, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_CONFIG_DOCK_AUTO_HIDE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteBool(true);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     ASSERT_EQ(0, sessionStageStub_->OnRemoteRequest(code, data, reply, option));
 }

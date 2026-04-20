@@ -152,6 +152,11 @@ public:
      */
     WMError SetGestureBackEnabled(bool isEnabled) override;
 
+    /*
+     * Float Navigation Avoid Area
+     */
+    WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) override;
+
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;
 
@@ -200,6 +205,7 @@ public:
     WSError SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy) override;
     WMError GetSelectMode(SelectMode& selectMode) override;
     void NotifyWindowStatusDidChangeAfterShowWindow() override;
+    WSError NotifyAttachedWindowsLimitsChanged(const WindowLimits& newLimits) override;
 
     /**
      * Window Transition Animation For PC

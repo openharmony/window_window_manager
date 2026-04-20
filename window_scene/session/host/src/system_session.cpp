@@ -474,22 +474,23 @@ WMError SystemSession::GetFloatingBallWindowId(uint32_t& windowId)
     if (!WindowHelper::IsFbWindow(GetWindowType())) {
         return WMError::WM_DO_NOTHING;
     }
-    int32_t callingPid = IPCSkeleton::GetCallingPid();
-
-    return PostSyncTask([weakThis = wptr(this), callingPid, &windowId, where = __func__] {
-        auto session = weakThis.promote();
-        if (!session) {
-            TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s session is null", where);
-            return WMError::WM_ERROR_INVALID_OPERATION;
-        }
-        if (callingPid != session->GetCallingPid()) {
-            TLOGNW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", where);
-            return WMError::WM_ERROR_INVALID_CALLING;
-        }
-        windowId = session->GetFbWindowId();
-        TLOGND(WmsLogTag::WMS_SYSTEM, "%{public}s mode: %{public}u", where, windowId);
-        return WMError::WM_OK;
-    }, __func__);
+    if (IPCSkeleton::GetCallingPid() != GetCallingPid()) {
+        TLOGW(WmsLogTag::WMS_SYSTEM, "%{public}s permission denied, not call by the same process", __func__);
+        return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    windowId = GetFbWindowId();
+    // wait FB_Panel to be created if windowId is INVALID_SESSION_ID = 0
+    constexpr int32_t WAIT_MILLISECONDS = 20;
+    constexpr int32_t MAX_WAIT_TIMES = 10;
+    int32_t waitTimes = 0;
+    while (windowId == INVALID_SESSION_ID && waitTimes < MAX_WAIT_TIMES) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MILLISECONDS));
+        std::this_thread::yield();
+        waitTimes++;
+        windowId = GetFbWindowId();
+    }
+    TLOGI(WmsLogTag::WMS_SYSTEM, "waitTimes: %{public}d, mode: %{public}u", waitTimes, windowId);
+    return WMError::WM_OK;
 }
 
 WMError SystemSession::RestoreFbMainWindow(const std::shared_ptr<AAFwk::Want>& want)

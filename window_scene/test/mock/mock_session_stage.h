@@ -52,7 +52,8 @@ public:
     MOCK_METHOD1(GetTopNavDestinationName, WSError(std::string& topNavDestName));
     MOCK_METHOD1(NotifyLayoutFinishAfterWindowModeChange, WSError(WindowMode mode));
     MOCK_METHOD1(NotifySubWindowAfterParentWindowSizeChange, WSError(Rect rect));
-    MOCK_METHOD1(NotifySubWindowAfterParentWindowStatusChange, WSError(WindowMode mode));
+    MOCK_METHOD3(NotifySubWindowAfterParentWindowStatusChange, WSError(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen));
     MOCK_METHOD1(NotifyForegroundInteractiveStatus, void(bool interactive));
     MOCK_METHOD1(UpdateMaximizeMode, WSError(MaximizeMode mode));
     MOCK_METHOD0(NotifyCloseExistPipWindow, WSError(void));
@@ -62,6 +63,13 @@ public:
     MOCK_METHOD2(NotifyDensityFollowHost, WSError(bool isFollowHost, float densityValue));
     MOCK_METHOD1(NotifyWindowVisibility, WSError(bool isVisible));
     MOCK_METHOD1(NotifyWindowOcclusionState, WSError(const WindowVisibilityState state));
+    MOCK_METHOD4(UpdateAttachedWindowLimits, WSError(int32_t sourcePersistentId,
+        const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit,
+        bool isIntersectedWidthLimit));
+    MOCK_METHOD1(RemoveAttachedWindowLimits, WSError(int32_t sourcePersistentId));
+    MOCK_METHOD2(SyncAllAttachedLimitsToChild, WSError(
+        const std::vector<std::pair<int32_t, WindowLimits>>& limitsList,
+        const std::vector<std::pair<int32_t, AttachLimitOptions>>& optionsList));
     MOCK_METHOD1(NotifyTransformChange, void(const Transform& transform));
     MOCK_METHOD1(NotifySingleHandTransformChange, void(const SingleHandTransform& singleHandTransform));
     MOCK_METHOD(void, NotifyGlobalScaledRectChange, (const Rect& globalScaledRect), (override));
@@ -71,6 +79,7 @@ public:
     MOCK_METHOD2(SetPiPControlEvent, WSError(WsPiPControlType controlType, WsPiPControlStatus status));
     MOCK_METHOD2(NotifyDisplayMove, void(DisplayId from, DisplayId to));
     MOCK_METHOD1(SwitchFreeMultiWindow, WSError(bool enable));
+    MOCK_METHOD1(ConfigDockAutoHide, WSError(bool isDockAutoHide));
     MOCK_METHOD2(SetUniqueVirtualPixelRatio, void(bool useUniqueDensity, float virtualPixelRatio));
     MOCK_METHOD1(UpdateAnimationSpeed, void(float speed));
     MOCK_METHOD0(PcAppInPadNormalClose, WSError(void));
@@ -93,6 +102,7 @@ public:
     MOCK_METHOD1(SetStageKeyFramePolicy, WSError(const KeyFramePolicy& keyFramePolicy));
     MOCK_METHOD1(SetCurrentRotation, WSError(int32_t currentRotation));
     MOCK_METHOD1(GetSceneNodeCount, WSError(uint32_t& nodeCount));
+    MOCK_METHOD1(GetSceneNodeCount, WSError(const sptr<IRemoteObject>& callback));
     MOCK_METHOD2(NotifyOrientationExecutionResult, WSError(uint32_t promiseId, OrientationExecutionResult result));
     MOCK_METHOD0(NotifyLifecyclePausedStatus, void(void));
     MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));

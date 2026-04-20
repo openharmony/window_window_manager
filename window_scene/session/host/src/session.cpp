@@ -2725,6 +2725,17 @@ sptr<Session> Session::GetMainSession() const
     }
 }
 
+sptr<Session> Session::GetMainSessionOrLoosenedSession() const
+{
+    if (SessionHelper::IsMainWindow(GetWindowType()) || IsLoosenedWithFreeMultiMode()) {
+        return const_cast<Session*>(this);
+    } else if (parentSession_) {
+        return parentSession_->GetMainSessionOrLoosenedSession();
+    } else {
+        return nullptr;
+    }
+}
+
 sptr<Session> Session::GetMainOrFloatSession() const
 {
     auto windowType = GetWindowType();
@@ -2950,8 +2961,12 @@ WSError Session::HandleSubWindowClick(int32_t action, int32_t sourceType, bool i
             RaiseToAppTopForPointDown();
             return WSError::WS_OK;
         }
-        if (auto mainSession = GetMainSession()) {
-            mainSession->NotifyClick(false);
+        if (auto mainSession = GetMainSessionOrLoosenedSession()) {
+            if (mainSession->IsLoosenedWithFreeMultiMode()) {
+                mainSession->RaiseToAppTopForPointDown();
+            } else {
+                mainSession->NotifyClick(false);
+            }
         }
         return WSError::WS_OK;
     }
@@ -4587,12 +4602,11 @@ void Session::SetSessionRect(const WSRect& rect)
 /** @note @window.layout */
 void Session::SetLastClientParentSize(const WSRect& rect)
 {
-    if (GetSessionRect() == rect) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
+    if (GetLastClientParentSize() == rect) {
+        TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d skip same rect", persistentId_);
         return;
     }
     layoutController_->SetLastClientParentSize(rect);
-    dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
 }
 
 /** @note @window.layout */

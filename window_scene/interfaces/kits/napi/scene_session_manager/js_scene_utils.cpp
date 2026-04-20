@@ -819,6 +819,9 @@ bool ConvertSessionInfoState(napi_env env, napi_value jsObject, SessionInfo& ses
     if (!IsJsIsUseControlSessionUndefined(env, jsIsUseControlSession, sessionInfo)) {
         return false;
     }
+    if (!ConvertFromJsValueProperty(env, jsObject, "isSkipAncoNotifyPreStart", sessionInfo.isSkipAncoNotifyPreStart)) {
+        return false;
+    }
     if (!ConvertFromJsValueProperty(env, jsObject, "hasPrivacyModeControl", sessionInfo.hasPrivacyModeControl)) {
         return false;
     }
@@ -2385,6 +2388,27 @@ napi_value CreateJsSessionPiPControlStatus(napi_env env)
         static_cast<int32_t>(PiPControlStatus::ENABLED)));
     napi_set_named_property(env, objValue, "DISABLED", CreateJsValue(env,
         static_cast<int32_t>(PiPControlStatus::DISABLED)));
+    return objValue;
+}
+
+napi_value CreateJsSessionFbTextUpdateAnimationType(napi_env env)
+{
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Env is nullptr");
+        return nullptr;
+    }
+
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+    if (objValue == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to create fb animate type object!");
+        return NapiGetUndefined(env);
+    }
+
+    napi_set_named_property(env, objValue, "ANIMATION_NONE", CreateJsValue(env,
+        static_cast<int32_t>(FloatingBallTextUpdateAnimationType::ANIMATION_NONE)));
+    napi_set_named_property(env, objValue, "ANIMATION_OPACITY", CreateJsValue(env,
+        static_cast<int32_t>(FloatingBallTextUpdateAnimationType::ANIMATION_OPACITY)));
     return objValue;
 }
 

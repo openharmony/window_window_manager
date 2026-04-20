@@ -51,7 +51,7 @@ namespace uiExtensionHost {
 
   function keyboardHeightChangeCallback(cb: object, cbArg: int): void {
     const func = cb as (cbArg: number) => void;
-    func(cbArg as number);
+    func(cbArg.toDouble());
   }
 
   class UIERect implements window.Rect {

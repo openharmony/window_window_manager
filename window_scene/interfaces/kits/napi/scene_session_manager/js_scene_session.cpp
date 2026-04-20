@@ -344,6 +344,8 @@ static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateI
         CreateJsValue(env, fbTemplateInfo.content_));
     napi_set_named_property(env, fbTemplateInfoValue, "backgroundColor",
         CreateJsValue(env, fbTemplateInfo.backgroundColor_));
+    napi_set_named_property(env, fbTemplateInfoValue, "textUpdateAnimationType",
+        CreateJsValue(env, fbTemplateInfo.textUpdateAnimationType_));
     napi_set_named_property(env, fbTemplateInfoValue, "isBind",
         CreateJsValue(env, fbTemplateInfo.isBind_));
     napi_set_named_property(env, fbTemplateInfoValue, "bindWindowId",
@@ -352,7 +354,7 @@ static napi_value CreateFbTemplateInfo(napi_env env, const FloatingBallTemplateI
         CreateJsValue(env, fbTemplateInfo.showWhenCreate_));
     napi_set_named_property(env, fbTemplateInfoValue, "id",
         CreateJsValue(env, fbTemplateInfo.id_));
-        
+
     if (fbTemplateInfo.icon_ != nullptr) {
         napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env, fbTemplateInfo.icon_);
         if (jsIcon == nullptr) {

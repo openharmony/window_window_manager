@@ -55,12 +55,16 @@ void FbOption::SetIcon(const std::shared_ptr<Media::PixelMap>& icon)
     icon_ = icon;
 }
 
+void FbOption::SetTextUpdateAnimationType(const uint32_t& type)
+{
+    textUpdateAnimationType_ = type;
+}
+
 void FbOption::SetShowWhenCreate(bool showWhenCreate)
 {
     showWhenCreate_ = showWhenCreate;
 }
 
-// LCOV_EXCL_START
 uint32_t FbOption::GetTemplate() const
 {
     return template_;
@@ -86,6 +90,11 @@ std::shared_ptr<Media::PixelMap> FbOption::GetIcon() const
     return icon_;
 }
 
+uint32_t FbOption::GetTextUpdateAnimationType() const
+{
+    return textUpdateAnimationType_;
+}
+
 bool FbOption::GetShowWhenCreate() const
 {
     return showWhenCreate_;
@@ -97,6 +106,7 @@ void FbOption::GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBas
     fbTemplateBaseInfo.title_ = title_;
     fbTemplateBaseInfo.content_ = content_;
     fbTemplateBaseInfo.backgroundColor_ = backgroundColor_;
+    fbTemplateBaseInfo.textUpdateAnimationType_ = textUpdateAnimationType_;
     fbTemplateBaseInfo.showWhenCreate_ = showWhenCreate_;
 }
 
@@ -133,9 +143,13 @@ bool FbOption::IsValid(std::string &errMsg) const
         errMsg = "Template need icon";
         return false;
     }
+    if (textUpdateAnimationType_ >= static_cast<uint32_t>(FloatingBallTextUpdateAnimationType::ANIMATION_END)) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]animationType %{public}u is invalid", textUpdateAnimationType_);
+        errMsg = "TextUpdateAnimationType is invalid";
+        return false;
+    }
     return true;
 }
-// LCOV_EXCL_STOP
 
 } // namespace Rosen
 } // namespace OHOS

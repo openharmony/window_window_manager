@@ -215,6 +215,47 @@ void RecalculateLimits(double maxRatio, double minRatio, WindowLimits& limits)
 }
 
 /**
+ * @brief Calculate intersection between current limits and attached limits.
+ * @param currentLimits Current window limits.
+ * @param attachedLimits Attached window limits.
+ * @param intersectHeight Whether to intersect height limits.
+ * @param intersectWidth Whether to intersect width limits.
+ * @return Intersected limits.
+ */
+WindowLimits CalculateLimitsIntersection(const WindowLimits& currentLimits,
+    const WindowLimits& attachedLimits, bool intersectHeight, bool intersectWidth)
+{
+    WindowLimits result = currentLimits;
+    if (intersectHeight) {
+        result.minHeight_ = std::max(currentLimits.minHeight_, attachedLimits.minHeight_);
+        result.maxHeight_ = std::min(currentLimits.maxHeight_, attachedLimits.maxHeight_);
+    }
+    if (intersectWidth) {
+        result.minWidth_ = std::max(currentLimits.minWidth_, attachedLimits.minWidth_);
+        result.maxWidth_ = std::min(currentLimits.maxWidth_, attachedLimits.maxWidth_);
+    }
+    return result;
+}
+
+/**
+ * @brief Check if limits intersection is valid (min <= max).
+ * @param limits Limits to validate.
+ * @param checkHeight Whether to check height limits.
+ * @param checkWidth Whether to check width limits.
+ * @return true if intersection is valid, false otherwise.
+ */
+bool IsLimitsIntersectionValid(const WindowLimits& limits, bool checkHeight, bool checkWidth)
+{
+    if (checkWidth && limits.minWidth_ > limits.maxWidth_) {
+        return false;
+    }
+    if (checkHeight && limits.minHeight_ > limits.maxHeight_) {
+        return false;
+    }
+    return true;
+}
+
+/**
  * @brief Returns candidate if it lies within the inclusive range; otherwise returns fallback.
  *
  * Performs a range check against [lowerBound, upperBound]. Unlike std::clamp,
@@ -985,6 +1026,10 @@ WMError WindowSceneSessionImpl::SetParentWindow(int32_t newParentWindowId)
     }
     auto newWindowType = newParentWindow->GetType();
     if (!WindowHelper::IsMainWindow(newWindowType) && !WindowHelper::IsFloatOrSubWindow(newWindowType)) {
+        TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d new parent window type invalid", subWindowId);
+        return WMError::WM_ERROR_INVALID_PARENT;
+    }
+    if (IsZLevelAboveParentLoosened() && !WindowHelper::IsMainWindow(newWindowType)) {
         TLOGE(WmsLogTag::WMS_SUB, "winId: %{public}d new parent window type invalid", subWindowId);
         return WMError::WM_ERROR_INVALID_PARENT;
     }
@@ -1795,7 +1840,7 @@ void WindowSceneSessionImpl::RecalculateSizeLimitsWithRatios(WindowLimits& limit
 }
 
 /** @note @window.layout */
-void WindowSceneSessionImpl::UpdateWindowSizeLimits()
+void WindowSceneSessionImpl::UpdateWindowSizeLimits(bool needNotifySession)
 {
     WindowLimits customizedLimits;
     WindowLimits newLimits;
@@ -1821,9 +1866,150 @@ void WindowSceneSessionImpl::UpdateWindowSizeLimits()
         newLimits.minHeight_ = 1;
     }
 
+    // Notify session side about window limits change before calculating attached windows intersection
+    // Save the limits regardless of needNotifySession flag
+    // Determine which limits to notify based on user's pixelUnit setting
+    const WindowLimits& limitsToNotify =
+        (property_->GetUserWindowLimits().pixelUnit_ == PixelUnit::VP) ? newLimitsVP : newLimits;
+    property_->SetLimitsForAttachedWindows(limitsToNotify);
+
+    // Only notify session side when triggered by SetWindowLimits
+    if (needNotifySession) {
+        NotifySessionSideLimitsChanged(limitsToNotify);
+    }
+
+    // Calculate intersection with attached windows' limits if configured
+    CalculateAttachedWindowLimitsIntersection(newLimits, newLimitsVP, virtualPixelRatio);
+
     property_->SetWindowLimits(newLimits);
     property_->SetWindowLimitsVP(newLimitsVP);
     property_->SetLastLimitsVpr(virtualPixelRatio);
+}
+
+/** @note @window.layout */
+void WindowSceneSessionImpl::CalculateAttachedWindowLimitsIntersection(
+    WindowLimits& newLimits, WindowLimits& newLimitsVP, float virtualPixelRatio)
+{
+    if (!IsPcOrPadFreeMultiWindowMode()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, not in PC or free multi-window mode",
+            GetPersistentId());
+        return;
+    }
+    if (MathHelper::NearZero(virtualPixelRatio)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "windowId:%{public}u, virtual pixel ratio is zero", GetWindowId());
+        return;
+    }
+
+    auto attachedLimitsList = property_->GetAttachedWindowLimitsList();
+    if (attachedLimitsList.empty()) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, no attached limits", GetPersistentId());
+        return;
+    }
+
+    const bool isMainWindow = WindowHelper::IsMainWindow(GetType());
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, calc with %{public}zu wins, type=%{public}u",
+        GetPersistentId(), attachedLimitsList.size(), static_cast<uint32_t>(GetType()));
+
+    for (const auto& [sourceId, attachedLimits] : attachedLimitsList) {
+        AttachLimitOptions limitOptions = isMainWindow ? property_->GetAttachedLimitOptions(sourceId) :
+            AttachLimitOptions { property_->GetWindowAnchorInfo().attachOptions.isIntersectedHeightLimit,
+            property_->GetWindowAnchorInfo().attachOptions.isIntersectedWidthLimit };
+        if (!limitOptions.isIntersectedHeightLimit && !limitOptions.isIntersectedWidthLimit) {
+            continue;
+        }
+        auto result = CalcSingleWinIntersect(
+            newLimits, newLimitsVP, attachedLimits, limitOptions, virtualPixelRatio);
+        if (!result.pxValid || !result.vpValid) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, no intersect srcId=%{public}d (%{public}s)",
+                GetPersistentId(), sourceId, !result.pxValid ? "PX" : "VP");
+            continue;
+        }
+
+        newLimits = result.pxLimits;
+        newLimitsVP = result.vpLimits;
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, intersect srcId=%{public}d "
+            "PX[%{public}u,%{public}u,%{public}u,%{public}u] VP[%{public}u,%{public}u,%{public}u,%{public}u]",
+            GetPersistentId(), sourceId, newLimits.minWidth_, newLimits.maxWidth_,
+            newLimits.minHeight_, newLimits.maxHeight_, newLimitsVP.minWidth_,
+            newLimitsVP.maxWidth_, newLimitsVP.minHeight_, newLimitsVP.maxHeight_);
+    }
+}
+
+/** @note @window.layout */
+WindowSceneSessionImpl::WinIntersectResult WindowSceneSessionImpl::CalcSingleWinIntersect(
+    const WindowLimits& currentLimits,
+    const WindowLimits& currentLimitsVP,
+    const WindowLimits& attachedLimits,
+    const AttachLimitOptions& limitOptions,
+    float virtualPixelRatio)
+{
+    WinIntersectResult result;
+    const bool intersectHeight = limitOptions.isIntersectedHeightLimit;
+    const bool intersectWidth = limitOptions.isIntersectedWidthLimit;
+
+    // Convert to PX and calculate intersection
+    WindowLimits attachedLimitsPX;
+    if (attachedLimits.pixelUnit_ == PixelUnit::VP) {
+        RecalculatePxLimitsByVp(attachedLimits, attachedLimitsPX, virtualPixelRatio);
+    } else {
+        attachedLimitsPX = attachedLimits;
+    }
+    result.pxLimits = CalculateLimitsIntersection(currentLimits, attachedLimitsPX, intersectHeight,
+        intersectWidth);
+    result.pxValid = IsLimitsIntersectionValid(result.pxLimits, intersectHeight, intersectWidth);
+
+    // Convert to VP and calculate intersection
+    WindowLimits attachedLimitsVP;
+    if (attachedLimits.pixelUnit_ == PixelUnit::PX) {
+        RecalculateVpLimitsByPx(attachedLimits, attachedLimitsVP, virtualPixelRatio);
+    } else {
+        attachedLimitsVP = attachedLimits;
+    }
+    result.vpLimits = CalculateLimitsIntersection(currentLimitsVP, attachedLimitsVP, intersectHeight,
+        intersectWidth);
+    result.vpValid = IsLimitsIntersectionValid(result.vpLimits, intersectHeight, intersectWidth);
+
+    return result;
+}
+
+/** @note @window.layout */
+void WindowSceneSessionImpl::NotifySessionSideLimitsChanged(const WindowLimits& limitsToNotify)
+{
+    if (GetHostSession() == nullptr) {
+        return;
+    }
+
+    WindowType windowType = GetType();
+    bool shouldNotify = false;
+
+    if (WindowHelper::IsMainWindow(windowType)) {
+        // Main window: check if any sub window attached with intersected limits
+        auto attachedLimitOptionsList = property_->GetAttachedLimitOptionsList();
+        shouldNotify = !attachedLimitOptionsList.empty();
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d is main window, has %{public}zu attached windows with limits",
+            GetWindowId(), attachedLimitOptionsList.size());
+    } else if (WindowHelper::IsSubWindow(windowType)) {
+        // Sub window: check if attached with intersected limits via windowAnchorInfo
+        WindowAnchorInfo anchorInfo = property_->GetWindowAnchorInfo();
+        shouldNotify = anchorInfo.isAnchoredByAttach_ &&
+            (anchorInfo.attachOptions.isIntersectedWidthLimit ||
+             anchorInfo.attachOptions.isIntersectedHeightLimit);
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d is sub window, isAnchoredByAttach=%{public}d, "
+            "isIntersectedWidthLimit=%{public}d, isIntersectedHeightLimit=%{public}d",
+            GetWindowId(), anchorInfo.isAnchoredByAttach_,
+            anchorInfo.attachOptions.isIntersectedWidthLimit,
+            anchorInfo.attachOptions.isIntersectedHeightLimit);
+    }
+
+    if (!shouldNotify) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, no need to notify session side", GetWindowId());
+        return;
+    }
+
+    GetHostSession()->NotifyAttachedWindowsLimitsChanged(limitsToNotify);
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Notified session side about window limits change for window "
+        "id=%{public}u with attach relationship and intersected limits, pixelUnit=%{public}u",
+        GetWindowId(), static_cast<uint32_t>(property_->GetUserWindowLimits().pixelUnit_));
 }
 
 void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info)
@@ -1900,7 +2086,8 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     if (state_ == WindowState::STATE_SHOWN) {
         TLOGI(WmsLogTag::WMS_LIFE, "window is already shown [name:%{public}s, id:%{public}d, type: %{public}u]",
             property_->GetWindowName().c_str(), property_->GetPersistentId(), type);
-        if (WindowHelper::IsMainWindow(type)) {
+        if (WindowHelper::IsMainWindow(type) ||
+            (WindowHelper::IsSubWindow(type) && IsLoosenedWithPcOrFreeMultiMode())) {
             hostSession->RaiseAppMainWindowToTop();
         }
         NotifyAfterForeground(true, false);
@@ -4066,6 +4253,7 @@ WMError WindowSceneSessionImpl::Maximize()
     }
     if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {
         UpdateIsShowDecorInFreeMultiWindow(true);
+        isMaximizeInvoked_ = true;
         SetLayoutFullScreen(enableImmersiveMode_);
     }
     return WMError::WM_OK;
@@ -4140,6 +4328,7 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
     }
     ApplyMaximizePresentation(presentation);
     UpdateIsShowDecorInFreeMultiWindow(true);
+    isMaximizeInvoked_ = true;
     property_->SetIsLayoutFullScreen(enableImmersiveMode_);
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
@@ -4267,6 +4456,7 @@ WMError WindowSceneSessionImpl::Recover()
         }
         hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER);
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        isMaximizeInvoked_ = false;
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
@@ -4342,6 +4532,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
             UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
         }
         SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+        isMaximizeInvoked_ = false;
         property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
         UpdateDecorEnable(true);
         UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
@@ -6110,9 +6301,10 @@ WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowSizeChange(Rect 
     return WSError::WS_OK;
 }
 
-WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowStatusChange(WindowMode mode)
+WSError WindowSceneSessionImpl::NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+    bool isLayoutFullScreen)
 {
-    NotifyParentWindowStatusChange(mode);
+    NotifyParentWindowStatusChange(mode, maximizeMode, isLayoutFullScreen);
     return WSError::WS_OK;
 }
 
@@ -6170,6 +6362,7 @@ WSError WindowSceneSessionImpl::UpdateWindowMode(WindowMode mode)
     }
     if (mode != WindowMode::WINDOW_MODE_FULLSCREEN) {
         UpdateIsShowDecorInFreeMultiWindow(true);
+        isMaximizeInvoked_ = false;
     }
     WMError ret = UpdateWindowModeImmediately(mode);
 
@@ -6348,6 +6541,21 @@ WSError WindowSceneSessionImpl::SwitchFreeMultiWindow(bool enable)
     }
     SwitchSubWindow(enable, GetPersistentId());
     SwitchSystemWindow(enable, GetPersistentId());
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::ConfigDockAutoHide(bool isDockAutoHide)
+{
+    windowSystemConfig_.isDockAutoHide_ = isDockAutoHide;
+    UpdateDecorEnable(true);
+    std::vector<sptr<WindowSessionImpl>> subWindows;
+    GetSubWindows(GetPersistentId(), subWindows);
+    for (auto& subWindowSession : subWindows) {
+        if (subWindowSession != nullptr) {
+            subWindowSession->SetDockAutoHide(isDockAutoHide);
+            subWindowSession->UpdateDecorEnable(true);
+        }
+    }
     return WSError::WS_OK;
 }
 
@@ -6657,7 +6865,8 @@ WMError WindowSceneSessionImpl::SetWindowLimits(WindowLimits& windowLimits, bool
         customizedLimits.vpRatio_, windowLimits.pixelUnit_
     });
 
-    UpdateWindowSizeLimits();
+    // Pass true to notify session side before calculating attached windows intersection
+    UpdateWindowSizeLimits(true);
     WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "update window proeprty failed! id: %{public}u.", GetWindowId());
@@ -6812,12 +7021,6 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
         return nullptr;
     }
     uint32_t maskWidth = windowMask[0].size();
-    for (uint32_t i = 0; i < maskHeight; i++) {
-        if (windowMask[i].size() != maskWidth) {
-            TLOGE(WmsLogTag::WMS_PC, "WindowMask row size mismatch, row:%{public}d", i);
-            return nullptr;
-        }
-    }
     if ((windowRect.height_ > 0 && windowRect.height_ != maskHeight) ||
         (windowRect.width_ > 0 && windowRect.width_ != maskWidth)) {
         WLOGFE("WindowMask is invalid");
@@ -6840,7 +7043,8 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             uint32_t idx = i * maskWidth + j;
-            uint32_t channel = windowMask[i][j] > 0 ? fullChannel : 0;
+            uint32_t value = (j < windowMask[i].size()) ? windowMask[i][j] : 1;
+            uint32_t channel = value > 0 ? fullChannel : 0;
             uint32_t channelIndex = idx * bgraChannel;
             data[channelIndex] = channel; // blue channel
             data[channelIndex + greenChannel] = channel; // green channel
@@ -7572,6 +7776,31 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable) const
     return WMError::WM_OK;
 }
 
+WMError WindowSceneSessionImpl::SetFloatNavigationAvoidAreaEnabled(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
+    floatNavigationAvoidAreaEnabled_ = enable;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    auto ret = hostSession->SetFloatNavigationAvoidAreaEnabled(enable);
+    return ret == WMError::WM_OK ? WMError::WM_OK : WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+}
+
+WMError WindowSceneSessionImpl::GetFloatNavigationAvoidAreaEnabled(bool& enable) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    enable = floatNavigationAvoidAreaEnabled_;
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
+    return WMError::WM_OK;
+}
+
 WSError WindowSceneSessionImpl::SetFullScreenWaterfallMode(bool isWaterfallMode)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "prev: %{public}d, curr: %{public}d, winId: %{public}u",
@@ -7748,6 +7977,7 @@ float WindowSceneSessionImpl::GetCustomDensity() const
 WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
 {
     const auto& property = GetProperty();
+
     if (windowAnchorInfo.isFromAttachOrDetach_ && (!(windowSystemConfig_.IsPcWindow() ||
         windowSystemConfig_.freeMultiWindowSupport_) || property_->IsAdaptToCompatibleDevice())) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
@@ -7756,29 +7986,36 @@ WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo&
             property_->IsAdaptToCompatibleDevice());
         return WMError::WM_OK;
     }
-    if (windowAnchorInfo.isFromAttachOrDetach_ && (!windowAnchorInfo.isAnchoredByAttach_ &&
-            !property->GetWindowAnchorInfo().isAnchoredByAttach_)) {
-        TLOGE(WmsLogTag::WMS_SUB, "Repeated invoking");
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "only 1 level sub window is valid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
-    if (!WindowHelper::IsSubWindow(property->GetWindowType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "only sub window is valid");
+    if (IsZLevelAboveParentLoosened()) {
+        TLOGE(WmsLogTag::WMS_SUB,
+            "only sub window is valid, windowType: %{public}d, IsZLevelAboveParentLoosened: %{public}d",
+            property->GetWindowType(), IsZLevelAboveParentLoosened());
         return WMError::WM_ERROR_INVALID_CALLING;
+    }
+    if (windowAnchorInfo.isFromAttachOrDetach_ && (!windowAnchorInfo.isAnchoredByAttach_ &&
+            !property->GetWindowAnchorInfo().isAnchoredByAttach_)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Repeated invoking");
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+    if (windowAnchorInfo.isFromAttachOrDetach_ && (WindowHelper::IsFullScreenWindow(property->GetWindowMode()) ||
+            property->IsFollowParentLayout())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "The subwindow is maximized or is following its parent window's layout.");
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     if (IsLoosenedWithPcOrFreeMultiMode()) {
         TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
-        TLOGE(WmsLogTag::WMS_SUB, "not support fullscreen sub window");
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
-    if (property->GetSubWindowLevel() > 1) {
-        TLOGI(WmsLogTag::WMS_SUB, "not support more than 1 level window");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "not support fullscreen sub window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!windowAnchorInfo.isFromAttachOrDetach_ && !windowSystemConfig_.supportFollowRelativePositionToParent_) {
-        TLOGI(WmsLogTag::WMS_SUB, "not support device");
+        TLOGI(WmsLogTag::WMS_LAYOUT, "not support device");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     return WMError::WM_OK;
@@ -7798,14 +8035,19 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         TLOGI(WmsLogTag::WMS_SUB, "session is nullptr");
         return WMError::WM_ERROR_INVALID_SESSION;
     }
-    WSError ret = hostSession->SetWindowAnchorInfo(windowAnchorInfo);
-    if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
+
+    const auto& property = GetProperty();
+    WSError wsRet = hostSession->SetWindowAnchorInfo(windowAnchorInfo);
+    if (wsRet == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    if (ret == WSError::WS_OK) {
+    if (wsRet == WSError::WS_ERROR_NOT_SYSTEM_APP) {
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (wsRet == WSError::WS_OK) {
         GetProperty()->SetWindowAnchorInfo(windowAnchorInfo);
     }
-    return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
+    return wsRet != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
 
 WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow)
@@ -7820,7 +8062,7 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
         TLOGE(WmsLogTag::WMS_SUB, "only sub window and dialog is valid");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
-    if (IsLoosenedWithPcOrFreeMultiMode()) {
+    if (IsZLevelAboveParentLoosened()) {
         TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
@@ -7841,6 +8083,9 @@ WMError WindowSceneSessionImpl::SetFollowParentWindowLayoutEnabled(bool isFollow
     if (ret == WSError::WS_ERROR_DEVICE_NOT_SUPPORT) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "windowId: %{public}u, device not support", GetWindowId());
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
+    if (ret == WSError::WS_OK) {
+        property->SetFollowParentLayout(isFollow);
     }
     return ret != WSError::WS_OK ? WMError::WM_ERROR_SYSTEM_ABNORMALLY : WMError::WM_OK;
 }
@@ -8099,6 +8344,97 @@ WSError WindowSceneSessionImpl::UpdatePropertyWhenTriggerMode(const sptr<WindowS
         return WSError::WS_ERROR_INVALID_PARAM;
     }
     property_->SetMobileAppInPadLayoutFullScreen(property->GetMobileAppInPadLayoutFullScreen());
+    return WSError::WS_OK;
+}
+
+/** @note @window.layout */
+WSError WindowSceneSessionImpl::UpdateAttachedWindowLimits(int32_t sourcePersistentId,
+    const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit,
+    bool isIntersectedWidthLimit)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "called for window id=%{public}u, sourcePersistentId=%{public}d, "
+        "isIntersectedHeightLimit=%{public}d, isIntersectedWidthLimit=%{public}d",
+        GetWindowId(), sourcePersistentId, isIntersectedHeightLimit, isIntersectedWidthLimit);
+
+    const auto& property = GetProperty();
+
+    // 1. Update window side's windowSessionProperty member with source window's limits
+    property->SetAttachedWindowLimits(sourcePersistentId, attachedWindowLimits);
+
+    // 2. Store limit options for this specific attached window
+    AttachLimitOptions limitOptions{ isIntersectedHeightLimit, isIntersectedWidthLimit };
+    property->SetAttachedLimitOptions(sourcePersistentId, limitOptions);
+
+    // 3. Trigger UpdateWindowSizeLimits logic to recalculate with all attached limits
+    UpdateWindowSizeLimits();
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    UpdateNewSize();
+
+    TLOGI(WmsLogTag::WMS_LAYOUT, "completed for window id=%{public}u", GetWindowId());
+    return WSError::WS_OK;
+}
+
+/** @note @window.layout */
+WSError WindowSceneSessionImpl::SyncAllAttachedLimitsToChild(
+    const std::vector<std::pair<int32_t, WindowLimits>>& limitsList,
+    const std::vector<std::pair<int32_t, AttachLimitOptions>>& optionsList)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "called for window id=%{public}u, limitsList size=%{public}zu, "
+        "optionsList size=%{public}zu", GetWindowId(), limitsList.size(), optionsList.size());
+
+    const auto& property = GetProperty();
+
+    // 1. Clear existing attached limits first, then store all entries from the parent
+    property->ClearAttachedWindowLimitsList();
+    property->ClearAttachedLimitOptionsList();
+
+    for (const auto& [sourceId, limits] : limitsList) {
+        property->SetAttachedWindowLimits(sourceId, limits);
+    }
+
+    for (const auto& [sourceId, options] : optionsList) {
+        property->SetAttachedLimitOptions(sourceId, options);
+    }
+
+    // 2. Trigger UpdateWindowSizeLimits logic to recalculate with all attached limits
+    UpdateWindowSizeLimits();
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    UpdateNewSize();
+
+    TLOGI(WmsLogTag::WMS_LAYOUT, "completed for window id=%{public}u", GetWindowId());
+    return WSError::WS_OK;
+}
+
+/** @note @window.layout */
+WSError WindowSceneSessionImpl::RemoveAttachedWindowLimits(int32_t sourcePersistentId)
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "called for window id=%{public}u, "
+        "sourcePersistentId=%{public}d", GetWindowId(), sourcePersistentId);
+
+    const auto& property = GetProperty();
+
+    // Check if the source is this window itself (detaching from all attached windows)
+    if (sourcePersistentId == GetPersistentId()) {
+        // This window is detaching - clear all attached limits lists
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Window id=%{public}u is detaching, clearing all attached limits",
+            GetWindowId());
+        property->ClearAttachedWindowLimitsList();
+        property->ClearAttachedLimitOptionsList();
+    } else {
+        // Another window is detaching - remove that window's limits from the map
+        // 1. Remove the source window's limits from the map
+        property->RemoveAttachedWindowLimits(sourcePersistentId);
+
+        // 2. Remove the source window's limit options
+        property->RemoveAttachedLimitOptions(sourcePersistentId);
+    }
+
+    // 3. Trigger UpdateWindowSizeLimits logic to recalculate with remaining attached limits
+    UpdateWindowSizeLimits();
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
+    UpdateNewSize();
+
+    TLOGI(WmsLogTag::WMS_LAYOUT, "completed for window id=%{public}u", GetWindowId());
     return WSError::WS_OK;
 }
 
@@ -8581,6 +8917,20 @@ void WindowSceneSessionImpl::ModifySidebarBlurProperty(bool isDark, SidebarBlurT
 bool WindowSceneSessionImpl::IsInFreeWindowMode() const
 {
     return IsPcOrPadFreeMultiWindowMode();
+}
+
+WSError WindowSceneSessionImpl::HideSubWindowZLevelAboveParentLoosened()
+{
+    TLOGI(WmsLogTag::WMS_SUB, "persistentId: %{public}d", GetPersistentId());
+    Hide(0, false, false, true);
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::ShowSubWindowZLevelAboveParentLoosened()
+{
+    TLOGI(WmsLogTag::WMS_SUB, "persistentId: %{public}d", GetPersistentId());
+    Show(0, false, true);
+    return WSError::WS_OK;
 }
 } // namespace Rosen
 } // namespace OHOS
