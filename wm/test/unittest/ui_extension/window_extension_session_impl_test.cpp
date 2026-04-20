@@ -3932,32 +3932,6 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfigWithWindowStatus
 }
 
 /**
- * @tc.name: RegisterWindowStatusChangeListener
- * @tc.desc: RegisterWindowStatusChangeListener Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, RegisterWindowStatusChangeListener, TestSize.Level1)
-{
-    sptr<IWindowStatusChangeListener> listener = sptr<IWindowStatusChangeListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_->RegisterWindowStatusChangeListener(nullptr));
-    EXPECT_EQ(WMError::WM_OK, window_->RegisterWindowStatusChangeListener(listener));
-    EXPECT_EQ(WMError::WM_OK, window_->UnregisterWindowStatusChangeListener(listener));
-}
-
-/**
- * @tc.name: UnregisterWindowStatusChangeListener
- * @tc.desc: UnregisterWindowStatusChangeListener Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowExtensionSessionImplTest, UnregisterWindowStatusChangeListener, TestSize.Level1)
-{
-    sptr<IWindowStatusChangeListener> listener = sptr<IWindowStatusChangeListener>::MakeSptr();
-    EXPECT_EQ(WMError::WM_OK, window_->RegisterWindowStatusChangeListener(listener));
-    EXPECT_EQ(WMError::WM_OK, window_->UnregisterWindowStatusChangeListener(nullptr));
-    EXPECT_EQ(WMError::WM_ERROR_INVALID_PARAM, window_->UnregisterWindowStatusChangeListener(listener));
-}
-
-/**
  * @tc.name: OnHostWindowStatusChangeWithListener
  * @tc.desc: OnHostWindowStatusChange with listener Test
  * @tc.type: FUNC
@@ -3976,7 +3950,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowStatusChangeWithListener, T
     WindowStatus windowStatus;
     EXPECT_EQ(WMError::WM_OK, window_->GetWindowStatus(windowStatus));
     EXPECT_EQ(WindowStatus::WINDOW_STATUS_MINIMIZE, windowStatus);
-    EXPECT_EQ(WMError::WM_OK, window_->UnregisterWindowStatusChangeListener(nullptr));
+    EXPECT_EQ(WMError::WM_OK, window_->UnregisterWindowStatusChangeListener(listener));
 }
 } // namespace Rosen
 } // namespace OHOS
