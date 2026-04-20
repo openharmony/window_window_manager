@@ -10137,35 +10137,39 @@ SessionState SceneSessionManager::GetSessionStateForPrivacy(const sptr<SceneSess
 {
     auto state = SessionState::STATE_DISCONNECT;
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_MAIN, "session is null");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
         return state;
     }
     state = session->GetSessionState();
-    auto winType = session->GetWindowType();
     if (!session->IsSessionForeground()) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}u",
-            session->GetWindowId(), session->GetWindowName().c_str(), state, winType);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], state=%{public}u",
+            session->GetWindowId(), session->GetWindowName().c_str(), state);
         return state;
     }
-    if (auto parent = session->GetParentSession()) {
-        state = parent->GetSessionState();
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE,
-            "win=[%{public}d, %{public}s], state=%{public}u, winType=%{public}u, parentId=%{public}d",
-            session->GetWindowId(), session->GetWindowName().c_str(), state, winType, parent->GetWindowId());
+    auto winType = session->GetWindowType();
+    if (!WindowHelper::IsSubWindow(winType) && !WindowHelper::IsDialogWindow(winType)) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], winType=%{public}u, state=%{public}u",
+            session->GetWindowId(), session->GetWindowName().c_str(), winType, state);
+        return state;
     }
-    if (WindowHelper::IsSubWindow(winType) || WindowHelper::IsDialogWindow(winType)) {
-        auto parent = GetSceneSessionNoLock(session->GetSessionProperty()->GetParentPersistentId());
-        while (parent != nullptr && parent->IsSessionForeground()) {
-            parent = GetSceneSessionNoLock(parent->GetSessionProperty()->GetParentPersistentId());
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], parentId=%{public}d",
-                session->GetWindowId(), session->GetWindowName().c_str(), parent->GetWindowId());
+    auto winId = session->GetWindowId();
+    auto parent = GetSceneSessionNoLock(session->GetSessionProperty()->GetParentPersistentId());
+    while (parent != nullptr) {
+        winType = parent->GetWindowType();
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+            "curId=%{public}d, parentId=%{public}d, parentType=%{public}u, parentState=%{public}u",
+            winId, parent->GetWindowId(), winType, parent->GetSessionState());
+        if (!parent->IsSessionForeground() ||
+            (!WindowHelper::IsSubWindow(winType) && !WindowHelper::IsDialogWindow(winType))) {
+            break;
         }
-        if (parent != nullptr) {
-            state = parent->GetSessionState();
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE,
-                "win=[%{public}d, %{public}s], finalState=%{public}u, parentId=%{public}d",
-                session->GetWindowId(), session->GetWindowName().c_str(), state, parent->GetWindowId());
-        }
+        winId = parent->GetWindowId();
+        parent = GetSceneSessionNoLock(parent->GetSessionProperty()->GetParentPersistentId());
+    }
+    if (parent != nullptr) {
+        state = parent->GetSessionState();
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], finalState=%{public}u",
+            session->GetWindowId(), session->GetWindowName().c_str(), state);
     }
     return state;
 }
