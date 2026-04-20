@@ -19927,6 +19927,11 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
             TLOGD(WmsLogTag::DEFAULT, "skip system session, id: %{public}d", curSession->GetPersistentId());
             continue;
         }
+        if (!curSession->IsSessionForeground()) {
+            TLOGD(WmsLogTag::DEFAULT,
+                "skip background session, id: %{public}d", curSession->GetPersistentId());
+            continue;
+        }
         auto mainSession = curSession->GetMainSession();
         if (mainSession == nullptr || !mainSession->IsSessionForeground()) {
             TLOGD(WmsLogTag::DEFAULT,
@@ -19934,11 +19939,6 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
                 curSession->GetPersistentId(),
                 mainSession ? mainSession->GetPersistentId() : INVALID_SESSION_ID,
                 mainSession ? mainSession->IsSessionForeground() : false);
-            continue;
-        }
-        if (!curSession->IsSessionForeground()) {
-            TLOGD(WmsLogTag::DEFAULT,
-                "skip background session, id: %{public}d", curSession->GetPersistentId());
             continue;
         }
         activeSession.push_back(curSession);
