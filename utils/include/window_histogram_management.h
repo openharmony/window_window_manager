@@ -19,24 +19,52 @@
 #include "histogram_plugin_macros.h"
 #include "wm_common.h"
 
+namespace OHOS {
+namespace Rosen {
+
+/**
+ * @brief Boolean values for histogram recording
+ */
+enum class HistogramBoolean : int32_t {
+    HISTOGRAM_BOOLEAN_FALSE = 0,
+    HISTOGRAM_BOOLEAN_TRUE = 1,
+};
+
+/**
+ * @brief Base value for WM error codes
+ */
+constexpr int32_t WM_ERROR_BASE = 1300000;
+
+/**
+ * @brief Maximum value for WM error code histogram
+ * @note Equals to WM_ERROR_DEVICE_NOT_SUPPORT (801),
+ *       which is the maximum value below WM_ERROR_BASE
+ */
+constexpr int32_t WM_ERROR_HISTOGRAM_MAX = 801;
+
 /**
  * @brief Convert WmErrorCode to histogram index
  * @param error - WmErrorCode enum value
- * @return Index value (0, 1, 2, ...), values >= 1300000 will be converted by subtracting 1300000
+ * @return Index value (0, 1, 2, ...), values >= WM_ERROR_BASE will be converted by subtracting WM_ERROR_BASE
  * @note constexpr function enables compile-time evaluation when error is a compile-time constant
  */
-constexpr int32_t WmErrorCodeToIndex(WmErrorCode error) {
+constexpr int32_t WmErrorCodeToIndex(WmErrorCode error)
+{
     int32_t value = static_cast<int32_t>(error);
-    return (value >= 1300000) ? (value - 1300000) : value;
+    return (value >= WM_ERROR_BASE) ? (value - WM_ERROR_BASE) : value;
 }
 
 /**
  * @brief Histogram enumeration macro for WmErrorCode
  * @param name - The histogram name (string)
- * @param error_code - WmErrorCode enum value, will be converted to index via WmErrorCodeToIndex()
- * @param max - Maximum value (element with the maximum value in WmErrorCode)
+ * @param errorCode - WmErrorCode enum value, will be converted to index via WmErrorCodeToIndex()
+ * @note Compile-time type check ensures errorCode is WmErrorCode type
  */
 #define HISTOGRAM_ENUMERATION_ERROR_CODE(name, errorCode) \
-    HISTOGRAM_ENUMERATION(name, WmErrorCodeToIndex(errorCode), 801)
+    static_assert(std::is_same_v<decltype(errorCode), WmErrorCode>, \
+        "HISTOGRAM_ENUMERATION_ERROR_CODE: errorCode parameter must be WmErrorCode type"); \
+    HISTOGRAM_ENUMERATION(name, WmErrorCodeToIndex(errorCode), WM_ERROR_HISTOGRAM_MAX)
 
+} // namespace Rosen
+} // namespace OHOS
 #endif // WINDOW_HISTOGRAM_MANAGEMENT_H
