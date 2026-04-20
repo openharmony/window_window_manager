@@ -16,20 +16,22 @@
 #ifndef WINDOW_HISTOGRAM_MANAGEMENT_H
 #define WINDOW_HISTOGRAM_MANAGEMENT_H
 
-#include "histogram_plugin_macros.h"
 #include "wm_common.h"
+
+#ifndef WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS
+// Stub implementations when WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS is not defined
+#define HISTOGRAM_BOOLEAN(name, value) ((void)0)
+#define HISTOGRAM_ENUMERATION(name, sample, boundary) ((void)0)
+#define HISTOGRAM_CUSTOM_COUNTS(name, sample, min, max, bucket_count) ((void)0)
+#define HISTOGRAM_TIMES(name, sample) ((void)0)
+#define HISTOGRAM_PERCENTAGE(name, sample) ((void)0)
+#define HISTOGRAM_ENUMERATION_ERROR_CODE(name, errorCode) ((void)0)
+
+#else
+#include "histogram_plugin_macros.h"
 
 namespace OHOS {
 namespace Rosen {
-
-/**
- * @brief Boolean values for histogram recording
- */
-enum class HistogramBoolean : int32_t {
-    HISTOGRAM_BOOLEAN_FALSE = 0,
-    HISTOGRAM_BOOLEAN_TRUE = 1,
-};
-
 /**
  * @brief Base value for WM error codes
  */
@@ -67,4 +69,6 @@ constexpr int32_t WmErrorCodeToIndex(WmErrorCode error)
 
 } // namespace Rosen
 } // namespace OHOS
+#endif // WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS
+
 #endif // WINDOW_HISTOGRAM_MANAGEMENT_H
