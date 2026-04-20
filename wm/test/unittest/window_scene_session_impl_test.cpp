@@ -4058,7 +4058,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeDelegatedPath01, TestSize.Level1)
 
     // Maximize(pres, state) -> MaximizeWithOptions(pres, state, {-1,-1})
     WMError ret = window->Maximize(
-        MaximizePresentation::ENTER_IMMERSIVE, AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING);
+        MaximizePresentation::ENTER_IMMERSIVE, WaterfallResidentState::UNCHANGED);
     ASSERT_TRUE(ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
 }
 
@@ -4159,7 +4159,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_WindowModeNotSupported0
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     // Only support floating, not fullscreen
     window->property_->SetWindowModeSupportType(
-        static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_ONLY_FLOATING));
+        static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING));
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
