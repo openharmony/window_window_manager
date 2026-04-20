@@ -13054,6 +13054,7 @@ void SceneSessionManager::SetSessionVisibilityInfo(const sptr<SceneSession>& ses
         windowId, session->GetCallingPid(), session->GetCallingUid(), visibleState, session->GetWindowType());
     windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
     windowVisibilityInfo->SetBundleName(session->GetSessionInfo().bundleName_);
+    windowVisibilityInfo->SetModuleName(session->GetSessionInfo().moduleName_);
     windowVisibilityInfo->SetAbilityName(session->GetSessionInfo().abilityName_);
     windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
     windowVisibilityInfo->SetZOrder(session->GetZOrder());
@@ -13511,6 +13512,7 @@ void SceneSessionManager::WindowDestroyNotifyVisibility(const sptr<SceneSession>
             WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION, sceneSession->GetWindowType());
         windowVisibilityInfo->SetAppIndex(sceneSession->GetSessionInfo().appIndex_);
         windowVisibilityInfo->SetBundleName(sceneSession->GetSessionInfo().bundleName_);
+        windowVisibilityInfo->SetModuleName(sceneSession->GetSessionInfo().moduleName_);
         windowVisibilityInfo->SetAbilityName(sceneSession->GetSessionInfo().abilityName_);
         windowVisibilityInfo->SetIsSystem(sceneSession->GetSessionInfo().isSystem_);
         windowVisibilityInfo->SetZOrder(sceneSession->GetZOrder());
@@ -16338,6 +16340,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                 session->GetCallingUid(), session->GetVisibilityState(), session->GetWindowType(), windowStatus, rect,
                 session->GetSessionInfo().bundleName_, session->GetSessionInfo().abilityName_,
                 session->IsFocused());
+            windowVisibilityInfo->SetModuleName(session->GetSessionInfo().moduleName_);
             windowVisibilityInfo->SetAppIndex(session->GetSessionInfo().appIndex_);
             windowVisibilityInfo->SetIsSystem(session->GetSessionInfo().isSystem_);
             windowVisibilityInfo->SetZOrder(session->GetZOrder());
