@@ -746,6 +746,7 @@ public:
      * Window Watermark
      */
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
+    WMError RecoverProcessWatermark(int32_t pid, const std::string& watermarkName) override;
 
     /*
      * Window Snapshot

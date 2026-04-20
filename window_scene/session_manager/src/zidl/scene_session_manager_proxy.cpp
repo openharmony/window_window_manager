@@ -3715,6 +3715,37 @@ WMError SceneSessionManagerProxy::SetProcessWatermark(int32_t pid, const std::st
     return static_cast<WMError>(reply.ReadInt32());
 }
 
+WMError SceneSessionManagerProxy::RecoverProcessWatermark(int32_t pid, const std::string& watermarkName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write pid failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteString(watermarkName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write watermarkName failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SceneSessionManagerMessage::TRANS_ID_RECOVER_PROCESS_WATERMARK),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    return static_cast<WMError>(reply.ReadInt32());
+}
+
 WMError SceneSessionManagerProxy::GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
     int32_t x, int32_t y, std::vector<int32_t>& windowIds)
 {

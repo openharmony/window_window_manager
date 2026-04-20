@@ -18651,6 +18651,22 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::RecoverProcessWatermark(int32_t pid, const std::string& watermarkName)
+{
+    if (!SessionPermission::IsSACalling() && !SessionPermission::IsShellCall()) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "permission denied!");
+        return WMError::WM_ERROR_INVALID_PERMISSION;
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, watermarkName=%{public}s", pid, watermarkName.c_str());
+    auto task = [this, pid, watermarkName] {
+        if (pid != 0 && !watermarkName.empty()) {
+            processWatermarkPidMap_.insert_or_assign(pid, watermarkName);
+        }
+    };
+    taskScheduler_->PostTask(task, __func__);
+    return WMError::WM_OK;
+}
+
 bool SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
 {
     if (auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());

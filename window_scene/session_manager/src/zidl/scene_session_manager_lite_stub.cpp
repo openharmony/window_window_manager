@@ -144,6 +144,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetWindowStyleType(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_SET_PROCESS_WATERMARK):
             return HandleSetProcessWatermark(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_RECOVER_PROCESS_WATERMARK):
+            return HandleRecoverProcessWatermark(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_TERMINATE_SESSION_BY_PERSISTENT_ID):
             return HandleTerminateSessionByPersistentId(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_CLOSE_TARGET_FLOAT_WINDOW):
@@ -1374,6 +1376,23 @@ int SceneSessionManagerLiteStub::HandleSetProcessWatermark(MessageParcel& data, 
         return ERR_INVALID_DATA;
     }
     WMError errCode = SetProcessWatermark(pid, watermarkName, isEnabled);
+    reply.WriteInt32(static_cast<int32_t>(errCode));
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleRecoverProcessWatermark(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t pid = INVALID_PID;
+    if (!data.ReadInt32(pid)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to readInt32 pid");
+        return ERR_INVALID_DATA;
+    }
+    std::string watermarkName;
+    if (!data.ReadString(watermarkName)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to readString watermarkName");
+        return ERR_INVALID_DATA;
+    }
+    WMError errCode = RecoverProcessWatermark(pid, watermarkName);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
 }

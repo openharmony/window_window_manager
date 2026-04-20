@@ -107,6 +107,7 @@ public:
     WMError ClearMainSessions(const std::vector<int32_t>& persistentIds, std::vector<int32_t>& clearFailedIds) override;
     WMError GetWindowStyleType(WindowStyleType& windowModeType) override;
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName, bool isEnabled) override;
+    WMError RecoverProcessWatermark(int32_t pid, const std::string& watermarkName) override;
     WMError TerminateSessionByPersistentId(int32_t persistentId) override;
     WMError CloseTargetFloatWindow(const std::string& bundleName) override;
     WMError CloseTargetPiPWindow(const std::string& bundleName) override;

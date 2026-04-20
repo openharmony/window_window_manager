@@ -133,6 +133,7 @@ public:
         TRANS_ID_SET_PROCESS_SNAPSHOT_SKIP,
         TRANS_ID_SET_SNAPSHOT_SKIP_BY_USERID_AND_BUNDLENAMES,
         TRANS_ID_SET_PROCESS_WATERMARK,
+        TRANS_ID_RECOVER_PROCESS_WATERMARK,
         TRANS_ID_GET_WINDOW_IDS_BY_COORDINATE,
         TRANS_ID_UPDATE_SESSION_SCREEN_LOCK,
         TRANS_ID_ADD_SKIP_SELF_ON_VIRTUAL_SCREEN,
@@ -446,6 +447,8 @@ public:
 
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) override { return WMError::WM_OK; }
+
+    WMError RecoverProcessWatermark(int32_t pid, const std::string& watermarkName) { return WMError::WM_OK; }
 
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber, int32_t x, int32_t y,
         std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
