@@ -456,30 +456,7 @@ HWTEST_F(WindowSceneSessionImplImmersiveTest, SetFloatNavigationAvoidAreaEnabled
 HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByType, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->property_ = sptr<WindowSessionProperty>::MakeSptr();
-    window->property_->SetPersistentId(1);
-    SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
-    window->hostSession_ = sptr<SessionMocker>::MakeSptr(sessionInfo);
-    window->state_ = WindowState::STATE_SHOWN;
-    window->floatNavigationAvoidAreaEnabled_ = false;
-    AvoidArea avoidArea;
-    EXPECT_EQ(window->GetAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, avoidArea), WMError::WM_DO_NOTHING);
-    window->floatNavigationAvoidAreaEnabled_ = true;
-    EXPECT_EQ(window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea), WMError::WM_OK);
-    window->floatNavigationAvoidAreaEnabled_ = false;
-    EXPECT_EQ(window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea), WMError::WM_OK);
-}
-
-/*
- * @tc.name: GetAvoidAreaByType
- * @tc.desc: GetAvoidAreaByType
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByType, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_ = sptr<WindowSessionProperty>::MakeSptr();
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
@@ -502,7 +479,7 @@ HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByType, TestSize.Level
 HWTEST_F(WindowSceneSessionImplImmersiveTest, GetAvoidAreaByTypeIgnoringVisibility, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    sptr<WindowSceneSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_ = sptr<WindowSessionProperty>::MakeSptr();
     window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
