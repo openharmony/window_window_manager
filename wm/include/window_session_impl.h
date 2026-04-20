@@ -1064,6 +1064,7 @@ protected:
      * RS Multi Process
      */
     sptr<IRemoteObject> renderSession_;
+    bool needCreateCompleteSurfaceNode_ = false;
 
     /**
      * Game Prelaunch flag
