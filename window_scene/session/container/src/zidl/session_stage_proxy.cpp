@@ -2754,64 +2754,6 @@ WSError SessionStageProxy::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(needUpdateViewport)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write needUpdateViewport failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(selectMode))) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write selectMode failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_ENABLE_UPDATED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return WSError::WS_OK;
-}
-
-WSError SessionStageProxy::NotifyAppHookWindowInfoUpdated()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_HOOK_WINDOW_INFO_UPDATED),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return WSError::WS_OK;
-}
-
 WSError SessionStageProxy::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
 {
     MessageParcel data;
@@ -2832,6 +2774,42 @@ WSError SessionStageProxy::UpdateAppHookWindowInfo(const HookWindowInfo& hookWin
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
+}
+
+WSError SessionStageProxy::SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(isForceSplitEnabled)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write isForceSplitEnabled failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteBool(needUpdateViewport)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write needUpdateViewport failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(selectMode))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "Write selectMode failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FORCE_SPLIT_ENABLE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

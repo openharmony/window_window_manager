@@ -112,7 +112,7 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using NotifyForceSplitEnableFunc = std::function<bool(const std::string& bundleName)>;
 using PageEnableCallback = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
-using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
+using SetSelectModeCallback = std::function<void(SelectMode selectMode)>;
 using GetSelectModeFunc = std::function<SelectMode()>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
@@ -489,8 +489,8 @@ public:
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
-    virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
     virtual void RegisterPageEnableCallback(PageEnableCallback&& callback) {}
+    virtual void RegisterSetSelectModeCallback(SetSelectModeCallback&& callback) {}
 
     /*
      * PC Window
@@ -990,8 +990,6 @@ public:
     bool IsAnyParentSessionDragZooming() const override;
     bool IsNeedNotifyDragEventOnNextVsync() const;
     void NotifiedDragEventOnNextVsync();
-    void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
-    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void RegisterSelectModeFunc(GetSelectModeFunc&& func);
     WMError GetSelectMode(SelectMode& selectMode) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
@@ -1557,7 +1555,6 @@ private:
     /*
      * Window Layout
      */
-    GetHookWindowInfoFunc getHookWindowInfoFunc_ = nullptr;
     GetSelectModeFunc getSelectModeFunc_ = nullptr;
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);

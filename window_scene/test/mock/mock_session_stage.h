@@ -108,8 +108,6 @@ public:
     MOCK_METHOD1(NotifyAppUseControlStatus, void(bool isUseControl));
     MOCK_METHOD1(NotifyExtensionSecureLimitChange, WSError(bool isLimit));
     MOCK_METHOD0(NotifyAppForceLandscapeConfigUpdated, WSError(void));
-    MOCK_METHOD2(NotifyAppForceLandscapeConfigEnableUpdated, WSError(bool needUpdateViewport, SelectMode selectMode));
-    MOCK_METHOD0(NotifyAppHookWindowInfoUpdated, WSError(void));
     MOCK_METHOD1(GetRouterStackInfo, WMError(std::string& routerStackInfo));
     MOCK_METHOD1(SendFbActionEvent, WSError(const std::string& action));
     MOCK_METHOD1(UpdateIsShowDecorInFreeMultiWindow, WSError(bool isShow));
@@ -119,6 +117,8 @@ public:
     MOCK_METHOD1(UpdateWindowUIType, WSError(WindowUIType windowUIType));
     MOCK_METHOD1(UpdatePropertyWhenTriggerMode, WSError(const sptr<WindowSessionProperty>& property));
     MOCK_METHOD1(UpdateAppHookWindowInfo, WSError(const HookWindowInfo& hookWindowInfo));
+    MOCK_METHOD3(SetForceSplitEnable, WSError(bool isForceSplitEnabled, bool needUpdateViewport,
+        SelectMode selectMode));
     MOCK_METHOD2(SendFvActionEvent, WSError(const std::string& action, const std::string& reason));
     MOCK_METHOD2(SyncFvWindowInfo, WSError(const FloatViewWindowInfo& windowInfo, const std::string& reason));
     MOCK_METHOD1(SyncFvLimits, WSError(const FloatViewLimits& limits));

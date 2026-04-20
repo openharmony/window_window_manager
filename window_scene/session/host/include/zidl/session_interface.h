@@ -424,8 +424,6 @@ public:
     virtual WMError UpdateSessionPropertyByAction(const sptr<WindowSessionProperty>& property,
         WSPropertyChangeAction action) { return WMError::WM_OK; }
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; }
-    virtual WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) { return WMError::WM_OK; }
-    virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
     virtual WMError GetSelectMode(SelectMode& selectMode) { return WMError::WM_OK; }
     virtual WSError AdjustKeyboardLayout(const KeyboardLayoutParams& params) { return WSError::WS_OK; }
     virtual WSError SetDialogSessionBackGestureEnabled(bool isEnabled) { return WSError::WS_OK; }
@@ -724,11 +722,6 @@ public:
     }
 
     virtual WSError RestartApp(const std::shared_ptr<AAFwk::Want>& want)
-    {
-        return WSError::WS_OK;
-    }
-    
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
     {
         return WSError::WS_OK;
     }

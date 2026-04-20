@@ -58,7 +58,6 @@ public:
     MOCK_METHOD1(NotifyExtensionTimeout, void(int32_t errorCode));
     MOCK_METHOD1(NotifyAttachedWindowsLimitsChanged, WSError(const WindowLimits& limits));
     MOCK_METHOD1(GetAppForceLandscapeConfig, WMError(AppForceLandscapeConfig& config));
-    MOCK_METHOD1(GetAppHookWindowInfoFromServer, WMError(HookWindowInfo& hookWindowInfo));
     MOCK_METHOD1(SetDialogSessionBackGestureEnabled, WSError(bool isEnabled));
     MOCK_METHOD1(SetActive, WSError(bool active));
     MOCK_METHOD1(SyncSessionEvent, WSError(SessionEvent event));
@@ -77,6 +76,7 @@ public:
     MOCK_METHOD0(NotifyFloatViewPrepareClose, void(void));
     MOCK_METHOD1(UpdateFloatView, WMError(const FloatViewTemplateInfo& fvTemplateInfo));
     MOCK_METHOD1(RestoreFloatViewMainWindow, WMError(const std::shared_ptr<AAFwk::WantParams>& wantParams));
+    MOCK_METHOD1(GetSelectMode, WMError(SelectMode& selectMode));
 };
 } // namespace Rosen
 } // namespace OHOS
