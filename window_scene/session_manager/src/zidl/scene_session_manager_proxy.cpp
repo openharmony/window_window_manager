@@ -4941,9 +4941,9 @@ WMError SceneSessionManagerProxy::GetAppWindowShowingInfosByBundleName(const App
     }
     windowInfos.clear();
     for (int32_t i = 0; i < size; i++) {
-        AppWindowShowingInfo* info = AppWindowShowingInfo::Unmarshalling(reply);
+        AppWindowShowingInfo* info = reply.ReadParcelable<AppWindowShowingInfo>();
         if (info == nullptr) {
-            TLOGE(WmsLogTag::WMS_MAIN, "Unmarshalling AppWindowShowingInfo failed");
+            TLOGE(WmsLogTag::WMS_MAIN, "ReadParcelable AppWindowShowingInfo failed");
             return WMError::WM_ERROR_IPC_FAILED;
         }
         windowInfos.push_back(*info);

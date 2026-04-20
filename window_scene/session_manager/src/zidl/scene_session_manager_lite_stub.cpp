@@ -222,7 +222,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
             return HandleGetMainWindowInfoByToken(data, reply);
         case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_NOTIFY_APP_USE_CONTROL_DISPLAY):
             return HandleNotifyAppUseControlDisplay(data, reply);
-        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_GET_APP_WINDOW_SHOWING_INFOS_BY_BUNDLE_NAME):
+        case static_cast<uint32_t>(
+            SceneSessionManagerLiteMessage::TRANS_ID_GET_APP_WINDOW_SHOWING_INFOS_BY_BUNDLE_NAME):
             return HandleGetAppWindowShowingInfosByBundleName(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
