@@ -37,6 +37,7 @@
 #include "singleton_container.h"
 #include "sys_cap_util.h"
 #include "get_snapshot_callback.h"
+#include "window_histogram_management.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -54,6 +55,7 @@ constexpr size_t ARGC_THREE = 3;
 constexpr size_t ARGC_FOUR = 4;
 constexpr int32_t INVALID_COORDINATE = -1;
 constexpr uint32_t API_VERSION_18 = 18;
+constexpr int32_t HISTOGRAM_BOOLEAN_COUNTS = 1;
 }
 
 JsWindowManager::JsWindowManager() : registerManager_(std::make_unique<JsWindowRegisterManager>())
@@ -1228,7 +1230,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
 napi_value JsWindowManager::OnGetTopWindow(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
-    HISTOGRAM_BOOLEAN("AukUI.window.getTopWindow", HistogramBoolean::HISTOGRAM_BOOLEAN_TRUE);
+    HISTOGRAM_BOOLEAN("AukUI.window.getTopWindow", HISTOGRAM_BOOLEAN_COUNTS);
     napi_value nativeContext = nullptr;
     napi_value nativeCallback = nullptr;
     size_t argc = 4;
