@@ -537,6 +537,10 @@ void SessionListenerController::NotifyAppInstanceLifecycleEvent(SessionState sta
                 bundleName.c_str(), persistentId, payload.sessionState_, payload.lifeCycleChangeReason_);
             controller->NotifyListeners(controller->listenerMapByAppInstance_, AppInstanceFilterKey{ bundleName,
                 appIndex, appInstanceKey }, payload);
+            if (!appInstanceKey.empty()) {
+                controller->NotifyListeners(controller->listenerMapByAppInstance_, AppInstanceFilterKey{ bundleName,
+                    appIndex, "" }, payload);
+            }
         }, __func__);
 }
 
