@@ -114,6 +114,48 @@ static std::string GetProcessNameByPid(int32_t pid)
     return processName;
 }
 
+static void DumpCreaseRectsToOss(std::ostringstream& oss,
+    const std::string& label, const std::vector<DMRect>& rects)
+{
+    oss << std::left << std::setw(LINE_WIDTH) << label;
+    if (rects.empty()) {
+        oss << "empty" << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < rects.size(); i++) {
+        if (i != 0) {
+            oss << std::left << std::setw(LINE_WIDTH) << "";
+        }
+        oss << "[" << rects[i].posX_ << ", " << rects[i].posY_ << ", "
+            << rects[i].width_ << ", " << rects[i].height_ << "]" << std::endl;
+    }
+}
+
+static void DumpScreenPropertyBounds(std::ostringstream& oss, ScreenProperty& prop)
+{
+    oss << std::left << std::setw(LINE_WIDTH) << "Bounds<L,T,W,H>: "
+        << prop.GetBounds().rect_.GetLeft() << ", "
+        << prop.GetBounds().rect_.GetTop() << ", "
+        << prop.GetBounds().rect_.GetWidth() << ", "
+        << prop.GetBounds().rect_.GetHeight() << ", " << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "PhyBounds<L,T,W,H>: "
+        << prop.GetPhyBounds().rect_.GetLeft() << ", "
+        << prop.GetPhyBounds().rect_.GetTop() << ", "
+        << prop.GetPhyBounds().rect_.GetWidth() << ", "
+        << prop.GetPhyBounds().rect_.GetHeight() << ", " << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "AvailableArea<X,Y,W,H> "
+        << prop.GetAvailableArea().posX_ << ", "
+        << prop.GetAvailableArea().posY_ << ", "
+        << prop.GetAvailableArea().width_ << ", "
+        << prop.GetAvailableArea().height_ << ", " << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DefaultDeviceRotationOffset "
+        << prop.GetDefaultDeviceRotationOffset() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "DisplayGroupId "
+        << prop.GetDisplayGroupId() << std::endl;
+    oss << std::left << std::setw(LINE_WIDTH) << "MainDisplayIdOfGroup "
+        << prop.GetMainDisplayIdOfGroup() << std::endl;
+}
+
 ScreenSessionDumper::ScreenSessionDumper(int fd, const std::vector<std::u16string>& args)
     : fd_(fd)
 {
@@ -500,37 +542,17 @@ void ScreenSessionDumper::DumpFoldCreaseRegion()
         TLOGE(WmsLogTag::DMS, "current crease region is null");
         return;
     }
-    oss << std::left << std::setw(LINE_WIDTH) << "CurrentCreaseRects<X, Y, W, H>: ";
-    for (size_t i = 0; i < creaseRects.size(); i++) {
-        if (i != 0) {
-            oss << std::left << std::setw(LINE_WIDTH) << "";
-        }
-        oss << "[" << creaseRects[i].posX_ << ", " << creaseRects[i].posY_ << ", "
-            << creaseRects[i].width_ << ", " << creaseRects[i].height_ << "]" << std::endl;
-    }
+    DumpCreaseRectsToOss(oss, "CurrentCreaseRects<X, Y, W, H>: ", creaseRects);
     dumpInfo_.append(oss.str());
 
-    // Dump LiveCreaseRegion
     FoldCreaseRegion liveRegion;
     DMError ret = ScreenSessionManager::GetInstance().GetLiveCreaseRegion(liveRegion);
-    if (ret == DMError::DM_OK) {
-        std::ostringstream liveOss;
-        auto liveRects = liveRegion.GetCreaseRects();
-        if (liveRects.empty()) {
-            liveOss << std::left << std::setw(LINE_WIDTH) << "LiveCreaseRects<X, Y, W, H>: "
-                << "empty" << std::endl;
-        } else {
-            liveOss << std::left << std::setw(LINE_WIDTH) << "LiveCreaseRects<X, Y, W, H>: ";
-            for (size_t i = 0; i < liveRects.size(); i++) {
-                if (i != 0) {
-                    liveOss << std::left << std::setw(LINE_WIDTH) << "";
-                }
-                liveOss << "[" << liveRects[i].posX_ << ", " << liveRects[i].posY_ << ", "
-                    << liveRects[i].width_ << ", " << liveRects[i].height_ << "]" << std::endl;
-            }
-        }
-        dumpInfo_.append(liveOss.str());
+    if (ret != DMError::DM_OK) {
+        return;
     }
+    std::ostringstream liveOss;
+    DumpCreaseRectsToOss(liveOss, "LiveCreaseRects<X, Y, W, H>: ", liveRegion.GetCreaseRects());
+    dumpInfo_.append(liveOss.str());
 }
 
 void ScreenSessionDumper::DumpScreenSessionById(ScreenId id)
@@ -774,27 +796,7 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
         << ", " << screenProperty.GetOffsetY() << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "StartPosition<X, Y>: " << screenProperty.GetStartX()
         << ", " << screenProperty.GetStartY() << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "Bounds<L,T,W,H>: "
-        << screenProperty.GetBounds().rect_.GetLeft() << ", "
-        << screenProperty.GetBounds().rect_.GetTop() << ", "
-        << screenProperty.GetBounds().rect_.GetWidth() << ", "
-        << screenProperty.GetBounds().rect_.GetHeight() << ", " << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "PhyBounds<L,T,W,H>: "
-        << screenProperty.GetPhyBounds().rect_.GetLeft() << ", "
-        << screenProperty.GetPhyBounds().rect_.GetTop() << ", "
-        << screenProperty.GetPhyBounds().rect_.GetWidth() << ", "
-        << screenProperty.GetPhyBounds().rect_.GetHeight() << ", " << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "AvailableArea<X,Y,W,H> "
-        << screenProperty.GetAvailableArea().posX_ << ", "
-        << screenProperty.GetAvailableArea().posY_ << ", "
-        << screenProperty.GetAvailableArea().width_ << ", "
-        << screenProperty.GetAvailableArea().height_ << ", " << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "DefaultDeviceRotationOffset "
-        << screenProperty.GetDefaultDeviceRotationOffset() << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "DisplayGroupId "
-        << screenProperty.GetDisplayGroupId() << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "MainDisplayIdOfGroup "
-        << screenProperty.GetMainDisplayIdOfGroup() << std::endl;
+    DumpScreenPropertyBounds(oss, screenProperty);
     dumpInfo_.append(oss.str());
 }
 
