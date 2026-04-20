@@ -747,6 +747,10 @@ protected:
     WMError UnregisterListenerInMap(std::unordered_map<int32_t, std::vector<sptr<T>>>& listenerMap,
         int32_t persistentId, const sptr<T>& listener)
     {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
+            return WMError::WM_ERROR_NULLPTR;
+        }
         auto it = listenerMap.find(persistentId);
         if (it == listenerMap.end()) {
             return WMError::WM_OK;
