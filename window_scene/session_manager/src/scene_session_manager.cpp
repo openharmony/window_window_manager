@@ -19932,18 +19932,21 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
                 "skip background session, id: %{public}d", curSession->GetPersistentId());
             continue;
         }
-        auto ancestor = curSession->GetParentSession();
-        while (ancestor != nullptr) {
-            if (!ancestor->IsSessionForeground()) {
-                TLOGD(WmsLogTag::DEFAULT,
-                    "skip, id: %{public}d, ancestorId: %{public}d not foreground",
-                    curSession->GetPersistentId(), ancestor->GetPersistentId());
-                break;
+        auto winType = curSession->GetWindowType();
+        if (WindowHelper::IsSubWindow(winType) || WindowHelper::IsDialogWindow(winType)) {
+            auto ancestor = curSession->GetParentSession();
+            while (ancestor != nullptr) {
+                if (!ancestor->IsSessionForeground()) {
+                    TLOGD(WmsLogTag::DEFAULT,
+                        "skip, id: %{public}d, ancestorId: %{public}d not foreground",
+                        curSession->GetPersistentId(), ancestor->GetPersistentId());
+                    break;
+                }
+                ancestor = ancestor->GetParentSession();
             }
-            ancestor = ancestor->GetParentSession();
-        }
-        if (ancestor != nullptr) {
-            continue;
+            if (ancestor != nullptr) {
+                continue;
+            }
         }
         activeSession.push_back(curSession);
     }
