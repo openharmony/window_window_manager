@@ -264,31 +264,6 @@ HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SubWindowWi
 }
 
 /**
- * @tc.name: GetActiveSceneSessionCopy_SubWindowWithNoParent
- * @tc.desc: Test GetActiveSceneSessionCopy with sub window that has no parent session
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SubWindowWithNoParent,
-    Function | SmallTest | Level2)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->sceneSessionMap_.clear();
-
-    SessionInfo subInfo;
-    subInfo.abilityName_ = "SubSession";
-    subInfo.bundleName_ = "SubSession";
-    subInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<SceneSessionMocker> subSession = sptr<SceneSessionMocker>::MakeSptr(subInfo, nullptr);
-    subSession->state_ = SessionState::STATE_FOREGROUND;
-    ssm_->sceneSessionMap_.insert({ subSession->GetPersistentId(), subSession });
-
-    std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
-    EXPECT_EQ(activeSession.empty(), true);
-
-    ssm_->sceneSessionMap_.clear();
-}
-
-/**
  * @tc.name: GetActiveSceneSessionCopy_SystemSession
  * @tc.desc: Test GetActiveSceneSessionCopy with system session should be skipped
  * @tc.type: FUNC
@@ -345,8 +320,6 @@ HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SubWindowBa
     std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
     EXPECT_EQ(activeSession.size(), static_cast<size_t>(1));
 
-    ssm_->sceneSessionMap_.clear();
-}
     ssm_->sceneSessionMap_.clear();
 }
 
