@@ -220,6 +220,15 @@ enum class WindowMode : uint32_t {
 };
 
 /**
+ * @brief Enumerates type of split ratio preference.
+ */
+enum class SplitRatioPreference : uint32_t {
+    EQUAL = 0,
+    PRIMARY_DOMINANT = 1,
+    SECONDARY_DOMINANT = 2
+};
+
+/**
  * @brief Enumerates modeType of window.
  */
 enum class WindowModeType : uint8_t {
