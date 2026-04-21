@@ -13581,6 +13581,8 @@ void ScreenSessionManager::CreateExtendVirtualScreen(ScreenId screenId)
             screenId, rsScreenId);
     }
     NotifyDisplayCreate(screenSession->ConvertToDisplayInfo());
+    OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE,
+        screenId);
 }
 
 DMError ScreenSessionManager::SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
