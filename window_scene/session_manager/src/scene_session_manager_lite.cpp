@@ -314,6 +314,11 @@ WMError SceneSessionManagerLite::SetProcessWatermark(int32_t pid, const std::str
     return SceneSessionManager::GetInstance().SetProcessWatermark(pid, watermarkName, isEnabled);
 }
 
+WMError SceneSessionManagerLite::RecoverProcessWatermark(int32_t pid, const std::string& watermarkName)
+{
+    return SceneSessionManager::GetInstance().RecoverProcessWatermark(pid, watermarkName);
+}
+
 WMError SceneSessionManagerLite::TerminateSessionByPersistentId(int32_t persistentId)
 {
     return SceneSessionManager::GetInstance().TerminateSessionByPersistentId(persistentId);
