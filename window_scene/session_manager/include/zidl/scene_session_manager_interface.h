@@ -448,8 +448,6 @@ public:
     WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) override { return WMError::WM_OK; }
 
-    WMError RecoverProcessWatermark(int32_t pid, const std::string& watermarkName) { return WMError::WM_OK; }
-
     WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber, int32_t x, int32_t y,
         std::vector<int32_t>& windowIds) override { return WMError::WM_OK; }
 
