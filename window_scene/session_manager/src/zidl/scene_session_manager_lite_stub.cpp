@@ -1393,7 +1393,10 @@ int SceneSessionManagerLiteStub::HandleRecoverProcessWatermark(MessageParcel& da
         return ERR_INVALID_DATA;
     }
     WMError errCode = RecoverProcessWatermark(pid, watermarkName);
-    reply.WriteInt32(static_cast<int32_t>(errCode));
+    if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write error code failed");
+        return ERR_INVALID_DATA;
+    }
     return ERR_NONE;
 }
 
