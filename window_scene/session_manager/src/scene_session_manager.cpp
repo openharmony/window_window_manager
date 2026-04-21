@@ -253,14 +253,14 @@ std::string ResolveAppInstanceKeyFromParent(const sptr<Session>& session)
     if (!ownKey.empty()) {
         return ownKey;
     }
-    if (session->IsMainSession()) {
+    if (SessionHelper::IsMainWindow(session->GetWindowType())) {
         return ownKey;
     }
     sptr<Session> parent = session->GetParentSession();
     int32_t depth = 0;
     while (parent != nullptr && depth < MAX_PARENT_TRAVERSE_DEPTH) {
         const auto& parentKey = parent->GetSessionInfo().appInstanceKey_;
-        if (!parentKey.empty() || parent->IsMainSession()) {
+        if (!parentKey.empty() || SessionHelper::IsMainWindow(parent->GetWindowType())) {
             return parentKey;
         }
         parent = parent->GetParentSession();
