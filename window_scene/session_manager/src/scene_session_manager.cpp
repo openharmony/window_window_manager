@@ -137,6 +137,7 @@ const std::string STARTWINDOW_TYPE = "startWindowType";
 const std::string STARTWINDOW_COLOR_MODE_TYPE = "startWindowColorModeType";
 const int32_t MAX_NUMBER_OF_DISTRIBUTED_SESSIONS = 20;
 const int32_t MAX_SESSION_LIMIT_ALL_APP = 512;
+const int32_t MAX_PARENT_TRAVERSE_DEPTH = 10;
 constexpr int HEX_BASE = 16;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
@@ -252,13 +253,18 @@ std::string ResolveAppInstanceKeyFromParent(const sptr<Session>& session)
     if (!ownKey.empty()) {
         return ownKey;
     }
+    if (session->IsMainSession()) {
+        return ownKey;
+    }
     sptr<Session> parent = session->GetParentSession();
-    while (parent != nullptr) {
+    int32_t depth = 0;
+    while (parent != nullptr && depth < MAX_PARENT_TRAVERSE_DEPTH) {
         const auto& parentKey = parent->GetSessionInfo().appInstanceKey_;
-        if (!parentKey.empty()) {
+        if (!parentKey.empty() || parent->IsMainSession()) {
             return parentKey;
         }
         parent = parent->GetParentSession();
+        depth++;
     }
     return "";
 }
@@ -2152,7 +2158,12 @@ void SceneSessionManager::GetSceneSessionsByAppInstance(const std::string& bundl
 void SceneSessionManager::CollectSubSessionsRecursively(std::vector<sptr<SceneSession>>& sceneSessions)
 {
     size_t idx = 0;
-    while (idx < sceneSessions.size()) {
+    while (idx < sceneSessions.size()
+        && sceneSessions.size() <= static_cast<size_t>(MAX_SESSION_LIMIT_ALL_APP)) {
+        if (!sceneSessions[idx]) {
+            idx++;
+            continue;
+        }
         auto subs = sceneSessions[idx]->GetSubSession();
         for (auto& sub : subs) {
             if (sub) {
