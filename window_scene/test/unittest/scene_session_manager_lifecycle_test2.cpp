@@ -700,12 +700,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest2,
     bool hasPid9101 = false;
     bool hasPid9102 = false;
     for (const auto& payload : payloads) {
-        if (payload.persistentId_ == sameGroupInfo1.persistentId_) {
-            hasPid9101 = true;
-        }
-        if (payload.persistentId_ == sameGroupInfo2.persistentId_) {
-            hasPid9102 = true;
-        }
+        if (payload.persistentId_ == sameGroupInfo1.persistentId_) hasPid9101 = true;
+        if (payload.persistentId_ == sameGroupInfo2.persistentId_) hasPid9102 = true;
         EXPECT_EQ(payload.bundleName_, sameGroupInfo1.bundleName_);
         EXPECT_EQ(payload.appIndex_, sameGroupInfo1.appIndex_);
     }
