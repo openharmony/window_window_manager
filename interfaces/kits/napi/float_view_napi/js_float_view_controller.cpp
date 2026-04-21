@@ -387,6 +387,7 @@ napi_value JsFloatViewController::OnGetWindowProperties(napi_env env, napi_callb
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "controller is null.");
     }
+    auto templateType = static_cast<uint32_t>(fvController->GetTemplateType());
     auto state = fvController->GetCurState();
     if (!fvController->IsStateWithWindow(state)) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_FV_INVALID_STATE,
@@ -398,7 +399,7 @@ napi_value JsFloatViewController::OnGetWindowProperties(napi_env env, napi_callb
             "window is null.");
     }
     auto windowInfo = fvController->GetWindowInfo();
-    auto jsObject = CreateJsFvWindowInfoObject(env, fvWindow, windowInfo, state);
+    auto jsObject = CreateJsFloatViewPropertiesObject(env, templateType, fvWindow, windowInfo, state);
     if (jsObject == nullptr) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "Failed to create js object.");
