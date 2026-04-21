@@ -22,6 +22,7 @@
 #include "session_manager/include/zidl/pip_change_listener_stub.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_interface.h"
 #include "session_manager/include/zidl/scene_session_manager_lite_proxy.h"
+#include "session_manager/include/zidl/session_lifecycle_listener_stub.h"
 #include "session_manager/include/zidl/session_router_stack_listener_stub.h"
 #include "window_manager_agent.h"
 #include "ws_common.h"
@@ -970,6 +971,13 @@ public:
     void OnPipStart(int32_t windowId) override {};
 };
 
+class MockSessionLifecycleListenerForLiteProxyTest : public SessionLifecycleListenerStub {
+public:
+    void OnLifecycleEvent(SessionLifecycleEvent event, const LifecycleEventPayload& payload) override {}
+    void OnBatchLifecycleEvent(const std::vector<LifecycleEventPayload>& payloads) override {}
+    void OnAppInstanceLifecycleEvent(const LifecycleEventPayload& payload) override {}
+};
+
 HWTEST_F(sceneSessionManagerLiteProxyTest, RegPipChgListenerByScreenId_Success, TestSize.Level1)
 {
     sptr<IPipChangeListener> listener = sptr<MockPipChgListener>::MakeSptr();
@@ -1114,6 +1122,93 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_ReadIntFaile
 {
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetSessionInfoWithDisplay, TestSize.Level1)
+{
+    SessionInfoBean sessionInfo;
+    AAFwk::DisplayInfo displayInfo;
+
+    sptr<SceneSessionManagerLiteProxy> nullProxy = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    ASSERT_NE(nullProxy, nullptr);
+    auto ret = nullProxy->GetSessionInfo("", 1, sessionInfo, displayInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->GetSessionInfo("", 1, sessionInfo, displayInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteString16ErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->GetSessionInfo("", 1, sessionInfo, displayInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->GetSessionInfo("", 1, sessionInfo, displayInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    iRemoteObjectMocker_->SetRequestResult(1);
+    ret = sceneSessionManagerLiteProxy_->GetSessionInfo("", 1, sessionInfo, displayInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+    iRemoteObjectMocker_->SetRequestResult(0);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    ret = sceneSessionManagerLiteProxy_->GetSessionInfo("", 1, sessionInfo, displayInfo);
+    EXPECT_EQ(ret, WSError::WS_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, RegisterSessionLifecycleListenerByAppInstance, TestSize.Level1)
+{
+    sptr<ISessionLifecycleListener> listener = sptr<MockSessionLifecycleListenerForLiteProxyTest>::MakeSptr();
+    ASSERT_NE(listener, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    auto ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        nullptr, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        listener, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_OK);
+
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        listener, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteRemoteObjectErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        listener, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        listener, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        listener, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    iRemoteObjectMocker_->SetRequestResult(1);
+    ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        listener, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker_->SetRequestResult(0);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ret = sceneSessionManagerLiteProxy_->RegisterSessionLifecycleListenerByAppInstance(
+        listener, "bundle", 1, "key");
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
 }
 }
 }
