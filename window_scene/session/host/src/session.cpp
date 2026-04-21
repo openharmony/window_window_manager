@@ -4807,7 +4807,7 @@ int32_t Session::GetRestartCallerPersistentId() const
     return sessionInfo_.restartCallerPersistentId_;
 }
 
-void Session::SetRestartCallerPersistentId(bool nativeHideWindow)
+void Session::SetNativeHideWindow(bool nativeHideWindow)
 {
     sessionInfo_.nativeHideWindow_ = nativeHideWindow;
 }
@@ -4815,11 +4815,6 @@ void Session::SetRestartCallerPersistentId(bool nativeHideWindow)
 bool Session::GetNativeHideWindow() const
 {
     return sessionInfo_.nativeHideWindow_;
-}
-
-void Session::updateNativeHideWindowByAbilityInfo(bool nativeHideWindow)
-{
-    sessionInfo_.nativeHideWindow_ = nativeHideWindow;
 }
 
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
