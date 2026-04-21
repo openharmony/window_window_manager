@@ -73,6 +73,9 @@ private:
     int HandleNotifyTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifySingleHandTransformChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyGlobalScaledRectChange(MessageParcel& data, MessageParcel& reply);
+    int HandleUpdateAttachedWindowLimits(MessageParcel& data, MessageParcel& reply);
+    int HandleRemoveAttachedWindowLimits(MessageParcel& data, MessageParcel& reply);
+    int HandleSyncAllAttachedLimitsToChild(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyDialogStateChange(MessageParcel& data, MessageParcel& reply);
     int HandleSetPipActionEvent(MessageParcel& data, MessageParcel& reply);
     int HandleSetPiPControlEvent(MessageParcel& data, MessageParcel& reply);
@@ -111,8 +114,8 @@ private:
     int HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAppHookWindowInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleSetForceSplitEnable(MessageParcel& data, MessageParcel& reply);
     int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetSceneNodeCount(MessageParcel& data, MessageParcel& reply);
     int HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply);
