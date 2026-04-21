@@ -170,6 +170,7 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "TitleButtonEventType", CreateTitleButtonEventType(env));
     napi_set_named_property(env, exportObj, "FloatingBallTextUpdateAnimationType",
         CreateJsSessionFbTextUpdateAnimationType(env));
+    napi_set_named_property(env, exportObj, "FloatViewTemplateType", CreateJsSessionFloatViewTemplateType(env));
 
     const char* moduleName = "JsSceneSessionManager";
     BindNativeFunction(env, exportObj, "setBehindWindowFilterEnabled",
@@ -3418,7 +3419,7 @@ napi_value JsSceneSessionManager::OnSyncFloatViewLimits(napi_env env, napi_callb
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-    FloatViewLimits limits;
+    std::map<uint32_t, FloatViewLimits> limits {};
     if (!ConvertFloatViewLimitsFromJs(env, jsLimits, limits)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to FloatViewLimits");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
@@ -6427,27 +6428,25 @@ void JsSceneSessionManager::RegisterGetFloatViewLimitCallback()
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "RegisterGetFloatViewLimitCallback called");
     SceneSessionManager::GetInstance().RegisterGetFloatViewLimitCallback(
-        [this](FloatViewLimits& limit) -> bool {
+        [this](std::map<uint32_t, FloatViewLimits>& limit) -> bool {
             return this->OnRegisterGetFloatViewLimitCallback(limit);
     });
 }
 
-bool JsSceneSessionManager::OnRegisterGetFloatViewLimitCallback(FloatViewLimits& fvlimit)
+bool JsSceneSessionManager::OnRegisterGetFloatViewLimitCallback(std::map<uint32_t, FloatViewLimits>& fvlimit)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "OnRegisterGetFloatViewLimitCallback called");
-    jsCallBack = GetJSCallback(GET_FLOAT_VIEW_LIMIT_CB);
+    auto jsCallBack = GetJSCallback(GET_FLOAT_VIEW_LIMIT_CB);
     if (jsCallBack == nullptr) {
-        TLOGNE(WmsLogTag::WMS_SYSTEM, "%{public}s, jsCallBack is nullptr", where);
-        return;
+        TLOGNE(WmsLogTag::WMS_SYSTEM, "jsCallBack is nullptr");
+        return false;
     }
     napi_value result = nullptr;
     napi_value argv[] = {};
-    napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, &result);
-    FloatViewLimits limit;
-    if (!ConvertFloatViewLimitsFromJs(env, result, limit)) {
+    napi_call_function(env_, NapiGetUndefined(env_), jsCallBack->GetNapiValue(), 0, argv, &result);
+    if (!ConvertFloatViewLimitsFromJs(env_, result, fvlimit)) {
         return false;
     }
-    fvlimit = limit;
     return true;
 }
 
