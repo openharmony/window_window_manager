@@ -4298,7 +4298,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
                 persistentId, static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
             auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
             auto retCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sceneSessionInfo, isDelegator,
-                    static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+                    static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), static_cast<int32_t>(reason));
             if (retCode != ERR_OK) {
                 RecordLifeCycleExceptionEvent(sceneSession, retCode,
                     WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize ability failed");

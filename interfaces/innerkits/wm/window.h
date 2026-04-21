@@ -1688,7 +1688,7 @@ public:
     /**
      * @brief Pause window
      */
-    virtual void Pause() {}
+    virtual void Pause(bool isGamePreLaunch = false) {}
 
     /**
      * @brief Hide window

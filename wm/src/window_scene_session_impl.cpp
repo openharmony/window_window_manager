@@ -2229,20 +2229,18 @@ void WindowSceneSessionImpl::Resume(bool isGamePreLaunch)
         isColdStart_, isDidForeground_, isGamePreLaunch);
     isDidForeground_ = true;
     isColdStart_ = false;
-    SetIsGamePreLaunch(isGamePreLaunch);
     NotifyAfterLifecycleResumed(isGamePreLaunch);
 }
 
-void WindowSceneSessionImpl::Pause()
+void WindowSceneSessionImpl::Pause(bool isGamePreLaunch)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d isGamePreLaunch_: %{public}d",
-        isColdStart_, isGamePreLaunch_);
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d isGamePreLaunch: %{public}d",
+        isColdStart_, isGamePreLaunch);
     isColdStart_ = false;
     NotifyAfterLifecyclePaused();
     auto hostSession = GetHostSession();
-    if (isGamePreLaunch_ && hostSession) {
+    if (isGamePreLaunch && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_CLEAR_GAME_PRELAUNCH_FLAG);
-        ClearIsGamePreLaunch();
     }
 }
 
