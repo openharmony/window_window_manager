@@ -1321,6 +1321,48 @@ HWTEST_F(ScreenSessionDumperTest, TriggerSecondarySensor_001, TestSize.Level1)
     LOG_SetCallback(nullptr);
 }
 
+/**
+ * @tc.name: DumpScreenPropertyById_OutputFormat
+ * @tc.desc: test DumpScreenPropertyById output contains expected property fields
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById_OutputFormat, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->dumpInfo_ = "";
+    ScreenId id = 0;
+    dumper->DumpScreenPropertyById(id);
+    EXPECT_TRUE(dumper->dumpInfo_.find("[SCREEN PROPERTY]") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("Rotation:") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("DisplayOrientation:") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("Bounds<L,T,W,H>:") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("PhyBounds<L,T,W,H>:") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("AvailableArea<X,Y,W,H>") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("DefaultDeviceRotationOffset") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("DisplayGroupId") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("MainDisplayIdOfGroup") != std::string::npos);
+}
+
+/**
+ * @tc.name: DumpScreenPropertyById_ScreenId5
+ * @tc.desc: test DumpScreenPropertyById with screen id 5
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById_ScreenId5, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->dumpInfo_ = "";
+    ScreenId id = 5;
+    dumper->DumpScreenPropertyById(id);
+    EXPECT_TRUE(dumper->dumpInfo_.find("[SCREEN PROPERTY]") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("Bounds<L,T,W,H>:") != std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("PhyBounds<L,T,W,H>:") != std::string::npos);
+}
+
 #ifdef FOLD_ABILITY_ENABLE
 /**
  * @tc.name: DumpFoldCreaseRegion
@@ -1333,6 +1375,23 @@ HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion, TestSize.Level1)
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->DumpFoldCreaseRegion();
+    ASSERT_EQ(dumper->fd_, 1);
+}
+
+/**
+ * @tc.name: DumpFoldCreaseRegion_NullCreaseRegion
+ * @tc.desc: test DumpFoldCreaseRegion when creaseRegion is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion_NullCreaseRegion, TestSize.Level1)
+{
+    int fd = 1;
+    std::vector<std::u16string> args = {u"-h"};
+    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
+    dumper->dumpInfo_ = "";
+    dumper->DumpFoldCreaseRegion();
+    EXPECT_TRUE(dumper->dumpInfo_.find("CurrentCreaseRects") == std::string::npos);
+    EXPECT_TRUE(dumper->dumpInfo_.find("LiveCreaseRects") == std::string::npos);
     ASSERT_EQ(dumper->fd_, 1);
 }
 
