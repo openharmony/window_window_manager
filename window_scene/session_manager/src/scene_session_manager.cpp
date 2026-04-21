@@ -19923,6 +19923,9 @@ bool SceneSessionManager::IsAncestorChainForeground(const sptr<SceneSession>& se
                 session->GetPersistentId(), ancestor->GetPersistentId());
             return false;
         }
+        if (ancestor->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+            return true;
+        }
         ancestor = ancestor->GetParentSession();
     }
     return true;
