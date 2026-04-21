@@ -3258,7 +3258,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!IsFloatNavigationAvoidAreaEnabled(type) {
+    if (!IsFloatNavigationAvoidAreaEnabled(type)) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
         return WMError::WM_DO_NOTHING;
     }
