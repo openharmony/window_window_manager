@@ -21,6 +21,7 @@
             OHOS::Rosen::SessionManager::UnregisterWMSConnectionChangedListener*;
             OHOS::Rosen::SessionManager::RegisterWindowManagerRecoverCallbackFunc*;
             OHOS::Rosen::SessionManager::NotifySetSpecificWindowZIndex*;
+            OHOS::Rosen::SessionManager::GetMockSessionManagerServiceProxy*;
         };
     local:
     *;

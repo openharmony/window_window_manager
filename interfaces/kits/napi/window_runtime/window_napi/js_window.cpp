@@ -68,8 +68,11 @@ static std::mutex g_mutex;
 static int g_ctorCnt = 0;
 static int g_dtorCnt = 0;
 static int g_finalizerCnt = 0;
-JsWindow::JsWindow(const sptr<Window>& window)
-    : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>())
+std::atomic<uint32_t> JsWindow::orientationExecutionResultPromiseIdGenerator_ = 0;
+std::unordered_map<uint32_t, std::shared_ptr<AbilityRuntime::NapiAsyncTask>> JsWindow::orientationExecutionResultPromiseMap_;
+std::mutex JsWindow::orientationExecutionResultMapMutex_;
+JsWindow::JsWindow(const sptr<Window>& window, napi_env env)
+    : windowToken_(window), registerManager_(std::make_unique<JsWindowRegisterManager>()), env_(env)
 {
     NotifyNativeWinDestroyFunc func = [this](const std::string& windowName) {
         {
@@ -84,7 +87,13 @@ JsWindow::JsWindow(const sptr<Window>& window)
         windowToken_ = nullptr;
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window %{public}s in js window", windowName.c_str());
     };
+    NotifyOrientationExecutionResultFunc orientationExecutionResultFunc = [this](
+        uint32_t promiseId, OrientationExecutionResult result) {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "Notify orientation result [%{public}u, %{public}u]", promiseId, result);
+        this->NotifyOrientationExecutionResult(promiseId, result);
+    };
     windowToken_->RegisterWindowDestroyedListener(func);
+    windowToken_->RegisterNotifyOrientationExecutionResultFunc(orientationExecutionResultFunc);
     windowName_ = windowToken_->GetWindowName();
     TLOGI(WmsLogTag::WMS_LIFE, "window: %{public}s, ctorCnt: %{public}d", windowName_.c_str(), ++g_ctorCnt);
 }
@@ -94,6 +103,7 @@ JsWindow::~JsWindow()
     TLOGI(WmsLogTag::WMS_LIFE, "window: %{public}s, dtorCnt: %{public}d", windowName_.c_str(), ++g_dtorCnt);
     if (windowToken_ != nullptr) {
         windowToken_->UnregisterWindowDestroyedListener();
+        windowToken_->UnregisterNotifyOrientationExecutionResultFunc();
     }
     windowToken_ = nullptr;
 }
@@ -710,6 +720,17 @@ napi_value JsWindow::SetPreferredOrientation(napi_env env, napi_callback_info in
         "[window][setPreferredOrientation]msg: Window is nullptr.");
 }
 
+napi_value JsWindow::SetPreferredOrientationWithResult(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::DEFAULT, "SetPreferredOrientationWithResult");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    if (me != nullptr) {
+        return me->OnSetPreferredOrientationWithResult(env, info);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        "[window][SetPreferredOrientationWithResult]msg: Window is nullptr.");
+}
+
 napi_value JsWindow::GetPreferredOrientation(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_ROTATION, "GetPreferredOrientation");
@@ -995,6 +1016,30 @@ napi_value JsWindow::GetWindowLimitsVP(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetWindowLimitsVP(env, info) : nullptr;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::AttachLayoutToParentWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    if (me != nullptr) {
+        return me->OnAttachToParentWindow(env, info);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        "[window][attachLayoutToParentWindow]msg: Window is nullptr.");
+}
+
+/** @note @window.layout */
+napi_value JsWindow::DetachLayoutToParentWindow(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    if (me != nullptr) {
+        return me->OnDetachLayoutToParentWindow(env, info);
+    }
+    return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+        "[window][detachLayoutToParentWindow]msg: Window is nullptr.");
 }
 
 /** @note @window.layout */
@@ -1289,6 +1334,20 @@ napi_value JsWindow::GetGestureBackEnabled(napi_env env, napi_callback_info info
     TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnGetGestureBackEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetFloatNavigationAvoidAreaEnabled(env, info) : nullptr;
+}
+
+napi_value JsWindow::IsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_IMMS, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnIsFloatNavigationAvoidAreaEnabled(env, info) : nullptr;
 }
 
 napi_value JsWindow::GetWindowDensityInfo(napi_env env, napi_callback_info info)
@@ -4059,14 +4118,11 @@ napi_value JsWindow::OnIsWindowShowingSync(napi_env env, napi_callback_info info
     return CreateJsValue(env, state);
 }
 
-napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info info)
+OrientationParams JsWindow::ValidateOrientationParams(napi_env env, size_t argc, napi_value* argv, const std::string& funcName)
 {
     WmErrorCode errCode = WmErrorCode::WM_OK;
     Orientation requestedOrientation = Orientation::UNSPECIFIED;
-    std::string errMsg = "[window][setPreferredOrientation]msg: ";
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    std::string errMsg = "[window][" + funcName + "]msg: ";
     if (argc < 1) { // 1: params num
         TLOGE(WmsLogTag::WMS_ROTATION, "Argc is invalid: %{public}zu", argc);
         errCode = WmErrorCode::WM_ERROR_INVALID_PARAM;
@@ -4095,10 +4151,30 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             }
         }
     }
-    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsg);
-    }
+    OrientationParams params;
+    params.errCode = errCode;
+    params.requestedOrientation = requestedOrientation;
+    params.errMsg = errMsg;
+    return params;
+}
 
+void JsWindow::RemoveOrientationPromiseFromMap(uint32_t promiseId)
+{
+    std::lock_guard<std::mutex> lock(orientationExecutionResultMapMutex_);
+    orientationExecutionResultPromiseMap_.erase(promiseId);
+}
+
+napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info info)
+{
+    size_t argc = 4;
+    napi_value argv[4] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientation");
+    WmErrorCode errCode = params.errCode;
+    Orientation requestedOrientation = params.requestedOrientation;
+    if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
+    }
     napi_value lastParam = (argc <= 1) ? nullptr :
         ((argv[1] != nullptr && GetType(env, argv[1]) == napi_function) ? argv[1] : nullptr);
     napi_value result = nullptr;
@@ -4132,6 +4208,94 @@ napi_value JsWindow::OnSetPreferredOrientation(napi_env env, napi_callback_info 
             "[window][setPreferredOrientation]msg: Send event failed."));
     }
     return result;
+}
+
+napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_callback_info info)
+{
+    std::string errMsgPrefix = "[window][setPreferredOrientationWithResult]msg: ";
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    OrientationParams params = ValidateOrientationParams(env, argc, argv, "setPreferredOrientationWithResult");
+    WmErrorCode errCode = params.errCode;
+    Orientation requestedOrientation = params.requestedOrientation;
+    if (errCode != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, params.errMsg);
+    }
+    napi_value lastParam = nullptr;
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
+    uint32_t promiseId = ++orientationExecutionResultPromiseIdGenerator_;
+    {
+        std::lock_guard<std::mutex> lock(orientationExecutionResultMapMutex_);
+        orientationExecutionResultPromiseMap_[promiseId] = napiAsyncTask;
+    }
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, errMsgPrefix, requestedOrientation, env,
+            promiseId, task = napiAsyncTask, where = __func__] {
+        auto weakWindow = windowToken.promote();
+        if (weakWindow == nullptr) {
+            task->Reject(env, JsErrUtils::CreateJsError(
+                env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, errMsgPrefix + "Window is nullptr."));
+            RemoveOrientationPromiseFromMap(promiseId);
+            return;
+        }
+        if (requestedOrientation == Orientation::INVALID) {
+            task->Reject(env, JsErrUtils::CreateJsError(
+                env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsgPrefix + "Invalid parameter value range."));
+            RemoveOrientationPromiseFromMap(promiseId);
+            return;
+        }
+        WMError ret = weakWindow->SetPreferredOrientationWithResult(requestedOrientation, promiseId);
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s end, window [%{public}u, %{public}s] orientation=%{public}u"
+            " primiseId=%{public}d result=%{public}d", where, weakWindow->GetWindowId(),
+            weakWindow->GetWindowName().c_str(), static_cast<uint32_t>(requestedOrientation), promiseId, ret);
+        WmErrorCode errCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
+        if (errCode != WmErrorCode::WM_OK) {
+            task->Reject(env, JsErrUtils::CreateJsError( env, errCode, errMsgPrefix + "failed."));
+            RemoveOrientationPromiseFromMap(promiseId);
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientationWithResult") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            errMsgPrefix + "Send event failed."));
+    }
+    return result;
+}
+
+void JsWindow::NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult executionResult)
+{
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask;
+    {
+        std::lock_guard<std::mutex> lock(orientationExecutionResultMapMutex_);
+        auto it = orientationExecutionResultPromiseMap_.find(promiseId);
+        if (it == orientationExecutionResultPromiseMap_.end()) {
+            TLOGE(WmsLogTag::WMS_ROTATION, "promise not found for id: %{public}u", promiseId);
+            return;
+        }
+        napiAsyncTask = it->second;
+        orientationExecutionResultPromiseMap_.erase(it);
+    }
+    const char* const where = __func__;
+    auto asyncTask = [task = napiAsyncTask, env = env_, executionResult, where] {
+        TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s result=%{public}u", where, executionResult);
+        if (env == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s env is null", where);
+            return;
+        }
+        napi_value objValue = nullptr;
+        napi_create_object(env, &objValue);
+        if (objValue == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "%{public}s Failed to get object", where);
+            return;
+        }
+        napi_set_named_property(env, objValue, "executionResult",
+            CreateJsValue(env, static_cast<uint32_t>(executionResult)));
+        task->Resolve(env, objValue);
+    };
+    if (napi_send_event(env_, asyncTask, napi_eprio_high, "NotifyOrientationExecutionResult") != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env_, JsErrUtils::CreateJsError(env_, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][NotifyOrientationExecutionResult]msg: Send event failed."));
+    }
 }
 
 napi_value JsWindow::OnGetPreferredOrientation(napi_env env, napi_callback_info info)
@@ -5165,10 +5329,6 @@ napi_value JsWindow::OnSetTouchable(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
 {
-    if (!Permission::IsSystemCalling()) {
-        TLOGE(WmsLogTag::WMS_EVENT, "OnSetTouchableAreas permission denied!");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
-    }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "WindowToken_ is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
@@ -5190,6 +5350,13 @@ napi_value JsWindow::OnSetTouchableAreas(napi_env env, napi_callback_info info)
             TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setTouchableAreas]msg:window is null"));
+            return;
+        }
+        if (!Permission::IsSystemCalling() &&
+            !Permission::CheckSelfPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
+            TLOGNE(WmsLogTag::WMS_EVENT, "OnSetTouchableAreas permission denied!");
+            task->Reject(
+                env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NO_PERMISSION, "OnSetTouchableAreas failed"));
             return;
         }
         WMError ret = weakWindow->SetTouchHotAreas(touchableAreas);
@@ -7495,7 +7662,7 @@ __attribute__((no_sanitize("cfi")))
     napi_create_object(env, &objValue);
 
     WLOGI("CreateJsWindow %{public}s", windowName.c_str());
-    std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window);
+    std::unique_ptr<JsWindow> jsWindow = std::make_unique<JsWindow>(window, env);
     napi_wrap(env, objValue, jsWindow.release(), JsWindow::Finalizer, nullptr, nullptr);
 
     BindFunctions(env, objValue, "JsWindow");
@@ -7566,6 +7733,77 @@ bool JsWindow::ParseWindowLimits(napi_env env, napi_value jsObject, WindowLimits
     windowLimits.pixelUnit_ = pixelUnit;
     return true;
 }
+
+bool JsWindow::ParseWindowAnchorInfo(napi_env env, napi_value jsObject, WindowAnchorInfo& windowAnchorInfo)
+{
+    int32_t data = 0;
+    int32_t defaultValue = 0;
+    WindowAnchor windowAnchor = WindowAnchor::TOP_START;
+    if (GetType(env, jsObject) != napi_object) {
+        return false;
+    }
+    if (!ParseJsValueOrGetDefault(jsObject, env, "anchorType", windowAnchor, WindowAnchor::TOP_START)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to anchorType");
+        return false;
+    }
+    windowAnchorInfo.windowAnchor_ = windowAnchor;
+    auto parseField = [](napi_env& env, const char* fieldName, int32_t& data, auto& field, auto& defValue,
+        napi_value& jsObject) -> bool {
+        if (!ParseJsValueOrGetDefault(jsObject, env, fieldName, data, defValue)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to %{public}s", fieldName);
+            return false;
+        }
+        field = data;
+        return true;
+    };
+
+    if (!parseField(env, "offsetX", data, windowAnchorInfo.offsetX_, defaultValue, jsObject)) {
+        return false;
+    }
+    if (!parseField(env, "offsetY", data, windowAnchorInfo.offsetY_, defaultValue, jsObject)) {
+        return false;
+    }
+    return true;
+}
+
+bool JsWindow::ParseWindowAttachOptions(napi_env env, napi_value jsObject,
+    WindowAnchorInfo::AttachOptions& subWindowAttachOptions)
+{
+    if (GetType(env, jsObject) != napi_object) {
+        return false;
+    }
+    auto parseField = [](napi_env& env, const char* fieldName, auto& data, auto& field, const auto& defValue,
+            napi_value& jsObject) -> bool {
+        if (!ParseJsValueOrGetDefault(jsObject, env, fieldName, data, defValue)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to %{public}s", fieldName);
+            return false;
+        }
+        field = data;
+        return true;
+    };
+
+    std::string data = "";
+    std::string defaultValue = "";
+    if (!parseField(env, "currentLayoutMode", data, subWindowAttachOptions.currentLayoutMode, defaultValue, jsObject)) {
+        return false;
+    }
+
+    const bool defaultBoolValue = false;
+    bool boolData = false;
+    if (!parseField(env, "isIntersectedHeightLimit", boolData, subWindowAttachOptions.isIntersectedHeightLimit,
+        defaultBoolValue, jsObject)) {
+        return false;
+    }
+
+    boolData = defaultBoolValue;
+    if (!parseField(env, "isIntersectedWidthLimit", boolData, subWindowAttachOptions.isIntersectedWidthLimit,
+        defaultBoolValue, jsObject)) {
+        return false;
+    }
+
+    return true;
+}
+
 
 static NapiAsyncTask::ExecuteCallback GetEnableDragExecuteCallback(bool enableDrag,
     const wptr<Window>& weakToken, const std::shared_ptr<WmErrorCode>& errCodePtr)
@@ -7778,6 +8016,194 @@ napi_value JsWindow::OnGetWindowLimitsVP(napi_env env, napi_callback_info info)
     } else {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][getWindowLimitsVP]msg: Nullptr");
     }
+}
+
+void JsWindow::CleanUpCallbackReferences(napi_env env, napi_ref sizeChangeCallbackRef,
+    napi_ref statusChangeCallbackRef)
+{
+    if (sizeChangeCallbackRef) {
+        napi_delete_reference(env, sizeChangeCallbackRef);
+    }
+    if (statusChangeCallbackRef) {
+        napi_delete_reference(env, statusChangeCallbackRef);
+    }
+}
+
+WmErrorCode JsWindow::RegisterParentWindowCallback(napi_env env, napi_ref callbackRef,
+    const char* callbackName)
+{
+    if (callbackRef == nullptr) {
+        return WmErrorCode::WM_OK; // No callback to register is not an error
+    }
+
+    napi_value callback = nullptr;
+    napi_get_reference_value(env, callbackRef, &callback);
+    if (callback == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    WmErrorCode ret = registerManager_->RegisterListener(windowToken_,
+        callbackName, CaseType::CASE_WINDOW, env, callback, nullptr);
+    return ret;
+}
+
+/** @note @window.layout */
+napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (!Permission::IsSystemCalling()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
+            "[window][attachToParentWindow]msg: not system application");
+    }
+    WindowAnchorInfo acceptAnchorInfo = {true, true, WindowAnchor::TOP_START, 0, 0};
+    if(argc > INDEX_ZERO && !ParseWindowAnchorInfo(env, argv[INDEX_ZERO], acceptAnchorInfo)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to anchorInfo");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to anchorInfo");
+    }
+    WindowAnchorInfo::AttachOptions windowAttachOptions = {""};
+    if (argc > INDEX_ONE && !ParseWindowAttachOptions(env, argv[INDEX_ONE], windowAttachOptions)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to windowAttachOptions");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to attachOptions");
+    }
+    napi_value sizeChangeCallback = nullptr;
+    napi_status sizeStatus = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowSizeChangeCallback",
+        &sizeChangeCallback);
+    if (sizeStatus != napi_ok) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to sizeChangeCallback");
+    }
+    napi_value statusChangeCallback = nullptr;
+    napi_status statusChange = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowStatusChangeCallback",
+        &statusChangeCallback);
+    if(statusChange != napi_ok) {
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+                "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to statusChangeCallback");
+    }
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    acceptAnchorInfo.attachOptions.currentLayoutMode = windowAttachOptions.currentLayoutMode;
+    acceptAnchorInfo.attachOptions.isIntersectedHeightLimit = windowAttachOptions.isIntersectedHeightLimit;
+    acceptAnchorInfo.attachOptions.isIntersectedWidthLimit = windowAttachOptions.isIntersectedWidthLimit;
+    acceptAnchorInfo.isFromAttachOrDetach_ = true;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offsetY:%{public}d, "
+        "currentLayoutMode:%{public}s, isIntersectedHeightLimit:%{public}d, isIntersectedWidthLimit:%{public}d",
+        acceptAnchorInfo.windowAnchor_, acceptAnchorInfo.offsetX_, acceptAnchorInfo.offsetY_,
+        acceptAnchorInfo.attachOptions.currentLayoutMode.c_str(),
+        acceptAnchorInfo.attachOptions.isIntersectedHeightLimit,
+        acceptAnchorInfo.attachOptions.isIntersectedWidthLimit);
+    napi_ref sizeChangeCallbackRef = nullptr;
+    if (sizeChangeCallback != nullptr) {
+        napi_valuetype valueType;
+        napi_typeof(env, sizeChangeCallback, &valueType);
+        if (valueType == napi_function) {
+            napi_create_reference(env, sizeChangeCallback, 1, &sizeChangeCallbackRef);
+        }
+    }
+    napi_ref statusChangeCallbackRef = nullptr;
+    if (statusChangeCallback != nullptr) {
+        napi_valuetype valueType;
+        napi_typeof(env, statusChangeCallback, &valueType);
+        if (valueType == napi_function) {
+            napi_create_reference(env, statusChangeCallback, 1, &statusChangeCallbackRef);
+        }
+    }
+    auto asyncTask = [this, weakToken = wptr(windowToken_), task = napiAsyncTask, env, acceptAnchorInfo, where,
+        sizeChangeCallbackRef, statusChangeCallbackRef]() {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
+            CleanUpCallbackReferences(env, sizeChangeCallbackRef, statusChangeCallbackRef);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][attachLayoutToParentWindow]msg: Window is nullptr."));
+            return;
+        }
+        WmErrorCode registerSizeChangeRet =
+            RegisterParentWindowCallback(env, sizeChangeCallbackRef, "parentWindowSizeChange");
+        if (registerSizeChangeRet != WmErrorCode::WM_OK) {
+            task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][attachLayoutToParentWindow]msg: Failed to register size change callback listener."));
+        }
+        WmErrorCode registerStatusChangeRet =
+            RegisterParentWindowCallback(env, statusChangeCallbackRef, "parentWindowStatusChange");
+        if (registerStatusChangeRet != WmErrorCode::WM_OK) {
+            task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][attachLayoutToParentWindow]msg: Failed to register status change callback listener."));
+        }
+        CleanUpCallbackReferences(env, sizeChangeCallbackRef, statusChangeCallbackRef);
+
+        if (!WindowHelper::IsSubWindow(window->GetType())) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s only sub window is valid", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                "[window][attachLayoutToParentWindow]msg: Only sub window is valid."));
+            return;
+        }
+
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(acceptAnchorInfo));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s failed, ret %{public}d", where, ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][attachLayoutToParentWindow]msg: attach window anchor failed."));
+        }
+    };
+    napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "attachLayoutToParentWindow");
+    if (status != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][attachLayoutToParentWindow]msg: Send event failed."));
+    }
+    return result;
+}
+
+
+/** @note @window.layout */
+napi_value JsWindow::OnDetachLayoutToParentWindow(napi_env env, napi_callback_info info)
+{
+    WindowAnchorInfo acceptAnchorInfo = {false, false, WindowAnchor::TOP_START, 0, 0};
+    acceptAnchorInfo.attachOptions.currentLayoutMode = "";
+    acceptAnchorInfo.isFromAttachOrDetach_ = true;
+    const char* const where = __func__;
+    napi_value result = nullptr;
+    std::shared_ptr napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    registerManager_->UnregisterListener(windowToken_, "parentWindowSizeChange", CaseType::CASE_WINDOW, env,
+            nullptr);
+    registerManager_->UnregisterListener(windowToken_, "parentWindowStatusChange", CaseType::CASE_WINDOW, env,
+            nullptr);
+    auto asyncTask = [weakToken = wptr(windowToken_), task = napiAsyncTask, env, acceptAnchorInfo, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][detachLayoutToParentWindow]msg: The window is not created or destroyed."));
+            return;
+        }
+        if (!WindowHelper::IsSubWindow(window->GetType())) {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s only sub window is valid", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                "[window][detachLayoutToParentWindow]msg: Only sub window is valid."));
+            return;
+        }
+        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(acceptAnchorInfo));
+        if (ret == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s failed, ret %{public}d", where, ret);
+            task->Reject(env, JsErrUtils::CreateJsError(env, ret,
+                "[window][detachLayoutToParentWindow]msg: attach window anchor failed."));
+        }
+    };
+    napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "detachLayoutToParentWindow");
+    if (status != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][detachLayoutToParentWindow]msg: Send event failed."));
+    }
+    return result;
 }
 
 napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info info)
@@ -9089,6 +9515,70 @@ napi_value JsWindow::OnGetGestureBackEnabled(napi_env env, napi_callback_info in
     return CreateJsValue(env, enable);
 }
 
+napi_value JsWindow::OnSetFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    size_t argc = FOUR_PARAMS_SIZE;
+    napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < INDEX_ONE) {
+        TLOGE(WmsLogTag::WMS_IMMS, "argc is invalid: %{public}zu", argc);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setFloatNavigationAvoidAreaEnabled]msg: Mandatory parameters are left unspecified");
+    }
+    bool enabled = false;
+    if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enabled) != napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enabled");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][setFloatNavigationAvoidanceEnabled]msg: Incorrect parameter types");
+    }
+    napi_value result = nullptr;
+    const char* const where = __func__;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), env, task = napiAsyncTask, enabled, argc, where] {
+        auto window = weakToken.promote();
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][setFloatNavigationAvoidAreaEnabled]msg: The window is not created or destroyed"));
+            return;
+        }
+        auto errCode = WM_JS_TO_ERROR_CODE_MAP.at(window->SetFloatNavigationAvoidAreaEnabled(enabled));
+        if (errCode == WmErrorCode::WM_OK) {
+            task->Resolve(env, NapiGetUndefined(env));
+        } else {
+            TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s failed, ret %{public}d", where, errCode);
+            task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
+                "[window][setFloatNavigationAvoidAreaEnabled]"));
+        }
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high,
+        "OnSetFloatNavigationAvoidAreaEnabled") != napi_status::napi_ok) {
+        TLOGE(WmsLogTag::WMS_IMMS, "napi_send_event failed");
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setFloatNavigationAvoidAreaEnabled]msg: Internal task error"));
+    }
+    return result;
+}
+
+napi_value JsWindow::OnIsFloatNavigationAvoidAreaEnabled(napi_env env, napi_callback_info info)
+{
+    if (windowToken_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_IMMS, "windowToken is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isFloatNavigationAvoidAreaEnabled]msg: The window is not created or destroyed");
+    }
+    bool enable = false;
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetFloatNavigationAvoidAreaEnabled(enable));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_IMMS, "get failed, ret %{public}d", ret);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][isFloatNavigationAvoidAreaEnabled]");
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win [%{public}u, %{public}s] enable %{public}u",
+        windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str(), enable);
+    return CreateJsValue(env, enable);
+}
+
 napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_info info)
 {
     if (windowToken_ == nullptr) {
@@ -9128,6 +9618,13 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         TLOGE(WmsLogTag::WMS_SUB, "device not support");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
             "[window][createSubWindowWithOptions]msg: Device not support."));
+        return NapiGetUndefined(env);
+    }
+    if (windowOption->IsSubWindowZLevelAboveParentLoosened() &&
+        !WindowHelper::IsMainWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_SUB, "SubWindowZLevelAboveParentLoosened property not support");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][createSubWindowWithOptions]msg: SubWindowZLevelAboveParentLoosened property not support."));
         return NapiGetUndefined(env);
     }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
@@ -9994,6 +10491,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "moveWindowTo", moduleName, JsWindow::MoveWindowTo);
     BindNativeFunction(env, object, "moveWindowToAsync", moduleName, JsWindow::MoveWindowToAsync);
     BindNativeFunction(env, object, "moveWindowToGlobal", moduleName, JsWindow::MoveWindowToGlobal);
+    BindNativeFunction(env, object, "attachLayoutToParentWindow", moduleName, JsWindow::AttachLayoutToParentWindow);
+    BindNativeFunction(env, object, "detachLayoutToParentWindow", moduleName, JsWindow::DetachLayoutToParentWindow);
     BindNativeFunction(env, object, "moveWindowToGlobalDisplay", moduleName, JsWindow::MoveWindowToGlobalDisplay);
     BindNativeFunction(env, object, "getGlobalRect", moduleName, JsWindow::GetGlobalScaledRect);
     BindNativeFunction(env, object, "resetSize", moduleName, JsWindow::Resize);
@@ -10069,6 +10568,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "dump", moduleName, JsWindow::Dump);
     BindNativeFunction(env, object, "setForbidSplitMove", moduleName, JsWindow::SetForbidSplitMove);
     BindNativeFunction(env, object, "setPreferredOrientation", moduleName, JsWindow::SetPreferredOrientation);
+    BindNativeFunction(env, object, "setPreferredOrientationWithResult", moduleName, JsWindow::SetPreferredOrientationWithResult);
     BindNativeFunction(env, object, "getPreferredOrientation", moduleName, JsWindow::GetPreferredOrientation);
     BindNativeFunction(env, object, "convertOrientationAndRotation",
         moduleName, JsWindow::ConvertOrientationAndRotation);
@@ -10146,6 +10646,10 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "getParentWindow", moduleName, JsWindow::GetParentWindow);
     BindNativeFunction(env, object, "setGestureBackEnabled", moduleName, JsWindow::SetGestureBackEnabled);
     BindNativeFunction(env, object, "isGestureBackEnabled", moduleName, JsWindow::GetGestureBackEnabled);
+    BindNativeFunction(env, object, "setFloatNavigationAvoidAreaEnabled", moduleName,
+        JsWindow::SetFloatNavigationAvoidAreaEnabled);
+    BindNativeFunction(env, object, "isFloatNavigationAvoidAreaEnabled", moduleName,
+        JsWindow::IsFloatNavigationAvoidAreaEnabled);
     BindNativeFunction(env, object, "getWindowDensityInfo", moduleName, JsWindow::GetWindowDensityInfo);
     BindNativeFunction(env, object, "setDefaultDensityEnabled", moduleName, JsWindow::SetDefaultDensityEnabled);
     BindNativeFunction(env, object, "isMainWindowFullScreenAcrossDisplays", moduleName,

@@ -81,6 +81,7 @@ public:
     virtual void NotifyDisplayEvent(DisplayEvent event);
     virtual bool SetFreeze(std::vector<DisplayId> displayIds, bool isFreeze);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
+    virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId, bool isGetActualInfo);
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId);
     virtual DMError GetExpandAvailableArea(DisplayId displayId, DMRect& area);
     virtual DMError GetAvailableArea(DisplayId displayId, DMRect& area);
@@ -91,6 +92,7 @@ public:
     virtual bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     virtual bool IsFoldable();
     virtual bool IsCaptured();
+    virtual bool IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList);
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);

@@ -44,9 +44,6 @@ ohos_static_library("libwm_static") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
   }
   include_dirs = [
     "../utils/include",
@@ -63,6 +60,10 @@ ohos_static_library("libwm_static") {
     "src/floating_ball_controller.cpp",
     "src/floating_ball_manager.cpp",
     "src/floating_ball_option.cpp",
+    "src/float_view_controller.cpp",
+    "src/float_view_manager.cpp",
+    "src/float_view_option.cpp",
+    "src/float_window_manager.cpp",
     "src/future_callback.cpp",
     "src/lifecycle_future_callback.cpp",
     "src/load_intention_event.cpp",
@@ -205,6 +206,7 @@ ohos_shared_library("libwm") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   include_dirs = [
     "../utils/include",
@@ -221,6 +223,10 @@ ohos_shared_library("libwm") {
     "src/floating_ball_controller.cpp",
     "src/floating_ball_manager.cpp",
     "src/floating_ball_option.cpp",
+    "src/float_view_controller.cpp",
+    "src/float_view_manager.cpp",
+    "src/float_view_option.cpp",
+    "src/float_window_manager.cpp",
     "src/future_callback.cpp",
     "src/lifecycle_future_callback.cpp",
     "src/load_intention_event.cpp",
@@ -275,6 +281,10 @@ ohos_shared_library("libwm") {
   ]
 
   public_configs = [ ":libwm_public_config" ]
+
+  if (window_manager_use_sceneboard) {
+    version_script = "libwm.map"
+  }
 
   deps = [
     "${window_base_path}/utils:libwmutil",
@@ -461,11 +471,12 @@ ohos_shared_library("libwm_ndk") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   include_dirs = [
     "${window_base_path}/interfaces/kits/ndk/wm",
-    "${window_base_path}/interfaces/inner_kits/wm",
+    "${window_base_path}/interfaces/innerkits/wm",
   ]
 
   sources = [
@@ -529,6 +540,7 @@ ohos_shared_library("libpip_web") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
   install_enable = true
   sources = [
@@ -610,6 +622,7 @@ ohos_shared_library("libpip_ndk") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   public_configs = [ ":libpip_ndk_public_config" ]
@@ -617,7 +630,7 @@ ohos_shared_library("libpip_ndk") {
   include_dirs = [
     "//foundation/window/window_manager",
     "//foundation/window/window_manager/interfaces/innerkits",
-    "//foundation/window/window_manager/interfaces/inner_kits/wm",
+    "//foundation/window/window_manager/interfaces/innerkits/wm",
     "//foundation/window/window_manager/interfaces/kits/ndk/wm",
     "//foundation/window/window_manager/wm/include",
   ]
@@ -675,6 +688,7 @@ ohos_shared_library("libmmi_client_adapter") {
     cfi_cross_dso = true
     cfi_vcall_icall_only = true
     debug = false
+    cfi_policy = "adaptive"
   }
 
   include_dirs = [

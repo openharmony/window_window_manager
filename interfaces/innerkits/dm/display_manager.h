@@ -247,6 +247,15 @@ public:
     sptr<Display> GetDisplayById(DisplayId displayId);
 
     /**
+     * @brief Get the display object by id and specify whether to get actual info.
+     *
+     * @param displayId Id of the target display.
+     * @param isGetActualInfo Whether to get actual display info.
+     * @return Default display object.
+     */
+    sptr<Display> GetDisplayById(DisplayId displayId, bool isGetActualInfo);
+
+    /**
      * @brief Get the display object by id.Only for PC.
      *
      * @param displayId Id of the target display.
@@ -727,6 +736,14 @@ public:
      * @return true means the device is capture.
      */
     bool IsCaptured();
+
+    /**
+     * @brief Check whether the device is captured by apps in bundle name list.
+     *
+     * @param bundleNameList The list of bundle names to check.
+     * @return true means the device is captured by apps in the list.
+     */
+    bool IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList);
 
     /**
      * @brief Get the current fold status of the foldable device.

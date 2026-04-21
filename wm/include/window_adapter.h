@@ -90,7 +90,8 @@ public:
     virtual WMError ConvertToRelativeCoordinateExtended(const Rect& rect, Rect& newRect, DisplayId& newDisplayId);
     virtual WMError GetUnreliableWindowInfo(int32_t windowId, std::vector<sptr<UnreliableWindowInfo>>& infos);
     virtual WMError ListWindowInfo(const WindowInfoOption& windowInfoOption, std::vector<sptr<WindowInfo>>& infos);
-    virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos);
+    virtual WMError GetAllWindowLayoutInfo(DisplayId displayId, std::vector<sptr<WindowLayoutInfo>>& infos,
+        const WindowInfoOptions& option = WindowInfoOptions());
     virtual WMError GetAllMainWindowInfo(std::vector<sptr<MainWindowInfo>>& infos);
     virtual WMError GetMainWindowSnapshot(const std::vector<int32_t>& windowIds,
         const WindowSnapshotConfiguration& config, const sptr<IRemoteObject>& callback);
@@ -128,6 +129,7 @@ public:
     virtual WMError RaiseWindowToTop(int32_t persistentId);
     virtual WMError ShiftAppWindowFocus(int32_t sourcePersistentId, int32_t targetPersistentId);
     virtual WMError SetSpecificWindowZIndex(WindowType windowType, int32_t zIndex, bool updateMap = true);
+    virtual WMError MoveMainWindowToTargetDisplay(DisplayId displayId, int32_t windowId);
     virtual void CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
         const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
         sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
@@ -178,6 +180,8 @@ public:
     /*
      * Window Recover
      */
+    bool IsWindowManagerServiceProxyValid();
+    bool IsMockSMSProxyAlive();
     void RegisterSessionRecoverCallbackFunc(int32_t persistentId, const SessionRecoverCallbackFunc& callbackFunc);
     void UnregisterSessionRecoverCallbackFunc(int32_t persistentId);
     virtual WMError RecoverAndReconnectSceneSession(const sptr<ISessionStage>& sessionStage,
@@ -226,12 +230,15 @@ public:
     virtual WMError AnimateTo(int32_t windowId, const WindowAnimationProperty& animationProperty,
         const WindowAnimationOption& animationOption);
     WMError NotifySupportRotationRegistered();
-    
+
     /*
      * Window Property
      */
     virtual WMError SetWatermarkImageForApp(const std::shared_ptr<Media::PixelMap>& pixelMap);
     virtual WMError RecoverWatermarkImageForApp();
+    virtual WMError SetScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap, uint32_t priority);
+    virtual WMError CleanScreenWatermarkImage(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    virtual WMError RecoverScreenWatermarkImage();
     virtual WMError NotifyScreenshotEvent(ScreenshotEventType type);
     virtual WMError CreateUIEffectController(const sptr<IUIEffectControllerClient>& controllerClient,
         sptr<IUIEffectController>& controller, int32_t& controllerId);
@@ -253,7 +260,10 @@ public:
     void UnregisterOutlineRecoverCallbackFunc();
     virtual WMError UpdateOutline(const sptr<IRemoteObject>& remoteObject, const OutlineParams& outlineParams);
 
-    sptr<IWindowManager> GetWindowManagerServiceProxy() const;
+    /**
+     * Float View
+     */
+    virtual WMError GetFloatViewLimits(FloatViewLimits &limits);
 
 private:
     friend class sptr<WindowAdapter>;
@@ -280,10 +290,16 @@ private:
     void WindowManagerAndSessionRecover();
     void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
+    void RegisterRecoverCallback();
+    std::string appWatermarkName_;
+    std::string screenWatermarkBundleName_;
+    uint32_t screenWatermarkPriority_ = 0;
+    std::unordered_map<WindowType, int32_t> specificZIndexMap_;
+
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
-    std::string appWatermarkName_;
-    std::unordered_map<WindowType, int32_t> specificZIndexMap_;
+
+    sptr<IWindowManager> GetWindowManagerServiceProxy() const;
 
     mutable std::mutex wmsProxyMutex_;
     sptr<IWindowManager> windowManagerServiceProxy_ = nullptr;
@@ -296,10 +312,10 @@ private:
     std::mutex sessionRecoverCallbackMapMutex_;
 
     // Note: Currently, sptr does not support unordered_map<T, unordered_set<sptr<T>>>.
-    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
-    std::map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentFaultMap_;
+    std::unordered_map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentMap_;
     std::mutex wmAgentMapMutex_;
-    // Agent map both locked by wmAgentMapMutex_
+    std::unordered_map<WindowManagerAgentType, std::set<sptr<IWindowManagerAgent>>> windowManagerAgentFaultMap_;
+    std::mutex wmFaultAgentMapMutex_;
 
     std::mutex effectMutex_;
     std::unordered_map<int32_t, UIEffectRecoverCallbackFunc> uiEffectRecoverCallbackFuncMap_;

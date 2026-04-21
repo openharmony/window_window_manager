@@ -238,8 +238,10 @@ void DisplayAniUtils::CvtDisplayHelper(sptr<Display> display, ani_env* env, ani_
         env, "@ohos.display.display.ScreenShape", static_cast<ani_size>(info->GetScreenShape())));
     if (info->GetDisplaySourceMode() == DisplaySourceMode::MAIN ||
         info->GetDisplaySourceMode() == DisplaySourceMode::EXTEND) {
-        env->Object_SetFieldByName_Long(obj, propName("x").c_str(), info->GetX());
-        env->Object_SetFieldByName_Long(obj, propName("y").c_str(), info->GetY());
+        env->Object_SetFieldByName_Ref(
+            obj, propName("x").c_str(), DisplayAniUtils::CreateOptionalInt(env, static_cast<ani_int>(info->GetX())));
+        env->Object_SetFieldByName_Ref(
+            obj, propName("y").c_str(), DisplayAniUtils::CreateOptionalInt(env, static_cast<ani_int>(info->GetY())));
     } else {
         env->Object_SetFieldByName_Ref(obj, propName("x").c_str(), DisplayAniUtils::CreateAniUndefined(env));
         env->Object_SetFieldByName_Ref(obj, propName("y").c_str(), DisplayAniUtils::CreateAniUndefined(env));
@@ -261,7 +263,7 @@ void DisplayAniUtils::CvtDisplayHelper(sptr<Display> display, ani_env* env, ani_
     }
     if (supportedRefreshRates.size() != 0) {
         ani_array supportedRefreshRatesAni;
-        CreateAniArrayInt(env, hdrFormats.size(), &supportedRefreshRatesAni, supportedRefreshRates);
+        CreateAniArrayInt(env, supportedRefreshRates.size(), &supportedRefreshRatesAni, supportedRefreshRates);
         env->Object_SetFieldByName_Ref(obj, propName("supportedRefreshRates").c_str(),
             static_cast<ani_ref>(supportedRefreshRatesAni));
     }
@@ -449,7 +451,7 @@ ani_object DisplayAniUtils::CreateAniUndefined(ani_env* env)
 static DmErrorCode GetFocusFromAni(ani_env* env, ani_object virtualScreenObj, VirtualScreenOption& option)
 {
     ani_ref supportsFocus = nullptr;
-    if (env->Object_GetPropertyByName_Ref(virtualScreenObj, "%%property-supportsFocus", &supportsFocus) != ANI_OK) {
+    if (env->Object_GetPropertyByName_Ref(virtualScreenObj, "supportsFocus", &supportsFocus) != ANI_OK) {
         TLOGE(WmsLogTag::DMS, "Failed to get supportsFocus.");
         return DmErrorCode::DM_ERROR_INVALID_PARAM;
     }

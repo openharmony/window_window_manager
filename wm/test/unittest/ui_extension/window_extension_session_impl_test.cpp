@@ -3139,6 +3139,27 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostRectChangeInGlobalDisplay, TestSi
 }
 
 /**
+ * @tc.name: OnRecover
+ * @tc.desc: OnRecover Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, OnRecover, TestSize.Level2)
+{
+    AAFwk::Want want;
+    std::optional<AAFwk::Want> reply = std::make_optional<AAFwk::Want>();
+    window_->OnRecover(std::move(want), reply);
+    window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+    window_->property_->SetUIExtensionUsage(UIExtensionUsage::MODAL);
+    want = AAFwk::Want();
+    window_->OnRecover(std::move(want), reply);
+    sptr<IRemoteObject> iRemoteObject = sptr<IRemoteObjectMocker>::MakeSptr();
+    ASSERT_NE(nullptr, iRemoteObject);
+    window_->abilityToken_ = iRemoteObject;
+    want = AAFwk::Want();
+    window_->OnRecover(std::move(want), reply);
+}
+
+/**
  * @tc.name: OnResyncExtensionConfig
  * @tc.desc: OnResyncExtensionConfig Test
  * @tc.type: FUNC
@@ -3822,6 +3843,20 @@ HWTEST_F(WindowExtensionSessionImplTest, SetUIExtensionTransparent, TestSize.Lev
     EXPECT_EQ(WSError::WS_OK, window_->SetUIExtensionTransparent());
     window_->uiContent_ = std::make_unique<Ace::UIContentMocker>();
     EXPECT_EQ(WSError::WS_OK, window_->SetUIExtensionTransparent());
+}
+
+/**
+ * @tc.name: IsBlockSubwindow
+ * @tc.desc: IsBlockSubwindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowExtensionSessionImplTest, IsBlockSubwindow, TestSize.Level1)
+{
+    ASSERT_NE(window_, nullptr);
+    window_->isBlockSubwindow_ = true;
+    EXPECT_TRUE(window_->IsBlockSubwindow());
+    window_->isBlockSubwindow_ = false;
+    EXPECT_FALSE(window_->IsBlockSubwindow());
 }
 }
 } // namespace Rosen

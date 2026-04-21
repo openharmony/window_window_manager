@@ -136,6 +136,9 @@ public:
     virtual WSError UpdateWindowMode(WindowMode mode) = 0;
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName) = 0;
     virtual WSError NotifyLayoutFinishAfterWindowModeChange(WindowMode mode) = 0;
+    virtual WSError NotifySubWindowAfterParentWindowSizeChange(Rect rect) = 0;
+    virtual WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
+        bool isLayoutFullScreen) = 0;
     virtual WMError UpdateWindowModeForUITest(int32_t updateMode) { return WMError::WM_OK; };
     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
     virtual void NotifyLifecyclePausedStatus() = 0;
@@ -175,6 +178,52 @@ public:
     virtual void NotifyGlobalScaledRectChange(const Rect& globalScaledRect) {}
 
     /**
+     * @brief Update attached window limits for parent-child windows
+     *
+     * Update window limits when parent and child windows establish attach relationship.
+     * Each window receives the other window's limits and decides whether to apply them based on flags.
+     *
+     * @param sourcePersistentId the persistentId of the window providing the limits
+     * @param attachedWindowLimits the other window's limits (parent gets sub's, sub gets parent's)
+     * @param isIntersectedHeightLimit whether to limit height with attached window's limits
+     * @param isIntersectedWidthLimit whether to limit width with attached window's limits
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError UpdateAttachedWindowLimits(int32_t sourcePersistentId,
+        const WindowLimits& attachedWindowLimits, bool isIntersectedHeightLimit, bool isIntersectedWidthLimit)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * Remove attached window limits from a specific source window.
+     * Called when a window detaches or is destroyed.
+     *
+     * @param sourcePersistentId the persistentId of the source window whose limits should be removed
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError RemoveAttachedWindowLimits(int32_t sourcePersistentId)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
+     * Sync parent's full limits list to attaching child window.
+     * Called when a sub-window first attaches, to deliver the main window's complete
+     * attached limits info (main window's own limits + all other attached windows' limits).
+     *
+     * @param limitsList vector of (sourcePersistentId, WindowLimits) pairs, main window first
+     * @param optionsList vector of (sourcePersistentId, AttachLimitOptions) pairs, main window first
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncAllAttachedLimitsToChild(
+        const std::vector<std::pair<int32_t, WindowLimits>>& limitsList,
+        const std::vector<std::pair<int32_t, AttachLimitOptions>>& optionsList)
+    {
+        return WSError::WS_OK;
+    }
+
+    /**
      * @brief Set pip event to client.
      *
      * Set the pip event to client. Such as close, restore, destroy events.
@@ -211,6 +260,7 @@ public:
     virtual WSError UpdateDisplayId(uint64_t displayId) = 0;
     virtual void NotifyDisplayMove(DisplayId from, DisplayId to) = 0;
     virtual WSError SwitchFreeMultiWindow(bool enable) = 0;
+    virtual WSError ConfigDockAutoHide(bool isDockAutoHide) = 0;
     virtual WSError PcAppInPadNormalClose()
     {
         return WSError::WS_OK;
@@ -288,6 +338,10 @@ public:
     virtual WSError NotifyWindowAttachStateChange(bool isAttach) { return WSError::WS_DO_NOTHING; }
     virtual void NotifyKeyboardAnimationCompleted(const KeyboardPanelInfo& keyboardPanelInfo) {}
     virtual WSError SetCurrentRotation(int32_t currentRotation) = 0;
+    virtual WSError GetSceneNodeCount(uint32_t& nodeCount) = 0;
+    virtual WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) = 0;
+    
+    virtual WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) = 0;
     virtual void NotifyKeyboardAnimationWillBegin(const KeyboardAnimationInfo& keyboardAnimationInfo,
         const std::shared_ptr<RSTransaction>& rsTransaction) {};
     virtual WSError NotifyTargetRotationInfo(OrientationInfo& info, OrientationInfo& currentInfo)
@@ -300,8 +354,8 @@ public:
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport = false) = 0;
-    virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
+    virtual WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) = 0;
+    virtual WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
     virtual WSError UpdateBrightness(float brightness) = 0;
 
@@ -382,6 +436,56 @@ public:
     {
         return WSError::WS_OK;
     }
+
+    /**
+     * @brief Send fv event to client.
+     *
+     * Send the fv event to client. Such as close events.
+     *
+     * @param action Indicates the action name.
+     * @param reason Indicates the reason for the action.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SendFvActionEvent(const std::string& action, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view window info to client.
+     *
+     * Sync float view window info to client.
+     *
+     * @param windowInfo Indicates the float view window info.
+     * @param reason Indicates the reason string for the sync.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvWindowInfo(const FloatViewWindowInfo& windowInfo, const std::string& reason) = 0;
+
+    /**
+     * @brief Sync float view limits info to client.
+     *
+     * Sync float view limits info to client.
+     *
+     * @param limits Indicates the float view limits info.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SyncFvLimits(const FloatViewLimits& limits) = 0;
+
+    /**
+     * @brief Hide SubWindow whose zLevel above parent loosened.
+     *
+     * Hide SubWindow whose zLevel above parent loosened.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError HideSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+
+    /**
+     * @brief Show SubWindow whose zLevel above parent loosened.
+     *
+     * Show SubWindow whose zLevel above parent loosened.
+     *
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError ShowSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H
