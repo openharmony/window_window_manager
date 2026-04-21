@@ -230,11 +230,11 @@ HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SubWindowWi
 }
 
 /**
- * @tc.name: GetActiveSceneSessionCopy_SubWindowWithBackgroundMain
- * @tc.desc: Test GetActiveSceneSessionCopy with sub window whose main window is not foreground
+ * @tc.name: GetActiveSceneSessionCopy_DialogWindowWithBackgroundParent
+ * @tc.desc: Test GetActiveSceneSessionCopy with dialog window whose parent is not foreground
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SubWindowWithBackgroundMain,
+HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_DialogWindowWithBackgroundParent,
     Function | SmallTest | Level2)
 {
     ASSERT_NE(ssm_, nullptr);
@@ -248,14 +248,14 @@ HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SubWindowWi
     mainSession->state_ = SessionState::STATE_BACKGROUND;
     ssm_->sceneSessionMap_.insert({ mainSession->GetPersistentId(), mainSession });
 
-    SessionInfo subInfo;
-    subInfo.abilityName_ = "SubSession";
-    subInfo.bundleName_ = "SubSession";
-    subInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<SceneSessionMocker> subSession = sptr<SceneSessionMocker>::MakeSptr(subInfo, nullptr);
-    subSession->state_ = SessionState::STATE_FOREGROUND;
-    subSession->SetParentSession(mainSession);
-    ssm_->sceneSessionMap_.insert({ subSession->GetPersistentId(), subSession });
+    SessionInfo dialogInfo;
+    dialogInfo.abilityName_ = "DialogSession";
+    dialogInfo.bundleName_ = "DialogSession";
+    dialogInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSessionMocker> dialogSession = sptr<SceneSessionMocker>::MakeSptr(dialogInfo, nullptr);
+    dialogSession->state_ = SessionState::STATE_FOREGROUND;
+    dialogSession->SetParentSession(mainSession);
+    ssm_->sceneSessionMap_.insert({ dialogSession->GetPersistentId(), dialogSession });
 
     std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
     EXPECT_EQ(activeSession.size(), static_cast<size_t>(0));
@@ -285,40 +285,6 @@ HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SystemSessi
 
     std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
     EXPECT_EQ(activeSession.empty(), true);
-
-    ssm_->sceneSessionMap_.clear();
-}
-
-/**
- * @tc.name: GetActiveSceneSessionCopy_SubWindowBackgroundWithForegroundMain
- * @tc.desc: Test GetActiveSceneSessionCopy with background sub window whose main window is foreground
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_SubWindowBackgroundWithForegroundMain,
-    Function | SmallTest | Level2)
-{
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->sceneSessionMap_.clear();
-
-    SessionInfo mainInfo;
-    mainInfo.abilityName_ = "MainSession";
-    mainInfo.bundleName_ = "MainSession";
-    mainInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    sptr<SceneSessionMocker> mainSession = sptr<SceneSessionMocker>::MakeSptr(mainInfo, nullptr);
-    mainSession->state_ = SessionState::STATE_FOREGROUND;
-    ssm_->sceneSessionMap_.insert({ mainSession->GetPersistentId(), mainSession });
-
-    SessionInfo subInfo;
-    subInfo.abilityName_ = "SubSession";
-    subInfo.bundleName_ = "SubSession";
-    subInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
-    sptr<SceneSessionMocker> subSession = sptr<SceneSessionMocker>::MakeSptr(subInfo, nullptr);
-    subSession->state_ = SessionState::STATE_BACKGROUND;
-    subSession->SetParentSession(mainSession);
-    ssm_->sceneSessionMap_.insert({ subSession->GetPersistentId(), subSession });
-
-    std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
-    EXPECT_EQ(activeSession.size(), static_cast<size_t>(1));
 
     ssm_->sceneSessionMap_.clear();
 }
@@ -407,6 +373,40 @@ HWTEST_F(SceneSessionManagerAnimationTest,
 
     std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
     EXPECT_EQ(activeSession.size(), static_cast<size_t>(3));
+
+    ssm_->sceneSessionMap_.clear();
+}
+
+/**
+ * @tc.name: GetActiveSceneSessionCopy_DialogWindowWithForegroundParent
+ * @tc.desc: Test GetActiveSceneSessionCopy with dialog window whose parent is foreground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAnimationTest, GetActiveSceneSessionCopy_DialogWindowWithForegroundParent,
+    Function | SmallTest | Level2)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ssm_->sceneSessionMap_.clear();
+
+    SessionInfo mainInfo;
+    mainInfo.abilityName_ = "MainSession";
+    mainInfo.bundleName_ = "MainSession";
+    mainInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    sptr<SceneSessionMocker> mainSession = sptr<SceneSessionMocker>::MakeSptr(mainInfo, nullptr);
+    mainSession->state_ = SessionState::STATE_FOREGROUND;
+    ssm_->sceneSessionMap_.insert({ mainSession->GetPersistentId(), mainSession });
+
+    SessionInfo dialogInfo;
+    dialogInfo.abilityName_ = "DialogSession";
+    dialogInfo.bundleName_ = "DialogSession";
+    dialogInfo.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_DIALOG);
+    sptr<SceneSessionMocker> dialogSession = sptr<SceneSessionMocker>::MakeSptr(dialogInfo, nullptr);
+    dialogSession->state_ = SessionState::STATE_FOREGROUND;
+    dialogSession->SetParentSession(mainSession);
+    ssm_->sceneSessionMap_.insert({ dialogSession->GetPersistentId(), dialogSession });
+
+    std::vector<sptr<SceneSession>> activeSession = ssm_->GetActiveSceneSessionCopy();
+    EXPECT_EQ(activeSession.size(), static_cast<size_t>(2));
 
     ssm_->sceneSessionMap_.clear();
 }
