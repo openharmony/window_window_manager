@@ -8307,6 +8307,10 @@ bool SceneSession::IsStartMoving()
 void SceneSession::SetIsStartMoving(bool startMoving)
 {
     isStartMoving_.store(startMoving);
+
+    // Notify client to update move status immediately.
+    RETURN_IF_NULL(sessionStage_);
+    sessionStage_->SetIsStartMoving(startMoving);
 }
 
 void SceneSession::SetShouldHideNonSecureWindows(bool shouldHide)

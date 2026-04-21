@@ -2009,6 +2009,52 @@ HWTEST_F(SessionStageStubTest, HandleSetForceSplitEnable02, TestSize.Level1)
     data3.WriteBool(false);
     ASSERT_EQ(ERR_INVALID_DATA, sessionStageStub_->OnRemoteRequest(code, data3, reply3, option));
 }
+
+/**
+ * @tc.name: HandleSetIsStartMoving
+ * @tc.desc: Verify HandleSetIsStartMoving handles invalid and valid cases correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleSetIsStartMoving, TestSize.Level1)
+{
+    // Case 1: ReadBool failed (no data)
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        int result = sessionStageStub_->HandleSetIsStartMoving(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_DATA);
+    }
+
+    // Case 2: isStartMoving = true
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteBool(true);
+        int result = sessionStageStub_->HandleSetIsStartMoving(data, reply);
+        EXPECT_EQ(result, ERR_NONE);
+    }
+
+    // Case 3: isStartMoving = false
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteBool(false);
+        int result = sessionStageStub_->HandleSetIsStartMoving(data, reply);
+        EXPECT_EQ(result, ERR_NONE);
+    }
+
+    // Case 4: OnRemoteRequest with TRANS_ID_SET_IS_START_MOVING
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        MessageOption option;
+        data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+        data.WriteBool(true);
+        uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_IS_START_MOVING);
+        int result = sessionStageStub_->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(result, ERR_NONE);
+    }
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
