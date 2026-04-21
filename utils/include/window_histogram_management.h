@@ -19,13 +19,53 @@
 #include "wm_common.h"
 
 #ifndef WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS
-// Stub implementations when WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS is not defined
-#define HISTOGRAM_BOOLEAN(name, value) ((void)0)
-#define HISTOGRAM_ENUMERATION(name, sample, boundary) ((void)0)
-#define HISTOGRAM_CUSTOM_COUNTS(name, sample, min, max, bucket_count) ((void)0)
-#define HISTOGRAM_TIMES(name, sample) ((void)0)
-#define HISTOGRAM_PERCENTAGE(name, sample) ((void)0)
-#define HISTOGRAM_ENUMERATION_ERROR_CODE(name, errorCode) ((void)0)
+
+namespace OHOS {
+namespace Rosen {
+
+inline void HISTOGRAM_BOOLEAN(const char* name, int32_t value)
+{
+    (void)name;
+    (void)value;
+}
+
+inline void HISTOGRAM_ENUMERATION(const char* name, int32_t sample, int32_t boundary)
+{
+    (void)name;
+    (void)sample;
+    (void)boundary;
+}
+
+inline void HISTOGRAM_CUSTOM_COUNTS(const char* name, int32_t sample,
+                                    int32_t min, int32_t max, size_t bucket_count)
+{
+    (void)name;
+    (void)sample;
+    (void)min;
+    (void)max;
+    (void)bucket_count;
+}
+
+inline void HISTOGRAM_TIMES(const char* name, int32_t sample)
+{
+    (void)name;
+    (void)sample;
+}
+
+inline void HISTOGRAM_PERCENTAGE(const char* name, int32_t sample)
+{
+    (void)name;
+    (void)sample;
+}
+
+inline void HISTOGRAM_ENUMERATION_ERROR_CODE(const char* name, WmErrorCode errorCode)
+{
+    (void)name;
+    (void)errorCode;
+}
+
+} // namespace Rosen
+} // namespace OHOS
 
 #else
 #include "histogram_plugin_macros.h"
