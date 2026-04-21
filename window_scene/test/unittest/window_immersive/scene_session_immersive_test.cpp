@@ -666,7 +666,6 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
     session->GetFloatNavigationAvoidArea(rect, area, true);
     std::tuple<bool, WSRect, WSRect> info1;
     EXPECT_EQ(session->specificCallback_->onGetFloatNavagationInfo_(1, info1), WSError::WS_OK);
-
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect);
     session->GetAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect);
