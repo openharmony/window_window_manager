@@ -156,7 +156,7 @@ public:
     /*
      * Float Navigation Avoid Area
      */
-    WMError UpdateNavigationAvoidArea(bool isEnabled) override;
+    WMError SetFloatNavigationEnabled(bool isEnabled) override;
 
     WSError NotifySubModalTypeChange(SubWindowModalType subWindowModalType) override;
     WSError NotifyMainModalTypeChange(bool isModal) override;

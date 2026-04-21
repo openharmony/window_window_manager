@@ -94,7 +94,7 @@ public:
     MOCK_METHOD1(UpdateIsShowDecorInFreeMultiWindow, WSError(bool& isShow));
     MOCK_METHOD(WSError, SetContentAspectRatio, (float ratio, bool isPersistent, bool needUpdateRect), (override));
     MOCK_METHOD(WSError, SetDecorVisible, (bool isVisible), (override));
-    MOCK_METHOD(WMError, UpdateNavigationAvoidArea, (bool enable), (override));
+    MOCK_METHOD(WMError, SetFloatNavigationEnabled, (bool enable), (override));
 };
 } // namespace Rosen
 } // namespace OHOS

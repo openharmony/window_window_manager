@@ -278,7 +278,7 @@ int SessionStub::ProcessRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_GESTURE_BACK_ENABLE):
             return HandleSetGestureBackEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FLOAT_NAVIGATION_AVOID_AREA_ENABLED):
-            return HandleUpdateNavigationAvoidArea(data, reply);
+            return HandleSetFloatNavigationEnabled(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SUB_MODAL_TYPE_CHANGE):
             return HandleNotifySubModalTypeChange(data, reply);
         case static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_MODAL_TYPE_CHANGE):
@@ -2221,14 +2221,14 @@ int SessionStub::HandleSetGestureBackEnabled(MessageParcel& data, MessageParcel&
     return ERR_NONE;
 }
 
-int SessionStub::HandleUpdateNavigationAvoidArea(MessageParcel& data, MessageParcel& reply)
+int SessionStub::HandleSetFloatNavigationEnabled(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_IMMS, "in");
     bool isEnabled;
     if (!data.ReadBool(isEnabled)) {
         return ERR_INVALID_DATA;
     }
-    WMError ret = UpdateNavigationAvoidArea(isEnabled);
+    WMError ret = SetFloatNavigationEnabled(isEnabled);
     reply.WriteInt32(static_cast<int32_t>(ret));
     return ERR_NONE;
 }

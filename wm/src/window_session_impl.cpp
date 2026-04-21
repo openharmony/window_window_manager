@@ -2041,7 +2041,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         for (const auto& [type, avoidArea] : avoidAreas) {
             TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
                 type, avoidArea.ToString().c_str());
-            if (!floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+            if (!IsFloatNavigationAvoidAreaEnabled(type)) {
                 continue;
             }
             if ((lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() && type != AvoidAreaType::TYPE_CUTOUT) ||
@@ -6698,7 +6698,7 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
         if (!window) {
             return;
         }
-        if (!window->floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+        if (!window->IsFloatNavigationAvoidAreaEnabled(type)) {
             return;
         }
         if ((window->lastAvoidAreaMap_.find(type) == window->lastAvoidAreaMap_.end() &&
@@ -6723,8 +6723,8 @@ WMError WindowSessionImpl::SetFloatNavigationAvoidAreaEnabled(bool enable)
     floatNavigationAvoidAreaEnabled_ = enable;
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    auto ret = hostSession->UpdateNavigationAvoidArea(isFirstSetFloatNavigationAvoidAreaEnabled_);
-    isFirstSetFloatNavigationAvoidAreaEnabled_ = false;
+    auto ret = hostSession->SetFloatNavigationEnabled(notifyOnceImmediately_);
+    notifyOnceImmediately_ = false;
     return ret == WMError::WM_OK ? WMError::WM_OK : WMError::WM_ERROR_SYSTEM_ABNORMALLY;
 }
  	 

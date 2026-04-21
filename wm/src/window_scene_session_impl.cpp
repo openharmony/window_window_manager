@@ -3258,7 +3258,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    if (!floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+    if (!IsFloatNavigationAvoidAreaEnabled(type) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
         return WMError::WM_DO_NOTHING;
     }
@@ -3282,7 +3282,7 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaTy
     if (type == AvoidAreaType::TYPE_KEYBOARD) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
-    if (!floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+    if (!IsFloatNavigationAvoidAreaEnabled(type)) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
         return WMError::WM_DO_NOTHING;
     }
