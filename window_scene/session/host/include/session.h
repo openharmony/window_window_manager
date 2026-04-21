@@ -443,6 +443,7 @@ public:
     void SetSessionInfoAncoSceneState(int32_t ancoSceneState);
     void SetSessionInfoTime(const std::string& time);
     void SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
+    void UpdateNativeHideWindowByAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo);
     void SetSessionInfoWant(const std::shared_ptr<AAFwk::Want>& want);
     void ResetSessionInfoResultCode();
     void SetSessionInfoPersistentId(int32_t persistentId);
@@ -502,6 +503,8 @@ public:
     bool GetRestartInSameProcess() const;
     void SetRestartCallerPersistentId(int32_t restartCallerPersistentId);
     int32_t GetRestartCallerPersistentId() const;
+    void SetNativeHideWindow(bool nativeHideWindow);
+    bool GetNativeHideWindow() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);

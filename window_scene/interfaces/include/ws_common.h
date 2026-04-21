@@ -505,6 +505,7 @@ struct SessionInfo {
     int32_t hostAppIndex = 0;
     std::string hostAppInstanceKey = "";
     std::string hostAbilityName = "";
+    bool nativeHideWindow_ = false;
 
     /*
      * Keyboard

@@ -96,6 +96,11 @@ const uint32_t ROTATION_360 = 360;
 const uint32_t ROTATION_LANDSCAPE_INVERTED = 3;
 const std::string APP_CAST_SCREEN_NAME = "HwCast_AppModeDisplay";
 constexpr float BLUR_SNAPSHOT_SCALE = 0.5f;
+const std::string WITH_NATIVE_MODULE_KEY = "ohos.ability.withNativeModule";
+const std::string STARTUP_PHASE_KEY = "ohos.ability.startupPhase";
+const std::string STARTUP_PHASE_PRE_WINDOW = "pre_window";
+const std::string STARTUP_PHASE_PRE_FOREGROUND = "pre_foreground";
+const std::string TRUE_VALUE = "true";
 } // namespace
 
 const std::string ATTACH_EVENT_NAME { "wms::ReportWindowTimeout_Attach" };
@@ -392,6 +397,26 @@ void Session::SetSessionInfoAbilityInfo(const std::shared_ptr<AppExecFwk::Abilit
 {
     std::lock_guard<std::recursive_mutex> lock(sessionInfoMutex_);
     sessionInfo_.abilityInfo = abilityInfo;
+}
+
+void Session::UpdateNativeHideWindowByAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
+{
+    if (abilityInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "AbilityInfo is nullptr");
+        return;
+    }
+    bool withNativeModule = false;
+    bool hideWindow = false;
+    for (const auto& item : abilityInfo->metadata) {
+        if (item.name == WITH_NATIVE_MODULE_KEY) {
+            withNativeModule = (item.value == TRUE_VALUE);
+        } else if (item.name == STARTUP_PHASE_KEY) {
+            hideWindow = (item.value == STARTUP_PHASE_PRE_WINDOW || item.value == STARTUP_PHASE_PRE_FOREGROUND);
+        }
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, withNativeModule:%{public}u, hideWindow:%{public}u",
+        GetPersistentId(), withNativeModule, hideWindow);
+    SetNativeHideWindow(withNativeModule && hideWindow);
 }
 
 void Session::SetSessionInfoSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& updatedWindowModes)
@@ -4780,6 +4805,21 @@ void Session::SetRestartCallerPersistentId(int32_t restartCallerPersistentId)
 int32_t Session::GetRestartCallerPersistentId() const
 {
     return sessionInfo_.restartCallerPersistentId_;
+}
+
+void Session::SetRestartCallerPersistentId(bool nativeHideWindow)
+{
+    sessionInfo_.nativeHideWindow_ = nativeHideWindow;
+}
+
+bool Session::GetNativeHideWindow() const
+{
+    return sessionInfo_.nativeHideWindow_;
+}
+
+void Session::updateNativeHideWindowByAbilityInfo(bool nativeHideWindow)
+{
+    sessionInfo_.nativeHideWindow_ = nativeHideWindow;
 }
 
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
