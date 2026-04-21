@@ -153,6 +153,7 @@ ohos_shared_library("window_native_kit") {
 
 ohos_shared_library("window_napi") {
   branch_protector_ret = "pac_ret"
+  defines = []
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -160,7 +161,7 @@ ohos_shared_library("window_napi") {
     debug = false
     cfi_policy = "adaptive"
   }
-  defines = [ "SUPPORT_SCREEN" ]
+  defines += [ "SUPPORT_SCREEN" ]
   sources = [
     "window_manager_napi/js_window_manager.cpp",
     "window_manager_napi/window_manager_module.cpp",
@@ -212,7 +213,6 @@ ohos_shared_library("window_napi") {
   part_name = "window_manager"
   subsystem_name = "window"
 
-  defines = []
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
@@ -220,6 +220,7 @@ ohos_shared_library("window_napi") {
 
 ohos_shared_library("windowstage_kit") {
   branch_protector_ret = "pac_ret"
+  defines = []
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -263,7 +264,6 @@ ohos_shared_library("windowstage_kit") {
   part_name = "window_manager"
   subsystem_name = "window"
 
-  defines = []
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
