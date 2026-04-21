@@ -615,6 +615,7 @@ void ScreenSessionManager::Init()
     }
     AodLibInit();
     RegisterScreenChangeListener();
+    RegisterRSListeners();
     if(FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
         FoldScreenStateInternel::IsLoadDmsExt() ||
         FoldScreenStateInternel::IsSingleDisplayPocketFoldDevice() ||
@@ -1004,6 +1005,70 @@ void ScreenSessionManager::RegisterScreenChangeListener()
     } else {
         screenEventTracker_.RecordEvent("Dms OnScreenChange register success.");
     }
+}
+
+void ScreenSessionManager::RegisterRSListeners()
+{
+    TLOGNFI(WmsLogTag::DMS, "RegisterRSListeners Start");
+    DoRegisterRSListeners();
+}
+
+void ScreenSessionManager::DoRegisterRSListeners()
+{
+    auto res = rsInterface_.RegisterExposedEventCallback(RSExposedEventType::EXT_SCREEN_UNSUPPORT,
+        DmUtils::wrap_callback([this](const std::shared_ptr<RSExposedEventDataBase>& param) {
+            OnTransRSEvent(param);
+        })
+    );
+    if (res != StatusCode::SUCCESS && retryCount_-- > 0) {
+        auto task = [this]() { DoRegisterRSListeners(); };
+        taskScheduler_->PostAsyncTask(task, "RegisterRSListeners", 50);
+        screenEventTracker_.RecordEvent("Dms register rs events failed, will retry.");
+    } else if (res != StatusCode::SUCCESS) {
+        TLOGNFE(WmsLogTag::DMS, "Dms register rs events failed after max retries.");
+        screenEventTracker_.RecordEvent("Dms register rs events failed after max retries.");
+    } else {
+        screenEventTracker_.RecordEvent("Dms register rs events success.");
+    }
+}
+
+sptr<RSEventDataBase> ScreenSessionManager::ConvertRSExposedEventDataBase(
+    const std::shared_ptr<RSExposedEventDataBase>& rsRawData)
+{
+    if (!rsRawData) {
+        return nullptr;
+    }
+
+    switch (rsRawData->type_) {
+        case RSExposedEventType::EXT_SCREEN_UNSUPPORT: {
+            sptr<RSEventDataBase> rsData = new (std::nothrow) RSExtScreenUnsupportEventData();
+            return rsData;
+        }
+        default: {
+            TLOGNFW(WmsLogTag::DMS, "Unknown RSExposedEventType: %{public}u", rsRawData->type_);
+            break;
+        }
+    }
+    return nullptr;
+}
+
+void ScreenSessionManager::OnTransRSEvent(const std::shared_ptr<RSExposedEventDataBase>& rsRawData)
+{
+    if(!rsRawData) {
+        TLOGNFE(WmsLogTag::DMS, "Rsdata is null");
+        return;
+    }
+    sptr<RSEventDataBase> rsData = ConvertRSExposedEventDataBase(rsRawData);
+    if (!rsData) {
+        return;
+    }
+    auto clientProxy = GetClientProxy();
+    if (!clientProxy) {
+        TLOGNFE(WmsLogTag::DMS, "ClientProxy is null.");
+        return;
+    }
+    clientProxy->OnTransRSEvent(rsData);
+    return;
 }
 
 void ScreenSessionManager::RegisterFoldNotSwitchingListener()
