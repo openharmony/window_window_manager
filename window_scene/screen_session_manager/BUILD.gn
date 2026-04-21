@@ -90,7 +90,8 @@ ohos_shared_library("screen_session_manager") {
     "src/setting_observer.cpp",
     "src/setting_provider.cpp",
     "src/zidl/screen_session_manager_stub.cpp",
-    "src/screen_session_manager_adapter.cpp"
+    "src/screen_session_manager_adapter.cpp",
+    "src/rs_event_data_manager.cpp"
   ]
 
   cflags_cc = [ "-std=c++17" ]

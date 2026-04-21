@@ -42,6 +42,7 @@ ohos_shared_library("screen_session_manager_client") {
     "../screen_session_manager/src/zidl/screen_session_manager_proxy.cpp",
     "src/screen_session_manager_client.cpp",
     "src/zidl/screen_session_manager_client_stub.cpp",
+    "../screen_session_manager/src/rs_event_data_manager.cpp",
   ]
 
   public_configs = [ ":screen_session_manager_client_public_config" ]
