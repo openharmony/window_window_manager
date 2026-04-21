@@ -50,7 +50,7 @@ HWTEST_F(SessionLifecycleListenerProxyTest, SessionLifecycleListenerProxy_Branch
 
     sptr<SessionLifecycleListenerProxy> nullProxy = sptr<SessionLifecycleListenerProxy>::MakeSptr(nullptr);
     ASSERT_NE(nullProxy, nullptr);
-    nullProxy->OnLifecycleEvent(SessionLifecycleEvent::CREATED, payload);
+    nullProxy->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
     nullProxy->OnBatchLifecycleEvent(payloads);
     nullProxy->OnAppInstanceLifecycleEvent(payload);
 
@@ -60,24 +60,24 @@ HWTEST_F(SessionLifecycleListenerProxyTest, SessionLifecycleListenerProxy_Branch
     ASSERT_NE(proxy, nullptr);
 
     MockMessageParcel::ClearAllErrorFlag();
-    proxy->OnLifecycleEvent(SessionLifecycleEvent::CREATED, payload);
+    proxy->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
     proxy->OnBatchLifecycleEvent(payloads);
     proxy->OnAppInstanceLifecycleEvent(payload);
 
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    proxy->OnLifecycleEvent(SessionLifecycleEvent::CREATED, payload);
+    proxy->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
     proxy->OnBatchLifecycleEvent(payloads);
     proxy->OnAppInstanceLifecycleEvent(payload);
 
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteParcelableErrorFlag(true);
-    proxy->OnLifecycleEvent(SessionLifecycleEvent::CREATED, payload);
+    proxy->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
     proxy->OnBatchLifecycleEvent(payloads);
     proxy->OnAppInstanceLifecycleEvent(payload);
 
     MockMessageParcel::ClearAllErrorFlag();
     remoteMocker->SetRequestResult(ERR_INVALID_DATA);
-    proxy->OnLifecycleEvent(SessionLifecycleEvent::CREATED, payload);
+    proxy->OnLifecycleEvent(ISessionLifecycleListener::SessionLifecycleEvent::CREATED, payload);
     proxy->OnBatchLifecycleEvent(payloads);
     proxy->OnAppInstanceLifecycleEvent(payload);
     remoteMocker->SetRequestResult(ERR_NONE);
