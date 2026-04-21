@@ -298,6 +298,8 @@ napi_value AvoidAreaTypeInit(napi_env env)
         CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
     napi_set_named_property(env, objValue, "TYPE_NAVIGATION_INDICATOR",
         CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)));
+    napi_set_named_property(env, objValue, "TYPE_FLOAT_NAVIGATION",
+        CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_FLOAT_NAVIGATION)));
     return objValue;
 }
 
