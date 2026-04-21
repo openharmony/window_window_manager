@@ -1069,7 +1069,7 @@ private:
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
     sptr<KeyboardSession::KeyboardSessionCallback> CreateKeyboardSessionCallback();
-    void FillSessionInfo(sptr<SceneSession>& sceneSession);
+    void FillSessionInfo(sptr<SceneSession>& sceneSession, bool isInit = false);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName, bool isAtomicServiceFreeInstall = false,
         bool isTargetPlugin = false, const std::string& hostBundleName = "");

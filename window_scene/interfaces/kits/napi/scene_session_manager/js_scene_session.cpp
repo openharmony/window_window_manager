@@ -512,6 +512,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, session->IsSubWindowOutlineEnabled()));
     napi_set_named_property(env, objValue, "zLevelAboveParentLoosened",
         CreateJsValue(env, session->IsSubWindowZLevelAboveParentLoosened()));
+    napi_set_named_property(env, objValue, "nativeHideWindow",
+        CreateJsValue(env, session->GetNativeHideWindow()));
     napi_set_named_property(env, objValue, "requestOrientation",
         CreateJsValue(env, session->GetSessionInfo().specificSessionRequestOrientation_));
     ParseMetadataConfiguration(env, objValue, session);
