@@ -203,7 +203,7 @@ namespace window {
      * @atomicservice
      * @since 12
      */
-    TYPE_NAVIGATION_INDICATOR
+    TYPE_NAVIGATION_INDICATOR,
 
     /**
      * Area for float navigation
