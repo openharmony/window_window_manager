@@ -1062,7 +1062,6 @@ napi_value JsExtensionWindow::OnSetFloatNavigationAvoidAreaEnabled(napi_env env,
     if (argv[INDEX_ZERO] == nullptr || napi_get_value_bool(env, argv[INDEX_ZERO], &enabled) != napi_ok) {
         TLOGE(WmsLogTag::WMS_IMMS, "failed to convert parameter to enabled");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-
             "[window][setFloatNavigationAvoidanceEnabled]msg: Incorrect parameter types");
     }
     napi_value result = nullptr;
