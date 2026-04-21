@@ -19909,6 +19909,25 @@ void SceneSessionManager::NotifyWindowSystemBarPropertyChange(
     SessionManagerAgentController::GetInstance().NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
 }
 
+bool SceneSessionManager::IsAncestorChainForeground(const sptr<SceneSession>& session) const
+{
+    auto winType = session->GetWindowType();
+    if (!WindowHelper::IsSubWindow(winType) && !WindowHelper::IsDialogWindow(winType)) {
+        return true;
+    }
+    auto ancestor = session->GetParentSession();
+    while (ancestor != nullptr) {
+        if (!ancestor->IsSessionForeground()) {
+            TLOGD(WmsLogTag::DEFAULT,
+                "ancestor not foreground, id: %{public}d, ancestorId: %{public}d",
+                session->GetPersistentId(), ancestor->GetPersistentId());
+            return false;
+        }
+        ancestor = ancestor->GetParentSession();
+    }
+    return true;
+}
+
 const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
@@ -19932,21 +19951,8 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
                 "skip background session, id: %{public}d", curSession->GetPersistentId());
             continue;
         }
-        auto winType = curSession->GetWindowType();
-        if (WindowHelper::IsSubWindow(winType) || WindowHelper::IsDialogWindow(winType)) {
-            auto ancestor = curSession->GetParentSession();
-            while (ancestor != nullptr) {
-                if (!ancestor->IsSessionForeground()) {
-                    TLOGD(WmsLogTag::DEFAULT,
-                        "skip, id: %{public}d, ancestorId: %{public}d not foreground",
-                        curSession->GetPersistentId(), ancestor->GetPersistentId());
-                    break;
-                }
-                ancestor = ancestor->GetParentSession();
-            }
-            if (ancestor != nullptr) {
-                continue;
-            }
+        if (!IsAncestorChainForeground(curSession)) {
+            continue;
         }
         activeSession.push_back(curSession);
     }
