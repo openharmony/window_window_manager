@@ -598,7 +598,8 @@ public:
     WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
     bool IsFloatNavigationAvoidAreaEnabled(AvoidAreaType type)
     {
-        return type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && floatNavigationAvoidAreaEnabled_;
+        return type != AvoidAreaType::TYPE_FLOAT_NAVIGATION ||
+            (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && floatNavigationAvoidAreaEnabled_);
     }
 
     /*
