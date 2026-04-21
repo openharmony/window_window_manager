@@ -437,41 +437,30 @@ WMError SessionListenerController::UnregisterSessionLifecycleListener(const sptr
     return WMError::WM_OK;
 }
 
+template <typename MapType>
+void SessionListenerController::RemoveListenersFromMap(MapType& listenerMap,
+    const std::function<bool(const sptr<ISessionLifecycleListener>&)>& predicate)
+{
+    for (auto it = listenerMap.begin(); it != listenerMap.end();) {
+        auto& listeners = it->second;
+        listeners.erase(std::remove_if(listeners.begin(), listeners.end(), predicate), listeners.end());
+        if (listeners.empty()) {
+            it = listenerMap.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 void SessionListenerController::RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target)
 {
     auto compareByAsObject = [&target](const sptr<ISessionLifecycleListener>& item) {
         return (item != nullptr) && (item->AsObject() == target);
     };
 
-    for (auto it = listenerMapById_.begin(); it != listenerMapById_.end();) {
-        auto& listeners = it->second;
-        listeners.erase(std::remove_if(listeners.begin(), listeners.end(), compareByAsObject), listeners.end());
-        if (listeners.empty()) {
-            it = listenerMapById_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
-    for (auto it = listenerMapByBundle_.begin(); it != listenerMapByBundle_.end();) {
-        auto& listeners = it->second;
-        listeners.erase(std::remove_if(listeners.begin(), listeners.end(), compareByAsObject), listeners.end());
-        if (listeners.empty()) {
-            it = listenerMapByBundle_.erase(it);
-        } else {
-            ++it;
-        }
-    }
-
-    for (auto it = listenerMapByAppInstance_.begin(); it != listenerMapByAppInstance_.end();) {
-        auto& listeners = it->second;
-        listeners.erase(std::remove_if(listeners.begin(), listeners.end(), compareByAsObject), listeners.end());
-        if (listeners.empty()) {
-            it = listenerMapByAppInstance_.erase(it);
-        } else {
-            ++it;
-        }
-    }
+    RemoveListenersFromMap(listenerMapById_, compareByAsObject);
+    RemoveListenersFromMap(listenerMapByBundle_, compareByAsObject);
+    RemoveListenersFromMap(listenerMapByAppInstance_, compareByAsObject);
 
     auto iter = std::remove_if(listenersOfAllBundles_.begin(), listenersOfAllBundles_.end(), compareByAsObject);
     listenersOfAllBundles_.erase(iter, listenersOfAllBundles_.end());
