@@ -805,6 +805,7 @@ public:
         const std::string& bundleName, int32_t appIndex, std::vector<sptr<SceneSession>>& mainSessions);
     void GetSceneSessionsByAppInstance(const std::string& bundleName,
         int32_t appIndex, const std::string& appInstanceKey, std::vector<sptr<SceneSession>>& sceneSessions);
+    void CollectSubSessionsRecursively(std::vector<sptr<SceneSession>>& sceneSessions);
     WSError NotifyAppUseControlList(
         ControlAppType type, int32_t userId, const std::vector<AppUseControlInfo>& controlList);
     void NotifyAppUseControlListInner(

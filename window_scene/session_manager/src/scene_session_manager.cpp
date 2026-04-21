@@ -16,7 +16,6 @@
 #include "session_manager/include/scene_session_manager.h"
 
 #include <algorithm>
-#include <queue>
 #include <regex>
 #include <string>
 #include <sys/stat.h>
@@ -2145,25 +2144,23 @@ void SceneSessionManager::GetSceneSessionsByAppInstance(const std::string& bundl
         sceneSessions.push_back(sceneSession);
     }
     if (!appInstanceKey.empty()) {
-        std::queue<sptr<SceneSession>> pendingQueue;
-        for (const auto& session : sceneSessions) {
-            if (session) {
-                pendingQueue.push(session);
-            }
-        }
-        while (!pendingQueue.empty()) {
-            auto current = pendingQueue.front();
-            pendingQueue.pop();
-            auto subs = current->GetSubSession();
-            for (auto& sub : subs) {
-                if (sub) {
-                    sceneSessions.push_back(sub);
-                    pendingQueue.push(sub);
-                }
-            }
-        }
+        CollectSubSessionsRecursively(sceneSessions);
     }
     TLOGI(WmsLogTag::WMS_LIFE, "end, matched sessions:%{public}zu", sceneSessions.size());
+}
+
+void SceneSessionManager::CollectSubSessionsRecursively(std::vector<sptr<SceneSession>>& sceneSessions)
+{
+    size_t idx = 0;
+    while (idx < sceneSessions.size()) {
+        auto subs = sceneSessions[idx]->GetSubSession();
+        for (auto& sub : subs) {
+            if (sub) {
+                sceneSessions.push_back(sub);
+            }
+        }
+        idx++;
+    }
 }
 
 void SceneSessionManager::GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
