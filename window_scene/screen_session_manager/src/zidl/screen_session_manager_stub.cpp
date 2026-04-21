@@ -19,7 +19,6 @@
 #include "dm_common.h"
 #include <ipc_skeleton.h>
 #include "transaction/rs_marshalling_helper.h"
-#include "session_manager/include/scene_session_manager.h"
 #include "marshalling_helper.h"
 
 namespace OHOS::Rosen {
@@ -170,7 +169,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         }
         case DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID: {
             DisplayId displayId = data.ReadUint64();
-            auto info = GetDisplayInfoById(displayId);
+            bool isGetActualInfo = data.ReadBool();
+            auto info = GetDisplayInfoById(displayId, isGetActualInfo);
             reply.WriteParcelable(info);
             break;
         }
@@ -337,6 +337,7 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             uint32_t phyWidth = data.ReadUint32();
             uint32_t phyHeight = data.ReadUint32();
             int32_t screenIdParam = data.ReadInt32();
+            VirtualScreenCaller caller = static_cast<VirtualScreenCaller>(data.ReadUint32());
             bool isSurfaceValid = data.ReadBool();
             sptr<Surface> surface = nullptr;
             if (isSurfaceValid) {
@@ -364,7 +365,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
                 .phyWidth_ = phyWidth,
                 .phyHeight_ = phyHeight,
                 .userId_ = userId,
-                .screenId_ = screenIdParam
+                .screenId_ = screenIdParam,
+                .caller_ = caller
             };
             ScreenId screenId = CreateVirtualScreen(virScrOption, virtualScreenAgent);
             static_cast<void>(reply.WriteUint64(static_cast<uint64_t>(screenId)));
@@ -977,7 +979,16 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
             reply.WriteBool(IsCaptured());
             break;
         }
-        //Fold Screen
+        case DisplayManagerMessage::TRANS_ID_DEVICE_IS_CAPTURE_BY_BUNDLE_LIST: {
+            std::vector<std::string> bundleNameList;
+            if (!data.ReadStringVector(&bundleNameList)) {
+                TLOGE(WmsLogTag::DMS, "Failed to read bundleNameList");
+                return ERR_INVALID_DATA;
+            }
+            reply.WriteBool(IsCapturedByBundleNameList(bundleNameList));
+            break;
+        }
+        // Fold Screen
         case DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE: {
             FoldDisplayMode displayMode = static_cast<FoldDisplayMode>(data.ReadUint32());
             SetFoldDisplayMode(displayMode);

@@ -41,6 +41,7 @@ public:
 
     virtual sptr<DisplayInfo> GetDefaultDisplayInfo(int32_t userId = CONCURRENT_USER_ID_DEFAULT) { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId) { return nullptr; }
+    virtual sptr<DisplayInfo> GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo) { return nullptr; }
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) { return nullptr; }
     virtual sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) {return nullptr; }
     virtual DMError HasPrivateWindow(DisplayId displayId, bool& hasPrivateWindow) { return DMError::DM_OK; }
@@ -281,6 +282,7 @@ public:
 
     virtual bool IsFoldable() { return false; }
     virtual bool IsCaptured() { return false; }
+    virtual bool IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList) { return false; }
 
     virtual FoldStatus GetFoldStatus() { return FoldStatus::UNKNOWN; }
     virtual SuperFoldStatus GetSuperFoldStatus() { return SuperFoldStatus::UNKNOWN; }

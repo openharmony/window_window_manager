@@ -396,6 +396,19 @@ HWTEST_F(WindowSessionTest, SetSessionRect, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetLastClientParentSize
+ * @tc.desc: check func SetLastClientParentSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetLastClientParentSize, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetLastClientParentSize(rect);
+    ASSERT_EQ(rect, session_->GetLastClientParentSize());
+}
+
+/**
  * @tc.name: GetSessionRect
  * @tc.desc: check func GetSessionRect
  * @tc.type: FUNC
@@ -406,6 +419,19 @@ HWTEST_F(WindowSessionTest, GetSessionRect, TestSize.Level1)
     WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
     session_->SetSessionRect(rect);
     ASSERT_EQ(rect, session_->GetSessionRect());
+}
+
+/**
+ * @tc.name: GetLastClientParentSize
+ * @tc.desc: check func GetLastClientParentSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetLastClientParentSize, TestSize.Level1)
+{
+    ASSERT_NE(session_, nullptr);
+    WSRect rect = { 0, 0, 320, 240 }; // width: 320, height: 240
+    session_->SetLastClientParentSize(rect);
+    ASSERT_EQ(rect, session_->GetLastClientParentSize());
 }
 
 /**
@@ -1672,6 +1698,29 @@ HWTEST_F(WindowSessionTest, SetSessionRect01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetLastClientParentSize01
+ * @tc.desc: SetSessionRect test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, SetLastClientParentSize01, TestSize.Level1)
+{
+    WSRect initLastClientRect = {10, 11, 12, 13};
+    session_->SetLastClientParentSize(rect);
+    {
+        // success
+        WSRect rect = {1, 2, 3, 4};
+        session_->SetLastClientParentSize(rect);
+        EXPECT_EQ(session_->GetLastClientParentSize().posX_, rect.posX_);
+    }
+    {
+        // fail
+        WSRect rect = {1, 2, 3, 4};
+        session_->SetLastClientParentSize(rect);
+        EXPECT_EQ(session_->GetLastClientParentSize().posX_, rect.posX_);
+    }
+}
+
+/**
  * @tc.name: UpdateClientRectPosYAndDisplayId02
  * @tc.desc: UpdateClientRectPosYAndDisplayId
  * @tc.type: FUNC
@@ -1965,6 +2014,37 @@ HWTEST_F(WindowSessionTest, IsCompatibilityModeSubWin05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRealSessionState
+ * @tc.desc: test get the real session state
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, GetRealSessionState, TestSize.Level1)
+{
+    SessionInfo parentInfo;
+    parentInfo.abilityName_ = "ParentSession";
+    parentInfo.bundleName_ = "ParentBundle";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->SetSessionState(SessionState::STATE_ACTIVE);
+
+    SessionInfo childInfo;
+    childInfo.abilityName_ = "ChildSession";
+    childInfo.bundleName_ = "ChildBundle";
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    ASSERT_NE(childSession, nullptr);
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentSession(parentSession);
+
+    childSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    EXPECT_EQ(childSession->GetRealSessionState(), SessionState::STATE_BACKGROUND);
+
+    childSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(childSession->GetRealSessionState(), SessionState::STATE_ACTIVE);
+}
+
+/**
  * @tc.name: TransformGlobalRectToRelativeRect_CompatibilityMode01
  * @tc.desc: TransformGlobalRectToRelativeRect Test - compatibility mode sub window with virtual display parent
  * @tc.type: FUNC
@@ -2046,6 +2126,124 @@ HWTEST_F(WindowSessionTest, TransformGlobalRectToRelativeRect_CompatibilityMode0
     DisplayId displayId = childSession->TransformGlobalRectToRelativeRect(rect);
     // Should return parent's client display id (default display)
     EXPECT_EQ(displayId, static_cast<DisplayId>(0));
+}
+
+/**
+ * @tc.name: IsSubWindowZLevelAboveParentLoosened_Default
+ * @tc.desc: test IsSubWindowZLevelAboveParentLoosened with default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSubWindowZLevelAboveParentLoosened_Default, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    ASSERT_EQ(false, session->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: IsSubWindowZLevelAboveParentLoosened_Enabled
+ * @tc.desc: test IsSubWindowZLevelAboveParentLoosened with enabled value
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSubWindowZLevelAboveParentLoosened_Enabled, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(true);
+    ASSERT_EQ(true, session->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: IsSubWindowZLevelAboveParentLoosened_NullProperty
+ * @tc.desc: test IsSubWindowZLevelAboveParentLoosened with null property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsSubWindowZLevelAboveParentLoosened_NullProperty, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = nullptr;
+    ASSERT_EQ(false, session->IsSubWindowZLevelAboveParentLoosened());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_Default
+ * @tc.desc: test IsLoosenedWithFreeMultiMode with default values
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_Default, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    ASSERT_EQ(false, session->IsLoosenedWithFreeMultiMode());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_EnabledPc
+ * @tc.desc: test IsLoosenedWithFreeMultiMode with PC mode enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_EnabledPc, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(true);
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(true, session->IsLoosenedWithFreeMultiMode());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_EnabledFreeMulti
+ * @tc.desc: test IsLoosenedWithFreeMultiMode with FreeMulti mode enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_EnabledFreeMulti, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(true);
+    session->systemConfig_.freeMultiWindowEnable_ = true;
+    session->systemConfig_.freeMultiWindowSupport_ = true;
+    ASSERT_EQ(true, session->IsLoosenedWithFreeMultiMode());
+}
+
+/**
+ * @tc.name: IsLoosenedWithFreeMultiMode_NotEnabled
+ * @tc.desc: test IsLoosenedWithFreeMultiMode when zLevel not loosened
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest, IsLoosenedWithFreeMultiMode_NotEnabled, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "TestSession";
+    info.bundleName_ = "TestBundle";
+    sptr<Session> session = sptr<Session>::MakeSptr(info);
+    ASSERT_NE(session, nullptr);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetZLevelAboveParentLoosened(false);
+    session->systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+    ASSERT_EQ(false, session->IsLoosenedWithFreeMultiMode());
 }
 } // namespace
 } // namespace Rosen

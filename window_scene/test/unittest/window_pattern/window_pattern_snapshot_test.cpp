@@ -1410,17 +1410,10 @@ HWTEST_F(WindowPatternSnapshotTest, SetImageForRecentPixelMap, TestSize.Level1)
     sptr<ScenePersistence> scenePersistence = sptr<ScenePersistence>::MakeSptr(bundleName, persistentId);
     sceneSession->scenePersistence_ = scenePersistence;
     ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
-    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo.isSystemApp = false;
-    abilityInfo->applicationInfo = applicationInfo;
-    sceneSession->SetAbilitySessionInfo(abilityInfo);
-    ret = ssm_->SetImageForRecentPixelMap(pixelMap, imageFit, sceneSession->GetPersistentId());
-    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
-
-    applicationInfo.isSystemApp = true;
     abilityInfo->applicationInfo = applicationInfo;
     sceneSession->SetAbilitySessionInfo(abilityInfo);
     sceneSession->state_ = SessionState::STATE_BACKGROUND;
@@ -1452,17 +1445,10 @@ HWTEST_F(WindowPatternSnapshotTest, RemoveImageForRecent, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ sceneSession->GetPersistentId(), sceneSession });
     ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
-    EXPECT_EQ(ret, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
+    EXPECT_EQ(ret, WMError::WM_OK);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
     AppExecFwk::ApplicationInfo applicationInfo;
-    applicationInfo.isSystemApp = false;
-    abilityInfo->applicationInfo = applicationInfo;
-    sceneSession->SetAbilitySessionInfo(abilityInfo);
-    ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
-    EXPECT_EQ(ret, WMError::WM_ERROR_NOT_SYSTEM_APP);
-
-    applicationInfo.isSystemApp = true;
     abilityInfo->applicationInfo = applicationInfo;
     sceneSession->SetAbilitySessionInfo(abilityInfo);
     ret = ssm_->RemoveImageForRecent(sceneSession->GetPersistentId());
@@ -1741,6 +1727,7 @@ HWTEST_F(WindowPatternSnapshotTest, ConfigPersistentScaledSnapshot, TestSize.Lev
         "<Configs>"
         "<persistDifferentScaledSnapshot enable=\"true\"/>"
         "</Configs>";
+    WindowSceneConfig::config_ = ReadConfig(xmlStr);
     ssm_->ConfigPersistentScaledSnapshot();
     EXPECT_EQ(ssm_->enablePersistentScaledSnapshot_, true);
 }

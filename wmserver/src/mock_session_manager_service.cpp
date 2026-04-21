@@ -62,6 +62,7 @@ const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string TEST_MODULE_NAME_SUFFIX = "_test";
 const std::string BOOTEVENT_WMS_READY = "bootevent.wms.ready";
+constexpr ErrCode ERR_OSACCOUNT_NOT_FOREGROUND_USER = 4194342;
 } // namespace
 
 
@@ -911,7 +912,12 @@ void MockSessionManagerService::SetScreenPrivacyWindowTagSwitch(
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "PrivacyWindowTags is empty");
         return;
     }
-    auto sessionManagerService = GetSessionManagerServiceInner(defaultWMSUserId_);
+    int32_t defaultWMSUserId;
+    {
+        std::lock_guard<std::mutex> lock(defaultWMSUserIdMutex_);
+        defaultWMSUserId = defaultWMSUserId_;
+    }
+    auto sessionManagerService = GetSessionManagerServiceInner(defaultWMSUserId);
     if (sessionManagerService == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sessionManagerService is nullptr");
         return;
@@ -1193,6 +1199,11 @@ ErrCode MockSessionManagerService::GetForegroundOsAccountDisplayId(int32_t userI
     ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountDisplayId(userId, displayId);
     TLOGI(WmsLogTag::WMS_RECOVER, "displayId: %{public}" PRIu64, displayId);
     if (err != ERR_OK) {
+        if (err == ERR_OSACCOUNT_NOT_FOREGROUND_USER) {
+            TLOGW(WmsLogTag::WMS_RECOVER, "User is not foreground, use default displayId");
+            displayId = DEFAULT_SCREEN_ID;
+            return ERR_OK;
+        }
         TLOGE(WmsLogTag::WMS_RECOVER,
               "get user display failed, errorCode: %{public}d, userId %{public}d", err, userId);
     }

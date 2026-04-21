@@ -1193,7 +1193,7 @@ ScreenId ScreenSessionManagerProxy::CreateVirtualScreen(VirtualScreenOption virt
         data.WriteString(virtualOption.serialNumber_) &&
         data.WriteString(virtualOption.bundleName_) && data.WriteInt32(virtualOption.userId_) &&
         data.WriteUint32(virtualOption.phyWidth_) && data.WriteUint32(virtualOption.phyHeight_) &&
-        data.WriteInt32(virtualOption.screenId_);
+        data.WriteInt32(virtualOption.screenId_) && data.WriteUint32(static_cast<uint32_t>(virtualOption.caller_));
     if (virtualOption.surface_ != nullptr && virtualOption.surface_->GetProducer() != nullptr) {
         res = res &&
             data.WriteBool(true) &&
@@ -2107,6 +2107,11 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManagerProxy::GetSnapshotByPicker(
 
 sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId)
 {
+    return GetDisplayInfoById(displayId, false);
+}
+
+sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displayId, bool isGetActualInfo)
+{
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGW(WmsLogTag::DMS, "remote is nullptr");
@@ -2122,6 +2127,10 @@ sptr<DisplayInfo> ScreenSessionManagerProxy::GetDisplayInfoById(DisplayId displa
     }
     if (!data.WriteUint64(displayId)) {
         TLOGW(WmsLogTag::DMS, "WriteUint64 displayId failed");
+        return nullptr;
+    }
+    if (!data.WriteBool(isGetActualInfo)) {
+        TLOGW(WmsLogTag::DMS, "WriteBool isGetActualInfo failed");
         return nullptr;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_DISPLAY_BY_ID),
@@ -3203,6 +3212,33 @@ bool ScreenSessionManagerProxy::IsCaptured()
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DEVICE_IS_CAPTURE),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "SendRequest failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool ScreenSessionManagerProxy::IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return false;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
+        return false;
+    }
+    if (!data.WriteStringVector(bundleNameList)) {
+        TLOGE(WmsLogTag::DMS, "Write bundleNameList failed");
+        return false;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_DEVICE_IS_CAPTURE_BY_BUNDLE_LIST),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return false;

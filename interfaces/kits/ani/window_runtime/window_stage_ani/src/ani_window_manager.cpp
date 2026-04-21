@@ -87,7 +87,9 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::NotifyScreenshotEvent)},
         ani_native_function {"setSpecificSystemWindowZIndexSync", "lC{@ohos.window.window.WindowType}i:",
             reinterpret_cast<void *>(AniWindowManager::SetSpecificSystemWindowZIndex)},
-        ani_native_function {"getAllWindowLayoutInfo", "ll:C{std.core.Array}",
+        ani_native_function {"moveMainWindowToTargetDisplaySync", "lli:",
+            reinterpret_cast<void *>(AniWindowManager::MoveMainWindowToTargetDisplay)},
+        ani_native_function {"getAllWindowLayoutInfo", "llC{@ohos.window.window.WindowInfoOptions}:C{std.core.Array}",
             reinterpret_cast<void *>(AniWindowManager::GetAllWindowLayoutInfo)},
         ani_native_function {"toggleShownStateForAllAppWindowsSync", "l:",
             reinterpret_cast<void *>(AniWindowManager::ToggleShownStateForAllAppWindows)},
@@ -99,7 +101,7 @@ ani_status AniWindowManager::AniWindowManagerInit(ani_env* env, ani_namespace wi
             reinterpret_cast<void *>(AniWindowManager::GetVisibleWindowInfo)},
         ani_native_function {"setGestureNavigationEnabled", "lz:",
             reinterpret_cast<void *>(AniWindowManager::SetGestureNavigationEnabled)},
-        ani_native_function {"setWaterMarkImage", "lC{@ohos.multimedia.image.image.PixelMap}z:",
+        ani_native_function {"setWaterMarkImage", "lC{@ohos.multimedia.image.image.PixelMap}zi:",
             reinterpret_cast<void *>(AniWindowManager::SetWaterMarkImage)},
         ani_native_function {"getWindowsByCoordinate",
             "lC{@ohos.window.window.GetWindowsByCoordinateParam}:C{std.core.Array}",
@@ -529,6 +531,48 @@ bool GetConfigProp(ani_env* env, ani_object configuration, const char* propName,
     return true;
 }
 
+bool ParseWindowInfoOptions(ani_env* env, ani_object optionObj, WindowInfoOptions& option)
+{
+    ani_ref result;
+    ani_boolean isPropUndefined = true;
+    GetConfigProp(env, optionObj, "excludeSystemWindows", result, isPropUndefined);
+    if (!isPropUndefined) {
+        ani_boolean boolValue;
+        if (env->Object_CallMethodByName_Boolean(static_cast<ani_object>(result),
+            "toBoolean", ":z", &boolValue) == ANI_OK) {
+            option.excludeSystemWindows = static_cast<bool>(boolValue);
+        }
+    }
+
+    isPropUndefined = true;
+    GetConfigProp(env, optionObj, "foregroundAboveWindow", result, isPropUndefined);
+    if (!isPropUndefined) {
+        ani_int intValue;
+        if (env->Object_CallMethodByName_Int(static_cast<ani_object>(result), "toInt", nullptr, &intValue) == ANI_OK) {
+            option.foregroundAboveWindow = static_cast<int32_t>(intValue);
+        }
+    }
+
+    isPropUndefined = true;
+    GetConfigProp(env, optionObj, "foregroundBelowWindow", result, isPropUndefined);
+    if (!isPropUndefined) {
+        ani_int intValue;
+        if (env->Object_CallMethodByName_Int(static_cast<ani_object>(result), "toInt", nullptr, &intValue) == ANI_OK) {
+            option.foregroundBelowWindow = static_cast<int32_t>(intValue);
+        }
+    }
+
+    if (option.foregroundAboveWindow < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] invalid foregroundAboveWindow=%{public}d", option.foregroundAboveWindow);
+        return false;
+    }
+    if (option.foregroundBelowWindow < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] invalid foregroundBelowWindow=%{public}d", option.foregroundBelowWindow);
+        return false;
+    }
+    return true;
+}
+
 bool ParseOptionalConfigOption(ani_env* env, ani_object configuration, WindowOption &option)
 {
     ani_ref result;
@@ -878,14 +922,16 @@ void AniWindowManager::OnShiftAppWindowTouchEvent(ani_env* env, ani_int sourceWi
     return;
 }
 
-ani_object AniWindowManager::GetAllWindowLayoutInfo(ani_env* env, ani_long nativeObj, ani_long displayId)
+ani_object AniWindowManager::GetAllWindowLayoutInfo(ani_env* env, ani_long nativeObj, ani_long displayId,
+    ani_object optionObj)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
-    return aniWindowManager != nullptr ? aniWindowManager->OnGetAllWindowLayoutInfo(env, displayId) : nullptr;
+    return aniWindowManager != nullptr ? aniWindowManager->OnGetAllWindowLayoutInfo(
+        env, displayId, optionObj) : nullptr;
 }
 
-ani_object AniWindowManager::OnGetAllWindowLayoutInfo(ani_env* env, ani_long displayId)
+ani_object AniWindowManager::OnGetAllWindowLayoutInfo(ani_env* env, ani_long displayId, ani_object optionObj)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     if (static_cast<int64_t>(displayId) < 0 ||
@@ -893,9 +939,18 @@ ani_object AniWindowManager::OnGetAllWindowLayoutInfo(ani_env* env, ani_long dis
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] GetAllWindowLayoutInfo failed, Invalidate params.");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
+    WindowInfoOptions option;
+    if (!ParseWindowInfoOptions(env, optionObj, option)) {
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM, "[ANI] Failed to parse option");
+    }
     std::vector<sptr<WindowLayoutInfo>> infos;
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(static_cast<uint64_t>(displayId), infos));
+    auto errCode = SingletonContainer::Get<WindowManager>().GetAllWindowLayoutInfo(
+        static_cast<uint64_t>(displayId), infos, option);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "[ANI] displayId=%{public}u, option=[%{public}d, %{public}d, %{public}d], errCode=%{public}d",
+        static_cast<uint32_t>(displayId), option.excludeSystemWindows, option.foregroundAboveWindow,
+        option.foregroundBelowWindow, errCode);
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] GetAllWindowLayoutInfo failed, ret:%{public}d", ret);
         return AniWindowUtils::AniThrowError(env, ret, "failed");
@@ -1080,25 +1135,30 @@ void AniWindowManager::OnSetGestureNavigationEnabled(ani_env* env, ani_boolean e
 }
 
 void AniWindowManager::SetWaterMarkImage(ani_env* env, ani_long nativeObj,
-    ani_object nativePixelMap, ani_boolean enable)
+    ani_object nativePixelMap, ani_boolean enable, ani_int priority)
 {
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
     if (aniWindowManager != nullptr) {
-        aniWindowManager->OnSetWaterMarkImage(env, nativePixelMap, enable);
+        aniWindowManager->OnSetWaterMarkImage(env, nativePixelMap, enable, priority);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindowManager is nullptr");
         return;
     }
 }
 
-void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelMap, ani_boolean enable)
+void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelMap, ani_boolean enable,
+    ani_int priority)
 {
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     std::shared_ptr<Media::PixelMap> pixelMap;
     pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, nativePixelMap);
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Failed to convert parameter to PixelMap");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return;
+    }
+    if (priority < 0) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI]enable=%{public}d, priority=%{public}d < 0", enable, priority);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
@@ -1107,7 +1167,22 @@ void AniWindowManager::OnSetWaterMarkImage(ani_env* env, ani_object nativePixelM
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
-    RSInterfaces::GetInstance().ShowWatermark(pixelMap, enable);
+    WMError errCode = WMError::WM_OK;
+    if (enable) {
+        errCode = SingletonContainer::Get<WindowManager>().SetScreenWatermarkImage(pixelMap, priority);
+    } else {
+        errCode = SingletonContainer::Get<WindowManager>().CleanScreenWatermarkImage(pixelMap);
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "enable=%{public}d, priority=%{public}d, errCode=%{public}d",
+        enable, priority, static_cast<int32_t>(errCode));
+    if (errCode == WMError::WM_OK || errCode == WMError::WM_DO_NOTHING) {
+        return;
+    }
+    auto ret = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    if (WM_JS_TO_ERROR_CODE_MAP.count(errCode) > 0) {
+        ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
+    }
+    AniWindowUtils::AniThrowError(env, ret, "setWaterMarkImage failed!");
 }
 
 ani_object AniWindowManager::GetWindowsByCoordinate(ani_env* env, ani_long nativeObj, ani_object getWindowsParam)
@@ -1159,6 +1234,33 @@ ani_object AniWindowManager::OnGetWindowsByCoordinate(ani_env* env, ani_object g
         windows[i] = CreateAniWindowObject(env, window);
     }
     return AniWindowUtils::CreateAniWindowArray(env, windows);
+}
+
+void AniWindowManager::MoveMainWindowToTargetDisplay(ani_env* env, ani_long nativeObj,
+    ani_long displayId, ani_int windowId)
+{
+    AniWindowManager* aniWindowManager = reinterpret_cast<AniWindowManager*>(nativeObj);
+    if (aniWindowManager != nullptr) {
+        aniWindowManager->OnMoveMainWindowToTargetDisplay(env, displayId, windowId);
+    } else {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] aniWindowManager is nullptr");
+    }
+}
+
+void AniWindowManager::OnMoveMainWindowToTargetDisplay(ani_env* env, ani_long displayId, ani_int windowId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "[ANI]");
+    if (static_cast<int64_t>(displayId) < 0) {
+        TLOGE(WmsLogTag::WMS_LIFE, "[ANI] failed, Invalid displayId.");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_DISPLAY,
+            "[window][moveMainWindowToTargetDisplay]msg: parameter verfication failed");
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
+        MoveMainWindowToTargetDisplay(displayId, windowId));
+    if (ret != WmErrorCode::WM_OK) {
+        AniWindowUtils::AniThrowError(env, ret, "[window][moveMainWindowToTargetDisplay]msg:set failed");
+    }
 }
 
 void AniWindowManager::SetSpecificSystemWindowZIndex(ani_env* env, ani_long nativeObj,

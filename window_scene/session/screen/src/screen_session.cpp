@@ -545,6 +545,7 @@ void ScreenSession::SetIsFakeSession(bool isFakeSession)
 
 void ScreenSession::SetPhyWidthAndHeight(uint32_t phyWidth, uint32_t phyHeight)
 {
+    TLOGNFI(WmsLogTag::DMS, "phyWidth=%{public}u, phyHeight=%{public}u", phyWidth, phyHeight);
     property_.SetPhyWidth(phyWidth);
     property_.SetPhyHeight(phyHeight);
     property_.CalculateXYDpi(phyWidth, phyHeight);
@@ -804,28 +805,49 @@ void ScreenSession::UpdatePropertyByResolution(uint32_t width, uint32_t height)
     property_.SetBounds(screenBounds);
 }
 
-void ScreenSession::UpdatePropertyByResolution(const DMRect& rect)
+ScreenProperty ScreenSession::GetPropertyByResolution(const DMRect& rect)
 {
-    auto logicalRect = rect;
-    if (!IsVertical(property_.GetScreenRotation())) {
-        std::swap(logicalRect.width_, logicalRect.height_);
-    }
-    auto screenBounds = property_.GetBounds();
-    screenBounds.rect_.left_ = logicalRect.posX_;
-    screenBounds.rect_.top_ = logicalRect.posY_;
-    screenBounds.rect_.width_ = logicalRect.width_;
-    screenBounds.rect_.height_ = logicalRect.height_;
-    property_.SetBounds(screenBounds);
+    auto newProperty = property_;
+    auto screenBounds = newProperty.GetBounds();
+    screenBounds.rect_.left_ = rect.posX_;
+    screenBounds.rect_.top_ = rect.posY_;
+    screenBounds.rect_.width_ = rect.width_;
+    screenBounds.rect_.height_ = rect.height_;
+    newProperty.SetBounds(screenBounds);
     // Determine whether the touch is in a valid area.
-    property_.SetValidWidth(logicalRect.width_);
-    property_.SetValidHeight(logicalRect.height_);
-    property_.SetInputOffset(rect.posX_, rect.posY_);
+    newProperty.SetValidWidth(rect.width_);
+    newProperty.SetValidHeight(rect.height_);
+    newProperty.SetInputOffset(rect.posX_, rect.posY_);
     // It is used to calculate the original screen size
-    property_.SetScreenAreaWidth(rect.width_);
-    property_.SetScreenAreaHeight(rect.height_);
+    newProperty.SetScreenAreaWidth(rect.width_);
+    newProperty.SetScreenAreaHeight(rect.height_);
     // It is used to calculate the effective area of the inner screen for cursor
-    property_.SetMirrorWidth(rect.width_);
-    property_.SetMirrorHeight(rect.height_);
+    newProperty.SetMirrorWidth(rect.width_);
+    newProperty.SetMirrorHeight(rect.height_);
+    return newProperty;
+}
+
+void ScreenSession::CheckAndNotifyPropertyChange()
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    if (isNeedNotify) {
+        TLOGI(WmsLogTag::DMS, "It's need notify RESOLUTION_EFFECT_CHANGE");
+        NotifyListenerPropertyChange(propertyNeedNotified_, ScreenPropertyChangeReason::RESOLUTION_EFFECT_CHANGE);
+        isNeedNotify = false;
+    }
+}
+
+void ScreenSession::SetPropertyNeedNotified(const ScreenProperty& property)
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    propertyNeedNotified_ = property;
+    isNeedNotify = true;
+}
+
+ScreenProperty ScreenSession::GetPropertyNeedNotified()
+{
+    std::lock_guard<std::mutex> lock(propertyNeedNotifiedMutex_);
+    return propertyNeedNotified_;
 }
 
 void ScreenSession::HandleResolutionEffectPropertyChange(ScreenProperty& screenProperty,
@@ -1782,7 +1804,8 @@ DisplayOrientation ScreenSession::CalcDisplayOrientation(Rotation rotation,
         isVerticalScreen = property_.GetPhyWidth() > property_.GetPhyHeight();
     }
     if (FoldScreenStateInternel::IsSecondaryDisplayFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
+        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() ||
+        FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) {
         isVerticalScreen = true;
     }
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL ||
@@ -2555,6 +2578,11 @@ void ScreenSession::SetExtendProperty(RRect bounds, bool isCurrentOffScreenRende
     property_.SetCurrentOffScreenRendering(isCurrentOffScreenRendering);
 }
 
+void ScreenSession::SetPhyBounds(const RectF& rect)
+{
+    property_.SetPhyBounds(RRect(rect, 0.0f, 0.0f));
+}
+
 void ScreenSession::Resize(uint32_t width, uint32_t height, bool isFreshBoundsSync)
 {
     if (isFreshBoundsSync) {
@@ -2685,13 +2713,13 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
     if (isForceCloseHdr == false) {
         DmsXcollie dmsXcollie("DMS:SetForceCloseHdr:GetScreenHDRStatus", XCOLLIE_TIMEOUT_5S);
         HdrStatus hdrStatus = HdrStatus::NO_HDR;
-        TLOGI(WmsLogTag::DMS, "Start get screen status.");
-        auto ret = RSInterfaces::GetInstance().GetScreenHDRStatus(rsId_, hdrStatus);
+        TLOGI(WmsLogTag::DMS, "Start get screen status, screenId: %{public}" PRIu64, phyScreenId_);
+        auto ret = RSInterfaces::GetInstance().GetScreenHDRStatus(phyScreenId_, hdrStatus);
         if (ret == StatusCode::SUCCESS && hdrStatus == HdrStatus::NO_HDR) {
             hdrDuration = DURATION_0MS;
         }
     }
-    TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d", isForceCloseHdr);
+    TLOGI(WmsLogTag::DMS, "ForceCloseHdr is %{public}d, hdrDuration is %{public}d", isForceCloseHdr, hdrDuration);
     auto rsUIContext = GetRSUIContext();
     RSAnimationTimingProtocol timingProtocol;
     // Duration of the animation
@@ -3360,6 +3388,8 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenProperty.SetScreenAreaHeight(eventPara.GetScreenAreaHeight());
         screenProperty.SetScreenAreaWidth(eventPara.GetScreenAreaWidth());
         screenProperty.SetInputOffset(eventPara.GetInputOffsetX(), eventPara.GetInputOffsetY());
+        screenProperty.SetScreenRealWidth(eventPara.GetScreenRealWidth());
+        screenProperty.SetScreenRealHeight(eventPara.GetScreenRealHeight());
         TLOGI(WmsLogTag::DMS, "ProcPropertyChange : Orientation= %{public}u", deviceOrientation);
     }
     screenProperty.SetPhysicalTouchBounds(GetRotationCorrection(eventPara.GetDisplayMode()));
