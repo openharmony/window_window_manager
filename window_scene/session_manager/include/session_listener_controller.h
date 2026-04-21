@@ -149,6 +149,9 @@ private:
         const std::vector<sptr<SceneSession>>& sessions);
     void OnSessionLifecycleListenerDied(const wptr<IRemoteObject>& remote);
     void RemoveSessionLifecycleListener(const sptr<IRemoteObject>& target);
+    template <typename MapType>
+    void RemoveListenersFromMap(MapType& listenerMap,
+        const std::function<bool(const sptr<ISessionLifecycleListener>&)>& predicate);
 
     template <typename KeyType, typename MapType>
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,
