@@ -66,8 +66,7 @@ void AbstractScreenController::RegisterRsScreenConnectionChangeListener()
         [this](ScreenId rsScreenId,
                ScreenEvent screenEvent,
                ScreenChangeReason reason,
-               sptr<IRemoteObject> 
-                connectToRenderToken) {
+               sptr<IRemoteObject> connectToRenderToken) {
             if (reason == ScreenChangeReason::HWCDEAD) {
                 TLOGE(WmsLogTag::DMS, "hwcdead, ignore");
                 return;
