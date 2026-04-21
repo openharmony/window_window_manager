@@ -6869,7 +6869,7 @@ bool SceneSession::GetEnableGestureBackHadSet()
     return isEnableGestureBackHadSet_;
 }
 
-WMError SceneSession::UpdateNavigationAvoidArea(bool isEnabled)
+WMError SceneSession::SetFloatNavigationEnabled(bool isEnabled)
 {
     return PostSyncTask([weakThis = wptr(this), isEnabled, where = __func__] {
         auto session = weakThis.promote();

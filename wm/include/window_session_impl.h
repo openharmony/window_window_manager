@@ -596,6 +596,10 @@ public:
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
     WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
     WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
+    bool IsFloatNavigationAvoidAreaEnabled(AvoidAreaType type)
+    {
+        return type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && floatNavigationAvoidAreaEnabled_;
+    }
 
     /*
      * Window Property
@@ -989,7 +993,7 @@ protected:
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
     SystemBarSettingFlag systemBarSettingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
     std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
-    std::atomic<bool> isFirstSetFloatNavigationAvoidAreaEnabled_ = true;
+    std::atomic<bool> notifyOnceImmediately_ = true;
 
     /*
      * PC Fold Screen

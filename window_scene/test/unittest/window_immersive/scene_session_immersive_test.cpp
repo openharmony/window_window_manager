@@ -678,7 +678,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
     session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAllAvoidAreas(avoidAreas);
 
-    session->UpdateNavigationAvoidArea(true);
+    session->SetFloatNavigationEnabled(true);
     session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
@@ -726,18 +726,18 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavagationInfo, TestSize.Level1)
 }
 
 /*
- * @tc.name: UpdateNavigationAvoidArea
- * @tc.desc: UpdateNavigationAvoidArea
+ * @tc.name: SetFloatNavigationEnabled
+ * @tc.desc: SetFloatNavigationEnabled
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionImmersiveTest, UpdateNavigationAvoidArea, TestSize.Level1)
+HWTEST_F(SceneSessionImmersiveTest, SetFloatNavigationEnabled, TestSize.Level1)
 {
     SessionInfo info;
-    info.abilityName_ = "UpdateNavigationAvoidArea";
-    info.bundleName_ = "UpdateNavigationAvoidArea";
+    info.abilityName_ = "SetFloatNavigationEnabled";
+    info.bundleName_ = "SetFloatNavigationEnabled";
     sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
-    EXPECT_EQ(session->UpdateNavigationAvoidArea(true), WMError::WM_OK);
-    EXPECT_EQ(session->UpdateNavigationAvoidArea(false), WMError::WM_OK);
+    EXPECT_EQ(session->SetFloatNavigationEnabled(true), WMError::WM_OK);
+    EXPECT_EQ(session->SetFloatNavigationEnabled(false), WMError::WM_OK);
 }
 }
 }

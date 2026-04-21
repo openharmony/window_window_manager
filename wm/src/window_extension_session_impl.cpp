@@ -1356,7 +1356,7 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
 {
     uint32_t currentApiVersion = GetTargetAPIVersionByApplicationInfo();
     apiVersion = (apiVersion == API_VERSION_INVALID) ? static_cast<int32_t>(currentApiVersion) : apiVersion;
-    if (!floatNavigationAvoidAreaEnabled_ && type == AvoidAreaType::TYPE_FLOAT_NAVIGATION) {
+    if (!IsFloatNavigationAvoidAreaEnabled(type)) {
         TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
         return WMError::WM_DO_NOTHING;
     }

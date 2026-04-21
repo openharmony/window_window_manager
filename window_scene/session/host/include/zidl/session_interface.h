@@ -533,7 +533,7 @@ public:
     /**
      *  Float Navigation Avoid Area
      */
-    virtual WMError UpdateNavigationAvoidArea(bool isEnabled) { return WMError::WM_OK; }
+    virtual WMError SetFloatNavigationEnabled(bool isEnabled) { return WMError::WM_OK; }
 
     /**
      * @brief Get waterfall mode.

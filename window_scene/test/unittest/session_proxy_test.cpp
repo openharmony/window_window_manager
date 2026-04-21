@@ -2458,38 +2458,38 @@ HWTEST_F(SessionProxyTest, TestSetDecorVisible, TestSize.Level1)
 }
 
 /*
- * @tc.name: UpdateNavigationAvoidArea
- * @tc.desc: Test UpdateNavigationAvoidArea behavior in various IPC scenarios
+ * @tc.name: SetFloatNavigationEnabled
+ * @tc.desc: Test SetFloatNavigationEnabled behavior in various IPC scenarios
  * @tc.type: FUNC
  */
-HWTEST_F(SessionProxyTest, UpdateNavigationAvoidArea, TestSize.Level1)
+HWTEST_F(SessionProxyTest, SetFloatNavigationEnabled, TestSize.Level1)
 {
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
 
     // Case 1: Failed to write interface token
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateNavigationAvoidArea(true));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->SetFloatNavigationEnabled(true));
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
     // Case 2: Failed to write isVisible
     MockMessageParcel::SetWriteBoolErrorFlag(true);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->UpdateNavigationAvoidArea(true));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, sessionProxy->SetFloatNavigationEnabled(true));
     MockMessageParcel::SetWriteBoolErrorFlag(false);
 
     // Case 3: remote is nullptr
     sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, nullProxy->UpdateNavigationAvoidArea(true));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, nullProxy->SetFloatNavigationEnabled(true));
 
     // Case 4: Failed to send request
     mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
     sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
-    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, failProxy->UpdateNavigationAvoidArea(true));
+    EXPECT_EQ(WMError::WM_ERROR_IPC_FAILED, failProxy->SetFloatNavigationEnabled(true));
 
     // Case 5: Success
     mockRemote->sendRequestResult_ = ERR_NONE;
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
-    EXPECT_EQ(WMError::WM_OK, okProxy->UpdateNavigationAvoidArea(true));
+    EXPECT_EQ(WMError::WM_OK, okProxy->SetFloatNavigationEnabled(true));
 }
 
 /**
