@@ -689,7 +689,8 @@ HWTEST_F(SceneSessionManagerLifecycleTest2,
 
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
-    auto ret = ssm_->RegisterSessionLifecycleListener(listener, sameGroupInfo1.bundleName_, sameGroupInfo1.appIndex_, "");
+    auto ret = ssm_->RegisterSessionLifecycleListener(listener,
+        sameGroupInfo1.bundleName_, sameGroupInfo1.appIndex_, "");
     EXPECT_EQ(ret, WMError::WM_OK);
 
     usleep(WAIT_SYNC_IN_NS);
