@@ -2463,12 +2463,9 @@ HWTEST_F(SceneSessionManagerStubTest, HandleRecoverProcessWatermark, TestSize.Le
 {
     MessageParcel data;
     MessageParcel reply;
-
     data.WriteInt32(123);
     data.WriteString("RecoverProcessWatermarkName");
-
-    int res = stub_->HandleRecoverProcessWatermark(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
+    EXPECT_EQ(stub_->HandleRecoverProcessWatermark(data, reply), ERR_NONE);
 }
 
 /**
