@@ -176,18 +176,7 @@ HWTEST_F(WindowSessionImplTest3, SetForceSplitConfig, TestSize.Level1)
     window_ = GetTestWindowImpl("SetForceSplitConfig");
     ASSERT_NE(window_, nullptr);
 
-    int32_t FORCE_SPLIT_MODE = 5;
-    int32_t NAV_FORCE_SPLIT_MODE = 6;
-    AppForceLandscapeConfig config = { FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
-    window_->SetForceSplitConfig(config);
-
-    config = { FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
-    window_->SetForceSplitConfig(config);
-
-    config = { NAV_FORCE_SPLIT_MODE, true, false, {}, {}, {}, false, false, false, false };
-    window_->SetForceSplitConfig(config);
-
-    config = { NAV_FORCE_SPLIT_MODE, false, false, {}, {}, {}, false, false, false, false };
+    AppForceLandscapeConfig config = { {}, {}, {}, false, false, false, false };
     window_->SetForceSplitConfig(config);
     EXPECT_TRUE(logMsg.find("uiContent is null!") != std::string::npos);
     LOG_SetCallback(nullptr);
