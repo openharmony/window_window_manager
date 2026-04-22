@@ -3452,7 +3452,7 @@ void ScreenSessionManager::UpdateSessionByActiveModeChange(sptr<ScreenSession> s
         return;
     }
     int32_t activeIdx = screenMode.GetScreenModeId();
-    if (!g_isPcDevice) {
+    if (!(g_isPcDevice || IS_SUPPORT_PC_MODE)) {
         screenSession->activeIdx_ = activeIdx;
         screenSession->UpdatePropertyByScreenMode(screenMode);
     } else {
@@ -6194,7 +6194,8 @@ void ScreenSessionManager::CallRsSetScreenPowerStatusSync(ScreenId screenId, Scr
     };
     screenPowerTaskScheduler_->PostVoidSyncTask(rsSetScreenPowerStatusTask, "rsInterface_.SetScreenPowerStatus task");
 #ifdef WM_MULTI_SCREEN_ENABLE
-    if (g_isPcDevice && status == ScreenPowerStatus::POWER_STATUS_ON && IsDefaultMirrorMode(screenId)) {
+    if ((g_isPcDevice || IS_SUPPORT_PC_MODE) && status == ScreenPowerStatus::POWER_STATUS_ON &&
+        IsDefaultMirrorMode(screenId)) {
         TLOGNFI(WmsLogTag::DMS, "set screen active mode, rsScreenId:%{public}" PRId64, screenId);
         RecoverScreenActiveMode(screenId);
         RecoverMultiScreenRelativePosition(screenId);
