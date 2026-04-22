@@ -185,6 +185,7 @@ using NotifyMoveMainWindowToTargetDisplayFunc = std::function<void(DisplayId dis
 using MinimizeAllFunc = std::function<void(DisplayId displayId, int32_t excludeWindlowId)>;
 using PageEnableFunc = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
+using GetFloatViewLimitFunc = std::function<bool(FloatViewLimits& limit)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
@@ -382,6 +383,7 @@ public:
      */
     WSError SyncFloatViewLimits(const FloatViewLimits &limits);
     WMError GetFloatViewLimits(FloatViewLimits& limits) override;
+    void RegisterGetFloatViewLimitCallback(GetFloatViewLimitFunc&& func);
 
     /*
      * Multi User
@@ -2069,6 +2071,7 @@ private:
      * Float view
      */
     std::mutex floatViewLimitsMutex_;
+    GetFloatViewLimitFunc getFloatViewLimitFunc_;
     FloatViewLimits floatViewLimits_ {};
 };
 } // namespace OHOS::Rosen
