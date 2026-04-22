@@ -622,6 +622,9 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidAreaForRoot, TestSize
     session->GetFloatNavigationAvoidAreaForRoot(rect, area, true);
     EXPECT_EQ(session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_FLOAT_NAVIGATION), AvoidArea());
     EXPECT_EQ(session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_NAVIGATION_INDICATOR), AvoidArea());
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetDisplayId(-1);
+    session->GetFloatNavigationAvoidArea(rect, area, true);
 }
 
 /*
@@ -646,7 +649,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
         std::tuple<bool, WSRect, WSRect>& floatNavagationInfo) {
         WSRect rect1;
         floatNavagationInfo = std::tuple<bool, WSRect, WSRect>(true, rect1, rect1);
-        return WSError::WS_OK;
+        return WSError::WS_DO_NOTHING;
     };
     session->GetFloatNavigationAvoidArea(rect, area, false);
     session->GetFloatNavigationAvoidArea(rect, area, true);
@@ -657,6 +660,9 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
         return WSError::WS_OK;
     };
     session->GetFloatNavigationAvoidArea(rect, area, false);
+    session->GetFloatNavigationAvoidArea(rect, area, true);
+    session->property_ = sptr<WindowSessionProperty>::MakeSptr();
+    session->property_->SetDisplayId(-1);
     session->GetFloatNavigationAvoidArea(rect, area, true);
     std::tuple<bool, WSRect, WSRect> info1;
     EXPECT_EQ(session->specificCallback_->onGetFloatNavagationInfo_(1, info1), WSError::WS_OK);
@@ -671,7 +677,7 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavigationAvoidArea, TestSize.Level1
     session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAllAvoidAreas(avoidAreas);
 
-    session->SetFloatNavigationAvoidAreaEnabled(true);
+    session->SetFloatNavigationEnabled(true);
     session->GetAvoidAreaByTypeInner(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAvoidAreaByType(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
     session->GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaType::TYPE_FLOAT_NAVIGATION, rect);
@@ -716,6 +722,21 @@ HWTEST_F(SceneSessionImmersiveTest, GetFloatNavagationInfo, TestSize.Level1)
     EXPECT_EQ(ssm_->GetFloatNavagationInfo(0, info), WSError::WS_DO_NOTHING);
     ssm_->floatNavagationInfoMap_[0] = info;
     EXPECT_EQ(ssm_->GetFloatNavagationInfo(0, info), WSError::WS_OK);
+}
+
+/*
+ * @tc.name: SetFloatNavigationEnabled
+ * @tc.desc: SetFloatNavigationEnabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionImmersiveTest, SetFloatNavigationEnabled, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SetFloatNavigationEnabled";
+    info.bundleName_ = "SetFloatNavigationEnabled";
+    sptr<SceneSession> session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    EXPECT_EQ(session->SetFloatNavigationEnabled(true), WMError::WM_OK);
+    EXPECT_EQ(session->SetFloatNavigationEnabled(false), WMError::WM_OK);
 }
 }
 }

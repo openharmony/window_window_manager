@@ -3091,7 +3091,7 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
     return static_cast<WMError>(ret);
 }
 
-WMError SessionProxy::SetFloatNavigationAvoidAreaEnabled(bool isEnabled)
+WMError SessionProxy::SetFloatNavigationEnabled(bool isEnabled)
 {
     MessageParcel data;
     MessageParcel reply;
