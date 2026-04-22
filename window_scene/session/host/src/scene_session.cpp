@@ -8962,7 +8962,7 @@ bool SceneSession::ShouldProcessAttachStateChange(bool wasAttached, bool isAttac
 {
     // Only proceed if this is from attach/detach operation
     if (!windowAnchorInfo_.isFromAttachOrDetach_) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Window id=%{public}d isFromAttachOrDetach_ is false, skip attach state change",
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Window id=%{public}d isFromAttachOrDetach_ is false, skip attach state change",
             GetPersistentId());
         return false;
     }
@@ -8979,7 +8979,7 @@ bool SceneSession::ShouldProcessAttachStateChange(bool wasAttached, bool isAttac
     bool heightLimitChanged = (oldEffectiveHeightLimit != newEffectiveHeightLimit);
 
     if (!widthLimitChanged && !heightLimitChanged) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "Win id=%{public}d attachState: wasAttach=%{public}d isAttach=%{public}d, "
+        TLOGI(WmsLogTag::WMS_LAYOUT, "Win id=%{public}d attachState: wasAttach=%{public}d isAttach=%{public}d, "
             "widthInt: %{public}d->%{public}d, heightInt: %{public}d->%{public}d, eff unchanged, skip",
             GetPersistentId(), wasAttached, isAttached,
             oldIsIntersectedWidthLimit, windowAnchorInfo_.attachOptions.isIntersectedWidthLimit,
@@ -9054,10 +9054,7 @@ void SceneSession::NotifyRelatedWindowsAttachStateChange(const sptr<Session>& pa
         // Detaching: remove this window's limits from parent and siblings' maps
         // Also clear this window's list
         TLOGI(WmsLogTag::WMS_LAYOUT, "Window id=%{public}d is detaching, notifying related windows", winId);
-
-        // Clear this window's list
-        property->ClearAttachedWindowLimitsList();
-        property->ClearAttachedLimitOptionsList();
+        RequestRemoveAttachedWindowLimits(winId);
 
         // Notify parent (main window will propagate to siblings automatically)
         if (parentSession) {
@@ -9103,6 +9100,11 @@ WSError SceneSession::NotifyAttachedWindowsLimitsChanged(const WindowLimits& new
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
             return;
         }
+
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "%{public}s id=%{public}d, newLimits: "
+            "maxW=%{public}u, maxH=%{public}u, minW=%{public}u, minH=%{public}u, pixelUnit=%{public}u",
+            where, session->GetPersistentId(), newLimits.maxWidth_, newLimits.maxHeight_,
+            newLimits.minWidth_, newLimits.minHeight_, static_cast<uint32_t>(newLimits.pixelUnit_));
 
         // Save the limits that are notified to attached windows
         session->GetSessionProperty()->SetLimitsForAttachedWindows(newLimits);

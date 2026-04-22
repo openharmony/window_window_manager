@@ -5393,6 +5393,9 @@ void SceneSessionManager::RecoverCachedSubSession(int32_t persistentId)
     TLOGI(WmsLogTag::WMS_RECOVER, "Id=%{public}d", persistentId);
     for (auto& sceneSession : iter->second) {
         NotifyCreateSubSession(persistentId, sceneSession);
+        if (sceneSession) {
+            sceneSession->SetWindowAnchorInfo(sceneSession->GetSessionProperty()->GetWindowAnchorInfo());
+        }
     }
     recoverSubSessionCacheMap_.erase(iter);
 }
