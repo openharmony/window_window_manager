@@ -1682,7 +1682,6 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
-    NotifyAppHookWindowInfoUpdated();
     sessionStage_->SetCurrentRotation(currentRotation_);
     windowEventChannel_ = eventChannel;
     SetSurfaceNode(surfaceNode);
@@ -1776,6 +1775,8 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
     if (SessionHelper::IsMainWindow(GetWindowType())) {
         property->SetIsPcAppInPad(GetSessionProperty()->GetIsPcAppInPad());
+        property->SetForceSplitEnable(GetSessionProperty()->GetForceSplitEnable());
+        property->SetHookWindowInfo(GetSessionProperty()->GetHookWindowInfo());
     }
     property->SetSkipSelfWhenShowOnVirtualScreen(GetSessionProperty()->GetSkipSelfWhenShowOnVirtualScreen());
     property->SetSkipEventOnCastPlus(GetSessionProperty()->GetSkipEventOnCastPlus());
@@ -1822,7 +1823,6 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
         return WSError::WS_ERROR_NULLPTR;
     }
     sessionStage_ = sessionStage;
-    NotifyAppHookWindowInfoUpdated();
     SetSurfaceNode(surfaceNode);
     windowEventChannel_ = eventChannel;
     abilityToken_ = token;
@@ -2695,14 +2695,6 @@ WSError Session::NotifyAppForceLandscapeConfigUpdated()
         return WSError::WS_ERROR_NULLPTR;
     }
     return sessionStage_->NotifyAppForceLandscapeConfigUpdated();
-}
-
-WSError Session::NotifyAppHookWindowInfoUpdated()
-{
-    if (!sessionStage_) {
-        return WSError::WS_ERROR_NULLPTR;
-    }
-    return sessionStage_->NotifyAppHookWindowInfoUpdated();
 }
 
 void Session::SetParentSession(const sptr<Session>& session)

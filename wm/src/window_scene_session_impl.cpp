@@ -2229,20 +2229,18 @@ void WindowSceneSessionImpl::Resume(bool isGamePreLaunch)
         isColdStart_, isDidForeground_, isGamePreLaunch);
     isDidForeground_ = true;
     isColdStart_ = false;
-    SetIsGamePreLaunch(isGamePreLaunch);
     NotifyAfterLifecycleResumed(isGamePreLaunch);
 }
 
-void WindowSceneSessionImpl::Pause()
+void WindowSceneSessionImpl::Pause(bool isGamePreLaunch)
 {
-    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d isGamePreLaunch_: %{public}d",
-        isColdStart_, isGamePreLaunch_);
+    TLOGI(WmsLogTag::WMS_LIFE, "in, isColdStart: %{public}d isGamePreLaunch: %{public}d",
+        isColdStart_, isGamePreLaunch);
     isColdStart_ = false;
     NotifyAfterLifecyclePaused();
     auto hostSession = GetHostSession();
-    if (isGamePreLaunch_ && hostSession) {
+    if (isGamePreLaunch && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_CLEAR_GAME_PRELAUNCH_FLAG);
-        ClearIsGamePreLaunch();
     }
 }
 
@@ -8270,7 +8268,7 @@ WMError WindowSceneSessionImpl::GetWindowPropertyInfo(WindowPropertyInfo& window
         windowPropertyInfo.globalDisplayRect.ToString().c_str());
     HookWindowSizeByHookWindowInfo(windowPropertyInfo.windowRect);
     HookWindowSizeByHookWindowInfo(windowPropertyInfo.globalDisplayRect);
-    auto hookWindowInfo = GetAppHookWindowInfo();
+    auto hookWindowInfo = GetProperty()->GetHookWindowInfo();
     if (hookWindowInfo.drawableRectHook) {
         HookWindowSizeByHookWindowInfo(windowPropertyInfo.drawableRect);
     }
@@ -8465,39 +8463,14 @@ WMError WindowSceneSessionImpl::GetAppForceLandscapeConfig(AppForceLandscapeConf
     return hostSession->GetAppForceLandscapeConfig(config);
 }
 
-WMError WindowSceneSessionImpl::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::DEFAULT, "HostSession is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return hostSession->GetAppForceLandscapeConfigEnable(enableForceSplit);
-}
-
 WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigUpdated()
 {
     TLOGI(WmsLogTag::DEFAULT, "in");
     WindowType winType = GetType();
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.supportSplit_ > 0) {
+        (config.containsSysConfig_ || config.containsAppConfig_)) {
         SetForceSplitConfig(config);
-        return WSError::WS_OK;
-    }
-    return WSError::WS_DO_NOTHING;
-}
-
-WSError WindowSceneSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
-    SelectMode selectMode)
-{
-    TLOGI(WmsLogTag::DEFAULT, "in");
-    WindowType winType = GetType();
-    bool enableForceSplit = false;
-    if (WindowHelper::IsMainWindow(winType) &&
-        GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-        SetForceSplitConfigEnable(enableForceSplit, needUpdateViewport, selectMode);
         return WSError::WS_OK;
     }
     return WSError::WS_DO_NOTHING;
@@ -8561,35 +8534,11 @@ void WindowSceneSessionImpl::SendCombinedCompatibleConfigToArkUI()
     TLOGI(WmsLogTag::WMS_COMPAT, "Send combined compatible config to arkui successfully!");
 }
 
-WMError WindowSceneSessionImpl::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
-{
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    return hostSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
-}
-
 WMError WindowSceneSessionImpl::GetSelectMode(SelectMode& selectMode)
 {
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     return hostSession->GetSelectMode(selectMode);
-}
-
-WSError WindowSceneSessionImpl::NotifyAppHookWindowInfoUpdated()
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "in");
-    const WindowType windowType = GetType();
-    if (!WindowHelper::IsMainWindow(windowType)) {
-        return WSError::WS_DO_NOTHING;
-    }
-
-    HookWindowInfo hookWindowInfo{};
-    if (GetAppHookWindowInfoFromServer(hookWindowInfo) != WMError::WM_OK) {
-        return WSError::WS_DO_NOTHING;
-    }
-
-    SetAppHookWindowInfo(hookWindowInfo);
-    return WSError::WS_OK;
 }
 
 WSError WindowSceneSessionImpl::UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
@@ -8600,6 +8549,18 @@ WSError WindowSceneSessionImpl::UpdateAppHookWindowInfo(const HookWindowInfo& ho
         return WSError::WS_DO_NOTHING;
     }
     SetAppHookWindowInfo(hookWindowInfo);
+    return WSError::WS_OK;
+}
+
+WSError WindowSceneSessionImpl::SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport,
+    SelectMode selectMode)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "in");
+    const WindowType windowType = GetType();
+    if (!WindowHelper::IsMainWindow(windowType)) {
+        return WSError::WS_DO_NOTHING;
+    }
+    SetForceSplitConfigEnable(isForceSplitEnabled, needUpdateViewport, selectMode);
     return WSError::WS_OK;
 }
 
