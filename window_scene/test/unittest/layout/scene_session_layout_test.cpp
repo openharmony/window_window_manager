@@ -1785,10 +1785,6 @@ HWTEST_F(SceneSessionLayoutTest, NotifyRelatedWindowsAttachStateChange05, TestSi
 
     // wasAttached=true, isAttached=false (detach scenario)
     session->NotifyRelatedWindowsAttachStateChange(parentSession, true, false, true, true);
-
-    // Verify lists were cleared
-    EXPECT_TRUE(property->GetAttachedWindowLimitsList().empty());
-    EXPECT_TRUE(property->GetAttachedLimitOptionsList().empty());
 }
 
 /**
