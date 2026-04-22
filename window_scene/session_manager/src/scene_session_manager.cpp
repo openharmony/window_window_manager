@@ -10106,9 +10106,11 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         if (displayId != currentDisplayId || !isPrivate) {
             continue;
         }
-        auto sessionState = GetSessionStateForPrivacy(sceneSession);
-        bool isForeground = sessionState == SessionState::STATE_FOREGROUND ||
-                            sessionState == SessionState::STATE_ACTIVE;
+        bool isForeground = sceneSession->GetRSVisible();
+        if (!IsScreenLocked()) {
+            auto sessionState = GetRealSessionState(sceneSession);
+            isForeground = sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE;
+        }
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
             TLOGW(WmsLogTag::WMS_ATTRIBUTE, "found privacy win=[%{public}d, %{public}s], display=%{public}" PRIu64,
@@ -10131,7 +10133,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
     }
 }
 
-SessionState SceneSessionManager::GetSessionStateForPrivacy(const sptr<SceneSession>& session)
+SessionState SceneSessionManager::GetRealSessionState(const sptr<SceneSession>& session)
 {
     auto state = SessionState::STATE_DISCONNECT;
     if (session == nullptr) {
@@ -10151,7 +10153,7 @@ SessionState SceneSessionManager::GetSessionStateForPrivacy(const sptr<SceneSess
         return state;
     }
     auto winId = session->GetWindowId();
-    auto parent = GetSceneSessionNoLock(session->GetSessionProperty()->GetParentPersistentId());
+    auto parent = GetSceneSessionNoLock(session->GetParentPersistentId());
     while (parent != nullptr) {
         winType = parent->GetWindowType();
         TLOGD(WmsLogTag::WMS_ATTRIBUTE,
@@ -10162,7 +10164,7 @@ SessionState SceneSessionManager::GetSessionStateForPrivacy(const sptr<SceneSess
             break;
         }
         winId = parent->GetWindowId();
-        parent = GetSceneSessionNoLock(parent->GetSessionProperty()->GetParentPersistentId());
+        parent = GetSceneSessionNoLock(parent->GetParentPersistentId());
     }
     if (parent != nullptr) {
         state = parent->GetSessionState();
