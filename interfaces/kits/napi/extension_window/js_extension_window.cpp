@@ -190,10 +190,10 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
         JsExtensionWindow::IsWindowSupportWideGamut);
     BindNativeFunction(env, objValue, "getGlobalRect", moduleName, JsExtensionWindow::GetGlobalScaledRect);
     BindNativeFunction(env, objValue, "getStatusBarProperty", moduleName, JsExtensionWindow::GetStatusBarProperty);
+    BindNativeFunction(env, objValue, "getWindowStatus", moduleName, JsExtensionWindow::GetWindowStatus);
 
     //return default value
     BindNativeFunction(env, objValue, "getTitleButtonRect", moduleName, JsExtensionWindow::GetTitleButtonRect);
-    BindNativeFunction(env, objValue, "getWindowStatus", moduleName, JsExtensionWindow::GetWindowStatus);
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
     BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
         JsExtensionWindow::GetWindowSystemBarProperties);
