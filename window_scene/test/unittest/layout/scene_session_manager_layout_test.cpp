@@ -451,6 +451,23 @@ HWTEST_F(SceneSessionManagerLayoutTest, TestRunAfterNVsyncs, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestRegisterUpdateAppHookDisplayInfoFunc
+ * @tc.desc: Verify RegisterUpdateAppHookDisplayInfoFunc behavior
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLayoutTest, TestRegisterUpdateAppHookDisplayInfoFunc, TestSize.Level1)
+{
+    // Case 1: sceneSession is nullptr
+    ssm_->RegisterUpdateAppHookDisplayInfoFunc(nullptr);
+
+    // Case 2: valid sceneSession
+    SessionInfo info;
+    auto session = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->RegisterUpdateAppHookDisplayInfoFunc(session);
+    EXPECT_NE(session->updateAppHookDisplayInfoFunc_, nullptr);
+}
+
+/**
  * @tc.name: GetAllWindowLayoutInfo
  * @tc.desc: test function : GetAllWindowLayoutInfo
  * @tc.type: FUNC

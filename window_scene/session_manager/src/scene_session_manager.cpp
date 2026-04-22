@@ -3513,6 +3513,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
     RegisterClientDisplayIdChangeNotifyManagerFunc(sceneSession);
     RegisterGetRsCmdBlockingCountFunc(sceneSession);
+    RegisterUpdateAppHookDisplayInfoFunc(sceneSession);
     BindVsyncStation(sceneSession);
 }
 
@@ -13846,7 +13847,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     sceneSession->UpdateSizeChangeReason(SizeChangeReason::AVOID_AREA_CHANGE);
-    sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
+    sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", std::nullopt, nullptr);
 }
 
 void SceneSessionManager::UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate)
@@ -15175,6 +15176,17 @@ void SceneSessionManager::RegisterGetRsCmdBlockingCountFunc(const sptr<SceneSess
     TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
+void SceneSessionManager::RegisterUpdateAppHookDisplayInfoFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+        return;
+    }
+    sceneSession->SetUpdateAppHookDisplayInfoFunc([this](int32_t uid, const HookInfo& hookInfo, bool enable) {
+        return UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    });
+}
+
 WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId %{public}d", persistentId);
@@ -15959,7 +15971,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession && sceneSession->IsDirtyWindow()) {
-                sceneSession->NotifyClientToUpdateRect("AfterLayoutFromPersistentTask", rsTransaction);
+                sceneSession->NotifyClientToUpdateRect("AfterLayoutFromPersistentTask", std::nullopt, rsTransaction);
             }
         }
     };
