@@ -15888,10 +15888,11 @@ WSError SceneSessionManager::GetAppMainSceneSession(int32_t persistentId, sptr<S
 }
 
 std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap(const int32_t persistentId,
-    const float scaleParam, SnapshotNodeType snapshotNode, bool needSnapshot)
+    const float scaleParam, SnapshotNodeType snapshotNode, bool needSnapshot, bool disableBlur)
 {
-    TLOGI(WmsLogTag::WMS_PATTERN, "id:%{public}d, scale:%{public}f, snapshotNode:%{public}d, needSnapshot:%{public}d",
-        persistentId, scaleParam, snapshotNode, needSnapshot);
+    TLOGI(WmsLogTag::WMS_PATTERN, "id:%{public}d, scale:%{public}f, snapshotNode:%{public}d, "
+        "needSnapshot:%{public}d, disableBlur:%{public}d",
+        persistentId, scaleParam, snapshotNode, needSnapshot, disableBlur);
     auto sceneSession = GetSceneSession(persistentId);
     if (!sceneSession) {
         TLOGE(WmsLogTag::WMS_MAIN, "get scene session is nullptr");
@@ -15905,7 +15906,7 @@ std::shared_ptr<Media::PixelMap> SceneSessionManager::GetSessionSnapshotPixelMap
         isPc : (snapshotNode == SnapshotNodeType::LEASH_NODE) ? false : true;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     if (needSnapshot && !sceneSession->IsPersistentImageFit()) {
-        pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow);
+        pixelMap = sceneSession->Snapshot(true, scaleParam, useCurWindow, disableBlur);
     }
     if (!pixelMap) {
         TLOGI(WmsLogTag::WMS_MAIN, "get local snapshot pixelmap start");
