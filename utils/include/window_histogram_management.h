@@ -79,21 +79,34 @@ constexpr int32_t WM_ERROR_BASE = 1300000;
 
 /**
  * @brief Maximum value for WM error code histogram
- * @note Equals to WM_ERROR_DEVICE_NOT_SUPPORT (801),
- *       which is the maximum value below WM_ERROR_BASE
+ * @note The maximum index is 54 (mapped from WM_ERROR_DEVICE_NOT_SUPPORT)
  */
-constexpr int32_t WM_ERROR_HISTOGRAM_MAX = 801;
+constexpr int32_t WM_ERROR_HISTOGRAM_MAX = 54;
 
 /**
  * @brief Convert WmErrorCode to histogram index
  * @param error - WmErrorCode enum value
- * @return Index value (0, 1, 2, ...), values >= WM_ERROR_BASE will be converted by subtracting WM_ERROR_BASE
+ * @return Index value:
+ *         - WM_OK -> 0
+ *         - WM_ERROR_NO_PERMISSION (201) -> 51
+ *         - WM_ERROR_NOT_SYSTEM_APP (202) -> 52
+ *         - WM_ERROR_INVALID_PARAM (401) -> 53
+ *         - WM_ERROR_DEVICE_NOT_SUPPORT (801) -> 54
+ *         - values >= WM_ERROR_BASE (1300000) -> value - WM_ERROR_BASE (1, 2, 3, ...)
  * @note constexpr function enables compile-time evaluation when error is a compile-time constant
  */
 constexpr int32_t WmErrorCodeToIndex(WmErrorCode error)
 {
-    int32_t value = static_cast<int32_t>(error);
-    return (value >= WM_ERROR_BASE) ? (value - WM_ERROR_BASE) : value;
+    switch (error) {
+        case WmErrorCode::WM_ERROR_NO_PERMISSION: return 51;
+        case WmErrorCode::WM_ERROR_NOT_SYSTEM_APP: return 52;
+        case WmErrorCode::WM_ERROR_INVALID_PARAM: return 53;
+        case WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT: return 54;
+        default: {
+            int32_t value = static_cast<int32_t>(error);
+            return (value >= WM_ERROR_BASE) ? (value - WM_ERROR_BASE) : 0;
+        }
+    }
 }
 
 /**
