@@ -1691,9 +1691,12 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     SetCallingPid(pid);
     callingUid_ = uid;
     UpdateSessionState(SessionState::STATE_CONNECT);
-    WindowHelper::IsUIExtensionWindow(GetWindowType()) ?
-        UpdateRect(GetSessionRect(), SizeChangeReason::UNDEFINED, "Connect") :
-        NotifyClientToUpdateRect("Connect", nullptr);
+
+    // Window Layout
+    const auto prelayoutContext = GetPrelayoutContext();
+    HandleInitialRect(prelayoutContext);
+    HandleHookDisplay(prelayoutContext);
+
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
     if (WindowHelper::IsSubWindow(GetWindowType()) && surfaceNode_ != nullptr) {
@@ -3863,6 +3866,11 @@ void Session::SetBufferAvailableChangeListener(const NotifyBufferAvailableChange
 void Session::SetGetRsCmdBlockingCountFunc(const GetRsCmdBlockingCountFunc& func)
 {
     getRsCmdBlockingCountFunc_ = func;
+}
+
+void Session::SetUpdateAppHookDisplayInfoFunc(const UpdateAppHookDisplayInfoFunc& func)
+{
+    updateAppHookDisplayInfoFunc_ = func;
 }
 
 void Session::SetAcquireRotateAnimationConfigFunc(const AcquireRotateAnimationConfigFunc& func)
@@ -6126,5 +6134,76 @@ WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
         return sessionStage_->UpdateIsShowDecorInFreeMultiWindow(isShow);
     }
     return WSError::WS_OK;
+}
+
+PrelayoutContext Session::GetPrelayoutContext()
+{
+    PrelayoutContext ctx;
+
+    // Enable prelayout only for game prelaunch to improve launch experience.
+    ctx.enable = sessionInfo_.isGamePrelaunch_;
+    if (!ctx.enable) {
+        return ctx;
+    }
+
+    const auto preCalc = PreCalcWindowProperty();
+
+    // Use pre-calculated size as initial window rect (position defaults to origin).
+    ctx.winRect = {
+        0, 0,
+        static_cast<int32_t>(preCalc.width),
+        static_cast<int32_t>(preCalc.height)
+    };
+
+    auto screenSession = ScreenSessionManagerClient::GetInstance()
+        .GetScreenSession(GetSessionProperty()->GetDisplayId());
+    const float density = screenSession ?
+        screenSession->GetScreenProperty().GetDensity() : 1.0f; // 1.0: default density
+
+    ctx.display = {
+        .width = preCalc.width,
+        .height = preCalc.height,
+        .density = density,
+        .rotation = preCalc.rotation
+    };
+    TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, ctx: %{public}s",
+          GetPersistentId(), ctx.ToString().c_str());
+    return ctx;
+}
+
+void Session::HandleInitialRect(const PrelayoutContext& ctx)
+{
+    if (WindowHelper::IsUIExtensionWindow(GetWindowType())) {
+        UpdateRect(GetSessionRect(), SizeChangeReason::UNDEFINED, "Connect");
+        return;
+    }
+
+    const std::optional<WSRect> rect =
+        ctx.enable ? std::make_optional(ctx.winRect) : std::nullopt;
+
+    NotifyClientToUpdateRect("Connect", rect, nullptr);
+}
+
+void Session::HandleHookDisplay(const PrelayoutContext& ctx)
+{
+    if (!ctx.enable || !updateAppHookDisplayInfoFunc_) {
+        return;
+    }
+
+    const HookInfo hookInfo = {
+        .width_ = ctx.display.width,
+        .height_ = ctx.display.height,
+        .density_ = ctx.display.density,
+        .rotation_ = ctx.display.rotation,
+        .enableHookRotation_ = true
+    };
+
+    const auto ret = updateAppHookDisplayInfoFunc_(callingUid_, hookInfo, true);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT,
+              "Failed to update app hook display info. id: %{public}d, uid: %{public}d, ret: %{public}d",
+              GetPersistentId(), callingUid_, ret);
+        return;
+    }
 }
 } // namespace OHOS::Rosen

@@ -1938,7 +1938,7 @@ WSError SceneSession::UpdateRect(const WSRect& rect, SizeChangeReason reason,
             session->SetWinRectWhenUpdateRect(rect);
         } else {
             session->SetWinRectWhenUpdateRect(rect);
-            session->NotifyClientToUpdateRect(updateReason, rsTransaction);
+            session->NotifyClientToUpdateRect(updateReason, std::nullopt, rsTransaction);
         }
         session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
         session->AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT));
@@ -1964,27 +1964,33 @@ void SceneSession::SetWinRectWhenUpdateRect(const WSRect& rect)
 }
 
 WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReason,
-    std::shared_ptr<RSTransaction> rsTransaction)
+                                                   std::optional<WSRect> updateRect,
+                                                   std::shared_ptr<RSTransaction> rsTransaction)
 {
-    WSRect winRect = GetSessionRect();
+    auto persistentId = GetPersistentId();
     SizeChangeReason reason = GetSizeChangeReason();
-    TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, reason:%{public}d, rect:%{public}s",
-        GetPersistentId(), reason, winRect.ToString().c_str());
-    bool isMoveOrDrag = moveDragController_ &&
-        (moveDragController_->GetStartDragFlag() || moveDragController_->GetStartMoveFlag());
-    if (isMoveOrDrag && reason == SizeChangeReason::UNDEFINED) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "skip redundant rect update!");
-        return WSError::WS_ERROR_REPEAT_OPERATION;
+    WSRect winRect = updateRect.value_or(GetSessionRect());
+
+    TLOGD(WmsLogTag::WMS_LAYOUT,
+          "id: %{public}d, reason: %{public}d, rect: %{public}s",
+          persistentId, reason, winRect.ToString().c_str());
+
+    if (reason == SizeChangeReason::UNDEFINED && (IsDragZooming() || IsDragMoving())) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Skip update rect. id: %{public}d, rect: %{public}s",
+              persistentId, winRect.ToString().c_str());
+        return WSError::WS_DO_NOTHING;
     }
+
     if (reason != SizeChangeReason::DRAG_MOVE) {
         UpdateCrossAxisOfLayout(winRect);
         if (reason != SizeChangeReason::DRAG) {
             UpdatePrivateStateOfLayout(winRect);
         }
     }
+
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "SceneSession::NotifyClientToUpdateRect%d [%d, %d, %u, %u] reason:%u",
-        GetPersistentId(), winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
+        persistentId, winRect.posX_, winRect.posY_, winRect.width_, winRect.height_, reason);
 
     std::map<AvoidAreaType, AvoidArea> avoidAreas;
     if (GetForegroundInteractiveStatus()) {
@@ -1994,45 +2000,49 @@ WSError SceneSession::NotifyClientToUpdateRectTask(const std::string& updateReas
             GetAllAvoidAreas(avoidAreas);
         }
     } else {
-        TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", GetPersistentId());
-    }
-    if (winRect.IsInvalid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "id:%{public}d rect:%{public}s is invalid",
-            GetPersistentId(), winRect.ToString().c_str());
-        return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
-    }
-    WSError ret = WSError::WS_OK;
-    // once reason is undefined, not use rsTransaction
-    // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
-    if (reason == SizeChangeReason::UNDEFINED || reason == SizeChangeReason::RESIZE || IsMoveToOrDragMove(reason)) {
-        ret = Session::UpdateRectWithLayoutInfo(GetSessionRect(), reason, updateReason, nullptr, avoidAreas);
-    } else {
-        ret = Session::UpdateRectWithLayoutInfo(GetSessionRect(), reason, updateReason, rsTransaction, avoidAreas);
-#ifdef DEVICE_STATUS_ENABLE
-        // When the drag is in progress, the drag window needs to be notified to rotate.
-        if (rsTransaction != nullptr) {
-            RotateDragWindow(rsTransaction);
-        }
-#endif // DEVICE_STATUS_ENABLE
+        TLOGD(WmsLogTag::WMS_IMMS, "win [%{public}d] avoid area update rejected by recent", persistentId);
     }
 
+    if (winRect.IsInvalid()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid rect. id: %{public}d, rect: %{public}s",
+              persistentId, winRect.ToString().c_str());
+        return WSError::WS_ERROR_INVALID_WINDOW_MODE_OR_SIZE;
+    }
+
+    // once reason is undefined, not use rsTransaction
+    // when rotation, sync cnt++ in marshalling. Although reason is undefined caused by resize
+    bool noNeedTrans = reason == SizeChangeReason::UNDEFINED || reason == SizeChangeReason::RESIZE ||
+                       reason == SizeChangeReason::MOVE || reason == SizeChangeReason::DRAG_MOVE;
+    auto transaction = noNeedTrans ? nullptr : rsTransaction;
+    WSError ret = Session::UpdateRectWithLayoutInfo(winRect, reason, updateReason, transaction, avoidAreas);
+#ifdef DEVICE_STATUS_ENABLE
+    // In window rotation scenarios, a transaction will be provided. By reusing this
+    // transaction, RS can synchronously apply rotation to both the main window and
+    // the dragged sub window (if present), ensuring consistent animation.
+    // Typical scenario: dragging a thumbnail in Gallery creates a sub window; upon
+    // device rotation, both windows should rotate synchronously.
+    //
+    // NOTE: Passing a transaction in non-rotation scenarios will not cause issues
+    // here. This is a temporary solution with strong coupling to the update path.
+    // It should be refined to handle rotation scenarios only.
+    if (transaction != nullptr) {
+        RotateDragWindow(transaction);
+    }
+#endif // DEVICE_STATUS_ENABLE
     return ret;
 }
 
 WSError SceneSession::NotifyClientToUpdateRect(const std::string& updateReason,
-    std::shared_ptr<RSTransaction> rsTransaction)
+                                               std::optional<WSRect> updateRect,
+                                               std::shared_ptr<RSTransaction> rsTransaction)
 {
-    PostTask([weakThis = wptr(this), rsTransaction, updateReason, where = __func__] {
+    PostTask([weakThis = wptr(this), updateReason, updateRect, rsTransaction, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s session is null", where);
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
+            return;
         }
-        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
-        if (ret != WSError::WS_OK) {
-            return ret;
-        }
-        return ret;
+        session->NotifyClientToUpdateRectTask(updateReason, updateRect, rsTransaction);
     }, __func__);
     return WSError::WS_OK;
 }
@@ -4507,7 +4517,7 @@ void SceneSession::OnNextVsyncReceivedWhenDrag(
                 winRect.width_, winRect.height_, session->GetSizeChangeReason());
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: id:%{public}u, winRect:%{public}s",
                 where, session->GetPersistentId(), winRect.ToString().c_str());
-            session->NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+            session->NotifyClientToUpdateRect("OnMoveDragCallback", std::nullopt, nullptr);
             if (!session->moveDragController_) {
                 TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session moveDragController is null", where);
             } else if (needSetBoundsNextVsync && session->moveDragController_->GetStartDragFlag()) {
@@ -5006,7 +5016,7 @@ WSError SceneSession::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy
             keyFramePolicy_ = keyFramePolicy;
         }
         InitKeyFrameState(GetSessionRect());
-        NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+        NotifyClientToUpdateRect("OnMoveDragCallback", std::nullopt, nullptr);
     } else {
         bool stopping = currentKeyFramePolicy.stopping_;
         std::lock_guard<std::mutex> lock(keyFrameMutex_);
@@ -5110,7 +5120,7 @@ void SceneSession::OnKeyFrameNextVsync(uint64_t count)
         layoutController_->SetSessionRect(lastKeyFrameDragRect_);
         lastKeyFrameRect_ = lastKeyFrameDragRect_;
         if (isToNotice) {
-            NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+            NotifyClientToUpdateRect("OnMoveDragCallback", std::nullopt, nullptr);
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT, "to notice for key frame drag paused: %{public}d", isToNotice);
     }
@@ -5124,7 +5134,7 @@ bool SceneSession::KeyFrameNotifyFilter(const WSRect& rect, SizeChangeReason rea
         return false;
     }
     if (reason == SizeChangeReason::DRAG_START) {
-        NotifyClientToUpdateRect("OnMoveDragCallback", nullptr);
+        NotifyClientToUpdateRect("OnMoveDragCallback", std::nullopt, nullptr);
         return true;
     }
     if (reason != SizeChangeReason::DRAG) {
@@ -9612,7 +9622,7 @@ bool SceneSession::UpdateRectInner(const SessionUIParam& uiParam, SizeChangeReas
     if (WindowHelper::IsSubWindow(GetWindowType())) {
         isSubWindowResizingOrMoving_ = false;
     }
-    NotifyClientToUpdateRect("WMSPipeline", RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext()));
+    NotifyClientToUpdateRect("WMSPipeline", std::nullopt, RSSyncTransactionAdapter::GetRSTransaction(GetRSUIContext()));
     return true;
 }
 

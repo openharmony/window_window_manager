@@ -80,15 +80,16 @@ WSError SCBSystemSession::ProcessPointDownSession(int32_t posX, int32_t posY)
 }
 
 WSError SCBSystemSession::NotifyClientToUpdateRect(const std::string& updateReason,
-    std::shared_ptr<RSTransaction> rsTransaction)
+                                                   std::optional<WSRect> updateRect,
+                                                   std::shared_ptr<RSTransaction> rsTransaction)
 {
-    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), updateReason, updateRect, rsTransaction, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            WLOGFE("session is null");
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
+        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, updateRect, rsTransaction);
         if (session->specificCallback_ != nullptr && session->specificCallback_->onUpdateAvoidArea_ != nullptr) {
             if (Session::IsScbCoreEnabled()) {
                 session->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::AVOID_AREA);

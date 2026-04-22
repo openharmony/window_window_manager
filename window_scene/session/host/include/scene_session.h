@@ -309,8 +309,22 @@ public:
     WSRect GetSessionGlobalRectWithSingleHandScale();
     WSRect GetMoveRectForWindowDrag();
     void UpdateSessionState(SessionState state) override;
-    virtual WSError NotifyClientToUpdateRect(const std::string& updateReason,
-        std::shared_ptr<RSTransaction> rsTransaction) override;
+
+    /**
+     * @brief Asynchronously notify client to update window rectangle.
+     *
+     * Posts a task to execute the update in NotifyClientToUpdateRectTask().
+     *
+     * @param updateReason Reason for the update.
+     * @param updateRect Optional target rectangle.
+     * @param rsTransaction RS transaction for synchronized rendering.
+     *
+     * @return Always returns WSError::WS_OK.
+     */
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+                                     std::optional<WSRect> updateRect,
+                                     std::shared_ptr<RSTransaction> rsTransaction) override;
+
     void SetWinRectWhenUpdateRect(const WSRect& rect);
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
@@ -1127,7 +1141,20 @@ public:
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     std::string GetRatioPreferenceKey();
-    WSError NotifyClientToUpdateRectTask(const std::string& updateReason, std::shared_ptr<RSTransaction> rsTransaction);
+
+    /**
+     * @brief Perform notifying client to update window rectangle.
+     *
+     * @param updateReason Reason for the update.
+     * @param updateRect Optional target rectangle; nullopt means use current rect.
+     * @param rsTransaction RS transaction for synchronized rendering.
+     *
+     * @return WSError::WS_OK on success, or an appropriate error code on failure.
+     */
+    WSError NotifyClientToUpdateRectTask(const std::string& updateReason,
+                                         std::optional<WSRect> updateRect,
+                                         std::shared_ptr<RSTransaction> rsTransaction);
+
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
 
     std::string GetRectInfo(const WSRect& rect)
