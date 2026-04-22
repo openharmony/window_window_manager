@@ -21062,6 +21062,18 @@ void SceneSessionManager::NotifyRotationBegin()
     SceneInputManager::GetInstance().SetIsRotationBegin(true);
 }
 
+WMError SceneSessionManager::GetFloatViewLimits(FloatViewLimits &limits)
+{
+    std::lock_guard<std::mutex> lock(floatViewLimitsMutex_);
+    limits = floatViewLimits_;
+    return WMError::WM_OK;
+}
+
+void SceneSessionManager::RegisterGetFloatViewLimitCallback(GetFloatViewLimitFunc&& func)
+{
+    getFloatViewLimitFunc_ = std::move(func);
+}
+
 void SceneSessionManager::SetSelectMode(SelectMode selectMode)
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "set SelectMode from %{public}u to %{public}u",
@@ -21072,13 +21084,6 @@ void SceneSessionManager::SetSelectMode(SelectMode selectMode)
 SelectMode SceneSessionManager::GetSelectMode() const
 {
     return selectMode_.load();
-}
-
-WMError SceneSessionManager::GetFloatViewLimits(FloatViewLimits &limits)
-{
-    std::lock_guard<std::mutex> lock(floatViewLimitsMutex_);
-    limits = floatViewLimits_;
-    return WMError::WM_OK;
 }
 
 } // namespace OHOS::Rosen
