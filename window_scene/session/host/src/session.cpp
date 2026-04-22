@@ -3146,7 +3146,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const SnapshotOptions& option
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = options.useCurWindow,
-        .isSync = options.windowSync,
+        .windowSync = options.windowSync,
         .backGroundColor = GetBackgroundColor(),
     };
     bool ret = false;
