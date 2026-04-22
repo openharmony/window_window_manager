@@ -3505,7 +3505,7 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
         Session::SnapshotOptions options;
         options.runInFfrt = runInFfrt;
         options.useCurWindow = updateSnapshot;
-        options.windowSync = true;
+        options.windowSync = session->systemConfig_.IsPhoneWindow() || session->systemConfig_.IsPadWindow();
         auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(options);
         if (pixelMap == nullptr) {
             return;
