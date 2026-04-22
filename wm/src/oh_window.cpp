@@ -431,17 +431,22 @@ WindowManager_ErrorCode RegisterDensityInfoChangeCallbackInner(
 WindowManager_ErrorCode UnregisterDensityInfoChangeCallbackInner(int32_t windowId, uintptr_t callbackId)
 {
     OHOS::sptr<OHDensityInfoChangeListener> listener = nullptr;
+    bool hasRegisteredListener = false;
     {
         std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
-        if (!FindDensityInfoChangeListener(windowId, callbackId, listener)) {
-            return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
-        }
+        hasRegisteredListener = FindDensityInfoChangeListener(windowId, callbackId, listener);
     }
     auto window = Window::GetWindowWithId(windowId);
     if (window == nullptr) {
+        if (!hasRegisteredListener) {
+            return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
+        }
         std::lock_guard<std::mutex> lock(g_densityInfoChangeCallbackMutex);
         EraseDensityInfoChangeListener(windowId, callbackId);
         return WindowManager_ErrorCode::OK;
+    }
+    if (!hasRegisteredListener) {
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     WMError retSystem = window->UnregisterSystemDensityChangeListener(listener);
     if (retSystem != WMError::WM_OK) {
@@ -917,10 +922,11 @@ int32_t OH_WindowManager_GetDensityInfoCopy(int32_t windowId, const OH_WindowMan
         }
         errCode = GetDensityInfoInner(windowId, *densityInfoInner);
         if (errCode != WindowManager_ErrorCode::OK) {
+            *info = nullptr;
             return;
         }
         *info = densityInfoInner.release();
-        }, __func__);
+    }, __func__);
     return errCode;
 }
 
@@ -950,7 +956,7 @@ int32_t OH_WindowManager_RegisterDensityInfoChangeCallback(
     auto callbackId = reinterpret_cast<uintptr_t>(callback);
     eventHandler->PostSyncTask([windowId, callback, callbackId, &errCode] {
         errCode = RegisterDensityInfoChangeCallbackInner(windowId, callback, callbackId);
-        }, __func__);
+    }, __func__);
     return errCode;
 }
 
@@ -959,6 +965,10 @@ int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
 {
     if (callback == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "callback is null, windowId:%{public}d", windowId);
+        return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
+    }
+    if (windowId < 1) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId is invalid, windowId:%{public}d", windowId);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INCORRECT_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
@@ -970,7 +980,7 @@ int32_t OH_WindowManager_UnregisterDensityInfoChangeCallback(
     auto callbackId = reinterpret_cast<uintptr_t>(callback);
     eventHandler->PostSyncTask([windowId, callbackId, &errCode] {
         errCode = UnregisterDensityInfoChangeCallbackInner(windowId, callbackId);
-        }, __func__);
+    }, __func__);
     return errCode;
 }
 
