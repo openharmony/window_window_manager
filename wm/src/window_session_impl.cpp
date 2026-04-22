@@ -2040,6 +2040,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         for (const auto& [type, avoidArea] : avoidAreas) {
             TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
                 type, avoidArea.ToString().c_str());
+            if (!IsFloatNavigationAvoidAreaEnabled(type)) {
+                continue;
+            }
             if ((lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() && type != AvoidAreaType::TYPE_CUTOUT) ||
                 lastAvoidAreaMap_[type] != avoidArea) {
                 lastAvoidAreaMap_[type] = avoidArea;
@@ -6697,6 +6700,9 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
         if (!window) {
             return;
         }
+        if (!window->IsFloatNavigationAvoidAreaEnabled(type)) {
+            return;
+        }
         if ((window->lastAvoidAreaMap_.find(type) == window->lastAvoidAreaMap_.end() &&
              type != AvoidAreaType::TYPE_CUTOUT) ||
             window->lastAvoidAreaMap_[type] != *avoidArea) {
@@ -6707,6 +6713,32 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
     };
     handler_->PostTask(std::move(task), __func__);
     return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::SetFloatNavigationAvoidAreaEnabled(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
+    floatNavigationAvoidAreaEnabled_ = enable;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    auto ret = hostSession->SetFloatNavigationEnabled(notifyOnceImmediately_);
+    notifyOnceImmediately_ = false;
+    return ret == WMError::WM_OK ? WMError::WM_OK : WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+}
+ 	 
+WMError WindowSessionImpl::GetFloatNavigationAvoidAreaEnabled(bool& enable) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    enable = floatNavigationAvoidAreaEnabled_;
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
+    return WMError::WM_OK;
 }
 
 WSError WindowSessionImpl::SetPipActionEvent(const std::string& action, int32_t status)

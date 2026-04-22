@@ -3441,6 +3441,10 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByType(AvoidAreaType type, AvoidArea
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (!IsFloatNavigationAvoidAreaEnabled(type)) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
+        return WMError::WM_DO_NOTHING;
+    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
@@ -3460,6 +3464,10 @@ WMError WindowSceneSessionImpl::GetAvoidAreaByTypeIgnoringVisibility(AvoidAreaTy
     }
     if (type == AvoidAreaType::TYPE_KEYBOARD) {
         return WMError::WM_ERROR_ILLEGAL_PARAM;
+    }
+    if (!IsFloatNavigationAvoidAreaEnabled(type)) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
+        return WMError::WM_DO_NOTHING;
     }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_SYSTEM_ABNORMALLY);
@@ -7833,31 +7841,6 @@ WMError WindowSceneSessionImpl::GetGestureBackEnabled(bool& enable) const
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     enable = gestureBackEnabled_;
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
-    return WMError::WM_OK;
-}
-
-WMError WindowSceneSessionImpl::SetFloatNavigationAvoidAreaEnabled(bool enable)
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "window is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
-    floatNavigationAvoidAreaEnabled_ = enable;
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
-    auto ret = hostSession->SetFloatNavigationAvoidAreaEnabled(enable);
-    return ret == WMError::WM_OK ? WMError::WM_OK : WMError::WM_ERROR_SYSTEM_ABNORMALLY;
-}
-
-WMError WindowSceneSessionImpl::GetFloatNavigationAvoidAreaEnabled(bool& enable) const
-{
-    if (IsWindowSessionInvalid()) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "window is invalid");
-        return WMError::WM_ERROR_INVALID_WINDOW;
-    }
-    enable = floatNavigationAvoidAreaEnabled_;
     TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
     return WMError::WM_OK;
 }
