@@ -4296,7 +4296,7 @@ HWTEST_F(WindowSceneSessionImplTest, RecoverWithConfig_WindowModeNotSupported01,
     window->windowSystemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
     // Only support fullscreen, not floating
     window->property_->SetWindowModeSupportType(
-        static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_ONLY_FULLSCREEN));
+        static_cast<uint32_t>(WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN));
     window->property_->SetWindowMode(WindowMode::WINDOW_MODE_FULLSCREEN);
     window->property_->SetMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
