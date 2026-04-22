@@ -672,6 +672,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         JsSceneSession::SetWindowEnableDragBySystem);
     BindNativeFunction(env, objValue, "setNeedSyncSessionRect", moduleName,
         JsSceneSession::SetNeedSyncSessionRect);
+    BindNativeFunction(env, objValue, "setIsShowOnDock", moduleName,
+        JsSceneSession::SetIsShowOnDock);
     BindNativeFunction(env, objValue, "setIsActivatedAfterScreenLocked", moduleName,
         JsSceneSession::SetIsActivatedAfterScreenLocked);
     BindNativeFunction(env, objValue, "setIsPendingToBackgroundState", moduleName,
@@ -3057,6 +3059,13 @@ napi_value JsSceneSession::SetNeedSyncSessionRect(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_PIPELINE, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetNeedSyncSessionRect(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetIsShowOnDock(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetIsShowOnDock(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetLabel(napi_env env, napi_callback_info info)
@@ -7988,6 +7997,36 @@ napi_value JsSceneSession::OnSetNeedSyncSessionRect(napi_env env, napi_callback_
         return NapiGetUndefined(env);
     }
     session->SetNeedSyncSessionRect(needSync);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnSetIsShowOnDock(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (argc != ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isShowOnDock = true;
+    if (!ConvertFromJsValue(env, argv[0], isShowOnDock)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isShowOnDock");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    TLOGI(WmsLogTag::WMS_LIFE, "isShowOnDock:%{public}u, id:%{public}d", isShowOnDock, persistentId_);
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->SetIsShowOnDock(isShowOnDock);
     return NapiGetUndefined(env);
 }
 
