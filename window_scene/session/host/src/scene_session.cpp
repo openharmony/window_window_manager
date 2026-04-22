@@ -3170,6 +3170,9 @@ void SceneSession::GetSystemAvoidArea(WSRect& rect, AvoidArea& avoidArea, bool i
             onGetStatusBarAvoidHeightFunc_(displayId, statusBarRect);
         }
         CalculateAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, rect, statusBarRect, avoidArea);
+        bool diffY = (avoidArea.topRect_.posY_ - rect.posY_) == 1;
+        avoidArea.topRect_.posY_ = diffY == 1 ? avoidArea.topRect_.posY_ - 1 : avoidArea.topRect_.posY_;
+        avoidArea.topRect_.height_ = diffY ? avoidArea.topRect_.height_ + 1 : avoidArea.topRect_.height_;
     }
 }
 
@@ -3302,6 +3305,8 @@ void SceneSession::GetAINavigationBarArea(WSRect& rect, AvoidArea& avoidArea, bo
     }
     CalculateAvoidAreaByType(AvoidAreaType::TYPE_NAVIGATION_INDICATOR, rect, barArea, avoidArea);
     PatchAINavigationBarArea(avoidArea);
+	bool diffY = (rect.posY_ - avoidArea.bottomRect_.posY_ - avoidArea.bottomRect_.height_) == 1;
+ 	avoidArea.bottomRect_.height_ = diffY ? avoidArea.bottomRect_.height_ + 1 : avoidArea.bottomRect_.height_;
 }
 
 void SceneSession::PatchFloatNavigationArea(WSRect& floatNavigationArea)
