@@ -371,6 +371,13 @@ WSError SessionProxy::Connect(const sptr<ISessionStage>& sessionStage, const spt
         property->SetPcAppInpadSpecificSystemBarInvisible(reply.ReadBool());
         property->SetPcAppInpadOrientationLandscape(reply.ReadBool());
         property->SetMobileAppInPadLayoutFullScreen(reply.ReadBool());
+        property->SetForceSplitEnable(reply.ReadBool());
+        sptr<HookWindowInfo> hookWindowInfo = reply.ReadParcelable<HookWindowInfo>();
+        if (hookWindowInfo == nullptr) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "read hookWindowInfo is nullptr!");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+        property->SetHookWindowInfo(*hookWindowInfo);
         property->SetCompatibleModeProperty(reply.ReadParcelable<CompatibleModeProperty>());
         property->SetUseControlState(reply.ReadBool());
         property->SetAncoRealBundleName(reply.ReadString());
@@ -2880,71 +2887,6 @@ WMError SessionProxy::GetAppForceLandscapeConfig(AppForceLandscapeConfig& config
     return static_cast<WMError>(ret);
 }
 
-WMError SessionProxy::GetAppForceLandscapeConfigEnable(bool& enableForceSplit)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    int sendCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE),
-        data, reply, option);
-    if (sendCode != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed, code: %{public}d", sendCode);
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    if (!reply.ReadBool(enableForceSplit)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Read enableForceSplit failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-
-    return static_cast<WMError>(ret);
-}
-
-WMError SessionProxy::GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (!remote) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "remote is null");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    uint32_t requestCode = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO);
-    if (remote->SendRequest(requestCode, data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "SendRequest failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    sptr<HookWindowInfo> replyInfo = reply.ReadParcelable<HookWindowInfo>();
-    if (replyInfo) {
-        hookWindowInfo = *replyInfo;
-    }
-    int32_t ret = 0;
-    if (!reply.ReadInt32(ret)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "read ret failed");
-        return WMError::WM_ERROR_IPC_FAILED;
-    }
-    return static_cast<WMError>(ret);
-}
-
 WMError SessionProxy::GetSelectMode(SelectMode& selectMode)
 {
     MessageParcel data;
@@ -4525,39 +4467,6 @@ WSError SessionProxy::NotifyCompatibleModeChange(CompatibleStyleMode mode)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_NOTIFY_COMPATIBLE_MODE_CHANGE),
-        data, reply, option) != ERR_NONE) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    return WSError::WS_OK;
-}
-
-WSError SessionProxy::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "WriteInterfaceToken failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteBool(needUpdateViewport)) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write needUpdateViewport failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-    if (!data.WriteUint32(static_cast<uint32_t>(selectMode))) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Write selectMode failed");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "remote is null");
-        return WSError::WS_ERROR_IPC_FAILED;
-    }
-
-    if (remote->SendRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_FORCE_LANDSCAPE_CONFIG_ENABLE),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_COMPAT, "SendRequest failed");
         return WSError::WS_ERROR_IPC_FAILED;

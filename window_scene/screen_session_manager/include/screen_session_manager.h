@@ -329,6 +329,7 @@ public:
 
     bool IsFoldable() override;
     bool IsCaptured() override;
+    bool IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList) override;
 
     FoldStatus GetFoldStatus() override;
     SuperFoldStatus GetSuperFoldStatus() override;
@@ -705,6 +706,11 @@ private:
     void ConfigureWaterfallDisplayCompressionParams();
     void ConfigureScreenSnapshotParams();
     void RegisterScreenChangeListener();
+    void RegisterRSListeners();
+    void DoRegisterRSListeners();
+    void OnTransRSEvent(const std::shared_ptr<RSExposedEventDataBase>& rsRawData);
+    sptr<RSEventDataBase> ConvertRSExposedEventDataBase(
+        const std::shared_ptr<RSExposedEventDataBase>& rsRawData);
     void RegisterFoldNotSwitchingListener();
     void RegisterBrightnessInfoChangeListener();
     void UnregisterBrightnessInfoChangeListener();
@@ -1241,6 +1247,7 @@ private:
     std::atomic<FoldDisplayMode> foldDisplayModeAfterRotation_ = FoldDisplayMode::UNKNOWN;
     std::atomic<bool> onBootAnimation_ = false;
     bool isBoot_ = false;
+    int32_t retryCount_ = 50;
     std::mutex screenActiveModeRectMapMutex_;
     std::map<FoldDisplayMode, RRect> screenActiveModeRectMap_ = {};
 
