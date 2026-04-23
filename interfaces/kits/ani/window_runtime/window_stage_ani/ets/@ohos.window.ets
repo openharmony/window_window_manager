@@ -846,7 +846,7 @@ export interface WindowSnapshotAnimationConfig {
 }
 
 export interface MaximizeOptions {
-  presentation?: MaximizePresentation;
+  maximizePresentation?: MaximizePresentation;
   acrossDisplayPresentation?: AcrossDisplayPresentation;
   snapshotAnimationConfig?: WindowSnapshotAnimationConfig;
 }

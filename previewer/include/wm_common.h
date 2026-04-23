@@ -2185,13 +2185,10 @@ enum class ScreenshotEventType : int32_t {
  * @struct SnapshotAnimationConfig
  * @brief Configuration for snapshot animation duration and delay.
  */
-#ifndef OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
 struct SnapshotAnimationConfig {
     int64_t duration = -1;  // Animation duration in ms, -1 means use system default
     int64_t delay = -1;     // Animation delay in ms, -1 means use system default
 };
-#define OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
-#endif
 
 /**
  * @enum WaterfallResidentState
@@ -2236,6 +2233,17 @@ enum class AcrossDisplayPresentation : uint32_t {
      * re-entering half-folded.
      */
     EXIT_ACROSS_DISPLAY_MODE = 2,
+};
+
+/**
+ * @struct MaximizeOptions
+ * @brief Options for maximize operation with animation configuration.
+ */
+struct MaximizeOptions {
+    MaximizePresentation maximizePresentation = MaximizePresentation::ENTER_IMMERSIVE;
+    AcrossDisplayPresentation acrossDisplayPresentation =
+        AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING;
+    SnapshotAnimationConfig snapshotAnimationConfig;
 };
 
 struct StateChangeOption {
