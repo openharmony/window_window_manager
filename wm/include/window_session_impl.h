@@ -568,6 +568,8 @@ public:
         { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
     Rect GetGlobalScaledRectLocal() const;
+    WSError SetIsStartMoving(bool isStartMoving) override;
+    bool IsStartMoving() override { return isStartMoving_; }
 
     /*
      * Free Multi Window
@@ -1355,6 +1357,7 @@ private:
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
     mutable std::mutex globalScaledRectMutex_;
     Rect globalScaledRect_;
+    std::atomic<bool> isStartMoving_ = false;
 
     /*
      * Window Decor

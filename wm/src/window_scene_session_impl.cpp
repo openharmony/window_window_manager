@@ -1344,7 +1344,8 @@ void WindowSceneSessionImpl::ConsumePointerEventInner(const std::shared_ptr<MMI:
     bool isPointUp = (action == MMI::PointerEvent::POINTER_ACTION_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
         action == MMI::PointerEvent::POINTER_ACTION_CANCEL);
-    if (isPointUp) {
+    bool needForwardMoveEvent = (action == MMI::PointerEvent::POINTER_ACTION_MOVE && IsStartMoving());
+    if (isPointUp || needForwardMoveEvent) {
         if (auto hostSession = GetHostSession()) {
             hostSession->SendPointEventForMoveDrag(pointerEvent, isExecuteDelayRaise_);
         }
@@ -4778,16 +4779,6 @@ void WindowSceneSessionImpl::StartMove()
     if (isValidWindow && hostSession) {
         hostSession->OnSessionEvent(SessionEvent::EVENT_START_MOVE);
     }
-}
-
-bool WindowSceneSessionImpl::IsStartMoving()
-{
-    bool isMoving = false;
-    if (auto hostSession = GetHostSession()) {
-        isMoving = hostSession->IsStartMoving();
-    }
-    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isMoving: %{public}d", GetPersistentId(), isMoving);
-    return isMoving;
 }
 
 bool WindowSceneSessionImpl::CheckCanMoveWindowType()
