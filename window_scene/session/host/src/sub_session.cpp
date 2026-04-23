@@ -88,6 +88,10 @@ WSError SubSession::Show(sptr<WindowSessionProperty> property)
             sessionProperty->SetAnimationFlag(static_cast<uint32_t>(WindowAnimation::CUSTOM));
             session->NotifyIsCustomAnimationPlaying(true);
         }
+        if (session->IsLoosenedWithFreeMultiMode()) {
+            TLOGND(WmsLogTag::WMS_SUB, "raise sub session when show, id: %{public}d", session->GetPersistentId());
+            session->RaiseAppMainWindowToTop();
+        }
         auto ret = session->SceneSession::Foreground(property);
         return ret;
     }, "Show");

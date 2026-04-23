@@ -480,6 +480,7 @@ public:
     virtual WSError SetSubWindowZLevel(int32_t zLevel) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual int32_t GetSubWindowZLevel() const { return 0; }
     void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
+    WSError RaiseAppMainWindowToTop() override;
 
     /*
      * Compatible Mode
@@ -1424,7 +1425,6 @@ private:
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
     void NotifyPropertyWhenConnect();
-    WSError RaiseAppMainWindowToTop() override;
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool IsMovableWindowType() const;
     bool IsFullScreenMovable() const;
