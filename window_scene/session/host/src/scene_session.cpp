@@ -9063,6 +9063,32 @@ void SceneSession::SyncAllAttachedLimitsToAttachingChild(const sptr<Session>& pa
 }
 
 /** @note @window.layout */
+void SceneSession::ResetAttachBindingState()
+{
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id=%{public}d", GetPersistentId());
+    windowAnchorInfo_ = {false, false, WindowAnchor::TOP_START, 0, 0};
+    windowAnchorInfo_.isFromAttachOrDetach_ = true;
+    windowAnchorInfo_.attachOptions.currentLayoutMode = "";
+    windowAnchorInfo_.attachOptions.isIntersectedWidthLimit = false;
+    windowAnchorInfo_.attachOptions.isIntersectedHeightLimit = false;
+    if (onWindowAnchorInfoChangeFunc_) {
+        onWindowAnchorInfoChangeFunc_(windowAnchorInfo_);
+    }
+}
+
+/** @note @window.layout */
+void SceneSession::NotifyRebindAttachAfterParentChange(int32_t newParentWindowId)
+{
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "sessionStage_ is null, id=%{public}d", GetPersistentId());
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id=%{public}d, newParentId=%{public}d",
+        GetPersistentId(), newParentWindowId);
+    sessionStage_->NotifyRebindAttachAfterParentChange(newParentWindowId);
+}
+
+/** @note @window.layout */
 void SceneSession::NotifyRelatedWindowsAttachStateChange(const sptr<Session>& parentSession,
     bool wasAttached, bool isAttached, bool oldIsIntersectedWidthLimit, bool oldIsIntersectedHeightLimit)
 {
