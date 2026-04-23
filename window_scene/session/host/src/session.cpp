@@ -3005,7 +3005,7 @@ WSError Session::HandlePointerEventForFocus(const std::shared_ptr<MMI::PointerEv
             HandlePointDownDialog();
             return WSError::WS_ERROR_INVALID_PERMISSION;
         }
-    } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+    } else if (GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && !IsLoosenedWithFreeMultiMode()) {
         WSError ret = HandleSubWindowClick(pointerAction, sourceType, isExecuteDelayRaise);
         if (ret != WSError::WS_OK) {
             return ret;
@@ -4046,6 +4046,15 @@ void Session::NotifyClick(bool requestFocus, bool isClick)
 {
     TLOGD(WmsLogTag::WMS_FOCUS, "id: %{public}d, focus: %{public}u, isClick: %{public}u",
         GetPersistentId(), requestFocus, isClick);
+    if (IsLoosenedWithFreeMultiMode()) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "raise sub window id: %{public}d", GetPersistentId());
+        RaiseToAppTopForPointDown();
+        if (requestFocus) {
+            FocusChangeReason reason = FocusChangeReason::MOVE_UP;
+            NotifyRequestFocusStatusNotifyManager(true, true, reason);
+        }
+        return;
+    }
     if (clickFunc_) {
         clickFunc_(requestFocus, isClick);
     }
@@ -4110,7 +4119,10 @@ void Session::PresentFocusIfNeed(int32_t pointerAction, int32_t sourceType)
 
 bool Session::IsNeedRequestToTop() const
 {
-    return WindowHelper::IsMainWindow(GetWindowType()) ? GetSessionProperty()->GetRaiseEnabled() : true;
+    if (WindowHelper::IsMainWindow(GetWindowType()) || WindowHelper::IsSubWindow(GetWindowType())) {
+        return GetSessionProperty()->GetRaiseEnabled();
+    }
+    return true;
 }
 
 void Session::NotifyClickIfNeed()
