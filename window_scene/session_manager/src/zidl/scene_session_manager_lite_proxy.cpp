@@ -3191,7 +3191,7 @@ WMError SceneSessionManagerLiteProxy::UnregisterPipChgListenerByScreenId(int32_t
 WMError SceneSessionManagerLiteProxy::GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
     std::vector<AppWindowShowingInfo>& windowInfos)
 {
-    TLOGD(WmsLogTag::WMS_MAIN, "in, bundleName:%{public}s, appIndex:%{public}d", 
+    TLOGD(WmsLogTag::WMS_MAIN, "in, bundleName:%{public}s, appIndex:%{public}d",
         appInfo.bundleName.c_str(), appInfo.appIndex);
     MessageParcel data;
     MessageParcel reply;

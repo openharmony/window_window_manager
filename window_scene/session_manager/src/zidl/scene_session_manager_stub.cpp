@@ -3083,10 +3083,8 @@ int SceneSessionManagerStub::HandleGetAppWindowShowingInfosByBundleName(MessageP
         TLOGE(WmsLogTag::WMS_MAIN, "read appInstanceKey failed");
         return ERR_INVALID_DATA;
     }
-    
     std::vector<AppWindowShowingInfo> windowInfos;
     WMError ret = GetAppWindowShowingInfosByBundleName(appInfo, windowInfos);
-    
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_MAIN, "write ret failed");
         return ERR_INVALID_DATA;

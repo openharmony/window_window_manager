@@ -3199,7 +3199,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName
  * @tc.desc: Test HandleGetAppWindowShowingInfosByBundleName when ReadString bundleName failed
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadBundleNameFailed, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest,
+    HandleGetAppWindowShowingInfosByBundleName_ReadBundleNameFailed, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3214,7 +3215,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName
  * @tc.desc: Test HandleGetAppWindowShowingInfosByBundleName when ReadInt32 appIndex failed
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppIndexFailed, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest,
+    HandleGetAppWindowShowingInfosByBundleName_ReadAppIndexFailed, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -3230,7 +3232,8 @@ HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName
  * @tc.desc: Test HandleGetAppWindowShowingInfosByBundleName when ReadString appInstanceKey failed
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppInstanceKeyFailed, Function | SmallTest | Level2)
+HWTEST_F(SceneSessionManagerStubTest,
+    HandleGetAppWindowShowingInfosByBundleName_ReadAppInstanceKeyFailed, Function | SmallTest | Level2)
 {
     MessageParcel data;
     MessageParcel reply;
