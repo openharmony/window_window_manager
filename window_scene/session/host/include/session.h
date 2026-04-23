@@ -390,8 +390,15 @@ public:
      */
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> GetPreloadSnapshot() const;
+    /**
+     * @brief Get the snapshot pixelMap.
+     *
+     * @param disableBlur Only for SceneBoard UI animation, cannot use with privacy window.
+     *
+     * @return PixelMap of this window.
+     */
     std::shared_ptr<Media::PixelMap> Snapshot(
-        bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false) const;
+        bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false, bool disableBlur = false) const;
     void ResetSnapshot();
     void RenameSnapshotFromOldPersistentId(int32_t oldPersistentId);
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
