@@ -2631,7 +2631,7 @@ HWTEST_F(SessionStubTest, HandleRestoreFloatViewMainWindow, TestSize.Level1)
     EXPECT_EQ(result, ERR_NONE);
 }
 
-class SessionStubAttributeRecorderForTest : public SessionStub {
+class SessionStubAttributeRecorderForTest : public SessionStubMocker {
 public:
     SessionStubAttributeRecorderForTest() = default;
     ~SessionStubAttributeRecorderForTest() = default;
@@ -2745,12 +2745,9 @@ HWTEST_F(SessionStubTest, HandleUpdateColorModeAttribute03, TestSize.Level1)
     ASSERT_NE(nullptr, session);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC };
-    data.WriteInterfaceToken(SessionStub::GetDescriptor());
     data.WriteString("DARK");
     data.WriteBool(true);
-    auto ret = session->OnRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE), data, reply, option);
+    auto ret = session->HandleUpdateColorMode(data, reply);
     EXPECT_EQ(ERR_NONE, ret);
     EXPECT_EQ(1, session->updateColorModeCallCount_);
     EXPECT_EQ("DARK", session->lastColorMode_);
@@ -2781,11 +2778,8 @@ HWTEST_F(SessionStubTest, HandleSetWindowCornerRadiusAttribute02, TestSize.Level
     ASSERT_NE(nullptr, session);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC };
-    data.WriteInterfaceToken(SessionStub::GetDescriptor());
     data.WriteFloat(12.5f);
-    auto ret = session->OnRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS), data, reply, option);
+    auto ret = session->HandleSetWindowCornerRadius(data, reply);
     EXPECT_EQ(ERR_NONE, ret);
     EXPECT_EQ(1, session->setWindowCornerRadiusCallCount_);
     EXPECT_FLOAT_EQ(12.5f, session->lastCornerRadius_);
@@ -2829,13 +2823,9 @@ HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegisteredAttribute03, T
     ASSERT_NE(nullptr, session);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC };
-    data.WriteInterfaceToken(SessionStub::GetDescriptor());
     data.WriteInt32(101);
     data.WriteBool(true);
-    auto ret = session->OnRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED),
-        data, reply, option);
+    auto ret = session->HandleUpdateScreenshotAppEventRegistered(data, reply);
     EXPECT_EQ(ERR_NONE, ret);
     EXPECT_EQ(1, session->updateScreenshotRegisteredCallCount_);
     EXPECT_EQ(101, session->lastScreenshotPersistentId_);
@@ -2867,12 +2857,8 @@ HWTEST_F(SessionStubTest, HandleUpdateAcrossDisplaysChangeRegisteredAttribute02,
     ASSERT_NE(nullptr, session);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC };
-    data.WriteInterfaceToken(SessionStub::GetDescriptor());
     data.WriteBool(false);
-    auto ret = session->OnRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED),
-        data, reply, option);
+    auto ret = session->HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
     EXPECT_EQ(ERR_NONE, ret);
     EXPECT_EQ(1, session->updateAcrossDisplaysRegisteredCallCount_);
     EXPECT_EQ(false, session->lastAcrossDisplaysIsRegister_);
@@ -2890,11 +2876,8 @@ HWTEST_F(SessionStubTest, HandleGetWaterfallModeAttribute01, TestSize.Level1)
     ASSERT_NE(nullptr, session);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC };
     session->waterfallModeValue_ = true;
-    data.WriteInterfaceToken(SessionStub::GetDescriptor());
-    auto ret = session->OnRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE), data, reply, option);
+    auto ret = session->HandleGetWaterfallMode(data, reply);
     EXPECT_EQ(ERR_NONE, ret);
     EXPECT_EQ(1, session->getWaterfallModeCallCount_);
     EXPECT_EQ(true, reply.ReadBool());
@@ -2911,12 +2894,8 @@ HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplaysAttribute01,
     ASSERT_NE(nullptr, session);
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC };
     session->acrossDisplaysValue_ = true;
-    data.WriteInterfaceToken(SessionStub::GetDescriptor());
-    auto ret = session->OnRemoteRequest(
-        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS),
-        data, reply, option);
+    auto ret = session->HandleIsMainWindowFullScreenAcrossDisplays(data, reply);
     EXPECT_EQ(ERR_NONE, ret);
     EXPECT_EQ(1, session->isMainAcrossDisplaysCallCount_);
     EXPECT_EQ(static_cast<int32_t>(WMError::WM_OK), reply.ReadInt32());
