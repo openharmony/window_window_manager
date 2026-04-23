@@ -19471,6 +19471,10 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
 WMError SceneSessionManager::GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
     std::vector<AppWindowShowingInfo>& windowInfos)
 {
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
     if (appInfo.bundleName.empty()) {
         TLOGE(WmsLogTag::WMS_MAIN, "bundleName is empty");
         return WMError::WM_ERROR_INVALID_PARAM;
