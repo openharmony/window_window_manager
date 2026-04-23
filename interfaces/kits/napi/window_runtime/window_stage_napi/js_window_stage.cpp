@@ -20,6 +20,7 @@
 #include "window_manager_hilog.h"
 #include "permission.h"
 #include "pixel_map_napi.h"
+#include "window_histogram_management.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -663,6 +664,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_MAIN, "WindowScene is null");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
             "[window][setWindowModal]msg: Invalid window scene"));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
         return NapiGetUndefined(env);
     }
     auto window = windowScene->GetMainWindow();
@@ -670,16 +672,19 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_MAIN, "window is nullptr");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STAGE_ABNORMALLY,
             "[window][setWindowModal]msg: Invalid main window"));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_STAGE_ABNORMALLY);
         return NapiGetUndefined(env);
     }
     if (window->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "This is PcAppInPad, not support");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         return NapiGetUndefined(env);
     }
     if (!window->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_MAIN, "device not support");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
             "[window][setWindowModal]msg: Device not support"));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         return NapiGetUndefined(env);
     }
     size_t argc = FOUR_PARAMS_SIZE;
@@ -689,6 +694,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowModal]msg: Argc is invalid"));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiGetUndefined(env);
     }
     bool isModal = false;
@@ -696,6 +702,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to convert parameter to bool");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowModal]msg: Failed to convert parameter to bool"));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiGetUndefined(env);
     }
     napi_value result = nullptr;
@@ -707,6 +714,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, window is null", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setWindowModal]msg: window is not valid"));
+            HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return;
         }
         WMError ret = window->SetWindowModal(isModal);
@@ -715,6 +723,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s failed, ret is %{public}d", where, wmErrorCode);
             task->Reject(env, JsErrUtils::CreateJsError(env, wmErrorCode,
                 "[window][setWindowModal]msg: set main window modal failed"));
+            HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", wmErrorCode);
             return;
         }
         task->Resolve(env, NapiGetUndefined(env));
@@ -725,6 +734,7 @@ napi_value JsWindowStage::OnSetWindowModal(napi_env env, napi_callback_info info
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setWindowModal]msg: send event failed"));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.setWindowModal", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return result;
 }
