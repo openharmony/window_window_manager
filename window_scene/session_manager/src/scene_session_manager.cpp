@@ -9779,6 +9779,12 @@ void SceneSessionManager::NotifySingleHandInfoChange(SingleHandScreenInfo single
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: get display size failed", funcName);
             return;
         }
+        TLOGNI(WmsLogTag::WMS_LAYOUT, "NotifySingleHandInfoChange singleHandScreenInfo: scaleRatio %{public}d,scalePivotX %{public}d,"
+                                      "scalePivotY %{public}d,mode %{public}d; originRect: posX %{public}d,posY %{public}d,width %{public}d,"
+                                      "height %{public}d; singleHandRect: posX %{public}d,posY %{public}d,width %{public}d,height %{public}d",
+                                      singleHandScreenInfo.scaleRatio, singleHandScreenInfo.scalePivotX, singleHandScreenInfo.scalePivotY,
+                                      singleHandScreenInfo.mode, originRect.posX_, originRect.posY_, originRect.width_, originRect.height_,
+                                      singleHandRect.posX_, singleHandRect.posY_, singleHandRect.width_, singleHandRect.height_);
         singleHandScreenInfo_ = singleHandScreenInfo;
         originRect_ = originRect;
         singleHandRect_ = singleHandRect;
@@ -9789,8 +9795,7 @@ void SceneSessionManager::NotifySingleHandInfoChange(SingleHandScreenInfo single
         {
             std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
             for (const auto& [_, sceneSession] : sceneSessionMap_) {
-                if (sceneSession == nullptr || !IsInDefaultScreen(sceneSession) ||
-                    sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
+                if (sceneSession == nullptr || sceneSession->GetWindowName().find("OneHandModeBackground", 0) != std::string::npos) {
                     continue;
                 }
                 sceneSession->SetSingleHandModeFlag(true);
