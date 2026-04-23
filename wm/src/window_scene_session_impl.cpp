@@ -4310,13 +4310,13 @@ void WindowSceneSessionImpl::ApplyMaximizePresentation(MaximizePresentation pres
 
 WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, WaterfallResidentState state)
 {
+    if (IsWindowSessionInvalid()) {
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     if (property_->GetWindowAnchorInfo().isFromAttachOrDetach_ &&
         property_->GetWindowAnchorInfo().isAnchoredByAttach_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Cannot maximize due to in ancor enabled mode.");
         return WMError::WM_OK;
-    }
-    if (IsWindowSessionInvalid()) {
-        return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (!CheckWaterfallResidentState(state)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid waterfallResidentState. windowId: %{public}u, state: %{public}u",
@@ -8021,14 +8021,12 @@ WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo&
             property_->IsAdaptToCompatibleDevice());
         return WMError::WM_OK;
     }
-    if (!WindowHelper::IsSubWindow(property->GetWindowType()) || property->GetSubWindowLevel() > 1) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "only 1 level sub window is valid");
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
-    if (IsZLevelAboveParentLoosened()) {
-        TLOGE(WmsLogTag::WMS_SUB,
-            "only sub window is valid, windowType: %{public}d, IsZLevelAboveParentLoosened: %{public}d",
-            property->GetWindowType(), IsZLevelAboveParentLoosened());
+    if (!WindowHelper::IsSubWindow(property->GetWindowType()) || property->GetSubWindowLevel() > 1 ||
+            IsZLevelAboveParentLoosened()) {
+        TLOGE(WmsLogTag::WMS_LAYOUT,
+            "only 1 level sub window is valid, windowType: %{public}d, IsZLevelAboveParentLoosened: %{public}d, "
+            "subWindowLevel: %{public}d",
+            property->GetWindowType(), IsZLevelAboveParentLoosened(), property->GetSubWindowLevel());
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (windowAnchorInfo.isFromAttachOrDetach_ && (!windowAnchorInfo.isAnchoredByAttach_ &&
@@ -8037,23 +8035,19 @@ WMError WindowSceneSessionImpl::ValidateWindowAnchorInfo(const WindowAnchorInfo&
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     if (windowAnchorInfo.isFromAttachOrDetach_ && (WindowHelper::IsFullScreenWindow(property->GetWindowMode()) ||
-            property->IsFollowParentLayout())) {
+        property->IsFollowParentLayout())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The subwindow is maximized or is following its parent window's layout.");
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
-    if (IsLoosenedWithPcOrFreeMultiMode()) {
-        TLOGE(WmsLogTag::WMS_SUB, "No parent sub window is invalid");
-        return WMError::WM_ERROR_INVALID_CALLING;
-    }
-    if (WindowHelper::IsFullScreenWindow(property->GetWindowMode())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "not support fullscreen sub window");
+    if (WindowHelper::IsFullScreenWindow(property->GetWindowMode()) || property->GetSubWindowLevel() > 1) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "not support fullscreen sub window or more than 1 level window");
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (!windowAnchorInfo.isFromAttachOrDetach_ && !windowSystemConfig_.supportFollowRelativePositionToParent_) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "not support device");
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
-    return WMError::WM_OK;
+    return WMError::WM_DO_NOTHING;
 }
 
 WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo)
@@ -8062,7 +8056,7 @@ WMError WindowSceneSessionImpl::SetWindowAnchorInfo(const WindowAnchorInfo& wind
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     WMError retValide = ValidateWindowAnchorInfo(windowAnchorInfo);
-    if (retValide != WMError::WM_OK) {
+    if (retValide != WMError::WM_DO_NOTHING) {
         return retValide;
     }
     auto hostSession = GetHostSession();
