@@ -18522,6 +18522,18 @@ WMError SceneSessionManager::SetProcessWatermark(int32_t pid, const std::string&
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::RecoverProcessWatermark(int32_t pid, const std::string& watermarkName)
+{
+    taskScheduler_->PostTask([this, pid, watermarkName, where = __func__] {
+        TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: pid=%{public}d, watermarkName=%{public}s",
+            where, pid, watermarkName.c_str());
+        if (pid != 0 && !watermarkName.empty()) {
+            processWatermarkPidMap_.insert_or_assign(pid, watermarkName);
+        }
+    }, __func__);
+    return WMError::WM_OK;
+}
+
 bool SceneSessionManager::SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession)
 {
     if (auto iter = processWatermarkPidMap_.find(sceneSession->GetCallingPid());
