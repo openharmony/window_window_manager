@@ -1913,6 +1913,11 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId02, TestSi
     EXPECT_EQ(ERR_NONE, res);
 }
 
+/**
+ * @tc.name: HandleGetAppWindowShowingInfosByBundleName_Success
+ * @tc.desc: Test HandleGetAppWindowShowingInfosByBundleName with valid params
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_Success, TestSize.Level1)
 {
     MessageParcel data;
@@ -1924,6 +1929,11 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundle
     EXPECT_EQ(res, ERR_NONE);
 }
 
+/**
+ * @tc.name: HandleGetAppWindowShowingInfosByBundleName_ReadBundleNameFailed
+ * @tc.desc: Test HandleGetAppWindowShowingInfosByBundleName when ReadString bundleName failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadBundleNameFailed, TestSize.Level1)
 {
     MessageParcel data;
@@ -1931,6 +1941,11 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundle
     EXPECT_EQ(sceneSessionManagerLiteStub_->HandleGetAppWindowShowingInfosByBundleName(data, reply), ERR_INVALID_DATA);
 }
 
+/**
+ * @tc.name: HandleGetAppWindowShowingInfosByBundleName_ReadAppIndexFailed
+ * @tc.desc: Test HandleGetAppWindowShowingInfosByBundleName when ReadInt32 appIndex failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppIndexFailed, TestSize.Level1)
 {
     MessageParcel data;
@@ -1939,6 +1954,11 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundle
     EXPECT_EQ(sceneSessionManagerLiteStub_->HandleGetAppWindowShowingInfosByBundleName(data, reply), ERR_INVALID_DATA);
 }
 
+/**
+ * @tc.name: HandleGetAppWindowShowingInfosByBundleName_ReadAppInstanceKeyFailed
+ * @tc.desc: Test HandleGetAppWindowShowingInfosByBundleName when ReadString appInstanceKey failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppInstanceKeyFailed, TestSize.Level1)
 {
     MessageParcel data;

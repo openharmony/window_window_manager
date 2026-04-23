@@ -1116,6 +1116,11 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_ReadIntFaile
     EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName_Success
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName with valid params
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_Success, TestSize.Level1)
 {
     ApplicationInfo appInfo;
@@ -1126,6 +1131,11 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_
     EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_OK);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName_WriteTokenFailed
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName when WriteInterfaceToken failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_WriteTokenFailed, TestSize.Level1)
 {
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
@@ -1135,6 +1145,11 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_
     EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName_WriteStringFailed
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName when WriteString failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_WriteStringFailed, TestSize.Level1)
 {
     MockMessageParcel::SetWriteStringErrorFlag(true);
@@ -1144,6 +1159,11 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_
     EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName_WriteIntFailed
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName when WriteInt32 failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_WriteIntFailed, TestSize.Level1)
 {
     MockMessageParcel::SetWriteInt32ErrorFlag(true);
@@ -1153,6 +1173,11 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_
     EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName_SendReqFailed
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName when SendRequest failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_SendReqFailed, TestSize.Level1)
 {
     iRemoteObjectMocker_->SetRequestResult(1);
@@ -1163,6 +1188,11 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_
     iRemoteObjectMocker_->SetRequestResult(0);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName_RemoteNullFailed
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName when remote object is nullptr
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_RemoteNullFailed, TestSize.Level1)
 {
     sptr<SceneSessionManagerLiteProxy> liteProxyNullRemote = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
@@ -1173,6 +1203,11 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_
     EXPECT_EQ(liteProxyNullRemote->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName_ReadRetFailed
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName when ReadInt32 failed
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_ReadRetFailed, TestSize.Level1)
 {
     MockMessageParcel::SetReadInt32ErrorFlag(true);

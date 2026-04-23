@@ -2891,6 +2891,11 @@ HWTEST_F(sceneSessionManagerProxyTest, GetFloatViewLimits01, TestSize.Level1)
     EXPECT_NE(ret, WMError::WM_OK);
 }
 
+/**
+ * @tc.name: GetAppWindowShowingInfosByBundleName01
+ * @tc.desc: Test GetAppWindowShowingInfosByBundleName with various error conditions
+ * @tc.type: FUNC
+ */
 HWTEST_F(sceneSessionManagerProxyTest, GetAppWindowShowingInfosByBundleName01, TestSize.Level1)
 {
     ApplicationInfo appInfo;
