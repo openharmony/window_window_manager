@@ -476,6 +476,7 @@ bool ScreenSession::GetIsExtend() const
 void ScreenSession::SetIsInternal(bool isInternal)
 {
     isInternal_ = isInternal;
+    property_.SetIsInternal(isInternal);
 }
 
 bool ScreenSession::GetIsInternal() const
