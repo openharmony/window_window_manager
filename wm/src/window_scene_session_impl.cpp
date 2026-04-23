@@ -4402,6 +4402,7 @@ WMError WindowSceneSessionImpl::MaximizeWithOptions(MaximizePresentation present
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
     }
+
     ApplyMaximizePresentation(presentation);
     UpdateIsShowDecorInFreeMultiWindow(true);
     isMaximizeInvoked_ = true;
@@ -4602,6 +4603,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason, const SnapshotAnimation
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "not support floating, can not Recover");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
     if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {

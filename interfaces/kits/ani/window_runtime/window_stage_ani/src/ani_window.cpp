@@ -4843,11 +4843,13 @@ void AniWindow::OnMaximizeWithOptions(ani_env* env, ani_object maximizeOptions)
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
+
     auto optionsOpt = ParseMaximizeOptionsANI(env, maximizeOptions);
     if (!optionsOpt) {
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
+
     auto options = *optionsOpt;
     auto ret = windowToken_->MaximizeWithOptions(
         options.maximizePresentation, options.acrossDisplayPresentation, options.snapshotAnimationConfig);
