@@ -19,6 +19,7 @@
 #include <atomic>
 #include <functional>
 #include <mutex>
+#include <iremote_object.h>
 
 namespace OHOS {
 namespace Rosen {
