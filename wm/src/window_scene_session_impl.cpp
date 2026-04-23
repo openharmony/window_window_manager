@@ -4362,7 +4362,7 @@ WMError WindowSceneSessionImpl::ValidateSnapshotAnimationConfig(const SnapshotAn
 }
 
 WMError WindowSceneSessionImpl::MaximizeWithOptions(MaximizePresentation presentation,
-    AcrossDisplayPresentation state, SnapshotAnimationConfig snapshotAnimationConfig)
+    AcrossDisplayPresentation state, const SnapshotAnimationConfig& snapshotAnimationConfig)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, presentation: %{public}u, state: %{public}u, "
         "duration: %{public}" PRId64 ", delay: %{public}" PRId64, GetPersistentId(),
@@ -4575,7 +4575,7 @@ WMError WindowSceneSessionImpl::Recover(uint32_t reason)
     return Recover(reason, { -1, -1 });
 }
 
-WMError WindowSceneSessionImpl::Recover(uint32_t reason, SnapshotAnimationConfig snapshotAnimationConfig)
+WMError WindowSceneSessionImpl::Recover(uint32_t reason, const SnapshotAnimationConfig& snapshotAnimationConfig)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, reason: %{public}u, duration: %{public}" PRId64
         ", delay: %{public}" PRId64, GetPersistentId(), reason,
