@@ -1912,6 +1912,41 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId02, TestSi
     int res = sceneSessionManagerLiteStub_->HandleGetDisplayIdByWindowId(data, reply);
     EXPECT_EQ(ERR_NONE, res);
 }
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_Success, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("com.test.app");
+    data.WriteInt32(0);
+    data.WriteString("");
+    int res = sceneSessionManagerLiteStub_->HandleGetAppWindowShowingInfosByBundleName(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadBundleNameFailed, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleGetAppWindowShowingInfosByBundleName(data, reply), ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppIndexFailed, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("com.test.app");
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleGetAppWindowShowingInfosByBundleName(data, reply), ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppInstanceKeyFailed, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("com.test.app");
+    data.WriteInt32(0);
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleGetAppWindowShowingInfosByBundleName(data, reply), ERR_INVALID_DATA);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
