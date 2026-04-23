@@ -20874,6 +20874,21 @@ void SceneSessionManager::RegisterMinimizeAllCallback(MinimizeAllFunc&& func){
     minimizeAllFunc_ = std::move(func);
 }
 
+void SceneSessionManager::UpdateShowOnDockByPersistentIds(const std::vector<int32_t>& persistentIds)
+{
+    std::unordered_set<int32_t> idSet(persistentIds.begin(), persistentIds.end());
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [id, session] : sceneSessionMap_) {
+        if (session == nullptr) {
+            continue;
+        }
+        bool isShowOnDock = idSet.find(id) != idSet.end();
+        session->SetIsShowOnDock(isShowOnDock);
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "UpdateShowOnDockByPersistentIds, ids count: %{public}zu, sessions count: %{public}zu",
+        persistentIds.size(), sceneSessionMap_.size());
+}
+
 void SceneSessionManager::NotifyRotationBegin()
 {
     TLOGI(WmsLogTag::WMS_ROTATION, "in");

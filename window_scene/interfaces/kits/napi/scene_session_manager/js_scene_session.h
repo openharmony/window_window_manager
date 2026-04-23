@@ -228,7 +228,6 @@ private:
     static napi_value SyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static napi_value UnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     static napi_value SetNeedSyncSessionRect(napi_env env, napi_callback_info info);
-    static napi_value SetIsShowOnDock(napi_env env, napi_callback_info info);
     static napi_value MaskSupportEnterWaterfallMode(napi_env env, napi_callback_info info);
     static napi_value UpdateFullScreenWaterfallMode(napi_env env, napi_callback_info info);
     static void BindNativeMethod(napi_env env, napi_value objValue, const char* moduleName);
@@ -368,7 +367,6 @@ private:
     napi_value OnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnUnSyncScenePanelGlobalPosition(napi_env env, napi_callback_info info);
     napi_value OnSetNeedSyncSessionRect(napi_env env, napi_callback_info info);
-    napi_value OnSetIsShowOnDock(napi_env env, napi_callback_info info);
     napi_value OnSetWindowEnableDragBySystem(napi_env env, napi_callback_info info);
     napi_value OnSetIsActivatedAfterScreenLocked(napi_env env, napi_callback_info info);
     napi_value OnSetIsPendingToBackgroundState(napi_env env, napi_callback_info info);
