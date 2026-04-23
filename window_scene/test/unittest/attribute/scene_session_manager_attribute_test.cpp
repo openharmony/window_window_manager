@@ -110,6 +110,48 @@ HWTEST_F(SceneSessionManagerAttributeTest, GetTopNavDestinationName, TestSize.Le
 }
 
 /**
+ * @tc.name: GetRealSessionState
+ * @tc.desc: test get the real session state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, GetRealSessionState, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    ssm_->sceneSessionMap_.clear();
+    EXPECT_EQ(ssm_->GetRealSessionState(nullptr), SessionState::STATE_DISCONNECT);
+
+    SessionInfo parentInfo;
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(parentInfo, nullptr);
+    ASSERT_NE(parentSession, nullptr);
+    parentSession->persistentId_ = 1;
+    parentSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->SetSessionState(SessionState::STATE_ACTIVE);
+    ssm_->sceneSessionMap_.insert(std::make_pair(parentSession->GetPersistentId(), parentSession));
+    EXPECT_EQ(ssm_->GetRealSessionState(parentSession), SessionState::STATE_ACTIVE);
+
+    SessionInfo childInfo;
+    sptr<SceneSession> childSession = sptr<SceneSession>::MakeSptr(childInfo, nullptr);
+    ASSERT_NE(childSession, nullptr);
+    childSession->persistentId_ = 2;
+    childSession->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    childSession->SetParentPersistentId(parentSession->GetPersistentId());
+    ssm_->sceneSessionMap_.insert(std::make_pair(childSession->GetPersistentId(), childSession));
+
+    childSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    EXPECT_EQ(ssm_->GetRealSessionState(childSession), SessionState::STATE_BACKGROUND);
+
+    childSession->SetSessionState(SessionState::STATE_FOREGROUND);
+    EXPECT_EQ(ssm_->GetRealSessionState(childSession), SessionState::STATE_ACTIVE);
+
+    parentSession->SetSessionState(SessionState::STATE_BACKGROUND);
+    EXPECT_EQ(ssm_->GetRealSessionState(childSession), SessionState::STATE_BACKGROUND);
+
+    ssm_->sceneSessionMap_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+}
+
+/**
  * @tc.name: IsNeedNotifyScreenshotEvent
  * @tc.desc: test IsNeedNotifyScreenshotEvent.
  * @tc.type: FUNC

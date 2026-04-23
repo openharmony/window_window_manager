@@ -3713,9 +3713,9 @@ napi_value JsSceneSession::OnSetPrivacyMode(napi_env env, napi_callback_info inf
         WLOGFE("session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isPrivacy=%{public}d", isPrivacy);
     session->SetPrivacyMode(isPrivacy);
     SceneSessionManager::GetInstance().UpdatePrivateStateAndNotify(session->GetPersistentId());
-    TLOGD(WmsLogTag::DEFAULT, "end");
     return NapiGetUndefined(env);
 }
 
