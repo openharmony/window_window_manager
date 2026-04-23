@@ -1128,7 +1128,8 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_
     appInfo.appIndex = 0;
     appInfo.appInstanceKey = "";
     std::vector<AppWindowShowingInfo> windowInfos;
-    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_OK);
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos),
+        WMError::WM_OK);
 }
 
 /**
