@@ -292,6 +292,7 @@ private:
     void RecoverSpecificZIndexSetByApp();
     WMError RecoverWindowPropertyChangeFlag();
     void RegisterRecoverCallback();
+    mutable std::mutex processWatermarkMutex_;
     int32_t processWatermarkPid_ = 0;
     std::string processWatermarkName_;
     std::string appWatermarkName_;

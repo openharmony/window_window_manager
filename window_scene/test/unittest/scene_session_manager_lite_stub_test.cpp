@@ -1724,6 +1724,25 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateSessionScreenLock, Functio
 }
 
 /**
+ * @tc.name: HandleRecoverProcessWatermark
+ * @tc.desc: test HandleRecoverProcessWatermark
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRecoverProcessWatermark, TestSize.Level1)
+{
+    ASSERT_NE(sceneSessionManagerLiteStub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInt32(123);
+    data.WriteString("RecoverProcessWatermarkName");
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManagerLite::SceneSessionManagerLiteMessage::TRANS_ID_RECOVER_PROCESS_WATERMARK);
+    auto res = sceneSessionManagerLiteStub_->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_NE(res, ERR_NULL_OBJECT);
+}
+
+/**
  * @tc.name: HandleSendPointerEventForHover
  * @tc.desc: HandleSendPointerEventForHover
  * @tc.type: FUNC

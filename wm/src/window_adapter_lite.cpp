@@ -555,6 +555,7 @@ WMError WindowAdapterLite::SetProcessWatermark(int32_t pid, const std::string& w
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
     auto errCode = wmsProxy->SetProcessWatermark(pid, watermarkName, isEnabled);
     if (errCode == WMError::WM_OK) {
+        std::lock_guard<std::mutex> lock(processWatermarkMutex_);
         if (isEnabled) {
             processWatermarkPid_ = pid;
             processWatermarkName_ = watermarkName;
@@ -570,15 +571,22 @@ WMError WindowAdapterLite::SetProcessWatermark(int32_t pid, const std::string& w
 
 WMError WindowAdapterLite::RecoverProcessWatermark()
 {
-    if (processWatermarkPid_ == 0 || processWatermarkName_.empty()) {
+    int32_t pid = 0;
+    std::string watermarkName;
+    {
+        std::lock_guard<std::mutex> lock(processWatermarkMutex_);
+        pid = processWatermarkPid_;
+        watermarkName = processWatermarkName_;
+    }
+    if (pid == 0 || watermarkName.empty()) {
         return WMError::WM_OK;
     }
     INIT_PROXY_CHECK_RETURN(WMError::WM_ERROR_SAMGR);
     auto wmsProxy = GetWindowManagerServiceProxy();
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, WMError::WM_ERROR_SAMGR);
-    auto errCode = wmsProxy->RecoverProcessWatermark(processWatermarkPid_, processWatermarkName_);
+    auto errCode = wmsProxy->RecoverProcessWatermark(pid, watermarkName);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "pid=%{public}d, watermarkName=%{public}s, err=%{public}d",
-        processWatermarkPid_, processWatermarkName_.c_str(), static_cast<int32_t>(errCode));
+        pid, watermarkName.c_str(), static_cast<int32_t>(errCode));
     return errCode;
 }
 
