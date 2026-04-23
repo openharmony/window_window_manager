@@ -71,9 +71,6 @@ sptr<SceneSession> SceneSessionManagerTest13::CreateSceneSession(int32_t persist
     info.persistentId_ = persistentId;
     info.bundleName_ = bundleName;
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    if (sceneSession != nullptr) {
-        sceneSession->SetPersistentId(persistentId);
-    }
     return sceneSession;
 }
 
