@@ -31,6 +31,7 @@
 #include "dm_common.h"
 #include "securec.h"
 #include "wm_animation_common.h"
+#include "wm_layout_common.h"
 #include "wm_math.h"
 #include "wm_type.h"
 
@@ -4018,18 +4019,6 @@ struct SupportRotationInfo : public Parcelable {
 };
 
 /**
- * @struct SnapshotAnimationConfig
- * @brief Configuration for snapshot animation duration and delay.
- */
-#ifndef OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
-struct SnapshotAnimationConfig {
-    int64_t duration = -1;  // Animation duration in ms, -1 means use system default
-    int64_t delay = -1;     // Animation delay in ms, -1 means use system default
-};
-#define OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
-#endif
-
-/**
  * @enum WaterfallResidentState
  * @brief Represents the resident (persistent) state control of the waterfall layout.
  */
@@ -4079,7 +4068,7 @@ enum class AcrossDisplayPresentation : uint32_t {
  * @brief Options for maximize operation with animation configuration.
  */
 struct MaximizeOptions {
-    MaximizePresentation presentation = MaximizePresentation::ENTER_IMMERSIVE;
+    MaximizePresentation maximizePresentation = MaximizePresentation::ENTER_IMMERSIVE;
     AcrossDisplayPresentation acrossDisplayPresentation =
         AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING;
     SnapshotAnimationConfig snapshotAnimationConfig;

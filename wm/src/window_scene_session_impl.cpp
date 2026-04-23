@@ -4377,6 +4377,13 @@ WMError WindowSceneSessionImpl::MaximizeWithOptions(MaximizePresentation present
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+
+    if (property_->GetWindowAnchorInfo().isFromAttachOrDetach_ &&
+        property_->GetWindowAnchorInfo().isAnchoredByAttach_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Cannot maximize due to in ancor enabled mode.");
+        return WMError::WM_OK;
+    }
+
     if (!CheckAcrossDisplayPresentation(state)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Invalid acrossDisplayPresentation. windowId: %{public}u, state: %{public}u",
               GetWindowId(), static_cast<uint32_t>(state));

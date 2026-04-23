@@ -26,8 +26,10 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "wm_animation_common.h"
 #include "pixel_map.h"
+#include "wm_animation_common.h"
+#include "wm_layout_common.h"
+
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -1212,18 +1214,6 @@ struct SceneAnimationConfig : public Parcelable {
 struct RotateAnimationConfig {
     int32_t duration_ = ROTATE_ANIMATION_DURATION;
 };
-
-/**
- * @struct SnapshotAnimationConfig
- * @brief Configuration for snapshot animation duration and delay.
- */
-#ifndef OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
-struct SnapshotAnimationConfig {
-    int64_t duration = -1;  // Animation duration in ms, -1 means use system default
-    int64_t delay = -1;     // Animation delay in ms, -1 means use system default
-};
-#define OHOS_WM_SNAPSHOT_ANIMATION_CONFIG_DEFINED
-#endif
 
 struct SessionEventParam {
     int32_t pointerX_ = 0;

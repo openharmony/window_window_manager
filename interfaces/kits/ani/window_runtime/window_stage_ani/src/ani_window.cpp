@@ -4735,7 +4735,7 @@ std::optional<MaximizeOptions> ParseMaximizeOptionsANI(ani_env* env, ani_object 
     MaximizeOptions options;
 
     ani_ref presentationRef;
-    env->Object_GetPropertyByName_Ref(aniOptions, "presentation", &presentationRef);
+    env->Object_GetPropertyByName_Ref(aniOptions, "maximizePresentation", &presentationRef);
     ani_boolean isPresentationUndefined;
     env->Reference_IsUndefined(presentationRef, &isPresentationUndefined);
     if (!isPresentationUndefined) {
@@ -4744,7 +4744,7 @@ std::optional<MaximizeOptions> ParseMaximizeOptionsANI(ani_env* env, ani_object 
             TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid presentation in MaximizeOptions");
             return std::nullopt;
         }
-        options.presentation = *opt;
+        options.maximizePresentation = *opt;
     }
 
     ani_ref acrossDisplayRef;
@@ -4850,7 +4850,7 @@ void AniWindow::OnMaximizeWithOptions(ani_env* env, ani_object maximizeOptions)
     }
     auto options = *optionsOpt;
     auto ret = windowToken_->MaximizeWithOptions(
-        options.presentation, options.acrossDisplayPresentation, options.snapshotAnimationConfig);
+        options.maximizePresentation, options.acrossDisplayPresentation, options.snapshotAnimationConfig);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC,
             "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
@@ -4861,7 +4861,7 @@ void AniWindow::OnMaximizeWithOptions(ani_env* env, ani_object maximizeOptions)
     TLOGD(WmsLogTag::WMS_LAYOUT_PC,
         "[ANI] Success, windowId: %{public}u, present: %{public}d, acrossDisplayPresentation: %{public}u",
         windowToken_->GetWindowId(),
-        static_cast<int32_t>(options.presentation),
+        static_cast<int32_t>(options.maximizePresentation),
         static_cast<uint32_t>(options.acrossDisplayPresentation));
 }
 

@@ -7711,14 +7711,14 @@ std::optional<MaximizeOptions> ParseMaximizeOptions(napi_env env, napi_value jsO
     napi_value jsSnapshotAnimationConfig = nullptr;
 
     // Get presentation
-    if (napi_get_named_property(env, jsOptions, "presentation", &jsPresentation) == napi_ok &&
+    if (napi_get_named_property(env, jsOptions, "maximizePresentation", &jsPresentation) == napi_ok &&
         jsPresentation != nullptr && GetType(env, jsPresentation) != napi_undefined) {
         auto presentationOpt = ParsePresentation(env, jsPresentation);
         if (!presentationOpt) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid presentation in MaximizeOptions");
             return std::nullopt;
         }
-        options.presentation = *presentationOpt;
+        options.maximizePresentation = *presentationOpt;
     }
 
     // Get acrossDisplayPresentation
@@ -7786,7 +7786,7 @@ napi_value JsWindow::OnMaximizeWithOptions(napi_env env, napi_callback_info info
             return;
         }
         WMError ret = window->MaximizeWithOptions(
-            options.presentation, options.acrossDisplayPresentation, options.snapshotAnimationConfig);
+            options.maximizePresentation, options.acrossDisplayPresentation, options.snapshotAnimationConfig);
         if (ret == WMError::WM_OK) {
             napiAsyncTask->Resolve(env, NapiGetUndefined(env));
         } else {
@@ -7795,7 +7795,7 @@ napi_value JsWindow::OnMaximizeWithOptions(napi_env env, napi_callback_info info
         }
         TLOGNI(WmsLogTag::WMS_LAYOUT,
             "%{public}s: windowId: %{public}u, present: %{public}d, acrossDisplayPresentation: %{public}u",
-            where, window->GetWindowId(), static_cast<int32_t>(options.presentation),
+            where, window->GetWindowId(), static_cast<int32_t>(options.maximizePresentation),
             static_cast<uint32_t>(options.acrossDisplayPresentation));
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "OnMaximizeWithOptions") != napi_status::napi_ok) {
