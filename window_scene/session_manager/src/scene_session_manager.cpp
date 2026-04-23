@@ -2050,6 +2050,15 @@ sptr<SceneSession> SceneSessionManager::GetSceneSession(int32_t persistentId)
     return nullptr;
 }
 
+sptr<SceneSession> SceneSessionManager::GetSceneSessionNoLock(int32_t persistentId)
+{
+    if (auto it = sceneSessionMap_.find(persistentId); it != sceneSessionMap_.end()) {
+        return it->second;
+    }
+    TLOGD(WmsLogTag::DEFAULT, "no scene session with id=%{public}d", persistentId);
+    return nullptr;
+}
+
 bool SceneSessionManager::CheckAndGetAbilityInfoByWant(const std::shared_ptr<AAFwk::Want>& want,
     AppExecFwk::AbilityInfo& abilityInfo)
 {
@@ -10057,7 +10066,7 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
         privacyBundleDisplayId[iter.first] = !iter.second.empty() || specialExtWindowHasPrivacyMode_.load();
         notifyPrivacyBundleList[iter.first] = std::vector<std::string>(iter.second.begin(), iter.second.end());
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "notify privacy, win=[%{public}u, %{public}s], uecPrivace=%{public}d",
+    TLOGW(WmsLogTag::WMS_ATTRIBUTE, "notify privacy, win=[%{public}u, %{public}s], uecPrivace=%{public}d",
         persistentId, sceneSession->GetWindowName().c_str(), specialExtWindowHasPrivacyMode_.load());
     ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(privacyBundleDisplayId);
     ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(notifyPrivacyBundleList);
@@ -10065,6 +10074,10 @@ void SceneSessionManager::UpdatePrivateStateAndNotify(uint32_t persistentId)
 
 void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
 {
+    if (isUserBackground_) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "user is in background");
+        return;
+    }
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundleList;
     auto screenProperties = ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
     for (auto& iter : screenProperties) {
@@ -10074,8 +10087,11 @@ void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
     for (const auto& iter : privacyBundleList) {
         privacyBundleDisplayId[iter.first] = !iter.second.empty() || specialExtWindowHasPrivacyMode_.load();
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "isEmptyPrivateBundles=%{public}d", privacyBundleDisplayId.empty());
+    TLOGW(WmsLogTag::WMS_ATTRIBUTE, "isEmptyPrivateBundles=%{public}d, uecPrivace=%{public}d",
+        privacyBundleDisplayId.empty(), specialExtWindowHasPrivacyMode_.load());
     ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(privacyBundleDisplayId);
+    std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
+    privacyBundleMap_ = privacyBundleList;
 }
 
 void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
@@ -10089,16 +10105,19 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
         }
         auto sessionProperty = sceneSession->GetSessionProperty();
         auto currentDisplayId = sessionProperty->GetDisplayId();
-        if (displayId != currentDisplayId) {
-            continue;
-        }
-        bool isForeground = sceneSession->GetRealSessionState() == SessionState::STATE_FOREGROUND ||
-                            sceneSession->GetRealSessionState() == SessionState::STATE_ACTIVE;
         bool isPrivate = sessionProperty->GetPrivacyMode() ||
             sceneSession->GetCombinedExtWindowFlags().privacyModeFlag;
+        if (displayId != currentDisplayId || !isPrivate) {
+            continue;
+        }
+        bool isForeground = sceneSession->GetRSVisible();
+        if (!IsScreenLocked()) {
+            auto sessionState = GetRealSessionState(sceneSession);
+            isForeground = sessionState == SessionState::STATE_FOREGROUND || sessionState == SessionState::STATE_ACTIVE;
+        }
         bool IsSystemWindowVisible = sceneSession->GetSessionInfo().isSystem_ && sceneSession->IsVisible();
         if ((isForeground || IsSystemWindowVisible) && isPrivate) {
-            TLOGI(WmsLogTag::WMS_ATTRIBUTE, "found privacy win=[%{public}d, %{public}s], display=%{public}" PRIu64,
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "found privacy win=[%{public}d, %{public}s], display=%{public}" PRIu64,
                 sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), displayId);
             if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId) &&
                 !PcFoldScreenManager::GetInstance().HasSystemKeyboard()) {
@@ -10116,6 +10135,47 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
     if (privacyBundles.empty()) {
         privacyBundles[displayId] = std::unordered_set<std::string>();
     }
+}
+
+SessionState SceneSessionManager::GetRealSessionState(const sptr<SceneSession>& session)
+{
+    auto state = SessionState::STATE_DISCONNECT;
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+        return state;
+    }
+    state = session->GetSessionState();
+    if (!session->IsSessionForeground()) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], state=%{public}u",
+            session->GetWindowId(), session->GetWindowName().c_str(), state);
+        return state;
+    }
+    auto winType = session->GetWindowType();
+    if (!WindowHelper::IsSubWindow(winType) && !WindowHelper::IsDialogWindow(winType)) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], winType=%{public}u, state=%{public}u",
+            session->GetWindowId(), session->GetWindowName().c_str(), winType, state);
+        return state;
+    }
+    auto winId = session->GetWindowId();
+    auto parent = GetSceneSessionNoLock(session->GetParentPersistentId());
+    while (parent != nullptr) {
+        winType = parent->GetWindowType();
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+            "curId=%{public}d, parentId=%{public}d, parentType=%{public}u, parentState=%{public}u",
+            winId, parent->GetWindowId(), winType, parent->GetSessionState());
+        if (!parent->IsSessionForeground() ||
+            (!WindowHelper::IsSubWindow(winType) && !WindowHelper::IsDialogWindow(winType))) {
+            break;
+        }
+        winId = parent->GetWindowId();
+        parent = GetSceneSessionNoLock(parent->GetParentPersistentId());
+    }
+    if (parent != nullptr) {
+        state = parent->GetSessionState();
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], finalState=%{public}u",
+            session->GetWindowId(), session->GetWindowName().c_str(), state);
+    }
+    return state;
 }
 
 void SceneSessionManager::UpdateSessionPrivacyForSuperFold(const sptr<SceneSession>& sceneSession, DisplayId displayId,
