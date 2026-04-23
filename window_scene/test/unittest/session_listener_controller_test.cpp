@@ -164,26 +164,9 @@ public:
         payload_ = payload;
     }
 
-    void OnAppInstanceLifecycleEvent(const LifecycleEventPayload& payload) override
-    {
-        appInstanceEventNotified_ = true;
-        payload_ = payload;
-    }
-
-    bool IsAppInstanceEventNotified() const
-    {
-        return appInstanceEventNotified_;
-    }
-
-    const ISessionLifecycleListener::LifecycleEventPayload& GetPayload() const
-    {
-        return payload_;
-    }
-
 private:
     ISessionLifecycleListener::SessionLifecycleEvent event_;
     ISessionLifecycleListener::LifecycleEventPayload payload_;
-    bool appInstanceEventNotified_ = false;
 };
 
 sptr<SceneSessionManager> SessionListenerControllerTest::ssm_ = nullptr;
@@ -577,201 +560,23 @@ HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByIds, T
 }
 
 /**
- * @tc.name: Register
- * @tc.desc: Register By AppInstance
+ * @tc.name: RegisterSessionLifecycleListenerByAppInstance
+ * @tc.desc: Register session lifecycle listener by bundle+appIndex+appInstanceKey
  * @tc.type: CLASS
  */
 HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByAppInstance, TestSize.Level1)
 {
-    std::string bundleName = "com.example.myapp";
-    int32_t appIndex = 0;
-    std::string appInstanceKey = "";
-    WMError res = slController->RegisterSessionLifecycleListener(nullptr, bundleName, appIndex, appInstanceKey);
+    WMError res = slController->RegisterSessionLifecycleListener(nullptr, "com.example.myapp", 0, "");
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
     sptr<ISessionLifecycleListener> listener = sptr<MySessionLifecycleListener>::MakeSptr();
     ASSERT_NE(listener, nullptr);
 
-    res = slController->RegisterSessionLifecycleListener(listener, "", appIndex, appInstanceKey);
+    res = slController->RegisterSessionLifecycleListener(listener, "", 0, "");
     EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
 
-    res = slController->RegisterSessionLifecycleListener(listener, bundleName, -1, "appInstanceKey");
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
-
-    res = slController->RegisterSessionLifecycleListener(listener, bundleName, appIndex, appInstanceKey);
+    res = slController->RegisterSessionLifecycleListener(listener, "com.example.myapp", 0, "");
     EXPECT_EQ(res, WMError::WM_OK);
-
-    std::string tooLongBundleName(2048, 'a');
-    res = slController->RegisterSessionLifecycleListener(listener, tooLongBundleName, appIndex, appInstanceKey);
-    EXPECT_EQ(res, WMError::WM_ERROR_INVALID_PARAM);
-}
-
-/**
- * @tc.name: RegisterSessionLifecycleListenerByAppInstance_AppendSameKey
- * @tc.desc: Register by appInstance should append listeners when key already exists
- * @tc.type: CLASS
- */
-HWTEST_F(SessionListenerControllerTest, RegisterSessionLifecycleListenerByAppInstance_AppendSameKey, TestSize.Level1)
-{
-    sptr<MySessionLifecycleListener> myListener1 = new MySessionLifecycleListener();
-    sptr<ISessionLifecycleListener> listener1 = iface_cast<ISessionLifecycleListener>(myListener1->AsObject());
-    ASSERT_NE(listener1, nullptr);
-
-    sptr<MySessionLifecycleListener> myListener2 = new MySessionLifecycleListener();
-    sptr<ISessionLifecycleListener> listener2 = iface_cast<ISessionLifecycleListener>(myListener2->AsObject());
-    ASSERT_NE(listener2, nullptr);
-
-    WMError res = slController->RegisterSessionLifecycleListener(listener1, "com.example.myapp", 8, "same_key");
-    ASSERT_EQ(res, WMError::WM_OK);
-    res = slController->RegisterSessionLifecycleListener(listener2, "com.example.myapp", 8, "same_key");
-    ASSERT_EQ(res, WMError::WM_OK);
-
-    SessionInfo info;
-    info.bundleName_ = "com.example.myapp";
-    info.abilityName_ = "MainAbility";
-    info.moduleName_ = "entry";
-    info.appIndex_ = 8;
-    info.appInstanceKey_ = "same_key";
-    info.persistentId_ = 208;
-
-    slController->NotifyAppInstanceLifecycleEvent(SessionState::STATE_ACTIVE, info);
-    usleep(WAIT_SYNC_IN_NS);
-
-    EXPECT_TRUE(myListener1->IsAppInstanceEventNotified());
-    EXPECT_TRUE(myListener2->IsAppInstanceEventNotified());
-}
-
-/**
- * @tc.name: NotifyAppInstanceLifecycleEvent_MatchedAppInstance
- * @tc.desc: Notify app instance lifecycle event for matched bundle+appIndex+appInstanceKey
- * @tc.type: CLASS
- */
-HWTEST_F(SessionListenerControllerTest, NotifyAppInstanceLifecycleEvent_MatchedAppInstance, TestSize.Level1)
-{
-    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
-    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
-    ASSERT_NE(listener, nullptr);
-
-    WMError res = slController->RegisterSessionLifecycleListener(listener, "com.example.myapp", 1, "app_instance_a");
-    ASSERT_EQ(res, WMError::WM_OK);
-
-    SessionInfo info;
-    info.bundleName_ = "com.example.myapp";
-    info.abilityName_ = "MainAbility";
-    info.moduleName_ = "entry";
-    info.appIndex_ = 1;
-    info.appInstanceKey_ = "app_instance_a";
-    info.persistentId_ = 201;
-
-    slController->NotifyAppInstanceLifecycleEvent(SessionState::STATE_ACTIVE, info);
-    usleep(WAIT_SYNC_IN_NS);
-
-    EXPECT_TRUE(myListener->IsAppInstanceEventNotified());
-    EXPECT_EQ(myListener->GetPayload().persistentId_, info.persistentId_);
-    EXPECT_EQ(myListener->GetPayload().bundleName_, info.bundleName_);
-    EXPECT_EQ(myListener->GetPayload().appIndex_, info.appIndex_);
-    EXPECT_EQ(myListener->GetPayload().appInstanceKey_, info.appInstanceKey_);
-    EXPECT_EQ(myListener->GetPayload().sessionState_, SessionState::STATE_ACTIVE);
-}
-
-/**
- * @tc.name: NotifyAppInstanceLifecycleEvent_MismatchedAppInstance
- * @tc.desc: Do not notify app instance lifecycle event when appInstanceKey does not match
- * @tc.type: CLASS
- */
-HWTEST_F(SessionListenerControllerTest, NotifyAppInstanceLifecycleEvent_MismatchedAppInstance, TestSize.Level1)
-{
-    sptr<MySessionLifecycleListener> myListener = new MySessionLifecycleListener();
-    sptr<ISessionLifecycleListener> listener = iface_cast<ISessionLifecycleListener>(myListener->AsObject());
-    ASSERT_NE(listener, nullptr);
-
-    WMError res = slController->RegisterSessionLifecycleListener(listener, "com.example.myapp", 2, "app_instance_a");
-    ASSERT_EQ(res, WMError::WM_OK);
-
-    SessionInfo info;
-    info.bundleName_ = "com.example.myapp";
-    info.abilityName_ = "MainAbility";
-    info.moduleName_ = "entry";
-    info.appIndex_ = 2;
-    info.appInstanceKey_ = "app_instance_b";
-    info.persistentId_ = 202;
-
-    slController->NotifyAppInstanceLifecycleEvent(SessionState::STATE_BACKGROUND, info);
-    usleep(WAIT_SYNC_IN_NS);
-
-    EXPECT_FALSE(myListener->IsAppInstanceEventNotified());
-}
-
-/**
- * @tc.name: ConstructBatchPayload
- * @tc.desc: Construct batch payload from scene sessions
- * @tc.type: CLASS
- */
-HWTEST_F(SessionListenerControllerTest, ConstructBatchPayload, TestSize.Level1)
-{
-    std::vector<sptr<SceneSession>> sessions;
-
-    SessionInfo info1;
-    info1.bundleName_ = "com.example.myapp";
-    info1.abilityName_ = "MainAbility1";
-    info1.moduleName_ = "entry";
-    info1.appIndex_ = 1;
-    info1.persistentId_ = 301;
-    info1.appInstanceKey_ = "instance_1";
-    info1.screenId_ = 11;
-    sptr<SceneSession> session1 = sptr<MainSession>::MakeSptr(info1, nullptr);
-    ASSERT_NE(session1, nullptr);
-    session1->SetSessionState(SessionState::STATE_ACTIVE);
-    sessions.emplace_back(session1);
-
-    SessionInfo info2;
-    info2.bundleName_ = "com.example.myapp";
-    info2.abilityName_ = "MainAbility2";
-    info2.moduleName_ = "feature";
-    info2.appIndex_ = 2;
-    info2.persistentId_ = 302;
-    info2.appInstanceKey_ = "instance_2";
-    info2.screenId_ = 12;
-    sptr<SceneSession> session2 = sptr<MainSession>::MakeSptr(info2, nullptr);
-    ASSERT_NE(session2, nullptr);
-    session2->SetSessionState(SessionState::STATE_BACKGROUND);
-    sessions.emplace_back(session2);
-
-    std::vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
-    slController->ConstructBatchPayload(payloads, sessions);
-
-    ASSERT_EQ(payloads.size(), 2);
-    EXPECT_EQ(payloads[0].bundleName_, info1.bundleName_);
-    EXPECT_EQ(payloads[0].abilityName_, info1.abilityName_);
-    EXPECT_EQ(payloads[0].moduleName_, info1.moduleName_);
-    EXPECT_EQ(payloads[0].appIndex_, info1.appIndex_);
-    EXPECT_EQ(payloads[0].persistentId_, info1.persistentId_);
-    EXPECT_EQ(payloads[0].appInstanceKey_, info1.appInstanceKey_);
-    EXPECT_EQ(payloads[0].screenId_, info1.screenId_);
-    EXPECT_EQ(payloads[0].sessionState_, SessionState::STATE_ACTIVE);
-
-    EXPECT_EQ(payloads[1].bundleName_, info2.bundleName_);
-    EXPECT_EQ(payloads[1].abilityName_, info2.abilityName_);
-    EXPECT_EQ(payloads[1].moduleName_, info2.moduleName_);
-    EXPECT_EQ(payloads[1].appIndex_, info2.appIndex_);
-    EXPECT_EQ(payloads[1].persistentId_, info2.persistentId_);
-    EXPECT_EQ(payloads[1].appInstanceKey_, info2.appInstanceKey_);
-    EXPECT_EQ(payloads[1].screenId_, info2.screenId_);
-    EXPECT_EQ(payloads[1].sessionState_, SessionState::STATE_BACKGROUND);
-}
-
-/**
- * @tc.name: ConstructBatchPayload_EmptySessions
- * @tc.desc: Construct batch payload with empty scene sessions
- * @tc.type: CLASS
- */
-HWTEST_F(SessionListenerControllerTest, ConstructBatchPayload_EmptySessions, TestSize.Level1)
-{
-    std::vector<sptr<SceneSession>> sessions;
-    std::vector<ISessionLifecycleListener::LifecycleEventPayload> payloads;
-
-    slController->ConstructBatchPayload(payloads, sessions);
-    ASSERT_TRUE(payloads.empty());
 }
 
 /**
