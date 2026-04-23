@@ -25,7 +25,8 @@ namespace Rosen {
 
 class RSUIDirector final {
 public:
-    static std::shared_ptr<RSUIDirector> Create()
+    static std::shared_ptr<RSUIDirector> Create(sptr<IRemoteObject> connectToRenderRemote = nullptr,
+        std::shared_ptr<RSUIContext> rsUIContext = nullptr)
     {
         return std::make_shared<RSUIDirector>();
     }
