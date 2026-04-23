@@ -66,7 +66,7 @@ public:
         return nodeMap_;
     }
 
-    std::shared_ptr<RSRenderInterface> GetRSRenderInterfacce()
+    std::shared_ptr<RSRenderInterface> GetRSRenderInterface()
     {
         return rsRenderInterface_;
     }
