@@ -2010,6 +2010,13 @@ Rect WindowSessionImpl::GetGlobalScaledRectLocal() const
     return globalScaledRect_;
 }
 
+WSError WindowSessionImpl::SetIsStartMoving(bool isStartMoving)
+{
+    isStartMoving_ = isStartMoving;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isStartMoving: %{public}d", GetPersistentId(), isStartMoving);
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::GetVirtualPixelRatio(float& vpr)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());

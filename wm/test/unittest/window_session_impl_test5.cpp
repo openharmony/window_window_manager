@@ -2798,6 +2798,25 @@ HWTEST_F(WindowSessionImplTest5, RecordLifeCycleExceptionEvent, TestSize.Level1)
         WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "test reason");
     window->Destroy();
 }
+
+/**
+ * @tc.name: SetIsStartMoving
+ * @tc.desc: Verify SetIsStartMoving updates state correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, SetIsStartMoving, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("SetIsStartMoving");
+    ASSERT_NE(window, nullptr);
+
+    // Case 1: set true
+    EXPECT_EQ(WSError::WS_OK, window->SetIsStartMoving(true));
+    EXPECT_TRUE(window->IsStartMoving());
+
+    // Case 2: set false
+    EXPECT_EQ(WSError::WS_OK, window->SetIsStartMoving(false));
+    EXPECT_FALSE(window->IsStartMoving());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
