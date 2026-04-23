@@ -5571,7 +5571,7 @@ void Session::NotifyDisplayIdChanged(int32_t persistentId, uint64_t displayId)
     } else {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "displayIdChangedNotifyManagerFunc is nullptr");
     }
-}
+} 
 
 bool Session::NeedCheckContextTransparent() const
 {
