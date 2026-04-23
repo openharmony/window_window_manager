@@ -56,6 +56,8 @@ private:
     std::string ConvertFoldStatusToString(FoldStatus foldStatus);
     void DumpTentMode();
     void DumpFoldCreaseRegion();
+    void DumpCreaseRectsToOss(std::ostringstream& oss,
+        const std::string& label, const std::vector<DMRect>& rects);
     void OutputDumpInfo();
     void DumpScreenSessionById(ScreenId id);
     void DumpRsInfoById(ScreenId id);

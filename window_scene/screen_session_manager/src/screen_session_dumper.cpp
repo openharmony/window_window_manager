@@ -114,7 +114,7 @@ static std::string GetProcessNameByPid(int32_t pid)
     return processName;
 }
 
-static void DumpCreaseRectsToOss(std::ostringstream& oss,
+void ScreenSessionDumper::DumpCreaseRectsToOss(std::ostringstream& oss,
     const std::string& label, const std::vector<DMRect>& rects)
 {
     oss << std::left << std::setw(LINE_WIDTH) << label;
