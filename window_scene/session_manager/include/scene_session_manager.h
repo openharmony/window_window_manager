@@ -97,6 +97,7 @@ struct SCBAbilityInfo {
     std::string codePath_;
     bool isAbilityHook_;
     bool isForceRotate_;
+    bool isNativeModuleHiddenStart_;
 };
 
 struct SessionIdentityInfo {
@@ -1069,7 +1070,7 @@ private:
     void LoadKeyboardAnimation(const WindowSceneConfig::ConfigItem& item, KeyboardSceneAnimationConfig& config);
     sptr<SceneSession::SpecificSessionCallback> CreateSpecificSessionCallback();
     sptr<KeyboardSession::KeyboardSessionCallback> CreateKeyboardSessionCallback();
-    void FillSessionInfo(sptr<SceneSession>& sceneSession, bool isInit = false);
+    void FillSessionInfo(sptr<SceneSession>& sceneSession);
     std::shared_ptr<AppExecFwk::AbilityInfo> QueryAbilityInfoFromBMS(const int32_t uId, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName, bool isAtomicServiceFreeInstall = false,
         bool isTargetPlugin = false, const std::string& hostBundleName = "");
@@ -1353,6 +1354,7 @@ private:
     WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos, int32_t userId = 0);
     void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
+    bool GetNativeModuleStartMode(AppExecFwk::AbilityInfo& abilityInfo);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     void ClosePipWindowIfExist(WindowType type);

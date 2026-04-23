@@ -1969,6 +1969,8 @@ static napi_value CreateAbilityItemInfo(napi_env env, const SCBAbilityInfo& scbA
     // forceRotate for anco
     napi_set_named_property(env, objValue, "isForceRotate", CreateJsValue(env, scbAbilityInfo.isForceRotate_));
     napi_set_named_property(env, objValue, "applicationInfo", CreateApplicationInfo(env, abilityInfo));
+    napi_set_named_property(env, objValue, "isNativeModuleHiddenStart",
+        CreateJsValue(env, scbAbilityInfo.isNativeModuleHiddenStart_));
     return objValue;
 }
 

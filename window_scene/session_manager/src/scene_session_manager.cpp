@@ -182,6 +182,12 @@ constexpr int32_t FLUSH_WINDOW_INFO_DELAY_INTERVAL = 2000;
 constexpr int32_t FLUSH_WINDOW_INFO_START_DELAY_INTERVAL = 1000;
 const std::string FLUSH_WINDOW_INFO_TASK_NAME = "DelayedFlushWindowInfoToMMITask";
 
+const std::string WITH_NATIVE_MODULE_KEY = "ohos.ability.withNativeModule";
+const std::string STARTUP_PHASE_KEY = "ohos.ability.startupPhase";
+const std::string STARTUP_PHASE_PRE_WINDOW = "pre_window";
+const std::string STARTUP_PHASE_PRE_FOREGROUND = "pre_foreground";
+const std::string TRUE_VALUE = "true";
+
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
     {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
@@ -3440,7 +3446,7 @@ void SceneSessionManager::InitSceneSession(sptr<SceneSession>& sceneSession, con
     }
     // Skip FillSessionInfo when atomicService free-install start.
     if (!IsAtomicServiceFreeInstall(sessionInfo)) {
-        FillSessionInfo(sceneSession, true);
+        FillSessionInfo(sceneSession);
     }
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:RequestSceneSession(%d )", sceneSession->GetPersistentId());
     if (WindowHelper::IsMainWindow(sceneSession->GetWindowType())) {
@@ -7033,9 +7039,6 @@ void SceneSessionManager::FillSessionInfo(sptr<SceneSession>& sceneSession, bool
         sceneSession->SetCollaboratorType(CollaboratorType::RESERVE_TYPE);
     } else if (abilityInfo->applicationInfo.codePath == std::to_string(CollaboratorType::OTHERS_TYPE)) {
         sceneSession->SetCollaboratorType(CollaboratorType::OTHERS_TYPE);
-    }
-    if (!sceneSession->GetNativeHideWindow() && isInit) {
-        sceneSession->UpdateNativeHideWindowByAbilityInfo(abilityInfo);
     }
     SetSessionInfoStartWindowType(sceneSession);
     TLOGI(WmsLogTag::WMS_MAIN, "bundleName:%{public}s removeMissionAfterTerminate:%{public}d "
@@ -11600,6 +11603,20 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
         return;
     }
     abilityInfo.orientation = STRING_TO_DISPLAY_ORIENTATION_MAP.at(orientation);
+}
+
+bool SceneSessionManager::GetNativeModuleStartMode(AppExecFwk::AbilityInfo& abilityInfo)
+{
+    bool withNativeModule = false;
+    bool hideWindow = false;
+    for (const auto& item : abilityInfo.metadata) {
+        if (item.name == WITH_NATIVE_MODULE_KEY) {
+            withNativeModule = (item.value == TRUE_VALUE);
+        } else if (item.name == STARTUP_PHASE_KEY) {
+            hideWindow = (item.value == STARTUP_PHASE_PRE_WINDOW || item.value == STARTUP_PHASE_PRE_FOREGROUND);
+        }
+    }
+    return withNativeModule && hideWindow;
 }
 
 WSError SceneSessionManager::TerminateSessionNew(
