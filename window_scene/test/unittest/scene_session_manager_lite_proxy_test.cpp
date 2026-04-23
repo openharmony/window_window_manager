@@ -1115,6 +1115,72 @@ HWTEST_F(sceneSessionManagerLiteProxyTest, UnsetPipEnableByScreenId_ReadIntFaile
     MockMessageParcel::SetReadInt32ErrorFlag(true);
     EXPECT_EQ(sceneSessionManagerLiteProxy_->UnsetPipEnableByScreenId(1), WMError::WM_ERROR_IPC_FAILED);
 }
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_Success, TestSize.Level1)
+{
+    ApplicationInfo appInfo;
+    appInfo.bundleName = "com.test.app";
+    appInfo.appIndex = 0;
+    appInfo.appInstanceKey = "";
+    std::vector<AppWindowShowingInfo> windowInfos;
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_OK);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_WriteTokenFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ApplicationInfo appInfo;
+    appInfo.bundleName = "com.test.app";
+    std::vector<AppWindowShowingInfo> windowInfos;
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_WriteStringFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ApplicationInfo appInfo;
+    appInfo.bundleName = "com.test.app";
+    std::vector<AppWindowShowingInfo> windowInfos;
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_WriteIntFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ApplicationInfo appInfo;
+    appInfo.bundleName = "com.test.app";
+    std::vector<AppWindowShowingInfo> windowInfos;
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_SendReqFailed, TestSize.Level1)
+{
+    iRemoteObjectMocker_->SetRequestResult(1);
+    ApplicationInfo appInfo;
+    appInfo.bundleName = "com.test.app";
+    std::vector<AppWindowShowingInfo> windowInfos;
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
+    iRemoteObjectMocker_->SetRequestResult(0);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_RemoteNullFailed, TestSize.Level1)
+{
+    sptr<SceneSessionManagerLiteProxy> liteProxyNullRemote = sptr<SceneSessionManagerLiteProxy>::MakeSptr(nullptr);
+    ASSERT_NE(liteProxyNullRemote, nullptr);
+    ApplicationInfo appInfo;
+    appInfo.bundleName = "com.test.app";
+    std::vector<AppWindowShowingInfo> windowInfos;
+    EXPECT_EQ(liteProxyNullRemote->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
+}
+
+HWTEST_F(sceneSessionManagerLiteProxyTest, GetAppWindowShowingInfosByBundleName_ReadRetFailed, TestSize.Level1)
+{
+    MockMessageParcel::SetReadInt32ErrorFlag(true);
+    ApplicationInfo appInfo;
+    appInfo.bundleName = "com.test.app";
+    std::vector<AppWindowShowingInfo> windowInfos;
+    EXPECT_EQ(sceneSessionManagerLiteProxy_->GetAppWindowShowingInfosByBundleName(appInfo, windowInfos), WMError::WM_ERROR_IPC_FAILED);
+}
 }
 }
 }

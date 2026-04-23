@@ -3170,6 +3170,57 @@ HWTEST_F(SceneSessionManagerStubTest, HandleNotifySupportRotationRegistered, Fun
     int res = stub_->HandleNotifySupportRotationRegistered(data, reply);
     EXPECT_EQ(res, ERR_NONE);
 }
+
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName_Success, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteString("com.test.app");
+    data.WriteInt32(0);
+    data.WriteString("");
+
+    uint32_t code = static_cast<uint32_t>(
+        ISceneSessionManager::SceneSessionManagerMessage::TRANS_ID_GET_APP_WINDOW_SHOWING_INFOS_BY_BUNDLE_NAME);
+
+    int res = stub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadBundleNameFailed, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    int res = stub_->HandleGetAppWindowShowingInfosByBundleName(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppIndexFailed, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteString("com.test.app");
+    int res = stub_->HandleGetAppWindowShowingInfosByBundleName(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
+
+HWTEST_F(SceneSessionManagerStubTest, HandleGetAppWindowShowingInfosByBundleName_ReadAppInstanceKeyFailed, Function | SmallTest | Level2)
+{
+    MessageParcel data;
+    MessageParcel reply;
+
+    data.WriteInterfaceToken(SceneSessionManagerStub::GetDescriptor());
+    data.WriteString("com.test.app");
+    data.WriteInt32(0);
+    int res = stub_->HandleGetAppWindowShowingInfosByBundleName(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
