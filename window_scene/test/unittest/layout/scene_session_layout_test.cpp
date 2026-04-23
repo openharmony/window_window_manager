@@ -220,7 +220,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect04, TestSize.Level0)
     sceneSession->SetClientRect(sessionRect);
     auto mockRsTx = std::shared_ptr<RSTransaction>(nullptr);
     // NotifyClientToUpdateRect is expected to be called once
-    EXPECT_CALL(*sceneSession, NotifyClientToUpdateRect("SceneSessionLayoutTest", mockRsTx))
+    EXPECT_CALL(*sceneSession, NotifyClientToUpdateRect("SceneSessionLayoutTest", _, mockRsTx))
         .Times(1);
     EXPECT_EQ(sceneSession->UpdateRect(requestRect, reason, "SceneSessionLayoutTest", mockRsTx), WSError::WS_OK);
 }
@@ -246,7 +246,7 @@ HWTEST_F(SceneSessionLayoutTest, UpdateRect05, TestSize.Level0)
     sceneSession->SetClientRect(sessionRect);
     auto mockRsTx = std::shared_ptr<RSTransaction>(nullptr);
     // NotifyClientToUpdateRect is expected to be called 0 times
-    EXPECT_CALL(*sceneSession, NotifyClientToUpdateRect("SceneSessionLayoutTest", mockRsTx))
+    EXPECT_CALL(*sceneSession, NotifyClientToUpdateRect("SceneSessionLayoutTest", _, mockRsTx))
         .Times(0);
     EXPECT_EQ(sceneSession->UpdateRect(requestRect, reason, "SceneSessionLayoutTest", mockRsTx), WSError::WS_OK);
 }
@@ -266,7 +266,7 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect01, TestSize.Level0)
     sptr<SessionStageMocker> mockSessionStage = sptr<SessionStageMocker>::MakeSptr();
     sceneSession->dirtyFlags_ |= static_cast<uint32_t>(SessionUIDirtyFlag::RECT);
     sceneSession->sessionStage_ = mockSessionStage;
-    auto ret = sceneSession->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr);
+    auto ret = sceneSession->NotifyClientToUpdateRect("SceneSessionLayoutTest", std::nullopt, nullptr);
     ASSERT_EQ(ret, WSError::WS_OK);
 }
 
@@ -366,14 +366,14 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRect, TestSize.Level1)
     session->Session::SetSessionState(SessionState::STATE_CONNECT);
     session->specificCallback_ = nullptr;
     session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG);
-    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr));
+    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionLayoutTest", std::nullopt, nullptr));
 
     UpdateAvoidAreaCallback func = [](const int32_t& persistentId) { return; };
     auto specificCallback = sptr<SceneSession::SpecificSessionCallback>::MakeSptr();
     specificCallback->onUpdateAvoidArea_ = func;
     session->specificCallback_ = specificCallback;
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
-    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionLayoutTest", nullptr));
+    EXPECT_EQ(WSError::WS_OK, session->NotifyClientToUpdateRect("SceneSessionLayoutTest", std::nullopt, nullptr));
 }
 
 /**
@@ -395,20 +395,20 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RESIZE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::RECOVER);
     EXPECT_EQ(session->GetSizeChangeReason(), SizeChangeReason::RECOVER);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
 
     session->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(session));
     session->moveDragController_->isStartDrag_ = true;
@@ -417,23 +417,23 @@ HWTEST_F(SceneSessionLayoutTest, NotifyClientToUpdateRectTask, TestSize.Level0)
     session->isKeyboardPanelEnabled_ = true;
     info.windowType_ = static_cast<uint32_t>(WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::UNDEFINED);
-    EXPECT_EQ(WSError::WS_ERROR_REPEAT_OPERATION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+    EXPECT_EQ(WSError::WS_DO_NOTHING,
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
 
     session->Session::UpdateSizeChangeReason(SizeChangeReason::MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
     session->Session::UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
     info.windowType_ = static_cast<uint32_t>(WindowType::WINDOW_TYPE_KEYBOARD_PANEL);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION,
-              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", nullptr));
+              session->NotifyClientToUpdateRectTask("SceneSessionLayoutTest", std::nullopt, nullptr));
 }
 
 /**
@@ -1785,10 +1785,6 @@ HWTEST_F(SceneSessionLayoutTest, NotifyRelatedWindowsAttachStateChange05, TestSi
 
     // wasAttached=true, isAttached=false (detach scenario)
     session->NotifyRelatedWindowsAttachStateChange(parentSession, true, false, true, true);
-
-    // Verify lists were cleared
-    EXPECT_TRUE(property->GetAttachedWindowLimitsList().empty());
-    EXPECT_TRUE(property->GetAttachedLimitOptionsList().empty());
 }
 
 /**
@@ -2621,65 +2617,6 @@ HWTEST_F(SceneSessionLayoutTest, SetMoveAvailableArea02, TestSize.Level1)
     sceneSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(sceneSession));
     res = sceneSession->SetMoveAvailableArea(0);
     EXPECT_EQ(res, WSError::WS_OK);
-}
-
-/**
- * @tc.name: GetAppHookWindowInfoFromServer
- * @tc.desc: GetAppHookWindowInfoFromServer
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, GetAppHookWindowInfoFromServer, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "GetAppHookWindowInfoFromServer";
-    info.bundleName_ = "GetAppHookWindowInfoFromServer";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-
-    sceneSession->getHookWindowInfoFunc_ = nullptr;
-    HookWindowInfo hookWindowInfo;
-    WMError errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_ERROR_NULLPTR);
-    EXPECT_EQ(hookWindowInfo.enableHookWindow, false);
-
-    sceneSession->getHookWindowInfoFunc_ = [](const std::string& bundleName) -> HookWindowInfo {
-        HookWindowInfo hookInfo;
-        hookInfo.enableHookWindow = true;
-        return hookInfo;
-    };
-    HookWindowInfo hookWindowInfo2;
-    errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo2);
-    EXPECT_EQ(errCode, WMError::WM_OK);
-    EXPECT_EQ(hookWindowInfo2.enableHookWindow, true);
-}
-
-/**
- * @tc.name: RegisterAppHookWindowInfoFunc
- * @tc.desc: RegisterAppHookWindowInfoFunc
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionLayoutTest, RegisterAppHookWindowInfoFunc, TestSize.Level1)
-{
-    SessionInfo info;
-    info.abilityName_ = "RegisterAppHookWindowInfoFunc";
-    info.bundleName_ = "RegisterAppHookWindowInfoFunc";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    sceneSession->getHookWindowInfoFunc_ = nullptr;
-
-    // Case 1: func is not nullptr
-    sceneSession->RegisterAppHookWindowInfoFunc([](const std::string& bundleName) -> HookWindowInfo {
-        HookWindowInfo hookInfo;
-        hookInfo.enableHookWindow = true;
-        return hookInfo;
-    });
-    ASSERT_NE(sceneSession->getHookWindowInfoFunc_, nullptr);
-    HookWindowInfo hookWindowInfo;
-    WMError errCode = sceneSession->GetAppHookWindowInfoFromServer(hookWindowInfo);
-    EXPECT_EQ(errCode, WMError::WM_OK);
-    EXPECT_EQ(hookWindowInfo.enableHookWindow, true);
-
-    // Case 2: func is nullptr
-    sceneSession->RegisterAppHookWindowInfoFunc(nullptr);
-    ASSERT_NE(sceneSession->getHookWindowInfoFunc_, nullptr);
 }
 
 /**

@@ -552,7 +552,7 @@ void PcFoldScreenController::UpdateRect()
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "only main screen need update rect.");
         return;
     }
-    auto ret = sceneSession->NotifyClientToUpdateRect("ScreenFoldStatusChanged", nullptr);
+    auto ret = sceneSession->NotifyClientToUpdateRect("ScreenFoldStatusChanged", std::nullopt, nullptr);
     if (ret != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "NotifyClientToUpdateRect Fail, id: %{public}d", GetPersistentId());
     }

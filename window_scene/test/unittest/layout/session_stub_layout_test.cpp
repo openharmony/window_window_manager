@@ -137,7 +137,6 @@ HWTEST_F(SessionStubLayoutTest, HandleSetSystemEnableDrag_TestReadBool, TestSize
     res = session_->HandleSetSystemEnableDrag(data, reply);
     ASSERT_EQ(ERR_NONE, res);
 }
-
 /**
  * @tc.name: HandleNotifyAttachedWindowsLimitsChanged01
  * @tc.desc: Test HandleNotifyAttachedWindowsLimitsChanged with valid data
@@ -237,36 +236,6 @@ HWTEST_F(SessionStubLayoutTest, HandleNotifyAttachedWindowsLimitsChanged05, Test
     // WindowLimits::Unmarshalling will fail due to invalid pixelUnit
     auto res = session->HandleNotifyAttachedWindowsLimitsChanged(data, reply);
     EXPECT_EQ(ERR_INVALID_DATA, res);
-}
-
-/**
- * @tc.name: HandleGetAppHookWindowInfoFromServer
- * @tc.desc: HandleGetAppHookWindowInfoFromServer01
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubLayoutTest, HandleGetAppHookWindowInfoFromServer01, TestSize.Level1)
-{
-    ASSERT_TRUE(session_ != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = { MessageOption::TF_SYNC };
-    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_HOOK_WINDOW_INFO);
-    auto res = session_->ProcessRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ERR_NONE, res);
-}
-
-/**
- * @tc.name: HandleGetAppHookWindowInfoFromServer
- * @tc.desc: HandleGetAppHookWindowInfoFromServer02
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStubLayoutTest, HandleGetAppHookWindowInfoFromServer02, TestSize.Level1)
-{
-    ASSERT_TRUE(session_ != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    auto res = session_->HandleGetAppHookWindowInfoFromServer(data, reply);
-    EXPECT_EQ(res, ERR_NONE);
 }
 } // namespace
 } // namespace Rosen

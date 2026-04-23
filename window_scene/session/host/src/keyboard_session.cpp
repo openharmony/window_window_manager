@@ -213,16 +213,17 @@ WSError KeyboardSession::Disconnect(bool isFromClient, const std::string& identi
 }
 
 WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReason,
-    std::shared_ptr<RSTransaction> rsTransaction)
+                                                  std::optional<WSRect> updateRect,
+                                                  std::shared_ptr<RSTransaction> rsTransaction)
 {
-    PostTask([weakThis = wptr(this), rsTransaction, updateReason]() {
+    PostTask([weakThis = wptr(this), updateReason, updateRect, rsTransaction] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null");
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
 
-        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, rsTransaction);
+        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, updateRect, rsTransaction);
         return ret;
     }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;

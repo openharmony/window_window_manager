@@ -112,7 +112,7 @@ using NotifyForceSplitFunc = std::function<AppForceLandscapeConfig(const std::st
 using NotifyForceSplitEnableFunc = std::function<bool(const std::string& bundleName)>;
 using PageEnableCallback = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
-using GetHookWindowInfoFunc = std::function<HookWindowInfo(const std::string& bundleName)>;
+using SetSelectModeCallback = std::function<void(SelectMode selectMode)>;
 using GetSelectModeFunc = std::function<SelectMode()>;
 using UpdatePrivateStateAndNotifyFunc = std::function<void(int32_t persistentId)>;
 using UpdateScreenshotAppEventRegisteredFunc = std::function<void(int32_t persistentId, bool isRegister)>;
@@ -309,8 +309,22 @@ public:
     WSRect GetSessionGlobalRectWithSingleHandScale();
     WSRect GetMoveRectForWindowDrag();
     void UpdateSessionState(SessionState state) override;
-    virtual WSError NotifyClientToUpdateRect(const std::string& updateReason,
-        std::shared_ptr<RSTransaction> rsTransaction) override;
+
+    /**
+     * @brief Asynchronously notify client to update window rectangle.
+     *
+     * Posts a task to execute the update in NotifyClientToUpdateRectTask().
+     *
+     * @param updateReason Reason for the update.
+     * @param updateRect Optional target rectangle.
+     * @param rsTransaction RS transaction for synchronized rendering.
+     *
+     * @return Always returns WSError::WS_OK.
+     */
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+                                     std::optional<WSRect> updateRect,
+                                     std::shared_ptr<RSTransaction> rsTransaction) override;
+
     void SetWinRectWhenUpdateRect(const WSRect& rect);
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
@@ -489,8 +503,8 @@ public:
     virtual void RegisterForceSplitFullScreenChangeCallback(ForceSplitFullScreenChangeCallback&& callback) {}
     virtual bool IsFullScreenInForceSplit() { return false; }
     virtual void RegisterCompatibleModeChangeCallback(CompatibleModeChangeCallback&& callback) {}
-    virtual void RegisterForceSplitEnableListener(NotifyForceSplitEnableFunc&& func) {}
     virtual void RegisterPageEnableCallback(PageEnableCallback&& callback) {}
+    virtual void RegisterSetSelectModeCallback(SetSelectModeCallback&& callback) {}
 
     /*
      * PC Window
@@ -573,7 +587,7 @@ public:
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
     WSError SetIsStatusBarVisibleInner(bool isVisible);
-    WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) override;
+    WMError SetFloatNavigationEnabled(bool isEnabled) override;
     WSError HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidArea = AvoidAreaType::TYPE_END);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
@@ -990,8 +1004,6 @@ public:
     bool IsAnyParentSessionDragZooming() const override;
     bool IsNeedNotifyDragEventOnNextVsync() const;
     void NotifiedDragEventOnNextVsync();
-    void RegisterAppHookWindowInfoFunc(GetHookWindowInfoFunc&& func);
-    WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) override;
     void RegisterSelectModeFunc(GetSelectModeFunc&& func);
     WMError GetSelectMode(SelectMode& selectMode) override;
     void SetFindScenePanelRsNodeByZOrderFunc(FindScenePanelRsNodeByZOrderFunc&& func);
@@ -1129,7 +1141,20 @@ public:
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     std::string GetRatioPreferenceKey();
-    WSError NotifyClientToUpdateRectTask(const std::string& updateReason, std::shared_ptr<RSTransaction> rsTransaction);
+
+    /**
+     * @brief Perform notifying client to update window rectangle.
+     *
+     * @param updateReason Reason for the update.
+     * @param updateRect Optional target rectangle; nullopt means use current rect.
+     * @param rsTransaction RS transaction for synchronized rendering.
+     *
+     * @return WSError::WS_OK on success, or an appropriate error code on failure.
+     */
+    WSError NotifyClientToUpdateRectTask(const std::string& updateReason,
+                                         std::optional<WSRect> updateRect,
+                                         std::shared_ptr<RSTransaction> rsTransaction);
+
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
 
     std::string GetRectInfo(const WSRect& rect)
@@ -1168,7 +1193,6 @@ protected:
     void CalculateAvoidAreaByType(AvoidAreaType type,
         const WSRect& winRect, const WSRect& avoidRect, AvoidArea& avoidArea);
     void PatchFloatNavigationArea(WSRect& floatNavigationArea);
-    bool GetFloatNavigationAvoidAreaEnabled() const { return isFloatNavigationAvoidAreaEnabled_; }
 
     /*
      * Gesture Back
@@ -1557,7 +1581,6 @@ private:
     /*
      * Window Layout
      */
-    GetHookWindowInfoFunc getHookWindowInfoFunc_ = nullptr;
     GetSelectModeFunc getSelectModeFunc_ = nullptr;
     bool SaveAspectRatio(float ratio);
     WSError UpdateRectForDrag(const WSRect& rect);
@@ -1727,7 +1750,6 @@ private:
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;
     std::unordered_map<AvoidAreaType, std::tuple<DisplayId, WSRect, WSRect>> lastAvoidAreaInputParamtersMap_;
-    bool isFloatNavigationAvoidAreaEnabled_ { false };
 
     /**
      * Window Layout
@@ -1756,6 +1778,9 @@ private:
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
+    void OnSurfaceNodeChanged() override;
+    void UpdateSurfaceDarkMode();
+    bool GetDarkMode() const;
     std::string colorMode_;
     bool hasDarkRes_ = false;
     mutable std::mutex colorModeMutex_;

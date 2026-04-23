@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_WINDOW_SCENE_SESSION_STAGE_RPOXY_H
-#define OHOS_WINDOW_SCENE_SESSION_STAGE_RPOXY_H
+#ifndef OHOS_WINDOW_SCENE_SESSION_STAGE_PROXY_H
+#define OHOS_WINDOW_SCENE_SESSION_STAGE_PROXY_H
 
 #include <iremote_proxy.h>
 #include <transaction/rs_transaction.h>
@@ -128,10 +128,8 @@ public:
     WSError GetSceneNodeCount(const sptr<IRemoteObject>& callback) override;
     WSError NotifyOrientationExecutionResult(uint32_t promiseId, OrientationExecutionResult result) override;
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
-        SelectMode selectMode) override;
-    WSError NotifyAppHookWindowInfoUpdated() override;
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override;
+    WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) override;
     WSError CloseSpecificScene() override;
     void NotifyLifecyclePausedStatus() override;
     void NotifyAppUseControlStatus(bool isUseControl) override;
@@ -151,9 +149,10 @@ public:
     // Window Property
     WSError UpdateBrightness(float brightness) override;
     void UpdateDensity() override;
+    WSError SetIsStartMoving(bool isStartMoving) override;
 
 private:
     static inline BrokerDelegator<SessionStageProxy> delegator_;
 };
 } // namespace OHOS::Rosen
-#endif // OHOS_WINDOW_SCENE_SESSION_STAGE_RPOXY_H
+#endif // OHOS_WINDOW_SCENE_SESSION_STAGE_PROXY_H

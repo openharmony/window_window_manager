@@ -2308,11 +2308,11 @@ HWTEST_F(SessionStubTest, HandleSetDecorVisibleCases, TestSize.Level1)
 }
 
 /*
- * @tc.name: HandleSetFloatNavigationAvoidAreaEnabled
- * @tc.desc: Verify HandleSetFloatNavigationAvoidAreaEnabled with invalid and valid inputs
+ * @tc.name: HandleSetFloatNavigationEnabled
+ * @tc.desc: Verify HandleSetFloatNavigationEnabled with invalid and valid inputs
  * @tc.type: FUNC
  */
-HWTEST_F(SessionStubTest, HandleSetFloatNavigationAvoidAreaEnabled, TestSize.Level1)
+HWTEST_F(SessionStubTest, HandleSetFloatNavigationEnabled, TestSize.Level1)
 {
     sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_FLOAT_NAVIGATION_AVOID_AREA_ENABLED);
@@ -2331,7 +2331,7 @@ HWTEST_F(SessionStubTest, HandleSetFloatNavigationAvoidAreaEnabled, TestSize.Lev
         MessageParcel reply;
         bool enable = true;
         data.WriteBool(enable);
-        EXPECT_CALL(*session, SetFloatNavigationAvoidAreaEnabled(enable)).Times(1);
+        EXPECT_CALL(*session, SetFloatNavigationEnabled(enable)).Times(1);
         EXPECT_EQ(session->ProcessRemoteRequest(code, data, reply, option), ERR_NONE);
     }
     MessageParcel data;
