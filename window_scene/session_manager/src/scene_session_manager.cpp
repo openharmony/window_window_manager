@@ -19779,6 +19779,28 @@ void SceneSessionManager::NotifyWindowSystemBarPropertyChange(
     SessionManagerAgentController::GetInstance().NotifyWindowSystemBarPropertyChange(type, systemBarProperty);
 }
 
+bool SceneSessionManager::IsAncestorChainForeground(const sptr<SceneSession>& session) const
+{
+    auto winType = session->GetWindowType();
+    if (!WindowHelper::IsSubWindow(winType) && !WindowHelper::IsDialogWindow(winType)) {
+        return true;
+    }
+    auto ancestor = session->GetParentSession();
+    while (ancestor != nullptr) {
+        if (!ancestor->IsSessionForeground()) {
+            TLOGD(WmsLogTag::DEFAULT,
+                "ancestor not foreground, id: %{public}d, ancestorId: %{public}d",
+                session->GetPersistentId(), ancestor->GetPersistentId());
+            return false;
+        }
+        if (ancestor->GetWindowType() == WindowType::WINDOW_TYPE_FLOAT) {
+            return true;
+        }
+        ancestor = ancestor->GetParentSession();
+    }
+    return true;
+}
+
 const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSessionCopy()
 {
     std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
@@ -19793,12 +19815,22 @@ const std::vector<sptr<SceneSession>> SceneSessionManager::GetActiveSceneSession
             TLOGW(WmsLogTag::DEFAULT, "curSession nullptr");
             continue;
         }
-        if (curSession->GetSessionInfo().isSystem_ ||
-            (!curSession->IsSessionForeground())) {
-             continue;
-         }
+        if (curSession->GetSessionInfo().isSystem_) {
+            TLOGD(WmsLogTag::DEFAULT, "skip system session, id: %{public}d", curSession->GetPersistentId());
+            continue;
+        }
+        if (!curSession->IsSessionForeground()) {
+            TLOGD(WmsLogTag::DEFAULT,
+                "skip background session, id: %{public}d", curSession->GetPersistentId());
+            continue;
+        }
+        if (!IsAncestorChainForeground(curSession)) {
+            continue;
+        }
         activeSession.push_back(curSession);
     }
+    TLOGD(WmsLogTag::DEFAULT, "total: %{public}zu, active: %{public}zu",
+        sceneSessionMapCopy.size(), activeSession.size());
     return activeSession;
 }
 
