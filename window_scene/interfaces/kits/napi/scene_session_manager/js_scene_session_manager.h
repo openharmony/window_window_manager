@@ -156,6 +156,7 @@ public:
      */
     static napi_value GetWindowLimits(napi_env env, napi_callback_info info);
     static napi_value SetIsDockAutoHide(napi_env env, napi_callback_info info);
+    static napi_value SetShowOnDockSessionIds(napi_env env, napi_callback_info info);
     static napi_value SetTrayAppListInfo(napi_env env, napi_callback_info info);
     static napi_value HandlePcAppStatus(napi_env env, napi_callback_info info);
 
@@ -310,6 +311,7 @@ private:
     void RegisterVirtualPixelRatioChangeCallback();
     void OnVirtualPixelChange(float density, DisplayId displayId);
     napi_value OnSetIsDockAutoHide(napi_env env, napi_callback_info info);
+    napi_value OnSetShowOnDockSessionIds(napi_env env, napi_callback_info info);
     napi_value OnHandleTrayAppChange(napi_env env, napi_callback_info info);
 
     /*
