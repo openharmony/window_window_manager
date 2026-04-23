@@ -654,7 +654,7 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, MoveToAsync02, TestSize.Level1)
         EXPECT_EQ(500, rect.posY_);
         window->state_ = WindowState::STATE_HIDDEN;
         ret = window->MoveToAsync(20000, 20000);
-        usleep(WAIT_SERVERAL_FRAMES);
+        usleep(10 * WAIT_SERVERAL_FRAMES);
         EXPECT_EQ(WMError::WM_OK, ret);
         rect = window->property_->GetWindowRect();
         EXPECT_EQ(20000, rect.posX_);
