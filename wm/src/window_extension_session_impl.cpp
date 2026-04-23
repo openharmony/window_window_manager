@@ -1356,6 +1356,10 @@ WMError WindowExtensionSessionImpl::GetAvoidAreaByType(AvoidAreaType type, Avoid
 {
     uint32_t currentApiVersion = GetTargetAPIVersionByApplicationInfo();
     apiVersion = (apiVersion == API_VERSION_INVALID) ? static_cast<int32_t>(currentApiVersion) : apiVersion;
+    if (!IsFloatNavigationAvoidAreaEnabled(type)) {
+        TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u type not supported", GetWindowId());
+        return WMError::WM_DO_NOTHING;
+    }
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
     WSRect sessionRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };

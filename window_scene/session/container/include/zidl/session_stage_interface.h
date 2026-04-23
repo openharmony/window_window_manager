@@ -354,10 +354,8 @@ public:
         return { RectType::RELATIVE_TO_SCREEN, { 0, 0, 0, 0, } };
     }
     virtual WSError NotifyAppForceLandscapeConfigUpdated() = 0;
-    virtual WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
-        SelectMode selectMode) = 0;
-    virtual WSError NotifyAppHookWindowInfoUpdated() = 0;
     virtual WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) = 0;
+    virtual WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) = 0;
     virtual WSError CloseSpecificScene() { return WSError::WS_DO_NOTHING; }
     virtual WSError UpdateBrightness(float brightness) = 0;
 
@@ -488,6 +486,14 @@ public:
      * @return Returns WSError::WS_OK if called success, otherwise failed.
      */
     virtual WSError ShowSubWindowZLevelAboveParentLoosened() { return WSError::WS_OK; }
+
+    /**
+     * @brief Set isStartMoving flag to client.
+     *
+     * @param isStartMoving Indicates whether start moving window.
+     * @return Returns WSError::WS_OK if called success, otherwise failed.
+     */
+    virtual WSError SetIsStartMoving(bool isStartMoving) { return WSError::WS_OK; }
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_INTERFACE_H

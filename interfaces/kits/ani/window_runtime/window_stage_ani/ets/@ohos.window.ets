@@ -203,7 +203,17 @@ namespace window {
      * @atomicservice
      * @since 12
      */
-    TYPE_NAVIGATION_INDICATOR
+    TYPE_NAVIGATION_INDICATOR,
+
+    /**
+     * Area for float navigation
+     *
+     * @syscap SystemCapability.Window.SessionManager
+     * @stagemodelonly
+     * @atomicservice
+     * @since 26.0.0 dynamic&static
+     */
+    TYPE_FLOAT_NAVIGATION
   }
   export interface AvoidArea {
     /**

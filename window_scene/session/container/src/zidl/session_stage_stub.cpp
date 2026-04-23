@@ -244,10 +244,6 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyRotationChange(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_CONFIG_UPDATED):
             return HandleNotifyAppForceLandscapeConfigUpdated(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_FORCE_LANDSCAPE_ENABLE_UPDATED):
-            return HandleNotifyAppForceLandscapeConfigEnableUpdated(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_APP_HOOK_WINDOW_INFO_UPDATED):
-            return HandleNotifyAppHookWindowInfoUpdated(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_PAUSED_STATUS):
             return HandleNotifyPausedStatus();
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_USE_CONTROL_STATUS):
@@ -286,6 +282,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleNotifyParentLifecycleEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_APP_HOOK_WINDOW_INFO):
             return HandleUpdateAppHookWindowInfo(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_FORCE_SPLIT_ENABLE):
+            return HandleSetForceSplitEnable(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SEND_FV_ACTION_EVENT):
             return HandleSendFvActionEvent(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SYNC_FV_WINDOW_INFO):
@@ -296,6 +294,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleHideSubWindowZLevelAboveParentLoosened(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SHOW_SUBWINDOW_ZLEVEL_ABOVE_PARENT_LOOSENED):
             return HandleShowSubWindowZLevelAboveParentLoosened(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_SET_IS_START_MOVING):
+            return HandleSetIsStartMoving(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -1634,9 +1634,26 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& 
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleUpdateAppHookWindowInfo(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    sptr<HookWindowInfo> hookInfo = data.ReadParcelable<HookWindowInfo>();
+    if (hookInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "hookInfo is nullptr!");
+        return ERR_INVALID_DATA;
+    }
+    UpdateAppHookWindowInfo(*hookInfo);
+    return ERR_NONE;
+}
+
+int SessionStageStub::HandleSetForceSplitEnable(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    bool isForceSplitEnabled = false;
+    if (!data.ReadBool(isForceSplitEnabled)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read isForceSplitEnabled failed");
+        return ERR_INVALID_DATA;
+    }
     bool needUpdateViewport = false;
     if (!data.ReadBool(needUpdateViewport)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "read needUpdateViewport failed");
@@ -1647,25 +1664,7 @@ int SessionStageStub::HandleNotifyAppForceLandscapeConfigEnableUpdated(MessagePa
         TLOGE(WmsLogTag::WMS_COMPAT, "read selectMode failed");
         return ERR_INVALID_DATA;
     }
-    NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, static_cast<SelectMode>(selectModeValue));
-    return ERR_NONE;
-}
-int SessionStageStub::HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    NotifyAppHookWindowInfoUpdated();
-    return ERR_NONE;
-}
-
-int SessionStageStub::HandleUpdateAppHookWindowInfo(MessageParcel& data, MessageParcel& reply)
-{
-    TLOGD(WmsLogTag::WMS_COMPAT, "in");
-    sptr<HookWindowInfo> hookInfo = data.ReadParcelable<HookWindowInfo>();
-    if (hookInfo == nullptr) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "hookInfo is nullptr!");
-        return ERR_INVALID_DATA;
-    }
-    UpdateAppHookWindowInfo(*hookInfo);
+    SetForceSplitEnable(isForceSplitEnabled, needUpdateViewport, static_cast<SelectMode>(selectModeValue));
     return ERR_NONE;
 }
 
@@ -1807,5 +1806,15 @@ int SessionStageStub::HandleShowSubWindowZLevelAboveParentLoosened(MessageParcel
     ShowSubWindowZLevelAboveParentLoosened();
     return ERR_NONE;
 }
-//
+
+int SessionStageStub::HandleSetIsStartMoving(MessageParcel& data, MessageParcel& reply)
+{
+    bool isStartMoving = false;
+    if (!data.ReadBool(isStartMoving)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to read isStartMoving");
+        return ERR_INVALID_DATA;
+    }
+    SetIsStartMoving(isStartMoving);
+    return ERR_NONE;
+}
 } // namespace OHOS::Rosen

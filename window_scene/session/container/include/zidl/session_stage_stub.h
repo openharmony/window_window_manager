@@ -114,8 +114,8 @@ private:
     int HandleNotifyRotationChange(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleNotifyAppForceLandscapeConfigEnableUpdated(MessageParcel& data, MessageParcel& reply);
-    int HandleNotifyAppHookWindowInfoUpdated(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateAppHookWindowInfo(MessageParcel& data, MessageParcel& reply);
+    int HandleSetForceSplitEnable(MessageParcel& data, MessageParcel& reply);
     int HandleGetRouterStackInfo(MessageParcel& data, MessageParcel& reply);
     int HandleGetSceneNodeCount(MessageParcel& data, MessageParcel& reply);
     int HandleGetSceneNodeCountWithCallback(MessageParcel& data, MessageParcel& reply);
@@ -134,6 +134,7 @@ private:
     int HandleSyncFvLimits(MessageParcel& data, MessageParcel& reply);
     int HandleHideSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply);
     int HandleShowSubWindowZLevelAboveParentLoosened(MessageParcel& data, MessageParcel& reply);
+    int HandleSetIsStartMoving(MessageParcel& data, MessageParcel& reply);
 };
 } // namespace OHOS::Rosen
 #endif // OHOS_WINDOW_SCENE_SESSION_STAGE_STUB_H

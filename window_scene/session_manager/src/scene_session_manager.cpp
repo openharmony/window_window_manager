@@ -171,8 +171,6 @@ constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PAD = 0;
 constexpr std::size_t MAX_SNAPSHOT_IN_RECENT_PHONE = 0;
 constexpr uint64_t NOTIFY_START_ABILITY_TIMEOUT = 4000;
 constexpr uint64_t START_UI_ABILITY_TIMEOUT = 5000;
-constexpr int32_t FORCE_SPLIT_MODE = 5;
-constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t SHOWABILITY_SCENARIOS = 0x00000002;
 const std::string FB_PANEL_NAME = "Fb_panel";
 constexpr std::size_t MAX_APP_BOUND_TRAY_MAP_SIZE = 50;
@@ -2986,9 +2984,6 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         sceneSession->RegisterForceSplitListener([this](const std::string& bundleName) {
             return this->GetAppForceLandscapeConfig(bundleName);
         });
-        sceneSession->RegisterAppHookWindowInfoFunc([this](const std::string& bundleName) {
-            return this->GetAppHookWindowInfo(bundleName);
-        });
         sceneSession->RegisterSelectModeFunc([this]() {
             return this->GetSelectMode();
         });
@@ -3054,12 +3049,12 @@ sptr<SceneSession> SceneSessionManager::CreateSceneSession(const SessionInfo& se
         });
 
         if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
-            sceneSession->RegisterForceSplitEnableListener([this](const std::string& bundleName) {
-                return this->GetAppForceLandscapeConfigEnable(bundleName);
-            });
             sceneSession->RegisterPageEnableCallback([this](const std::string& bundleName, int32_t windowId,
                 const std::string& action, const std::string& message) {
                 return this->NotifyPageEnableFunc(bundleName, windowId, action, message);
+            });
+            sceneSession->RegisterSetSelectModeCallback([this](SelectMode selectMode) {
+                return this->SetSelectMode(selectMode);
             });
         }
         DragResizeType dragResizeType = DragResizeType::RESIZE_TYPE_UNDEFINED;
@@ -3518,6 +3513,7 @@ void SceneSessionManager::PerformRegisterInRequestSceneSession(sptr<SceneSession
     RegisterSessionPropertyChangeNotifyManagerFunc(sceneSession);
     RegisterClientDisplayIdChangeNotifyManagerFunc(sceneSession);
     RegisterGetRsCmdBlockingCountFunc(sceneSession);
+    RegisterUpdateAppHookDisplayInfoFunc(sceneSession);
     BindVsyncStation(sceneSession);
 }
 
@@ -4303,7 +4299,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
                 persistentId, static_cast<uint32_t>(sceneSession->GetSessionInfo().isSystem_));
             auto sceneSessionInfo = SetAbilitySessionInfo(sceneSession);
             auto retCode = AAFwk::AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sceneSessionInfo, isDelegator,
-                    static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL));
+                    static_cast<uint32_t>(WindowStateChangeReason::ABILITY_CALL), static_cast<int32_t>(reason));
             if (retCode != ERR_OK) {
                 RecordLifeCycleExceptionEvent(sceneSession, retCode,
                     WSErrorReason::WS_REASON_WINDOW_MINIMIZE_ERR, "minimize ability failed");
@@ -5398,6 +5394,9 @@ void SceneSessionManager::RecoverCachedSubSession(int32_t persistentId)
     TLOGI(WmsLogTag::WMS_RECOVER, "Id=%{public}d", persistentId);
     for (auto& sceneSession : iter->second) {
         NotifyCreateSubSession(persistentId, sceneSession);
+        if (sceneSession) {
+            sceneSession->SetWindowAnchorInfo(sceneSession->GetSessionProperty()->GetWindowAnchorInfo());
+        }
     }
     recoverSubSessionCacheMap_.erase(iter);
 }
@@ -6559,7 +6558,8 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) |
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
-            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_ONLY_WITH_LAUNCHER_ABILITY),
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_ONLY_WITH_LAUNCHER_ABILITY) |
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_EXCLUDE_EXT),
             bundleInfos, currentUserId_));
         if (ret != 0) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s GetBundleInfosV9 error:%{public}d", where, ret);
@@ -6663,7 +6663,8 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         }
     } else {
         if (!bundleMgr_->QueryAbilityInfo(
-            want, AppExecFwk::GET_ABILITY_INFO_DEFAULT, AppExecFwk::Constants::ANY_USERID, abilityInfo)) {
+            want, AppExecFwk::GET_ABILITY_INFO_DEFAULT | AppExecFwk::GET_ABILITY_INFO_EXCLUDE_EXT,
+            AppExecFwk::Constants::ANY_USERID, abilityInfo)) {
             TLOGE(WmsLogTag::WMS_PATTERN, "Get ability info from BMS failed!");
             return;
         }
@@ -6807,10 +6808,6 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
         TLOGD(WmsLogTag::WMS_PATTERN, "not supported");
         return;
     }
-    if (IsSyncLoadStartingWindow()) {
-        TLOGD(WmsLogTag::WMS_PATTERN, "sync load starting window");
-        return;
-    }
     const char* const where = __func__;
     auto loadTask = [this, weakSceneSession = wptr(sceneSession), where]() {
         HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:PreLoadStartingWindow");
@@ -6829,6 +6826,10 @@ void SceneSessionManager::PreLoadStartingWindow(sptr<SceneSession> sceneSession)
             TLOGND(WmsLogTag::WMS_PATTERN, "%{public}s id: %{public}d change to preloadSnapshot",
                 where, sceneSession->GetPersistentId());
             sceneSession->PreloadSnapshot();
+            return;
+        }
+        if (IsSyncLoadStartingWindow()) {
+            TLOGND(WmsLogTag::WMS_PATTERN, "sync load starting window");
             return;
         }
         StartingWindowInfo startingWindowInfo;
@@ -6940,7 +6941,8 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
         bool ret = bundleMgr_->GetBundleInfoV9(bundleName,
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) |
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
-            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY),
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_EXCLUDE_EXT),
             bundleInfo, currentUserId_);
         if (ret == 0) {
             std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues;
@@ -13845,7 +13847,7 @@ void SceneSessionManager::UpdateNormalSessionAvoidArea(
         return;
     }
     sceneSession->UpdateSizeChangeReason(SizeChangeReason::AVOID_AREA_CHANGE);
-    sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", nullptr);
+    sceneSession->NotifyClientToUpdateRect("AvoidAreaChange", std::nullopt, nullptr);
 }
 
 void SceneSessionManager::UpdateRootSceneSessionAvoidArea(int32_t persistentId, bool& needUpdate)
@@ -15174,6 +15176,17 @@ void SceneSessionManager::RegisterGetRsCmdBlockingCountFunc(const sptr<SceneSess
     TLOGD(WmsLogTag::WMS_LAYOUT, "success");
 }
 
+void SceneSessionManager::RegisterUpdateAppHookDisplayInfoFunc(const sptr<SceneSession>& sceneSession)
+{
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "session is nullptr");
+        return;
+    }
+    sceneSession->SetUpdateAppHookDisplayInfoFunc([this](int32_t uid, const HookInfo& hookInfo, bool enable) {
+        return UpdateAppHookDisplayInfo(uid, hookInfo, enable);
+    });
+}
+
 WSError SceneSessionManager::NotifyStackEmpty(int32_t persistentId)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "persistentId %{public}d", persistentId);
@@ -15958,7 +15971,7 @@ void SceneSessionManager::NotifyUpdateRectAfterLayout()
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
             if (sceneSession && sceneSession->IsDirtyWindow()) {
-                sceneSession->NotifyClientToUpdateRect("AfterLayoutFromPersistentTask", rsTransaction);
+                sceneSession->NotifyClientToUpdateRect("AfterLayoutFromPersistentTask", std::nullopt, rsTransaction);
             }
         }
     };
@@ -16084,7 +16097,7 @@ WMError SceneSessionManager::GetAllWindowLayoutInfo(DisplayId displayId,
             if (isVirtualDisplay) {
                 globalScaledRect.posY_ -= GetFoldLowerScreenPosY();
             }
-            HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
+            HookWindowInfo hookWindowInfo = session->GetSessionProperty()->GetHookWindowInfo();
             if (hookWindowInfo.enableHookWindow && !session->IsFullScreenInForceSplit() &&
                 WindowHelper::IsMainWindow(session->GetWindowType()) &&
                 !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
@@ -16359,7 +16372,7 @@ WMError SceneSessionManager::GetVisibilityWindowInfo(std::vector<sptr<WindowVisi
                 where, session->GetWindowId(), displayId);
             TLOGD(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: wid=%{public}d, globalDisplayRect=%{public}s",
                 where, static_cast<int32_t>(session->GetPersistentId()), globalDisplayRect.ToString().c_str());
-            HookWindowInfo hookWindowInfo = GetAppHookWindowInfo(session->GetSessionInfo().bundleName_);
+            HookWindowInfo hookWindowInfo = session->GetSessionProperty()->GetHookWindowInfo();
             if (hookWindowInfo.enableHookWindow && !session->IsFullScreenInForceSplit() &&
                 WindowHelper::IsMainWindow(session->GetWindowType()) &&
                 !MathHelper::NearEqual(hookWindowInfo.widthHookRatio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
@@ -17891,7 +17904,7 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     dmHookInfo.displayOrientation_ = 0;
     dmHookInfo.enableHookDisplayOrientation_ = false;
     {
-        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        std::shared_lock lock(fullScreenInForceSplitUidSetMutex_);
         dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
     }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
@@ -17917,89 +17930,21 @@ WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInf
         .posX_ = hookInfo.actualRect_.posX_, .posY_ = hookInfo.actualRect_.posY_,
     .width_ = hookInfo.actualRect_.width_, .height_ = hookInfo.actualRect_.height_};
     {
-        std::shared_lock lock(appHookWindowInfoMapMutex_);
+        std::shared_lock lock(fullScreenInForceSplitUidSetMutex_);
         dmHookInfo.isFullScreenInForceSplit_ = fullScreenInForceSplitUidSet_.find(uid) != fullScreenInForceSplitUidSet_.end();
     }
     ScreenSessionManagerClient::GetInstance().UpdateDisplayHookInfo(uid, enable, dmHookInfo);
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UpdateAppHookWindowInfo(const std::string& bundleName,
-                                                     const HookWindowInfo& hookWindowInfo)
-{
-    if (bundleName.empty()) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Bundle name is empty");
-        return WMError::WM_ERROR_NULLPTR;
-    }
-    if (hookWindowInfo.widthHookRatio < 0.0f) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "Invalid hook window parameters: widthHookRatio:%{public}f, "
-            "bundleName:%{public}s", hookWindowInfo.widthHookRatio, bundleName.c_str());
-        return WMError::WM_ERROR_INVALID_PARAM;
-    }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, hookWindowInfo:[%{public}s]", bundleName.c_str(),
-        hookWindowInfo.ToString().c_str());
-
-    HookWindowInfo preInfo;
-    {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
-        if (appHookWindowInfoMap_.count(bundleName)) {
-            preInfo = appHookWindowInfoMap_[bundleName];
-        } else {
-            preInfo = {};
-        }
-        HookWindowInfo newInfo = {};
-        newInfo.enableHookWindow = hookWindowInfo.enableHookWindow;
-        newInfo.widthHookRatio = hookWindowInfo.widthHookRatio;
-        newInfo.notifyWindowChange = false;
-        newInfo.drawableRectHook = hookWindowInfo.drawableRectHook;
-        appHookWindowInfoMap_[bundleName] = newInfo;
-    }
-
-    if (preInfo.enableHookWindow != hookWindowInfo.enableHookWindow ||
-        !MathHelper::NearZero(preInfo.widthHookRatio - hookWindowInfo.widthHookRatio) ||
-        preInfo.drawableRectHook != hookWindowInfo.drawableRectHook) {
-        //Notify the client of the info change
-        std::shared_lock lock(sceneSessionMapMutex_);
-        for (const auto& [_, session] : sceneSessionMap_) {
-            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
-                session->UpdateAppHookWindowInfo(hookWindowInfo);
-            }
-        }
-    }
-    return WMError::WM_OK;
-}
-
-HookWindowInfo SceneSessionManager::GetAppHookWindowInfo(const std::string& bundleName)
-{
-    if (bundleName.empty()) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "Empty bundle name requested");
-        return {};
-    }
-    std::shared_lock lock(appHookWindowInfoMapMutex_);
-    const auto& it = appHookWindowInfoMap_.find(bundleName);
-    if (it == appHookWindowInfoMap_.end()) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "app: %{public}s, hookWindowInfo not find", bundleName.c_str());
-        return {};
-    }
-    return it->second;
-}
-
 void SceneSessionManager::UpdateAppHookWindowInfoWhenSwitchFreeMultiWindow(bool isOpenFreeMultiWindow)
 {
-    std::unordered_set<std::string> bundleNames;
-    {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
-        for (auto& [bundleName, hookWindowInfo] : appHookWindowInfoMap_) {
+    std::shared_lock lock(sceneSessionMapMutex_);
+    for (const auto& [_, session] : sceneSessionMap_) {
+        if (session && SessionHelper::IsMainWindow(session->GetWindowType())) {
+            auto hookWindowInfo = session->GetSessionProperty()->GetHookWindowInfo();
             hookWindowInfo.enableHookWindow = !isOpenFreeMultiWindow;
-            bundleNames.insert(bundleName);
-        }
-    }
-    {
-        std::shared_lock lock(sceneSessionMapMutex_);
-        for (const auto& [_, session] : sceneSessionMap_) {
-            if (session && bundleNames.count(session->GetSessionInfo().bundleName_)) {
-                session->NotifyAppHookWindowInfoUpdated();
-            }
+            session->UpdateHookWindowInfo(hookWindowInfo);
         }
     }
 }
@@ -18252,71 +18197,12 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
     }
 
     TLOGI(WmsLogTag::WMS_COMPAT,
-        "bundleName:%{public}s, config:[mode_%{public}d, supportSplit_%{public}d, ignoreOrientation_%{public}d, "
-        "containsSysConfig_%{public}d, isSysRouter_%{public}d, sysHomePage_%{public}s, sysConfigJsonStr_%{public}s, "
-        "containsAppConfig_%{public}d, isAppRouter_%{public}d, appConfigJsonStr_%{public}s]",
-        bundleName.c_str(),
-        config.mode_,
-        config.supportSplit_,
-        config.ignoreOrientation_,
-        config.containsSysConfig_,
-        config.isSysRouter_,
-        config.sysHomePage_.c_str(),
-        config.sysConfigJsonStr_.c_str(),
-        config.containsAppConfig_,
-        config.isAppRouter_,
+        "bundleName:%{public}s, config:[containsSysConfig_%{public}d, isSysRouter_%{public}d, sysHomePage_%{public}s, "
+        "sysConfigJsonStr_%{public}s, containsAppConfig_%{public}d, isAppRouter_%{public}d, "
+        "appConfigJsonStr_%{public}s]",
+        bundleName.c_str(), config.containsSysConfig_, config.isSysRouter_, config.sysHomePage_.c_str(),
+        config.sysConfigJsonStr_.c_str(), config.containsAppConfig_, config.isAppRouter_,
         config.appConfigJsonStr_.c_str());
-    if (preConfig.mode_ == FORCE_SPLIT_MODE || config.mode_ == FORCE_SPLIT_MODE ||
-        preConfig.mode_ == NAV_FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) {
-        //Notify the client of the mode change
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        for (const auto& iter : sceneSessionMap_) {
-            auto& session = iter.second;
-            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
-                session->NotifyAppForceLandscapeConfigUpdated();
-            }
-        }
-    }
-    return WSError::WS_OK;
-}
-
-WSError SceneSessionManager::SetAppForceLandscapeConfigEnable(const std::string& bundleName,
-    const bool enableForceSplit, bool needUpdateViewport, SelectMode selectMode)
-{
-    if (bundleName.empty()) {
-        TLOGE(WmsLogTag::WMS_COMPAT, "bundle name is empty");
-        return WSError::WS_ERROR_NULLPTR;
-    }
-
-    // update selectMode
-    SetSelectMode(selectMode);
-
-    AppForceLandscapeConfig config;
-    {
-        std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-        if (appForceLandscapeMap_.count(bundleName)) {
-            config = appForceLandscapeMap_[bundleName];
-        } else {
-            TLOGI(WmsLogTag::WMS_COMPAT, "app: %{public}s, config not find", bundleName.c_str());
-        }
-        config.configEnable_ = enableForceSplit;
-        appForceLandscapeMap_[bundleName] = config;
-    }
-    std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
-    {
-        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
-        sceneSessionMapCopy = sceneSessionMap_;
-    }
-    for (const auto& iter : sceneSessionMapCopy) {
-        auto& session = iter.second;
-        if (session && session->GetSessionInfo().bundleName_ == bundleName &&
-            SessionHelper::IsMainWindow(session->GetWindowType())) {
-            session->NotifyAppForceLandscapeConfigEnableUpdated(needUpdateViewport, selectMode);
-        }
-    }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d, needUpdateViewport:%{public}d, "
-        "selectMode: %{public}d", bundleName.c_str(), enableForceSplit, needUpdateViewport,
-        static_cast<uint32_t>(selectMode));
     return WSError::WS_OK;
 }
 
@@ -18332,22 +18218,6 @@ AppForceLandscapeConfig SceneSessionManager::GetAppForceLandscapeConfig(const st
         return {};
     }
     return appForceLandscapeMap_[bundleName];
-}
-
-bool SceneSessionManager::GetAppForceLandscapeConfigEnable(const std::string& bundleName)
-{
-    if (bundleName.empty()) {
-        return false;
-    }
-    std::shared_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-    if (appForceLandscapeMap_.empty() ||
-        appForceLandscapeMap_.find(bundleName) == appForceLandscapeMap_.end()) {
-        TLOGD(WmsLogTag::WMS_COMPAT, "app: %{public}s, config not find", bundleName.c_str());
-        return false;
-    }
-    TLOGI(WmsLogTag::WMS_COMPAT, "bundleName:%{public}s, enable:%{public}d",
-        bundleName.c_str(), appForceLandscapeMap_[bundleName].configEnable_);
-    return appForceLandscapeMap_[bundleName].configEnable_;
 }
 
 WMError SceneSessionManager::TerminateSessionByPersistentId(int32_t persistentId)
@@ -20696,10 +20566,10 @@ void SceneSessionManager::DeleteAllOutline(const sptr<IRemoteObject>& remoteObje
 void SceneSessionManager::NotifyIsFullScreenInForceSplitMode(uint32_t uid, bool isFullScreen)
 {
     if (isFullScreen) {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
+        std::unique_lock lock(fullScreenInForceSplitUidSetMutex_);
         fullScreenInForceSplitUidSet_.insert(uid);
     } else {
-        std::unique_lock lock(appHookWindowInfoMapMutex_);
+        std::unique_lock lock(fullScreenInForceSplitUidSetMutex_);
         fullScreenInForceSplitUidSet_.erase(uid);
     }
     ScreenSessionManagerClient::GetInstance().NotifyIsFullScreenInForceSplitMode(uid, isFullScreen);

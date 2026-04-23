@@ -77,8 +77,6 @@ namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSessionImpl"};
-constexpr int32_t FORCE_SPLIT_MODE = 5;
-constexpr int32_t NAV_FORCE_SPLIT_MODE = 6;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t API_VERSION_MOD = 1000;
 constexpr int32_t  WINDOW_ROTATION_CHANGE = 50;
@@ -809,6 +807,7 @@ WMError WindowSessionImpl::Connect()
         RegisterWindowScaleCallback();
     }
     FloatViewManager::isSupportFloatView_ = windowSystemConfig_.supportCreateFloatView_;
+    SetAppHookWindowInfo(property_->GetHookWindowInfo());
     return static_cast<WMError>(ret);
 }
 
@@ -2011,6 +2010,13 @@ Rect WindowSessionImpl::GetGlobalScaledRectLocal() const
     return globalScaledRect_;
 }
 
+WSError WindowSessionImpl::SetIsStartMoving(bool isStartMoving)
+{
+    isStartMoving_ = isStartMoving;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, isStartMoving: %{public}d", GetPersistentId(), isStartMoving);
+    return WSError::WS_OK;
+}
+
 WMError WindowSessionImpl::GetVirtualPixelRatio(float& vpr)
 {
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
@@ -2041,6 +2047,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
         for (const auto& [type, avoidArea] : avoidAreas) {
             TLOGD(WmsLogTag::WMS_IMMS, "avoid type %{public}u area %{public}s",
                 type, avoidArea.ToString().c_str());
+            if (!IsFloatNavigationAvoidAreaEnabled(type)) {
+                continue;
+            }
             if ((lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() && type != AvoidAreaType::TYPE_CUTOUT) ||
                 lastAvoidAreaMap_[type] != avoidArea) {
                 lastAvoidAreaMap_[type] = avoidArea;
@@ -2590,12 +2599,9 @@ void WindowSessionImpl::SetForceSplitConfig(const AppForceLandscapeConfig& confi
 void WindowSessionImpl::SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo)
 {
     bool notifyWindowChange = hookWindowInfo.notifyWindowChange;
-    {
-        std::unique_lock<std::shared_mutex> lock(hookWindowInfoMutex_);
-        TLOGI(WmsLogTag::WMS_COMPAT, "Id:%{public}u, preHookWindowInfo:[%{public}s], newHookWindowInfo:[%{public}s]",
-            GetWindowId(), hookWindowInfo_.ToString().c_str(), hookWindowInfo.ToString().c_str());
-        hookWindowInfo_ = hookWindowInfo;
-    }
+    TLOGI(WmsLogTag::WMS_COMPAT, "Id:%{public}u, preHookWindowInfo:[%{public}s], newHookWindowInfo:[%{public}s]",
+        GetWindowId(), GetProperty()->GetHookWindowInfo().ToString().c_str(), hookWindowInfo.ToString().c_str());
+    property_->SetHookWindowInfo(hookWindowInfo);
     if (notifyWindowChange) {
         if (state_ == WindowState::STATE_SHOWN) {
             const auto& windowRect = GetRect();
@@ -2608,15 +2614,9 @@ void WindowSessionImpl::SetAppHookWindowInfo(const HookWindowInfo& hookWindowInf
     }
 }
 
-HookWindowInfo WindowSessionImpl::GetAppHookWindowInfo()
-{
-    std::shared_lock<std::shared_mutex> lock(hookWindowInfoMutex_);
-    return hookWindowInfo_;
-}
-
 void WindowSessionImpl::HookWindowSizeByHookWindowInfo(Rect& rect)
 {
-    auto hookWindowInfo = GetAppHookWindowInfo();
+    auto hookWindowInfo = GetProperty()->GetHookWindowInfo();
     if (!hookWindowInfo.enableHookWindow || !WindowHelper::IsMainWindow(GetType()) ||
         isFullScreenInForceSplit_.load()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}u, do not need hook window info.", GetWindowId());
@@ -2675,24 +2675,18 @@ WMError WindowSessionImpl::SetUIContentInner(const std::string& contentInfo, voi
 
     AppForceLandscapeConfig config = {};
     if (WindowHelper::IsMainWindow(winType) && GetAppForceLandscapeConfig(config) == WMError::WM_OK &&
-        config.supportSplit_ > 0) {
+        (config.containsSysConfig_ || config.containsAppConfig_)) {
         SetForceSplitConfig(config);
-        bool enableForceSplit = false;
-        if ((config.mode_ == FORCE_SPLIT_MODE || config.mode_ == NAV_FORCE_SPLIT_MODE) &&
-            GetAppForceLandscapeConfigEnable(enableForceSplit) == WMError::WM_OK) {
-            // try to fetch selectMode
-            SelectMode finalSelectMode = SelectMode::INVALID_MODE;
-            if (GetSelectMode(finalSelectMode) != WMError::WM_OK) {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "get selectMode fail, id:%{public}d", GetPersistentId());
-                finalSelectMode = SelectMode::INVALID_MODE;
-            } else {
-                TLOGI(WmsLogTag::WMS_LAYOUT, "get selectMode success, id:%{public}d, selectMode: %{public}u",
-                    GetPersistentId(), static_cast<uint32_t>(finalSelectMode));
-            }
-            SetForceSplitConfigEnable(enableForceSplit, false, finalSelectMode);
+        // try to fetch selectMode
+        SelectMode finalSelectMode = SelectMode::INVALID_MODE;
+        if (GetSelectMode(finalSelectMode) != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "get selectMode fail, id: %{public}d", GetPersistentId());
+            finalSelectMode = SelectMode::INVALID_MODE;
         } else {
-            SetForceSplitConfigEnable(false);
+            TLOGI(WmsLogTag::WMS_COMPAT, "get selectMode success, id: %{public}d, selectMode: %{public}u",
+                GetPersistentId(), static_cast<uint32_t>(finalSelectMode));
         }
+        SetForceSplitConfigEnable(property_->GetForceSplitEnable(), false, finalSelectMode);
     }
 
     uint32_t version = 0;
@@ -6713,6 +6707,9 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
         if (!window) {
             return;
         }
+        if (!window->IsFloatNavigationAvoidAreaEnabled(type)) {
+            return;
+        }
         if ((window->lastAvoidAreaMap_.find(type) == window->lastAvoidAreaMap_.end() &&
              type != AvoidAreaType::TYPE_CUTOUT) ||
             window->lastAvoidAreaMap_[type] != *avoidArea) {
@@ -6723,6 +6720,32 @@ WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, Avo
     };
     handler_->PostTask(std::move(task), __func__);
     return WSError::WS_OK;
+}
+
+WMError WindowSessionImpl::SetFloatNavigationAvoidAreaEnabled(bool enable)
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
+    floatNavigationAvoidAreaEnabled_ = enable;
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_NULLPTR);
+    auto ret = hostSession->SetFloatNavigationEnabled(notifyOnceImmediately_);
+    notifyOnceImmediately_ = false;
+    return ret == WMError::WM_OK ? WMError::WM_OK : WMError::WM_ERROR_SYSTEM_ABNORMALLY;
+}
+ 	 
+WMError WindowSessionImpl::GetFloatNavigationAvoidAreaEnabled(bool& enable) const
+{
+    if (IsWindowSessionInvalid()) {
+        TLOGE(WmsLogTag::WMS_IMMS, "window is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    enable = floatNavigationAvoidAreaEnabled_;
+    TLOGI(WmsLogTag::WMS_IMMS, "win %{public}u enable %{public}u", GetWindowId(), enable);
+    return WMError::WM_OK;
 }
 
 WSError WindowSessionImpl::SetPipActionEvent(const std::string& action, int32_t status)
@@ -8970,11 +8993,6 @@ WSError WindowSessionImpl::NotifyAppForceLandscapeConfigUpdated()
     return WSError::WS_DO_NOTHING;
 }
 
-WSError WindowSessionImpl::NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport, SelectMode selectMode)
-{
-    return WSError::WS_DO_NOTHING;
-}
-
 void WindowSessionImpl::SetFrameLayoutCallbackEnable(bool enable)
 {
     enableFrameLayoutFinishCb_ = enable;
@@ -9710,6 +9728,16 @@ nlohmann::json WindowSessionImpl::SetContainerButtonStyle(const DecorButtonStyle
 bool WindowSessionImpl::IsAnco() const
 {
     return property_->GetCollaboratorType() == static_cast<int32_t>(CollaboratorType::RESERVE_TYPE);
+}
+
+bool WindowSessionImpl::GetIsAtomicService() const
+{
+    return property_->GetIsAtomicService();
+}
+
+int32_t WindowSessionImpl::GetWindowPersistentId() const
+{
+    return GetPersistentId();
 }
 
 bool WindowSessionImpl::OnPointDown(int32_t eventId, int32_t posX, int32_t posY)

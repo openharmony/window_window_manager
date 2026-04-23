@@ -563,10 +563,13 @@ public:
     WSError NotifySubWindowAfterParentWindowStatusChange(WindowMode mode, MaximizeMode maximizeMode,
         bool isLayoutFullScreen) override { return WSError::WS_OK; }
     WMError UpdateWindowModeForUITest(int32_t updateMode) override { return WMError::WM_OK; }
-    WSError NotifyAppHookWindowInfoUpdated() override { return WSError::WS_DO_NOTHING; }
     WSError UpdateAppHookWindowInfo(const HookWindowInfo& hookWindowInfo) override { return WSError::WS_DO_NOTHING; }
+    WSError SetForceSplitEnable(bool isForceSplitEnabled, bool needUpdateViewport, SelectMode selectMode) override
+        { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
     Rect GetGlobalScaledRectLocal() const;
+    WSError SetIsStartMoving(bool isStartMoving) override;
+    bool IsStartMoving() override { return isStartMoving_; }
 
     /*
      * Free Multi Window
@@ -598,6 +601,13 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
+    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
+    bool IsFloatNavigationAvoidAreaEnabled(AvoidAreaType type)
+    {
+        return type != AvoidAreaType::TYPE_FLOAT_NAVIGATION ||
+            (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && floatNavigationAvoidAreaEnabled_);
+    }
 
     /*
      * Window Property
@@ -610,6 +620,8 @@ public:
     bool IsDeviceFeatureCapableFor(const std::string& feature) const override;
     bool IsDeviceFeatureCapableForFreeMultiWindow() const override;
     bool IsAnco() const override;
+    bool GetIsAtomicService() const override;
+    int32_t GetWindowPersistentId() const override;
 
     /*
      * Window Input Event
@@ -745,6 +757,10 @@ protected:
     WMError UnregisterListenerInMap(std::unordered_map<int32_t, std::vector<sptr<T>>>& listenerMap,
         int32_t persistentId, const sptr<T>& listener)
     {
+        if (listener == nullptr) {
+            TLOGE(WmsLogTag::DEFAULT, "listener could not be null");
+            return WMError::WM_ERROR_NULLPTR;
+        }
         auto it = listenerMap.find(persistentId);
         if (it == listenerMap.end()) {
             return WMError::WM_OK;
@@ -962,7 +978,7 @@ protected:
     sptr<FutureCallback> getRotationResultFuture_ = nullptr;
     sptr<FutureCallback> updateRectCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
-    WMError GetVirtualPixelRatio(float& vpr);
+    virtual WMError GetVirtualPixelRatio(float& vpr);
     void SetCurrentTransform(const Transform& transform);
     Transform GetCurrentTransform() const;
     void NotifyAfterUIContentReady();
@@ -979,8 +995,6 @@ protected:
     std::atomic_bool hasSetEnableDrag_ = false;
     void HookWindowSizeByHookWindowInfo(Rect& rect);
     void SetAppHookWindowInfo(const HookWindowInfo& hookWindowInfo);
-    HookWindowInfo GetAppHookWindowInfo();
-    virtual WMError GetAppHookWindowInfoFromServer(HookWindowInfo& hookWindowInfo) { return WMError::WM_OK; }
     virtual WMError GetSelectMode(SelectMode& selectMode) { return WMError::WM_OK; }
 
     /*
@@ -992,6 +1006,8 @@ protected:
     uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
     SystemBarSettingFlag systemBarSettingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
+    std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
+    std::atomic<bool> notifyOnceImmediately_ = true;
 
     /*
      * PC Fold Screen
@@ -1198,10 +1214,7 @@ private:
         const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void SubmitNoInteractionMonitorTask(int32_t eventId, const IWindowNoInteractionListenerSptr& listener);
     virtual WMError GetAppForceLandscapeConfig(AppForceLandscapeConfig& config) { return WMError::WM_OK; };
-    virtual WMError GetAppForceLandscapeConfigEnable(bool& enableForceSplit) { return WMError::WM_OK; };
     WSError NotifyAppForceLandscapeConfigUpdated() override;
-    WSError NotifyAppForceLandscapeConfigEnableUpdated(bool needUpdateViewport,
-        SelectMode selectMode) override;
     void SetFrameLayoutCallbackEnable(bool enable);
     void UpdateFrameLayoutCallbackIfNeeded(WindowSizeChangeReason wmReason);
     void SetUniqueVirtualPixelRatioForSub(bool useUniqueDensity, float virtualPixelRatio);
@@ -1340,12 +1353,11 @@ private:
     std::atomic<WindowStatus> lastStatusWhenNotifyWindowStatusDidChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     std::atomic<WindowStatus> lastStatusWhenNotifyParentStatusChange_ = WindowStatus::WINDOW_STATUS_UNDEFINED;
     SizeChangeReason globalDisplayRectSizeChangeReason_ = SizeChangeReason::END;
-    std::shared_mutex hookWindowInfoMutex_;
-    HookWindowInfo hookWindowInfo_;
     std::atomic_bool notifySizeChangeFlag_ = false;
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
     mutable std::mutex globalScaledRectMutex_;
     Rect globalScaledRect_;
+    std::atomic<bool> isStartMoving_ = false;
 
     /*
      * Window Decor
