@@ -4120,7 +4120,12 @@ void Session::PresentFocusIfNeed(int32_t pointerAction, int32_t sourceType)
 bool Session::IsNeedRequestToTop() const
 {
     if (WindowHelper::IsMainWindow(GetWindowType()) || WindowHelper::IsSubWindow(GetWindowType())) {
-        return GetSessionProperty()->GetRaiseEnabled();
+        auto property = GetSessionProperty();
+        if (property == nullptr) {
+            TLOGE(WmsLogTag::WMS_FOCUS, "id: %{public}d property is nullptr", persistentId_);
+            return false;
+        }
+        return property->GetRaiseEnabled();
     }
     return true;
 }
