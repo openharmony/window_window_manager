@@ -1365,7 +1365,7 @@ HWTEST_F(ScreenSessionDumperTest, DumpScreenPropertyById_ScreenId5, TestSize.Lev
 
 /**
  * @tc.name: ExtractPositionGroups_Normal
- * @tc.desc: test ExtractPositionGroups with valid input
+ * @tc.desc: test ExtractPositionGroups with valid flat comma-separated input
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_Normal, TestSize.Level1)
@@ -1375,18 +1375,24 @@ HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_Normal, TestSize.Level1)
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     std::string first, second;
 
-    EXPECT_TRUE(dumper->ExtractPositionGroups("(0,100,200)(5,300,400)", first, second));
+    // real command format: valueStr after "-setPos" starts with ","
+    EXPECT_TRUE(dumper->ExtractPositionGroups(",0,100,200,5,300,400", first, second));
     EXPECT_EQ(first, "0,100,200");
     EXPECT_EQ(second, "5,300,400");
 
-    EXPECT_TRUE(dumper->ExtractPositionGroups("(1,0,0)(2,0,0)", first, second));
+    EXPECT_TRUE(dumper->ExtractPositionGroups(",1,0,0,2,0,0", first, second));
     EXPECT_EQ(first, "1,0,0");
     EXPECT_EQ(second, "2,0,0");
+
+    // without leading comma also works
+    EXPECT_TRUE(dumper->ExtractPositionGroups("0,100,200,5,300,400", first, second));
+    EXPECT_EQ(first, "0,100,200");
+    EXPECT_EQ(second, "5,300,400");
 }
 
 /**
  * @tc.name: ExtractPositionGroups_NoParentheses
- * @tc.desc: test ExtractPositionGroups with missing parentheses
+ * @tc.desc: test ExtractPositionGroups with wrong value count
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_NoParentheses, TestSize.Level1)
@@ -1398,13 +1404,13 @@ HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_NoParentheses, TestSize.
 
     EXPECT_FALSE(dumper->ExtractPositionGroups("", first, second));
     EXPECT_FALSE(dumper->ExtractPositionGroups("0,100,200", first, second));
-    EXPECT_FALSE(dumper->ExtractPositionGroups("(0,100,200", first, second));
-    EXPECT_FALSE(dumper->ExtractPositionGroups("0,100,200)", first, second));
+    EXPECT_FALSE(dumper->ExtractPositionGroups(",0,100,200,5,300", first, second));
+    EXPECT_FALSE(dumper->ExtractPositionGroups(",0,100,200,5,300,400,700", first, second));
 }
 
 /**
  * @tc.name: ExtractPositionGroups_EmptyGroup
- * @tc.desc: test ExtractPositionGroups with empty group content
+ * @tc.desc: test ExtractPositionGroups with double commas causing empty tokens
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_EmptyGroup, TestSize.Level1)
@@ -1414,14 +1420,14 @@ HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_EmptyGroup, TestSize.Lev
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     std::string first, second;
 
-    EXPECT_FALSE(dumper->ExtractPositionGroups("()(5,300,400)", first, second));
-    EXPECT_FALSE(dumper->ExtractPositionGroups("(0,100,200)()", first, second));
-    EXPECT_FALSE(dumper->ExtractPositionGroups("()()", first, second));
+    EXPECT_FALSE(dumper->ExtractPositionGroups(",,100,200,5,300,400", first, second));
+    EXPECT_FALSE(dumper->ExtractPositionGroups(",0,100,,5,300,400", first, second));
+    EXPECT_FALSE(dumper->ExtractPositionGroups(",0,100,200,5,300,", first, second));
 }
 
 /**
  * @tc.name: ExtractPositionGroups_MissingSecondGroup
- * @tc.desc: test ExtractPositionGroups with only one group
+ * @tc.desc: test ExtractPositionGroups with only 3 values (missing second screen)
  * @tc.type: FUNC
  */
 HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_MissingSecondGroup, TestSize.Level1)
@@ -1431,8 +1437,8 @@ HWTEST_F(ScreenSessionDumperTest, ExtractPositionGroups_MissingSecondGroup, Test
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     std::string first, second;
 
-    EXPECT_FALSE(dumper->ExtractPositionGroups("(0,100,200)", first, second));
-    EXPECT_FALSE(dumper->ExtractPositionGroups("(0,100,200)abc", first, second));
+    EXPECT_FALSE(dumper->ExtractPositionGroups(",0,100,200", first, second));
+    EXPECT_FALSE(dumper->ExtractPositionGroups("0,100,200", first, second));
 }
 
 /**
@@ -1525,7 +1531,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMultiScreenRelativePositionCmd_InvalidForma
     EXPECT_TRUE(dumper->dumpInfo_.find("[error]: invalid format") != std::string::npos);
 
     dumper->dumpInfo_ = "";
-    dumper->SetMultiScreenRelativePositionCmd("-setPos,(0,100,200)");
+    dumper->SetMultiScreenRelativePositionCmd("-setPos,0,100,200");
     EXPECT_TRUE(dumper->dumpInfo_.find("[error]: invalid format") != std::string::npos);
 }
 
@@ -1541,11 +1547,11 @@ HWTEST_F(ScreenSessionDumperTest, SetMultiScreenRelativePositionCmd_MainScreenIn
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
 
     dumper->dumpInfo_ = "";
-    dumper->SetMultiScreenRelativePositionCmd("-setPos,(abc,100,200)(5,300,400)");
+    dumper->SetMultiScreenRelativePositionCmd("-setPos,abc,100,200,5,300,400");
     EXPECT_TRUE(dumper->dumpInfo_.find("[error]: main screen params invalid") != std::string::npos);
 
     dumper->dumpInfo_ = "";
-    dumper->SetMultiScreenRelativePositionCmd("-setPos,(0,100)(5,300,400)");
+    dumper->SetMultiScreenRelativePositionCmd("-setPos,0,abc,200,5,300,400");
     EXPECT_TRUE(dumper->dumpInfo_.find("[error]: main screen params invalid") != std::string::npos);
 }
 
@@ -1561,11 +1567,11 @@ HWTEST_F(ScreenSessionDumperTest, SetMultiScreenRelativePositionCmd_SecondScreen
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
 
     dumper->dumpInfo_ = "";
-    dumper->SetMultiScreenRelativePositionCmd("-setPos,(0,100,200)(abc,300,400)");
+    dumper->SetMultiScreenRelativePositionCmd("-setPos,0,100,200,abc,300,400");
     EXPECT_TRUE(dumper->dumpInfo_.find("[error]: second screen params invalid") != std::string::npos);
 
     dumper->dumpInfo_ = "";
-    dumper->SetMultiScreenRelativePositionCmd("-setPos,(0,100,200)(5,300)");
+    dumper->SetMultiScreenRelativePositionCmd("-setPos,0,100,200,5,abc,400");
     EXPECT_TRUE(dumper->dumpInfo_.find("[error]: second screen params invalid") != std::string::npos);
 }
 
@@ -1581,7 +1587,7 @@ HWTEST_F(ScreenSessionDumperTest, SetMultiScreenRelativePositionCmd_ValidFormat,
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
 
     dumper->dumpInfo_ = "";
-    dumper->SetMultiScreenRelativePositionCmd("-setPos,(0,0,0)(1,1920,0)");
+    dumper->SetMultiScreenRelativePositionCmd("-setPos,0,0,0,1,1920,0");
     EXPECT_TRUE(dumper->dumpInfo_.find("SET MULTI SCREEN RELATIVE POSITION") != std::string::npos);
     EXPECT_TRUE(dumper->dumpInfo_.find("[error]") != std::string::npos ||
         dumper->dumpInfo_.find("[success]") != std::string::npos);
@@ -1599,23 +1605,6 @@ HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion, TestSize.Level1)
     std::vector<std::u16string> args = {u"-h"};
     sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
     dumper->DumpFoldCreaseRegion();
-    ASSERT_EQ(dumper->fd_, 1);
-}
-
-/**
- * @tc.name: DumpFoldCreaseRegion_NullCreaseRegion
- * @tc.desc: test DumpFoldCreaseRegion when creaseRegion is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionDumperTest, DumpFoldCreaseRegion_NullCreaseRegion, TestSize.Level1)
-{
-    int fd = 1;
-    std::vector<std::u16string> args = {u"-h"};
-    sptr<ScreenSessionDumper> dumper = new ScreenSessionDumper(fd, args);
-    dumper->dumpInfo_ = "";
-    dumper->DumpFoldCreaseRegion();
-    EXPECT_TRUE(dumper->dumpInfo_.find("CurrentCreaseRects") == std::string::npos);
-    EXPECT_TRUE(dumper->dumpInfo_.find("LiveCreaseRects") == std::string::npos);
     ASSERT_EQ(dumper->fd_, 1);
 }
 

@@ -42,6 +42,9 @@ constexpr int LINE_WIDTH = 30;
 constexpr int DUMPER_PARAM_INDEX_ONE = 1;
 constexpr int DUMPER_PARAM_INDEX_TWO = 2;
 constexpr int DUMPER_PARAM_INDEX_THREE = 3;
+constexpr int DUMPER_PARAM_INDEX_FOUR = 4;
+constexpr int DUMPER_PARAM_INDEX_FIVE = 5;
+constexpr int DUMPER_PARAM_INDEX_SIX = 6;
 constexpr int MAX_DUMPER_PARAM_NUMBER = 10;
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
@@ -446,7 +449,7 @@ void ScreenSessionDumper::ShowHelpInfo()
         .append("|set hall register, 0 to unregister, 1 to register\n")
         .append(" -setPos        ")
         .append("|set multi screen relative position, "
-            "eg. -setPos,(0,0,0)(1,1920,0)\n");
+            "eg. -setPos,0,0,0,1,1920,0\n");
 }
 
 void ScreenSessionDumper::ShowAllScreenInfo()
@@ -1301,19 +1304,19 @@ void ScreenSessionDumper::SetMultiScreenRelativePositionCmd(std::string input)
     std::string firstGroup;
     std::string secondGroup;
     if (!ExtractPositionGroups(valueStr, firstGroup, secondGroup)) {
-        oss << std::left << "[error]: invalid format, expected (id,x,y)(id,x,y)" << std::endl;
+        oss << std::left << "[error]: invalid format, expected id,x,y,id,x,y" << std::endl;
         dumpInfo_.append(oss.str());
         return;
     }
     MultiScreenPositionOptions mainScreenOptions;
     MultiScreenPositionOptions secondScreenOptions;
     if (!ParsePositionGroup(firstGroup, mainScreenOptions)) {
-        oss << std::left << "[error]: main screen params invalid, expected (id,x,y)" << std::endl;
+        oss << std::left << "[error]: main screen params invalid, expected id,x,y" << std::endl;
         dumpInfo_.append(oss.str());
         return;
     }
     if (!ParsePositionGroup(secondGroup, secondScreenOptions)) {
-        oss << std::left << "[error]: second screen params invalid, expected (id,x,y)" << std::endl;
+        oss << std::left << "[error]: second screen params invalid, expected id,x,y" << std::endl;
         dumpInfo_.append(oss.str());
         return;
     }
@@ -1342,18 +1345,20 @@ void ScreenSessionDumper::SetMultiScreenRelativePositionCmd(std::string input)
 bool ScreenSessionDumper::ExtractPositionGroups(const std::string& valueStr,
     std::string& firstGroup, std::string& secondGroup)
 {
-    size_t firstOpen = valueStr.find('(');
-    size_t firstClose = valueStr.find(')');
-    if (firstOpen == std::string::npos || firstClose == std::string::npos || firstClose <= firstOpen + 1) {
+    std::vector<std::string> values;
+    std::istringstream ss(valueStr);
+    std::string token;
+    while (std::getline(ss, token, ',')) {
+        if (!token.empty()) {
+            values.push_back(token);
+        }
+    }
+    if (values.size() != static_cast<size_t>(DUMPER_PARAM_INDEX_SIX)) {
         return false;
     }
-    firstGroup = valueStr.substr(firstOpen + 1, firstClose - firstOpen - 1);
-    size_t secondOpen = valueStr.find('(', firstClose);
-    size_t secondClose = valueStr.find(')', firstClose + 1);
-    if (secondOpen == std::string::npos || secondClose == std::string::npos || secondClose <= secondOpen + 1) {
-        return false;
-    }
-    secondGroup = valueStr.substr(secondOpen + 1, secondClose - secondOpen - 1);
+    firstGroup = values[0] + "," + values[DUMPER_PARAM_INDEX_ONE] + "," + values[DUMPER_PARAM_INDEX_TWO];
+    secondGroup = values[DUMPER_PARAM_INDEX_THREE] + "," + values[DUMPER_PARAM_INDEX_FOUR]
+        + "," + values[DUMPER_PARAM_INDEX_FIVE];
     return true;
 }
 
