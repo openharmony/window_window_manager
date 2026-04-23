@@ -2630,6 +2630,298 @@ HWTEST_F(SessionStubTest, HandleRestoreFloatViewMainWindow, TestSize.Level1)
     result = session_->HandleRestoreFloatViewMainWindow(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 }
+
+class SessionStubAttributeRecorderForTest : public SessionStub {
+public:
+    SessionStubAttributeRecorderForTest() = default;
+    ~SessionStubAttributeRecorderForTest() = default;
+
+    WMError OnUpdateColorMode(const std::string& colorMode, bool hasDarkRes) override
+    {
+        updateColorModeCallCount_++;
+        lastColorMode_ = colorMode;
+        lastHasDarkRes_ = hasDarkRes;
+        return updateColorModeRet_;
+    }
+
+    WSError SetWindowCornerRadius(float cornerRadius) override
+    {
+        setWindowCornerRadiusCallCount_++;
+        lastCornerRadius_ = cornerRadius;
+        return setWindowCornerRadiusRet_;
+    }
+
+    WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override
+    {
+        updateScreenshotRegisteredCallCount_++;
+        lastScreenshotPersistentId_ = persistentId;
+        lastScreenshotIsRegister_ = isRegister;
+        return updateScreenshotRegisteredRet_;
+    }
+
+    WMError UpdateAcrossDisplaysChangeRegistered(bool isRegister) override
+    {
+        updateAcrossDisplaysRegisteredCallCount_++;
+        lastAcrossDisplaysIsRegister_ = isRegister;
+        return updateAcrossDisplaysRegisteredRet_;
+    }
+
+    WSError GetWaterfallMode(bool& isWaterfallMode) override
+    {
+        getWaterfallModeCallCount_++;
+        isWaterfallMode = waterfallModeValue_;
+        return getWaterfallModeRet_;
+    }
+
+    WMError IsMainWindowFullScreenAcrossDisplays(bool& isAcrossDisplays) override
+    {
+        isMainAcrossDisplaysCallCount_++;
+        isAcrossDisplays = acrossDisplaysValue_;
+        return isMainAcrossDisplaysRet_;
+    }
+
+    int32_t updateColorModeCallCount_ = 0;
+    std::string lastColorMode_ = "";
+    bool lastHasDarkRes_ = false;
+    WMError updateColorModeRet_ = WMError::WM_OK;
+
+    int32_t setWindowCornerRadiusCallCount_ = 0;
+    float lastCornerRadius_ = 0.0f;
+    WSError setWindowCornerRadiusRet_ = WSError::WS_OK;
+
+    int32_t updateScreenshotRegisteredCallCount_ = 0;
+    int32_t lastScreenshotPersistentId_ = -1;
+    bool lastScreenshotIsRegister_ = false;
+    WMError updateScreenshotRegisteredRet_ = WMError::WM_OK;
+
+    int32_t updateAcrossDisplaysRegisteredCallCount_ = 0;
+    bool lastAcrossDisplaysIsRegister_ = false;
+    WMError updateAcrossDisplaysRegisteredRet_ = WMError::WM_OK;
+
+    int32_t getWaterfallModeCallCount_ = 0;
+    bool waterfallModeValue_ = false;
+    WSError getWaterfallModeRet_ = WSError::WS_OK;
+
+    int32_t isMainAcrossDisplaysCallCount_ = 0;
+    bool acrossDisplaysValue_ = false;
+    WMError isMainAcrossDisplaysRet_ = WMError::WM_OK;
+};
+
+/**
+ * @tc.name: HandleUpdateColorModeAttribute01
+ * @tc.desc: Verify missing colorMode returns ERR_INVALID_DATA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateColorModeAttribute01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = session_->HandleUpdateColorMode(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, ret);
+}
+
+/**
+ * @tc.name: HandleUpdateColorModeAttribute02
+ * @tc.desc: Verify missing hasDarkRes returns ERR_INVALID_DATA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateColorModeAttribute02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("LIGHT");
+    auto ret = session_->HandleUpdateColorMode(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, ret);
+}
+
+/**
+ * @tc.name: HandleUpdateColorModeAttribute03
+ * @tc.desc: Verify OnUpdateColorMode receives expected params
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateColorModeAttribute03, TestSize.Level1)
+{
+    sptr<SessionStubAttributeRecorderForTest> session = sptr<SessionStubAttributeRecorderForTest>::MakeSptr();
+    ASSERT_NE(nullptr, session);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_SYNC };
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    data.WriteString("DARK");
+    data.WriteBool(true);
+    auto ret = session->OnRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_COLOR_MODE), data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(1, session->updateColorModeCallCount_);
+    EXPECT_EQ("DARK", session->lastColorMode_);
+    EXPECT_EQ(true, session->lastHasDarkRes_);
+}
+
+/**
+ * @tc.name: HandleSetWindowCornerRadiusAttribute01
+ * @tc.desc: Verify missing cornerRadius returns ERR_INVALID_DATA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowCornerRadiusAttribute01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = session_->HandleSetWindowCornerRadius(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, ret);
+}
+
+/**
+ * @tc.name: HandleSetWindowCornerRadiusAttribute02
+ * @tc.desc: Verify SetWindowCornerRadius receives parsed value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleSetWindowCornerRadiusAttribute02, TestSize.Level1)
+{
+    sptr<SessionStubAttributeRecorderForTest> session = sptr<SessionStubAttributeRecorderForTest>::MakeSptr();
+    ASSERT_NE(nullptr, session);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_SYNC };
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    data.WriteFloat(12.5f);
+    auto ret = session->OnRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SET_WINDOW_CORNER_RADIUS), data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(1, session->setWindowCornerRadiusCallCount_);
+    EXPECT_FLOAT_EQ(12.5f, session->lastCornerRadius_);
+}
+
+/**
+ * @tc.name: HandleUpdateScreenshotAppEventRegisteredAttribute01
+ * @tc.desc: Verify missing persistentId returns ERR_INVALID_DATA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegisteredAttribute01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = session_->HandleUpdateScreenshotAppEventRegistered(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, ret);
+}
+
+/**
+ * @tc.name: HandleUpdateScreenshotAppEventRegisteredAttribute02
+ * @tc.desc: Verify missing isRegister returns ERR_INVALID_DATA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegisteredAttribute02, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(101);
+    auto ret = session_->HandleUpdateScreenshotAppEventRegistered(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, ret);
+}
+
+/**
+ * @tc.name: HandleUpdateScreenshotAppEventRegisteredAttribute03
+ * @tc.desc: Verify screenshot registration params and reply code
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateScreenshotAppEventRegisteredAttribute03, TestSize.Level1)
+{
+    sptr<SessionStubAttributeRecorderForTest> session = sptr<SessionStubAttributeRecorderForTest>::MakeSptr();
+    ASSERT_NE(nullptr, session);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_SYNC };
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    data.WriteInt32(101);
+    data.WriteBool(true);
+    auto ret = session->OnRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_SCREEN_SHOT_APP_EVENT_REGISTERED),
+        data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(1, session->updateScreenshotRegisteredCallCount_);
+    EXPECT_EQ(101, session->lastScreenshotPersistentId_);
+    EXPECT_EQ(true, session->lastScreenshotIsRegister_);
+    EXPECT_EQ(static_cast<int32_t>(WMError::WM_OK), reply.ReadInt32());
+}
+
+/**
+ * @tc.name: HandleUpdateAcrossDisplaysChangeRegisteredAttribute01
+ * @tc.desc: Verify missing isRegister returns ERR_INVALID_DATA
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateAcrossDisplaysChangeRegisteredAttribute01, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto ret = session_->HandleUpdateAcrossDisplaysChangeRegistered(data, reply);
+    EXPECT_EQ(ERR_INVALID_DATA, ret);
+}
+
+/**
+ * @tc.name: HandleUpdateAcrossDisplaysChangeRegisteredAttribute02
+ * @tc.desc: Verify registration flag and reply code
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleUpdateAcrossDisplaysChangeRegisteredAttribute02, TestSize.Level1)
+{
+    sptr<SessionStubAttributeRecorderForTest> session = sptr<SessionStubAttributeRecorderForTest>::MakeSptr();
+    ASSERT_NE(nullptr, session);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_SYNC };
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    data.WriteBool(false);
+    auto ret = session->OnRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_UPDATE_ACROSS_DISPLAYS_REGISTERED),
+        data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(1, session->updateAcrossDisplaysRegisteredCallCount_);
+    EXPECT_EQ(false, session->lastAcrossDisplaysIsRegister_);
+    EXPECT_EQ(static_cast<int32_t>(WMError::WM_OK), reply.ReadInt32());
+}
+
+/**
+ * @tc.name: HandleGetWaterfallModeAttribute01
+ * @tc.desc: Verify waterfall mode is written to reply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleGetWaterfallModeAttribute01, TestSize.Level1)
+{
+    sptr<SessionStubAttributeRecorderForTest> session = sptr<SessionStubAttributeRecorderForTest>::MakeSptr();
+    ASSERT_NE(nullptr, session);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_SYNC };
+    session->waterfallModeValue_ = true;
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    auto ret = session->OnRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_GET_WATERFALL_MODE), data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(1, session->getWaterfallModeCallCount_);
+    EXPECT_EQ(true, reply.ReadBool());
+}
+
+/**
+ * @tc.name: HandleIsMainWindowFullScreenAcrossDisplaysAttribute01
+ * @tc.desc: Verify return code and across-displays status in reply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandleIsMainWindowFullScreenAcrossDisplaysAttribute01, TestSize.Level1)
+{
+    sptr<SessionStubAttributeRecorderForTest> session = sptr<SessionStubAttributeRecorderForTest>::MakeSptr();
+    ASSERT_NE(nullptr, session);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option { MessageOption::TF_SYNC };
+    session->acrossDisplaysValue_ = true;
+    data.WriteInterfaceToken(SessionStub::GetDescriptor());
+    auto ret = session->OnRemoteRequest(
+        static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_MAIN_WINDOW_FULL_SCREEN_ACROSS_DISPLAYS),
+        data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(1, session->isMainAcrossDisplaysCallCount_);
+    EXPECT_EQ(static_cast<int32_t>(WMError::WM_OK), reply.ReadInt32());
+    EXPECT_EQ(true, reply.ReadBool());
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
