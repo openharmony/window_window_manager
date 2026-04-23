@@ -185,13 +185,13 @@ HWTEST_F(SceneSessionManagerTest13, GetAppWindowShowingInfosByBundleName_005, Te
     
     MockAccesstokenKit::MockIsSACalling(true);
     
-    sptr<SceneSession> session1 = CreateSceneSession(1, "com.test.app1");
+    sptr<SceneSession> session1 = CreateSceneSession(101, "com.test.app1");
     ASSERT_NE(session1, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(101, session1));
     
-    sptr<SceneSession> session2 = CreateSceneSession(2, "com.test.app2");
+    sptr<SceneSession> session2 = CreateSceneSession(102, "com.test.app2");
     ASSERT_NE(session2, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, session2));
+    ssm_->sceneSessionMap_.insert(std::make_pair(102, session2));
     
     ApplicationInfo appInfo;
     appInfo.bundleName = "com.test.app1";
@@ -204,7 +204,7 @@ HWTEST_F(SceneSessionManagerTest13, GetAppWindowShowingInfosByBundleName_005, Te
     EXPECT_EQ(result, WMError::WM_OK);
     EXPECT_EQ(windowInfos.size(), 1);
     if (windowInfos.size() > 0) {
-        EXPECT_EQ(windowInfos[0].persistentId, 1);
+        EXPECT_EQ(windowInfos[0].persistentId, 101);
     }
 }
 
@@ -217,15 +217,15 @@ HWTEST_F(SceneSessionManagerTest13, UpdateShowOnDockByPersistentIds_001, TestSiz
 {
     ASSERT_NE(nullptr, ssm_);
     
-    sptr<SceneSession> session1 = CreateSceneSession(1, "com.test.app");
+    sptr<SceneSession> session1 = CreateSceneSession(201, "com.test.app");
     ASSERT_NE(session1, nullptr);
     session1->SetIsShowOnDock(true);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(201, session1));
     
-    sptr<SceneSession> session2 = CreateSceneSession(2, "com.test.app");
+    sptr<SceneSession> session2 = CreateSceneSession(202, "com.test.app");
     ASSERT_NE(session2, nullptr);
     session2->SetIsShowOnDock(true);
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, session2));
+    ssm_->sceneSessionMap_.insert(std::make_pair(202, session2));
     
     std::vector<int32_t> persistentIds;
     ssm_->UpdateShowOnDockByPersistentIds(persistentIds);
@@ -243,22 +243,22 @@ HWTEST_F(SceneSessionManagerTest13, UpdateShowOnDockByPersistentIds_002, TestSiz
 {
     ASSERT_NE(nullptr, ssm_);
     
-    sptr<SceneSession> session1 = CreateSceneSession(1, "com.test.app");
+    sptr<SceneSession> session1 = CreateSceneSession(301, "com.test.app");
     ASSERT_NE(session1, nullptr);
     session1->SetIsShowOnDock(false);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(301, session1));
     
-    sptr<SceneSession> session2 = CreateSceneSession(2, "com.test.app");
+    sptr<SceneSession> session2 = CreateSceneSession(302, "com.test.app");
     ASSERT_NE(session2, nullptr);
     session2->SetIsShowOnDock(false);
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, session2));
+    ssm_->sceneSessionMap_.insert(std::make_pair(302, session2));
     
-    sptr<SceneSession> session3 = CreateSceneSession(3, "com.test.app");
+    sptr<SceneSession> session3 = CreateSceneSession(303, "com.test.app");
     ASSERT_NE(session3, nullptr);
     session3->SetIsShowOnDock(true);
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, session3));
+    ssm_->sceneSessionMap_.insert(std::make_pair(303, session3));
     
-    std::vector<int32_t> persistentIds = {1, 2};
+    std::vector<int32_t> persistentIds = {301, 302};
     ssm_->UpdateShowOnDockByPersistentIds(persistentIds);
     
     EXPECT_EQ(session1->GetIsShowOnDock(), true);
@@ -275,19 +275,19 @@ HWTEST_F(SceneSessionManagerTest13, UpdateShowOnDockByPersistentIds_003, TestSiz
 {
     ASSERT_NE(nullptr, ssm_);
     
-    sptr<SceneSession> session1 = CreateSceneSession(1, "com.test.app");
+    sptr<SceneSession> session1 = CreateSceneSession(401, "com.test.app");
     ASSERT_NE(session1, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(401, session1));
     
-    sptr<SceneSession> session2 = CreateSceneSession(2, "com.test.app");
+    sptr<SceneSession> session2 = CreateSceneSession(402, "com.test.app");
     ASSERT_NE(session2, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, session2));
+    ssm_->sceneSessionMap_.insert(std::make_pair(402, session2));
     
-    sptr<SceneSession> session3 = CreateSceneSession(3, "com.test.app");
+    sptr<SceneSession> session3 = CreateSceneSession(403, "com.test.app");
     ASSERT_NE(session3, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, session3));
+    ssm_->sceneSessionMap_.insert(std::make_pair(403, session3));
     
-    std::vector<int32_t> persistentIds = {1, 3};
+    std::vector<int32_t> persistentIds = {401, 403};
     ssm_->UpdateShowOnDockByPersistentIds(persistentIds);
     
     EXPECT_EQ(session1->GetIsShowOnDock(), true);
@@ -304,17 +304,17 @@ HWTEST_F(SceneSessionManagerTest13, UpdateShowOnDockByPersistentIds_004, TestSiz
 {
     ASSERT_NE(nullptr, ssm_);
     
-    sptr<SceneSession> session1 = CreateSceneSession(1, "com.test.app");
+    sptr<SceneSession> session1 = CreateSceneSession(501, "com.test.app");
     ASSERT_NE(session1, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(1, session1));
+    ssm_->sceneSessionMap_.insert(std::make_pair(501, session1));
     
-    ssm_->sceneSessionMap_.insert(std::make_pair(2, nullptr));
+    ssm_->sceneSessionMap_.insert(std::make_pair(502, nullptr));
     
-    sptr<SceneSession> session3 = CreateSceneSession(3, "com.test.app");
+    sptr<SceneSession> session3 = CreateSceneSession(503, "com.test.app");
     ASSERT_NE(session3, nullptr);
-    ssm_->sceneSessionMap_.insert(std::make_pair(3, session3));
+    ssm_->sceneSessionMap_.insert(std::make_pair(503, session3));
     
-    std::vector<int32_t> persistentIds = {1, 2, 3};
+    std::vector<int32_t> persistentIds = {501, 502, 503};
     ssm_->UpdateShowOnDockByPersistentIds(persistentIds);
     
     EXPECT_EQ(session1->GetIsShowOnDock(), true);
