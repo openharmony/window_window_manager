@@ -359,6 +359,10 @@ public:
     virtual WMError SkipSnapshotForAppProcess(int32_t pid, bool skip) { return WMError::WM_OK; }
     virtual WMError SetProcessWatermark(int32_t pid, const std::string& watermarkName,
         bool isEnabled) { return WMError::WM_OK; }
+    virtual WMError RecoverProcessWatermark(int32_t pid, const std::string& watermarkName)
+    {
+        return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
+    }
     virtual WMError GetWindowIdsByCoordinate(DisplayId displayId, int32_t windowNumber,
         int32_t x, int32_t y, std::vector<int32_t>& windowIds) { return WMError::WM_ERROR_DEVICE_NOT_SUPPORT; }
     virtual WMError UpdateScreenLockStatusForApp(

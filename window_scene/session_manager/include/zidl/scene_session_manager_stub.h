@@ -135,6 +135,7 @@ private:
     int HandleSkipSnapshotForAppProcess(MessageParcel& data, MessageParcel& reply);
     int HandleSkipSnapshotByUserIdAndBundleNames(MessageParcel& data, MessageParcel& reply);
     int HandleSetProcessWatermark(MessageParcel& data, MessageParcel& reply);
+    int HandleRecoverProcessWatermark(MessageParcel& data, MessageParcel& reply);
     int HandleGetWindowIdsByCoordinate(MessageParcel& data, MessageParcel& reply);
     int HandleUpdateSessionScreenLock(MessageParcel& data, MessageParcel& reply);
     int HandleAddSkipSelfWhenShowOnVirtualScreenList(MessageParcel& data, MessageParcel& reply);
