@@ -4680,7 +4680,7 @@ std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfigANI(
         ani_status ret = env->Object_CallMethodByName_Long(
             static_cast<ani_object>(durationRef), "toLong", ":l", &duration);
         if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to parse duration, ret: %{public}d", ret);
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed to parse duration, ret: %{public}d", ret);
             return std::nullopt;
         }
         config.duration = static_cast<int64_t>(duration);
@@ -4695,7 +4695,7 @@ std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfigANI(
         ani_status ret = env->Object_CallMethodByName_Long(
             static_cast<ani_object>(delayRef), "toLong", ":l", &delay);
         if (ret != ANI_OK) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed to parse delay, ret: %{public}d", ret);
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed to parse delay, ret: %{public}d", ret);
             return std::nullopt;
         }
         config.delay = static_cast<int64_t>(delay);
@@ -4716,7 +4716,7 @@ std::optional<AcrossDisplayPresentation> ParseAcrossDisplayPresentation(
     uint32_t value = 0;
     ani_status ret = AniWindowUtils::GetEnumValue(env, static_cast<ani_enum_item>(aniAcrossDisplay), value);
     if (ret != ANI_OK || value > static_cast<uint32_t>(AcrossDisplayPresentation::EXIT_ACROSS_DISPLAY_MODE)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid acrossDisplayPresentation, ret: %{public}d, value: %{public}u",
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Invalid acrossDisplayPresentation, ret: %{public}d, value: %{public}u",
             ret, value);
         return std::nullopt;
     }
@@ -4741,7 +4741,7 @@ std::optional<MaximizeOptions> ParseMaximizeOptionsANI(ani_env* env, ani_object 
     if (!isPresentationUndefined) {
         auto opt = ParsePresentation(env, static_cast<ani_object>(presentationRef));
         if (!opt) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid presentation in MaximizeOptions");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Invalid presentation in MaximizeOptions");
             return std::nullopt;
         }
         options.maximizePresentation = *opt;
@@ -4754,7 +4754,7 @@ std::optional<MaximizeOptions> ParseMaximizeOptionsANI(ani_env* env, ani_object 
     if (!isAcrossDisplayUndefined) {
         auto opt = ParseAcrossDisplayPresentation(env, static_cast<ani_object>(acrossDisplayRef));
         if (!opt) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid acrossDisplayPresentation in MaximizeOptions");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Invalid acrossDisplayPresentation in MaximizeOptions");
             return std::nullopt;
         }
         options.acrossDisplayPresentation = *opt;
@@ -4767,7 +4767,7 @@ std::optional<MaximizeOptions> ParseMaximizeOptionsANI(ani_env* env, ani_object 
     if (!isConfigUndefined) {
         auto opt = ParseSnapshotAnimationConfigANI(env, static_cast<ani_object>(configRef));
         if (!opt) {
-            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Invalid snapshotAnimationConfig in MaximizeOptions");
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Invalid snapshotAnimationConfig in MaximizeOptions");
             return std::nullopt;
         }
         options.snapshotAnimationConfig = *opt;
@@ -4820,10 +4820,10 @@ void AniWindow::OnMaximize(ani_env* env, ani_object aniPresentation, ani_object 
 void AniWindow::MaximizeWithOptions(ani_env* env, ani_object obj, ani_long nativeObj,
     ani_object maximizeOptions)
 {
-    TLOGD(WmsLogTag::WMS_LAYOUT_PC, "[ANI]");
+    TLOGD(WmsLogTag::WMS_LAYOUT, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] aniWindow is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] aniWindow is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -4833,13 +4833,13 @@ void AniWindow::MaximizeWithOptions(ani_env* env, ani_object obj, ani_long nativ
 void AniWindow::OnMaximizeWithOptions(ani_env* env, ani_object maximizeOptions)
 {
     if (windowToken_ == nullptr) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] window is nullptr");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     if (!(WindowHelper::IsMainWindow(windowToken_->GetType()) ||
           windowToken_->IsSubWindowMaximizeSupported())) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Unsupported window type");
+        TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Unsupported window type");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
@@ -4852,13 +4852,13 @@ void AniWindow::OnMaximizeWithOptions(ani_env* env, ani_object maximizeOptions)
     auto ret = windowToken_->MaximizeWithOptions(
         options.maximizePresentation, options.acrossDisplayPresentation, options.snapshotAnimationConfig);
     if (ret != WMError::WM_OK) {
-        TLOGE(WmsLogTag::WMS_LAYOUT_PC,
+        TLOGE(WmsLogTag::WMS_LAYOUT,
             "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
             windowToken_->GetWindowId(), static_cast<int32_t>(ret));
         AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
         return;
     }
-    TLOGD(WmsLogTag::WMS_LAYOUT_PC,
+    TLOGD(WmsLogTag::WMS_LAYOUT,
         "[ANI] Success, windowId: %{public}u, present: %{public}d, acrossDisplayPresentation: %{public}u",
         windowToken_->GetWindowId(),
         static_cast<int32_t>(options.maximizePresentation),

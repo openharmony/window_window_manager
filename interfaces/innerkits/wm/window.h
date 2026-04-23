@@ -2867,7 +2867,7 @@ public:
      * @return WMError::WM_OK on success, or appropriate error code on failure.
      */
     virtual WMError MaximizeWithOptions(MaximizePresentation presentation,
-        AcrossDisplayPresentation acrossDisplayPresentation, SnapshotAnimationConfig snapshotAnimationConfig)
+        AcrossDisplayPresentation acrossDisplayPresentation, const SnapshotAnimationConfig& snapshotAnimationConfig)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
@@ -3994,7 +3994,7 @@ public:
      * @param snapshotAnimationConfig The snapshot animation configuration.
      * @return WMError
      */
-    virtual WMError Recover(uint32_t reason, SnapshotAnimationConfig snapshotAnimationConfig)
+    virtual WMError Recover(uint32_t reason, const SnapshotAnimationConfig& snapshotAnimationConfig)
     {
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }

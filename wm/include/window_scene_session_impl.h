@@ -233,10 +233,10 @@ public:
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Maximize(MaximizePresentation presentation, WaterfallResidentState state) override;
     WMError MaximizeWithOptions(MaximizePresentation presentation, AcrossDisplayPresentation state,
-        SnapshotAnimationConfig snapshotAnimationConfig) override;
+        const SnapshotAnimationConfig& snapshotAnimationConfig) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
-    WMError Recover(uint32_t reason, SnapshotAnimationConfig snapshotAnimationConfig) override;
+    WMError Recover(uint32_t reason, const SnapshotAnimationConfig& snapshotAnimationConfig) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
         bool grayOutMaximizeButton = false) override;
