@@ -2785,21 +2785,6 @@ HWTEST_F(WindowSessionImplTest5, WindowStatusToString, TestSize.Level1)
 }
 
 /**
- * @tc.name: RecordLifeCycleExceptionEvent
- * @tc.desc: Test RecordLifeCycleExceptionEvent function
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest5, RecordLifeCycleExceptionEvent, TestSize.Level1)
-{
-    auto window = GetTestWindowImpl("RecordLifeCycleExceptionEvent");
-    ASSERT_NE(window, nullptr);
-    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
-    window->RecordLifeCycleExceptionEvent(WMError::WM_ERROR_INVALID_WINDOW,
-        WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "test reason");
-    window->Destroy();
-}
-
-/**
  * @tc.name: GetRSSurfaceNodeType01
  * @tc.desc: Test GetRSSurfaceNodeType with BOOT_ANIMATION type
  * @tc.type: FUNC
@@ -3067,6 +3052,21 @@ HWTEST_F(WindowSessionImplTest5, CreateSurfaceNode06, TestSize.Level1)
 
     surfaceNode = window->CreateSurfaceNode("TestToastNode", WindowType::WINDOW_TYPE_TOAST);
     ASSERT_NE(surfaceNode, nullptr);
+}
+
+/**
+ * @tc.name: RecordLifeCycleExceptionEvent
+ * @tc.desc: Test RecordLifeCycleExceptionEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplTest5, RecordLifeCycleExceptionEvent, TestSize.Level1)
+{
+    auto window = GetTestWindowImpl("RecordLifeCycleExceptionEvent");
+    ASSERT_NE(window, nullptr);
+    window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    window->RecordLifeCycleExceptionEvent(WMError::WM_ERROR_INVALID_WINDOW,
+        WMErrorReason::WM_REASON_WINDOW_CREATE_ERR, "test reason");
+    window->Destroy();
 }
 } // namespace
 } // namespace Rosen
