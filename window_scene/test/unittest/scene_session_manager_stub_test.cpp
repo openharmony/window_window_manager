@@ -2455,20 +2455,6 @@ HWTEST_F(SceneSessionManagerStubTest, HandleSetProcessWatermark, TestSize.Level1
 }
 
 /**
- * @tc.name: HandleRecoverProcessWatermark
- * @tc.desc: test HandleRecoverProcessWatermark
- * @tc.type: FUNC
- */
-HWTEST_F(SceneSessionManagerStubTest, HandleRecoverProcessWatermark, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteInt32(123);
-    data.WriteString("RecoverProcessWatermarkName");
-    EXPECT_EQ(stub_->HandleRecoverProcessWatermark(data, reply), ERR_NONE);
-}
-
-/**
  * @tc.name: HandleGetProcessSurfaceNodeIdByPersistentId
  * @tc.desc: test HandleGetProcessSurfaceNodeIdByPersistentId
  * @tc.type: FUNC

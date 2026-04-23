@@ -103,6 +103,7 @@ private:
     uint32_t observedFlags_ = 0;
     uint32_t interestedFlags_ = 0;
     WMError RecoverWindowPropertyChangeFlag();
+    mutable std::mutex processWatermarkMutex_;
     int32_t processWatermarkPid_ = 0;
     std::string processWatermarkName_;
 

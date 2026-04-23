@@ -1163,6 +1163,48 @@ HWTEST_F(sceneSessionManagerProxyTest, SetProcessWatermark, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RecoverProcessWatermark01
+ * @tc.desc: recover watermark image for process
+ * @tc.type: FUNC
+ */
+HWTEST_F(sceneSessionManagerProxyTest, RecoverProcessWatermark01, TestSize.Level1)
+{
+    int32_t pid = 1;
+    std::string watermarkName = "test";
+    auto tempProxy = sptr<SceneSessionManagerProxy>::MakeSptr(nullptr);
+    auto ret = tempProxy->RecoverProcessWatermark(pid, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
+    auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
+    ASSERT_NE(proxy, nullptr);
+
+    MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    ret = proxy->RecoverProcessWatermark(pid, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    MockMessageParcel::SetWriteInt32ErrorFlag(true);
+    ret = proxy->RecoverProcessWatermark(pid, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteInt32ErrorFlag(false);
+
+    MockMessageParcel::SetWriteStringErrorFlag(true);
+    ret = proxy->RecoverProcessWatermark(pid, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+    MockMessageParcel::SetWriteStringErrorFlag(false);
+
+    remoteMocker->SetRequestResult(ERR_INVALID_DATA);
+    ret = proxy->RecoverProcessWatermark(pid, watermarkName);
+    EXPECT_EQ(ret, WMError::WM_ERROR_IPC_FAILED);
+
+    remoteMocker->SetRequestResult(ERR_NONE);
+    ret = proxy->RecoverProcessWatermark(pid, watermarkName);
+    EXPECT_NE(ret, WMError::WM_ERROR_INVALID_CALLING);
+}
+
+/**
  * @tc.name: SetWatermarkImageForApp01
  * @tc.desc: set watermark image for app
  * @tc.type: FUNC
