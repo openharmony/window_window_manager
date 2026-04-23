@@ -510,21 +510,6 @@ public:
     WMError NotifySupportRotationRegistered() override { return WMError::WM_OK; }
     WMError GetFloatViewLimits(FloatViewLimits& limits) override { return WMError::WM_OK; }
 
-    /**
-     * @brief Get application window information list by bundleName, appIndex and appInstanceKey
-     *
-     * This function is used to query application window information list
-     * including windowId, windowName, sessionState and isShowOnDock
-     *
-     * @caller SA
-     * @permission SA permission
-     *
-     * @param bundleName The bundle name of the application
-     * @param appIndex The app index of the application, default is 0
-     * @param appInstanceKey The app instance key, default is empty (no filter)
-     * @param windowInfos The window information list for output
-     * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
-     */
     virtual WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
         std::vector<AppWindowShowingInfo>& windowInfos) = 0;
 };
