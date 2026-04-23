@@ -78,8 +78,17 @@ namespace Rosen {
 constexpr int32_t WM_ERROR_BASE = 1300000;
 
 /**
+ * @brief Histogram index constants for specific error codes
+ */
+constexpr int32_t WM_ERROR_HISTOGRAM_INDEX_OK = 0;
+constexpr int32_t WM_ERROR_HISTOGRAM_INDEX_NO_PERMISSION = 51;
+constexpr int32_t WM_ERROR_HISTOGRAM_INDEX_NOT_SYSTEM_APP = 52;
+constexpr int32_t WM_ERROR_HISTOGRAM_INDEX_INVALID_PARAM = 53;
+constexpr int32_t WM_ERROR_HISTOGRAM_INDEX_DEVICE_NOT_SUPPORT = 54;
+
+/**
  * @brief Maximum value for WM error code histogram
- * @note The maximum index is 54 (mapped from WM_ERROR_DEVICE_NOT_SUPPORT)
+ * @note The maximum index is 54 (mapped from WM_ERROR_HISTOGRAM_INDEX_DEVICE_NOT_SUPPORT)
  */
 constexpr int32_t WM_ERROR_HISTOGRAM_MAX = 54;
 
@@ -98,13 +107,17 @@ constexpr int32_t WM_ERROR_HISTOGRAM_MAX = 54;
 constexpr int32_t WmErrorCodeToIndex(WmErrorCode error)
 {
     switch (error) {
-        case WmErrorCode::WM_ERROR_NO_PERMISSION: return 51;
-        case WmErrorCode::WM_ERROR_NOT_SYSTEM_APP: return 52;
-        case WmErrorCode::WM_ERROR_INVALID_PARAM: return 53;
-        case WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT: return 54;
+        case WmErrorCode::WM_ERROR_NO_PERMISSION:
+            return WM_ERROR_HISTOGRAM_INDEX_NO_PERMISSION;
+        case WmErrorCode::WM_ERROR_NOT_SYSTEM_APP:
+            return WM_ERROR_HISTOGRAM_INDEX_NOT_SYSTEM_APP;
+        case WmErrorCode::WM_ERROR_INVALID_PARAM:
+            return WM_ERROR_HISTOGRAM_INDEX_INVALID_PARAM;
+        case WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT:
+            return WM_ERROR_HISTOGRAM_INDEX_DEVICE_NOT_SUPPORT;
         default: {
             int32_t value = static_cast<int32_t>(error);
-            return (value >= WM_ERROR_BASE) ? (value - WM_ERROR_BASE) : 0;
+            return (value >= WM_ERROR_BASE) ? (value - WM_ERROR_BASE) : WM_ERROR_HISTOGRAM_INDEX_OK;
         }
     }
 }
