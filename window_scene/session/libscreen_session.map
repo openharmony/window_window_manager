@@ -340,6 +340,8 @@
             OHOS::Rosen::ScreenSession::UpdateTouchBoundsAndOffset*;
             OHOS::Rosen::ScreenSession::UpdateValidRotationToScb*;
             OHOS::Rosen::ScreenSession::SetRogScreenResolution*;
+            OHOS::Rosen::ScreenSession::GetRenderSession*;
+            OHOS::Rosen::ScreenSession::SetRenderSession*;
             OHOS::Rosen::ScreenSessionGroup::AddChild*;
             OHOS::Rosen::ScreenSessionGroup::ConvertToScreenGroupInfo*;
             OHOS::Rosen::ScreenSessionGroup::GetChildCount*;

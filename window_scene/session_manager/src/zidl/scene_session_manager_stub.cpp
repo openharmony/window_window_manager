@@ -350,14 +350,16 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     auto persistentId = INVALID_SESSION_ID;
     sptr<ISession> sceneSession;
     SystemSessionConfig systemConfig;
+    sptr<IRemoteObject> renderSession;
     CreateAndConnectSpecificSession(sessionStage, eventChannel, surfaceNode,
-        property, persistentId, sceneSession, systemConfig, token);
+        property, persistentId, sceneSession, systemConfig, renderSession, token);
     if (sceneSession== nullptr) {
         return ERR_INVALID_STATE;
     }
     reply.WriteInt32(persistentId);
     reply.WriteRemoteObject(sceneSession->AsObject());
     reply.WriteParcelable(&systemConfig);
+    reply.WriteRemoteObject(renderSession);
     reply.WriteUint32(property->GetSubWindowLevel());
     reply.WriteUint64(property->GetDisplayId());
     reply.WriteUint32(static_cast<uint32_t>(property->GetWindowType()));

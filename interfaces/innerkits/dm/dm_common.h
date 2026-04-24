@@ -806,23 +806,6 @@ struct ScreenDirectionInfo {
 };
 
 /**
- * @brief Session option when connect
- */
-struct SessionOption {
-    ScreenId rsId_;
-    std::string name_;
-    bool isExtend_;
-    std::string innerName_;
-    ScreenId screenId_;
-    std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
-    bool supportsFocus_ {true};
-    bool isRotationLocked_;
-    int32_t rotation_;
-    std::map<int32_t, int32_t> rotationOrientationMap_;
-    bool isBooting_ { false };
-};
-
-/**
  * @brief Device state
  */
 enum class DMDeviceStatus: uint32_t {

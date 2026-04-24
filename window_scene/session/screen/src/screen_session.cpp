@@ -64,7 +64,8 @@ ScreenCache<int32_t, int32_t> g_uidVersionMap(MAP_SIZE, NO_EXIST_UID_VERSION);
 
 ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionReason reason)
     : name_(config.name), screenId_(config.screenId), rsId_(config.rsId), defaultScreenId_(config.defaultScreenId),
-    property_(config.property), displayNode_(config.displayNode), innerName_(config.innerName)
+    property_(config.property), displayNode_(config.displayNode), innerName_(config.innerName),
+    renderSession_(config.renderSession)
 {
     TLOGI(WmsLogTag::DMS,
         "[DPNODE]Create Session, reason: %{public}d, screenId: %{public}" PRIu64", rsId: %{public}" PRIu64"",
@@ -73,7 +74,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         "[DPNODE]Config name: %{public}s, defaultId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64"",
         name_.c_str(), defaultScreenId_, config.mirrorNodeId);
     sessionId_ = sessionIdGenerator_++;
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, config.renderSession);
     RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
     Rosen::RSDisplayNodeConfig rsConfig;
     bool isNeedCreateDisplayNode = true;
@@ -167,7 +168,7 @@ ScreenSession::ScreenSession(ScreenId screenId, ScreenId rsId, const std::string
         screenId_);
     sessionId_ = sessionIdGenerator_++;
     property_.SetRsId(rsId_);
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession_);
     RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
 }
 
@@ -175,7 +176,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property, 
     : screenId_(screenId), defaultScreenId_(defaultScreenId), property_(property)
 {
     sessionId_ = sessionIdGenerator_++;
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession_);
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
     TLOGD(WmsLogTag::WMS_SCB,
@@ -202,7 +203,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     sessionId_ = sessionIdGenerator_++;
     rsId_ = screenId;
     property_.SetRsId(rsId_);
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession_);
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId,
         .isSync = true};
     displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
@@ -228,7 +229,7 @@ ScreenSession::ScreenSession(const std::string& name, ScreenId smsId, ScreenId r
     sessionId_ = sessionIdGenerator_++;
     (void)rsId_;
     property_.SetRsId(rsId_);
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true);
+    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession_);
     // 虚拟屏的screen id和rs id不一致，displayNode的创建应使用rs id
     Rosen::RSDisplayNodeConfig config = { .screenId = rsId_ };
     displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
@@ -979,6 +980,11 @@ void ScreenSession::PowerStatusChange(DisplayPowerEvent event, EventStatus statu
         }
         listener->OnPowerStatusChange(event, status, reason);
     }
+}
+
+sptr<IRemoteObject> ScreenSession::GetRenderSession()
+{
+    return renderSession_;
 }
 
 void ScreenSession::HandleKeyboardOnPropertyChange(ScreenProperty& screenProperty, int32_t height)
@@ -2714,7 +2720,17 @@ void ScreenSession::SetForceCloseHdr(bool isForceCloseHdr)
         DmsXcollie dmsXcollie("DMS:SetForceCloseHdr:GetScreenHDRStatus", XCOLLIE_TIMEOUT_5S);
         HdrStatus hdrStatus = HdrStatus::NO_HDR;
         TLOGI(WmsLogTag::DMS, "Start get screen status, screenId: %{public}" PRIu64, phyScreenId_);
-        auto ret = RSInterfaces::GetInstance().GetScreenHDRStatus(phyScreenId_, hdrStatus);
+        auto rsUIContext = GetRSUIContext();
+        if (rsUIContext == nullptr) {
+            TLOGE(WmsLogTag::DMS, "rsUIContext is null");
+            return;
+        }
+        auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
+        if (rsRenderInterface == nullptr) {
+            TLOGE(WmsLogTag::DMS, "rsRenderInterface is null");
+            return;
+        }
+        auto ret = rsRenderInterface->GetScreenHDRStatus(phyScreenId_, hdrStatus);
         if (ret == StatusCode::SUCCESS && hdrStatus == HdrStatus::NO_HDR) {
             hdrDuration = DURATION_0MS;
         }
@@ -2766,14 +2782,6 @@ void ScreenSession::SetScreenSnapshotRect(RSSurfaceCaptureConfig& config)
 
 std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, float scaleY)
 {
-    {
-        std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-        if (displayNode_ == nullptr) {
-            TLOGE(WmsLogTag::DMS, "get screen snapshot displayNode_ is null");
-            return nullptr;
-        }
-    }
-
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ss:GetScreenSnapshot");
     auto callback = std::make_shared<SurfaceCaptureFuture>();
     RSSurfaceCaptureConfig config = {
@@ -2785,7 +2793,13 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshot(float scaleX, 
     {
         DmsXcollie dmsXcollie("DMS:GetScreenSnapshot:TakeSurfaceCapture", XCOLLIE_TIMEOUT_5S);
         std::shared_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-        bool ret = RSInterfaces::GetInstance().TakeSurfaceCapture(displayNode_, callback, config);
+        if (displayNode_ == nullptr || displayNode_->GetRSUIContext() == nullptr ||
+            displayNode_->GetRSUIContext()->GetRSRenderInterface() == nullptr) {
+            TLOGE(WmsLogTag::DMS, "get screen snapshot displayNode or rsUIContext is null");
+            return nullptr;
+        }
+        bool ret = displayNode_->GetRSUIContext()->GetRSRenderInterface()->TakeSurfaceCapture(displayNode_, callback,
+            config);
         if (!ret) {
             TLOGE(WmsLogTag::DMS, "get screen snapshot TakeSurfaceCapture failed");
             return nullptr;
@@ -2922,7 +2936,17 @@ void ScreenSession::FreezeScreen(bool isFreeze)
         TLOGE(WmsLogTag::DMS, "displayNode is null");
         return;
     }
-    RSInterfaces::GetInstance().FreezeScreen(displayNode_, isFreeze);
+    auto rsUIContext = GetRSUIContext();
+    if (rsUIContext == nullptr) {
+        TLOGE(WmsLogTag::DMS, "rsUIContext is null");
+        return;
+    }
+    auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
+    if (rsRenderInterface == nullptr) {
+        TLOGE(WmsLogTag::DMS, "rsRenderInterface is null");
+        return;
+    }
+    rsRenderInterface->FreezeScreen(displayNode_, isFreeze);
 }
 
 std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(float scaleX, float scaleY,
@@ -2943,7 +2967,17 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(
             .scaleY = scaleY,
         };
         SetScreenSnapshotRect(config);
-        bool ret = RSInterfaces::GetInstance().TakeSurfaceCaptureWithAllWindows(displayNode_, callback, config,
+        auto rsUIContext = GetRSUIContext();
+        if (rsUIContext == nullptr) {
+            TLOGE(WmsLogTag::DMS, "rsUIContext is null");
+            return nullptr;
+        }
+        auto rsRenderInterface = rsUIContext->GetRSRenderInterface();
+        if (rsRenderInterface == nullptr) {
+            TLOGE(WmsLogTag::DMS, "rsRenderInterface is null");
+            return nullptr;
+        }
+        bool ret = rsRenderInterface->TakeSurfaceCaptureWithAllWindows(displayNode_, callback, config,
             isNeedCheckDrmAndSurfaceLock);
         if (!ret) {
             TLOGE(WmsLogTag::DMS, "take surface capture with all windows failed");

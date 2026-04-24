@@ -39,7 +39,7 @@ constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, const std::shared_ptr<RSSurfaceNode>& surfaceNode,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
-    SystemSessionConfig& systemConfig, sptr<IRemoteObject> token)
+    SystemSessionConfig& systemConfig, sptr<IRemoteObject>& renderSession, sptr<IRemoteObject> token)
 {
     MessageOption option(MessageOption::TF_SYNC);
     MessageParcel data;
@@ -91,6 +91,12 @@ WSError SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sptr<ISe
     if (config) {
         systemConfig = *config;
     }
+    sptr<IRemoteObject> renderSessionObject = reply.ReadRemoteObject();
+    if (renderSessionObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "ReadRemoteObject failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    renderSession = renderSessionObject;
     uint32_t level = 0;
     if (!reply.ReadUint32(level)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read level failed");

@@ -331,11 +331,13 @@ bool WindowSessionImpl::isUIExtensionAbilityProcess_ = false;
     } while (false)
 
 WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
-    const std::shared_ptr<RSUIContext>& rsUIContext)
+    const std::shared_ptr<RSUIContext>& rsUIContext, sptr<IRemoteObject> renderSession)
 {
     WLOGFD("[WMSCom] Constructor");
     property_ = sptr<WindowSessionProperty>::MakeSptr();
     windowOption_ = option;
+    rsUIContext_ = rsUIContext;
+    renderSession_ = renderSession;
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
     WindowType optionWindowType = option->GetWindowType();
@@ -347,11 +349,20 @@ WindowSessionImpl::WindowSessionImpl(const sptr<WindowOption>& option,
     isIgnoreSafeArea_ = WindowHelper::IsSubWindow(optionWindowType);
     followCreatorLifecycle_ = option->IsFollowCreatorLifecycle();
 
-    RSAdapterUtil::InitRSUIDirector(rsUIDirector_, true, true, rsUIContext);
     if (WindowHelper::IsSubWindow(GetType())) {
         property_->SetDecorEnable(option->GetSubWindowDecorEnable());
     }
-    surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
+    TLOGD(WmsLogTag::WMS_LIFE, "renderSession is %{public}p", renderSession.GetRefPtr());
+    if (IsSceneBoardEnabled()) {
+        if (renderSession) {
+            RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession, rsUIContext);
+        }
+        surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
+    } else {
+        needCreateCompleteSurfaceNode_ = true;
+        RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession, rsUIContext);
+        surfaceNode_ = CreateSurfaceNode(property_->GetWindowName(), optionWindowType);
+    }
     if (surfaceNode_ != nullptr) {
         vsyncStation_ = std::make_shared<VsyncStation>(surfaceNode_->GetId());
     }
@@ -514,10 +525,8 @@ void WindowSessionImpl::SetSubWindowZLevelToProperty()
     }
 }
 
-RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string& name, WindowType type)
+RSSurfaceNodeType WindowSessionImpl::GetRSSurfaceNodeType(WindowType type)
 {
-    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = name;
     RSSurfaceNodeType rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
     switch (type) {
         case WindowType::WINDOW_TYPE_BOOT_ANIMATION:
@@ -545,11 +554,22 @@ RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string&
             rsSurfaceNodeType = RSSurfaceNodeType::DEFAULT;
             break;
     }
-    auto surfaceNode = RSSurfaceNode::Create(
-        rsSurfaceNodeConfig, rsSurfaceNodeType, true, property_->IsConstrainedModal(), GetRSUIContext());
-    RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
-    TLOGD(WmsLogTag::WMS_SCB, "Create RSSurfaceNode: %{public}s, name: %{public}s",
-          RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
+    return rsSurfaceNodeType;
+}
+
+RSSurfaceNode::SharedPtr WindowSessionImpl::CreateSurfaceNode(const std::string& name, WindowType type)
+{
+    struct RSSurfaceNodeConfig rsSurfaceNodeConfig;
+    rsSurfaceNodeConfig.SurfaceNodeName = name;
+    RSSurfaceNodeType rsSurfaceNodeType = GetRSSurfaceNodeType(type);
+    auto surfaceNode = (renderSession_ || needCreateCompleteSurfaceNode_) ? RSSurfaceNode::Create(rsSurfaceNodeConfig,
+        rsSurfaceNodeType, true, property_->IsConstrainedModal(), GetRSUIContext())
+        : RSSurfaceNode::CreateSurfaceNode(rsSurfaceNodeConfig, true);
+    if (renderSession_ || needCreateCompleteSurfaceNode_) {
+        RSAdapterUtil::SetSkipCheckInMultiInstance(surfaceNode, true);
+    }
+    TLOGI(WmsLogTag::WMS_SCB, "Create RSSurfaceNode: %{public}s, name: %{public}s",
+        RSAdapterUtil::RSNodeToStr(surfaceNode).c_str(), name.c_str());
     return surfaceNode;
 }
 
@@ -1517,6 +1537,7 @@ void WindowSessionImpl::UpdateRectForOtherReason(const Rect& wmRect, const Rect&
         bool ifNeedCommitRsTransaction = window->CheckIfNeedCommitRsTransaction(wmReason);
         if (rsTransaction && ifNeedCommitRsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
+            RSAdapterUtil::SetRSTransactionHandler(rsTransaction, window->GetRSUIContext());
             rsTransaction->Begin();
         }
         if (wmReason == WindowSizeChangeReason::DRAG) {
@@ -4068,8 +4089,22 @@ std::shared_ptr<Media::PixelMap> WindowSessionImpl::Snapshot()
     if (IsWindowSessionInvalid()) {
         return nullptr;
     }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
+        return nullptr;
+    }
+    auto rsUICtx = surfaceNode_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return nullptr;
+    }
+    auto rsInterface = rsUICtx->GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return nullptr;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    auto isSucceeded = rsInterface->TakeSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
         WLOGFE("Failed to TakeSurfaceCapture!");
         return nullptr;
@@ -4093,8 +4128,22 @@ WMError WindowSessionImpl::Snapshot(std::shared_ptr<Media::PixelMap>& pixelMap)
             GetPersistentId(), state_);
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsUICtx = surfaceNode_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsInterface = rsUICtx->GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode_, callback);
+    auto isSucceeded = rsInterface->TakeSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}d, Failed to TakeSurfaceCapture", GetPersistentId());
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -4114,8 +4163,22 @@ WMError WindowSessionImpl::SnapshotIgnorePrivacy(std::shared_ptr<Media::PixelMap
     if (IsWindowSessionInvalid()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    if (surfaceNode_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "surfaceNode is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsUICtx = surfaceNode_->GetRSUIContext();
+    if (rsUICtx == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsUIContext is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    auto rsInterface = rsUICtx->GetRSRenderInterface();
+    if (rsInterface == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
     std::shared_ptr<SurfaceCaptureFuture> callback = std::make_shared<SurfaceCaptureFuture>();
-    auto isSucceeded = RSInterfaces::GetInstance().TakeSelfSurfaceCapture(surfaceNode_, callback);
+    auto isSucceeded = rsInterface->TakeSelfSurfaceCapture(surfaceNode_, callback);
     if (!isSucceeded) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowId:%{public}u, Failed to TakeSelfSurfaceCapture!", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
@@ -8184,6 +8247,9 @@ void WindowSessionImpl::NotifyOccupiedAreaChangeInfo(sptr<OccupiedAreaChangeInfo
         }
         if (rsTransaction) {
             RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
+            if(auto rsUIContext = window->GetRSUIContext()){
+                rsTransaction->SetTransactionHandler(rsUIContext->GetRSTransaction());
+            }
             rsTransaction->Begin();
         }
         window->NotifyOccupiedAreaChangeInfoInner(info);
@@ -8349,7 +8415,8 @@ void WindowSessionImpl::NotifyKeyboardAnimationWillBegin(const KeyboardAnimation
         }
 
         if (rsTransaction != nullptr) {
-            RSTransaction::FlushImplicitTransaction();
+            RSTransactionAdapter::FlushImplicitTransaction(window->GetRSUIContext());
+            RSAdapterUtil::SetRSTransactionHandler(rsTransaction, window->GetRSUIContext());
             rsTransaction->Begin();
         }
         if (keyboardAnimationInfo.isShow) {

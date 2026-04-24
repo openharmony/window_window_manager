@@ -911,6 +911,22 @@ std::shared_ptr<RSUIContext> ScreenSessionManagerClient::GetRSUIContext(ScreenId
     return rsUIContext;
 }
 
+sptr<IRemoteObject> ScreenSessionManagerClient::GetRenderSessionToken()
+{
+    auto screenSession = GetScreenSession(GetDefaultScreenId());
+    if (!screenSession) {
+        TLOGE(WmsLogTag::DMS, "ScreenSession is null");
+        return nullptr;
+    }
+    auto renderSession = screenSession->GetRenderSession();
+    if (!renderSession) {
+        TLOGE(WmsLogTag::DMS, "RenderSession is null");
+        return nullptr;
+    }
+    TLOGI(WmsLogTag::DMS, "Get renderSession success");
+    return renderSession;
+}
+
 ScreenId ScreenSessionManagerClient::GetDefaultScreenId()
 {
     std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
@@ -1147,6 +1163,7 @@ bool ScreenSessionManagerClient::HandleScreenConnection(SessionOption option)
         .rsId = option.rsId_,
         .name = option.name_,
         .innerName = option.innerName_,
+        .renderSession = option.connectToRenderToken_,
     };
     config.property = screenSessionManager_->GetScreenProperty(option.screenId_);
     TLOGW(WmsLogTag::DMS, "width:%{public}f, height=%{public}f",
@@ -1202,13 +1219,14 @@ bool ScreenSessionManagerClient::HandleScreenDisconnection(SessionOption option)
 }
 
 bool ScreenSessionManagerClient::OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
-    const std::string& name, bool isExtend)
+    const std::string& name, sptr<IRemoteObject> renderSession, bool isExtend)
 {
     sptr<ScreenSession> screenSession = nullptr;
     ScreenSessionConfig config = {
         .screenId = screenId,
         .rsId = rsId,
         .name = name,
+        .renderSession = renderSession,
     };
     {
         std::lock_guard<std::mutex> lock(screenSessionMapMutex_);
@@ -1298,10 +1316,16 @@ sptr<ScreenSession> ScreenSessionManagerClient::CreateTempScreenSession(
         TLOGE(WmsLogTag::DMS, "Failed to create temp screen session, screenSessionManager_ is null");
         return nullptr;
     }
+    auto screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGE(WmsLogTag::DMS, "screenSession is null");
+        return nullptr;
+    }
     ScreenSessionConfig config = {
         .screenId = screenId,
         .rsId = rsId,
         .displayNode = displayNode,
+        .renderSession = screenSession->GetRenderSession(),
     };
     config.property = screenSessionManager_->GetScreenProperty(screenId);
     TLOGW(WmsLogTag::DMS, "CreateTempScreenSession width:%{public}f, height=%{public}f",
