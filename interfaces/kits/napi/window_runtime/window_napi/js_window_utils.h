@@ -263,6 +263,7 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     napi_value WindowTypeInit(napi_env env);
     napi_value AvoidAreaTypeInit(napi_env env);
     napi_value WindowModeInit(napi_env env);
+    napi_value SplitRatioPreferenceInit(napi_env env);
     napi_value ScreenshotEventTypeInit(napi_env env);
     napi_value GlobalWindowModeInit(napi_env env);
     napi_value WindowOcclusionStateInit(napi_env env);
