@@ -25,6 +25,7 @@
 #include "mock_session_stub.h"
 #include "mock_uicontent.h"
 #include "mock_window.h"
+#include "mock_window_session_impl.h"
 #include "parameters.h"
 #include "scene_board_judgement.h"
 #include "window_helper.h"
@@ -1629,7 +1630,7 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInnerGetSelectModeFail, Function | 
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetUIContentInnerGetSelectModeFail");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<MockWindowSessionImpl> window = sptr<MockWindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = {"SetUIContentInnerGetSelectModeFail", "SetUIContentInnerGetSelectModeFail",
         "SetUIContentInnerGetSelectModeFail"};
@@ -1641,19 +1642,16 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInnerGetSelectModeFail, Function | 
     window->hostSession_ = hostSession;
     window->state_ = WindowState::STATE_SHOWN;
 
-    // Mock GetAppForceLandscapeConfig to return OK with config
     AppForceLandscapeConfig config;
     config.containsSysConfig_ = true;
-    EXPECT_CALL(*hostSession, GetAppForceLandscapeConfig(::testing::_))
+    EXPECT_CALL(*window, GetAppForceLandscapeConfig(::testing::_))
         .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(config), ::testing::Return(WMError::WM_OK)));
-
-    // Mock GetSelectMode to fail
-    EXPECT_CALL(*hostSession, GetSelectMode(::testing::_))
+    EXPECT_CALL(*window, GetSelectMode(::testing::_))
         .WillOnce(::testing::Return(WMError::WM_ERROR_NULLPTR));
 
     window->SetUIContentInner("info", nullptr, nullptr,
         WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
-    EXPECT_TRUE(g_errLog.find("get selectMode fail") == std::string::npos);
+    EXPECT_TRUE(g_errLog.find("get selectMode fail") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 
@@ -1668,7 +1666,7 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInnerGetSelectModeSuccess, Function
     LOG_SetCallback(MyLogCallback);
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("SetUIContentInnerGetSelectModeSuccess");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    sptr<MockWindowSessionImpl> window = sptr<MockWindowSessionImpl>::MakeSptr(option);
 
     SessionInfo sessionInfo = {"SetUIContentInnerGetSelectModeSuccess", "SetUIContentInnerGetSelectModeSuccess",
         "SetUIContentInnerGetSelectModeSuccess"};
@@ -1680,19 +1678,16 @@ HWTEST_F(WindowSessionImplTest5, SetUIContentInnerGetSelectModeSuccess, Function
     window->hostSession_ = hostSession;
     window->state_ = WindowState::STATE_SHOWN;
 
-    // Mock GetAppForceLandscapeConfig to return OK with config
     AppForceLandscapeConfig config;
     config.containsSysConfig_ = true;
-    EXPECT_CALL(*hostSession, GetAppForceLandscapeConfig(::testing::_))
+    EXPECT_CALL(*window, GetAppForceLandscapeConfig(::testing::_))
         .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(config), ::testing::Return(WMError::WM_OK)));
-
-    // Mock GetSelectMode to succeed
-    EXPECT_CALL(*hostSession, GetSelectMode(::testing::_)).WillOnce(
+    EXPECT_CALL(*window, GetSelectMode(::testing::_)).WillOnce(
         ::testing::DoAll(::testing::SetArgReferee<0>(SelectMode::WIDE_MODE), ::testing::Return(WMError::WM_OK)));
 
     window->SetUIContentInner("info", nullptr, nullptr,
         WindowSetUIContentType::DEFAULT, BackupAndRestoreType::NONE, nullptr);
-    EXPECT_TRUE(g_errLog.find("get selectMode success") == std::string::npos);
+    EXPECT_TRUE(g_errLog.find("get selectMode success") != std::string::npos);
     LOG_SetCallback(nullptr);
 }
 

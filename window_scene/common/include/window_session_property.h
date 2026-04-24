@@ -707,8 +707,7 @@ private:
     bool isPcAppInpadSpecificSystemBarInvisible_ = false;
     bool isPcAppInpadOrientationLandscape_ = false;
     bool isMobileAppInPadLayoutFullScreen_ = false;
-    mutable std::mutex isForceSplitEnabledMutex_;
-    bool isForceSplitEnabled_ = false;
+    std::atomic<bool> isForceSplitEnabled_ = false;
     bool isRotationLock_ = false;
 
     /*
