@@ -157,8 +157,7 @@ private:
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,
         const ISessionLifecycleListener::SessionLifecycleEvent event,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
-    template <typename KeyType, typename MapType>
-    void NotifyListeners(const MapType& listenerMap, const KeyType& key,
+    void NotifyListeners(const AppInstanceFilterKey& key,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
