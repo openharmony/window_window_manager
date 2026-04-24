@@ -850,6 +850,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWi
 {
     if (window == nullptr) {
         WLOGFE("Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowStatusChange" : "ArkUI.window.offWindowStatusChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowStatusChangeListener> thisListener(listener);
@@ -859,6 +862,8 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<JsWi
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterWindowStatusChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onWindowStatusChange" : "ArkUI.window.offWindowStatusChange", ret);
     return ret;
 }
 
@@ -867,6 +872,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusDidChangeRegister(sptr<J
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Window is null");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowStatusDidChange" : "ArkUI.window.offWindowStatusDidChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowStatusDidChangeListener> thisListener(listener);
@@ -876,6 +884,8 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowStatusDidChangeRegister(sptr<J
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterWindowStatusDidChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onWindowStatusDidChange" : "ArkUI.window.offWindowStatusDidChange", ret);
     return ret;
 }
 
@@ -917,6 +927,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWind
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowRectChange" : "ArkUI.window.offWindowRectChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowRectChangeListener> thisListener(listener);
@@ -926,6 +939,8 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<JsWind
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterWindowRectChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onWindowRectChange" : "ArkUI.window.offWindowRectChange", ret);
     return ret;
 }
 
@@ -935,6 +950,9 @@ WmErrorCode JsWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(
 {
     if (!window) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onRectChangeInGlobalDisplay" : "ArkUI.window.offRectChangeInGlobalDisplay",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     WMError ret = WMError::WM_OK;
@@ -944,7 +962,11 @@ WmErrorCode JsWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(
         ret = window->UnregisterRectChangeInGlobalDisplayListener(listener);
     }
     auto it = WM_JS_TO_ERROR_CODE_MAP.find(ret);
-    return it != WM_JS_TO_ERROR_CODE_MAP.end() ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    WmErrorCode wmRet = it != WM_JS_TO_ERROR_CODE_MAP.end() ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onRectChangeInGlobalDisplay" : "ArkUI.window.offRectChangeInGlobalDisplay",
+        wmRet);
+    return wmRet;
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(sptr<JsWindowListener> listener,
