@@ -2461,9 +2461,9 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
                       env, task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
         if (window == nullptr) {	 
-            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);	 
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));	 
-            return;	 
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
         }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             window->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
@@ -4956,7 +4956,7 @@ napi_value JsWindow::OnSetWindowTopmost(napi_env env, napi_callback_info info)
             "%{public}s id: %{public}u, name: %{public}s, isMainWindowTopmost: %{public}d",
             where, window->GetWindowId(), window->GetWindowName().c_str(), isMainWindowTopmost);
     };
-if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTopmost") != napi_status::napi_ok) {
+    if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTopmost") != napi_status::napi_ok) {
         HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTopmost", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(env,
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "send event failed"));
@@ -9642,10 +9642,10 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), offsetX, offsetY,
                       env, task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
-        if (window == nullptr) {	 
-            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);	 
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));	 
-            return;	 
+        if (window == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
+            return;
         }
         WmErrorCode ret = window->StartMoveWindowWithCoordinate(offsetX, offsetY);
         if (ret == WmErrorCode::WM_OK) {
