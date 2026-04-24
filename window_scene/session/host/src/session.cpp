@@ -4024,10 +4024,6 @@ void Session::NotifyClick(bool requestFocus, bool isClick)
     if (IsLoosenedWithFreeMultiMode()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "raise sub window id: %{public}d", GetPersistentId());
         RaiseToAppTopForPointDown();
-        if (requestFocus) {
-            FocusChangeReason reason = FocusChangeReason::MOVE_UP;
-            NotifyRequestFocusStatusNotifyManager(true, true, reason);
-        }
         return;
     }
     if (clickFunc_) {
