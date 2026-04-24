@@ -2971,9 +2971,6 @@ WSError SceneSession::RaiseAppMainWindowToTop()
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
         }
-        if (WindowHelper::IsSubWindow(session->GetWindowType()) && session->IsLoosenedWithFreeMultiMode()) {
-            session->RaiseToAppTopForPointDown();
-        }
         if (session->IsFocusedOnShow()) {
             FocusChangeReason reason = FocusChangeReason::MOVE_UP;
             session->NotifyRequestFocusStatusNotifyManager(true, true, reason);
