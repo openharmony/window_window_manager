@@ -1064,6 +1064,30 @@ HWTEST_F(SessionStubTest, HandlePendingSessionActivation, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandlePendingSessionActivation
+ * @tc.desc: sessionStub HandlePendingSessionActivation with valid splitRatioPreference value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, HandlePendingSessionActivation, TestSize.Level1)
+{
+    MessageParcel data2;
+    MessageParcel reply2;
+
+    auto result1 = session_->HandlePendingSessionActivation(data2, reply2);
+    ASSERT_EQ(result1, ERR_INVALID_DATA);
+    
+    sptr<SessionProxy> sProxy2 = sptr<SessionProxy>::MakeSptr(session_);
+    sptr<AAFwk::SessionInfo> abilitySessionInfo2 = sptr<AAFwk::SessionInfo>::MakeSptr();
+    ASSERT_NE(abilitySessionInfo2, nullptr);
+    auto result2 = sProxy2->PendingSessionActivation(abilitySessionInfo2);
+    EXPECT_EQ(result2, WSError::WS_OK);
+    
+    abilitySessionInfo2->splitRatioPreference = -1;
+    auto resultWithoutSplitRatio = session_->HandlePendingSessionActivation(data2, reply2);
+    ASSERT_EQ(resultWithoutSplitRatio, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name: WindowCreateParams
  * @tc.desc: sessionStub WindowCreateParams
  * @tc.type: FUNC
