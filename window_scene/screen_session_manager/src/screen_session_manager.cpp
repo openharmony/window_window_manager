@@ -2226,7 +2226,11 @@ void ScreenSessionManager::HandlePhysicalMirrorColorSpaceWithDeviceType()
 {
     std::string deviceType = DEVICE_TYPE;
     std::transform(deviceType.begin(), deviceType.end(), deviceType.begin(), ::tolower);
-    if (deviceType == "phone" || deviceType == "pc" || g_isPcDevice) {
+    if (deviceType == "pc" || g_isPcDevice) {
+        HandlePhysicalMirrorColorSpace(GraphicCM_ColorSpaceType::GRAPHIC_CM_SRGB_FULL);
+        return;
+    }
+    if (deviceType == "phone") {
         HandlePhysicalMirrorColorSpace(GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_FULL);
         return;
     }
@@ -11790,7 +11794,7 @@ bool ScreenSessionManager::HandleSwitchPcMode()
     std::lock_guard<std::mutex> lock(pcModeSwitchMutex_);
     if (system::GetBoolParameter(IS_PC_MODE_KEY, false)) {
         if (isPhyScreenConnected_) {
-            HandlePhysicalMirrorColorSpace(GraphicCM_ColorSpaceType::GRAPHIC_CM_P3_FULL);
+            HandlePhysicalMirrorColorSpace(GraphicCM_ColorSpaceType::GRAPHIC_CM_SRGB_FULL);
         }
         TLOGNFI(WmsLogTag::DMS, "PcMode change isPcDevice true");
         g_isPcDevice = true;
