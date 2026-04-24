@@ -157,7 +157,9 @@ private:
     void NotifyListeners(const MapType& listenerMap, const KeyType& key,
         const ISessionLifecycleListener::SessionLifecycleEvent event,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
-    void NotifyListeners(const AppInstanceFilterKey& key,
+    void NotifyAppInstanceListeners(const AppInstanceFilterKey& key,
+        const ISessionLifecycleListener::LifecycleEventPayload& payload);
+    void NotifyAppInstanceListenersByKey(const AppInstanceFilterKey& filterKey,
         const ISessionLifecycleListener::LifecycleEventPayload& payload);
     std::shared_ptr<TaskScheduler> taskScheduler_;
     sptr<IRemoteObject::DeathRecipient> lifecycleListenerDeathRecipient_;
