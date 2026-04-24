@@ -137,7 +137,6 @@ const std::string STARTWINDOW_TYPE = "startWindowType";
 const std::string STARTWINDOW_COLOR_MODE_TYPE = "startWindowColorModeType";
 const int32_t MAX_NUMBER_OF_DISTRIBUTED_SESSIONS = 20;
 const int32_t MAX_SESSION_LIMIT_ALL_APP = 512;
-const int32_t MAX_PARENT_TRAVERSE_DEPTH = 10;
 constexpr int HEX_BASE = 16;
 
 constexpr int WINDOW_NAME_MAX_WIDTH = 21;
@@ -244,31 +243,6 @@ std::string GetCurrentTime()
     return std::to_string(uTime);
 }
 
-std::string ResolveAppInstanceKeyFromParent(const sptr<Session>& session)
-{
-    if (!session) {
-        return "";
-    }
-    const auto& ownKey = session->GetSessionInfo().appInstanceKey_;
-    if (!ownKey.empty()) {
-        return ownKey;
-    }
-    if (SessionHelper::IsMainWindow(session->GetWindowType())) {
-        return ownKey;
-    }
-    sptr<Session> parent = session->GetParentSession();
-    int32_t depth = 0;
-    while (parent != nullptr && depth < MAX_PARENT_TRAVERSE_DEPTH) {
-        const auto& parentKey = parent->GetSessionInfo().appInstanceKey_;
-        if (!parentKey.empty() || SessionHelper::IsMainWindow(parent->GetWindowType())) {
-            return parentKey;
-        }
-        parent = parent->GetParentSession();
-        depth++;
-    }
-    return "";
-}
-
 void ConstructBatchLifecyclePayload(
     std::vector<ISessionLifecycleListener::LifecycleEventPayload>& payloads,
     const std::vector<sptr<SceneSession>>& sessions)
@@ -286,7 +260,7 @@ void ConstructBatchLifecyclePayload(
         payload.windowName_ = session->GetWindowName();
         payload.appIndex_ = info.appIndex_;
         payload.persistentId_ = info.persistentId_;
-        payload.appInstanceKey_ = ResolveAppInstanceKeyFromParent(session);
+        payload.appInstanceKey_ = info.appInstanceKey_;
         payload.screenId_ = info.screenId_;
         payload.sessionState_ = session->GetSessionState();
         payloads.emplace_back(std::move(payload));
@@ -2144,34 +2118,15 @@ void SceneSessionManager::GetSceneSessionsByAppInstance(const std::string& bundl
             sceneSession->GetSessionInfo().appIndex_ != appIndex) {
             continue;
         }
-        if (!appInstanceKey.empty() && sceneSession->GetSessionInfo().appInstanceKey_ != appInstanceKey) {
-            continue;
+        if (!appInstanceKey.empty()) {
+            auto mainSession = sceneSession->GetMainSession();
+            if (!mainSession || mainSession->GetSessionInfo().appInstanceKey_ != appInstanceKey) {
+                continue;
+            }
         }
         sceneSessions.push_back(sceneSession);
     }
-    if (!appInstanceKey.empty()) {
-        CollectSubSessionsRecursively(sceneSessions);
-    }
     TLOGI(WmsLogTag::WMS_LIFE, "end, matched sessions:%{public}zu", sceneSessions.size());
-}
-
-void SceneSessionManager::CollectSubSessionsRecursively(std::vector<sptr<SceneSession>>& sceneSessions)
-{
-    size_t idx = 0;
-    while (idx < sceneSessions.size()
-        && sceneSessions.size() <= static_cast<size_t>(MAX_SESSION_LIMIT_ALL_APP)) {
-        if (!sceneSessions[idx]) {
-            idx++;
-            continue;
-        }
-        auto subs = sceneSessions[idx]->GetSubSession();
-        for (auto& sub : subs) {
-            if (sub) {
-                sceneSessions.push_back(sub);
-            }
-        }
-        idx++;
-    }
 }
 
 void SceneSessionManager::GetMainSessionByAbilityInfo(const AbilityInfoBase& abilityInfo,
@@ -10335,8 +10290,6 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
     }
     if (state >= SessionState::STATE_DISCONNECT && state < SessionState::STATE_END) {
         if (listenerController_) {
-            auto sessionInfo = sceneSession->GetSessionInfo();
-            sessionInfo.appInstanceKey_ = ResolveAppInstanceKeyFromParent(sceneSession);
             listenerController_->NotifyAppInstanceLifecycleEvent(state, sessionInfo);
         }
     }
