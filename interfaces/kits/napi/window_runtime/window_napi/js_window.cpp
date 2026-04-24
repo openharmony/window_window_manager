@@ -2460,13 +2460,11 @@ napi_value JsWindow::OnResizeWindow(napi_env env, napi_callback_info info)
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), width, height,
                       env, task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
-if (window == nullptr) {
-                TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s: window is nullptr", where);
-                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setMainWindowRaiseByClickEnabled",
-                    WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                return;
-            }
+        if (window == nullptr) {	 
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);	 
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));	 
+            return;	 
+        }
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
             window->Resize(static_cast<uint32_t>(width), static_cast<uint32_t>(height)));
         if (ret == WmErrorCode::WM_OK) {
@@ -5006,7 +5004,8 @@ napi_value JsWindow::OnSetSubWindowZLevel(napi_env env, napi_callback_info info)
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s window is nullptr", where);
-HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSubWindowZLevel", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSubWindowZLevel",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env, JsErrUtils::CreateJsError(env,
                 WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][setSubWindowZLevel]msg: Window is nullptr"));
             return;
@@ -9643,13 +9642,11 @@ napi_value JsWindow::OnStartMoveWindowWithCoordinate(napi_env env, size_t argc, 
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), offsetX, offsetY,
                       env, task = napiAsyncTask, where = __func__] {
         auto window = windowToken.promote();
-if (window == nullptr) {
-                TLOGNE(WmsLogTag::WMS_HIERARCHY, "%{public}s: window is nullptr", where);
-                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setRaiseByClickEnabled",
-                    WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-                task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
-                return;
-            }
+        if (window == nullptr) {	 
+            TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s window is nullptr.", where);	 
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));	 
+            return;	 
+        }
         WmErrorCode ret = window->StartMoveWindowWithCoordinate(offsetX, offsetY);
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
