@@ -5914,6 +5914,8 @@ napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][OnKeepKeyboardOnFocus]msg:argc is invalid");
     }
@@ -5921,6 +5923,8 @@ napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info
     napi_value nativeVal = argv[0];
     if (nativeVal == nullptr) {
         WLOGFE("Failed to get parameter keepKeyboardFlag");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][OnKeepKeyboardOnFocus]msg:nativeVal is null");
     } else {
@@ -5928,6 +5932,8 @@ napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info
         CHECK_NAPI_RETCODE(errCode, WmErrorCode::WM_ERROR_INVALID_PARAM,
             napi_get_value_bool(env, nativeVal, &keepKeyboardFlag));
         if (errCode == WmErrorCode::WM_ERROR_INVALID_PARAM) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus",
+                WmErrorCode::WM_ERROR_INVALID_PARAM);
             return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 "[window][OnKeepKeyboardOnFocus]msg:invalid nativeVal");
         }
@@ -5935,12 +5941,16 @@ napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info
 
     if (windowToken_ == nullptr) {
         WLOGFE("WindowToken_ is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][OnKeepKeyboardOnFocus]msg:windowToken_ is null");
     }
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
         WLOGFE("not allowed since window is not system window or app subwindow");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][OnKeepKeyboardOnFocus]msg:windowType is invalid");
     }
@@ -5948,6 +5958,7 @@ napi_value JsWindow::OnKeepKeyboardOnFocus(napi_env env, napi_callback_info info
     WmErrorCode ret = windowToken_->KeepKeyboardOnFocus(keepKeyboardFlag);
     if (ret != WmErrorCode::WM_OK) {
         WLOGFE("failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus", ret);
         return NapiThrowError(env, ret,
             "[window][OnKeepKeyboardOnFocus]msg:failed");
     }
