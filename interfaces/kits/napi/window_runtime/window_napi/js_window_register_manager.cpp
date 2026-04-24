@@ -18,6 +18,7 @@
 #include "sys_cap_util.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "window_histogram_management.h"
 #include "js_runtime_utils.h"
 #include <cstdint>
 
@@ -979,6 +980,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowHighlightChangeRegister(const 
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowHighlightChange" : "ArkUI.window.offWindowHighlightChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowHighlightChangeListener> thisListener(listener);
@@ -988,6 +992,8 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowHighlightChangeRegister(const 
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterWindowHighlightChangeListeners(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onWindowHighlightChange" : "ArkUI.window.offWindowHighlightChange", ret);
     return ret;
 }
 

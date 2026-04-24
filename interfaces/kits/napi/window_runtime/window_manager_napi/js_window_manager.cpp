@@ -1168,7 +1168,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
                 lists->errMsg = "[window][getLastWindow]msg: FA mode can not get ability window";
-                HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
                 return;
             }
             lists->window = Window::GetTopWindowWithId(lists->ability->GetWindow()->GetWindowId());
@@ -1178,7 +1178,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
                 lists->errMsg = "[window][getLastWindow]msg: Stage mode without context";
-                HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
                 return;
             }
             auto context = AbilityRuntime::Context::ConvertTo<AbilityRuntime::Context>(contextTmp->lock());
@@ -1186,7 +1186,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
                 lists->errMsg = "[window][getLastWindow]msg: Stage mode without context";
-                HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
                 return;
             }
             lists->window = Window::GetTopWindowWithContext(context);
@@ -1197,7 +1197,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, static_cast<WmErrorCode>(lists->errorCode),
                     lists->errMsg));
-                HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.getLastWindow",
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getLastWindow",
                     static_cast<WmErrorCode>(lists->errorCode));
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, static_cast<WMError>(lists->errorCode),
@@ -1210,7 +1210,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "[window][getLatsWindow]msg: Get top window failed"));
-                HISTOGRAM_ENUMERATION_ERROR_CODE("AukUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
                     "[window][getLatsWindow]msg: Get top window failed"));
@@ -1230,7 +1230,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
 napi_value JsWindowManager::OnGetTopWindow(napi_env env, napi_callback_info info)
 {
     WLOGFD("[NAPI]");
-    HISTOGRAM_BOOLEAN("AukUI.window.getTopWindow", HISTOGRAM_BOOLEAN_COUNTS);
+    HISTOGRAM_BOOLEAN("ArkUI.window.getTopWindow", HISTOGRAM_BOOLEAN_COUNTS);
     napi_value nativeContext = nullptr;
     napi_value nativeCallback = nullptr;
     size_t argc = 4;
@@ -1517,6 +1517,8 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
         errCode = WMError::WM_ERROR_INVALID_PARAM;
     }
     if (errCode == WMError::WM_ERROR_INVALID_PARAM) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.shiftAppWindowFocus",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][shiftAppWindowFocus]"));
         return NapiGetUndefined(env);
@@ -1532,10 +1534,13 @@ napi_value JsWindowManager::OnShiftAppWindowFocus(napi_env env, napi_callback_in
                 task->Resolve(env, NapiGetUndefined(env));
                 TLOGND(WmsLogTag::WMS_FOCUS, "OnShiftAppWindowFocus success");
             } else {
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.shiftAppWindowFocus", ret);
                 task->Reject(env, JsErrUtils::CreateJsError(env, ret, "ShiftAppWindowFocus failed"));
             }
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnShiftAppWindowFocus") != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.shiftAppWindowFocus",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         TLOGE(WmsLogTag::WMS_FOCUS, "window state is abnormal!");
     }
     return result;
@@ -2162,6 +2167,8 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
     uint32_t windowTypeValue = 0;
     if (!ConvertFromJsValue(env, argv[0], windowTypeValue)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to windowType");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemWindowZIndex",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setSpecificSystemWindowZIndex]msg:failed to convert paramter to windowType");
     }
@@ -2171,17 +2178,23 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
         windowType = JS_TO_NATIVE_WINDOW_TYPE_MAP.at(static_cast<ApiWindowType>(windowTypeValue));
     } else {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "invalid windowType");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemWindowZIndex",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setSpecificSystemWindowZIndex]msg:failed to convert paramter to windowType");
     }
     if (!WindowHelper::IsSupportSetZIndexWindow(windowType)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "windowType not support %{public}d", windowType);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemWindowZIndex",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][setSpecificSystemWindowZIndex]msg:windowType not support");
     }
     int32_t zIndex = 0;
     if (!ConvertFromJsValue(env, argv[1], zIndex)) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "failed to convert paramter to zIndex");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemWindowZIndex",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setSpecificSystemWindowZIndex]msg:failed to convert paramter to zIndex");
     }
@@ -2193,12 +2206,15 @@ napi_value JsWindowManager::OnSetSpecificSystemWindowZIndex(napi_env env, napi_c
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemWindowZIndex", ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
                 "[window][setSpecificSystemWindowZIndex]msg:set failed"));
         }
     };
     napi_status status = napi_send_event(env, std::move(asyncTask), napi_eprio_high, "OnSetSpecificSystemWindowZIndex");
     if (status != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemWindowZIndex",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY),
             "[window][setSpecificSystemWindowZIndex]msg:send event failed"));
     }
