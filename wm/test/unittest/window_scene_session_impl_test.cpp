@@ -4181,6 +4181,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_AcrossDisplay_EnterMode
     option->SetWindowName("AcrossDisplayEnterMode01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
@@ -4188,7 +4189,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_AcrossDisplay_EnterMode
     SnapshotAnimationConfig config = { -1, -1 };
     WMError ret = window->MaximizeWithOptions(
         MaximizePresentation::ENTER_IMMERSIVE, AcrossDisplayPresentation::ENTER_ACROSS_DISPLAY_MODE, config);
-    ASSERT_TRUE(ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -4202,6 +4203,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_AcrossDisplay_ExitMode0
     option->SetWindowName("AcrossDisplayExitMode01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
@@ -4209,7 +4211,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_AcrossDisplay_ExitMode0
     SnapshotAnimationConfig config = { -1, -1 };
     WMError ret = window->MaximizeWithOptions(
         MaximizePresentation::ENTER_IMMERSIVE, AcrossDisplayPresentation::EXIT_ACROSS_DISPLAY_MODE, config);
-    ASSERT_TRUE(ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
@@ -4223,6 +4225,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_SubWindowExitMode01, Te
     option->SetWindowName("SubWindowExitMode01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
@@ -4244,6 +4247,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_SubWindowFollowMode01, 
     option->SetWindowName("SubWindowFollowMode01");
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::APP_SUB_WINDOW_BASE);
+    window->property_->SetPersistentId(1);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility" };
     sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
@@ -4251,7 +4255,7 @@ HWTEST_F(WindowSceneSessionImplTest, MaximizeWithOptions_SubWindowFollowMode01, 
     SnapshotAnimationConfig config = { -1, -1 };
     WMError ret = window->MaximizeWithOptions(
         MaximizePresentation::ENTER_IMMERSIVE, AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING, config);
-    ASSERT_TRUE(ret == WMError::WM_OK || ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    ASSERT_EQ(ret, WMError::WM_OK);
 }
 
 /**
