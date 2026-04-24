@@ -250,7 +250,7 @@ void KeyboardSession::SetCallingSessionId(uint32_t callingSessionId)
         uint32_t curCallingId = session->GetCallingSessionId();
         TLOGI(WmsLogTag::WMS_KEYBOARD, "CurId: %{public}d, newId: %{public}d", curCallingId, callingSessionId);
         // When the keyboard is shown, if the callingId changes, restore the cur calling session.
-        if (curCallingId != INVALID_WINDOW_ID && callingSessionId != curCallingId && session->IsLifeCycleForeground()) {
+        if (curCallingId != INVALID_WINDOW_ID && callingSessionId != curCallingId && session->IsLifecycleForeground()) {
             session->RestoreCallingSession(curCallingId, nullptr);
             sptr<SceneSession> callingSession = session->GetSceneSession(curCallingId);
             WSRect panelRect = session->GetPanelRect();
@@ -293,7 +293,7 @@ bool KeyboardSession::isNeedProcessKeyboardOccupiedAreaInfo(
         lastParams.LandscapePanelRect_ != params.LandscapePanelRect_ ||
         lastParams.PortraitPanelRect_ != params.PortraitPanelRect_);
     
-    return IsLifeCycleForeground() && lastParams != params && !isKeyboardRectsChanged &&
+    return IsLifecycleForeground() && lastParams != params && !isKeyboardRectsChanged &&
         lastParams.isValidAvoidHeight() && params.isValidAvoidHeight();
 }
 
@@ -314,7 +314,7 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
             session->SetWindowAnimationFlag(false);
         } else {
-            if (session->IsLifeCycleForeground()) {
+            if (session->IsLifecycleForeground()) {
                 session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
             }
             session->SetWindowAnimationFlag(true);
@@ -548,7 +548,7 @@ bool KeyboardSession::RaiseCallingSession(const sptr<SceneSession>& callingSessi
             GetKeyboardGravity());
         return false;
     }
-    if (!IsLifeCycleForeground()) {
+    if (!IsLifecycleForeground()) {
         TLOGI(WmsLogTag::WMS_KEYBOARD, "Keyboard is not foreground, sessionState: %{public}d", GetSessionState());
         return false;
     }
@@ -855,7 +855,7 @@ void KeyboardSession::CloseKeyboardSyncTransaction(const WSRect& keyboardPanelRe
                 session->ProcessKeyboardOccupiedAreaInfo(callingId, true, true);
                 session->stateChanged_ = false;
             }
-            if (session->IsLifeCycleForeground() && session->GetCallingSessionId() == INVALID_WINDOW_ID &&
+            if (session->IsLifecycleForeground() && session->GetCallingSessionId() == INVALID_WINDOW_ID &&
                 !animationInfo.isGravityChanged) {
                 session->GetSessionProperty()->SetCallingSessionId(callingId);
             }
