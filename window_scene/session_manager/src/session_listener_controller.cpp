@@ -524,7 +524,7 @@ void SessionListenerController::NotifyAppInstanceLifecycleEvent(SessionState sta
             TLOGI(WmsLogTag::WMS_LIFE,
                 "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d, reason: %{public}u",
                 bundleName.c_str(), persistentId, payload.sessionState_, payload.lifeCycleChangeReason_);
-            controller->NotifyListeners(AppInstanceFilterKey{ bundleName,
+            controller->NotifyAppInstanceListeners(AppInstanceFilterKey{ bundleName,
                 appIndex, appInstanceKey }, payload);
         }, __func__);
 }
@@ -545,23 +545,26 @@ void SessionListenerController::NotifyListeners(const MapType& listenerMap, cons
     }
 }
 
-void SessionListenerController::NotifyListeners(const AppInstanceFilterKey& key,
+void SessionListenerController::NotifyAppInstanceListeners(const AppInstanceFilterKey& key,
     const ISessionLifecycleListener::LifecycleEventPayload& payload)
 {
-    auto notifyByKey = [this, &payload](const AppInstanceFilterKey& filterKey) {
-        auto it = listenerMapByAppInstance_.find(filterKey);
-        if (it != listenerMapByAppInstance_.end()) {
-            const auto& listeners = it->second;
-            for (const auto& listener : listeners) {
-                if (listener != nullptr) {
-                    listener->OnAppInstanceLifecycleEvent(payload);
-                }
+    NotifyAppInstanceListenersByKey(key, payload);
+    if (!key.appInstanceKey_.empty()) {
+        NotifyAppInstanceListenersByKey(AppInstanceFilterKey{ key.bundleName_, key.appIndex_, "" }, payload);
+    }
+}
+
+void SessionListenerController::NotifyAppInstanceListenersByKey(const AppInstanceFilterKey& filterKey,
+    const ISessionLifecycleListener::LifecycleEventPayload& payload)
+{
+    auto it = listenerMapByAppInstance_.find(filterKey);
+    if (it != listenerMapByAppInstance_.end()) {
+        const auto& listeners = it->second;
+        for (const auto& listener : listeners) {
+            if (listener != nullptr) {
+                listener->OnAppInstanceLifecycleEvent(payload);
             }
         }
-    };
-    notifyByKey(key);
-    if (!key.appInstanceKey_.empty()) {
-        notifyByKey(AppInstanceFilterKey{ key.bundleName_, key.appIndex_, "" });
     }
 }
 
