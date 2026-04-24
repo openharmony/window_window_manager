@@ -2475,16 +2475,20 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs, TestSize.Level1
     uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT);
     MessageOption option;
 
-    // Case 1: EVENT_MAXIMIZE with valid 'waterfallResidentState' → should succeed and return WS_OK
+    // Case 1: EVENT_MAXIMIZE with valid params → should succeed and return WS_OK
     {
         MessageParcel data;
         MessageParcel reply;
         uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE);
         uint32_t waterfallResidentState = 0;
         uint32_t titleButtonEventType = 0;
+        int64_t duration = -1;
+        int64_t delay = -1;
         data.WriteUint32(eventId);
         data.WriteUint32(waterfallResidentState);
         data.WriteUint32(titleButtonEventType);
+        data.WriteInt64(duration);
+        data.WriteInt64(delay);
 
         EXPECT_CALL(*session, OnSessionEvent(_, _))
             .Times(1)
@@ -2502,7 +2506,6 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventWithValidInputs, TestSize.Level1
         MessageParcel data;
         MessageParcel reply;
         uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_MINIMIZE);
-        uint32_t waterfallResidentState = 1;
         data.WriteUint32(eventId);
 
         EXPECT_CALL(*session, OnSessionEvent(_, _))
