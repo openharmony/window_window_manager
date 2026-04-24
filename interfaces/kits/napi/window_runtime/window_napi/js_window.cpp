@@ -7718,8 +7718,8 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
 
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-auto asyncTask = [windowToken = wptr<Window>(windowToken_), aspectRatio, isPersistent, needUpdateRect,
-                       env, napiAsyncTask, where = __func__, errMsgPrefix] {
+    auto asyncTask = [windowToken = wptr<Window>(windowToken_), aspectRatio, isPersistent, needUpdateRect,
+        env, napiAsyncTask, where = __func__, errMsgPrefix] {
         auto window = windowToken.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Window is nullptr", where);
