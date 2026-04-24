@@ -2243,7 +2243,7 @@ HWTEST_F(SceneSessionManagerTest, SetSelectMode, TestSize.Level1)
 
 /**
  * @tc.name: GetNativeModuleStartMode01
- * @tc.desc: Test GetNativeModuleStartMode with both conditions met (withNativeModule=true and startupPhase=pre_window)
+ * @tc.desc: Test GetNativeModuleStartMode with both conditions met
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, GetNativeModuleStartMode01, TestSize.Level1)
@@ -2265,7 +2265,7 @@ HWTEST_F(SceneSessionManagerTest, GetNativeModuleStartMode01, TestSize.Level1)
 
 /**
  * @tc.name: GetNativeModuleStartMode02
- * @tc.desc: Test GetNativeModuleStartMode with both conditions met (withNativeModule=true and startupPhase=pre_foreground)
+ * @tc.desc: Test GetNativeModuleStartMode with both conditions met
  * @tc.type: FUNC
  */
 HWTEST_F(SceneSessionManagerTest, GetNativeModuleStartMode02, TestSize.Level1)
