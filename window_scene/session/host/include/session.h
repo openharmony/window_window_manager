@@ -389,18 +389,17 @@ public:
      * Window Scene Snapshot
      */
     struct SnapshotOptions {
-        SnapshotOptions(bool runInFfrtValue = false, float scaleParamValue = 0.0f,
-            bool useCurWindowValue = false, bool windowSyncValue = false, bool disableBlurValue = false)
-            : runInFfrt(runInFfrtValue), scaleParam(scaleParamValue), useCurWindow(useCurWindowValue),
-            windowSync(windowSyncValue), disableBlur(disableBlurValue)
-        {
-        }
-
-        bool runInFfrt;
-        float scaleParam;
-        bool useCurWindow;
-        bool windowSync;
-        bool disableBlur;
+        // Run snapshot capture in FFRT task with a longer timeout.
+        bool runInFfrt = false;
+        // Snapshot scale value; non-positive values use the session default scale.
+        float scaleParam = 0.0f;
+        // Capture the current window surface instead of the default surface node content.
+        bool useCurWindow = false;
+        // Capture the snapshot synchronously when supported by the render service.
+        bool windowSync = false;
+        // Skip blur processing for SceneBoard UI animation snapshots.
+        // Only for SceneBoard UI animation, cannot use with privacy window.
+        bool disableBlur = false;
     };
 
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
@@ -412,7 +411,8 @@ public:
      *
      * @return PixelMap of this window.
      */
-    std::shared_ptr<Media::PixelMap> Snapshot(const SnapshotOptions& options = SnapshotOptions()) const;
+    std::shared_ptr<Media::PixelMap> Snapshot() const;
+    std::shared_ptr<Media::PixelMap> Snapshot(const SnapshotOptions& options) const;
     void ResetSnapshot();
     void RenameSnapshotFromOldPersistentId(int32_t oldPersistentId);
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
