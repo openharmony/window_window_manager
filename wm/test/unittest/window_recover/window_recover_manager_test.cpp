@@ -266,6 +266,8 @@ HWTEST_F(WindowRecoverManagerTest, OnWindowRecoverStateChange, TestSize.Level1)
     sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
     window->property_->SetCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    window->UpdateFocusState(true);
+    window->NotifyHighlightChange(true);
     window->OnWindowRecoverStateChange(false, WindowRecoverState::WINDOW_START_RECONNECT);
     EXPECT_EQ(window->property_->GetWindowState(), window->state_);
 
