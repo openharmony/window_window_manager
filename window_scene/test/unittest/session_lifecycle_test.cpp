@@ -405,25 +405,25 @@ HWTEST_F(WindowSessionLifecycleTest, IsActive43, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsLifeCycleForeground01
- * @tc.desc: IsLifeCycleForeground, normal scene
+ * @tc.name: IsLifecycleForeground01
+ * @tc.desc: IsLifecycleForeground, normal scene
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionLifecycleTest, IsLifeCycleForeground, TestSize.Level1)
+HWTEST_F(WindowSessionLifecycleTest, IsLifecycleForeground, TestSize.Level1)
 {
     ASSERT_NE(session_, nullptr);
     session_->state_ = SessionState::STATE_FOREGROUND;
-    ASSERT_EQ(true, session_->IsLifeCycleForeground());
+    ASSERT_EQ(true, session_->IsLifecycleForeground());
     session_->state_ = SessionState::STATE_ACTIVE;
-    ASSERT_EQ(true, session_->IsLifeCycleForeground());
+    ASSERT_EQ(true, session_->IsLifecycleForeground());
     session_->state_ = SessionState::STATE_INACTIVE;
-    ASSERT_EQ(false, session_->IsLifeCycleForeground());
+    ASSERT_EQ(false, session_->IsLifecycleForeground());
     session_->state_ = SessionState::STATE_BACKGROUND;
-    ASSERT_EQ(false, session_->IsLifeCycleForeground());
+    ASSERT_EQ(false, session_->IsLifecycleForeground());
     session_->state_ = SessionState::STATE_DISCONNECT;
-    ASSERT_EQ(false, session_->IsLifeCycleForeground());
+    ASSERT_EQ(false, session_->IsLifecycleForeground());
     session_->state_ = SessionState::STATE_CONNECT;
-    ASSERT_EQ(false, session_->IsLifeCycleForeground());
+    ASSERT_EQ(false, session_->IsLifecycleForeground());
 }
 
 /**

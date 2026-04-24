@@ -1253,7 +1253,7 @@ bool Session::IsTerminated() const
     return (GetSessionState() == SessionState::STATE_DISCONNECT || isTerminating_);
 }
 
-bool Session::IsLifeCycleForeground() const
+bool Session::IsLifecycleForeground() const
 {
     return state_ == SessionState::STATE_FOREGROUND || state_ == SessionState::STATE_ACTIVE;
 }
@@ -3260,7 +3260,7 @@ void Session::UpdateAppLockSnapshot(ControlAppType type, ControlInfo controlInfo
         SaveSnapshot(true, true, nullptr, true);
         return;
     }
-    if (IsLifeCycleForeground() || isVisible_.load()) {
+    if (IsLifecycleForeground() || isVisible_.load()) {
         NotifyRemoveSnapshot();
         return;
     }
@@ -3288,7 +3288,7 @@ bool Session::IsSupportAppLockSnapshot() const
 
 bool Session::GetSnapshotPrivacyMode() const
 {
-    if (IsLifeCycleForeground()) {
+    if (IsLifecycleForeground()) {
         return false;
     }
     return snapshotPrivacyMode_.load();
@@ -4543,7 +4543,7 @@ void Session::RectSizeCheckProcess(float curWidth, float curHeight, uint32_t min
 /** @note @window.layout */
 void Session::RectCheckProcess()
 {
-    if (!(IsLifeCycleForeground() || isVisible_.load())) {
+    if (!(IsLifecycleForeground() || isVisible_.load())) {
         return;
     }
     auto property = GetSessionProperty();
@@ -5685,7 +5685,7 @@ std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriSca
 
 bool Session::IsVisibleForeground() const
 {
-    return isVisible_.load() && IsLifeCycleForeground();
+    return isVisible_.load() && IsLifecycleForeground();
 }
 
 bool Session::IsVisibleNotBackground() const
@@ -6016,7 +6016,7 @@ WSError Session::NotifyClientToUpdateGlobalDisplayRect(const WSRect& rect, SizeC
 {
     // Skip notifying client when the window is not in the foreground to avoid waking up
     // the application via IPC, which may cause unnecessary power consumption.
-    if (!sessionStage_ || !IsLifeCycleForeground()) {
+    if (!sessionStage_ || !IsLifecycleForeground()) {
         return WSError::WS_DO_NOTHING;
     }
     return sessionStage_->UpdateGlobalDisplayRectFromServer(rect, reason);
