@@ -18,6 +18,7 @@
 #include "singleton_container.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
+#include "window_histogram_management.h"
 #include "sys_cap_util.h"
 #include <cstdint>
 
@@ -224,6 +225,9 @@ WmErrorCode AniWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<Ani
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onKeyboardHeightChange" : "ArkUI.window.offKeyboardHeightChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IOccupiedAreaChangeListener> thisListener(listener);
@@ -233,6 +237,8 @@ WmErrorCode AniWindowRegisterManager::ProcessOccupiedAreaChangeRegister(sptr<Ani
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterOccupiedAreaChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onKeyboardHeightChange" : "ArkUI.window.offKeyboardHeightChange", ret);
     return ret;
 }
 
@@ -241,6 +247,9 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidShowRegister(sptr<AniWin
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onKeyboardDidShow" : "ArkUI.window.offKeyboardDidShow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IKeyboardDidShowListener> thisListener(listener);
@@ -250,6 +259,8 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidShowRegister(sptr<AniWin
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidShowListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onKeyboardDidShow" : "ArkUI.window.offKeyboardDidShow", ret);
     return ret;
 }
 
@@ -258,6 +269,9 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidHideRegister(sptr<AniWin
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onKeyboardDidHide" : "ArkUI.window.offKeyboardDidHide",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IKeyboardDidHideListener> thisListener(listener);
@@ -267,6 +281,8 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardDidHideRegister(sptr<AniWin
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardDidHideListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onKeyboardDidHide" : "ArkUI.window.offKeyboardDidHide", ret);
     return ret;
 }
 
@@ -275,6 +291,9 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillShowRegister(sptr<AniWi
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onKeyboardWillShow" : "ArkUI.window.offKeyboardWillShow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IKeyboardWillShowListener> thisListener(listener);
@@ -284,6 +303,8 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillShowRegister(sptr<AniWi
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillShowListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onKeyboardWillShow" : "ArkUI.window.offKeyboardWillShow", ret);
     return ret;
 }
 
@@ -292,6 +313,9 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillHideRegister(sptr<AniWi
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "[ANI]Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onKeyboardWillHide" : "ArkUI.window.offKeyboardWillHide",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IKeyboardWillHideListener> thisListener(listener);
@@ -301,6 +325,8 @@ WmErrorCode AniWindowRegisterManager::ProcessKeyboardWillHideRegister(sptr<AniWi
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterKeyboardWillHideListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onKeyboardWillHide" : "ArkUI.window.offKeyboardWillHide", ret);
     return ret;
 }
 

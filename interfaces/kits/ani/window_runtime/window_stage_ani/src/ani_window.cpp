@@ -3430,6 +3430,8 @@ void AniWindow::OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "WindowToken_ is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][keepKeyboardOnFocus]msg:WindowToken_ is nullptr");
         return;
@@ -3437,6 +3439,8 @@ void AniWindow::OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag
     if (!WindowHelper::IsSystemWindow(windowToken_->GetType()) &&
         !WindowHelper::IsSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "not allowed since window is not system window or app subwindow");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][keepKeyboardOnFocus]msg:not system window or app subwindow");
         return;
@@ -3445,6 +3449,7 @@ void AniWindow::OnKeepKeyboardOnFocus(ani_env* env, ani_boolean keepKeyboardFlag
     WmErrorCode ret = windowToken_->KeepKeyboardOnFocus(keepKeyboardFlag);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_KEYBOARD, "failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.keepKeyboardOnFocus", ret);
         AniWindowUtils::AniThrowError(env, ret,
             "[window][keepKeyboardOnFocus]");
     }
