@@ -500,27 +500,43 @@ void SessionListenerController::NotifySessionLifecycleEvent(ISessionLifecycleLis
 }
 
 void SessionListenerController::NotifyAppInstanceLifecycleEvent(SessionState state,
-    const SessionInfo& sessionInfo, LifeCycleChangeReason reason)
+    const sptr<SceneSession>& session, LifeCycleChangeReason reason)
 {
-    std::string bundleName = sessionInfo.bundleName_;
-    int32_t appIndex = sessionInfo.appIndex_;
-    std::string appInstanceKey = sessionInfo.appInstanceKey_;
-    int32_t persistentId = sessionInfo.persistentId_;
+    if (!session) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr!");
+        return;
+    }
+    int32_t persistentId = session->GetPersistentId();
     if (persistentId <= INVALID_SESSION_ID) {
         TLOGE(WmsLogTag::WMS_LIFE, "invalid persistentId!");
         return;
     }
-    ISessionLifecycleListener::LifecycleEventPayload payload;
-    ConstructPayload(payload, sessionInfo, 0, 0, 0, reason);
-    payload.sessionState_ = state;
     taskScheduler_->PostAsyncTask(
-        [weakThis = weak_from_this(), payload, bundleName, appIndex, appInstanceKey, persistentId,
-            where = __func__] {
+        [weakThis = weak_from_this(), state, weakSession = wptr<SceneSession>(session), reason,
+            persistentId, where = __func__] {
             auto controller = weakThis.lock();
             if (controller == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "controller is null.");
                 return;
             }
+            auto session = weakSession.promote();
+            if (session == nullptr) {
+                TLOGNE(WmsLogTag::WMS_LIFE, "session is null, persistentId:%{public}d", persistentId);
+                return;
+            }
+            const auto& sessionInfo = session->GetSessionInfo();
+            std::string bundleName = sessionInfo.bundleName_;
+            int32_t appIndex = sessionInfo.appIndex_;
+            std::string appInstanceKey = sessionInfo.appInstanceKey_;
+            if (appInstanceKey.empty()) {
+                auto mainSession = session->GetMainSession();
+                if (mainSession) {
+                    appInstanceKey = mainSession->GetSessionInfo().appInstanceKey_;
+                }
+            }
+            ISessionLifecycleListener::LifecycleEventPayload payload;
+            controller->ConstructPayload(payload, sessionInfo, 0, 0, 0, reason);
+            payload.sessionState_ = state;
             TLOGI(WmsLogTag::WMS_LIFE,
                 "start notify listeners, bundleName:%{public}s, Id:%{public}d, state:%{public}d, reason: %{public}u",
                 bundleName.c_str(), persistentId, payload.sessionState_, payload.lifeCycleChangeReason_);

@@ -52,7 +52,7 @@ public:
         const SessionInfo& sessionInfo, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
 
     void NotifyAppInstanceLifecycleEvent(SessionState state,
-        const SessionInfo& sessionInfo, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
+        const sptr<SceneSession>& session, LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
 
     void NotifySessionTransferToTargetScreenEvent(const SessionInfo& sessionInfo,
         const uint32_t resultCode, const uint64_t fromScreenId, const uint64_t toScreenId,

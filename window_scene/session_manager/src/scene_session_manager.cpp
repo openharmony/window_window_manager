@@ -10290,12 +10290,7 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
     }
     if (state >= SessionState::STATE_DISCONNECT && state < SessionState::STATE_END) {
         if (listenerController_) {
-            auto sessionInfo = sceneSession->GetSessionInfo();
-            auto mainSession = sceneSession->GetMainSession();
-            if (mainSession) {
-                sessionInfo.appInstanceKey_ = mainSession->GetSessionInfo().appInstanceKey_;
-            }
-            listenerController_->NotifyAppInstanceLifecycleEvent(state, sessionInfo);
+            listenerController_->NotifyAppInstanceLifecycleEvent(state, sceneSession);
         }
     }
     switch (state) {
