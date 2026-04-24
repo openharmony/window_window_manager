@@ -990,6 +990,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         return ERR_INVALID_DATA;
     }
     abilitySessionInfo->windowCreateParams.reset(data.ReadParcelable<WindowCreateParams>());
+    if (!data.ReadInt32(abilitySessionInfo->splitRatioPreference)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read splitRatioPreference failed.");
+        return ERR_INVALID_DATA;
+    }
     if (!data.ReadBool(abilitySessionInfo->isPrelaunch)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isPrelaunch failed.");
         return ERR_INVALID_DATA;

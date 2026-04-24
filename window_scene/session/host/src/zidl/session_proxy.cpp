@@ -601,6 +601,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write windowCreateParams failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteInt32(abilitySessionInfo->splitRatioPreference)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write splitRatioPreference failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     if (!data.WriteBool(abilitySessionInfo->isPrelaunch)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write isPrelaunch failed");
         return WSError::WS_ERROR_IPC_FAILED;

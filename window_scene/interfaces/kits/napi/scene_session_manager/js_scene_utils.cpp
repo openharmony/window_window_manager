@@ -1887,6 +1887,8 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
     SetJsSessionInfoByWant(env, sessionInfo, objValue);
     napi_set_named_property(env, objValue, "supportWindowModes",
         CreateSupportWindowModes(env, sessionInfo.supportedWindowModes));
+    napi_set_named_property(env, objValue, "splitRatioPreference",
+        CreateJsValue(env, sessionInfo.splitRatioPreference));
 
     if (config != nullptr) {
         napi_set_named_property(env, objValue, "extendPendingActivationConfig",
