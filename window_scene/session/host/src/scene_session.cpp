@@ -717,7 +717,7 @@ void SceneSession::NotifyRemoveAppLockSnapshot()
         return;
     }
     SetAppLockControl(false);
-    if (IsSessionForeground()) {
+    if (IsLifeCycleForeground()) {
         NotifyRemoveSnapshot();
     }
 }
@@ -2584,7 +2584,7 @@ WSError SceneSession::UpdateClientRect(const WSRect& rect)
 
 void SceneSession::NotifySingleHandTransformChange(const SingleHandTransform& singleHandTransform)
 {
-    if (!IsSessionForeground() && !IsVisible()) {
+    if (!IsLifeCycleForeground() && !IsVisible()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground and not visible!", GetPersistentId());
         return;
     }
@@ -2595,7 +2595,7 @@ void SceneSession::NotifySingleHandTransformChange(const SingleHandTransform& si
 
 void SceneSession::NotifyGlobalScaledRectChange()
 {
-    if (!IsSessionForeground()) {
+    if (!IsLifeCycleForeground()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());
         return;
     }
@@ -2709,7 +2709,7 @@ WSError SceneSession::RestartApp(const std::shared_ptr<AAFwk::Want>& want)
                 where, session->GetPersistentId());
             return WSError::WS_ERROR_INVALID_SESSION;
         }
-        if (!session->IsSessionForeground() || !session->GetForegroundInteractiveStatus()) {
+        if (!session->IsLifeCycleForeground() || !session->GetForegroundInteractiveStatus()) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s: session is not foreground, id:%{public}d",
                 where, session->GetPersistentId());
             return WSError::WS_ERROR_INVALID_PERMISSION;
@@ -4394,7 +4394,7 @@ void SceneSession::NotifySessionDisplayIdChange(uint64_t displayId)
 void SceneSession::CheckSubSessionShouldFollowParent(uint64_t displayId)
 {
     for (const auto& session : subSession_) {
-        if (session && session->IsSessionForeground() && session->GetSessionProperty()->GetDisplayId() != displayId) {
+        if (session && session->IsLifeCycleForeground() && session->GetSessionProperty()->GetDisplayId() != displayId) {
             session->SetShouldFollowParentWhenShow(false);
         }
     }
@@ -6752,9 +6752,9 @@ bool SceneSession::DisallowActivationFromPendingBackground(bool isPcOrPadEnableA
         "isPendingToBackgroundState:%{public}u, isFromAncoAndToAnco:%{public}u",
         GetSessionState(), isFoundationCall, canStartAbilityFromBackground, foregroundInteractiveStatus,
         isPendingToBackgroundState, isFromAncoAndToAnco);
-    bool isSessionForeground = GetSessionState() == SessionState::STATE_FOREGROUND ||
+    bool isLifeCycleForeground = GetSessionState() == SessionState::STATE_FOREGROUND ||
         GetSessionState() == SessionState::STATE_ACTIVE;
-    if (isSessionForeground) {
+    if (isLifeCycleForeground) {
         if (isPendingToBackgroundState) {
             if (!(isFoundationCall && canStartAbilityFromBackground) && !isFromAncoAndToAnco) {
                 TLOGW(WmsLogTag::WMS_LIFE, "no permission to start ability from PendingBackground, id:%{public}d",
@@ -8370,7 +8370,7 @@ void SceneSession::UpdateExtWindowFlags(int32_t extPersistentId, const Extension
 ExtensionWindowFlags SceneSession::GetCombinedExtWindowFlags()
 {
     auto combinedExtWindowFlags = combinedExtWindowFlags_;
-    combinedExtWindowFlags.hideNonSecureWindowsFlag = IsSessionForeground() &&
+    combinedExtWindowFlags.hideNonSecureWindowsFlag = IsLifeCycleForeground() &&
         (combinedExtWindowFlags.hideNonSecureWindowsFlag || shouldHideNonSecureWindows_.load());
     return combinedExtWindowFlags;
 }
@@ -9572,7 +9572,7 @@ bool SceneSession::UpdateInteractiveInner(bool interactive)
     if (GetForegroundInteractiveStatus() == interactive) {
         return false;
     }
-    NotifyAddOrRemoveSnapshotWindow(interactive && IsSessionForeground());
+    NotifyAddOrRemoveSnapshotWindow(interactive && IsLifeCycleForeground());
     SetForegroundInteractiveStatus(interactive);
     NotifyClientToUpdateInteractive(interactive);
     return true;
@@ -9714,7 +9714,7 @@ bool SceneSession::UpdateScaleInner(
     }
     Session::SetRsScale(rsScaleX, rsScaleY);
     Session::SetScale(scaleX, scaleY, pivotX, pivotY);
-    if (!IsSessionForeground()) {
+    if (!IsLifeCycleForeground()) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id:%{public}d, session is not foreground!", GetPersistentId());
         return false;
     }

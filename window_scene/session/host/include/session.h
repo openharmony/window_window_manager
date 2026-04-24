@@ -700,7 +700,7 @@ public:
     bool IsSystemActive() const;
     bool IsSystemSession() const;
     bool IsTerminated() const;
-    bool IsSessionForeground() const;
+    bool IsLifeCycleForeground() const;
     bool IsSessionNotBackground() const;
     virtual bool IsAnco() const { return false; }
     virtual void SetBlank(bool isAddBlank) {}
