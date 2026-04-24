@@ -3149,13 +3149,18 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(
         .useCurWindow = useCurWindow,
         .backGroundColor = GetBackgroundColor(),
     };
+    auto rsUICtx = surfaceNode->GetRSUIContext();
+    if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "rsUIContext is null");
+        return nullptr;
+    }
     bool ret = false;
     if (needBlurSnapshot) {
         config.backGroundColor = blurBackgroundColor_ == std::numeric_limits<uint32_t>::max() ?
             GetBackgroundColor() : blurBackgroundColor_;
-        ret = RSInterfaces::GetInstance().TakeSurfaceCaptureWithBlur(surfaceNode, callback, config, blurRadius_);
+        ret = rsUICtx->GetRSRenderInterface()->TakeSurfaceCaptureWithBlur(surfaceNode, callback, config, blurRadius_);
     } else {
-        ret = RSInterfaces::GetInstance().TakeSurfaceCapture(surfaceNode, callback, config);
+        ret = rsUICtx->GetRSRenderInterface()->TakeSurfaceCapture(surfaceNode, callback, config);
     }
     if (!ret) {
         TLOGE(WmsLogTag::WMS_PATTERN, "TakeSurfaceCapture failed %{public}d", persistentId_);
@@ -5765,7 +5770,13 @@ std::shared_ptr<Media::PixelMap> Session::SetFreezeImmediately(float scale, bool
         .isHdrCapture = true,
         .needF16WindowCaptureForScRGB = isNeedF16WindowShot,
     };
-    bool ret = RSInterfaces::GetInstance().SetWindowFreezeImmediately(surfaceNode, isFreeze, callback, config, blur);
+    auto rsUICtx = surfaceNode->GetRSUIContext();
+    if (rsUICtx == nullptr || rsUICtx->GetRSRenderInterface() == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "rsUIContext is null");
+        return nullptr;
+    }
+    bool ret = rsUICtx->GetRSRenderInterface()->SetWindowFreezeImmediately(
+        surfaceNode, isFreeze, callback, config, blur);
     if (!ret) {
         TLOGE(WmsLogTag::WMS_PATTERN, "failed");
         return nullptr;
@@ -6060,7 +6071,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     RETURN_IF_RS_CLIENT_MULTI_INSTANCE_DISABLED(nullptr);
     auto screenId = GetScreenId();
     std::lock_guard<std::mutex> lock(rsUIContextMutex_);
-    if (screenIdOfRSUIContext_ != screenId) {
+    if (screenIdOfRSUIContext_ != screenId || screenIdOfRSUIContext_ == SCREEN_ID_INVALID) {
         // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
         // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
         // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,

@@ -72,7 +72,9 @@ constexpr const char* TRANSPARENT_BACKGROUND_COLOR_HEX = "#00000000";
         }                                                                      \
     } while (false)
 
-WindowExtensionSessionImpl::WindowExtensionSessionImpl(const sptr<WindowOption>& option) : WindowSessionImpl(option)
+WindowExtensionSessionImpl::WindowExtensionSessionImpl(
+    const sptr<WindowOption>& option, sptr<IRemoteObject> renderSession)
+    : WindowSessionImpl(option, nullptr, renderSession)
 {
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
         SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
@@ -1007,6 +1009,7 @@ void WindowExtensionSessionImpl::UpdateRectForRotation(const Rect& wmRect, const
         if (needSync) {
             window->UpdateRotateDuration(wmReason, duration, rsTransaction);
             RSTransactionAdapter::FlushImplicitTransaction(rsUIContext);
+            RSAdapterUtil::SetRSTransactionHandler(rsTransaction, rsUIContext);
             rsTransaction->Begin();
         }
         window->rotationAnimationCount_++;
