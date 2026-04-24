@@ -2077,7 +2077,9 @@ void SceneSession::SetSessionRectChangeCallback(const NotifySessionRectChangeFun
         session->sessionRectChangeFunc_ = func;
         if (session->sessionRectChangeFunc_ && session->GetWindowType() != WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
             auto reason = SizeChangeReason::UNDEFINED;
-            auto rect = session->GetSessionRequestRect();
+            auto sessionRect = session->GetSessionRect();
+            auto sessionRequestRect = session->GetSessionRequestRect();
+            auto rect = sessionRect.IsEmpty() ? sessionRequestRect : sessionRect;
             if (rect.width_ == 0 && rect.height_ == 0) {
                 reason = SizeChangeReason::MOVE;
             }
