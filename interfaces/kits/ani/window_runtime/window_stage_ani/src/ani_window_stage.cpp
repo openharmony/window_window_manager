@@ -837,12 +837,16 @@ void AniWindowStage::OnSetSupportedWindowModes(ani_env* env, ani_object aniSuppo
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowScene is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSupportedWindowModes",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] mainWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSupportedWindowModes",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -852,6 +856,8 @@ void AniWindowStage::OnSetSupportedWindowModes(ani_env* env, ani_object aniSuppo
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
               window->GetWindowId(), static_cast<int32_t>(ret));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSupportedWindowModes",
+            AniWindowUtils::ToErrorCode(ret));
         AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
         return;
     }
@@ -878,12 +884,16 @@ void AniWindowStage::OnSetSupportedWindowModesWithGrayOutMaximizeButton(
     auto windowScene = windowScene_.lock();
     if (windowScene == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] windowScene is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSupportedWindowModes",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     auto window = windowScene->GetMainWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] mainWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSupportedWindowModes",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -893,6 +903,8 @@ void AniWindowStage::OnSetSupportedWindowModesWithGrayOutMaximizeButton(
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
               window->GetWindowId(), static_cast<int32_t>(ret));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSupportedWindowModes",
+            AniWindowUtils::ToErrorCode(ret));
         AniWindowUtils::AniThrowError(env, AniWindowUtils::ToErrorCode(ret));
         return;
     }

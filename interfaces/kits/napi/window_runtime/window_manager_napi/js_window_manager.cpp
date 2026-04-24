@@ -1276,6 +1276,8 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     size_t argc = 4;
@@ -1283,16 +1285,22 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) { // 1: minimum params num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     uint32_t winLayoutModeValue = 0;
     if (!ConvertFromJsValue(env, argv[0], winLayoutModeValue)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to winLayoutModeValue");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     WindowLayoutMode winLayoutMode = static_cast<WindowLayoutMode>(winLayoutModeValue);
     if (winLayoutMode != WindowLayoutMode::CASCADE && winLayoutMode != WindowLayoutMode::TILE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid winLayoutMode: %{public}u", winLayoutMode);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "winLayoutMode: %{public}u", winLayoutMode);
@@ -1308,10 +1316,13 @@ napi_value JsWindowManager::OnSetWindowLayoutMode(napi_env env, napi_callback_in
             task->Resolve(env, NapiGetUndefined(env));
             TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: success", where);
         } else {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode", ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "SetWindowLayoutMode failed"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowLayoutMode") != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY, "failed to send event"));
     }

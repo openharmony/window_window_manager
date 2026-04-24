@@ -821,6 +821,8 @@ void AniWindowManager::OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode)
 {
     if (!Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] permission denied!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
@@ -829,6 +831,8 @@ void AniWindowManager::OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode)
     ani_status ani_ret = AniWindowUtils::GetEnumValue(env, mode, modeType);
     if (ani_ret != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] GetEnumValue failed, ret: %{public}d", ani_ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
@@ -836,6 +840,8 @@ void AniWindowManager::OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode)
     WindowLayoutMode winLayoutMode = static_cast<WindowLayoutMode>(modeType);
     if (winLayoutMode != WindowLayoutMode::CASCADE && winLayoutMode != WindowLayoutMode::TILE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Invalid winLayoutMode: %{public}u", winLayoutMode);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
@@ -845,6 +851,7 @@ void AniWindowManager::OnSetWindowLayoutMode(ani_env* env, ani_enum_item mode)
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed, modeType: %{public}u, ret: %{public}d",
             modeType, static_cast<int32_t>(ret));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutMode", errorCode);
         AniWindowUtils::AniThrowError(env, errorCode);
         return;
     }

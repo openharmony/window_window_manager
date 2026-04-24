@@ -850,6 +850,9 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<Ani
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowStatusChange" : "ArkUI.window.offWindowStatusChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowStatusChangeListener> thisListener(listener);
@@ -859,6 +862,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowStatusChangeRegister(sptr<Ani
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowStatusChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onWindowStatusChange" : "ArkUI.window.offWindowStatusChange", ret);
     return ret;
 }
 
@@ -884,6 +889,9 @@ WmErrorCode AniWindowRegisterManager::ProcessParentWindowStatusChangeRegister(sp
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onParentWindowStatusChange" : "ArkUI.window.offParentWindowStatusChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IParentWindowStatusChangeListener> thisListener(listener);
@@ -893,6 +901,8 @@ WmErrorCode AniWindowRegisterManager::ProcessParentWindowStatusChangeRegister(sp
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterParentWindowStatusChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onParentWindowStatusChange" : "ArkUI.window.offParentWindowStatusChange", ret);
     return ret;
 }
 
@@ -900,6 +910,9 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<AniWi
     sptr<Window> window, bool isRegister, ani_env* env)
 {
     if (window == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowRectChange" : "ArkUI.window.offWindowRectChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowRectChangeListener> thisListener(listener);
@@ -909,6 +922,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowRectChangeRegister(sptr<AniWi
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterWindowRectChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onWindowRectChange" : "ArkUI.window.offWindowRectChange", ret);
     return ret;
 }
 
@@ -986,6 +1001,9 @@ WmErrorCode AniWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(c
     const sptr<Window>& window, bool isRegister, ani_env* env)
 {
     if (window == nullptr || listener == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onRectChangeInGlobalDisplay" : "ArkUI.window.offRectChangeInGlobalDisplay",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IRectChangeInGlobalDisplayListener> thisListener(listener);
@@ -995,7 +1013,10 @@ WmErrorCode AniWindowRegisterManager::ProcessRectChangeInGlobalDisplayRegister(c
     } else {
         ret = window->UnregisterRectChangeInGlobalDisplayListener(thisListener);
     }
-    return AniWindowUtils::ToErrorCode(ret);
+    WmErrorCode wmRet = AniWindowUtils::ToErrorCode(ret);
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onRectChangeInGlobalDisplay" : "ArkUI.window.offRectChangeInGlobalDisplay", wmRet);
+    return wmRet;
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(const sptr<AniWindowListener>& listener,
