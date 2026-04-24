@@ -3128,6 +3128,11 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
+std::shared_ptr<Media::PixelMap> Session::Snapshot() const
+{
+    return Snapshot(SnapshotOptions());
+}
+
 std::shared_ptr<Media::PixelMap> Session::Snapshot(const SnapshotOptions& options) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%d][%s]", persistentId_, sessionInfo_.bundleName_.c_str());
