@@ -521,6 +521,8 @@ public:
     bool GetRestartInSameProcess() const;
     void SetRestartCallerPersistentId(int32_t restartCallerPersistentId);
     int32_t GetRestartCallerPersistentId() const;
+    void SetNativeHideWindow(bool nativeHideWindow);
+    bool GetNativeHideWindow() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);

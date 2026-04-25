@@ -506,6 +506,8 @@ struct SessionInfo {
     int32_t hostAppIndex = 0;
     std::string hostAppInstanceKey = "";
     std::string hostAbilityName = "";
+    // Indicates whether the window should be hidden when the native process launches
+    bool nativeHideWindow_ = false;
 
     /*
      * Keyboard

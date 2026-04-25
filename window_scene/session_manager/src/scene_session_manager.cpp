@@ -181,6 +181,12 @@ constexpr int32_t FLUSH_WINDOW_INFO_DELAY_INTERVAL = 2000;
 constexpr int32_t FLUSH_WINDOW_INFO_START_DELAY_INTERVAL = 1000;
 const std::string FLUSH_WINDOW_INFO_TASK_NAME = "DelayedFlushWindowInfoToMMITask";
 
+const std::string WITH_NATIVE_MODULE_KEY = "ohos.ability.withNativeModule";
+const std::string STARTUP_PHASE_KEY = "ohos.ability.startupPhase";
+const std::string STARTUP_PHASE_PRE_WINDOW = "pre_window";
+const std::string STARTUP_PHASE_PRE_FOREGROUND = "pre_foreground";
+const std::string TRUE_VALUE = "true";
+
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
     {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
@@ -3604,6 +3610,7 @@ sptr<AAFwk::SessionInfo> SceneSessionManager::SetAbilitySessionInfo(const sptr<S
     abilitySessionInfo->requestId = sessionInfo.requestId;
     abilitySessionInfo->reuseDelegatorWindow = sessionInfo.reuseDelegatorWindow;
     abilitySessionInfo->specifiedFlag = sessionInfo.specifiedFlag_;
+    abilitySessionInfo->nativeHideWindow = sessionInfo.nativeHideWindow_;
     std::shared_ptr<AAFwk::Want> requestWant = nullptr;
     if (useRequestTaskInfo &&
         (requestWant = GetRequestWantFromTaskInfoMap(sceneSession->GetPersistentId(), requestId)) != nullptr) {
@@ -11538,6 +11545,7 @@ WSError SceneSessionManager::GetAbilityInfo(const std::string& bundleName, const
                 scbAbilityInfo.isAbilityHook_ = isModuleAbilityHook;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfo.isForceRotate_ = bundleInfo.applicationInfo.isForceRotate;
+                scbAbilityInfo.isNativeModuleHiddenStart_ = GetNativeModuleStartMode(scbAbilityInfo.abilityInfo_);
                 return WSError::WS_OK;
             }
         }
@@ -11583,6 +11591,7 @@ WSError SceneSessionManager::GetAbilityInfosFromBundleInfo(const std::vector<App
                 scbAbilityInfo.sdkVersion_ = sdkVersion;
                 scbAbilityInfo.isAbilityHook_ = isModuleAbilityHook;
                 GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
+                scbAbilityInfo.isNativeModuleHiddenStart_ = GetNativeModuleStartMode(scbAbilityInfo.abilityInfo_);
                 scbAbilityInfos.push_back(scbAbilityInfo);
             }
         }
@@ -11635,6 +11644,7 @@ void SceneSessionManager::GetCollaboratorAbilityInfos(const std::vector<AppExecF
         scbAbilityInfo.codePath_ = bundleInfo.applicationInfo.codePath;
         GetOrientationFromResourceManager(scbAbilityInfo.abilityInfo_);
         scbAbilityInfo.isForceRotate_ = bundleInfo.applicationInfo.isForceRotate;
+        scbAbilityInfo.isNativeModuleHiddenStart_ = GetNativeModuleStartMode(scbAbilityInfo.abilityInfo_);
         scbAbilityInfos.push_back(scbAbilityInfo);
     }
 }
@@ -11688,6 +11698,20 @@ void SceneSessionManager::GetOrientationFromResourceManager(AppExecFwk::AbilityI
         return;
     }
     abilityInfo.orientation = STRING_TO_DISPLAY_ORIENTATION_MAP.at(orientation);
+}
+
+bool SceneSessionManager::GetNativeModuleStartMode(AppExecFwk::AbilityInfo& abilityInfo)
+{
+    bool withNativeModule = false;
+    bool hideWindow = false;
+    for (const auto& item : abilityInfo.metadata) {
+        if (item.name == WITH_NATIVE_MODULE_KEY) {
+            withNativeModule = (item.value == TRUE_VALUE);
+        } else if (item.name == STARTUP_PHASE_KEY) {
+            hideWindow = (item.value == STARTUP_PHASE_PRE_WINDOW || item.value == STARTUP_PHASE_PRE_FOREGROUND);
+        }
+    }
+    return withNativeModule && hideWindow;
 }
 
 WSError SceneSessionManager::TerminateSessionNew(
