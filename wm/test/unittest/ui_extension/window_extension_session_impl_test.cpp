@@ -3916,6 +3916,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfigWithWindowStatus
     window_->property_->SetIsAtomicService(true);
     AAFwk::Want want;
     AAFwk::WantParams configParam;
+    AAFwk::WantParams wantParam;
     configParam.SetParam(Extension::CROSS_AXIS_FIELD, AAFwk::Integer::Box(0));
     configParam.SetParam(Extension::WATERFALL_MODE_FIELD, AAFwk::Integer::Box(0));
     configParam.SetParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, AAFwk::Integer::Box(0));
@@ -3925,7 +3926,8 @@ HWTEST_F(WindowExtensionSessionImplTest, OnResyncExtensionConfigWithWindowStatus
     configParam.SetParam(Extension::COMPAT_IS_PROPORTION_SCALE_FIELD, AAFwk::Integer::Box(0));
     configParam.SetParam(Extension::COMPAT_SCALE_X_FIELD, AAFwk::Float::Box(1.0f));
     configParam.SetParam(Extension::COMPAT_SCALE_Y_FIELD, AAFwk::Float::Box(1.0f));
-    want.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, configParam);
+    wantParam.SetParam(Extension::UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    want.SetParams(wantParam);
 
     std::optional<AAFwk::Want> reply;
     EXPECT_EQ(WMError::WM_OK, window_->OnResyncExtensionConfig(std::move(want), reply));
