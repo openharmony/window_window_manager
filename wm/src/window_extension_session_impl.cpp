@@ -2121,7 +2121,7 @@ void WindowExtensionSessionImpl::UpdateExtensionConfig(const std::shared_ptr<AAF
     SetRootHostWindowType(rootHostWindowType);
     SetCompatInfo(configParam);
     auto hostWindowStatus = static_cast<WindowStatus>(configParam.GetIntParam(Extension::HOST_WINDOW_STATUS_FIELD,
-            static_cast<int32_t>(WindowStatus::WINDOW_STATUS_UNDEFINED)));
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_UNDEFINED)));
     hostWindowStatus_ = hostWindowStatus;
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "CrossAxisState: %{public}d, waterfall: %{public}d, "
         "rootHostWindowType: %{public}u, isHostWindowDelayRaiseEnabled: %{public}d, "
