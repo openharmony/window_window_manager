@@ -1649,8 +1649,7 @@ void AniWindow::SetWindowTopmost(ani_env* env, ani_boolean isWindowTopmost)
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_HIERARCHY, "[ANI] Window set main window topmost failed");
         HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTopmost", ret);
-        AniWindowUtils::AniThrowError(env, ret,
-            "[window][setWindowTopmost]");
+        AniWindowUtils::AniThrowError(env, ret, "[window][setWindowTopmost]");
         return;
     }
     TLOGI(WmsLogTag::WMS_HIERARCHY,
