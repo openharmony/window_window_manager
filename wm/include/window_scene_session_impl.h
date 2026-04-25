@@ -603,6 +603,11 @@ private:
     bool CheckWaterfallResidentState(WaterfallResidentState state) const;
     bool CheckAcrossDisplayPresentation(AcrossDisplayPresentation state) const;
     void ApplyMaximizePresentation(MaximizePresentation presentation);
+    WMError CheckMaximizePreConditions(AcrossDisplayPresentation state);
+    WMError ExecuteMaximizeWithOptions(MaximizePresentation presentation,
+        AcrossDisplayPresentation state, const SnapshotAnimationConfig& snapshotAnimationConfig);
+    WMError CheckRecoverPreConditions();
+    WMError ExecuteRecover(uint32_t reason, const SnapshotAnimationConfig& snapshotAnimationConfig);
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
     bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);
     std::atomic<bool> isResizedByLimit_ = false;
