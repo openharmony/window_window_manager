@@ -309,8 +309,22 @@ public:
     WSRect GetSessionGlobalRectWithSingleHandScale();
     WSRect GetMoveRectForWindowDrag();
     void UpdateSessionState(SessionState state) override;
-    virtual WSError NotifyClientToUpdateRect(const std::string& updateReason,
-        std::shared_ptr<RSTransaction> rsTransaction) override;
+
+    /**
+     * @brief Asynchronously notify client to update window rectangle.
+     *
+     * Posts a task to execute the update in NotifyClientToUpdateRectTask().
+     *
+     * @param updateReason Reason for the update.
+     * @param updateRect Optional target rectangle.
+     * @param rsTransaction RS transaction for synchronized rendering.
+     *
+     * @return Always returns WSError::WS_OK.
+     */
+    WSError NotifyClientToUpdateRect(const std::string& updateReason,
+                                     std::optional<WSRect> updateRect,
+                                     std::shared_ptr<RSTransaction> rsTransaction) override;
+
     void SetWinRectWhenUpdateRect(const WSRect& rect);
     void RegisterNotifySurfaceBoundsChangeFunc(int32_t sessionId, NotifySurfaceBoundsChangeFunc&& func) override;
     void UnregisterNotifySurfaceBoundsChangeFunc(int32_t sessionId) override;
@@ -480,6 +494,7 @@ public:
     virtual WSError SetSubWindowZLevel(int32_t zLevel) { return WSError::WS_ERROR_INVALID_CALLING; }
     virtual int32_t GetSubWindowZLevel() const { return 0; }
     void SetMainWindowTopmostChangeCallback(NotifyMainWindowTopmostChangeFunc&& func);
+    WSError RaiseAppMainWindowToTop() override;
 
     /*
      * Compatible Mode
@@ -573,7 +588,7 @@ public:
     WSError SetSystemBarProperty(WindowType type, SystemBarProperty systemBarProperty);
     void SetIsStatusBarVisible(bool isVisible);
     WSError SetIsStatusBarVisibleInner(bool isVisible);
-    WMError SetFloatNavigationAvoidAreaEnabled(bool isEnabled) override;
+    WMError SetFloatNavigationEnabled(bool isEnabled) override;
     WSError HandleLayoutAvoidAreaUpdate(AvoidAreaType avoidArea = AvoidAreaType::TYPE_END);
     WSError UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type) override;
     void UpdateRotationAvoidArea();
@@ -627,6 +642,8 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
+    void SetIsShowOnDock(bool isShowOnDock);
+    bool GetIsShowOnDock() const;
 
     /*
      * Window Watermark
@@ -1127,7 +1144,20 @@ public:
 protected:
     void NotifyIsCustomAnimationPlaying(bool isPlaying);
     std::string GetRatioPreferenceKey();
-    WSError NotifyClientToUpdateRectTask(const std::string& updateReason, std::shared_ptr<RSTransaction> rsTransaction);
+
+    /**
+     * @brief Perform notifying client to update window rectangle.
+     *
+     * @param updateReason Reason for the update.
+     * @param updateRect Optional target rectangle; nullopt means use current rect.
+     * @param rsTransaction RS transaction for synchronized rendering.
+     *
+     * @return WSError::WS_OK on success, or an appropriate error code on failure.
+     */
+    WSError NotifyClientToUpdateRectTask(const std::string& updateReason,
+                                         std::optional<WSRect> updateRect,
+                                         std::shared_ptr<RSTransaction> rsTransaction);
+
     bool CheckPermissionWithPropertyAnimation(const sptr<WindowSessionProperty>& property) const;
 
     std::string GetRectInfo(const WSRect& rect)
@@ -1166,7 +1196,6 @@ protected:
     void CalculateAvoidAreaByType(AvoidAreaType type,
         const WSRect& winRect, const WSRect& avoidRect, AvoidArea& avoidArea);
     void PatchFloatNavigationArea(WSRect& floatNavigationArea);
-    bool GetFloatNavigationAvoidAreaEnabled() const { return isFloatNavigationAvoidAreaEnabled_; }
 
     /*
      * Gesture Back
@@ -1428,7 +1457,6 @@ private:
     void RotateDragWindow(std::shared_ptr<RSTransaction> rsTransaction);
 #endif // DEVICE_STATUS_ENABLE
     void NotifyPropertyWhenConnect();
-    WSError RaiseAppMainWindowToTop() override;
     void UpdateWinRectForSystemBar(WSRect& rect);
     bool IsMovableWindowType() const;
     bool IsFullScreenMovable() const;
@@ -1630,6 +1658,11 @@ private:
     bool isMinimizedByUserSwitch_ { false };
 
     /*
+     * Dock
+     */
+    bool isShowOnDock_ = false;
+
+    /*
      * Window ZOrder: PC
      */
     bool isPcScenePanel_ { false };
@@ -1724,7 +1757,6 @@ private:
     IsLastFrameLayoutFinishedFunc isLastFrameLayoutFinishedFunc_;
     IsAINavigationBarAvoidAreaValidFunc isAINavigationBarAvoidAreaValid_;
     std::unordered_map<AvoidAreaType, std::tuple<DisplayId, WSRect, WSRect>> lastAvoidAreaInputParamtersMap_;
-    bool isFloatNavigationAvoidAreaEnabled_ { false };
 
     /**
      * Window Layout

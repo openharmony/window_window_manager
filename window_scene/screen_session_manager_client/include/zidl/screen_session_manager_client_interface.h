@@ -21,6 +21,7 @@
 
 #include "display_info.h"
 #include "session/screen/include/screen_property.h"
+#include "session_option.h"
 #include "rs_event_data_manager.h"
 
 namespace OHOS::Rosen {
@@ -103,7 +104,7 @@ public:
         ExtendScreenConnectStatus extendScreenConnectStatus) = 0;
     virtual bool OnExtendDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId) = 0;
     virtual bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
-        const std::string& name, bool isExtend) = 0;
+        const std::string& name, sptr<IRemoteObject> renderSession, bool isExtend) = 0;
     virtual bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId, ScreenId extendRSId) = 0;
     virtual void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) = 0;

@@ -284,6 +284,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::GetWindowLimits);
     BindNativeFunction(env, exportObj, "setIsDockAutoHide", moduleName,
         JsSceneSessionManager::SetIsDockAutoHide);
+    BindNativeFunction(env, exportObj, "setShowOnDockSessionIds", moduleName,
+        JsSceneSessionManager::SetShowOnDockSessionIds);
     BindNativeFunction(env, exportObj, "notifyEnterRecentTask", moduleName,
         JsSceneSessionManager::NotifyEnterRecentTask);
     BindNativeFunction(env, exportObj, "notifySCBRecentStateChange", moduleName,
@@ -1453,6 +1455,13 @@ napi_value JsSceneSessionManager::SetIsDockAutoHide(napi_env env, napi_callback_
     return (me != nullptr) ? me->OnSetIsDockAutoHide(env, info) : nullptr;
 }
 
+napi_value JsSceneSessionManager::SetShowOnDockSessionIds(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_MAIN, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetShowOnDockSessionIds(env, info) : nullptr;
+}
+
 napi_value JsSceneSessionManager::SetTrayAppListInfo(napi_env env, napi_callback_info info)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
@@ -1969,6 +1978,8 @@ static napi_value CreateAbilityItemInfo(napi_env env, const SCBAbilityInfo& scbA
     // forceRotate for anco
     napi_set_named_property(env, objValue, "isForceRotate", CreateJsValue(env, scbAbilityInfo.isForceRotate_));
     napi_set_named_property(env, objValue, "applicationInfo", CreateApplicationInfo(env, abilityInfo));
+    napi_set_named_property(env, objValue, "isNativeModuleHiddenStart",
+        CreateJsValue(env, scbAbilityInfo.isNativeModuleHiddenStart_));
     return objValue;
 }
 
@@ -4251,8 +4262,8 @@ napi_value JsSceneSessionManager::OnSupportCreateFloatWindow(napi_env env, napi_
 
 napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, napi_callback_info info)
 {
-    size_t argc = 4;
-    napi_value argv[4] = {nullptr};
+    size_t argc = 5;
+    napi_value argv[5] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
@@ -4294,16 +4305,24 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    bool disableBlur = false;
+    if (argc > ARGC_FOUR && !ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], disableBlur)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to disableBlur");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
 
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     std::shared_ptr<std::shared_ptr<Media::PixelMap>> pixelPtr = std::make_shared<std::shared_ptr<Media::PixelMap>>();
-    NapiAsyncTask::ExecuteCallback execute = [persistentId, scaleParam, pixelPtr, snapshotNode, useNewSnapshot]() {
+    NapiAsyncTask::ExecuteCallback execute =
+        [persistentId, scaleParam, pixelPtr, snapshotNode, useNewSnapshot, disableBlur]() {
         if (pixelPtr == nullptr) {
             return;
         }
         *pixelPtr = SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(
-            persistentId, scaleParam, snapshotNode, useNewSnapshot);
+            persistentId, scaleParam, snapshotNode, useNewSnapshot, disableBlur);
     };
     NapiAsyncTask::CompleteCallback complete =
         [persistentId, scaleParam, pixelPtr, where = __func__](napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -4335,8 +4354,8 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMap(napi_env env, nap
 
 napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = {nullptr};
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARGC_TWO) {
         TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
@@ -4378,11 +4397,18 @@ napi_value JsSceneSessionManager::OnGetSessionSnapshotPixelMapSync(napi_env env,
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    bool disableBlur = false;
+    if (argc > ARGC_FOUR && !ConvertFromJsValue(env, argv[ARG_INDEX_FOUR], disableBlur)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to disableBlur");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     float scaleParam = GreatOrEqual(scaleValue, 0.0f) && LessOrEqual(scaleValue, 1.0f) ?
         static_cast<float>(scaleValue) : 0.0f;
     std::shared_ptr<Media::PixelMap> pixelPtr =
         SceneSessionManager::GetInstance().GetSessionSnapshotPixelMap(
-            persistentId, scaleParam, snapshotNode, useNewSnapshot);
+            persistentId, scaleParam, snapshotNode, useNewSnapshot, disableBlur);
     if (pixelPtr == nullptr) {
         TLOGE(WmsLogTag::WMS_MAIN, "Failed to create pixlePtr");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_STATE_ABNORMALLY),
@@ -4590,6 +4616,47 @@ napi_value JsSceneSessionManager::OnSetIsDockAutoHide(napi_env env, napi_callbac
         return NapiGetUndefined(env);
     }
     SceneSessionManager::GetInstance().ConfigDockAutoHide(isDockAutoHide);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::OnSetShowOnDockSessionIds(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    
+    bool isArray = false;
+    napi_is_array(env, argv[0], &isArray);
+    if (!isArray) {
+        TLOGE(WmsLogTag::WMS_MAIN, "argv[0] is not array");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+    
+    uint32_t arrayLength = 0;
+    napi_get_array_length(env, argv[0], &arrayLength);
+    std::vector<int32_t> persistentIds;
+    for (uint32_t i = 0; i < arrayLength; i++) {
+        napi_value element = nullptr;
+        napi_get_element(env, argv[0], i, &element);
+        if (element == nullptr) {
+            continue;
+        }
+        int32_t id = 0;
+        if (ConvertFromJsValue(env, element, id)) {
+            persistentIds.push_back(id);
+        }
+    }
+    
+    TLOGI(WmsLogTag::WMS_MAIN, "SetShowOnDockSessionIds, ids count: %{public}zu", persistentIds.size());
+    SceneSessionManager::GetInstance().UpdateShowOnDockByPersistentIds(persistentIds);
     return NapiGetUndefined(env);
 }
 

@@ -31,8 +31,9 @@ using OwnSystemBarPropertyPair = std::pair<SystemBarPropertyOwner, PartialSystem
 
 class WindowSceneSessionImpl : public WindowSessionImpl {
 public:
+    using WindowSessionImpl::GetVirtualPixelRatio;
     explicit WindowSceneSessionImpl(const sptr<WindowOption>& option,
-        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr, sptr<IRemoteObject> renderSession = nullptr);
     ~WindowSceneSessionImpl();
     WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISession>& iSession, const std::string& identityToken = "",
@@ -51,7 +52,6 @@ public:
     void SetDefaultProperty();
     WMError Minimize() override;
     void StartMove() override;
-    bool IsStartMoving() override;
     WindowMode GetWindowMode() const override;
     WMError SetHookTargetElementInfo(const AppExecFwk::ElementName& elementName) override;
     class WindowScreenListener : public ScreenManager::IScreenListener {
@@ -359,8 +359,6 @@ public:
         SystemBarPropertyOwner owner) override;
     WMError RemoveOwnSystemBarProperty(WindowType type, const SystemBarPropertyFlag& flag,
         SystemBarPropertyOwner owner) override;
-    WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
-    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
 
     /*
      * Window Pattern
@@ -401,6 +399,7 @@ public:
 
 protected:
     WMError CreateAndConnectSpecificSession();
+    void PostInitSurfaceNode(sptr<IRemoteObject> renderSession);
     WMError CreateSystemWindow(WindowType type);
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);
@@ -523,6 +522,9 @@ private:
     void UpdateWindowState();
     void UpdateNewSize();
     void FillWindowLimits(WindowLimits& windowLimits, PixelUnit pixelUnit);
+    bool HasIntersectedAttachLimits() const;
+    WindowLimits GetCustomizedLimitsForSetWindowLimits(const WindowLimits& windowLimits);
+    WindowLimits ConvertBaseLimitsToTargetUnit(const WindowLimits& srcLimits, PixelUnit targetPixelUnit);
     void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     void PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
     void maximizeWhenSwitchMultiWindowIfOnlySupportFullScreen();
@@ -612,7 +614,6 @@ private:
     std::atomic<bool> cacheEnableImmersiveMode_ = false;
     std::atomic<bool> maximizeLayoutFullScreen_ = false;
     std::atomic<bool> titleHoverShowEnabled_ = true;
-    std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
     bool dockHoverShowEnabled_ = true;
     void PreLayoutOnShow(WindowType type, const sptr<DisplayInfo>& info = nullptr);
     void MobileAppInPadLayoutFullScreenChange(bool statusBarEnable, bool navigationEnable);

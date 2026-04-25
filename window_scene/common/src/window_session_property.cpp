@@ -1862,6 +1862,7 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     isFollowScreenChange_ = property->isFollowScreenChange_;
     shadowsInfo_ = property->shadowsInfo_;
     windowAnchorInfo_ = property->windowAnchorInfo_;
+    limitsForAttachedWindows_ = property->GetLimitsForAttachedWindows();
     subWindowOutlineEnabled_ = property->subWindowOutlineEnabled_;
     zLevelAboveParentLoosened_ = property->zLevelAboveParentLoosened_;
     isPcAppInpadSpecificSystemBarInvisible_ = property->isPcAppInpadSpecificSystemBarInvisible_;
@@ -2706,13 +2707,11 @@ void WindowSessionProperty::SetMobileAppInPadLayoutFullScreen(bool isMobileAppIn
 
 void WindowSessionProperty::SetForceSplitEnable(bool isForceSplitEnabled)
 {
-    std::lock_guard<std::mutex> lock(isForceSplitEnabledMutex_);
     isForceSplitEnabled_ = isForceSplitEnabled;
 }
 
 bool WindowSessionProperty::GetForceSplitEnable() const
 {
-    std::lock_guard<std::mutex> lock(isForceSplitEnabledMutex_);
     return isForceSplitEnabled_;
 }
 
