@@ -1082,7 +1082,7 @@ HWTEST_F(SessionStubTest, HandlePendingSessionActivation, TestSize.Level1)
     auto result2 = sProxy2->PendingSessionActivation(abilitySessionInfo2);
     EXPECT_EQ(result2, WSError::WS_OK);
     
-    abilitySessionInfo2->splitRatioPreference = -1;
+    abilitySessionInfo2->splitRatioPreference = 3;
     auto resultWithoutSplitRatio = session_->HandlePendingSessionActivation(data2, reply2);
     ASSERT_EQ(resultWithoutSplitRatio, ERR_INVALID_DATA);
 }

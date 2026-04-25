@@ -706,13 +706,14 @@ bool ConvertSplitRatioPreferenceFromAniValue(
     CHECK_NULL_VALUE_RETURN_FALSE(aniObject, "[ANI] splitRatioPreference object is null.");
     
     ani_int enumValue = 0;
+    ani_int defaultEnumValue = 0;
     auto ret = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(aniObject), &enumValue);
     CHECK_RET_RETURN_FALSE(ret, "[ANI] EnumItem_GetValue_Int failed.");
     if (enumValue < static_cast<ani_int>(SplitRatioPreference::EQUAL) ||
         enumValue > static_cast<ani_int>(SplitRatioPreference::SECONDARY_DOMINANT)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "[ANI] splitRatioPreference value is invalid. %{public}d",
             static_cast<int32_t>(enumValue));
-        splitRatioPreference = static_cast<SplitRatioPreference>(enumValue);
+        splitRatioPreference = static_cast<SplitRatioPreference>(defaultEnumValue);
         return false;
     }
     splitRatioPreference = static_cast<SplitRatioPreference>(enumValue);

@@ -425,16 +425,17 @@ bool ConvertSplitRatioPreferenceFromJsValue(
     napi_env env, napi_value jsObject, SplitRatioPreference& splitRatioPreference)
 {
     int32_t splitRatioPreferenceValue = 0;
+    int32_t defaultSplitRatioPreferenceValue = 0;
     if (napi_get_value_int32(env, jsObject, &splitRatioPreferenceValue) != napi_ok) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "Failed to get splitRatioPreference value");
-        splitRatioPreference = static_cast<SplitRatioPreference>(splitRatioPreferenceValue);
+        splitRatioPreference = static_cast<SplitRatioPreference>(defaultSplitRatioPreferenceValue);
         return false;
     }
     if (splitRatioPreferenceValue < static_cast<int32_t>(SplitRatioPreference::EQUAL) ||
         splitRatioPreferenceValue > static_cast<int32_t>(SplitRatioPreference::SECONDARY_DOMINANT)) {
         TLOGE(WmsLogTag::WMS_ANIMATION, "splitRatioPreference value is invalid: %{public}d",
             splitRatioPreferenceValue);
-        splitRatioPreference = static_cast<SplitRatioPreference>(splitRatioPreferenceValue);
+        splitRatioPreference = static_cast<SplitRatioPreference>(defaultSplitRatioPreferenceValue);
         return false;
     }
     splitRatioPreference = static_cast<SplitRatioPreference>(splitRatioPreferenceValue);
