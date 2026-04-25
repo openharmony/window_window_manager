@@ -266,7 +266,6 @@ void ConstructBatchLifecyclePayload(
         payload.appInstanceKey_ = info.appInstanceKey_;
         payload.screenId_ = info.screenId_;
         payload.sessionState_ = session->GetSessionState();
-
         payloads.emplace_back(std::move(payload));
     }
     TLOGI(WmsLogTag::WMS_LIFE, "%{public}s: end, payloadCount:%{public}zu", __func__, payloads.size());
@@ -2144,8 +2143,11 @@ void SceneSessionManager::GetSceneSessionsByAppInstance(const std::string& bundl
             sceneSession->GetSessionInfo().appIndex_ != appIndex) {
             continue;
         }
-        if (!appInstanceKey.empty() && sceneSession->GetSessionInfo().appInstanceKey_ != appInstanceKey) {
-            continue;
+        if (!appInstanceKey.empty()) {
+            auto mainSession = sceneSession->GetMainSession();
+            if (!mainSession || mainSession->GetSessionInfo().appInstanceKey_ != appInstanceKey) {
+                continue;
+            }
         }
         sceneSessions.push_back(sceneSession);
     }
@@ -10384,7 +10386,9 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
         return;
     }
     if (state >= SessionState::STATE_DISCONNECT && state < SessionState::STATE_END) {
-        listenerController_->NotifyAppInstanceLifecycleEvent(state, sceneSession->GetSessionInfo());
+        if (listenerController_) {
+            listenerController_->NotifyAppInstanceLifecycleEvent(state, sceneSession);
+        }
     }
     switch (state) {
         case SessionState::STATE_FOREGROUND:
