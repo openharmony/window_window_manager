@@ -449,11 +449,11 @@ void JsExtensionWindowListener::AfterDestroyed()
 
 void JsExtensionWindowListener::OnWindowStatusChange(WindowStatus status)
 {
-    TLOGI(WmsLogTag::WMS_LAYOUT, "status: %{public}u", status);
+    TLOGI(WmsLogTag::WMS_UIEXT, "status: %{public}u", status);
     auto jsCallback = [self = weakRef_, status, env = env_, funcName = __func__] {
         auto thisListener = self.promote();
         if (thisListener == nullptr || env == nullptr) {
-            TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: this listener or env is nullptr", funcName);
+            TLOGE(WmsLogTag::WMS_UIEXT, "%{public}s: this listener or env is nullptr", funcName);
             return;
         }
         HandleScope handleScope(env);
@@ -461,7 +461,7 @@ void JsExtensionWindowListener::OnWindowStatusChange(WindowStatus status)
         thisListener->CallJsMethod(WINDOW_STATUS_CHANGE_CB.c_str(), argv, ArraySize(argv));
     };
     if (napi_send_event(env_, jsCallback, napi_eprio_high, "OnWindowStatusChange") != napi_status::napi_ok) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to send event");
+        TLOGE(WmsLogTag::WMS_UIEXT, "Failed to send event");
     }
 }
 } // namespace Rosen
