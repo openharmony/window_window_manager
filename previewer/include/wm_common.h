@@ -196,6 +196,15 @@ enum class WindowMode : uint32_t {
 };
 
 /**
+ * @brief Split ratio preference of window.
+ */
+enum class SplitRatioPreference : int32_t {
+    EQUAL = 0,
+    PRIMARY_DOMINANT = 1,
+    SECONDARY_DOMINANT = 2,
+};
+
+/**
  * @brief Enumerates global mode of window.
  */
 enum class GlobalWindowMode : uint32_t {

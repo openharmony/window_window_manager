@@ -551,6 +551,11 @@ struct SessionInfo {
      * Window Rotation
      */
     int32_t currentRotation_ = 0;
+    
+    /*
+     * Split Ratio PreferenceValue
+     */
+    int32_t splitRatioPreference = 0;
 
     /*
      * Compatible Mode
