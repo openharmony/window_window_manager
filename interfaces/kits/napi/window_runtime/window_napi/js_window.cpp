@@ -7623,8 +7623,7 @@ napi_value JsWindow::OnSetAspectRatio(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
-                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setAspectRatio",
-                    WM_JS_TO_ERROR_CODE_MAP.at(ret));
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setAspectRatio", WM_JS_TO_ERROR_CODE_MAP.at(ret));
                 task->Reject(env, JsErrUtils::CreateJsError(env, WM_JS_TO_ERROR_CODE_MAP.at(ret),
                     "[window][setAspectRatio]msg: Failed"));
             }
@@ -8559,17 +8558,15 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
         WmErrorCode registerSizeChangeRet =
             RegisterParentWindowCallback(env, sizeChangeCallbackRef, "parentWindowSizeChange");
         if (registerSizeChangeRet != WmErrorCode::WM_OK) {
-            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
-                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-            task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow", registerSizeChangeRet);
+            task->Reject(env,JsErrUtils::CreateJsError(env, registerSizeChangeRet,
                 "[window][attachLayoutToParentWindow]msg: Failed to register size change callback listener."));
         }
         WmErrorCode registerStatusChangeRet =
             RegisterParentWindowCallback(env, statusChangeCallbackRef, "parentWindowStatusChange");
         if (registerStatusChangeRet != WmErrorCode::WM_OK) {
-            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
-                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-            task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow", registerStatusChangeRet);
+            task->Reject(env,JsErrUtils::CreateJsError(env, registerStatusChangeRet,
                 "[window][attachLayoutToParentWindow]msg: Failed to register status change callback listener."));
         }
         CleanUpCallbackReferences(env, sizeChangeCallbackRef, statusChangeCallbackRef);
@@ -9801,8 +9798,7 @@ napi_value JsWindow::OnStartMoving(napi_env env, napi_callback_info info)
     }
     if (WindowHelper::IsInputWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "is not allowed since input window");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.startMoving",
-            WmErrorCode::WM_ERROR_INVALID_CALLING);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.startMoving", WmErrorCode::WM_ERROR_INVALID_CALLING);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][startMoving]msg: Not allowed since input window");
     }
@@ -10523,8 +10519,6 @@ static void SetDragKeyFramePolicyTask(NapiAsyncTask::ExecuteCallback& execute,
     };
     complete = [keyFramePolicy, errCodePtr, where](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (errCodePtr == nullptr) {
-            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDragKeyFramePolicy",
-                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }

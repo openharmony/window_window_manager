@@ -186,7 +186,7 @@ constexpr int32_t WindowManagerErrorCodeToIndex(WindowManager_ErrorCode error)
 }
 
 /**
- * @brief Histogram enumeration macro for WindowManager_ErrorCode (NDK)
+ * @brief Histogram enumeration macro for WindowManager_ErrorCode
  * @param name - The histogram name (string)
  * @param errorCode - WindowManager_ErrorCode enum value, will be converted to index via WindowManagerErrorCodeToIndex()
  * @note Compile-time type check ensures errorCode is WindowManager_ErrorCode type
