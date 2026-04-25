@@ -3251,6 +3251,63 @@ HWTEST_F(SessionStubTest, TestHandleSessionEventSwitchCompatibleMissingMode01, T
     int ret = session->ProcessRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
+
+/**
+ * @tc.name: TestHandleSessionEventMaximizeMissingTitleButton01
+ * @tc.desc: Verify EVENT_MAXIMIZE fails when titleButtonEventType is missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, TestHandleSessionEventMaximizeMissingTitleButton01, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT);
+    MessageOption option;
+
+    MessageParcel data;
+    MessageParcel reply;
+    uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_MAXIMIZE);
+    data.WriteUint32(eventId);
+    data.WriteUint32(1); // waterfallResidentState
+    // Missing: titleButtonEventType, duration, delay
+
+    EXPECT_CALL(*session, OnSessionEvent(_, _)).Times(0);
+
+    int ret = session->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: TestHandleSessionEventSwitchCompatibleRoundtrip01
+ * @tc.desc: Verify EVENT_SWITCH_COMPATIBLE_MODE Write→Read roundtrip preserves compatibleStyleMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStubTest, TestHandleSessionEventSwitchCompatibleRoundtrip01, TestSize.Level1)
+{
+    sptr<SessionStubMocker> session = sptr<SessionStubMocker>::MakeSptr();
+    uint32_t code = static_cast<uint32_t>(SessionInterfaceCode::TRANS_ID_SESSION_EVENT);
+    MessageOption option;
+
+    MessageParcel data;
+    MessageParcel reply;
+    uint32_t eventId = static_cast<uint32_t>(SessionEvent::EVENT_SWITCH_COMPATIBLE_MODE);
+    uint32_t compatibleStyleMode = 3;
+    data.WriteUint32(eventId);
+    data.WriteUint32(compatibleStyleMode);
+
+    SessionEventParam capturedParam;
+    EXPECT_CALL(*session, OnSessionEvent(_, _))
+        .Times(1)
+        .WillOnce(testing::DoAll(
+            testing::SaveArg<1>(&capturedParam),
+            testing::Return(WSError::WS_OK)));
+
+    int ret = session->ProcessRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_NONE);
+
+    uint32_t errCode = reply.ReadUint32();
+    EXPECT_EQ(errCode, static_cast<uint32_t>(WSError::WS_OK));
+    EXPECT_EQ(capturedParam.compatibleStyleMode, compatibleStyleMode);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
