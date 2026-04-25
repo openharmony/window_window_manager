@@ -2737,6 +2737,95 @@ HWTEST_F(SessionProxyTest, RestoreFloatViewMainWindow, TestSize.Level1)
 
     GTEST_LOG_(INFO) << "SessionProxyTest: RestoreFloatViewMainWindow end";
 }
+
+/**
+ * @tc.name: TestOnSessionEvent_RecoverSuccess
+ * @tc.desc: Verify OnSessionEvent with EVENT_RECOVER writes duration and delay via WriteEventParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent_RecoverSuccess, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_RECOVER;
+    SessionEventParam param;
+    param.snapshotAnimationConfig_.duration = 300;
+    param.snapshotAnimationConfig_.delay = 50;
+
+    // EVENT_RECOVER writes duration(int64) + delay(int64), no waterfall/titleButton
+    EXPECT_EQ(WSError::WS_OK, sessionProxy->OnSessionEvent(event, param));
+}
+
+/**
+ * @tc.name: TestOnSessionEvent_RecoverWriteInt64Failed
+ * @tc.desc: Verify OnSessionEvent with EVENT_RECOVER fails when WriteInt64 fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent_RecoverWriteInt64Failed, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_RECOVER;
+    SessionEventParam param;
+
+    MockMessageParcel::SetWriteInt64ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteInt64ErrorFlag(false);
+}
+
+/**
+ * @tc.name: TestOnSessionEvent_MaximizeWriteInt64Failed
+ * @tc.desc: Verify OnSessionEvent with EVENT_MAXIMIZE fails when WriteInt64 (duration/delay) fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent_MaximizeWriteInt64Failed, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
+    SessionEventParam param;
+
+    MockMessageParcel::SetWriteInt64ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteInt64ErrorFlag(false);
+}
+
+/**
+ * @tc.name: TestOnSessionEvent_MaximizeWithSnapshotConfig
+ * @tc.desc: Verify OnSessionEvent with EVENT_MAXIMIZE and valid SnapshotAnimationConfig succeeds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent_MaximizeWithSnapshotConfig, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
+    SessionEventParam param;
+    param.waterfallResidentState = 1;
+    param.titleButtonEventType_ = 2;
+    param.snapshotAnimationConfig_.duration = 200;
+    param.snapshotAnimationConfig_.delay = 100;
+
+    EXPECT_EQ(WSError::WS_OK, sessionProxy->OnSessionEvent(event, param));
+}
+
+/**
+ * @tc.name: TestOnSessionEvent_OtherEventNoExtraParams
+ * @tc.desc: Verify OnSessionEvent with event that writes no extra params (e.g. EVENT_CLOSE)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent_OtherEventNoExtraParams, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_CLOSE;
+    SessionEventParam param;
+
+    EXPECT_EQ(WSError::WS_OK, sessionProxy->OnSessionEvent(event, param));
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
