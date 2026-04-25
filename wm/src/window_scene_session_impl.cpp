@@ -4386,7 +4386,7 @@ WMError WindowSceneSessionImpl::CheckMaximizePreConditions(AcrossDisplayPresenta
         WindowMode::WINDOW_MODE_FULLSCREEN)) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    // The device is not supported - silent success
+    // The device is not supported
     if (!IsPcOrPadFreeMultiWindowMode() || property_->IsFullScreenDisabled()) {
         TLOGW(WmsLogTag::WMS_LAYOUT_PC, "The device is not supported");
         return WMError::WM_OK;
@@ -4616,35 +4616,34 @@ WMError WindowSceneSessionImpl::ExecuteRecover(uint32_t reason, const SnapshotAn
 {
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    if (WindowHelper::IsMainWindow(GetType()) || IsSubWindowMaximizeSupported()) {
-        if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
-            property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Recover fail, already MODE_RECOVER");
-            return WMError::WM_ERROR_REPEAT_OPERATION;
-        }
-        if (enableImmersiveMode_) {
-            enableImmersiveMode_ = false;
-            property_->SetIsLayoutFullScreen(enableImmersiveMode_);
-            hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
-        }
-        SessionEventParam param;
-        param.snapshotAnimationConfig_ = snapshotAnimationConfig;
-        hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER, param);
-        // need notify arkui maximize mode change
-        if (reason == REASON_MAXIMIZE_MODE_CHANGE &&
-            property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-            UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
-        }
-        SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
-        isMaximizeInvoked_ = false;
-        property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
-        UpdateDecorEnable(true);
-        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
-        NotifyWindowStatusChange(GetWindowMode());
-    } else {
+    if (!WindowHelper::IsMainWindow(GetType()) && !IsSubWindowMaximizeSupported()) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "recovery is invalid on sub window");
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
+    if (property_->GetMaximizeMode() == MaximizeMode::MODE_RECOVER &&
+        property_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Recover fail, already MODE_RECOVER");
+        return WMError::WM_ERROR_REPEAT_OPERATION;
+    }
+    if (enableImmersiveMode_) {
+        enableImmersiveMode_ = false;
+        property_->SetIsLayoutFullScreen(enableImmersiveMode_);
+        hostSession->OnLayoutFullScreenChange(enableImmersiveMode_);
+    }
+    SessionEventParam param;
+    param.snapshotAnimationConfig_ = snapshotAnimationConfig;
+    hostSession->OnSessionEvent(SessionEvent::EVENT_RECOVER, param);
+    // need notify arkui maximize mode change
+    if (reason == REASON_MAXIMIZE_MODE_CHANGE &&
+        property_->GetMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
+        UpdateMaximizeMode(MaximizeMode::MODE_RECOVER);
+    }
+    SetWindowMode(WindowMode::WINDOW_MODE_FLOATING);
+    isMaximizeInvoked_ = false;
+    property_->SetMaximizeMode(MaximizeMode::MODE_RECOVER);
+    UpdateDecorEnable(true);
+    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_MAXIMIZE_STATE);
+    NotifyWindowStatusChange(GetWindowMode());
     return WMError::WM_OK;
 }
 
