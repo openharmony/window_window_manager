@@ -8484,12 +8484,16 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
     WindowAnchorInfo acceptAnchorInfo = {true, true, WindowAnchor::TOP_START, 0, 0};
     if(argc > INDEX_ZERO && !ParseWindowAnchorInfo(env, argv[INDEX_ZERO], acceptAnchorInfo)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to anchorInfo");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to anchorInfo");
     }
     WindowAnchorInfo::AttachOptions windowAttachOptions = {""};
     if (argc > INDEX_ONE && !ParseWindowAttachOptions(env, argv[INDEX_ONE], windowAttachOptions)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to windowAttachOptions");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to attachOptions");
     }
@@ -8497,6 +8501,8 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
     napi_status sizeStatus = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowSizeChangeCallback",
         &sizeChangeCallback);
     if (sizeStatus != napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to sizeChangeCallback");
     }
@@ -8504,6 +8510,8 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
     napi_status statusChange = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowStatusChangeCallback",
         &statusChangeCallback);
     if(statusChange != napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to statusChangeCallback");
     }
@@ -8542,6 +8550,8 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
             CleanUpCallbackReferences(env, sizeChangeCallbackRef, statusChangeCallbackRef);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][attachLayoutToParentWindow]msg: Window is nullptr."));
             return;
@@ -8549,12 +8559,16 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
         WmErrorCode registerSizeChangeRet =
             RegisterParentWindowCallback(env, sizeChangeCallbackRef, "parentWindowSizeChange");
         if (registerSizeChangeRet != WmErrorCode::WM_OK) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][attachLayoutToParentWindow]msg: Failed to register size change callback listener."));
         }
         WmErrorCode registerStatusChangeRet =
             RegisterParentWindowCallback(env, statusChangeCallbackRef, "parentWindowStatusChange");
         if (registerStatusChangeRet != WmErrorCode::WM_OK) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][attachLayoutToParentWindow]msg: Failed to register status change callback listener."));
         }
@@ -8562,6 +8576,8 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
 
         if (!WindowHelper::IsSubWindow(window->GetType())) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s only sub window is valid", where);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+                WmErrorCode::WM_ERROR_INVALID_CALLING);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
                 "[window][attachLayoutToParentWindow]msg: Only sub window is valid."));
             return;
@@ -8572,12 +8588,15 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s failed, ret %{public}d", where, ret);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow", ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
                 "[window][attachLayoutToParentWindow]msg: attach window anchor failed."));
         }
     };
     napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "attachLayoutToParentWindow");
     if (status != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][attachLayoutToParentWindow]msg: Send event failed."));
     }
@@ -8602,12 +8621,16 @@ napi_value JsWindow::OnDetachLayoutToParentWindow(napi_env env, napi_callback_in
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][detachLayoutToParentWindow]msg: The window is not created or destroyed."));
             return;
         }
         if (!WindowHelper::IsSubWindow(window->GetType())) {
             TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s only sub window is valid", where);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow",
+                WmErrorCode::WM_ERROR_INVALID_CALLING);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
                 "[window][detachLayoutToParentWindow]msg: Only sub window is valid."));
             return;
@@ -8617,12 +8640,15 @@ napi_value JsWindow::OnDetachLayoutToParentWindow(napi_env env, napi_callback_in
             task->Resolve(env, NapiGetUndefined(env));
         } else {
             TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s failed, ret %{public}d", where, ret);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow", ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
                 "[window][detachLayoutToParentWindow]msg: attach window anchor failed."));
         }
     };
     napi_status status = napi_send_event(env, asyncTask, napi_eprio_high, "detachLayoutToParentWindow");
     if (status != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][detachLayoutToParentWindow]msg: Send event failed."));
     }
