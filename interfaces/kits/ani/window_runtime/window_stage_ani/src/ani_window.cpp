@@ -5797,9 +5797,9 @@ ani_object AniWindow::OnCreateSubWindowWithOptions(ani_env* env, ani_string name
     }
     if (windowOption->IsSubWindowZLevelAboveParentLoosened() &&
         !WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "SubWindowZLevelAboveParentLoosened property not support");
+        TLOGE(WmsLogTag::WMS_SUB, "The SubWindowZLevelAboveParentLoosened which is true is only supported for main window");
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "SubWindowZLevelAboveParentLoosened property not support.");
+            "The SubWindowZLevelAboveParentLoosened which is true is only supported for main window");
     }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
