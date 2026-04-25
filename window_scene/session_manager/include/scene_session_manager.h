@@ -813,6 +813,8 @@ public:
     sptr<SceneSession> GetSessionForAppUseControl(const AppUseControlInfo& appUseControlInfo);
     void RegisterNotifyAppUseControlListCallback(NotifyAppUseControlListFunc&& func);
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
+    WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+        std::vector<AppWindowShowingInfo>& windowInfos) override;
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
@@ -907,6 +909,7 @@ public:
     void UpdateAppBoundSystemTrayStatus(const std::string &callingTokenInstanceKey, int32_t pid, bool enabled);
     void RegisterIsSessionBoundedSystemTrayFunc(const sptr<SceneSession>& sceneSession);
     void RegisterMinimizeAllCallback(MinimizeAllFunc&& func);
+    void UpdateShowOnDockByPersistentIds(const std::vector<int32_t>& persistentIds);
 
     /*
      * Window Pattern

@@ -137,6 +137,8 @@ public:
 
     WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener) override;
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override;
+    WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+        std::vector<AppWindowShowingInfo>& windowInfos) override;
 };
 } // namespace OHOS::Rosen
 
