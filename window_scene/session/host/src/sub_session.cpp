@@ -137,7 +137,7 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
         return;
     }
 
-    if (IsSessionForeground() && (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE)) {
+    if (IsLifecycleForeground() && (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE)) {
         SetOriPosYBeforeRaisedByKeyboard(0);
         const WSRect& winRect = GetSessionRect();
         if (reason == SizeChangeReason::MOVE && (rect.posX_ != winRect.posX_ || rect.posY_ != winRect.posY_)) {
