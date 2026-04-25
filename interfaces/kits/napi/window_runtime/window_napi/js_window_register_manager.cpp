@@ -102,6 +102,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowChangeRegister(sptr<JsWindowLi
 {
     if (window == nullptr) {
         WLOGFE("Window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowSizeChange" : "ArkUI.window.offWindowSizeChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowChangeListener> thisListener(listener);
@@ -111,6 +114,8 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowChangeRegister(sptr<JsWindowLi
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterWindowChangeListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onWindowSizeChange" : "ArkUI.window.offWindowSizeChange", ret);
     return ret;
 }
 

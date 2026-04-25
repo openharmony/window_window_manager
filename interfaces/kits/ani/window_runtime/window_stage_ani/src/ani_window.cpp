@@ -7183,6 +7183,8 @@ static ani_object WindowGlobalDisplayToClient(ani_env* env, ani_object obj, ani_
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow || !aniWindow->GetWindow()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.globalDisplayToClient",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][globalDisplayToClient]msg: window is nullptr");
     }
