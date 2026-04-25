@@ -55,14 +55,17 @@ HWTEST_F(SessionProxyTest, TestOnSessionEvent, TestSize.Level1)
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
     auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
-    SessionEventParam param { .waterfallResidentState = 0 };
+    SessionEventParam param {
+        .waterfallResidentState = 0,
+        .snapshotAnimationConfig_ = { .duration = 0, .delay = 0 }
+    };
 
     // Case 1: Failed to write interface token
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
 
-    // Case 2: Failed to write eventId or waterfallResidentState
+    // Case 2: Failed to write eventId
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
     MockMessageParcel::SetWriteUint32ErrorFlag(false);
@@ -103,7 +106,7 @@ HWTEST_F(SessionProxyTest, TestOnSessionEvent02, TestSize.Level1)
     EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
  
-    // Case 2: Failed to write eventId or compatibleStyleMode
+    // Case 2: Failed to write eventId
     MockMessageParcel::SetWriteUint32ErrorFlag(true);
     EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
     MockMessageParcel::SetWriteUint32ErrorFlag(false);
@@ -121,10 +124,70 @@ HWTEST_F(SessionProxyTest, TestOnSessionEvent02, TestSize.Level1)
     mockRemote->sendRequestResult_ = ERR_NONE;
     sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
     EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
- 
+
     // Case 6: Success when event is not EVENT_MAXIMIZE
     event = SessionEvent::EVENT_MINIMIZE;
     EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
+}
+
+/**
+ * @tc.name: TestOnSessionEvent_Recover
+ * @tc.desc: Verify OnSessionEvent handles EVENT_RECOVER correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent_Recover, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_RECOVER;
+    SessionEventParam param { .snapshotAnimationConfig_ = { 200, 30 } };
+
+    // Case 1: Failed to write interface token
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
+
+    // Case 2: Failed to write eventId
+    MockMessageParcel::SetWriteUint32ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteUint32ErrorFlag(false);
+
+    // Case 3: Failed to write snapshotAnimationConfig (WriteInt64)
+    MockMessageParcel::SetWriteInt64ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteInt64ErrorFlag(false);
+
+    // Case 4: remote is nullptr
+    sptr<SessionProxy> nullProxy = sptr<SessionProxy>::MakeSptr(nullptr);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, nullProxy->OnSessionEvent(event, param));
+
+    // Case 5: Failed to send request
+    mockRemote->sendRequestResult_ = ERR_TRANSACTION_FAILED;
+    sptr<SessionProxy> failProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, failProxy->OnSessionEvent(event, param));
+
+    // Case 6: Success
+    mockRemote->sendRequestResult_ = ERR_NONE;
+    sptr<SessionProxy> okProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    EXPECT_EQ(WSError::WS_OK, okProxy->OnSessionEvent(event, param));
+}
+
+/**
+ * @tc.name: TestOnSessionEvent_WriteEventParamFailure
+ * @tc.desc: Verify OnSessionEvent handles WriteEventParam failures for EVENT_MAXIMIZE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionProxyTest, TestOnSessionEvent_WriteEventParamFailure, TestSize.Level1)
+{
+    auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
+    auto sessionProxy = sptr<SessionProxy>::MakeSptr(mockRemote);
+    SessionEvent event = SessionEvent::EVENT_MAXIMIZE;
+    SessionEventParam param { .waterfallResidentState = 0 };
+
+    // Case 1: WriteInt64 fails (snapshotAnimationConfig duration/delay)
+    MockMessageParcel::SetWriteInt64ErrorFlag(true);
+    EXPECT_EQ(WSError::WS_ERROR_IPC_FAILED, sessionProxy->OnSessionEvent(event, param));
+    MockMessageParcel::SetWriteInt64ErrorFlag(false);
 }
 
 /**

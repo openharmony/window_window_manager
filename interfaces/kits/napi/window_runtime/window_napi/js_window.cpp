@@ -1935,7 +1935,7 @@ napi_value JsWindow::OnRecover(napi_env env, napi_callback_info info)
         lastParam = nullptr;
         configOpt = ParseSnapshotAnimationConfig(env, argv[INDEX_ZERO]);
         if (!configOpt) {
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 "[window][recover]msg: Failed to parse SnapshotAnimationConfig");
         }
     }
@@ -7706,14 +7706,14 @@ std::optional<MaximizeOptions> ParseMaximizeOptions(napi_env env, napi_value jsO
     }
 
     MaximizeOptions options;
-    napi_value jsPresentation = nullptr;
+    napi_value jsMaximizePresentation = nullptr;
     napi_value jsAcrossDisplayPresentation = nullptr;
     napi_value jsSnapshotAnimationConfig = nullptr;
 
     // Get presentation
-    if (napi_get_named_property(env, jsOptions, "maximizePresentation", &jsPresentation) == napi_ok &&
-        jsPresentation != nullptr && GetType(env, jsPresentation) != napi_undefined) {
-        auto presentationOpt = ParsePresentation(env, jsPresentation);
+    if (napi_get_named_property(env, jsOptions, "maximizePresentation", &jsMaximizePresentation) == napi_ok &&
+        jsMaximizePresentation != nullptr && GetType(env, jsMaximizePresentation) != napi_undefined) {
+        auto presentationOpt = ParsePresentation(env, jsMaximizePresentation);
         if (!presentationOpt) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Invalid presentation in MaximizeOptions");
             return std::nullopt;
@@ -10767,7 +10767,6 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "minimize", moduleName, JsWindow::Minimize);
     BindNativeFunction(env, object, "maximize", moduleName, JsWindow::Maximize);
     BindNativeFunction(env, object, "maximizeWithOptions", moduleName, JsWindow::MaximizeWithOptions);
-
     BindNativeFunction(env, object, "setResizeByDragEnabled", moduleName, JsWindow::SetResizeByDragEnabled);
     BindNativeFunction(env, object, "setRaiseByClickEnabled", moduleName, JsWindow::SetRaiseByClickEnabled);
     BindNativeFunction(env, object, "setMainWindowRaiseByClickEnabled", moduleName,
