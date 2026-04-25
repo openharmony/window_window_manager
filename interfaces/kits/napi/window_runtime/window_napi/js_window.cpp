@@ -5590,7 +5590,7 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
     napi_value lastParam = (argc <= 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-auto asyncTask = [weakToken = wptr<Window>(windowToken_), dragEnabled,
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), dragEnabled,
                        env, task = napiAsyncTask, where = __func__] {
         auto window = weakToken.promote();
         if (window == nullptr) {
@@ -7736,7 +7736,7 @@ napi_value JsWindow::OnSetContentAspectRatio(napi_env env, napi_callback_info in
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), aspectRatio, isPersistent, needUpdateRect,
-        env, napiAsyncTask, where = __func__, errMsgPrefix] {
+                      env, napiAsyncTask, where = __func__, errMsgPrefix] {
         auto window = windowToken.promote();
         if (!window) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: Window is nullptr", where);
