@@ -566,6 +566,7 @@ void SessionListenerController::NotifyAppInstanceListeners(const AppInstanceFilt
 {
     NotifyAppInstanceListenersByKey(key, payload);
     if (!key.appInstanceKey_.empty()) {
+        // Empty appInstanceKey is a wildcard, notify regardless of the appInstanceKey.
         NotifyAppInstanceListenersByKey(AppInstanceFilterKey{ key.bundleName_, key.appIndex_, "" }, payload);
     }
 }
