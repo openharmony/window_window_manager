@@ -4613,10 +4613,6 @@ void SceneSessionManager::ResetWantInfo(const sptr<SceneSession>& sceneSession)
 
 void SceneSessionManager::MoveStartLifeCycleTask(const sptr<SceneSession>& sceneSession)
 {
-    if(!sceneSession->IsPcWindow()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d is not pc window", sceneSession->GetPersistentId());
-        return;
-    }
     if(!sceneSession->isRemoving_) {
         TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d is not removing.", sceneSession->GetPersistentId());
         return;
@@ -19568,6 +19564,36 @@ WMError SceneSessionManager::MinimizeMainSession(const std::string& bundleName, 
     return WMError::WM_OK;
 }
 
+WMError SceneSessionManager::GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
+    std::vector<AppWindowShowingInfo>& windowInfos)
+{
+    if (!SessionPermission::IsSACalling()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "permission denied!");
+        return WMError::WM_ERROR_NOT_SYSTEM_APP;
+    }
+    if (appInfo.bundleName.empty()) {
+        TLOGE(WmsLogTag::WMS_MAIN, "bundleName is empty");
+        return WMError::WM_ERROR_INVALID_PARAM;
+    }
+    std::vector<sptr<SceneSession>> sceneSessions;
+    GetSceneSessionsByAppInstance(appInfo.bundleName, appInfo.appIndex, appInfo.appInstanceKey, sceneSessions);
+    windowInfos.clear();
+    for (const auto& session : sceneSessions) {
+        if (session == nullptr) {
+            continue;
+        }
+        AppWindowShowingInfo info;
+        info.persistentId = session->GetPersistentId();
+        info.windowName = session->GetWindowName();
+        info.sessionState = static_cast<uint32_t>(session->GetSessionState());
+        info.isShowOnDock = session->GetIsShowOnDock();
+        windowInfos.push_back(info);
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "bundleName:%{public}s, appIndex:%{public}d, appInstanceKey:%{public}s, size:%{public}zu",
+        appInfo.bundleName.c_str(), appInfo.appIndex, appInfo.appInstanceKey.c_str(), windowInfos.size());
+    return WMError::WM_OK;
+}
+
 void SceneSessionManager::ConfigSupportFunctionType(SupportFunctionType funcType)
 {
     systemConfig_.supportFunctionType_ = funcType;
@@ -20978,6 +21004,21 @@ uint32_t SceneSessionManager::GetBlurBackgroundColorFromParam(const std::string&
 
 void SceneSessionManager::RegisterMinimizeAllCallback(MinimizeAllFunc&& func){
     minimizeAllFunc_ = std::move(func);
+}
+
+void SceneSessionManager::UpdateShowOnDockByPersistentIds(const std::vector<int32_t>& persistentIds)
+{
+    std::unordered_set<int32_t> idSet(persistentIds.begin(), persistentIds.end());
+    std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+    for (const auto& [id, session] : sceneSessionMap_) {
+        if (session == nullptr) {
+            continue;
+        }
+        bool isShowOnDock = idSet.find(id) != idSet.end();
+        session->SetIsShowOnDock(isShowOnDock);
+    }
+    TLOGI(WmsLogTag::WMS_MAIN, "UpdateShowOnDockByPersistentIds, ids count: %{public}zu, sessions count: %{public}zu",
+        persistentIds.size(), sceneSessionMap_.size());
 }
 
 void SceneSessionManager::NotifyRotationBegin()

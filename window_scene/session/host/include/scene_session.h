@@ -642,6 +642,8 @@ public:
     SubWindowModalType GetSubWindowModalType() const;
     int32_t GetOriPosYBeforeRaisedByKeyboard() const;
     std::string GetClientIdentityToken() const;
+    void SetIsShowOnDock(bool isShowOnDock);
+    bool GetIsShowOnDock() const;
 
     /*
      * Window Watermark
@@ -1654,6 +1656,11 @@ private:
      * Multi User
      */
     bool isMinimizedByUserSwitch_ { false };
+
+    /*
+     * Dock
+     */
+    bool isShowOnDock_ = false;
 
     /*
      * Window ZOrder: PC
