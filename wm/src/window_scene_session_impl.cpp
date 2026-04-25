@@ -673,10 +673,6 @@ WMError WindowSceneSessionImpl::RecoverAndReconnectSceneSession()
     TLOGI(WmsLogTag::WMS_RECOVER, "windowName=%{public}s, windowMode=%{public}u, windowType=%{public}u, "
         "persistentId=%{public}d, windowState=%{public}d, requestWindowState=%{public}d", GetWindowName().c_str(),
         property_->GetWindowMode(), property_->GetWindowType(), GetPersistentId(), state_, requestState_);
-
-    if (isFocused_) {
-        UpdateFocusState(false);
-    }
     auto context = GetContext();
     auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
     if (context && context->GetHapModuleInfo() && abilityContext && abilityContext->GetAbilityInfo()) {
@@ -1203,6 +1199,12 @@ void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, 
         case WindowRecoverState::WINDOW_START_RECONNECT:
             UpdateStartRecoverProperty(isSpecificSession);
             UpdateStartRecoverEventFlag();
+            if (isFocused_) {
+                UpdateFocusState(false);
+            }
+            if (isHighlighted_) {
+                NotifyHighlightChange(false);
+            }
             break;
         case WindowRecoverState::WINDOW_FINISH_RECONNECT:
             UpdateFinishRecoverProperty(isSpecificSession);
