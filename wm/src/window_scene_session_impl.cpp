@@ -4343,18 +4343,22 @@ WMError WindowSceneSessionImpl::Maximize(MaximizePresentation presentation, Wate
 {
     // Convert WaterfallResidentState to AcrossDisplayPresentation
     auto acrossDisplay = static_cast<AcrossDisplayPresentation>(static_cast<uint32_t>(state));
-    return MaximizeWithOptions(presentation, acrossDisplay, { -1, -1 });
+    WMError checkRet = CheckMaximizePreConditions(acrossDisplay);
+    if (checkRet != WMError::WM_OK) {
+        return checkRet;
+    }
+    return ExecuteMaximizeWithOptions(presentation, acrossDisplay, { -1, -1 });
 }
 
 WMError WindowSceneSessionImpl::ValidateSnapshotAnimationConfig(const SnapshotAnimationConfig& config)
 {
     constexpr int64_t MAX_DURATION = 400;
     constexpr int64_t MAX_DELAY = 350;
-    if ((config.duration != -1 && (config.duration < 0 || config.duration > MAX_DURATION)) ||
-        (config.delay != -1 && (config.delay < 0 || config.delay > MAX_DELAY))) {
+    if (config.duration < 0 || config.duration > MAX_DURATION ||
+        config.delay < 0 || config.delay > MAX_DELAY) {
         TLOGW(WmsLogTag::WMS_LAYOUT, "Invalid animation config: duration=%{public}" PRId64
             ", delay=%{public}" PRId64 " (valid: duration [0,%{public}" PRId64
-            "], delay [0,%{public}" PRId64 "], or -1)",
+            "], delay [0,%{public}" PRId64 "])",
             config.duration, config.delay, MAX_DURATION, MAX_DELAY);
         return WMError::WM_ERROR_ILLEGAL_PARAM;
     }
@@ -4588,7 +4592,11 @@ WMError WindowSceneSessionImpl::Restore()
 
 WMError WindowSceneSessionImpl::Recover(uint32_t reason)
 {
-    return Recover(reason, { -1, -1 });
+    WMError checkRet = CheckRecoverPreConditions();
+    if (checkRet != WMError::WM_OK) {
+        return checkRet;
+    }
+    return ExecuteRecover(reason, { -1, -1 });
 }
 
 WMError WindowSceneSessionImpl::CheckRecoverPreConditions()
