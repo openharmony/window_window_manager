@@ -621,6 +621,10 @@ WSError SessionProxy::PendingSessionActivation(sptr<AAFwk::SessionInfo> abilityS
         TLOGE(WmsLogTag::WMS_LIFE, "Write splitRatioPreference failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
+    if (!data.WriteBool(abilitySessionInfo->nativeHideWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write nativeHideWindow failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         WLOGFE("remote is null");
@@ -3095,7 +3099,7 @@ WMError SessionProxy::SetGestureBackEnabled(bool isEnabled)
     return static_cast<WMError>(ret);
 }
 
-WMError SessionProxy::SetFloatNavigationAvoidAreaEnabled(bool isEnabled)
+WMError SessionProxy::SetFloatNavigationEnabled(bool isEnabled)
 {
     MessageParcel data;
     MessageParcel reply;

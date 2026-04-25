@@ -61,7 +61,7 @@ public:
         ExtendScreenConnectStatus extendScreenConnectStatus) override;
     bool OnExtendDisplayNodeChange(ScreenId firstId, ScreenId secondId) override;
     bool OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId, const std::string& name,
-        bool isExtend) override;
+        sptr<IRemoteObject> renderSession, bool isExtend) override;
     bool OnMainDisplayNodeChange(ScreenId mainScreenId, ScreenId extendScreenId, ScreenId extendRSId) override;
     void SetScreenCombination(ScreenId mainScreenId, ScreenId extendScreenId,
         ScreenCombination extendCombination) override;

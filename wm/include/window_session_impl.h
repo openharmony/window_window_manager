@@ -92,7 +92,7 @@ using IKBWillHideListener = IKeyboardWillHideListener;
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
     explicit WindowSessionImpl(const sptr<WindowOption>& option,
-        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
+        const std::shared_ptr<RSUIContext>& rsUIContext = nullptr, sptr<IRemoteObject> renderSession = nullptr);
     ~WindowSessionImpl();
 
     static sptr<Window> Find(const std::string& name);
@@ -568,6 +568,8 @@ public:
         { return WSError::WS_DO_NOTHING; }
     void SetNotifySizeChangeFlag(bool flag);
     Rect GetGlobalScaledRectLocal() const;
+    WSError SetIsStartMoving(bool isStartMoving) override;
+    bool IsStartMoving() override { return isStartMoving_; }
 
     /*
      * Free Multi Window
@@ -599,6 +601,13 @@ public:
     void UpdateSpecificSystemBarEnabled(bool systemBarEnable, bool systemBarEnableAnimation,
         SystemBarProperty& property) override;
     WMError SetSystemBarProperty(WindowType type, const SystemBarProperty& property) override;
+    WMError SetFloatNavigationAvoidAreaEnabled(bool enable) override;
+    WMError GetFloatNavigationAvoidAreaEnabled(bool& enable) const override;
+    bool IsFloatNavigationAvoidAreaEnabled(AvoidAreaType type)
+    {
+        return type != AvoidAreaType::TYPE_FLOAT_NAVIGATION ||
+            (type == AvoidAreaType::TYPE_FLOAT_NAVIGATION && floatNavigationAvoidAreaEnabled_);
+    }
 
     /*
      * Window Property
@@ -707,6 +716,7 @@ public:
     WSError UpdateIsShowDecorInFreeMultiWindow(bool isShow) override;
 
 protected:
+    RSSurfaceNodeType GetRSSurfaceNodeType(WindowType type);
     WMError Connect();
     bool IsWindowSessionInvalid() const;
     void NotifyWindowAfterUnfocused();
@@ -969,7 +979,7 @@ protected:
     sptr<FutureCallback> getRotationResultFuture_ = nullptr;
     sptr<FutureCallback> updateRectCallback_ = nullptr;
     void UpdateVirtualPixelRatio(const sptr<Display>& display);
-    WMError GetVirtualPixelRatio(float& vpr);
+    virtual WMError GetVirtualPixelRatio(float& vpr);
     void SetCurrentTransform(const Transform& transform);
     Transform GetCurrentTransform() const;
     void NotifyAfterUIContentReady();
@@ -997,6 +1007,8 @@ protected:
     uint32_t GetStatusBarHeight() const override;
     WindowType rootHostWindowType_ = WindowType::APP_MAIN_WINDOW_BASE;
     SystemBarSettingFlag systemBarSettingFlag_ = SystemBarSettingFlag::DEFAULT_SETTING;
+    std::atomic<bool> floatNavigationAvoidAreaEnabled_ = false;
+    std::atomic<bool> notifyOnceImmediately_ = true;
 
     /*
      * PC Fold Screen
@@ -1057,6 +1069,18 @@ protected:
     void NotifyTitleChange(bool isShow, int32_t height);
     bool isDecorHiddenByApp_ = false;
     bool isMaximizeInvoked_ = false;
+
+    /*
+     * RS Client Multi Instance
+     */
+    std::shared_ptr<RSUIDirector> rsUIDirector_;
+    std::shared_ptr<RSUIContext> rsUIContext_;
+
+    /**
+     * RS Multi Process
+     */
+    sptr<IRemoteObject> renderSession_;
+    bool needCreateCompleteSurfaceNode_ = false;
 
     /**
      * Game Prelaunch flag
@@ -1346,6 +1370,7 @@ private:
     std::atomic<bool> isFirstValidLayoutUpdate_ = true;
     mutable std::mutex globalScaledRectMutex_;
     Rect globalScaledRect_;
+    std::atomic<bool> isStartMoving_ = false;
 
     /*
      * Window Decor
@@ -1412,11 +1437,6 @@ private:
     void NotifyRotationChangeResult(RotationChangeResult rotationChangeResult) override;
     void NotifyRotationChangeResultInner(const RotationChangeInfo& rotationChangeInfo);
     DisplayOrientation windowOrientation_ = DisplayOrientation::UNKNOWN;
-
-    /*
-     * RS Client Multi Instance
-     */
-    std::shared_ptr<RSUIDirector> rsUIDirector_;
 };
 } // namespace Rosen
 } // namespace OHOS

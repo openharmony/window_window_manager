@@ -33,6 +33,18 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(SessionOption Se
     if (!ScreenConnectWriteParam(SessionOption, screenEvent, data)) {
         return;
     }
+    auto renderSession = SessionOption.connectToRenderToken_;
+    if (renderSession) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(renderSession)) {
+            TLOGE(WmsLogTag::DMS, "Write bool or renderSession failed");
+            return;
+        } else {
+            if (!data.WriteBool(false)) {
+                TLOGE(WmsLogTag::DMS, "Write boolbool failed");
+                return;
+            }
+        }
+    }
     if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED),
         data, reply, option) != ERR_NONE) {
@@ -919,7 +931,7 @@ void ScreenSessionManagerClientProxy::OnSecondaryReflexionChanged(ScreenId scree
 }
 
 bool ScreenSessionManagerClientProxy::OnCreateScreenSessionOnly(ScreenId screenId, ScreenId rsId,
-    const std::string& name, bool isExtend)
+    const std::string& name, sptr<IRemoteObject> renderSession, bool isExtend)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -934,7 +946,7 @@ bool ScreenSessionManagerClientProxy::OnCreateScreenSessionOnly(ScreenId screenI
         return false;
     }
     if (!data.WriteUint64(screenId) || !data.WriteUint64(rsId) || !data.WriteString(name) ||
-        !data.WriteBool(isExtend)) {
+        !data.WriteRemoteObject(renderSession) || !data.WriteBool(isExtend)) {
         TLOGE(WmsLogTag::DMS, "Write parameters failed");
         return false;
     }
