@@ -5849,6 +5849,8 @@ void AniWindow::AttachLayoutToParentWindow(ani_env* env, ani_object Obj, ani_lon
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow) {
         TLOGE(WmsLogTag::WMS_SUB, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -5924,16 +5926,22 @@ void AniWindow::OnAttachToParentWindow(ani_env* env, ani_object anchorInfo,
 {
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "permission denied!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP, "not system application");
         return;
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     if (!WindowHelper::IsSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] only sub window is valid");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
@@ -5942,10 +5950,14 @@ void AniWindow::OnAttachToParentWindow(ani_env* env, ani_object anchorInfo,
     ani_status aniAnchorRet = env->Reference_IsUndefined(anchorInfo, &isUndefinedAnchorInfo);
     if (aniAnchorRet != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Check enum_object isUndefined fail");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
     if (!isUndefinedAnchorInfo && !AniWindowUtils::ParseWindowAnchorInfo(env, anchorInfo, acceptWindowAnchorInfo)) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to parse windowAnchorInfo");
         return;
     }
@@ -5953,6 +5965,8 @@ void AniWindow::OnAttachToParentWindow(ani_env* env, ani_object anchorInfo,
     ani_status aniOptionRet = env->Reference_IsUndefined(attachOptions, &isUndefinedOptions);
     if (aniOptionRet != ANI_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Check enum_object isUndefined fail");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
@@ -5978,6 +5992,7 @@ void AniWindow::OnAttachToParentWindow(ani_env* env, ani_object anchorInfo,
     WmErrorCode errorCode = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_SUB, "[ANI] failed, errorCode:%{public}d ", errorCode);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.attachLayoutToParentWindow", errorCode);
         AniWindowUtils::AniThrowError(env, errorCode, "[ANI] attach to parent window failed.");
         return;
     }
@@ -5989,6 +6004,8 @@ void AniWindow::DetachLayoutToParentWindow(ani_env* env, ani_object obj, ani_lon
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -6000,17 +6017,23 @@ void AniWindow::OnDetachLayoutToParentWindow(ani_env* env)
     TLOGI(WmsLogTag::WMS_LAYOUT, "[ANI]");
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     if (!WindowHelper::IsSubWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] only sub window is valid");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
         return;
     }
     WmErrorCode sizeChangeRet = registerManager_->UnregisterListener(windowToken_, "parentWindowSizeChange",
         CaseType::CASE_WINDOW, env, nullptr);
     if (sizeChangeRet != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow",
+            sizeChangeRet);
         AniWindowUtils::AniThrowError(env, sizeChangeRet);
         return;
     }
@@ -6018,6 +6041,7 @@ void AniWindow::OnDetachLayoutToParentWindow(ani_env* env)
     WmErrorCode statusChangeRet = registerManager_->UnregisterListener(windowToken_, "parentWindowStatusChange",
         CaseType::CASE_WINDOW, env, nullptr);
     if (statusChangeRet != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow", statusChangeRet);
         AniWindowUtils::AniThrowError(env, statusChangeRet);
         return;
     }
@@ -6029,6 +6053,7 @@ void AniWindow::OnDetachLayoutToParentWindow(ani_env* env)
     WmErrorCode errorCode = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     if (errorCode != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.detachLayoutToParentWindow", errorCode);
         AniWindowUtils::AniThrowError(env, errorCode, "[ANI] detach from parent window failed.");
         return;
     }
