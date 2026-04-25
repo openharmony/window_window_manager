@@ -2712,7 +2712,7 @@ WMError WindowExtensionSessionImpl::OnHostWindowStatusChange(AAFwk::Want&& data,
     std::optional<AAFwk::Want>& reply)
 {
     if (!property_->GetIsAtomicService()) {
-        TLOGD(WmsLogTag::WMS_IMMS, "win %{public}u no support", GetPersistentId());
+        TLOGD(WmsLogTag::WMS_UIEXT, "win %{public}u no support", GetPersistentId());
         return WMError::WM_OK;
     }
     auto windowStatus = static_cast<WindowStatus>(data.GetIntParam(Extension::HOST_WINDOW_STATUS_FIELD,
