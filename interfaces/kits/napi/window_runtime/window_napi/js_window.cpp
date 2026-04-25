@@ -2789,7 +2789,7 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     if (windowToken_ == nullptr) {
         WLOGFE("Window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][on]msg: Window is nullptr.");
+            "[window][on]msg: The window is not created or destroyed.");
     }
     sptr<Window> windowToken = windowToken_;
     constexpr size_t argcMin = 2;
@@ -2837,7 +2837,7 @@ napi_value JsWindow::OnUnregisterWindowCallback(napi_env env, napi_callback_info
 {
     if (windowToken_ == nullptr) {
         WLOGFE("Window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][off]msg: Window is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][off]msg: The window is not created or destroyed.");
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
