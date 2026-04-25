@@ -97,6 +97,7 @@ struct SCBAbilityInfo {
     std::string codePath_;
     bool isAbilityHook_;
     bool isForceRotate_;
+    bool isNativeModuleHiddenStart_;
 };
 
 struct SessionIdentityInfo {
@@ -1362,6 +1363,7 @@ private:
     WSError GetAbilityInfosFromBundleInfo(const std::vector<AppExecFwk::BundleInfo>& bundleInfos,
         std::vector<SCBAbilityInfo>& scbAbilityInfos, int32_t userId = 0);
     void GetOrientationFromResourceManager(AppExecFwk::AbilityInfo& abilityInfo);
+    bool GetNativeModuleStartMode(AppExecFwk::AbilityInfo& abilityInfo);
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     void ClosePipWindowIfExist(WindowType type);

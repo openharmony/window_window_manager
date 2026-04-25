@@ -1006,6 +1006,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read hostBundleName failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadBool(abilitySessionInfo->nativeHideWindow)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read nativeHideWindow failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;

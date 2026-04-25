@@ -218,10 +218,11 @@ WSError SceneSession::ConnectInner(const sptr<ISessionStage>& sessionStage,
             property->SetAppInstanceKey(session->GetAppInstanceKey());
             property->SetUseControlState(session->isAppUseControl_);
             property->SetAncoRealBundleName(session->IsAnco() ? session->GetSessionInfo().bundleName_ : "");
-            if (session->GetSessionInfo().processOptions != nullptr) {
+            if (session->GetNativeHideWindow() || session->GetSessionInfo().processOptions != nullptr) {
                 MissionInfo missionInfo;
-                missionInfo.startupInvisibility_ = session->GetSessionInfo().processOptions->startupVisibility ==
-                    AAFwk::StartupVisibility::STARTUP_HIDE;
+                missionInfo.startupInvisibility_ =  session->GetNativeHideWindow() ||
+                    (session->GetSessionInfo().processOptions->startupVisibility ==
+                        AAFwk::StartupVisibility::STARTUP_HIDE);
                 property->SetMissionInfo(missionInfo);
             }
             if (WindowHelper::IsMainWindow(session->GetWindowType())) {
@@ -6470,6 +6471,7 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     info.hostAppIndex = session->GetSessionInfo().appIndex_;
     info.hostAppInstanceKey = session->GetAppInstanceKey();
     info.hostAbilityName = session->GetSessionInfo().abilityName_;
+    info.nativeHideWindow_ = abilitySessionInfo->nativeHideWindow;
     if (session->IsPcOrPadEnableActivation()) {
         info.startWindowOption = abilitySessionInfo->startWindowOption;
         int32_t maxWindowWidth = abilitySessionInfo->want.GetIntParam(AAFwk::Want::PARAM_RESV_MAX_WINDOW_WIDTH, 0);
