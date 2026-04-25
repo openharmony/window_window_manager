@@ -938,6 +938,12 @@ export enum WindowMode {
     FLOATING = 5
 }
 
+export enum SplitRatioPreference {
+    EQUAL = 0,
+    PRIMARY_DOMINANT = 1,
+    SECONDARY_DOMINANT = 2,
+}
+
 export enum WindowLayoutMode {
     WINDOW_LAYOUT_MODE_CASCADE = 0,
     WINDOW_LAYOUT_MODE_TILE = 1

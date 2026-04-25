@@ -1010,6 +1010,10 @@ int SessionStub::HandlePendingSessionActivation(MessageParcel& data, MessageParc
         TLOGE(WmsLogTag::WMS_LIFE, "Read nativeHideWindow failed.");
         return ERR_INVALID_DATA;
     }
+    if (!data.ReadInt32(abilitySessionInfo->splitRatioPreference)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Read splitRatioPreference failed.");
+        return ERR_INVALID_DATA;
+    }
     WSError errCode = PendingSessionActivation(abilitySessionInfo);
     reply.WriteUint32(static_cast<uint32_t>(errCode));
     return ERR_NONE;
