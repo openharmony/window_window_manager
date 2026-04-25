@@ -9620,13 +9620,6 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
             "[window][createSubWindowWithOptions]msg: Device not support."));
         return NapiGetUndefined(env);
     }
-    if (windowOption->IsSubWindowZLevelAboveParentLoosened() &&
-        !WindowHelper::IsMainWindow(windowToken_->GetType())) {
-        TLOGE(WmsLogTag::WMS_SUB, "SubWindowZLevelAboveParentLoosened property not support");
-        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-            "[window][createSubWindowWithOptions]msg: SubWindowZLevelAboveParentLoosened property not support."));
-        return NapiGetUndefined(env);
-    }
     if (windowOption->GetWindowTopmost() && !Permission::IsSystemCalling() && !Permission::IsStartByHdcd()) {
         TLOGE(WmsLogTag::WMS_SUB, "Modal subwindow has topmost, but no system permission");
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP,
@@ -9652,6 +9645,15 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
             TLOGNE(WmsLogTag::WMS_SUB, "%{public}s invalid window type: %{public}d", where, window->GetType());
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
                 "[window][createSubWindowWithOptions]msg: Invalid window type"));
+            return;
+        }
+        if (windowOption->IsSubWindowZLevelAboveParentLoosened() &&
+            !WindowHelper::IsMainWindow(window->GetType())) {
+            TLOGE(WmsLogTag::WMS_SUB, "The SubWindowZLevelAboveParentLoosened which"
+                " is true is only supported for main window");
+            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+                "[window][createSubWindowWithOptions]msg: The SubWindowZLevelAboveParentLoosened which is true"
+                " is only supported for main window"));
             return;
         }
         windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
