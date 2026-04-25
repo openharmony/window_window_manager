@@ -2389,12 +2389,15 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getGlobalRect",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getGlobalScaledRect]msg: Window is nullptr");
     }
     Rect globalScaledRect;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetGlobalScaledRect(globalScaledRect));
     if (ret != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getGlobalRect", ret);
         return NapiThrowError(env, ret, "[window][getGlobalScaledRect]");
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "Window [%{public}u, %{public}s] end",
@@ -2402,6 +2405,8 @@ napi_value JsWindow::OnGetGlobalScaledRect(napi_env env, napi_callback_info info
     napi_value globalScaledRectObj = GetRectAndConvertToJsValue(env, globalScaledRect);
     if (globalScaledRectObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "globalScaledRectObj is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getGlobalRect",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getGlobalScaledRect]msg: Failed to convert result into JS value object.");
     }
@@ -2637,27 +2642,37 @@ template <typename PositionTransformFunc>
 napi_value JsWindow::HandlePositionTransform(
     napi_env env, napi_callback_info info, PositionTransformFunc transformFunc, const char* caller)
 {
+    const std::string histogramName = (std::string(caller) == "OnClientToGlobalDisplay")
+        ? "ArkUI.window.clientToGlobalDisplay" : "ArkUI.window.globalDisplayToClient";
     size_t argc = TWO_PARAMS_SIZE;
     napi_value argv[TWO_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != TWO_PARAMS_SIZE) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Invalid argc: %{public}zu", caller, argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE(histogramName.c_str(),
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     int32_t x = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], x)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert parameter to x", caller);
+        HISTOGRAM_ENUMERATION_ERROR_CODE(histogramName.c_str(),
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     int32_t y = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], y)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to convert parameter to y", caller);
+        HISTOGRAM_ENUMERATION_ERROR_CODE(histogramName.c_str(),
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
 
     if (!windowToken_) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", caller);
+        HISTOGRAM_ENUMERATION_ERROR_CODE(histogramName.c_str(),
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
@@ -2667,6 +2682,7 @@ napi_value JsWindow::HandlePositionTransform(
     auto it = WM_JS_TO_ERROR_CODE_MAP.find(transformRet);
     WmErrorCode errCode = (it != WM_JS_TO_ERROR_CODE_MAP.end()) ? it->second : WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     if (errCode != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(histogramName.c_str(), errCode);
         return NapiThrowError(env, errCode);
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "%{public}s: windowId: %{public}u, inPosition: %{public}s, outPosition: %{public}s",
@@ -2675,6 +2691,8 @@ napi_value JsWindow::HandlePositionTransform(
     auto jsOutPosition = BuildJsPosition(env, outPosition);
     if (!jsOutPosition) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s: Failed to build JS position object", caller);
+        HISTOGRAM_ENUMERATION_ERROR_CODE(histogramName.c_str(),
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return jsOutPosition;
