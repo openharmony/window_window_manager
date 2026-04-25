@@ -49,7 +49,7 @@ KeyboardSession::KeyboardSession(const SessionInfo& info, const sptr<SpecificSes
         scenePersistence_->RenameSnapshotFromOldPersistentId(info.persistentId_);
         TLOGI(WmsLogTag::WMS_KEYBOARD, "RenameSnapshotFromOldPersistentId %{public}d", info.persistentId_);
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "Create KeyboardSession1");
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "Create KeyboardSession");
 }
 
 KeyboardSession::~KeyboardSession()
