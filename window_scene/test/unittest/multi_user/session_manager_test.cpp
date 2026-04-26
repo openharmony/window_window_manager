@@ -48,7 +48,9 @@ HWTEST_F(SessionManagerTest, OnWMSConnectionChangedCallback, Function | SmallTes
     sptr<SessionManager> sm = &SessionManager::GetInstance(100);
     ASSERT_NE(nullptr, sm);
     bool funcInvoked = false;
-    sm->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected, int32_t pid) { funcInvoked = true; };
+    sm->wmsConnectionChangedFunc_ = [&](int32_t userId, int32_t screenId, bool isConnected, int32_t pid) {
+        funcInvoked = true;
+    };
     sm->OnWMSConnectionChangedCallback(101, DEFAULT_SCREEN_ID, true, INVALID_PID);
     sm->wmsConnectionChangedFunc_ = nullptr;
     ASSERT_EQ(funcInvoked, true);
