@@ -990,8 +990,7 @@ WMError WindowSceneSessionImpl::SetParentWindowInner(int32_t oldParentWindowId,
         subWindowSessionMap_[newParentWindowId].push_back(this);
     }
     property_->SetParentPersistentId(newParentWindowId);
-    UpdateSubWindowInfo(newParentWindow->GetProperty()->GetSubWindowLevel() +
-        (IsLoosenedWithPcOrFreeMultiMode() ? 0 : 1), newParentWindow->GetContext());
+    UpdateSubWindowInfo(newParentWindow->GetProperty()->GetSubWindowLevel() + 1, newParentWindow->GetContext());
     if (!IsLoosenedWithPcOrFreeMultiMode() && state_ == WindowState::STATE_SHOWN &&
         newParentWindow->GetWindowState() == WindowState::STATE_HIDDEN) {
         UpdateSubWindowStateAndNotify(newParentWindowId, WindowState::STATE_HIDDEN);
