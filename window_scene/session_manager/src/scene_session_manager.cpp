@@ -16285,7 +16285,7 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session->GetSessionGlobalRect().IsInvalid()) {
                 continue;
             }
-            if (option.excludeSystemWindows && WindowHelper::IsSystemWindow(session->GetWindowType())) {
+            if (option.excludeSystemWindows && WindowHelper::IsApiSystemWindow(session->GetWindowType())) {
                 continue;
             }
             if ((zOrderForAboveWin > 0 && session->GetZOrder() <= zOrderForAboveWin) ||

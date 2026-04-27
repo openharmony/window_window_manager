@@ -148,6 +148,16 @@ public:
         return IsSystemWindow(type) && !IsDialogWindow(type);
     }
 
+    static inline bool IsApiSystemWindow(WindowType type)
+    {
+        return IsSystemWindow(type) && !IsDialogWindow(type) && !IsFloatTypeWindow(type);
+    }
+
+    static inline bool IsFloatTypeWindow(WindowType type)
+    {
+        return type == WindowType::WINDOW_TYPE_FLOAT;
+    }
+
     static inline bool IsUIExtensionWindow(WindowType type)
     {
         return (type == WindowType::WINDOW_TYPE_UI_EXTENSION);
