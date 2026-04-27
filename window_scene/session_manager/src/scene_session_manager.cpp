@@ -19977,25 +19977,6 @@ WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subS
         SetHighlightSessionIds(subSession, true, std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count());
     }
-
-    // Handle anchor binding rebind after parent switch
-    auto subAnchorInfo = subSession->GetWindowAnchorInfo();
-    if (subAnchorInfo.isAnchorEnabled_) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "Rebinding anchor after parent change, subId=%{public}d", subWindowId);
-        // 1. Server-side: detach from old main window's attach system
-        if (subAnchorInfo.isAnchoredByAttach_) {
-            subSession->RequestRemoveAttachedWindowLimits(subWindowId);
-            auto oldMainSession = oldParentSession->GetMainSession();
-            if (oldMainSession) {
-                oldMainSession->RequestRemoveAttachedWindowLimits(subWindowId);
-            }
-        }
-        // 2. Reset server-side anchor state and trigger callback
-        subSession->ResetAttachBindingState();
-        // 3. Notify client to walk through full rebind flow
-        subSession->NotifyRebindAttachAfterParentChange(newParentWindowId);
-    }
-
     return WMError::WM_OK;
 }
 

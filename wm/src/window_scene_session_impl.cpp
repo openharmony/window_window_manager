@@ -8457,45 +8457,6 @@ WSError WindowSceneSessionImpl::SyncAllAttachedLimitsToChild(
 }
 
 /** @note @window.layout */
-WSError WindowSceneSessionImpl::NotifyRebindAttachAfterParentChange(int32_t newParentWindowId)
-{
-    TLOGI(WmsLogTag::WMS_LAYOUT, "window id=%{public}u, newParentWindowId=%{public}d",
-        GetWindowId(), newParentWindowId);
-
-    const auto& property = GetProperty();
-    WindowAnchorInfo anchorInfo = property->GetWindowAnchorInfo();
-    if (!anchorInfo.isAnchorEnabled_) {
-        TLOGI(WmsLogTag::WMS_LAYOUT, "id=%{public}u no anchor binding, skip", GetWindowId());
-        return WSError::WS_OK;
-    }
-
-    // Step 1: Clear local attach limits and recalculate
-    property->ClearAttachedWindowLimitsList();
-    property->ClearAttachedLimitOptionsList();
-    UpdateWindowSizeLimits();
-    UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
-    UpdateNewSize();
-
-    // Step 2: Check new parent type
-    auto newParentWindow = GetWindowWithId(newParentWindowId);
-    if (newParentWindow && WindowHelper::IsMainWindow(newParentWindow->GetType())) {
-        // New parent is main window → re-attach (server already reset state via ResetAttachBindingState)
-        SetWindowAnchorInfo(anchorInfo);
-    } else {
-        // New parent is not main window → detach
-        // Server already reset attach state and triggered callback via ResetAttachBindingState
-        // Only need to clear client-side property and listeners
-        WindowAnchorInfo clearedInfo = {false, false, WindowAnchor::TOP_START, 0, 0};
-        clearedInfo.isFromAttachOrDetach_ = true;
-        clearedInfo.attachOptions.currentLayoutMode = "";
-        property->SetWindowAnchorInfo(clearedInfo);
-        // Clear parent window event listeners registered during attach
-        ClearParentWindowListeners(GetPersistentId());
-    }
-    return WSError::WS_OK;
-}
-
-/** @note @window.layout */
 WSError WindowSceneSessionImpl::RemoveAttachedWindowLimits(int32_t sourcePersistentId)
 {
     TLOGI(WmsLogTag::WMS_LAYOUT, "called for window id=%{public}u, "
