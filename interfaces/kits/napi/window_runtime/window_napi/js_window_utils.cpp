@@ -298,6 +298,8 @@ napi_value AvoidAreaTypeInit(napi_env env)
         CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_KEYBOARD)));
     napi_set_named_property(env, objValue, "TYPE_NAVIGATION_INDICATOR",
         CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_NAVIGATION_INDICATOR)));
+    napi_set_named_property(env, objValue, "TYPE_FLOAT_NAVIGATION",
+        CreateJsValue(env, static_cast<int32_t>(AvoidAreaType::TYPE_FLOAT_NAVIGATION)));
     return objValue;
 }
 
@@ -320,6 +322,21 @@ napi_value WindowModeInit(napi_env env)
         static_cast<int32_t>(ApiWindowMode::SECONDARY)));
     napi_set_named_property(env, objValue, "FLOATING", CreateJsValue(env,
         static_cast<int32_t>(ApiWindowMode::FLOATING)));
+    return objValue;
+}
+
+napi_value SplitRatioPreferenceInit(napi_env env)
+{
+    WLOGFD("SplitRatioPreferenceInit");
+    CHECK_NAPI_ENV_RETURN_IF_NULL(env);
+    napi_value objValue = nullptr;
+    CHECK_NAPI_CREATE_OBJECT_RETURN_IF_NULL(env, objValue);
+    napi_set_named_property(env, objValue, "EQUAL", CreateJsValue(env,
+        static_cast<int32_t>(SplitRatioPreference::EQUAL)));
+    napi_set_named_property(env, objValue, "PRIMARY_DOMINANT", CreateJsValue(env,
+        static_cast<int32_t>(SplitRatioPreference::PRIMARY_DOMINANT)));
+    napi_set_named_property(env, objValue, "SECONDARY_DOMINANT", CreateJsValue(env,
+        static_cast<int32_t>(SplitRatioPreference::SECONDARY_DOMINANT)));
     return objValue;
 }
 
@@ -1075,6 +1092,7 @@ napi_value CreateJsWindowInfoObject(napi_env env, const sptr<WindowVisibilityInf
     napi_set_named_property(env, objValue, "displayId",
         CreateJsNumber(env, static_cast<uint64_t>(info->GetDisplayId())));
     napi_set_named_property(env, objValue, "bundleName", CreateJsValue(env, info->GetBundleName()));
+    napi_set_named_property(env, objValue, "moduleName", CreateJsValue(env, info->GetModuleName()));
     napi_set_named_property(env, objValue, "abilityName", CreateJsValue(env, info->GetAbilityName()));
     napi_set_named_property(env, objValue, "windowId", CreateJsValue(env, info->GetWindowId()));
     napi_set_named_property(env, objValue, "windowStatusType",

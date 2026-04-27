@@ -88,6 +88,7 @@ public:
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     bool IsFoldable();
     bool IsCaptured();
+    bool IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList);
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
@@ -155,6 +156,7 @@ public:
     DMError UnRegisterDisplayAttribute(const std::vector<std::string>& attributesNotListened);
 
 private:
+    FoldDisplayMode FoldDisplayModeTrans(FoldDisplayMode displaymode);
     void ClearDisplayStateCallback();
     void ClearFoldStatusCallback();
     void ClearFoldAngleCallback();
@@ -569,6 +571,32 @@ bool DisplayManager::Impl::CheckSizeValid(const Media::Size& size, int32_t oriHe
         return false;
     }
     return true;
+}
+
+FoldDisplayMode DisplayManager::Impl::FoldDisplayModeTrans(FoldDisplayMode displaymode)
+{
+    FoldDisplayMode transdisplaymode = FoldDisplayMode::UNKNOWN;
+    switch (displaymode) {
+        case FoldDisplayMode::FULL:
+        case FoldDisplayMode::L_FULL:
+            transdisplaymode = FoldDisplayMode::FULL;
+            break;
+        case FoldDisplayMode::N_MAIN:
+        case FoldDisplayMode::V_MAIN:
+        case FoldDisplayMode::MAIN:
+            transdisplaymode = FoldDisplayMode::MAIN;
+            break;
+        case FoldDisplayMode::GLOBAL_FULL:
+            transdisplaymode = FoldDisplayMode::GLOBAL_FULL;
+            break;
+        case FoldDisplayMode::COORDINATION:
+            transdisplaymode = FoldDisplayMode::COORDINATION;
+            break;
+        default:
+            transdisplaymode = FoldDisplayMode::UNKNOWN;
+            break;
+    }
+    return transdisplaymode;
 }
 
 void DisplayManager::Impl::ClearDisplayStateCallback()
@@ -1200,7 +1228,15 @@ std::vector<DisplayId> DisplayManager::GetAllDisplayIds(int32_t userId)
 
 std::vector<DisplayPhysicalResolution> DisplayManager::Impl::GetAllDisplayPhysicalResolution()
 {
-    return SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
+    auto physicalResolution = SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayPhysicalResolution();
+    for (auto& info : physicalResolution) {
+        auto displayMode = FoldDisplayModeTrans(info.foldDisplayMode_);
+        info.foldDisplayMode_ = displayMode;
+        if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
+            info.foldDisplayMode_ = FoldDisplayMode::FULL;
+        }
+    }
+    return physicalResolution;
 }
 
 std::vector<DisplayPhysicalResolution> DisplayManager::GetAllDisplayPhysicalResolution()
@@ -1254,6 +1290,16 @@ bool DisplayManager::Impl::IsCaptured()
     return SingletonContainer::Get<DisplayManagerAdapter>().IsCaptured();
 }
 
+bool DisplayManager::IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList)
+{
+    return pImpl_->IsCapturedByBundleNameList(bundleNameList);
+}
+
+bool DisplayManager::Impl::IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().IsCapturedByBundleNameList(bundleNameList);
+}
+
 FoldStatus DisplayManager::GetFoldStatus()
 {
     return pImpl_->GetFoldStatus();
@@ -1282,6 +1328,7 @@ FoldDisplayMode DisplayManager::Impl::GetFoldDisplayMode()
 FoldDisplayMode DisplayManager::Impl::GetFoldDisplayModeForExternal()
 {
     FoldDisplayMode displayMode = SingletonContainer::Get<DisplayManagerAdapter>().GetFoldDisplayMode();
+    displayMode = FoldDisplayModeTrans(displayMode);
     if (displayMode == FoldDisplayMode::GLOBAL_FULL) {
         return FoldDisplayMode::FULL;
     }
@@ -2030,6 +2077,7 @@ DMError DisplayManager::Impl::UnregisterDisplayUpdateListener(sptr<IDisplayUpdat
 
 void DisplayManager::Impl::NotifyDisplayModeChanged(FoldDisplayMode displayMode)
 {
+    displayMode = FoldDisplayModeTrans(displayMode);
     std::set<sptr<IDisplayModeListener>> displayModeListeners;
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);

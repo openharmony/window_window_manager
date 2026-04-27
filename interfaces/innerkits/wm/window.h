@@ -1057,9 +1057,12 @@ public:
      * @param identityToken identity token of sceneSession
      * @return sptr<Window> If create window success, return window instance; Otherwise, return nullptr
      */
-    static sptr<Window> Create(sptr<WindowOption>& option, const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
-        const std::string& identityToken = "", bool isModuleAbilityHookEnd = false);
+    static sptr<Window> Create(sptr<WindowOption>& option,
+                               const std::shared_ptr<AbilityRuntime::Context>& context,
+                               const sptr<IRemoteObject>& iSession, WMError& errCode = DefaultCreateErrCode,
+                               const std::string& identityToken = "", 
+                               bool isModuleAbilityHookEnd = false,
+                               sptr<IRemoteObject> renderSession = nullptr);
 
     /**
      * @brief get and verify windowType, include sub_window/system_window
@@ -1688,7 +1691,7 @@ public:
     /**
      * @brief Pause window
      */
-    virtual void Pause() {}
+    virtual void Pause(bool isGamePreLaunch = false) {}
 
     /**
      * @brief Hide window
@@ -5440,6 +5443,20 @@ public:
     {
         return WMError::WM_ERROR_INVALID_WINDOW_TYPE;
     }
+
+    /**
+     * @brief Get Window PersistentId.
+     *
+     * @return Window PersistentId.
+     */
+    virtual int32_t GetWindowPersistentId() const { return INVALID_WINDOW_ID; };
+
+    /**
+     * @brief Get whether this window is AtomicService.
+     *
+     * @return True means the window is AtomicService, false means the window is not AtomicService.
+     */
+    virtual bool GetIsAtomicService() const { return false; };
 
     /**
      * @brief notify split ratio changed
