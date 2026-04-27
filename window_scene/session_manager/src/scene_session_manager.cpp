@@ -19834,9 +19834,7 @@ WMError SceneSessionManager::SetParentWindowInner(const sptr<SceneSession>& subS
     newParentSession->AddSubSession(subSession);
     subSession->SetParentSession(newParentSession);
     subSession->SetParentPersistentId(newParentWindowId);
-    if (!subSession->IsLoosenedWithFreeMultiMode()) {
-        subSession->UpdateSubWindowLevel(newSubWindowLevel + 1);
-    }
+    subSession->UpdateSubWindowLevel(newSubWindowLevel + 1);
     if (oldSubWindowLevel == 0) {
         oldParentSession->UnregisterNotifySurfaceBoundsChangeFunc(subWindowId);
         if (newSubWindowLevel == 0 && subSession->GetIsFollowParentLayout()) {
