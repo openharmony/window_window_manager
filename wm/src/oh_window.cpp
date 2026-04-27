@@ -1063,7 +1063,7 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_FOCUS, "eventHandler is null, windowId:%{public}d", windowId);
-        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.setWindowFocusable",
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.OH_WindowManager_SetWindowFocusable",
             WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
@@ -1072,7 +1072,7 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
         auto window = Window::GetWindowWithId(windowId);
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s window is null, windowId:%{public}d", where, windowId);
-            HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.setWindowFocusable",
+            HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.OH_WindowManager_SetWindowFocusable",
                 WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL);
             errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_STATE_ABNORMAL;
             return;
@@ -1080,7 +1080,7 @@ int32_t OH_WindowManager_SetWindowFocusable(int32_t windowId, bool isFocusable)
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetFocusable(isFocusable));
     }, __func__);
     if (errCode != WindowManager_ErrorCode::OK) {
-        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.setWindowFocusable", errCode);
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.OH_WindowManager_SetWindowFocusable", errCode);
     }
     return errCode;
 }

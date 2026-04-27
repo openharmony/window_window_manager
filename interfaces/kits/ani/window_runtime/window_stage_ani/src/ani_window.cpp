@@ -5465,6 +5465,8 @@ void AniWindow::EnableLandscapeMultiWindow(ani_env* env, ani_object obj, ani_lon
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.enableLandscapeMultiWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -5475,6 +5477,8 @@ void AniWindow::OnEnableLandscapeMultiWindow(ani_env* env)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.enableLandscapeMultiWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -5482,6 +5486,8 @@ void AniWindow::OnEnableLandscapeMultiWindow(ani_env* env)
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
             windowToken_->GetWindowId(), static_cast<int32_t>(ret));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.enableLandscapeMultiWindow",
+            AniWindowUtils::ToErrorCode(ret));
         AniWindowUtils::AniThrowError(env, ret);
         return;
     }
@@ -5492,6 +5498,8 @@ void AniWindow::DisableLandscapeMultiWindow(ani_env* env, ani_object obj, ani_lo
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (!aniWindow) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableLandscapeMultiWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -5502,6 +5510,8 @@ void AniWindow::OnDisableLandscapeMultiWindow(ani_env* env)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableLandscapeMultiWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -5509,6 +5519,8 @@ void AniWindow::OnDisableLandscapeMultiWindow(ani_env* env)
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_MULTI_WINDOW, "[ANI] Failed, windowId: %{public}u, ret: %{public}d",
             windowToken_->GetWindowId(), static_cast<int32_t>(ret));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableLandscapeMultiWindow",
+            AniWindowUtils::ToErrorCode(ret));
         AniWindowUtils::AniThrowError(env, ret);
         return;
     }

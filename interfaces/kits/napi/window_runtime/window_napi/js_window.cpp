@@ -3989,6 +3989,7 @@ napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_in
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.enableLandscapeMultiWindow", err);
             task->Reject(env, JsErrUtils::CreateJsError(env, err));
             return;
         }
@@ -3996,11 +3997,15 @@ napi_value JsWindow::OnEnableLandscapeMultiWindow(napi_env env, napi_callback_in
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.enableLandscapeMultiWindow",
+                WM_JS_TO_ERROR_CODE_MAP.at(ret));
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
                 "JsWindow::OnEnableLandscapeMultiWindow failed"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnEnableLandscapeMultiWindow") != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.enableLandscapeMultiWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(
             env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4021,6 +4026,7 @@ napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_i
         auto weakWindow = weakToken.promote();
         err = (weakWindow == nullptr) ? WmErrorCode::WM_ERROR_STATE_ABNORMALLY : err;
         if (err != WmErrorCode::WM_OK) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableLandscapeMultiWindow", err);
             task->Reject(env, JsErrUtils::CreateJsError(env, err));
             return;
         }
@@ -4028,11 +4034,15 @@ napi_value JsWindow::OnDisableLandscapeMultiWindow(napi_env env, napi_callback_i
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableLandscapeMultiWindow",
+                WM_JS_TO_ERROR_CODE_MAP.at(ret));
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
                 "JsWindow::OnDisableLandscapeMultiWindow failed"));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnDisableLandscapeMultiWindow") != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableLandscapeMultiWindow",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(
             env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
