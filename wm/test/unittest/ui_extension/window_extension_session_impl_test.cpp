@@ -3858,7 +3858,6 @@ HWTEST_F(WindowExtensionSessionImplTest, IsBlockSubwindow, TestSize.Level1)
     window_->isBlockSubwindow_ = false;
     EXPECT_FALSE(window_->IsBlockSubwindow());
 }
-}
 
 /**
  * @tc.name: OnHostWindowStatusChange
@@ -3953,6 +3952,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowStatusChangeWithListener, T
     EXPECT_EQ(WMError::WM_OK, window_->GetWindowStatus(windowStatus));
     EXPECT_EQ(WindowStatus::WINDOW_STATUS_MINIMIZE, windowStatus);
     EXPECT_EQ(WMError::WM_OK, window_->UnregisterWindowStatusChangeListener(listener));
+}
 }
 } // namespace Rosen
 } // namespace OHOS
