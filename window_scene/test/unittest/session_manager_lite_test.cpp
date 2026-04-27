@@ -306,7 +306,7 @@ HWTEST_F(SessionManagerLiteTest, RegisterWMSConnectionChangedListener, TestSize.
     auto callback = [](int32_t userId, int32_t screenId, bool isConnected, int32_t pid) {};
 
     // branch 1: Set callbackFunc is null
-    ret = instance->RegisterWMSConnectionChangedListener(nullptr);
+    ret = instance_->RegisterWMSConnectionChangedListener(nullptr);
     EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
 
     // branch 2: Mock RegisterSMSRecoverListener return not ok
@@ -553,6 +553,7 @@ HWTEST_F(SessionManagerLiteTest, SMSRecoverListener3, TestSize.Level1)
     int32_t wmsUserId = INVALID_USER_ID;
     int32_t screenId = DEFAULT_SCREEN_ID;
     bool isConnected = false;
+    int32_t pid = -1;
     auto listener = sptr<SessionManagerServiceLiteRecoverListener>::MakeSptr(userId_);
 
     // branch 4: TRANS_ID_ON_WMS_CONNECTION_CHANGED
@@ -562,6 +563,7 @@ HWTEST_F(SessionManagerLiteTest, SMSRecoverListener3, TestSize.Level1)
     data.WriteInt32(wmsUserId);
     data.WriteInt32(screenId);
     data.WriteBool(isConnected);
+    data.WriteBool(pid);
     ret = listener->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, ERR_NONE);
 
@@ -571,6 +573,7 @@ HWTEST_F(SessionManagerLiteTest, SMSRecoverListener3, TestSize.Level1)
     data.WriteInt32(wmsUserId);
     data.WriteInt32(screenId);
     data.WriteBool(isConnected);
+    data.WriteBool(pid);
     ret = listener->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, ERR_NONE);
 
