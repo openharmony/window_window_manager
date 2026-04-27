@@ -94,7 +94,7 @@ constexpr int32_t WM_ERROR_HISTOGRAM_INDEX_INVALID_PARAM = 53;
 constexpr int32_t WM_ERROR_HISTOGRAM_INDEX_DEVICE_NOT_SUPPORT = 54;
 
 /**
- * @brief Histogram index constants for WindowManager_ErrorCode (NDK)
+ * @brief Histogram index constants for WindowManager_ErrorCode
  */
 constexpr int32_t WM_MANAGER_ERROR_HISTOGRAM_INDEX_OK = 0;
 constexpr int32_t WM_MANAGER_ERROR_HISTOGRAM_INDEX_NO_PERMISSION = 51;
@@ -151,7 +151,7 @@ constexpr int32_t WmErrorCodeToIndex(WmErrorCode error)
     HISTOGRAM_ENUMERATION(name, WmErrorCodeToIndex(errorCode), WM_ERROR_HISTOGRAM_MAX)
 
 /**
- * @brief Convert WindowManager_ErrorCode (NDK) to histogram index
+ * @brief Convert WindowManager_ErrorCode to histogram index
  * @param error - WindowManager_ErrorCode enum value
  * @return Index value:
  *         - OK -> 0
