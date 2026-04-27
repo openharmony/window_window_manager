@@ -9649,11 +9649,11 @@ napi_value JsWindow::OnCreateSubWindowWithOptions(napi_env env, napi_callback_in
         }
         if (windowOption->IsSubWindowZLevelAboveParentLoosened() &&
             !WindowHelper::IsMainWindow(window->GetType())) {
-            TLOGE(WmsLogTag::WMS_SUB, "The SubWindowZLevelAboveParentLoosened which"
-                " is true is only supported for main window");
+            TLOGE(WmsLogTag::WMS_SUB, "Only the main window supports creating subwindow"
+                " with the parameter zLevelAboveParentLoosened set to true.");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
-                "[window][createSubWindowWithOptions]msg: The SubWindowZLevelAboveParentLoosened which is true"
-                " is only supported for main window"));
+                "[window][createSubWindowWithOptions]msg: Only the main window supports creating subwindow"
+                " with the parameter zLevelAboveParentLoosened set to true."));
             return;
         }
         windowOption->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
