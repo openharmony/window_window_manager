@@ -894,9 +894,6 @@ WmErrorCode AniWindowRegisterManager::ProcessParentWindowStatusChangeRegister(sp
 {
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE(
-            isRegister ? "ArkUI.window.onParentWindowStatusChange" : "ArkUI.window.offParentWindowStatusChange",
-            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IParentWindowStatusChangeListener> thisListener(listener);
@@ -906,8 +903,6 @@ WmErrorCode AniWindowRegisterManager::ProcessParentWindowStatusChangeRegister(sp
     } else {
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->UnregisterParentWindowStatusChangeListener(thisListener));
     }
-    HISTOGRAM_ENUMERATION_ERROR_CODE(
-        isRegister ? "ArkUI.window.onParentWindowStatusChange" : "ArkUI.window.offParentWindowStatusChange", ret);
     return ret;
 }
 

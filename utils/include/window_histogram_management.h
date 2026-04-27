@@ -146,7 +146,7 @@ constexpr int32_t WmErrorCodeToIndex(WmErrorCode error)
  * @note Compile-time type check ensures errorCode is WmErrorCode type
  */
 #define HISTOGRAM_ENUMERATION_ERROR_CODE(name, errorCode) \
-    static_assert(std::is_same_v<decltype(errorCode), WmErrorCode>, \
+    static_assert(std::is_same_v<std::remove_const_t<decltype(errorCode)>, WmErrorCode>, \
         "HISTOGRAM_ENUMERATION_ERROR_CODE: errorCode parameter must be WmErrorCode type"); \
     HISTOGRAM_ENUMERATION(name, WmErrorCodeToIndex(errorCode), WM_ERROR_HISTOGRAM_MAX)
 
@@ -192,7 +192,7 @@ constexpr int32_t WindowManagerErrorCodeToIndex(WindowManager_ErrorCode error)
  * @note Compile-time type check ensures errorCode is WindowManager_ErrorCode type
  */
 #define HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE(name, errorCode) \
-    static_assert(std::is_same_v<decltype(errorCode), WindowManager_ErrorCode>, \
+    static_assert(std::is_same_v<std::remove_const_t<decltype(errorCode)>, WindowManager_ErrorCode>, \
         "HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE: errorCode parameter must be WindowManager_ErrorCode type"); \
     HISTOGRAM_ENUMERATION(name, WindowManagerErrorCodeToIndex(errorCode), WM_ERROR_HISTOGRAM_MAX)
 
