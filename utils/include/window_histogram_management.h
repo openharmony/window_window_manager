@@ -17,6 +17,7 @@
 #define WINDOW_HISTOGRAM_MANAGEMENT_H
 
 #include "wm_common.h"
+#include "window_manager_hilog.h"
 
 #ifndef WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS
 
@@ -25,12 +26,15 @@ namespace Rosen {
 
 inline void HISTOGRAM_BOOLEAN(const char* name, int32_t value)
 {
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_BOOLEAN called: %{public}s, value=%{public}d", name, value);
     (void)name;
     (void)value;
 }
 
 inline void HISTOGRAM_ENUMERATION(const char* name, int32_t sample, int32_t boundary)
 {
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_ENUMERATION called: %{public}s, sample=%{public}d, boundary=%{public}d",
+        name, sample, boundary);
     (void)name;
     (void)sample;
     (void)boundary;
@@ -39,6 +43,8 @@ inline void HISTOGRAM_ENUMERATION(const char* name, int32_t sample, int32_t boun
 inline void HISTOGRAM_CUSTOM_COUNTS(const char* name, int32_t sample,
                                     int32_t min, int32_t max, size_t bucket_count)
 {
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_CUSTOM_COUNTS called: %{public}s, sample=%{public}d",
+        name, sample);
     (void)name;
     (void)sample;
     (void)min;
@@ -48,24 +54,30 @@ inline void HISTOGRAM_CUSTOM_COUNTS(const char* name, int32_t sample,
 
 inline void HISTOGRAM_TIMES(const char* name, int32_t sample)
 {
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_TIMES called: %{public}s, sample=%{public}d", name, sample);
     (void)name;
     (void)sample;
 }
 
 inline void HISTOGRAM_PERCENTAGE(const char* name, int32_t sample)
 {
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_PERCENTAGE called: %{public}s, sample=%{public}d", name, sample);
     (void)name;
     (void)sample;
 }
 
 inline void HISTOGRAM_ENUMERATION_ERROR_CODE(const char* name, WmErrorCode errorCode)
 {
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_ENUMERATION_ERROR_CODE called: %{public}s, code=%{public}d",
+        name, errorCode);
     (void)name;
     (void)errorCode;
 }
 
 inline void HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE(const char* name, int32_t errorCode)
 {
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE called: %{public}s, code=%{public}d",
+        name, errorCode);
     (void)name;
     (void)errorCode;
 }
@@ -146,6 +158,7 @@ constexpr int32_t WmErrorCodeToIndex(WmErrorCode error)
  * @note Compile-time type check ensures errorCode is WmErrorCode type
  */
 #define HISTOGRAM_ENUMERATION_ERROR_CODE(name, errorCode) \
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_ENUMERATION_ERROR_CODE called: %{public}s", name); \
     static_assert(std::is_same_v<std::remove_const_t<decltype(errorCode)>, WmErrorCode>, \
         "HISTOGRAM_ENUMERATION_ERROR_CODE: errorCode parameter must be WmErrorCode type"); \
     HISTOGRAM_ENUMERATION(name, WmErrorCodeToIndex(errorCode), WM_ERROR_HISTOGRAM_MAX)
@@ -192,6 +205,7 @@ constexpr int32_t WindowManagerErrorCodeToIndex(WindowManager_ErrorCode error)
  * @note Compile-time type check ensures errorCode is WindowManager_ErrorCode type
  */
 #define HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE(name, errorCode) \
+    TLOGD(WmsLogTag::DEFAULT, "HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE called: %{public}s", name); \
     static_assert(std::is_same_v<std::remove_const_t<decltype(errorCode)>, WindowManager_ErrorCode>, \
         "HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE: errorCode parameter must be WindowManager_ErrorCode type"); \
     HISTOGRAM_ENUMERATION(name, WindowManagerErrorCodeToIndex(errorCode), WM_ERROR_HISTOGRAM_MAX)

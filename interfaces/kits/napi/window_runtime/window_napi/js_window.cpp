@@ -5609,7 +5609,7 @@ napi_value JsWindow::OnSetResizeByDragEnabled(napi_env env, napi_callback_info i
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), dragEnabled,
-                       env, task = napiAsyncTask, where = __func__] {
+                      env, task = napiAsyncTask, where = __func__] {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
