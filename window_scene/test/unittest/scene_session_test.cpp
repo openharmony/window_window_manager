@@ -46,19 +46,27 @@ void SceneSessionLogCallback(const LogType type,
 }
 } // namespace
 constexpr int WAIT_ASYNC_US = 1000000;
+constexpr DisplayId VIRTUAL_DISPLAY_ID = 999;
 class SceneSessionTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+
+private:
+    sptr<SceneSession> session_;
 };
 
 void SceneSessionTest::SetUpTestCase() {}
 
 void SceneSessionTest::TearDownTestCase() {}
 
-void SceneSessionTest::SetUp() {}
+void SceneSessionTest::SetUp()
+{
+    SessionInfo info;
+    session_ = sptr<SceneSession>::MakeSptr(info, nullptr);
+}
 
 void SceneSessionTest::TearDown() {}
 
@@ -1590,56 +1598,134 @@ HWTEST_F(SceneSessionTest, SetMainWindowTopmost, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateSessionRectPosYFromClient01
- * @tc.desc: normal function
+ * @tc.name: TestUpdateSessionRectPosYNotHalfFolded
+ * @tc.desc: Default display is not half-folded, should early return and not modify rect
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionTest, UpdateSessionRectPosYFromClient01, TestSize.Level1)
+HWTEST_F(SceneSessionTest, TestUpdateSessionRectPosYNotHalfFolded, TestSize.Level1)
 {
-    DisplayId displayId = 0;
-    SessionInfo info;
-    info.abilityName_ = "UpdateSessionRectPosYFromClient";
-    info.bundleName_ = "UpdateSessionRectPosYFromClient";
-    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    ASSERT_NE(sceneSession, nullptr);
-    sceneSession->sessionInfo_.screenId_ = 0;
-    EXPECT_EQ(sceneSession->GetScreenId(), 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
-        0, SuperFoldStatus::EXPANDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    WSRect rect = { 0, 0, 0, 0 };
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
-    EXPECT_EQ(rect.posY_, 0);
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
-        0, SuperFoldStatus::KEYBOARD, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1624, 2472, 1648 });
-    rect = { 0, 100, 0, 0 };
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
+    auto& foldMgr = PcFoldScreenManager::GetInstance();
+    foldMgr.UpdateFoldScreenStatus(DEFAULT_DISPLAY_ID,
+                                   SuperFoldStatus::EXPANDED,
+                                   { 0, 0, 2472, 1648 },
+                                   { 0, 0, 0, 0 },
+                                   { 0, 0, 0, 0 });
+    WSRect rect = { 0, 100, 0, 0 };
+    DisplayId displayId = VIRTUAL_DISPLAY_ID;
+    session_->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
+    EXPECT_EQ(rect.posY_, 100);
+}
+
+/**
+ * @tc.name: TestUpdateSessionRectPosYHasSystemKeyboard
+ * @tc.desc: System keyboard exists, should early return and not modify rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TestUpdateSessionRectPosYHasSystemKeyboard, TestSize.Level1)
+{
+    auto& foldMgr = PcFoldScreenManager::GetInstance();
+    foldMgr.UpdateFoldScreenStatus(DEFAULT_DISPLAY_ID,
+                                   SuperFoldStatus::HALF_FOLDED,
+                                   { 0, 0, 2472, 1648 },
+                                   { 0, 1648, 2472, 1648 },
+                                   { 0, 1649, 2472, 40 });
+    foldMgr.UpdateSystemKeyboardStatus(true); // ensure HasSystemKeyboard() == true
+    WSRect rect = { 0, 100, 0, 0 };
+    DisplayId displayId = VIRTUAL_DISPLAY_ID;
+    session_->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
+    foldMgr.UpdateSystemKeyboardStatus(false); // reset state
+    EXPECT_EQ(rect.posY_, 100);
+}
+
+/**
+ * @tc.name: TestUpdateSessionRectPosYNotPcFoldDisplay
+ * @tc.desc: configDisplayId is not a fold screen, should early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TestUpdateSessionRectPosYNotPcFoldDisplay, TestSize.Level1)
+{
+    auto& foldMgr = PcFoldScreenManager::GetInstance();
+    foldMgr.UpdateFoldScreenStatus(DEFAULT_DISPLAY_ID,
+                                   SuperFoldStatus::HALF_FOLDED,
+                                   { 0, 0, 2472, 1648 },
+                                   { 0, 1648, 2472, 1648 },
+                                   { 0, 1649, 2472, 40 });
+    DisplayId notFoldDisplayId = 123;
+    session_->configDisplayId_ = notFoldDisplayId;
+    WSRect rect = { 0, 100, 0, 0 };
+
+    // Case 1: When the reason is RESIZE, configDisplayId_ remains unchanged.
+    session_->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, notFoldDisplayId, rect);
     EXPECT_EQ(rect.posY_, 100);
 
-    PcFoldScreenManager::GetInstance().UpdateFoldScreenStatus(
-        0, SuperFoldStatus::HALF_FOLDED, { 0, 0, 2472, 1648 }, { 0, 1648, 2472, 1648 }, { 0, 1649, 2472, 40 });
-    sceneSession->clientDisplayId_ = 0;
-    rect = { 0, 100, 100, 100 };
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, displayId, rect);
+    // Case 2: When the reason is not RESIZE, configDisplayId_ is updated to the input value.
+    session_->UpdateSessionRectPosYFromClient(SizeChangeReason::UNDEFINED, notFoldDisplayId, rect);
     EXPECT_EQ(rect.posY_, 100);
-    sceneSession->clientDisplayId_ = 999;
-    sceneSession->configDisplayId_ = 999;
-    rect = { 0, 100, 100, 100 };
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+}
+
+/**
+ * @tc.name: TestUpdateSessionRectPosY_MoveToLowerScreen
+ * @tc.desc: Move window from upper part to lower screen when using virtual display
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TestUpdateSessionRectPosYMoveToLowerScreen, TestSize.Level1)
+{
+    auto& foldMgr = PcFoldScreenManager::GetInstance();
+    foldMgr.UpdateFoldScreenStatus(DEFAULT_DISPLAY_ID,
+                                   SuperFoldStatus::HALF_FOLDED,
+                                   { 0, 0, 2472, 1648 },
+                                   { 0, 1648, 2472, 1648 },
+                                   { 0, 1649, 2472, 40 });
+    session_->clientDisplayId_ = VIRTUAL_DISPLAY_ID;
+    session_->configDisplayId_ = VIRTUAL_DISPLAY_ID;
+    WSRect rect = { 0, 100, 0, 0 };
+    DisplayId displayId = VIRTUAL_DISPLAY_ID;
+    session_->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
     EXPECT_EQ(rect.posY_, 100 + 1648 + 40);
+}
 
-    sceneSession->clientDisplayId_ = 999;
-    sceneSession->configDisplayId_ = 999;
-    rect = { 0, 1700, 100, 100 };
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+/**
+ * @tc.name: TestUpdateSessionRectPosYAlreadyInLowerScreen
+ * @tc.desc: Window already in lower screen, position should not change
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TestUpdateSessionRectPosYAlreadyInLowerScreen, TestSize.Level1)
+{
+    auto& foldMgr = PcFoldScreenManager::GetInstance();
+    foldMgr.UpdateFoldScreenStatus(DEFAULT_DISPLAY_ID,
+                                   SuperFoldStatus::HALF_FOLDED,
+                                   { 0, 0, 2472, 1648 },
+                                   { 0, 1648, 2472, 1648 },
+                                   { 0, 1649, 2472, 40 });
+    session_->clientDisplayId_ = VIRTUAL_DISPLAY_ID;
+    session_->configDisplayId_ = VIRTUAL_DISPLAY_ID;
+    WSRect rect = { 0, 1700, 0, 0 };
+    DisplayId displayId = VIRTUAL_DISPLAY_ID;
+    session_->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
     EXPECT_EQ(rect.posY_, 1700);
+}
 
-    WSRect sessionRect = {100, 200, 1000, 1000};
-    sceneSession->SetSessionRect(sessionRect);
-    sceneSession->clientDisplayId_ = 999;
-    sceneSession->configDisplayId_ = 999;
-    rect = { 0, -100, 100, 100 };
-    sceneSession->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
-    EXPECT_EQ(rect.posY_, -100 + sessionRect.posY_);
+/**
+ * @tc.name: TestUpdateSessionRectPosYNegativePosY
+ * @tc.desc: Negative posY means moving from lower to upper screen, should offset by session rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest, TestUpdateSessionRectPosYNegativePosY, TestSize.Level1)
+{
+    auto& foldMgr = PcFoldScreenManager::GetInstance();
+    foldMgr.UpdateFoldScreenStatus(DEFAULT_DISPLAY_ID,
+                                   SuperFoldStatus::HALF_FOLDED,
+                                   { 0, 0, 2472, 1648 },
+                                   { 0, 1648, 2472, 1648 },
+                                   { 0, 1649, 2472, 40 });
+    WSRect sessionRect = { 0, 200, 0, 0 };
+    session_->SetSessionRect(sessionRect);
+    session_->clientDisplayId_ = VIRTUAL_DISPLAY_ID;
+    session_->configDisplayId_ = VIRTUAL_DISPLAY_ID;
+    WSRect rect = { 0, -100, 0, 0 };
+    DisplayId displayId = VIRTUAL_DISPLAY_ID;
+    session_->UpdateSessionRectPosYFromClient(SizeChangeReason::RESIZE, displayId, rect);
+    EXPECT_EQ(rect.posY_, 100); // -100 + 200
 }
 
 /**
