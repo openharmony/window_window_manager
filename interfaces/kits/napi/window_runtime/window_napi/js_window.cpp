@@ -2789,7 +2789,7 @@ napi_value JsWindow::OnRegisterWindowCallback(napi_env env, napi_callback_info i
     if (windowToken_ == nullptr) {
         WLOGFE("Window is nullptr");
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][on]msg: Window is nullptr.");
+            "[window][on]msg: The window is not created or destroyed.");
     }
     sptr<Window> windowToken = windowToken_;
     constexpr size_t argcMin = 2;
@@ -2837,7 +2837,7 @@ napi_value JsWindow::OnUnregisterWindowCallback(napi_env env, napi_callback_info
 {
     if (windowToken_ == nullptr) {
         WLOGFE("Window is nullptr");
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][off]msg: Window is nullptr.");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "[window][off]msg: The window is not created or destroyed.");
     }
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
@@ -7769,12 +7769,10 @@ bool JsWindow::ParseWindowAnchorInfo(napi_env env, napi_value jsObject, WindowAn
 bool JsWindow::ParseWindowAttachOptions(napi_env env, napi_value jsObject,
     WindowAnchorInfo::AttachOptions& subWindowAttachOptions)
 {
-    std::string data = "";
-    std::string defaultValue = "";
     if (GetType(env, jsObject) != napi_object) {
         return false;
     }
-    auto parseField = [](napi_env& env, const char* fieldName, std::string& data, auto& field, auto& defValue,
+    auto parseField = [](napi_env& env, const char* fieldName, auto& data, auto& field, const auto& defValue,
             napi_value& jsObject) -> bool {
         if (!ParseJsValueOrGetDefault(jsObject, env, fieldName, data, defValue)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert object to %{public}s", fieldName);
@@ -7784,9 +7782,25 @@ bool JsWindow::ParseWindowAttachOptions(napi_env env, napi_value jsObject,
         return true;
     };
 
+    std::string data = "";
+    std::string defaultValue = "";
     if (!parseField(env, "currentLayoutMode", data, subWindowAttachOptions.currentLayoutMode, defaultValue, jsObject)) {
         return false;
     }
+
+    const bool defaultBoolValue = false;
+    bool boolData = false;
+    if (!parseField(env, "isIntersectedHeightLimit", boolData, subWindowAttachOptions.isIntersectedHeightLimit,
+        defaultBoolValue, jsObject)) {
+        return false;
+    }
+
+    boolData = defaultBoolValue;
+    if (!parseField(env, "isIntersectedWidthLimit", boolData, subWindowAttachOptions.isIntersectedWidthLimit,
+        defaultBoolValue, jsObject)) {
+        return false;
+    }
+
     return true;
 }
 
@@ -8004,6 +8018,35 @@ napi_value JsWindow::OnGetWindowLimitsVP(napi_env env, napi_callback_info info)
     }
 }
 
+void JsWindow::CleanUpCallbackReferences(napi_env env, napi_ref sizeChangeCallbackRef,
+    napi_ref statusChangeCallbackRef)
+{
+    if (sizeChangeCallbackRef) {
+        napi_delete_reference(env, sizeChangeCallbackRef);
+    }
+    if (statusChangeCallbackRef) {
+        napi_delete_reference(env, statusChangeCallbackRef);
+    }
+}
+
+WmErrorCode JsWindow::RegisterParentWindowCallback(napi_env env, napi_ref callbackRef,
+    const char* callbackName)
+{
+    if (callbackRef == nullptr) {
+        return WmErrorCode::WM_OK; // No callback to register is not an error
+    }
+
+    napi_value callback = nullptr;
+    napi_get_reference_value(env, callbackRef, &callback);
+    if (callback == nullptr) {
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+
+    WmErrorCode ret = registerManager_->RegisterListener(windowToken_,
+        callbackName, CaseType::CASE_WINDOW, env, callback, nullptr);
+    return ret;
+}
+
 /** @note @window.layout */
 napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info info)
 {
@@ -8027,61 +8070,80 @@ napi_value JsWindow::OnAttachToParentWindow(napi_env env, napi_callback_info inf
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to attachOptions");
     }
-
     napi_value sizeChangeCallback = nullptr;
     napi_status sizeStatus = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowSizeChangeCallback",
         &sizeChangeCallback);
-    if (sizeStatus == napi_ok && sizeChangeCallback != nullptr) {
-        WmErrorCode registerWindowSizeChangeRet = registerManager_->RegisterListener(windowToken_,
-            "parentWindowSizeChange", CaseType::CASE_WINDOW, env, sizeChangeCallback, nullptr);
-        if (registerWindowSizeChangeRet != WmErrorCode::WM_OK) {
-            return NapiThrowError(env, registerWindowSizeChangeRet,
-                "[window][attachLayoutToParentWindow]msg: Register window size change listener failed");
-        }
-
-    } else if(sizeStatus != napi_ok) {
+    if (sizeStatus != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to sizeChangeCallback");
     }
-
     napi_value statusChangeCallback = nullptr;
     napi_status statusChange = napi_get_named_property(env, argv[INDEX_ONE], "parentWindowStatusChangeCallback",
         &statusChangeCallback);
-    if (statusChange == napi_ok && statusChangeCallback != nullptr) {
-        WmErrorCode registerWindowStatusChangeRet = registerManager_->RegisterListener(windowToken_,
-            "parentWindowStatusChange", CaseType::CASE_WINDOW, env, statusChangeCallback, nullptr);
-        if (registerWindowStatusChangeRet != WmErrorCode::WM_OK) {
-            return NapiThrowError(env, registerWindowStatusChangeRet,
-                "[window][attachLayoutToParentWindow]msg: Register window status change listener failed");
-        }
-
-    } else if(statusChange != napi_ok) {
+    if(statusChange != napi_ok) {
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
                 "[window][attachLayoutToParentWindow]msg: Failed to convert parameter to statusChangeCallback");
     }
-
     const char* const where = __func__;
     napi_value result = nullptr;
     std::shared_ptr napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     acceptAnchorInfo.attachOptions.currentLayoutMode = windowAttachOptions.currentLayoutMode;
+    acceptAnchorInfo.attachOptions.isIntersectedHeightLimit = windowAttachOptions.isIntersectedHeightLimit;
+    acceptAnchorInfo.attachOptions.isIntersectedWidthLimit = windowAttachOptions.isIntersectedWidthLimit;
     acceptAnchorInfo.isFromAttachOrDetach_ = true;
-    TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offsetY:%{public}d"
-        "currentLayoutMode:%{public}s", acceptAnchorInfo.windowAnchor_, acceptAnchorInfo.offsetX_,
-        acceptAnchorInfo.offsetY_, acceptAnchorInfo.attachOptions.currentLayoutMode.c_str());
-    auto asyncTask = [weakToken = wptr(windowToken_), task = napiAsyncTask, env, acceptAnchorInfo, where] {
+    TLOGI(WmsLogTag::WMS_LAYOUT, "windowAnchorInfo %{public}d, offsetX:%{public}d, offsetY:%{public}d, "
+        "currentLayoutMode:%{public}s, isIntersectedHeightLimit:%{public}d, isIntersectedWidthLimit:%{public}d",
+        acceptAnchorInfo.windowAnchor_, acceptAnchorInfo.offsetX_, acceptAnchorInfo.offsetY_,
+        acceptAnchorInfo.attachOptions.currentLayoutMode.c_str(),
+        acceptAnchorInfo.attachOptions.isIntersectedHeightLimit,
+        acceptAnchorInfo.attachOptions.isIntersectedWidthLimit);
+    napi_ref sizeChangeCallbackRef = nullptr;
+    if (sizeChangeCallback != nullptr) {
+        napi_valuetype valueType;
+        napi_typeof(env, sizeChangeCallback, &valueType);
+        if (valueType == napi_function) {
+            napi_create_reference(env, sizeChangeCallback, 1, &sizeChangeCallbackRef);
+        }
+    }
+    napi_ref statusChangeCallbackRef = nullptr;
+    if (statusChangeCallback != nullptr) {
+        napi_valuetype valueType;
+        napi_typeof(env, statusChangeCallback, &valueType);
+        if (valueType == napi_function) {
+            napi_create_reference(env, statusChangeCallback, 1, &statusChangeCallbackRef);
+        }
+    }
+    auto asyncTask = [this, weakToken = wptr(windowToken_), task = napiAsyncTask, env, acceptAnchorInfo, where,
+        sizeChangeCallbackRef, statusChangeCallbackRef]() {
         auto window = weakToken.promote();
         if (window == nullptr) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s window is nullptr", where);
+            CleanUpCallbackReferences(env, sizeChangeCallbackRef, statusChangeCallbackRef);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][attachLayoutToParentWindow]msg: Window is nullptr."));
             return;
         }
+        WmErrorCode registerSizeChangeRet =
+            RegisterParentWindowCallback(env, sizeChangeCallbackRef, "parentWindowSizeChange");
+        if (registerSizeChangeRet != WmErrorCode::WM_OK) {
+            task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][attachLayoutToParentWindow]msg: Failed to register size change callback listener."));
+        }
+        WmErrorCode registerStatusChangeRet =
+            RegisterParentWindowCallback(env, statusChangeCallbackRef, "parentWindowStatusChange");
+        if (registerStatusChangeRet != WmErrorCode::WM_OK) {
+            task->Reject(env,JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+                "[window][attachLayoutToParentWindow]msg: Failed to register status change callback listener."));
+        }
+        CleanUpCallbackReferences(env, sizeChangeCallbackRef, statusChangeCallbackRef);
+
         if (!WindowHelper::IsSubWindow(window->GetType())) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "%{public}s only sub window is valid", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
                 "[window][attachLayoutToParentWindow]msg: Only sub window is valid."));
             return;
         }
+
         WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetWindowAnchorInfo(acceptAnchorInfo));
         if (ret == WmErrorCode::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));

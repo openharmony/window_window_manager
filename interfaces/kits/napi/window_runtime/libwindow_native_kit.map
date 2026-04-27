@@ -383,6 +383,7 @@
             OHOS::Rosen::WindowEventTypeInit*;
             OHOS::Rosen::WindowLayoutModeInit*;
             OHOS::Rosen::WindowModeInit*;
+            OHOS::Rosen::SplitRatioPreferenceInit*;
             OHOS::Rosen::WindowOcclusionStateInit*;
             OHOS::Rosen::WindowStageEventTypeInit*;
             OHOS::Rosen::WindowStageLifecycleEventTypeInit*;
