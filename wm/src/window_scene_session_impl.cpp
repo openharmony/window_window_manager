@@ -7130,6 +7130,66 @@ std::unique_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMask(
     return mask;
 }
 
+std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMaskWithAlpha(
+    const uint8_t* windowMask, uint32_t maskWidth, uint32_t maskHeight)
+{
+    if (windowMask == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "windowMask is nullptr");
+        return nullptr;
+    }
+    constexpr uint32_t BGRA_CHANNEL = 4;
+    Media::InitializationOptions opts;
+    opts.size.width = static_cast<int32_t>(maskWidth);
+    opts.size.height = static_cast<int32_t>(maskHeight);
+    size_t length = static_cast<size_t>(maskWidth) * static_cast<size_t>(maskHeight) * BGRA_CHANNEL;
+    uint8_t* data = static_cast<uint8_t*>(malloc(length));
+    if (data == nullptr) {
+        WLOGFE("data is nullptr");
+        return nullptr;
+    }
+    constexpr uint32_t FULL_CHANNEL = 255;
+    constexpr uint32_t GREEN_CHANNEL = 1;
+    constexpr uint32_t RED_CHANNEL = 2;
+    constexpr uint32_t ALPHA_CHANNEL = 3;
+    for (uint32_t i = 0; i < maskHeight; i++) {
+        for (uint32_t j = 0; j < maskWidth; j++) {
+            size_t idx = static_cast<size_t>(i) * static_cast<size_t>(maskWidth) + static_cast<size_t>(j);
+            uint8_t alpha = windowMask[idx];
+            size_t channelIndex = idx * BGRA_CHANNEL;
+            data[channelIndex] = alpha;
+            data[channelIndex + GREEN_CHANNEL] = FULL_CHANNEL;
+            data[channelIndex + RED_CHANNEL] = FULL_CHANNEL;
+            data[channelIndex + ALPHA_CHANNEL] = FULL_CHANNEL;
+        }
+    }
+    std::shared_ptr<Media::PixelMap> mask = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), length, opts);
+    free(data);
+    return mask;
+}
+
+WMError WindowSceneSessionImpl::ApplyWindowMask(const std::shared_ptr<Media::PixelMap>& mask)
+{
+    auto rsMask = RSMask::CreatePixelMapMask(mask);
+    surfaceNode_->SetCornerRadius(0.0f);
+    if (property_->GetWindowShadows().hasRadiusValue_) {
+        surfaceNode_->SetShadowRadius(WINDOW_SHADOW_RADIUS_INVALID);
+    }
+    surfaceNode_->SetAbilityBGAlpha(0);
+    surfaceNode_->SetMask(rsMask);
+    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
+
+    auto hostSession = GetHostSession();
+    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    hostSession->SetWindowCornerRadius(0);
+    ShadowsInfo shadowsInfo;
+    shadowsInfo.hasRadiusValue_ = true;
+    hostSession->SetWindowShadows(shadowsInfo);
+
+    property_->SetWindowMask(mask);
+    property_->SetIsShaped(true);
+    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
+}
+
 WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint32_t>>& windowMask)
 {
     TLOGI(WmsLogTag::WMS_PC, "WindowId: %{public}u", GetWindowId());
@@ -7143,26 +7203,24 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
         TLOGE(WmsLogTag::WMS_PC, "Failed to create pixelMap of window mask");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
+    return ApplyWindowMask(mask);
+}
 
-    auto rsMask = RSMask::CreatePixelMapMask(mask);
-    surfaceNode_->SetCornerRadius(0.0f);
-    if (property_->GetWindowShadows().hasRadiusValue_) {
-        surfaceNode_->SetShadowRadius(WINDOW_SHADOW_RADIUS_INVALID);
+WMError WindowSceneSessionImpl::SetWindowMaskWithAlpha(const uint8_t* windowMask, uint32_t maskWidth, uint32_t maskHeight)
+{
+    TLOGI(WmsLogTag::WMS_PC, "WindowId: %{public}u, maskWidth: %{public}u, maskHeight: %{public}u",
+        GetWindowId(), maskWidth, maskHeight);
+    if (IsWindowSessionInvalid()) {
+        WLOGFE("session is invalid");
+        return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    surfaceNode_->SetAbilityBGAlpha(0);
-    surfaceNode_->SetMask(rsMask); // RS interface to set mask
-    RSTransactionAdapter::FlushImplicitTransaction(surfaceNode_);
 
-    auto hostSession = GetHostSession();
-    CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
-    hostSession->SetWindowCornerRadius(0);
-    ShadowsInfo shadowsInfo;
-    shadowsInfo.hasRadiusValue_ = true;
-    hostSession->SetWindowShadows(shadowsInfo);
-
-    property_->SetWindowMask(mask);
-    property_->SetIsShaped(true);
-    return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_MASK);
+    std::shared_ptr<Media::PixelMap> mask = HandleWindowMaskWithAlpha(windowMask, maskWidth, maskHeight);
+    if (mask == nullptr) {
+        TLOGE(WmsLogTag::WMS_PC, "Failed to create pixelMap of window mask");
+        return WMError::WM_ERROR_INVALID_WINDOW;
+    }
+    return ApplyWindowMask(mask);
 }
 
 WMError WindowSceneSessionImpl::ClearWindowMask()
