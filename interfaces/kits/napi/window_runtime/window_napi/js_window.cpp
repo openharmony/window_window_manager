@@ -2041,12 +2041,14 @@ napi_value JsWindow::OnMoveTo(napi_env env, napi_callback_info info)
     auto asyncTask = [windowToken = wptr<Window>(windowToken_), errCode, x, y,
                       env, task = napiAsyncTask, where = __func__] {
         if (errCode != WMError::WM_OK) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.moveTo", WmErrorCode::WM_ERROR_INVALID_PARAM);
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: invalid param", where);
             return;
         }
         auto window = windowToken.promote();
         if (window == nullptr) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.moveTo", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             TLOGNE(WmsLogTag::WMS_LAYOUT, "%{public}s: window is nullptr", where);
             task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
             return;
@@ -2055,12 +2057,14 @@ napi_value JsWindow::OnMoveTo(napi_env env, napi_callback_info info)
         if (ret == WMError::WM_OK) {
             task->Resolve(env, NapiGetUndefined(env));
         } else {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.moveTo", WM_JS_TO_ERROR_CODE_MAP.at(ret));
             task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window move failed"));
         }
         TLOGND(WmsLogTag::WMS_LAYOUT, "%{public}s: end, window [%{public}u, %{public}s] ret=%{public}d",
                where, window->GetWindowId(), window->GetWindowName().c_str(), ret);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnMoveTo") != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.moveTo", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(env,
             JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "failed to send event"));
     }
@@ -4846,11 +4850,13 @@ napi_value JsWindow::OnSetFocusable(napi_env env, napi_callback_info info)
         [weakToken = wptr<Window>(windowToken_), focusable, errCode, env, task = napiAsyncTask, where = __func__] {
             auto window = weakToken.promote();
             if (window == nullptr) {
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setFocusable", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
                 TLOGNE(WmsLogTag::WMS_FOCUS, "%{public}s: window is nullptr", where);
                 task->Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR));
                 return;
             }
             if (errCode != WMError::WM_OK) {
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setFocusable", WmErrorCode::WM_ERROR_INVALID_PARAM);
                 task->Reject(env, JsErrUtils::CreateJsError(env, errCode, "Invalidate params."));
                 return;
             }
@@ -4858,12 +4864,14 @@ napi_value JsWindow::OnSetFocusable(napi_env env, napi_callback_info info)
             if (ret == WMError::WM_OK) {
                 task->Resolve(env, NapiGetUndefined(env));
             } else {
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setFocusable", WM_JS_TO_ERROR_CODE_MAP.at(ret));
                 task->Reject(env, JsErrUtils::CreateJsError(env, ret, "Window set focusable failed"));
             }
             TLOGNI(WmsLogTag::WMS_FOCUS, "%{public}s: Window [%{public}u, %{public}s] set focusable end",
                 where, window->GetWindowId(), window->GetWindowName().c_str());
         };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetFocusable") != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setFocusable", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         TLOGE(WmsLogTag::WMS_FOCUS, "window state is abnormal!");
     }
     return result;
