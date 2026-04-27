@@ -9249,18 +9249,19 @@ WSError WindowSessionImpl::SetEnableDragBySystem(bool enableDrag)
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::SetDragActivated(bool dragActivated)
+WSError WindowSessionImpl::SetDragActivated(uint32_t dragActivatedBitmap)
 {
-    dragActivated_ = dragActivated;
+    dragActivatedBitmap_.store(dragActivatedBitmap);
     return WSError::WS_OK;
 }
 
 bool WindowSessionImpl::IsWindowDraggable()
 {
     bool isDragEnabled = GetProperty()->GetDragEnabled();
+    bool isDragActivated = (dragActivatedBitmap_.load() & DRAG_ACTIVATE_ALL_MASK) == DRAG_ACTIVATE_ALL_MASK;
     TLOGD(WmsLogTag::WMS_LAYOUT, "PersistentId: %{public}d, dragEnabled: %{public}d, dragActivate: %{public}d",
-        GetPersistentId(), isDragEnabled, dragActivated_.load());
-    return isDragEnabled && dragActivated_.load();
+        GetPersistentId(), isDragEnabled, isDragActivated);
+    return isDragEnabled && isDragActivated;
 }
 
 void WindowSessionImpl::SetTargetAPIVersion(uint32_t targetAPIVersion)

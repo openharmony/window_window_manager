@@ -343,7 +343,7 @@ public:
 
     virtual WSError SetEnableDragBySystem(bool dragEnable) = 0;
 
-    virtual WSError SetDragActivated(bool dragActivated) = 0;
+    virtual WSError SetDragActivated(uint32_t dragActivatedBitmap) = 0;
 
     virtual WSError SetFullScreenWaterfallMode(bool isWaterfallMode) { return WSError::WS_DO_NOTHING; }
     virtual WSError SetSupportEnterWaterfallMode(bool isSupportEnter) { return WSError::WS_DO_NOTHING; }
