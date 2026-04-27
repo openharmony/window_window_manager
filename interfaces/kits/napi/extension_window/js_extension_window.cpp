@@ -46,7 +46,6 @@ const std::unordered_set<std::string> g_emptyListener = {
     "noInteractionDetected",
     "dialogTargetTouch",
     "windowEvent",
-    "windowStatusChange",
     "windowTitleButtonRectChange",
     "windowRectChange",
     "rotationChange",
@@ -231,10 +230,10 @@ napi_value JsExtensionWindow::CreateJsExtensionWindowObject(napi_env env, sptr<R
         JsExtensionWindow::IsWindowSupportWideGamut);
     BindNativeFunction(env, objValue, "getGlobalRect", moduleName, JsExtensionWindow::GetGlobalScaledRect);
     BindNativeFunction(env, objValue, "getStatusBarProperty", moduleName, JsExtensionWindow::GetStatusBarProperty);
+    BindNativeFunction(env, objValue, "getWindowStatus", moduleName, JsExtensionWindow::GetWindowStatus);
 
     //return default value
     BindNativeFunction(env, objValue, "getTitleButtonRect", moduleName, JsExtensionWindow::GetTitleButtonRect);
-    BindNativeFunction(env, objValue, "getWindowStatus", moduleName, JsExtensionWindow::GetWindowStatus);
     BindNativeFunction(env, objValue, "getWindowDensityInfo", moduleName, JsExtensionWindow::GetWindowDensityInfo);
     BindNativeFunction(env, objValue, "getWindowSystemBarProperties", moduleName,
         JsExtensionWindow::GetWindowSystemBarProperties);
@@ -577,8 +576,9 @@ napi_value JsExtensionWindow::GetTitleButtonRect(napi_env env, napi_callback_inf
 
 napi_value JsExtensionWindow::GetWindowStatus(napi_env env, napi_callback_info info)
 {
-    WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
-    return CreateJsValue(env, static_cast<uint32_t>(windowStatus));
+    TLOGI(WmsLogTag::WMS_UIEXT, "[NAPI]");
+    JsExtensionWindow* me = CheckParamsAndGetThis<JsExtensionWindow>(env, info);
+    return (me != nullptr) ? me->OnGetWindowStatus(env, info) : nullptr;
 }
 
 napi_value JsExtensionWindow::GetWindowStateSnapshot(napi_env env, napi_callback_info info)
@@ -2228,6 +2228,26 @@ napi_value JsExtensionWindow::OnInvalidAsyncCall(napi_env env, napi_callback_inf
             CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY), "failed to send event"));
     }
     return result;
+}
+
+napi_value JsExtensionWindow::OnGetWindowStatus(napi_env env, napi_callback_info info)
+{
+    sptr<Window> windowImpl = extensionWindow_->GetWindow();
+    if (windowImpl == nullptr) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "window is nullptr");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getWindowStatus]msg: The window is not created or destroyed");
+    }
+    WindowStatus windowStatus = WindowStatus::WINDOW_STATUS_UNDEFINED;
+    WMError errCode = windowImpl->GetWindowStatus(windowStatus);
+    if (errCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_UIEXT, "get window status failed, err: %{public}d", errCode);
+        return NapiThrowError(env, WM_JS_TO_ERROR_CODE_MAP.at(errCode),
+            "[window][getWindowStatus]msg: get window status failed");
+    }
+    TLOGI(WmsLogTag::WMS_UIEXT, "Window [%{public}u, %{public}s] get window status: %{public}u",
+        windowImpl->GetWindowId(), windowImpl->GetWindowName().c_str(), windowStatus);
+    return CreateJsValue(env, static_cast<uint32_t>(windowStatus));
 }
 
 napi_value JsExtensionWindow::OnSnapshot(napi_env env, napi_callback_info info)
