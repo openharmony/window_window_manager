@@ -769,7 +769,6 @@ protected:
         return UnregisterListener(listenerMap[persistentId], listener);
     }
     void ClearListenersById(int32_t persistentId);
-    void ClearParentWindowListeners(int32_t persistentId);
     void NotifyDmsDisplayMove(DisplayId to);
     void DestroyExistUIContent();
     void RecordLifeCycleExceptionEvent(WMError retCode,

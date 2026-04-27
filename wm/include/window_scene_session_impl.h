@@ -89,7 +89,6 @@ public:
     WSError SyncAllAttachedLimitsToChild(
         const std::vector<std::pair<int32_t, WindowLimits>>& limitsList,
         const std::vector<std::pair<int32_t, AttachLimitOptions>>& optionsList) override;
-    WSError NotifyRebindAttachAfterParentChange(int32_t newParentWindowId) override;
 
     /*
      * Window Hierarchy
