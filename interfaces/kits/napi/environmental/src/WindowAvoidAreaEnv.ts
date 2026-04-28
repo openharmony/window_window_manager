@@ -119,7 +119,7 @@ class WindowAvoidAreaVpEnv implements IEnvironmentValue<UIEnvAvoidArea> {
   constructor(context: UIContext) {
     try {
       this.#context = context;
-      this.#win = windowenv.findWindowById(this.#context.getId());
+      this.#win = windowenv.findWindowById(context.getId());
       for (const type of [AvoidAreaType.TYPE_SYSTEM, AvoidAreaType.TYPE_CUTOUT, AvoidAreaType.TYPE_KEYBOARD, AvoidAreaType.TYPE_NAVIGATION_INDICATOR]) {
         this.#areaInPx.set(type, this.#win.getWindowAvoidArea(type));
       }
