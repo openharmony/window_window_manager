@@ -7206,7 +7206,8 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
     return ApplyWindowMask(mask);
 }
 
-WMError WindowSceneSessionImpl::SetWindowMaskWithAlpha(const uint8_t* windowMask, uint32_t maskWidth, uint32_t maskHeight)
+WMError WindowSceneSessionImpl::SetWindowMaskWithAlpha(const uint8_t* windowMask, uint32_t maskWidth,
+    uint32_t maskHeight)
 {
     TLOGI(WmsLogTag::WMS_PC, "WindowId: %{public}u, maskWidth: %{public}u, maskHeight: %{public}u",
         GetWindowId(), maskWidth, maskHeight);

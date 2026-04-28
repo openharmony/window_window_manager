@@ -547,7 +547,8 @@ private:
     bool HandlePointDownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const MMI::PointerEvent::PointerItem& pointerItem);
     std::unique_ptr<Media::PixelMap> HandleWindowMask(const std::vector<std::vector<uint32_t>>& windowMask);
-    std::shared_ptr<Media::PixelMap> HandleWindowMaskWithAlpha(const uint8_t* windowMask, uint32_t maskWidth, uint32_t maskHeight);
+    std::shared_ptr<Media::PixelMap> HandleWindowMaskWithAlpha(const uint8_t* windowMask, uint32_t maskWidth,
+        uint32_t maskHeight);
     WMError ApplyWindowMask(const std::shared_ptr<Media::PixelMap>& mask);
     void NotifyDisplayInfoChange(const sptr<DisplayInfo>& info = nullptr);
     void UpdateDensityInner(const sptr<DisplayInfo>& info = nullptr);

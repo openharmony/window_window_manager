@@ -8961,6 +8961,31 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     return result;
 }
 
+static void SetWindowMaskWithAlphaAsyncTask(wptr<Window> weakToken, uint8_t* maskData,
+    const WindowMaskWithAlphaParams& params, napi_env env, std::shared_ptr<NapiAsyncTask> task)
+{
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        TLOGNE(WmsLogTag::WMS_PC, "window is nullptr");
+        task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowMaskWithAlpha]msg: The window is not created or destroyed"));
+        free(maskData);
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        window->SetWindowMaskWithAlpha(maskData, params.maskWidth, params.maskHeight));
+    free(maskData);
+    if (ret != WmErrorCode::WM_OK) {
+        task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowMaskWithAlpha]"));
+        TLOGNE(WmsLogTag::WMS_PC, "Window [%{public}u, %{public}s]",
+            window->GetWindowId(), window->GetWindowName().c_str());
+        return;
+    }
+    task->Resolve(env, NapiGetUndefined(env));
+    TLOGNI(WmsLogTag::WMS_PC, "Window [%{public}u, %{public}s] end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+}
+
 napi_value JsWindow::OnSetWindowMaskWithAlpha(napi_env env, napi_callback_info info)
 {
     size_t argc = THREE_PARAMS_SIZE;
@@ -8986,32 +9011,19 @@ napi_value JsWindow::OnSetWindowMaskWithAlpha(napi_env env, napi_callback_info i
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setWindowMaskWithAlpha]msg: malloc failed");
     }
-    memcpy(maskData, params.maskData, params.byteLength);
+    errno_t ret = memcpy_s(maskData, params.byteLength, params.maskData, params.byteLength);
+    if (ret != EOK) {
+        TLOGE(WmsLogTag::WMS_PC, "memcpy_s failed, ret: %{public}d", ret);
+        free(maskData);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowMaskWithAlpha]msg: memcpy_s failed");
+    }
 
     napi_value result = nullptr;
-    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    const char* const where = __func__;
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), maskData, params, env, task = napiAsyncTask, where] {
-        auto window = weakToken.promote();
-        if (window == nullptr) {
-            TLOGNE(WmsLogTag::WMS_PC, "%{public}s window is nullptr", where);
-            task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                "[window][setWindowMaskWithAlpha]msg: The window is not created or destroyed"));
-            free(maskData);
-            return;
-        }
-        WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-            window->SetWindowMaskWithAlpha(maskData, params.maskWidth, params.maskHeight));
-        free(maskData);
-        if (ret != WmErrorCode::WM_OK) {
-            task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowMaskWithAlpha]"));
-            TLOGNE(WmsLogTag::WMS_PC, "%{public}s Window [%{public}u, %{public}s]",
-                where, window->GetWindowId(), window->GetWindowName().c_str());
-            return;
-        }
-        task->Resolve(env, NapiGetUndefined(env));
-        TLOGNI(WmsLogTag::WMS_PC, "%{public}s Window [%{public}u, %{public}s] end",
-            where, window->GetWindowId(), window->GetWindowName().c_str());
+    auto napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), maskData, params, env,
+        task = napiAsyncTask] {
+        SetWindowMaskWithAlphaAsyncTask(weakToken, maskData, params, env, task);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, __func__) != napi_status::napi_ok) {
         free(maskData);
