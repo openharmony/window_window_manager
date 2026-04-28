@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,7 @@ protected:
     void NotifyRestoreFloatMainWindow(const std::shared_ptr<AAFwk::WantParams>& wantParameters);
     void NotifyUpdateFloatView(const FloatViewTemplateInfo& fvTemplateInfo) override;
 private:
+    WMError IsFloatingBallValid(const FloatingBallTemplateInfo& fbTemplateInfo) const;
     void UpdateCameraWindowStatus(bool isShowing);
     bool NeedSystemPermission(WindowType type);
     void UpdatePiPWindowStateChanged(bool isForeground);

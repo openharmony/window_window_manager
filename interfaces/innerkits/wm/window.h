@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -5160,6 +5160,16 @@ public:
         return WMError::WM_OK;
     }
  
+    /**
+     * @brief update the floating ball visibility.
+     *
+     * @param isVisible the visibility status of the floating-ball.
+     */
+    virtual WMError UpdateFloatingBallForVisible(bool isVisible)
+    {
+        return WMError::WM_OK;
+    }
+
     /**
      * @brief get windowId of floating-ball
      *

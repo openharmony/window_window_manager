@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "on", moduleName, JsFbController::RegisterCallback);
     BindNativeFunction(env, object, "off", moduleName, JsFbController::UnregisterCallback);
     BindNativeFunction(env, object, "getFloatingBallWindowInfo", moduleName, JsFbController::GetFloatingBallWindowInfo);
+    BindNativeFunction(env, object, "setFloatingBallVisibilityInApp", moduleName,
+        JsFbController::SetInApplicationVisible);
 }
 
 napi_value CreateJsFbControllerObject(napi_env env, const sptr<FloatingBallController>& fbController)
@@ -218,6 +220,64 @@ napi_value JsFbController::UpdateFloatingBallTask(napi_env env, const FbOption &
         };
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsFbController::OnUpdateFloatingBall",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsFbController::SetInApplicationVisible(napi_env env, napi_callback_info info)
+{
+    JsFbController* me = CheckParamsAndGetThis<JsFbController>(env, info);
+    return (me != nullptr) ? me->OnSetInApplicationVisible(env, info) : nullptr;
+}
+
+napi_value JsFbController::OnSetInApplicationVisible(napi_env env, napi_callback_info info)
+{
+    TLOGI(WmsLogTag::WMS_SYSTEM, "OnSetInApplicationVisible is called");
+    size_t argc = 1;
+    napi_value argv[1] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < 1) {
+        return NapiThrowInvalidParam(env, "Missing args when set floating ball visible in app");
+    }
+
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, argv[0], &valueType);
+    if (status != napi_ok || valueType != napi_boolean) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "param type is not boolean");
+        return NapiThrowInvalidParam(env, "param type is not boolean");
+    }
+
+    bool isVisible = false;
+    napi_get_value_bool(env, argv[0], &isVisible);
+
+    wptr<FloatingBallController> weakController(fbController_);
+    std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
+    NapiAsyncTask::ExecuteCallback execute = [weakController, isVisible, errCodePtr] {
+        if (errCodePtr == nullptr) {
+            return;
+        }
+        auto fbController = weakController.promote();
+        if (fbController == nullptr) {
+            *errCodePtr = WmErrorCode::WM_ERROR_FB_STATE_ABNORMALLY;
+            return;
+        }
+        *errCodePtr = ConvertErrorToCode(fbController->SetInApplicationVisible(isVisible));
+    };
+    NapiAsyncTask::CompleteCallback complete =
+        [errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
+            if (errCodePtr == nullptr) {
+                task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR));
+                return;
+            }
+            if (*errCodePtr == WmErrorCode::WM_OK) {
+                task.Resolve(env, NapiGetUndefined(env));
+            } else {
+                task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
+                    "JsFbController::OnSetFloatingBallVisibleInApp failed."));
+            }
+        };
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsFbController::OnSetFloatingBallVisibleInApp",
         env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
     return result;
 }
