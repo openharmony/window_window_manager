@@ -122,7 +122,6 @@ napi_value JsFbWindowManager::NapiSendTask(napi_env env, void* contextPtr)
             task.Resolve(env, CreateJsFbControllerObject(env, fbController));
             HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_FB_CREATE, WmErrorCode::WM_OK);
         } else {
-            HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_FB_CREATE, WmErrorCode::WM_ERROR_FB_CREATE_FAILED);
                 task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr,
                     "JsFbController::OnStartFloatingBall failed."));
         }

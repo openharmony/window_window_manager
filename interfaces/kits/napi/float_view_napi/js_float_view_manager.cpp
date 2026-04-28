@@ -411,7 +411,7 @@ napi_value JsFloatViewManager::UnBindTask(napi_env env, const sptr<FloatViewCont
         if (!FloatViewManager::isSupportFloatView_ || !FloatingBallManager::IsSupportFloatingBall()) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Device do not support float view");
             *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
-            HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_FV_UNBIND, WmErrorCode::WM_ERROR_INVALID_PARAM);
+            HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_FV_UNBIND, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
             return;
         }
         if (fvController == nullptr || fbController == nullptr) {
