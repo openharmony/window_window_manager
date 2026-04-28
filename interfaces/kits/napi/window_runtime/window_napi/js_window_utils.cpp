@@ -118,6 +118,7 @@ const std::map<ApiWindowType, WindowType> JS_TO_NATIVE_WINDOW_TYPE_MAP {
     { ApiWindowType::TYPE_DYNAMIC,                  WindowType::WINDOW_TYPE_DYNAMIC                  },
     { ApiWindowType::TYPE_MUTISCREEN_COLLABORATION, WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION },
     { ApiWindowType::TYPE_FB,                       WindowType::WINDOW_TYPE_FB                       },
+    { ApiWindowType::TYPE_FV,                       WindowType::WINDOW_TYPE_FV                       },
     { ApiWindowType::TYPE_MAIN,                     WindowType::WINDOW_TYPE_APP_MAIN_WINDOW          },
 };
 

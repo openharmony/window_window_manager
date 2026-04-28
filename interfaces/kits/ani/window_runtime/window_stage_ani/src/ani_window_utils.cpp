@@ -1711,7 +1711,7 @@ ani_object AniWindowUtils::CreateWindowsProperties(ani_env* env, const WindowPro
     ani_string aniWindowName;
     GetAniString(env, windowPropertyInfo.name, &aniWindowName);
     ani_object aniWindowsProperties = InitAniObjectByCreator(env, "@ohos.window.window.WindowPropertiesInternal",
-        "C{@ohos.window.window.Rect}C{@ohos.window.window.Rect}zzzzddzzzziiiilC{std.core.String}"
+        "C{@ohos.window.window.Rect}C{@ohos.window.window.Rect}zzzzddzzzziiilC{std.core.String}"
         "C{@ohos.window.window.Rect}:",
         aniRect, aniDrawableRect, ani_boolean(windowPropertyInfo.isFullScreen),
         ani_boolean(windowPropertyInfo.isLayoutFullScreen), ani_boolean(windowPropertyInfo.isFocusable),

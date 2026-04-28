@@ -194,8 +194,9 @@ enum class WindowType : uint32_t {
 
     WINDOW_TYPE_UI_EXTENSION = 3000
 };
-
+ 
 /**
+ * @struct RealTimeSwitchInfo.
  *
  * @brief the information for compatible mode App when switching window style in real time.
  */
