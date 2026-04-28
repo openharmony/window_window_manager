@@ -197,7 +197,7 @@ HWTEST_F(SessionStageProxyRotationTest, NotifyOrientationExecutionResult, TestSi
     errCode = nullProxy->NotifyOrientationExecutionResult(promiseId, result);
     EXPECT_EQ(errCode, WSError::WS_ERROR_IPC_FAILED);
 
-MockMessageParcel::ClearAllErrorFlag();
+    MockMessageParcel::ClearAllErrorFlag();
     GTEST_LOG_(INFO) << "SessionStageProxyRotationTest: NotifyOrientationExecutionResult end";
 }
 
