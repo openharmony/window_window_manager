@@ -8957,7 +8957,7 @@ bool SceneSessionManager::CheckTopmostWindowFocus(const sptr<SceneSession>& focu
 bool SceneSessionManager::CheckRequestFocusImmediately(const sptr<SceneSession>& sceneSession)
 {
     bool isMainSession = sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-        IsLoosenedWithFreeMultiMode();
+        sceneSession->IsLoosenedWithFreeMultiMode();
     if ((isMainSession || (SessionHelper::IsSubWindow(sceneSession->GetWindowType()) && !sceneSession->IsModal())) &&
         (ProcessModalTopmostRequestFocusImmediately(sceneSession) == WSError::WS_OK ||
          ProcessDialogRequestFocusImmediately(sceneSession) == WSError::WS_OK)) {
@@ -10688,7 +10688,7 @@ WSError SceneSessionManager::ProcessModalTopmostRequestFocusImmediately(const sp
     // focus must on modal topmost subwindow when APP_MAIN_WINDOW or sub window request focus
     sptr<SceneSession> mainSession = nullptr;
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-        IsLoosenedWithFreeMultiMode()) {
+        sceneSession->IsLoosenedWithFreeMultiMode()) {
         mainSession = sceneSession;
     } else if (SessionHelper::IsSubWindow(sceneSession->GetWindowType())) {
         mainSession = GetSceneSession(sceneSession->GetParentPersistentId());
@@ -10776,7 +10776,7 @@ WSError SceneSessionManager::ProcessDialogRequestFocusImmediately(const sptr<Sce
     // focus must on dialog when APP_MAIN_WINDOW or sub window request focus
     sptr<SceneSession> mainSession = nullptr;
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW ||
-        IsLoosenedWithFreeMultiMode()) {
+        sceneSession->IsLoosenedWithFreeMultiMode()) {
         mainSession = sceneSession;
     } else if (SessionHelper::IsSubWindow(sceneSession->GetWindowType())) {
         mainSession = GetSceneSession(sceneSession->GetParentPersistentId());
@@ -15868,7 +15868,7 @@ WSError SceneSessionManager::RaiseWindowToTop(int32_t persistentId)
         if (WindowHelper::IsSubWindow(sceneSession->GetWindowType())) {
             sceneSession->RaiseToAppTop();
         }
-        if (IsLoosenedWithFreeMultiMode()) {
+        if (sceneSession->IsLoosenedWithFreeMultiMode()) {
             return WSError::WS_OK;
         }
         if (WindowHelper::IsSubWindow(sceneSession->GetWindowType()) ||
