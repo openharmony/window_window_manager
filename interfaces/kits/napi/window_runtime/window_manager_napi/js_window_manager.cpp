@@ -2382,6 +2382,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowType", WindowTypeInit(env));
     napi_set_named_property(env, exportObj, "AvoidAreaType", AvoidAreaTypeInit(env));
     napi_set_named_property(env, exportObj, "WindowMode", WindowModeInit(env));
+    napi_set_named_property(env, exportObj, "SplitRatioPreference", SplitRatioPreferenceInit(env));
     napi_set_named_property(env, exportObj, "GlobalWindowMode", GlobalWindowModeInit(env));
     napi_set_named_property(env, exportObj, "OcclusionState", WindowOcclusionStateInit(env));
     napi_set_named_property(env, exportObj, "ScreenshotEventType", ScreenshotEventTypeInit(env));
@@ -2400,6 +2401,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "WindowStatusType", WindowStatusTypeInit(env));
     napi_set_named_property(env, exportObj, "RectChangeReason", RectChangeReasonInit(env));
     napi_set_named_property(env, exportObj, "MaximizePresentation", MaximizePresentationInit(env));
+    napi_set_named_property(env, exportObj, "AcrossDisplayPresentation", AcrossDisplayPresentationInit(env));
     napi_set_named_property(env, exportObj, "ExtensionWindowAttribute", ExtensionWindowAttributeInit(env));
     napi_set_named_property(env, exportObj, "ModalityType", ModalityTypeInit(env));
     napi_set_named_property(env, exportObj, "RotationChangeType", RotationChangeTypeInit(env));

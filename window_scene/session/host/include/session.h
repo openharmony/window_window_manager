@@ -388,17 +388,31 @@ public:
     /*
      * Window Scene Snapshot
      */
+    struct SnapshotOptions {
+        // Run snapshot capture in FFRT task with a longer timeout.
+        bool runInFfrt = false;
+        // Snapshot scale value; non-positive values use the session default scale.
+        float scaleParam = 0.0f;
+        // Capture the current window surface instead of the default surface node content.
+        bool useCurWindow = false;
+        // Capture the snapshot synchronously when supported by the render service.
+        bool windowSync = false;
+        // Skip blur processing for SceneBoard UI animation snapshots.
+        // Only for SceneBoard UI animation, cannot use with privacy window.
+        bool disableBlur = false;
+    };
+
     std::shared_ptr<Media::PixelMap> GetSnapshot() const;
     std::shared_ptr<Media::PixelMap> GetPreloadSnapshot() const;
     /**
      * @brief Get the snapshot pixelMap.
      *
-     * @param disableBlur Only for SceneBoard UI animation, cannot use with privacy window.
+     * @param options Snapshot capture options.
      *
      * @return PixelMap of this window.
      */
-    std::shared_ptr<Media::PixelMap> Snapshot(
-        bool runInFfrt = false, float scaleParam = 0.0f, bool useCurWindow = false, bool disableBlur = false) const;
+    std::shared_ptr<Media::PixelMap> Snapshot() const;
+    std::shared_ptr<Media::PixelMap> Snapshot(const SnapshotOptions& options) const;
     void ResetSnapshot();
     void RenameSnapshotFromOldPersistentId(int32_t oldPersistentId);
     void SaveSnapshot(bool useFfrt, bool needPersist = true,
@@ -521,6 +535,8 @@ public:
     bool GetRestartInSameProcess() const;
     void SetRestartCallerPersistentId(int32_t restartCallerPersistentId);
     int32_t GetRestartCallerPersistentId() const;
+    void SetNativeHideWindow(bool nativeHideWindow);
+    bool GetNativeHideWindow() const;
 
     virtual WSError SetActive(bool active);
     virtual WSError UpdateSizeChangeReason(SizeChangeReason reason);

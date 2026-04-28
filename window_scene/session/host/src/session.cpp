@@ -3128,8 +3128,12 @@ WSError Session::TransferFocusStateEvent(bool focusState)
     return windowEventChannel_->TransferFocusState(focusState);
 }
 
-std::shared_ptr<Media::PixelMap> Session::Snapshot(
-    bool runInFfrt, float scaleParam, bool useCurWindow, bool disableBlur) const
+std::shared_ptr<Media::PixelMap> Session::Snapshot() const
+{
+    return Snapshot(SnapshotOptions());
+}
+
+std::shared_ptr<Media::PixelMap> Session::Snapshot(const SnapshotOptions& options) const
 {
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "Snapshot[%d][%s]", persistentId_, sessionInfo_.bundleName_.c_str());
     auto surfaceNode = GetSurfaceNode();
@@ -3137,16 +3141,17 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(
         TLOGE(WmsLogTag::WMS_PATTERN, "SurfaceNode invalid %{public}d", persistentId_);
         return nullptr;
     }
-    bool needBlurSnapshot = disableBlur ? false : GetNeedUseBlurSnapshot();
+    bool needBlurSnapshot = options.disableBlur ? false : GetNeedUseBlurSnapshot();
     auto callback = std::make_shared<SurfaceCaptureFuture>();
-    auto scaleValue = (scaleParam < 0.0f || std::fabs(scaleParam) < std::numeric_limits<float>::min()) ?
-        snapshotScale_ : scaleParam;
+    auto scaleValue = (options.scaleParam < 0.0f || std::fabs(options.scaleParam) < std::numeric_limits<float>::min()) ?
+        snapshotScale_ : options.scaleParam;
     scaleValue = needBlurSnapshot ? scaleValue * BLUR_SNAPSHOT_SCALE : scaleValue;
     RSSurfaceCaptureConfig config = {
         .scaleX = scaleValue,
         .scaleY = scaleValue,
         .useDma = true,
-        .useCurWindow = useCurWindow,
+        .useCurWindow = options.useCurWindow,
+        .windowSync = options.windowSync,
         .backGroundColor = GetBackgroundColor(),
     };
     auto rsUICtx = surfaceNode->GetRSUIContext();
@@ -3167,7 +3172,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(
         return nullptr;
     }
     constexpr int32_t FFRT_SNAPSHOT_TIMEOUT_MS = 5000;
-    auto pixelMap = callback->GetResult(runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
+    auto pixelMap = callback->GetResult(options.runInFfrt ? FFRT_SNAPSHOT_TIMEOUT_MS : SNAPSHOT_TIMEOUT_MS);
     if (pixelMap != nullptr) {
         bool isCropped = CropSnapshotPixelMap(pixelMap, lastLayoutRect_, scaleValue);
         TLOGI(WmsLogTag::WMS_PATTERN, "Save snapshot WxH=%{public}dx%{public}d, "
@@ -3507,7 +3512,11 @@ void Session::SaveSnapshot(bool useFfrt, bool needPersist, std::shared_ptr<Media
             return;
         }
         session->lastLayoutRect_ = session->layoutRect_;
-        auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(runInFfrt, 0.0f, updateSnapshot);
+        Session::SnapshotOptions options;
+        options.runInFfrt = runInFfrt;
+        options.useCurWindow = updateSnapshot;
+        options.windowSync = session->systemConfig_.IsPhoneWindow() || session->systemConfig_.IsPadWindow();
+        auto pixelMap = persistentPixelMap ? persistentPixelMap : session->Snapshot(options);
         if (pixelMap == nullptr) {
             return;
         }
@@ -4029,10 +4038,6 @@ void Session::NotifyClick(bool requestFocus, bool isClick)
     if (IsLoosenedWithFreeMultiMode()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "raise sub window id: %{public}d", GetPersistentId());
         RaiseToAppTopForPointDown();
-        if (requestFocus) {
-            FocusChangeReason reason = FocusChangeReason::MOVE_UP;
-            NotifyRequestFocusStatusNotifyManager(true, true, reason);
-        }
         return;
     }
     if (clickFunc_) {
@@ -4782,6 +4787,16 @@ void Session::SetRestartCallerPersistentId(int32_t restartCallerPersistentId)
 int32_t Session::GetRestartCallerPersistentId() const
 {
     return sessionInfo_.restartCallerPersistentId_;
+}
+
+void Session::SetNativeHideWindow(bool nativeHideWindow)
+{
+    sessionInfo_.nativeHideWindow_ = nativeHideWindow;
+}
+
+bool Session::GetNativeHideWindow() const
+{
+    return sessionInfo_.nativeHideWindow_;
 }
 
 WSError Session::SetLeashWindowAlpha(bool hidingStartWindow)
@@ -6135,7 +6150,6 @@ WSError Session::SetIsShowDecorInFreeMultiWindow(bool isShow)
     }
     return WSError::WS_OK;
 }
-
 PrelayoutContext Session::GetPrelayoutContext()
 {
     PrelayoutContext ctx;

@@ -31,6 +31,7 @@
 #include "dm_common.h"
 #include "securec.h"
 #include "wm_animation_common.h"
+#include "wm_layout_common.h"
 #include "wm_math.h"
 #include "wm_type.h"
 
@@ -217,6 +218,15 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_FB,
     WINDOW_MODE_FV,
     END = WINDOW_MODE_FV,
+};
+
+/**
+ * @brief Enumerates type of split ratio preference.
+ */
+enum class SplitRatioPreference : uint32_t {
+    EQUAL = 0,
+    PRIMARY_DOMINANT = 1,
+    SECONDARY_DOMINANT = 2
 };
 
 /**
@@ -3669,6 +3679,66 @@ struct RecentSessionInfo : public Parcelable {
     RecentSessionState sessionState = RecentSessionState::DISCONNECT;
 };
 
+struct ApplicationInfo : public Parcelable {
+    ApplicationInfo() = default;
+    ApplicationInfo(const std::string& bundleName, int32_t appIndex = 0, const std::string& appInstanceKey = "")
+        : bundleName(bundleName), appIndex(appIndex), appInstanceKey(appInstanceKey) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteString(bundleName) &&
+               parcel.WriteInt32(appIndex) &&
+               parcel.WriteString(appInstanceKey);
+    }
+
+    static ApplicationInfo* Unmarshalling(Parcel& parcel)
+    {
+        ApplicationInfo* info = new ApplicationInfo();
+        if (!parcel.ReadString(info->bundleName) ||
+            !parcel.ReadInt32(info->appIndex) ||
+            !parcel.ReadString(info->appInstanceKey)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    std::string bundleName;
+    int32_t appIndex = 0;
+    std::string appInstanceKey;
+};
+
+struct AppWindowShowingInfo : public Parcelable {
+    AppWindowShowingInfo() = default;
+    AppWindowShowingInfo(int32_t persistentId) : persistentId(persistentId) {}
+
+    bool Marshalling(Parcel& parcel) const override
+    {
+        return parcel.WriteInt32(persistentId) &&
+               parcel.WriteString(windowName) &&
+               parcel.WriteUint32(sessionState) &&
+               parcel.WriteBool(isShowOnDock);
+    }
+
+    static AppWindowShowingInfo* Unmarshalling(Parcel& parcel)
+    {
+        AppWindowShowingInfo* info = new AppWindowShowingInfo();
+        if (!parcel.ReadInt32(info->persistentId) ||
+            !parcel.ReadString(info->windowName) ||
+            !parcel.ReadUint32(info->sessionState) ||
+            !parcel.ReadBool(info->isShowOnDock)) {
+            delete info;
+            return nullptr;
+        }
+        return info;
+    }
+
+    int32_t persistentId = -1;
+    std::string windowName;
+    uint32_t sessionState = 0;
+    bool isShowOnDock = false;
+};
+
 /**
  * @brief Screenshot event type.
  */
@@ -3961,6 +4031,17 @@ enum class WaterfallResidentState : uint32_t {
 
     /** Disable the resident state and exit the waterfall layout. */
     CLOSE = 2,
+};
+
+/**
+ * @struct MaximizeOptions
+ * @brief Options for maximize operation with animation configuration.
+ */
+struct MaximizeOptions {
+    MaximizePresentation maximizePresentation = MaximizePresentation::ENTER_IMMERSIVE;
+    AcrossDisplayPresentation acrossDisplayPresentation =
+        AcrossDisplayPresentation::FOLLOW_ACROSS_DISPLAY_SETTING;
+    SnapshotAnimationConfig snapshotAnimationConfig;
 };
 
 /**
