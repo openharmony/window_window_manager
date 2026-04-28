@@ -1854,7 +1854,8 @@ void AniWindow::OnSetWindowSystemBarEnable(ani_env* env, ani_object nameAry)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowSystemBarEnable", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowSystemBarEnable",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -2223,7 +2224,8 @@ ani_object AniWindow::OnGetWindowAvoidAreaIgnoringVisibility(ani_env* env, ani_i
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowAvoidAreaIgnoringVisibility", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowAvoidAreaIgnoringVisibility",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     AvoidArea avoidArea;
@@ -2424,7 +2426,8 @@ ani_object AniWindow::SetWindowBackgroundColor(ani_env* env, const std::string& 
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] windowToken_ is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowBackgroundColor", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowBackgroundColor",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetBackgroundColor(color));
@@ -3565,7 +3568,8 @@ ani_boolean AniWindow::IsWindowSupportWideGamut(ani_env* env)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "[ANI]");
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowToken_ is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isWindowSupportWideGamut", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isWindowSupportWideGamut",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return false;
     }
@@ -3578,7 +3582,8 @@ ani_object AniWindow::SetWindowLayoutFullScreen(ani_env* env, ani_boolean isLayo
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutFullScreen", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutFullScreen",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 
@@ -3674,12 +3679,14 @@ ani_object AniWindow::SetSpecificSystemBarEnabled(ani_env* env, ani_string name,
     SystemBarPropertyFlag propertyFlag;
     if (!AniWindowUtils::GetSpecificBarStatus(env, name, enable, enableAnimation, type, property, propertyFlag)) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] invalid param or argc");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemBarEnabled", WmErrorCode::WM_ERROR_INVALID_PARAM);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemBarEnabled",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] windowToken_ is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemBarEnabled", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemBarEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     auto systemBarProperty = windowToken_->GetSystemBarPropertyByType(type);
@@ -4093,12 +4100,14 @@ ani_object AniWindow::GetWindowSystemBarProperties(ani_env* env)
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is null");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowSystemBarProperties", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowSystemBarProperties",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     if (!WindowHelper::IsMainWindow(windowToken_->GetType())) {
         TLOGE(WmsLogTag::WMS_IMMS, "only main window is allowed");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowSystemBarProperties", WmErrorCode::WM_ERROR_INVALID_CALLING);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowSystemBarProperties",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING);
     }
     SystemBarProperty status = windowToken_->GetSystemBarPropertyByType(WindowType::WINDOW_TYPE_STATUS_BAR);
@@ -6428,7 +6437,8 @@ static ani_int WindowSetWindowBackgroundColor(ani_env* env, ani_object obj, ani_
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr || aniWindow->GetWindow() == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowBackgroundColor", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowBackgroundColor",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
@@ -6446,7 +6456,8 @@ static ani_int WindowSetImmersiveModeEnabledState(ani_env* env, ani_object obj,
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setImmersiveModeEnabledState", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setImmersiveModeEnabledState",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
@@ -6502,7 +6513,8 @@ static ani_boolean WindowIsWindowSupportWideGamut(ani_env* env, ani_object obj, 
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isWindowSupportWideGamut", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isWindowSupportWideGamut",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return false;
     }
@@ -6518,7 +6530,8 @@ static ani_int WindowSetWindowLayoutFullScreen(ani_env* env, ani_object obj,
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutFullScreen", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowLayoutFullScreen",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
@@ -6585,7 +6598,8 @@ static ani_int WindowSetSpecificSystemBarEnabled(ani_env* env, ani_object obj, a
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] windowToken_ is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemBarEnabled", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSpecificSystemBarEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return ANI_ERROR;
     }
@@ -6642,7 +6656,8 @@ static void HideNonSystemFloatingWindows(ani_env* env, ani_object obj, ani_long 
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.hideNonSystemFloatingWindows", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.hideNonSystemFloatingWindows",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -6752,7 +6767,8 @@ static ani_boolean IsSystemAvoidAreaEnabled(ani_env* env, ani_object obj, ani_lo
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isSystemAvoidAreaEnabled", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isSystemAvoidAreaEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return false;
     }
@@ -6766,7 +6782,8 @@ static void SetSystemAvoidAreaEnabled(ani_env* env, ani_object obj, ani_long nat
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSystemAvoidAreaEnabled", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSystemAvoidAreaEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -6793,7 +6810,8 @@ static ani_boolean GetImmersiveModeEnabledState(ani_env* env, ani_object obj, an
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getImmersiveModeEnabledState", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getImmersiveModeEnabledState",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return false;
     }
@@ -6821,7 +6839,8 @@ static ani_object GetWindowSystemBarProperties(ani_env* env, ani_object obj, ani
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "[ANI] aniWindow is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowSystemBarProperties", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowSystemBarProperties",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
     return aniWindow->GetWindowSystemBarProperties(env);
