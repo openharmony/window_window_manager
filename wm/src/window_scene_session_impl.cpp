@@ -7137,29 +7137,29 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMaskWithAlp
         TLOGE(WmsLogTag::WMS_PC, "windowMask is nullptr");
         return nullptr;
     }
-    constexpr uint32_t BGRA_CHANNEL = 4;
+    constexpr uint32_t bgraChannel = 4;
     Media::InitializationOptions opts;
     opts.size.width = static_cast<int32_t>(maskWidth);
     opts.size.height = static_cast<int32_t>(maskHeight);
-    size_t length = static_cast<size_t>(maskWidth) * static_cast<size_t>(maskHeight) * BGRA_CHANNEL;
+    size_t length = static_cast<size_t>(maskWidth) * static_cast<size_t>(maskHeight) * bgraChannel;
     uint8_t* data = static_cast<uint8_t*>(malloc(length));
     if (data == nullptr) {
         WLOGFE("data is nullptr");
         return nullptr;
     }
-    constexpr uint32_t FULL_CHANNEL = 255;
-    constexpr uint32_t GREEN_CHANNEL = 1;
-    constexpr uint32_t RED_CHANNEL = 2;
-    constexpr uint32_t ALPHA_CHANNEL = 3;
+    constexpr uint32_t fullChannel = 255;
+    constexpr uint32_t greenChannel = 1;
+    constexpr uint32_t redChannel = 2;
+    constexpr uint32_t alphaChannel = 3;
     for (uint32_t i = 0; i < maskHeight; i++) {
         for (uint32_t j = 0; j < maskWidth; j++) {
             size_t idx = static_cast<size_t>(i) * static_cast<size_t>(maskWidth) + static_cast<size_t>(j);
             uint8_t alpha = windowMask[idx];
-            size_t channelIndex = idx * BGRA_CHANNEL;
+            size_t channelIndex = idx * bgraChannel;
             data[channelIndex] = alpha;
-            data[channelIndex + GREEN_CHANNEL] = FULL_CHANNEL;
-            data[channelIndex + RED_CHANNEL] = FULL_CHANNEL;
-            data[channelIndex + ALPHA_CHANNEL] = FULL_CHANNEL;
+            data[channelIndex + greenChannel] = fullChannel;
+            data[channelIndex + redChannel] = fullChannel;
+            data[channelIndex + alphaChannel] = fullChannel;
         }
     }
     std::shared_ptr<Media::PixelMap> mask = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), length, opts);
