@@ -28,6 +28,7 @@
 #include "pixel_map_taihe_ani.h"
 #include "singleton_container.h"
 #include "sys_cap_util.h"
+#include "window_histogram_management.h"
 #include "window_manager.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"
