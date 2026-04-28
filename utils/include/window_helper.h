@@ -150,12 +150,7 @@ public:
 
     static inline bool IsApiSystemWindow(WindowType type)
     {
-        return IsSystemWindow(type) && !IsDialogWindow(type) && !IsFloatTypeWindow(type);
-    }
-
-    static inline bool IsFloatTypeWindow(WindowType type)
-    {
-        return type == WindowType::WINDOW_TYPE_FLOAT;
+        return IsSystemWindow(type) && !IsWindowInApp(type);
     }
 
     static inline bool IsUIExtensionWindow(WindowType type)
