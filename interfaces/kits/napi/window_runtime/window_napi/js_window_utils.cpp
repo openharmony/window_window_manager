@@ -1617,9 +1617,9 @@ bool GetWindowMaskWithAlphaFromJsValue(napi_env env, napi_value jsObject, uint8_
 WmErrorCode ParseSetWindowMaskWithAlphaParams(napi_env env, napi_value* argv, size_t argc,
     WindowMaskWithAlphaParams& params, const sptr<Window>& windowToken)
 {
-    constexpr size_t MIN_REQUIRED_PARAMS = 3;  // windowMask, maskWidth, maskHeight
-    if (argc < MIN_REQUIRED_PARAMS) {
-        TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu, required: %{public}zu", argc, MIN_REQUIRED_PARAMS);
+    constexpr size_t minRequiredParams = 3;  // windowMask, maskWidth, maskHeight
+    if (argc < minRequiredParams) {
+        TLOGE(WmsLogTag::WMS_PC, "Argc is invalid: %{public}zu, required: %{public}zu", argc, minRequiredParams);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     if (!GetWindowMaskWithAlphaFromJsValue(env, argv[INDEX_ZERO], &params.maskData, params.byteLength)) {
