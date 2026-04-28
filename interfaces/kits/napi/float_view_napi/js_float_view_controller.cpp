@@ -100,6 +100,7 @@ napi_value JsFloatViewController::OnStartFloatView(napi_env env, napi_callback_i
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [weakController, env, task = napiAsyncTask] {
         if (!Permission::CheckCallingPermission(FLOAT_VIEW_PERMISSION)) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.start", WmErrorCode::WM_ERROR_NO_PERMISSION);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_NO_PERMISSION,
                 "no permission."));
             return;
@@ -107,6 +108,7 @@ napi_value JsFloatViewController::OnStartFloatView(napi_env env, napi_callback_i
         auto fvController = weakController.promote();
         if (fvController == nullptr) {
             TLOGNE(WmsLogTag::WMS_SYSTEM, "Controller is nullptr");
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.start", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "The controller is nullptr."));
             return;
@@ -114,8 +116,7 @@ napi_value JsFloatViewController::OnStartFloatView(napi_env env, napi_callback_i
         auto errCode = ConvertErrorToCode(fvController->StartFloatView());
         if (errCode != WmErrorCode::WM_OK) {
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode,
-                "JsFloatViewController::StartFloatView failed."));
-            return;
+                "JsFloatViewController::StartFloatView failed."));            return;
         }
         task->Resolve(env, NapiGetUndefined(env));
     };
@@ -179,6 +180,7 @@ napi_value JsFloatViewController::OnSetUIContext(napi_env env, napi_callback_inf
     napi_value argv[2] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setUIContext", WmErrorCode::WM_ERROR_INVALID_PARAM);
         TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "param num verification failed.");
@@ -186,6 +188,7 @@ napi_value JsFloatViewController::OnSetUIContext(napi_env env, napi_callback_inf
     std::string contextUrl;
     if (!ConvertFromJsValue(env, argv[0], contextUrl)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to context url");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setUIContext", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to convert parameter to context url");
     }
@@ -213,6 +216,7 @@ napi_value JsFloatViewController::SetUIContextTask(napi_env env, const std::stri
             TLOGNE(WmsLogTag::WMS_SYSTEM, "The ui path is empty");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
                 "The ui path is empty."));
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setUIContext", WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
             return;
         }
         auto fvController = weakController.promote();
@@ -220,6 +224,7 @@ napi_value JsFloatViewController::SetUIContextTask(napi_env env, const std::stri
             TLOGNE(WmsLogTag::WMS_SYSTEM, "Controller is nullptr");
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "The controller is nullptr."));
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setUIContext", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return;
         }
         auto errCode = ConvertErrorToCode(fvController->SetUIContext(contextUrl, contentStorage));
@@ -250,12 +255,15 @@ napi_value JsFloatViewController::OnSetFloatViewVisibilityInApp(napi_env env, na
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-            "param num verification failed.");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setFloatViewVisibilityInApp",
+                                         WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "param num verification failed.");
     }
     bool visibleInApp = true;
     if (!ConvertFromJsValue(env, argv[0], visibleInApp)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to visibility");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setFloatViewVisibilityInApp",
+                                         WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to convert parameter to visibility");
     }
@@ -268,6 +276,8 @@ napi_value JsFloatViewController::OnSetFloatViewVisibilityInApp(napi_env env, na
         auto fvController = weakController.promote();
         if (fvController == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setFloatViewVisibilityInApp",
+                                             WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return;
         }
         *errCodePtr = ConvertErrorToCode(fvController->SetVisibilityInApp(visibleInApp));
@@ -305,12 +315,14 @@ napi_value JsFloatViewController::OnSetWindowSize(napi_env env, napi_callback_in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setWindowSize", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "param num verification failed.");
     }
     napi_value jsSize = argv[0];
     if (jsSize == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "jsSize is null");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setWindowSize", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to convert object to Size or size is null");
     }
@@ -343,11 +355,13 @@ napi_value JsFloatViewController::OnSetWindowSizeTask(napi_env env, int32_t widt
         }
         auto fvController = weakController.promote();
         if (fvController == nullptr) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setWindowSize", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
         if (width <= 0 || height <= 0) {
             *errCodePtr = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.setWindowSize", WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
             return;
         }
         Rect rect = {0, 0, static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
@@ -384,24 +398,29 @@ napi_value JsFloatViewController::OnGetWindowProperties(napi_env env, napi_callb
     wptr<FloatViewController> weakController(fvController_);
     auto fvController = weakController.promote();
     if (fvController == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "controller is null.");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.getWindowProperties",
+                                         WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "controller is null.");
     }
     auto state = fvController->GetCurState();
     if (!fvController->IsStateWithWindow(state)) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_FV_INVALID_STATE,
-            "current state do not support get window properties.");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.getWindowProperties",
+                                         WmErrorCode::WM_ERROR_FV_INVALID_STATE);
+        return NapiThrowError(
+            env, WmErrorCode::WM_ERROR_FV_INVALID_STATE, "current state do not support get window properties.");
     }
     auto fvWindow = fvController->GetWindow();
     if (fvWindow == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "window is null.");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.getWindowProperties",
+                                         WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is null.");
     }
     auto windowInfo = fvController->GetWindowInfo();
     auto jsObject = CreateJsFvWindowInfoObject(env, fvWindow, windowInfo, state);
     if (jsObject == nullptr) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "Failed to create js object.");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.getWindowProperties",
+                                         WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Failed to create js object.");
     }
     return jsObject;
 }
@@ -423,8 +442,10 @@ napi_value JsFloatViewController::OnRestoreMainWindow(napi_env env, napi_callbac
         napi_value wantValue = argv[INDEX_ZERO];
         if (wantValue != nullptr && !AppExecFwk::UnwrapWantParams(env, wantValue, wantParams)) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameters to wantParameters");
-            return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
-                "Failed to convert parameters to wantParameters.");
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.restoreMainWindow",
+                                             WmErrorCode::WM_ERROR_INVALID_PARAM);
+            return NapiThrowError(
+                env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to convert parameters to wantParameters.");
         }
     }
 
@@ -437,6 +458,8 @@ napi_value JsFloatViewController::OnRestoreMainWindow(napi_env env, napi_callbac
         }
         auto controller = weakController.promote();
         if (controller == nullptr) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.restoreMainWindow",
+                                             WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
@@ -491,19 +514,23 @@ napi_value JsFloatViewController::RegisterCallbackWithType(
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARG_COUNT_ONE) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "RegisterCallbackWithType Params not match: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.onChange", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "No enough params.");
     }
     napi_value value = argv[INDEX_ZERO];
     if (value == nullptr || !NapiIsCallable(env, value)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Callback is nullptr or not callable");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.onChange", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Callback is nullptr or not callable.");
     }
     if (fvController_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "controller is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.onChange", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Controller not exists.");
     }
     if (IsCallbackRegistered(env, callbackType, value)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Callback already registered!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.onChange", WmErrorCode::WM_ERROR_FV_REPEAT_OPERATION);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_FV_REPEAT_OPERATION, "Callback already registered.");
     }
 
@@ -514,15 +541,18 @@ napi_value JsFloatViewController::RegisterCallbackWithType(
     auto fvWindowListener = sptr<JsFloatViewListener>::MakeSptr(env, callbackRef);
     if (fvWindowListener == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "New JsFloatViewListener failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.onChange", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "New JsFloatViewListener failed.");
     }
     WMError errCode = DoRegisterCallbackWithType(callbackType, fvWindowListener);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Register callback failed, type: %{public}d", callbackType);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.onChange", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "Register callback failed.");
     }
     jsCallbackMap_[callbackType].insert(fvWindowListener);
     TLOGI(WmsLogTag::WMS_SYSTEM, "Register type %{public}d success", callbackType);
+    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.onChange", WmErrorCode::WM_OK);
     return NapiGetUndefined(env);
 }
 
@@ -540,6 +570,7 @@ napi_value JsFloatViewController::UnregisterCallbackWithType(
             WMError ret = DoUnregisterCallbackWithType(callbackType, callback);
             if (ret != WMError::WM_OK) {
                 TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d failed, no value", callbackType);
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.offChange", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
                 return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "unRegister failed.");
             }
         }
@@ -557,12 +588,14 @@ napi_value JsFloatViewController::UnregisterCallbackWithType(
         WMError ret = DoUnregisterCallbackWithType(callbackType, callback);
         if (ret != WMError::WM_OK) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d failed, no value", callbackType);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.offChange", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "unRegister failed.");
         }
         jsCallbackMap_[callbackType].erase(callback);
         break;
     }
     TLOGI(WmsLogTag::WMS_SYSTEM, "Unregister type %{public}d success", callbackType);
+    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.offChange", WmErrorCode::WM_OK);
     return NapiGetUndefined(env);
 }
 
