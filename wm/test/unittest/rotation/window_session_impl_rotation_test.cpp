@@ -172,6 +172,36 @@ HWTEST_F(WindowSessionImplRotationTest, SetCurrentRotation, Function | SmallTest
 }
 
 /**
+ * @tc.name: SetCurrentRotation02
+ * @tc.desc: Test SetCurrentRotation with boundary values and property verification
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, SetCurrentRotation02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetCurrentRotation02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetCurrentRotation02");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+
+    // Case 1: Boundary value - ZERO_CIRCLE_DEGREE (0)
+    auto ret = window->SetCurrentRotation(ZERO_CIRCLE_DEGREE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->property_->GetSessionInfo().currentRotation_, ZERO_CIRCLE_DEGREE);
+
+    // Case 2: Boundary value - FULL_CIRCLE_DEGREE (360)
+    ret = window->SetCurrentRotation(FULL_CIRCLE_DEGREE);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->property_->GetSessionInfo().currentRotation_, FULL_CIRCLE_DEGREE);
+
+    // Case 3: Typical value - 180 degrees
+    ret = window->SetCurrentRotation(180);
+    EXPECT_EQ(ret, WSError::WS_OK);
+    EXPECT_EQ(window->property_->GetSessionInfo().currentRotation_, 180);
+
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetCurrentRotation02 end";
+}
+
+/**
  * @tc.name: GetSceneNodeCount
  * @tc.desc: GetSceneNodeCount
  * @tc.type: FUNC
