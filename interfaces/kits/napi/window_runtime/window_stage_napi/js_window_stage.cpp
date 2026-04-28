@@ -1013,7 +1013,8 @@ napi_value JsWindowStage::OnRemoveStartingWindow(napi_env env, napi_callback_inf
         auto window = weakWindow.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_STARTUP_PAGE, "%{public}s window is nullptr", where);
-            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.removeStartingWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.removeStartingWindow",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][removeStartingWindow]msg: The main window is not created or destroyed"));
             return;
@@ -1267,7 +1268,8 @@ napi_value JsWindowStage::OnRemoveImageForRecent(napi_env env, napi_callback_inf
         auto windowScene = weakWindow.lock();
         if (windowScene == nullptr) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s windowScene is null", where);
-            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.removeImageForRecent", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.removeImageForRecent",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY));
             return;
         }
