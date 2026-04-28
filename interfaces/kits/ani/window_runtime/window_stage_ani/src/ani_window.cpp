@@ -1212,6 +1212,8 @@ void AniWindow::SetWaterMarkFlag(ani_env* env, ani_object obj, ani_long nativeOb
         aniWindow->OnSetWaterMarkFlag(env, enable);
     } else {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWaterMarkFlag",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -1222,6 +1224,8 @@ void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWaterMarkFlag",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1232,6 +1236,7 @@ void AniWindow::OnSetWaterMarkFlag(ani_env* env, ani_boolean enable)
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->RemoveWindowFlag(WindowFlag::WINDOW_FLAG_WATER_MARK));
     }
     if (ret != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWaterMarkFlag", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetWaterMarkFlag failed.");
     }
 }
@@ -1444,6 +1449,8 @@ void AniWindow::SetReceiveDragEventEnabled(ani_env* env, ani_object obj, ani_lon
         aniWindow->OnSetReceiveDragEventEnabled(env, enabled);
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setReceiveDragEventEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -1454,12 +1461,15 @@ void AniWindow::OnSetReceiveDragEventEnabled(ani_env* env, ani_boolean enabled)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setReceiveDragEventEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetReceiveDragEventEnabled(enabled));
     if (ret != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setReceiveDragEventEnabled", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetReceiveDragEventEnabled failed.");
     }
 }
@@ -1470,6 +1480,8 @@ ani_boolean AniWindow::IsReceiveDragEventEnabled(ani_env* env, ani_object obj, a
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isReceiveDragEventEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return static_cast<ani_boolean>(true);
     }
@@ -1481,6 +1493,8 @@ bool AniWindow::OnIsReceiveDragEventEnabled(ani_env* env)
     TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isReceiveDragEventEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return true;
     }
@@ -1496,6 +1510,8 @@ void AniWindow::SetSeparationTouchEnabled(ani_env* env, ani_object obj, ani_long
         aniWindow->OnSetSeparationTouchEnabled(env, enabled);
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSeparationTouchEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -1506,12 +1522,15 @@ void AniWindow::OnSetSeparationTouchEnabled(ani_env* env, ani_boolean enabled)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSeparationTouchEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
 
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->SetSeparationTouchEnabled(enabled));
     if (ret != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setSeparationTouchEnabled", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetSeparationTouchEnabled failed.");
     }
 }
@@ -1522,6 +1541,8 @@ ani_boolean AniWindow::IsSeparationTouchEnabled(ani_env* env, ani_object obj, an
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isSeparationTouchEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return static_cast<ani_boolean>(true);
     }
@@ -1533,6 +1554,8 @@ bool AniWindow::OnIsSeparationTouchEnabled(ani_env* env)
     TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI] window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isSeparationTouchEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return true;
     }
@@ -1937,6 +1960,8 @@ void AniWindow::SetWindowTouchable(ani_env* env, ani_object obj, ani_long native
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
     if (aniWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]aniWindow is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTouchable",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -1948,12 +1973,15 @@ void AniWindow::OnSetWindowTouchable(ani_env* env, ani_boolean isTouchable)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]window is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTouchable",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     WmErrorCode ret = AniWindowUtils::ToErrorCode(window->SetTouchable(static_cast<bool>(isTouchable)));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]SetTouchable failed, ret: %{public}d", ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTouchable", ret);
         AniWindowUtils::AniThrowError(env, ret, "Window set touchable on failed");
         return;
     }
@@ -1969,6 +1997,8 @@ void AniWindow::SetDialogBackGestureEnabled(ani_env* env, ani_object obj, ani_lo
         aniWindow->OnSetDialogBackGestureEnabled(env, enabled);
     } else {
         TLOGE(WmsLogTag::WMS_DIALOG, "[ANI]aniWindow is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDialogBackGestureEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -1978,12 +2008,15 @@ void AniWindow::OnSetDialogBackGestureEnabled(ani_env* env, ani_boolean enabled)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[ANI]window is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDialogBackGestureEnabled",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     WmErrorCode ret = AniWindowUtils::ToErrorCode(window->SetDialogBackGestureEnabled(static_cast<bool>(enabled)));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[ANI]SetDialogBackGestureEnabled failed, ret: %{public}d", ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDialogBackGestureEnabled", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetDialogBackGestureEnabled failed!");
         return;
     }
@@ -1999,6 +2032,8 @@ void AniWindow::SetWindowMask(ani_env* env, ani_object obj, ani_long nativeObj, 
         aniWindow->OnSetWindowMask(env, windowMask);
     } else {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]aniWindow is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowMask",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -2011,6 +2046,8 @@ void AniWindow::ClearWindowMask(ani_env* env, ani_object obj, ani_long nativeObj
         aniWindow->OnClearWindowMask(env);
     } else {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]aniWindow is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.clearWindowMask",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -2020,26 +2057,35 @@ void AniWindow::OnSetWindowMask(ani_env* env, ani_array windowMaskArray)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]window is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowMask",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     if (!CheckWindowMaskParams(env, windowMaskArray)) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowMask",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
     std::vector<std::vector<uint32_t>> windowMask;
     if (!AniWindowUtils::ParseWindowMask(env, windowMaskArray, windowMask)) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]Parse windowMask value failed!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowMask",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
     if (!WindowHelper::IsSubWindow(window->GetType()) && !WindowHelper::IsAppFloatingWindow(window->GetType())) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowMask",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING, "Invalid window type");
         return;
     }
     WmErrorCode ret = AniWindowUtils::ToErrorCode(window->SetWindowMask(windowMask));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]SetWindowMask failed, ret: %{public}d", ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowMask", ret);
         AniWindowUtils::AniThrowError(env, ret);
         return;
     }
@@ -2085,16 +2131,21 @@ void AniWindow::OnClearWindowMask(ani_env* env)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]window is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.clearWindowMask",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     if (!WindowHelper::IsSubWindow(window->GetType()) && !WindowHelper::IsAppFloatingWindow(window->GetType())) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.clearWindowMask",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING, "Invalid window type");
         return;
     }
     WmErrorCode ret = AniWindowUtils::ToErrorCode(window->ClearWindowMask());
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]ClearWindowMask failed, ret: %{public}d", ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.clearWindowMask", ret);
         AniWindowUtils::AniThrowError(env, ret);
         return;
     }
@@ -2110,6 +2161,8 @@ void AniWindow::SetTouchableAreas(ani_env* env, ani_object obj, ani_long nativeO
         aniWindow->OnSetTouchableAreas(env, rects);
     } else {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]aniWindow is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTouchableAreas",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
@@ -2119,12 +2172,16 @@ void AniWindow::OnSetTouchableAreas(ani_env* env, ani_array rects)
     if (!Permission::IsSystemCalling() &&
         !Permission::CheckSelfPermission("ohos.permission.SET_WINDOW_TOUCH_AREAS")) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]OnSetTouchableAreas permission denied!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTouchableAreas",
+            WmErrorCode::WM_ERROR_NO_PERMISSION);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NO_PERMISSION);
         return;
     }
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]window is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTouchableAreas",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
@@ -2132,12 +2189,14 @@ void AniWindow::OnSetTouchableAreas(ani_env* env, ani_array rects)
     std::vector<Rect> touchableAreas;
     WmErrorCode errCode = AniWindowUtils::ParseTouchableAreas(env, rects, windowRect, touchableAreas);
     if (errCode != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTouchableAreas", errCode);
         AniWindowUtils::AniThrowError(env, errCode);
         return;
     }
     WmErrorCode ret = AniWindowUtils::ToErrorCode(window->SetTouchHotAreas(touchableAreas));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]SetTouchHotAreas failed, ret: %{public}d", ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTouchableAreas", ret);
         AniWindowUtils::AniThrowError(env, ret, "SetTouchableAreas failed!");
     }
     TLOGI(WmsLogTag::WMS_EVENT, "[ANI]Window [%{public}u, %{public}s] OnSetTouchableAreas end",
@@ -2608,6 +2667,8 @@ void AniWindow::BindDialogTarget(ani_env* env, ani_object obj, ani_long nativeOb
         return aniWindow->OnBindDialogTarget(env, argv, deathCallback);
     } else {
         TLOGE(WmsLogTag::WMS_DIALOG, "[ANI] aniWindow is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.bindDialogTarget",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
     }
 }
 
@@ -2615,11 +2676,15 @@ void AniWindow::OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathC
 {
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[ANI] window is nullptr!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.bindDialogTarget",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_DIALOG, "permission denied, require system application!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.bindDialogTarget",
+            WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return;
     }
@@ -2627,6 +2692,8 @@ void AniWindow::OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathC
     sptr<IRemoteObject> token = GetBindDialogToken(env, argv);
     if (token == nullptr) {
         TLOGE(WmsLogTag::WMS_DIALOG, "token is null!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.bindDialogTarget",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
         return;
     }
@@ -2636,12 +2703,15 @@ void AniWindow::OnBindDialogTarget(ani_env* env, ani_object argv, ani_ref deathC
     wptr<Window> weakToken(windowToken_);
     auto window = weakToken.promote();
     if (window == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.bindDialogTarget",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(window->BindDialogTarget(token));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DIALOG, "[ANI] bind dialog target failed, result=%{public}d", ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.bindDialogTarget", ret);
         AniWindowUtils::AniThrowError(env, ret, "Bind Dialog Target failed");
     }
     TLOGI(WmsLogTag::WMS_SYSTEM, "BindDialogTarget end, window [%{public}u, %{public}s]",
