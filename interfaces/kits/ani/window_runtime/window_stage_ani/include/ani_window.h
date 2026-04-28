@@ -95,7 +95,7 @@ public:
     static void SetDialogBackGestureEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enabled);
     static void SetWindowMask(ani_env* env, ani_object obj, ani_long nativeObj, ani_array windowMask);
     static void SetWindowMaskWithAlpha(ani_env* env, ani_object obj, ani_long nativeObj,
-        ani_array windowMask, ani_int maskWidth, ani_int maskHeight);
+        ani_object windowMask, ani_int maskWidth, ani_int maskHeight);
     static void ClearWindowMask(ani_env* env, ani_object obj, ani_long nativeObj);
     static void SetTouchableAreas(ani_env* env, ani_object obj, ani_long nativeObj, ani_array rects);
     static ani_object GetUIContext(ani_env* env, ani_object obj, ani_long nativeObj);

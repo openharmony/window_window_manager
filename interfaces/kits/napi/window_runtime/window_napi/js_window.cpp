@@ -9020,7 +9020,7 @@ napi_value JsWindow::OnSetWindowMaskWithAlpha(napi_env env, napi_callback_info i
     }
 
     napi_value result = nullptr;
-    auto napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
     auto asyncTask = [weakToken = wptr<Window>(windowToken_), maskData, params, env,
         task = napiAsyncTask] {
         SetWindowMaskWithAlphaAsyncTask(weakToken, maskData, params, env, task);

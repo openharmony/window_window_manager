@@ -2539,7 +2539,7 @@ bool AniWindowUtils::GetUint8ArrayBufferData(ani_env* env, ani_object uint8Array
         return false;
     }
 
-    aniRet = env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(result), data, &byteLength);
+    aniRet = env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(result), &data, &byteLength);
     if (aniRet != ANI_OK) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]Get ArrayBuffer info failed: %{public}u", aniRet);
         return false;
