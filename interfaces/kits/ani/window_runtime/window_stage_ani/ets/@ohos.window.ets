@@ -1275,7 +1275,7 @@ export class WindowPropertiesInternal implements WindowProperties {
     this.isRoundCorner = isRoundCorner;
     this.isTransparent = isTransparent;
     this.type = WindowType.fromValue(typeInternal);
-    this.windowType = WindowType.fromValue(windowTypeInternal);
+    this.windowType = windowTypeInternal as WindowType;
     this.id = id;
     this.displayId = displayId;
     this.name = name;
