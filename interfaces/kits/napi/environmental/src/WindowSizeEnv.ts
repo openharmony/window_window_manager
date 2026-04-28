@@ -113,7 +113,7 @@ class WindowSizeVpEnv implements IEnvironmentValue<window.SizeInVp> {
 
     try {
       this.#context = context;
-      this.#win = windowenv.findWindowById(context.getId());
+      this.#win = windowenv.findWindowById(this.#context.getId());
       const props = this.#win.getWindowProperties();
       this.#widthPx = props.windowRect.width;
       this.#heightPx = props.windowRect.height;
