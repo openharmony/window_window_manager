@@ -52,7 +52,7 @@ napi_value JsFloatViewWMInit(napi_env env, napi_value exportObj)
     }
     std::unique_ptr<JsFloatViewManager> jsFvManager = std::make_unique<JsFloatViewManager>();
     napi_wrap(env, exportObj, jsFvManager.release(), JsFloatViewManager::Finalizer, nullptr, nullptr);
-    
+
     const char* moduleName = "JsFloatViewManager";
     BindNativeFunction(env, exportObj, "create", moduleName, JsFloatViewManager::CreateFloatViewController);
     BindNativeFunction(env, exportObj, "isFloatViewEnabled", moduleName, JsFloatViewManager::IsFloatViewEnabled);
@@ -80,12 +80,13 @@ napi_value JsFloatViewManager::OnCreateFloatViewController(napi_env env, napi_ca
     FvOption option;
     auto errMsg = CheckAndGetParam(env, info, option);
     if (!errMsg.empty()) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.create", WmErrorCode::WM_ERROR_FB_PARAM_INVALID);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, errMsg);
     }
     return CreateFloatViewControllerTask(env, option);
 }
 
-napi_value JsFloatViewManager::CreateFloatViewControllerTask(napi_env env, const FvOption &option)
+napi_value JsFloatViewManager::CreateFloatViewControllerTask(napi_env env, const FvOption& option)
 {
     std::shared_ptr<WmErrorCode> errCodePtr = std::make_shared<WmErrorCode>(WmErrorCode::WM_OK);
     sptr<FloatViewController> floatViewController = sptr<FloatViewController>::MakeSptr(option, env);
@@ -96,22 +97,26 @@ napi_value JsFloatViewManager::CreateFloatViewControllerTask(napi_env env, const
         if (!FloatViewManager::isSupportFloatView_) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Device do not support float view");
             *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.create", WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
             return;
         }
 
         if (option.GetTemplate() >= static_cast<uint32_t>(FloatViewTemplate::END)) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "template type is invalid");
             *errCodePtr = WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.create", WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
             return;
         }
 
         auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(option.GetContext());
         if (context == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.create", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return;
         }
         if (floatViewController == nullptr) {
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.create", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return;
         }
     };
@@ -181,6 +186,12 @@ napi_value JsFloatViewManager::IsFloatViewEnabled(napi_env env, napi_callback_in
 napi_value JsFloatViewManager::OnIsFloatViewEnabled(napi_env env, napi_callback_info info)
 {
     bool isSupportFloatView = FloatViewManager::isSupportFloatView_;
+    if (!isSupportFloatView) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.isFloatingViewEnabled",
+                                         WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+    } else {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.isFloatingViewEnabled", WmErrorCode::WM_OK);
+    }
     return CreateJsValue(env, isSupportFloatView);
 }
 
@@ -195,6 +206,8 @@ napi_value JsFloatViewManager::OnGetFloatViewLimits(napi_env env, napi_callback_
     TLOGI(WmsLogTag::WMS_SYSTEM, "OnGetFloatViewLimits");
     if (!FloatViewManager::isSupportFloatView_) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Device do not support float view");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.getFloatViewLimits",
+                                         WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
             "Device do not support float view.");
     }
@@ -206,6 +219,8 @@ napi_value JsFloatViewManager::OnGetFloatViewLimits(napi_env env, napi_callback_
     }
     auto jsObject = CreateJsFloatViewLimitsObject(env, limits);
     if (jsObject == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.getFloatViewLimits",
+                                         WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "Failed to create js object.");
     }
@@ -226,17 +241,20 @@ napi_value JsFloatViewManager::OnBind(napi_env env, napi_callback_info info)
     // 解析应用传参FloatViewConfiguration对象
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARG_COUNT_THREE) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Missing args when bind.");
     }
 
     auto controllerPair = GetBindControllers(env, argv);
     if (controllerPair.first == nullptr || controllerPair.second == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to get controllers from js objects.");
     }
 
     auto jsFvController = static_cast<JsFloatViewController*>(controllerPair.first);
     if (jsFvController == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to get floatViewController from js object");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to get floatViewController from js object.");
     }
@@ -244,6 +262,7 @@ napi_value JsFloatViewManager::OnBind(napi_env env, napi_callback_info info)
     auto jsFbController = static_cast<JsFbController*>(controllerPair.second);
     if (jsFbController == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to get floatingBallController from js object");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to get floatingBallController from js object.");
     }
@@ -251,6 +270,7 @@ napi_value JsFloatViewManager::OnBind(napi_env env, napi_callback_info info)
     napi_value jsFbOption = argv[2];
     if (jsFbOption == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to get floating ball param");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to get floating ball param.");
     }
 
@@ -294,22 +314,26 @@ napi_value JsFloatViewManager::BindTask(napi_env env, const sptr<FloatViewContro
         if (!FloatViewManager::isSupportFloatView_ || !FloatingBallManager::IsSupportFloatingBall()) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Device do not support float view");
             *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
             return;
         }
         if (!Permission::CheckCallingPermission(FLOATING_BALL_PERMISSION) ||
             !Permission::CheckCallingPermission(FLOAT_VIEW_PERMISSION)) {
             *errCodePtr = WmErrorCode::WM_ERROR_NO_PERMISSION;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_NO_PERMISSION);
             return;
         }
         if (fvController == nullptr || fbController == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "fvController or fbController is null");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return;
         }
         std::string errMsg = "";
         if (!option.IsValid(errMsg)) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "check floating ball param failed, %{public}s", errMsg.c_str());
             *errCodePtr = WmErrorCode::WM_ERROR_FB_PARAM_INVALID;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.bind", WmErrorCode::WM_ERROR_FB_PARAM_INVALID);
             return;
         }
         *errCodePtr = ConvertErrorToCode(FloatWindowManager::Bind(fvController, fbController, option));
@@ -338,20 +362,23 @@ napi_value JsFloatViewManager::OnUnBind(napi_env env, napi_callback_info info)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "OnUnBind");
     size_t argc = ARG_COUNT_TWO;
-    napi_value argv[ARG_COUNT_TWO] = {nullptr};
+    napi_value argv[ARG_COUNT_TWO] = { nullptr };
     // 解析应用传参FloatViewConfiguration对象
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < ARG_COUNT_TWO) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.unBind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Missing args when bind.");
     }
     auto controllerPair = GetBindControllers(env, argv);
     if (controllerPair.first == nullptr || controllerPair.second == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.unBind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM, "Failed to get controllers from js objects.");
     }
 
     auto jsFvController = static_cast<JsFloatViewController*>(controllerPair.first);
     if (jsFvController == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to get floatViewController from js object");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.unBind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to get floatViewController from js object.");
     }
@@ -359,6 +386,7 @@ napi_value JsFloatViewManager::OnUnBind(napi_env env, napi_callback_info info)
     auto jsFbController = static_cast<JsFbController*>(controllerPair.second);
     if (jsFbController == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to get floatingBallController from js object");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.unBind", WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "Failed to get floatingBallController from js object.");
     }
@@ -378,11 +406,13 @@ napi_value JsFloatViewManager::UnBindTask(napi_env env, const sptr<FloatViewCont
         if (!FloatViewManager::isSupportFloatView_ || !FloatingBallManager::IsSupportFloatingBall()) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Device do not support float view");
             *errCodePtr = WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.unBind", WmErrorCode::WM_ERROR_INVALID_PARAM);
             return;
         }
         if (fvController == nullptr || fbController == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "fvController or fbController is null");
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.fv.unBind", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             return;
         }
         *errCodePtr = ConvertErrorToCode(FloatWindowManager::UnBind(fvController, fbController));

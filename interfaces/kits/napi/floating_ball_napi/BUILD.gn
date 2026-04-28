@@ -18,7 +18,8 @@ config("fb_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "../../../../wm/include",
-    "../common"
+    "../common",
+    "../../../../utils/include",
   ]
 }
 
@@ -60,6 +61,7 @@ ohos_shared_library("floatingball_kit") {
     "image_framework:image",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "api_metrics:histogrammanager",
   ]
   
   public_configs = [ ":fb_config" ]
@@ -72,6 +74,7 @@ ohos_shared_library("floatingball_kit") {
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
+  defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
 
   version_script = "libfloatingball_kit.map"
 }
@@ -107,6 +110,7 @@ ohos_shared_library("floatingball_napi") {
     "ability_runtime:runtime",
     "c_utils:utils",
     "napi:ace_napi",
+    "api_metrics:histogrammanager",
   ]
 
   relative_install_dir = "module/window"
@@ -117,4 +121,6 @@ ohos_shared_library("floatingball_napi") {
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
+  defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
+
 }
