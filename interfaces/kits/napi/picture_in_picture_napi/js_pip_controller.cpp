@@ -437,7 +437,7 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
                 "PiP internal error."));
             HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONGETPIPWINDOWINFO,
-                                             WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+                                             WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR);
             return;
         }
         const sptr<Window>& pipWindow = pipController->GetPipWindow();
@@ -446,7 +446,7 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
             task->Reject(env, CreateJsError(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR),
                 "PiP internal error."));
             HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONGETPIPWINDOWINFO,
-                                             WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+                                             WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR);
             return;
         }
         task->Resolve(env, CreateJsPiPWindowInfoObject(env, pipWindow));
@@ -780,8 +780,6 @@ napi_value JsPipController::OnUnregisterCallback(napi_env env, napi_callback_inf
     }
     if (argc == NUMBER_ONE) {
         UnRegisterListenerWithType(env, cbType, nullptr);
-        HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONUNREGISTERCALLBACK,
-                                         WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiGetUndefined(env);
     }
     napi_value value = argv[NUMBER_ONE];
@@ -830,7 +828,6 @@ WmErrorCode JsPipController::UnRegisterListenerWithType(napi_env env, const std:
         }
         if (!foundCallbackValue) {
             TLOGE(WmsLogTag::WMS_PIP, "Unregister type %{public}s failed because not found callback!", type.c_str());
-            HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONUNREGISTERCALLBACK, WmErrorCode::WM_OK);
             return WmErrorCode::WM_OK;
         }
         if (jsCbMap_[type].empty()) {
