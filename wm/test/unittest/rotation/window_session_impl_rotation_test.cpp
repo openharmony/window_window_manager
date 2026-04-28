@@ -20,6 +20,7 @@
 #include "ability_context_impl.h"
 #include "common_test_utils.h"
 #include "extension_data_handler.h"
+#include "future_callback.h"
 #include "iremote_object_mocker.h"
 #include "mock_session.h"
 #include "mock_uicontent.h"
@@ -1102,6 +1103,74 @@ HWTEST_F(WindowSessionImplRotationTest, ConvertInvalidOrientation_Complete, Test
     EXPECT_EQ(window->ConvertInvalidOrientation(), Orientation::UNSPECIFIED);
 
     GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: ConvertInvalidOrientation_Complete end";
+}
+
+/**
+ * @tc.name: NotifyRotationChangeResult_NullFuture
+ * @tc.desc: Test NotifyRotationChangeResult when getRotationResultFuture_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, NotifyRotationChangeResult_NullFuture, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyRotationChangeResult_NullFuture start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyRotationChangeResult_NullFuture");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->getRotationResultFuture_ = nullptr;
+    RotationChangeResult result = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 100, 100 } };
+    window->NotifyRotationChangeResult(result);
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyRotationChangeResult_NullFuture end";
+}
+
+/**
+ * @tc.name: NotifyRotationChangeResult_ValidFuture
+ * @tc.desc: Test NotifyRotationChangeResult when getRotationResultFuture_ is valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, NotifyRotationChangeResult_ValidFuture, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyRotationChangeResult_ValidFuture start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("NotifyRotationChangeResult_ValidFuture");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    window->getRotationResultFuture_ = sptr<FutureCallback>::MakeSptr();
+    RotationChangeResult result = { RectType::RELATIVE_TO_SCREEN, { 0, 0, 100, 100 } };
+    window->NotifyRotationChangeResult(result);
+    EXPECT_NE(window->getRotationResultFuture_, nullptr);
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: NotifyRotationChangeResult_ValidFuture end";
+}
+
+/**
+ * @tc.name: SetRotationLocked_NotSupported
+ * @tc.desc: Test SetRotationLocked default implementation returns WM_ERROR_DEVICE_NOT_SUPPORT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, SetRotationLocked_NotSupported, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetRotationLocked_NotSupported start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("SetRotationLocked_NotSupported");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    auto ret = window->SetRotationLocked(true);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: SetRotationLocked_NotSupported end";
+}
+
+/**
+ * @tc.name: GetRotationLocked_NotSupported
+ * @tc.desc: Test GetRotationLocked default implementation returns WM_ERROR_DEVICE_NOT_SUPPORT
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionImplRotationTest, GetRotationLocked_NotSupported, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetRotationLocked_NotSupported start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("GetRotationLocked_NotSupported");
+    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
+    bool locked = false;
+    auto ret = window->GetRotationLocked(locked);
+    EXPECT_EQ(ret, WMError::WM_ERROR_DEVICE_NOT_SUPPORT);
+    GTEST_LOG_(INFO) << "WindowSessionImplRotationTest: GetRotationLocked_NotSupported end";
 }
 
 } // namespace
