@@ -7151,16 +7151,13 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMaskWithAlp
     constexpr uint32_t greenChannel = 1;
     constexpr uint32_t redChannel = 2;
     constexpr uint32_t alphaChannel = 3;
-    for (uint32_t i = 0; i < maskHeight; i++) {
-        for (uint32_t j = 0; j < maskWidth; j++) {
-            size_t idx = static_cast<size_t>(i) * static_cast<size_t>(maskWidth) + static_cast<size_t>(j);
-            uint8_t alpha = windowMask[idx];
-            size_t channelIndex = idx * bgraChannel;
-            data[channelIndex] = alpha;
-            data[channelIndex + greenChannel] = fullChannel;
-            data[channelIndex + redChannel] = fullChannel;
-            data[channelIndex + alphaChannel] = fullChannel;
-        }
+    size_t totalPixels = static_cast<size_t>(maskWidth) * static_cast<size_t>(maskHeight);
+    for (size_t idx = 0; idx < totalPixels; idx++) {
+        size_t channelIndex = idx * bgraChannel;
+        data[channelIndex] = fullChannel;  // blue channel
+        data[channelIndex + greenChannel] = fullChannel;
+        data[channelIndex + redChannel] = fullChannel;
+        data[channelIndex + alphaChannel] = windowMask[idx];
     }
     std::shared_ptr<Media::PixelMap> mask = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), length, opts);
     free(data);
