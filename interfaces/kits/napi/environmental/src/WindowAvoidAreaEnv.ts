@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const windowenv = requireInternal('windowenv');;
+const windowenv = requireInternal('windowenv');
 const hilog = requireInternal('hilog');
 const HILOG_DOMAIN = 0x04209;
 const HILOG_TAG = 'WMSImms';
