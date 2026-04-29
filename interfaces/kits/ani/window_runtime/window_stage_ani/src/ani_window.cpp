@@ -1147,7 +1147,7 @@ void AniWindow::OnRecover(ani_env* env, ani_object snapshotAnimationConfig)
     if (!AniWindowUtils::CheckParaIsUndefined(env, snapshotAnimationConfig)) {
         auto configOpt = ParseSnapshotAnimationConfigANI(env, snapshotAnimationConfig);
         if (!configOpt) {
-            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+            AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
             return;
         }
         ret = WM_JS_TO_ERROR_CODE_MAP.at(window->Recover(1, *configOpt));
@@ -4894,6 +4894,17 @@ std::optional<WaterfallResidentState> ParseWaterfallResidentState(ani_env* env, 
     return acrossDisplay ? WaterfallResidentState::OPEN : WaterfallResidentState::CLOSE;
 }
 
+/**
+ * @brief Parse SnapshotAnimationConfig from ANI object.
+ *
+ * Duration and delay are optional. If omitted, the struct defaults to -1 (system default).
+ * If the user explicitly provides a negative value, parsing fails and returns std::nullopt,
+ * which causes the caller to throw a 401 (WM_ERROR_INVALID_PARAM) error.
+ *
+ * @param env ANI environment.
+ * @param aniConfig ANI object containing optional "duration" and "delay" properties.
+ * @return Parsed config, or std::nullopt on error.
+ */
 std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfigANI(
     ani_env* env, ani_object aniConfig)
 {
@@ -4918,6 +4929,11 @@ std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfigANI(
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed to parse duration, ret: %{public}d", ret);
             return std::nullopt;
         }
+        if (duration < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] duration must not be negative, got: %{public}" PRId64,
+                static_cast<int64_t>(duration));
+            return std::nullopt;
+        }
         config.duration = static_cast<int64_t>(duration);
     }
 
@@ -4931,6 +4947,11 @@ std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfigANI(
             static_cast<ani_object>(delayRef), "toLong", ":l", &delay);
         if (ret != ANI_OK) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] Failed to parse delay, ret: %{public}d", ret);
+            return std::nullopt;
+        }
+        if (delay < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] delay must not be negative, got: %{public}" PRId64,
+                static_cast<int64_t>(delay));
             return std::nullopt;
         }
         config.delay = static_cast<int64_t>(delay);
