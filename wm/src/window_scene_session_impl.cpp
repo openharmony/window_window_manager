@@ -337,7 +337,7 @@ sptr<WindowSessionImpl> WindowSceneSessionImpl::FindParentMainSession(uint32_t p
     for (const auto& [_, pair] : sessionMap) {
         auto& window = pair.second;
         if (window && window->GetWindowId() == parentId) {
-            if (WindowHelper::IsMainWindow(window->GetType()) ||
+            if (WindowHelper::IsMainWindow(window->GetType()) || window->IsLoosenedWithPcOrFreeMultiMode() ||
                 (WindowHelper::IsSystemWindow(window->GetType()) && window->GetParentId() == INVALID_SESSION_ID)) {
                 TLOGD(WmsLogTag::WMS_SUB, "find main session, id:%{public}u", window->GetWindowId());
                 return window;
@@ -5598,7 +5598,7 @@ static WMError GetParentMainWindowIdInner(WindowSessionImplMap& sessionMap, int3
             continue;
         }
 
-        if (WindowHelper::IsMainWindow(window->GetType())) {
+        if (WindowHelper::IsMainWindow(window->GetType()) || window->IsLoosenedWithPcOrFreeMultiMode()) {
             TLOGI(WmsLogTag::WMS_SUB, "find main window, id:%{public}u", window->GetPersistentId());
             mainWindowId = window->GetPersistentId();
             return WMError::WM_OK;
