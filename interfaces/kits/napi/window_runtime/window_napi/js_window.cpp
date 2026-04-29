@@ -9714,7 +9714,7 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
 }
 
 static void SetWindowMaskWithAlphaAsyncTask(wptr<Window> weakToken,
-    std::shared_ptr<uint8_t[]> maskData, uint32_t maskWidth, uint32_t maskHeight,
+    std::shared_ptr<uint8_t[]> maskData, const WindowMaskWithAlphaParams& params,
     napi_env env, std::shared_ptr<NapiAsyncTask> task)
 {
     auto window = weakToken.promote();
@@ -9725,7 +9725,7 @@ static void SetWindowMaskWithAlphaAsyncTask(wptr<Window> weakToken,
         return;
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        window->SetWindowMaskWithAlpha(maskData.get(), maskWidth, maskHeight));
+        window->SetWindowMaskWithAlpha(maskData.get(), params.maskWidth, params.maskHeight));
     if (ret != WmErrorCode::WM_OK) {
         task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowMaskWithAlpha]"));
         TLOGE(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s]",
@@ -9771,9 +9771,8 @@ napi_value JsWindow::OnSetWindowMaskWithAlpha(napi_env env, napi_callback_info i
 
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
-    auto asyncTask = [weakToken = wptr<Window>(windowToken_), maskData,
-        maskWidth = params.maskWidth, maskHeight = params.maskHeight, env, task = napiAsyncTask] {
-        SetWindowMaskWithAlphaAsyncTask(weakToken, maskData, maskWidth, maskHeight, env, task);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), maskData, params, env, task = napiAsyncTask] {
+        SetWindowMaskWithAlphaAsyncTask(weakToken, maskData, params, env, task);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, __func__) != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
