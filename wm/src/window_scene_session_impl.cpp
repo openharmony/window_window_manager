@@ -6580,6 +6580,12 @@ WSError WindowSceneSessionImpl::UpdateTitleInTargetPos(bool isShow, int32_t heig
         TLOGE(WmsLogTag::WMS_DECOR, "uiContent is null");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    if (isPcMode && windowSystemConfig_.isDockAutoHide_ && (isDecorHiddenByApp_ || isMaximizeInvoked_) && !IsAnco() &&
+        GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN) {
+        TLOGI(WmsLogTag::WMS_DECOR, "dock auto hide skip updateTitleInTargetPos");
+        return WSError::WS_OK;
+    }
     NotifyTitleChange(isShow, height);
     uiContent->UpdateTitleInTargetPos(isShow, height);
     return WSError::WS_OK;
