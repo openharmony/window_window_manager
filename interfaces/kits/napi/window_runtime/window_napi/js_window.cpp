@@ -1884,6 +1884,17 @@ napi_value JsWindow::OnHideWithAnimation(napi_env env, napi_callback_info info)
     return result;
 }
 
+/**
+ * @brief Parse SnapshotAnimationConfig from JS object.
+ *
+ * Duration and delay are optional. If omitted, the struct defaults to -1 (system default).
+ * If the user explicitly provides a negative value, parsing fails and returns std::nullopt,
+ * which causes the caller to throw a 401 (WM_ERROR_INVALID_PARAM) error.
+ *
+ * @param env NAPI environment.
+ * @param jsConfig JS object containing optional "duration" and "delay" properties.
+ * @return Parsed config, or std::nullopt on error.
+ */
 std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfig(napi_env env, napi_value jsConfig)
 {
     if (env == nullptr) {
@@ -1907,6 +1918,10 @@ std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfig(napi_env env
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert duration");
             return std::nullopt;
         }
+        if (duration < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "duration must not be negative, got: %{public}" PRId64, duration);
+            return std::nullopt;
+        }
         config.duration = duration;
     }
 
@@ -1916,6 +1931,10 @@ std::optional<SnapshotAnimationConfig> ParseSnapshotAnimationConfig(napi_env env
         int64_t delay = -1;
         if (!ConvertFromJsValue(env, jsDelay, delay)) {
             TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert delay");
+            return std::nullopt;
+        }
+        if (delay < 0) {
+            TLOGE(WmsLogTag::WMS_LAYOUT, "delay must not be negative, got: %{public}" PRId64, delay);
             return std::nullopt;
         }
         config.delay = delay;
@@ -8257,7 +8276,7 @@ napi_value JsWindow::OnMaximizeWithOptions(napi_env env, napi_callback_info info
 
     auto optionsOpt = ParseMaximizeOptions(env, argv[INDEX_ZERO]);
     if (!optionsOpt) {
-        return NapiThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM,
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][maximizeWithOptions]msg: Failed to parse MaximizeOptions");
     }
 
