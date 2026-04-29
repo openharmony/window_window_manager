@@ -9751,7 +9751,7 @@ napi_value JsWindow::OnSetWindowMaskWithAlpha(napi_env env, napi_callback_info i
     }
 
     WindowMaskWithAlphaParams params;
-    WmErrorCode parseRet = ParseSetWindowMaskWithAlphaParams(env, argv, argc, params, windowToken_);
+    WmErrorCode parseRet = ParseWindowMaskWithAlphaParams(env, argv, argc, params, windowToken_);
     if (parseRet != WmErrorCode::WM_OK) {
         return NapiThrowError(env, parseRet, "[window][setWindowMaskWithAlpha]msg: Invalid parameters");
     }

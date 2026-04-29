@@ -1646,7 +1646,7 @@ bool GetWindowMaskWithAlphaFromJsValue(napi_env env, napi_value jsObject, uint8_
     return true;
 }
 
-WmErrorCode ParseSetWindowMaskWithAlphaParams(napi_env env, napi_value* argv, size_t argc,
+WmErrorCode ParseWindowMaskWithAlphaParams(napi_env env, napi_value* argv, size_t argc,
     WindowMaskWithAlphaParams& params, const sptr<Window>& windowToken)
 {
     constexpr size_t minRequiredParams = 3;  // windowMask, maskWidth, maskHeight

@@ -2189,7 +2189,7 @@ void AniWindow::OnSetWindowMaskWithAlpha(ani_env* env, ani_object windowMaskArra
         window->SetWindowMaskWithAlpha(reinterpret_cast<uint8_t*>(params.maskData),
             params.maskWidth, params.maskHeight));
     if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_PC, "[ANI]SetWindowMaskWithAlpha failed, ret: %{public}d", ret);
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]SetWindowMaskWithAlpha failed, ret: %{public}d", ret);
         AniWindowUtils::AniThrowError(env, ret);
         return;
     }
