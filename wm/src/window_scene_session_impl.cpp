@@ -7134,7 +7134,7 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMaskWithAlp
     const uint8_t* windowMask, uint32_t maskWidth, uint32_t maskHeight)
 {
     if (windowMask == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "windowMask is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "windowMask is nullptr");
         return nullptr;
     }
     constexpr uint32_t bgraChannel = 4;
@@ -7144,7 +7144,7 @@ std::shared_ptr<Media::PixelMap> WindowSceneSessionImpl::HandleWindowMaskWithAlp
     size_t length = static_cast<size_t>(maskWidth) * static_cast<size_t>(maskHeight) * bgraChannel;
     uint8_t* data = static_cast<uint8_t*>(malloc(length));
     if (data == nullptr) {
-        WLOGFE("data is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "data is nullptr");
         return nullptr;
     }
     constexpr uint32_t fullChannel = 255;
@@ -7206,16 +7206,16 @@ WMError WindowSceneSessionImpl::SetWindowMask(const std::vector<std::vector<uint
 WMError WindowSceneSessionImpl::SetWindowMaskWithAlpha(const uint8_t* windowMask, uint32_t maskWidth,
     uint32_t maskHeight)
 {
-    TLOGI(WmsLogTag::WMS_PC, "WindowId: %{public}u, maskWidth: %{public}u, maskHeight: %{public}u",
+    TLOGI(WmsLogTag::WMS_EVENT, "WindowId: %{public}u, maskWidth: %{public}u, maskHeight: %{public}u",
         GetWindowId(), maskWidth, maskHeight);
     if (IsWindowSessionInvalid()) {
-        WLOGFE("session is invalid");
+        TLOGE(WmsLogTag::WMS_EVENT, "session is invalid");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
 
     std::shared_ptr<Media::PixelMap> mask = HandleWindowMaskWithAlpha(windowMask, maskWidth, maskHeight);
     if (mask == nullptr) {
-        TLOGE(WmsLogTag::WMS_PC, "Failed to create pixelMap of window mask");
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to create pixelMap of window mask");
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     return ApplyWindowMask(mask);
