@@ -4210,6 +4210,7 @@ WMError WindowSessionImpl::SetDecorVisible(bool isVisible)
     }
     uiContent->SetContainerModalTitleVisible(isVisible, true);
     isDecorHiddenByApp_ = !isVisible;
+    UpdateDecorEnable(true);
     handler_->PostTask([weakWindow = wptr(this), isVisible, where = __func__] {
         auto window = weakWindow.promote();
         if (window == nullptr) {
