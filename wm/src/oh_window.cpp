@@ -990,6 +990,8 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "eventHandler null, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_SetWindowTouchable",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
@@ -1002,6 +1004,9 @@ int32_t OH_WindowManager_SetWindowTouchable(int32_t windowId, bool touchable)
         }
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->SetTouchable(touchable));
     }, __func__);
+    if (errCode != WindowManager_ErrorCode::OK) {
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.OH_WindowManager_SetWindowTouchable", errCode);
+    }
     return errCode;
 }
 
@@ -1090,10 +1095,14 @@ int32_t OH_WindowManager_InjectTouchEvent(
 {
     if (touchEvent == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "touchEvent is null, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_InjectTouchEvent",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowId is invalid, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_InjectTouchEvent",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     if (OH_Input_GetTouchEventWindowId(touchEvent) == -1) { // -1: invalid window id
@@ -1102,11 +1111,15 @@ int32_t OH_WindowManager_InjectTouchEvent(
     }
     if (OH_Input_GetTouchEventWindowId(touchEvent) != windowId) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowIds are not equal, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_InjectTouchEvent",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_InjectTouchEvent",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::OK;
@@ -1127,6 +1140,9 @@ int32_t OH_WindowManager_InjectTouchEvent(
         TLOGND(WmsLogTag::WMS_EVENT, "%{public}s, windowId:%{public}d", where, windowId);
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.at(window->InjectTouchEvent(pointerEvent));
     }, __func__);
+    if (errCode != WindowManager_ErrorCode::OK) {
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.OH_WindowManager_InjectTouchEvent", errCode);
+    }
     return errCode;
 }
 
@@ -1290,11 +1306,15 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
 {
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowId is invalid, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_LockCursor",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_LockCursor",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
@@ -1314,6 +1334,9 @@ int32_t OH_WindowManager_LockCursor(int32_t windowId, bool isCursorFollowMovemen
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
             WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
         }, __func__);
+    if (errCode != WindowManager_ErrorCode::OK) {
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.OH_WindowManager_LockCursor", errCode);
+    }
     return errCode;
 }
 
@@ -1321,11 +1344,15 @@ int32_t OH_WindowManager_UnlockCursor(int32_t windowId)
 {
     if (windowId <= 0) {
         TLOGE(WmsLogTag::WMS_EVENT, "windowId is invalid, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_UnlockCursor",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_INVALID_PARAM;
     }
     auto eventHandler = GetMainEventHandler();
     if (eventHandler == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "eventHandler is null, windowId:%{public}d", windowId);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.OH_WindowManager_UnlockCursor",
+            WmErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL);
         return WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
     }
     WindowManager_ErrorCode errCode = WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL;
@@ -1345,5 +1372,8 @@ int32_t OH_WindowManager_UnlockCursor(int32_t windowId)
         errCode = OH_WINDOW_TO_ERROR_CODE_MAP.find(ret) == OH_WINDOW_TO_ERROR_CODE_MAP.end() ?
             WindowManager_ErrorCode::WINDOW_MANAGER_ERRORCODE_SYSTEM_ABNORMAL : OH_WINDOW_TO_ERROR_CODE_MAP.at(ret);
         }, __func__);
+    if (errCode != WindowManager_ErrorCode::OK) {
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.OH_WindowManager_UnlockCursor", errCode);
+    }
     return errCode;
 }
