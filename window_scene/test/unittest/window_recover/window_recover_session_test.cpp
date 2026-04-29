@@ -563,6 +563,7 @@ HWTEST_F(WindowRecoverSessionTest, CacheSpecificSessionForRecovering, TestSize.L
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     int32_t parentPersistentId = 1;
     property->SetParentPersistentId(parentPersistentId);
+    sceneSession->SetSessionProperty(property);
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 1);
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
@@ -584,6 +585,8 @@ HWTEST_F(WindowRecoverSessionTest, RecoverCachedSubSession, TestSize.Level1)
     info.bundleName_ = "SubSession";
     info.abilityName_ = "SubSession";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    sceneSession->SetSessionProperty(property);
     ssm_->recoverSubSessionCacheMap_[123].emplace_back(sceneSession);
     ssm_->RecoverCachedSubSession(123);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_.size(), 0);
