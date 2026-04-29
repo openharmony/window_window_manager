@@ -616,8 +616,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister
 {
     TLOGD(WmsLogTag::DEFAULT, "called");
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onWindowTitleButtonRectChange" : "ArkUI.window.offWindowTitleButtonRectChange"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onWindowTitleButtonRectChange" : "ArkUI.window.offWindowTitleButtonRectChange",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
 	    HISTOGRAM_ENUMERATION_ERROR_CODE(	 
@@ -648,8 +648,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowWillCloseRegister(const sptr<
 {
     TLOGD(WmsLogTag::DEFAULT, "called");
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onWindowWillClose" : "ArkUI.window.offWindowWillClose"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onWindowWillClose" : "ArkUI.window.offWindowWillClose",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
         HISTOGRAM_ENUMERATION_ERROR_CODE(	 
@@ -1029,8 +1029,8 @@ WmErrorCode AniWindowRegisterManager::ProcessSubWindowCloseRegister(sptr<AniWind
     sptr<Window> window, bool isRegister, ani_env* env)
 {
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onSubWindowClose" : "ArkUI.window.offSubWindowClose"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onSubWindowClose" : "ArkUI.window.offSubWindowClose",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(
             isRegister ? "ArkUI.window.onSubWindowClose.error" : "ArkUI.window.offSubWindowClose.error",
@@ -1072,8 +1072,8 @@ WmErrorCode AniWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<
     const sptr<Window>& window, bool isRegister, ani_env* env)
 {
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onWindowStageClose" : "ArkUI.window.offWindowStageClose"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onWindowStageClose" : "ArkUI.window.offWindowStageClose",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {	 
         HISTOGRAM_ENUMERATION_ERROR_CODE(	 
             isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
@@ -1235,8 +1235,8 @@ WmErrorCode AniWindowRegisterManager::ProcessFreeWindowModeChangeRegister(const 
     const sptr<Window>& window, bool isRegister, ani_env* env)
 {
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onFreeWindowModeChange" : "ArkUI.window.offFreeWindowModeChange"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onFreeWindowModeChange" : "ArkUI.window.offFreeWindowModeChange",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {	 
         HISTOGRAM_ENUMERATION_ERROR_CODE(	 
             isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
