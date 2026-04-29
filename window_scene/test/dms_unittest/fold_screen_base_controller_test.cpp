@@ -390,6 +390,19 @@ HWTEST_F(FoldScreenBaseControllerTest, GetCurrentDisplayMode, TestSize.Level1)
     FoldScreenBasePolicy::GetInstance().currentDisplayMode_ = FoldDisplayMode::MAIN;
     EXPECT_EQ(controller.GetCurrentDisplayMode(), FoldDisplayMode::MAIN);
 }
+
+/**
+ * @tc.name: GetScreenActiveModeRectMap
+ * @tc.desc: test function : GetScreenActiveModeRectMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(FoldScreenBaseControllerTest, GetScreenActiveModeRectMap, TestSize.Level1)
+{
+    auto controller = FoldScreenBaseController();
+    auto screenActiveModeRectMapTemp = FoldScreenBasePolicy::GetInstance().GetScreenActiveModeRectMap();
+    auto screenActiveModeRectMap = controller.GetScreenActiveModeRectMap();
+    EXPECT_EQ(screenActiveModeRectMapTemp.size(), screenActiveModeRectMap.size());
+}
 } // namespace
 } // namespace DMS
 } // namespace Rosen

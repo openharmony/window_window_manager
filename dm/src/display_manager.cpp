@@ -88,6 +88,7 @@ public:
     bool ConvertScreenIdToRsScreenId(ScreenId screenId, ScreenId& rsScreenId);
     bool IsFoldable();
     bool IsCaptured();
+    bool IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList);
     FoldStatus GetFoldStatus();
     FoldDisplayMode GetFoldDisplayMode();
     FoldDisplayMode GetFoldDisplayModeForExternal();
@@ -962,7 +963,7 @@ std::shared_ptr<Media::PixelMap> DisplayManager::GetScreenshot(DisplayId display
 }
 
 std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(DisplayId displayId,
-    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen)
+    DmErrorCode& errorCode, bool isUseDma, bool isCaptureFullOfScreen, DisplayIntentType displayIntent)
 {
     if (displayId == DISPLAY_ID_INVALID) {
         TLOGE(WmsLogTag::DMS, "displayId invalid!");
@@ -970,7 +971,7 @@ std::vector<std::shared_ptr<Media::PixelMap>> DisplayManager::GetScreenHDRshot(D
     }
     const std::vector<std::shared_ptr<Media::PixelMap>>& screenShotVec =
         SingletonContainer::Get<DisplayManagerAdapter>().GetDisplayHDRSnapshot(displayId, errorCode,
-            isUseDma, isCaptureFullOfScreen);
+            isUseDma, isCaptureFullOfScreen, displayIntent);
     if (screenShotVec.size() != PIXMAP_VECTOR_SIZE) {
         TLOGE(WmsLogTag::DMS, "failed!");
         return { nullptr, nullptr };
@@ -1287,6 +1288,16 @@ bool DisplayManager::IsCaptured()
 bool DisplayManager::Impl::IsCaptured()
 {
     return SingletonContainer::Get<DisplayManagerAdapter>().IsCaptured();
+}
+
+bool DisplayManager::IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList)
+{
+    return pImpl_->IsCapturedByBundleNameList(bundleNameList);
+}
+
+bool DisplayManager::Impl::IsCapturedByBundleNameList(const std::vector<std::string>& bundleNameList)
+{
+    return SingletonContainer::Get<DisplayManagerAdapter>().IsCapturedByBundleNameList(bundleNameList);
 }
 
 FoldStatus DisplayManager::GetFoldStatus()
