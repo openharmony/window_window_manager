@@ -2572,6 +2572,15 @@ HWTEST_F(WindowSessionImplTest, GetExtensionConfig, TestSize.Level1)
     window->GetExtensionConfig(want);
     EXPECT_EQ(want.GetIntParam(Extension::HOST_WINDOW_DELAY_RAISE_STATE_FIELD, 0),
         static_cast<int32_t>(isHostWindowDelayRaiseEnabled));
+
+    window->lastWindowStatus_.store(WindowStatus::WINDOW_STATUS_FULLSCREEN);
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::HOST_WINDOW_STATUS_FIELD, 0),
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_FULLSCREEN));
+    window->lastWindowStatus_.store(WindowStatus::WINDOW_STATUS_MAXIMIZE);
+    window->GetExtensionConfig(want);
+    EXPECT_EQ(want.GetIntParam(Extension::HOST_WINDOW_STATUS_FIELD, 0),
+        static_cast<int32_t>(WindowStatus::WINDOW_STATUS_MAXIMIZE));
 }
 
 /**
