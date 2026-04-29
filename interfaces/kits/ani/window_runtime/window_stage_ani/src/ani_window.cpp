@@ -58,6 +58,7 @@ std::optional<MaximizeOptions> ParseMaximizeOptionsANI(ani_env* env, ani_object 
 constexpr int32_t MIN_DECOR_HEIGHT = 37;
 constexpr int32_t MAX_DECOR_HEIGHT = 112;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
+constexpr int32_t HISTOGRAM_BOOLEAN_COUNTS = 1;
 namespace {
 /* used for free, ani has no destructor right now, only free when aniObj freed */
 static std::map<ani_ref, AniWindow*> g_localObjs;
