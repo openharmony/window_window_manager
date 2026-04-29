@@ -1041,6 +1041,18 @@ HWTEST_F(DisplayManagerTest, IsCaptured01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsCapturedByBundleNameList01
+ * @tc.desc: IsCapturedByBundleNameList01 fun
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplayManagerTest, IsCapturedByBundleNameList01, TestSize.Level1)
+{
+    std::vector<std::string> bundleNameList;
+    auto ret = DisplayManager::GetInstance().IsCapturedByBundleNameList(bundleNameList);
+    ASSERT_FALSE(ret);
+}
+
+/**
  * @tc.name: isinsideof
  * @tc.desc: isinside0f fun
  * @tc.type: FUNC
@@ -2329,7 +2341,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshot_ShouldReturnNullptrVector_WhenSnap
  
     // Mock the behavior of DisplayManagerAdapter to return a vector with size != PIXMAP_VECTOR_SIZE
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetDisplayHDRSnapshot(_, _, _, _)).Times(EXECUTION_TIMES).WillOnce(
+    EXPECT_CALL(m->Mock(), GetDisplayHDRSnapshot(_, _, _, _, _)).Times(EXECUTION_TIMES).WillOnce(
         Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr }));
  
     std::vector<std::shared_ptr<Media::PixelMap>> result = displayManager.GetScreenHDRshot(
@@ -2356,7 +2368,7 @@ HWTEST_F(DisplayManagerTest, GetScreenHDRshot_ShouldReturnSnapshotVector_WhenSna
  
     // Mock the GetDisplayHDRSnapshot function to return a vector with size equal to 2
     std::unique_ptr<Mocker> m = std::make_unique<Mocker>();
-    EXPECT_CALL(m->Mock(), GetDisplayHDRSnapshot(_, _, _, _)).Times(EXECUTION_TIMES).WillOnce(
+    EXPECT_CALL(m->Mock(), GetDisplayHDRSnapshot(_, _, _, _, _)).Times(EXECUTION_TIMES).WillOnce(
         Return(std::vector<std::shared_ptr<Media::PixelMap>> { nullptr, nullptr }));
  
     std::vector<std::shared_ptr<Media::PixelMap>> result =
