@@ -63,6 +63,7 @@ constexpr size_t ARG_COUNT_TWO = 2;
 constexpr double MIN_GRAY_SCALE = 0.0;
 constexpr double MAX_GRAY_SCALE = 1.0;
 constexpr uint32_t DEFAULT_WINDOW_MAX_WIDTH = 3840;
+constexpr int32_t HISTOGRAM_BOOLEAN_COUNTS = 1;
 }
 
 static thread_local std::map<std::string, std::shared_ptr<NativeReference>> g_jsWindowMap;
@@ -6447,13 +6448,17 @@ napi_value JsWindow::OnChangeCallingWindowId(napi_env env, napi_callback_info in
 
 napi_value JsWindow::OnDisableWindowDecor(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.disableWindowDecor", HISTOGRAM_BOOLEAN_COUNTS);
     if (windowToken_ == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableWindowDecor",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][disableWindowDecor]msg: windowToken is nullptr");
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->DisableAppWindowDecor());
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "Window DisableWindowDecor failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.disableWindowDecor", ret);
         return NapiThrowError(env, ret);
     }
     TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] end",
@@ -7778,17 +7783,22 @@ napi_value JsWindow::OnSetWaterMarkFlag(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setHandwritingFlag", HISTOGRAM_BOOLEAN_COUNTS);
     size_t argc = 4;
     napi_value argv[4] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setHandwritingFlag.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
-
+ 
     napi_value nativeBool = argv[0];
     if (nativeBool == nullptr) {
         WLOGFE("SetHandwritingFlag Invalid window flag");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setHandwritingFlag.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isAddFlag = false;
@@ -7801,6 +7811,8 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
         }
         auto weakWindow = weakToken.promote();
         if (weakWindow == nullptr) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setHandwritingFlag.error", 
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             *errCodePtr = WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
             return;
         }
@@ -7813,6 +7825,8 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
     NapiAsyncTask::CompleteCallback complete =
         [weakToken, isAddFlag, errCodePtr](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (errCodePtr == nullptr) {
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setHandwritingFlag.error", 
+                    WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                     "[window][setHandwritingFlag]msg:System abnormal."));
                 return;
@@ -7820,10 +7834,11 @@ napi_value JsWindow::OnSetHandwritingFlag(napi_env env, napi_callback_info info)
             if (*errCodePtr == WmErrorCode::WM_OK) {
                 task.Resolve(env, NapiGetUndefined(env));
             } else {
+                HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setHandwritingFlag.error", *errCodePtr);
                 task.Reject(env, JsErrUtils::CreateJsError(env, *errCodePtr, "SetHandwritingFlag failed."));
             }
         };
-
+ 
     napi_value lastParam = (argc == 1) ? nullptr : (GetType(env, argv[1]) == napi_function ? argv[1] : nullptr);
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsWindow::OnSetHandwritingFlag",
@@ -8921,28 +8936,36 @@ napi_value JsWindow::OnDetachLayoutToParentWindow(napi_env env, napi_callback_in
 
 napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setWindowDecorVisible", HISTOGRAM_BOOLEAN_COUNTS);
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowDecorVisible]msg: Mandatory parameters are left unspecified.");
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorVisible.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setWindowDecorVisible]msg: WindowToken is nullptr.");
     }
     bool isVisible = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowDecorVisible]msg: Failed to convert parameter to isVisible.");
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorVisible(isVisible));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "Window decor set visible failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorVisible.error", ret);
         return NapiThrowError(env, ret,
             "[window][setWindowDecorVisible]msg: Window decor set visible failed.");
     }
@@ -8953,8 +8976,11 @@ napi_value JsWindow::OnSetWindowDecorVisible(napi_env env, napi_callback_info in
 
 napi_value JsWindow::OnGetWindowDecorVisible(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.getWindowDecorVisible", HISTOGRAM_BOOLEAN_COUNTS);
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorVisible.error", 
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getWindowDecorVisible]msg: WindowToken is nullptr.");
     }
@@ -8962,6 +8988,7 @@ napi_value JsWindow::OnGetWindowDecorVisible(napi_env env, napi_callback_info in
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetDecorVisible(isVisible));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "Get window decor visibility failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorVisible.error", ret);
         return NapiThrowError(env, ret,
             "[window][getWindowDecorVisible]msg: Get window decor visibility failed.");
     }
@@ -8972,28 +8999,36 @@ napi_value JsWindow::OnGetWindowDecorVisible(napi_env env, napi_callback_info in
 
 napi_value JsWindow::OnSetWindowTitleMoveEnabled(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setWindowTitleMoveEnabled", HISTOGRAM_BOOLEAN_COUNTS);
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleMoveEnabled.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitleMoveEnabled]msg: Exactly one parameter is required.");
     }
     bool enable = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], enable)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to enable");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleMoveEnabled.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitleMoveEnabled]msg: Failed to convert parameter to enable.");
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "windowToken is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleMoveEnabled.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setWindowTitleMoveEnabled]msg: WindowToken is nullptr.");
     }
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetWindowTitleMoveEnabled(enable));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "Window set title move enable failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleMoveEnabled.error", ret);
         return NapiThrowError(env, ret,
             "[window][setWindowTitleMoveEnabled]msg: Window set title move enable failed.");
     }
@@ -9254,35 +9289,44 @@ napi_value JsWindow::OnGetWindowTransitionAnimation(napi_env env, napi_callback_
 
 napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setWindowDecorHeight", HISTOGRAM_BOOLEAN_COUNTS);
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorHeight.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowDecorHeight]msg: Mandatory parameters are left unspecified.");
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorHeight.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setWindowDecorHeight]msg: WindowToken is nullptr.");
     }
     int32_t height = 0;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], height)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to height");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorHeight.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowDecorHeight]msg: Failed to convert parameter to height.");
     }
-
+ 
     if (height < MIN_DECOR_HEIGHT || height > MAX_DECOR_HEIGHT) {
         TLOGE(WmsLogTag::WMS_DECOR, "height should greater than 37 or smaller than 112");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorHeight.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowDecorHeight]msg: Height should greater than 37 or smaller than 112.");
     }
-
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->SetDecorHeight(height));
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "Set window decor height failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowDecorHeight.error", ret);
         return NapiThrowError(env, ret,
             "[window][setWindowDecorHeight]msg: Set window decor height failed.");
     }
@@ -9293,8 +9337,11 @@ napi_value JsWindow::OnSetWindowDecorHeight(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.getWindowDecorHeight", HISTOGRAM_BOOLEAN_COUNTS);
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowDecorHeight.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getWindowDecorHeight]msg: Window is nullptr.");
     }
@@ -9302,9 +9349,13 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
     WMError ret = windowToken_->GetDecorHeight(height);
     if (ret != WMError::WM_OK) {
         if (ret == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowDecorHeight.error",
+                WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
             return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
                 "[window][getWindowDecorHeight]msg: Device not support.");
         }
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getWindowDecorHeight.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getWindowDecorHeight]msg: Get window decor height failed.");
     }
@@ -9315,17 +9366,24 @@ napi_value JsWindow::OnGetWindowDecorHeight(napi_env env, napi_callback_info inf
 
 napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setDecorButtonStyle", HISTOGRAM_BOOLEAN_COUNTS);
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setDecorButtonStyle]msg: Window is nullptr.");
     }
     if (windowToken_->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         return NapiGetUndefined(env);
     }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "device not support");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
             "[window][setDecorButtonStyle]msg: Device not support.");
     }
@@ -9334,28 +9392,43 @@ napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setDecorButtonStyle]msg: Exactly one parameter is required.");
     }
     DecorButtonStyle decorButtonStyle;
     WMError res = windowToken_->GetDecorButtonStyle(decorButtonStyle);
+    if (res == WMError::WM_ERROR_DEVICE_NOT_SUPPORT) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
+            "[window][setDecorButtonStyle]msg: Device not support.");
+    }
     if (res != WMError::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_INVALID_CALLING);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
             "[window][setDecorButtonStyle]msg: Called by invalid window type.");
     }
     if (argv[INDEX_ZERO] == nullptr || !ConvertDecorButtonStyleFromJs(env, argv[INDEX_ZERO], decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setDecorButtonStyle]msg: Argc is invalid.");
     }
     if (!WindowHelper::CheckButtonStyleValid(decorButtonStyle)) {
         TLOGE(WmsLogTag::WMS_DECOR, "out of range params");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setDecorButtonStyle]msg: Out of range params.");
     }
     WMError errCode = windowToken_->SetDecorButtonStyle(decorButtonStyle);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setDecorButtonStyle.error", ret);
         return NapiThrowError(env, ret, "[window][setDecorButtonStyle]msg: Set decorButtonStyle failed.");
     }
     return NapiGetUndefined(env);
@@ -9363,17 +9436,24 @@ napi_value JsWindow::OnSetDecorButtonStyle(napi_env env, napi_callback_info info
 
 napi_value JsWindow::OnGetDecorButtonStyle(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.getDecorButtonStyle", HISTOGRAM_BOOLEAN_COUNTS);
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getDecorButtonStyle]msg: Window is nullptr.");
     }
     if (windowToken_->IsPadAndNotFreeMultiWindowCompatibleMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "This is PcAppInPad, not support");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         return NapiGetUndefined(env);
     }
     if (!windowToken_->IsPcOrPadFreeMultiWindowMode()) {
         TLOGE(WmsLogTag::WMS_DECOR, "device not support");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
             "[window][setDecorButtonStyle]msg: Device not support.");
     }
@@ -9381,11 +9461,14 @@ napi_value JsWindow::OnGetDecorButtonStyle(napi_env env, napi_callback_info info
     WMError errCode = windowToken_->GetDecorButtonStyle(decorButtonStyle);
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getDecorButtonStyle.error", ret);
         return NapiThrowError(env, ret);
     }
     auto jsDecorButtonStyle = CreateJsDecorButtonStyleObj(env, decorButtonStyle);
     if (jsDecorButtonStyle == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "decorButtonStyle format failed");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getDecorButtonStyle.error",
+            WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY,
             "[window][getDecorButtonStyle]msg: DecorButtonStyle format failed.");
     }
@@ -9394,20 +9477,26 @@ napi_value JsWindow::OnGetDecorButtonStyle(napi_env env, napi_callback_info info
 
 napi_value JsWindow::OnGetTitleButtonRect(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.getTitleButtonRect", HISTOGRAM_BOOLEAN_COUNTS);
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "window is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getTitleButtonRect",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getTitleButtonRect]msg: Window is nullptr.");
     }
     TitleButtonRect titleButtonRect;
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(windowToken_->GetTitleButtonArea(titleButtonRect));
     if (ret != WmErrorCode::WM_OK) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getTitleButtonRect", ret);
         return NapiThrowError(env, ret, "[window][getTitleButtonRect]msg: Get titleButtonRect failed.");
     }
     TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] end",
         windowToken_->GetWindowId(), windowToken_->GetWindowName().c_str());
     napi_value TitleButtonAreaObj = ConvertTitleButtonAreaToJsValue(env, titleButtonRect);
     if (TitleButtonAreaObj == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getTitleButtonRect",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][getTitleButtonRect]msg: TitleButtonRect convert Failed.");
     }
@@ -9508,8 +9597,11 @@ napi_value JsWindow::OnSetWindowContainerModalColor(napi_env env, napi_callback_
 
 napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setTitleButtonVisible", HISTOGRAM_BOOLEAN_COUNTS);
     if (!Permission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_DECOR, "set title button visible permission denied!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_NOT_SYSTEM_APP);
     }
     size_t argc = FOUR_PARAMS_SIZE;
@@ -9517,30 +9609,42 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 3) { // 3: params num
         TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isMaximizeVisible = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMaximizeVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isMaximizeVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isMinimizeVisible = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], isMinimizeVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isMinimizeVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isSplitVisible = true;
     if (!ConvertFromJsValue(env, argv[INDEX_TWO], isSplitVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isSplitVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     bool isCloseVisible = true;
     if (argc >= FOUR_PARAMS_SIZE && !ConvertFromJsValue(env, argv[INDEX_THREE], isCloseVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isCloseVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setTitleButtonVisible]msg: WindowToken is nullptr");
     }
@@ -9549,6 +9653,7 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set title button visible failed!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setTitleButtonVisible.error", ret);
         return NapiThrowError(env, ret);
     }
     TLOGI(WmsLogTag::WMS_DECOR,
@@ -9560,34 +9665,45 @@ napi_value JsWindow::OnSetTitleButtonVisible(napi_env env, napi_callback_info in
 
 napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setWindowTitleButtonVisible", HISTOGRAM_BOOLEAN_COUNTS);
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 2) { // 2: min params num
-        TLOGE(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        WLOGFE("Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitleButtonVisible]msg: Mandatory parameters are left unspecified.");
     }
     bool isMaximizeVisible = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], isMaximizeVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isMaximizeVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitleButtonVisible]msg: Failed to convert parameter to isMaximizeVisible.");
     }
     bool isMinimizeVisible = true;
     if (!ConvertFromJsValue(env, argv[INDEX_ONE], isMinimizeVisible)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to isMinimizeVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitleButtonVisible]msg: Failed to convert parameter to isMinimizeVisible.");
     }
     bool isCloseVisible = true;
     if (argc > 2 && !ConvertFromJsValue(env, argv[INDEX_TWO], isCloseVisible)) { // 2: min params num
         TLOGE(WmsLogTag::WMS_LAYOUT, "Failed to convert parameter to isCloseVisible");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitleButtonVisible]msg: Failed to convert parameter to isCloseVisible.");
     }
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_DECOR, "WindowToken is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleButtonVisible.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setWindowTitleButtonVisible]msg: WindowToken is nullptr.");
     }
@@ -9596,6 +9712,7 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(errCode);
     if (ret != WmErrorCode::WM_OK) {
         TLOGE(WmsLogTag::WMS_DECOR, "set title button visible failed!");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitleButtonVisible.error", ret);
         return NapiThrowError(env, ret, "[window][setWindowTitleButtonVisible]msg: Set title button visible failed.");
     }
     TLOGI(WmsLogTag::WMS_DECOR, "Window [%{public}u, %{public}s] [%{public}d, %{public}d, %{public}d]",
@@ -9606,17 +9723,22 @@ napi_value JsWindow::OnSetWindowTitleButtonVisible(napi_env env, napi_callback_i
 
 napi_value JsWindow::OnSetWindowTitle(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.setWindowTitle", HISTOGRAM_BOOLEAN_COUNTS);
     size_t argc = FOUR_PARAMS_SIZE;
     napi_value argv[FOUR_PARAMS_SIZE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc != 1) {
         TLOGW(WmsLogTag::WMS_DECOR, "Argc is invalid: %{public}zu", argc);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitle.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitle]msg: Exactly one parameter is required.");
     }
     std::string title;
     if (!ConvertFromJsValue(env, argv[INDEX_ZERO], title)) {
         TLOGE(WmsLogTag::WMS_DECOR, "Failed to convert parameter to title");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitle.error",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
             "[window][setWindowTitle]msg: Failed to convert parameter to title.");
     }
@@ -9627,6 +9749,8 @@ napi_value JsWindow::OnSetWindowTitle(napi_env env, napi_callback_info info)
         auto window = windowToken.promote();
         if (window == nullptr) {
             TLOGNE(WmsLogTag::WMS_DECOR, "%{public}s window is nullptr", where);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitle.error",
+                WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
                 "[window][setWindowTitle]msg: Window is nullptr."));
             return;
@@ -9636,11 +9760,14 @@ napi_value JsWindow::OnSetWindowTitle(napi_env env, napi_callback_info info)
             TLOGNI(WmsLogTag::WMS_DECOR, "%{public}s Window [%{public}u] end", where, window->GetWindowId());
             task->Resolve(env, NapiGetUndefined(env));
         } else {
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitle.error", ret);
             task->Reject(env, JsErrUtils::CreateJsError(env, ret,
                 "[window][setWindowTitle]msg: Window set title failed."));
         }
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetWindowTitle") != napi_status::napi_ok) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowTitle.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setWindowTitle]msg: Send event failed."));
     }
@@ -9960,8 +10087,11 @@ napi_value JsWindow::OnIsImmersiveLayout(napi_env env, napi_callback_info info)
 
 napi_value JsWindow::OnIsInFreeWindowMode(napi_env env, napi_callback_info info)
 {
+    HISTOGRAM_BOOLEAN("ArkUI.window.isInFreeWindowMode", HISTOGRAM_BOOLEAN_COUNTS);
     if (windowToken_ == nullptr) {
         TLOGE(WmsLogTag::WMS_IMMS, "windowToken_ is nullptr");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.isInFreeWindowMode.error",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][OnIsInFreeWindowMode]msg: invalid window");
     }
