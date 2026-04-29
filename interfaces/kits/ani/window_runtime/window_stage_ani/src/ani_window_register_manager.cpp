@@ -23,6 +23,7 @@
 #include <cstdint>
 
 constexpr uint32_t API_VERSION_23 = 23;
+constexpr int32_t HISTOGRAM_BOOLEAN_COUNTS = 1;
 
 namespace OHOS {
 namespace Rosen {
@@ -86,6 +87,7 @@ const std::map<CaseType, std::map<std::string, RegisterListenerType>> LISTENER_C
     {CaseType::CASE_WINDOW, WINDOW_LISTENER_MAP},
     {CaseType::CASE_STAGE, WINDOW_STAGE_LISTENER_MAP},
 };
+
 }
 
 AniWindowRegisterManager::AniWindowRegisterManager()
