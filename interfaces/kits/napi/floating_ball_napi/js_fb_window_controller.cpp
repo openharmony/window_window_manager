@@ -39,8 +39,6 @@ const char* ARKUI_WINDOW_FB_STOPFLOATINGBALL = "ArkUI.window.fb.stopFloatingBall
 const char* ARKUI_WINDOW_FB_ONRESTOREMAINWINDOW = "ArkUI.window.fb.onRestoreMainWindow";
 const char* ARKUI_WINDOW_FB_ONSTATECHANGE = "ArkUI.window.fb.onStateChange";
 const char* ARKUI_WINDOW_FB_ONCLICK = "ArkUI.window.fb.onClick";
-const char* ARKUI_WINDOW_FB_OFFSTATECHANGE = "ArkUI.window.fb.offStateChange";
-const char* ARKUI_WINDOW_FB_OFFCLICK = "ArkUI.window.fb.offClick";
 const char* ARKUI_WINDOW_FB_GETFLOATINGBALLWINDOWINFO = "ArkUI.window.fb.getFloatingBallWindowInfo";
 }
 
