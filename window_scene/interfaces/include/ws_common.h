@@ -26,8 +26,10 @@
 
 #include <iremote_broker.h>
 #include <want.h>
-#include "wm_animation_common.h"
 #include "pixel_map.h"
+#include "wm_animation_common.h"
+#include "wm_layout_common.h"
+
 
 namespace OHOS::AAFwk {
 class AbilityStartSetting;
@@ -506,6 +508,8 @@ struct SessionInfo {
     int32_t hostAppIndex = 0;
     std::string hostAppInstanceKey = "";
     std::string hostAbilityName = "";
+    // Indicates whether the window should be hidden when the native process launches
+    bool nativeHideWindow_ = false;
 
     /*
      * Keyboard
@@ -549,6 +553,11 @@ struct SessionInfo {
      * Window Rotation
      */
     int32_t currentRotation_ = 0;
+    
+    /*
+     * Split Ratio PreferenceValue
+     */
+    int32_t splitRatioPreference = 0;
 
     /*
      * Compatible Mode
@@ -1219,6 +1228,7 @@ struct SessionEventParam {
     int32_t windowGlobalPosX_ = 0;
     int32_t windowGlobalPosY_ = 0;
     uint32_t titleButtonEventType_ = 0;
+    SnapshotAnimationConfig snapshotAnimationConfig_;
 };
 
 struct BackgroundParams {
