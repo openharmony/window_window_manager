@@ -270,6 +270,7 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     napi_value WindowTypeInit(napi_env env);
     napi_value AvoidAreaTypeInit(napi_env env);
     napi_value WindowModeInit(napi_env env);
+    napi_value SplitRatioPreferenceInit(napi_env env);
     napi_value ScreenshotEventTypeInit(napi_env env);
     napi_value GlobalWindowModeInit(napi_env env);
     napi_value WindowOcclusionStateInit(napi_env env);
@@ -284,6 +285,7 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     napi_value WindowLayoutModeInit(napi_env env);
     napi_value BlurStyleInit(napi_env env);
     napi_value MaximizePresentationInit(napi_env env);
+    napi_value AcrossDisplayPresentationInit(napi_env env);
     napi_value WindowErrorCodeInit(napi_env env);
     napi_value WindowErrorInit(napi_env env);
     napi_value WindowStatusTypeInit(napi_env env);

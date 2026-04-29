@@ -3881,7 +3881,6 @@ HWTEST_F(WindowExtensionSessionImplTest, GetAvoidAreaByType, TestSize.Level1)
     window->floatNavigationAvoidAreaEnabled_ = false;
     EXPECT_EQ(window->GetAvoidAreaByType(AvoidAreaType::TYPE_SYSTEM, avoidArea), WMError::WM_OK);
 }
-}
 
 /**
  * @tc.name: OnHostWindowStatusChange
@@ -3976,6 +3975,7 @@ HWTEST_F(WindowExtensionSessionImplTest, OnHostWindowStatusChangeWithListener, T
     EXPECT_EQ(WMError::WM_OK, window_->GetWindowStatus(windowStatus));
     EXPECT_EQ(WindowStatus::WINDOW_STATUS_MINIMIZE, windowStatus);
     EXPECT_EQ(WMError::WM_OK, window_->UnregisterWindowStatusChangeListener(listener));
+}
 }
 } // namespace Rosen
 } // namespace OHOS

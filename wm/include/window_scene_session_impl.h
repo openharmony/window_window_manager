@@ -89,6 +89,7 @@ public:
     WSError SyncAllAttachedLimitsToChild(
         const std::vector<std::pair<int32_t, WindowLimits>>& limitsList,
         const std::vector<std::pair<int32_t, AttachLimitOptions>>& optionsList) override;
+    WSError NotifyRebindAttachAfterParentChange(int32_t newParentWindowId) override;
 
     /*
      * Window Hierarchy
@@ -233,8 +234,11 @@ public:
     WMError Maximize() override;
     WMError Maximize(MaximizePresentation presentation) override;
     WMError Maximize(MaximizePresentation presentation, WaterfallResidentState state) override;
+    WMError MaximizeWithOptions(MaximizePresentation presentation, AcrossDisplayPresentation state,
+        const SnapshotAnimationConfig& snapshotAnimationConfig) override;
     WMError Recover() override;
     WMError Recover(uint32_t reason) override;
+    WMError Recover(uint32_t reason, const SnapshotAnimationConfig& snapshotAnimationConfig) override;
     WSError UpdateMaximizeMode(MaximizeMode mode) override;
     WMError SetSupportedWindowModes(const std::vector<AppExecFwk::SupportWindowMode>& supportedWindowModes,
         bool grayOutMaximizeButton = false) override;
@@ -528,6 +532,7 @@ private:
     WindowLimits ConvertBaseLimitsToTargetUnit(const WindowLimits& srcLimits, PixelUnit targetPixelUnit);
     void UpdateSupportWindowModesWhenSwitchFreeMultiWindow();
     void PendingUpdateSupportWindowModesWhenSwitchMultiWindow();
+    WMError ValidateSnapshotAnimationConfig(const SnapshotAnimationConfig& config);
     void maximizeWhenSwitchMultiWindowIfOnlySupportFullScreen();
     void ConsumePointerEventInner(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         MMI::PointerEvent::PointerItem& pointerItem, bool isHitTargetDraggable = false);
@@ -601,7 +606,13 @@ private:
      * PC Window Layout
      */
     bool CheckWaterfallResidentState(WaterfallResidentState state) const;
+    bool CheckAcrossDisplayPresentation(AcrossDisplayPresentation state) const;
     void ApplyMaximizePresentation(MaximizePresentation presentation);
+    WMError CheckMaximizePreConditions(AcrossDisplayPresentation state);
+    WMError ExecuteMaximizeWithOptions(MaximizePresentation presentation,
+        AcrossDisplayPresentation state, const SnapshotAnimationConfig& snapshotAnimationConfig);
+    WMError CheckRecoverPreConditions();
+    WMError ExecuteRecover(uint32_t reason, const SnapshotAnimationConfig& snapshotAnimationConfig);
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
     bool IsFullScreenSizeWindow(uint32_t width, uint32_t height);
     std::atomic<bool> isResizedByLimit_ = false;
