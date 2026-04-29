@@ -3033,7 +3033,7 @@ void AniWindow::OnSetHandwritingFlag(ani_env* env, ani_boolean enable)
     auto window = GetWindow();
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setHandwritingFlag.error", 
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setHandwritingFlag.error",
             WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
