@@ -4204,7 +4204,8 @@ napi_value JsWindow::OnGetAvoidArea(napi_env env, napi_callback_info info)
             return;
         }
         if (errCode != WMError::WM_OK) {
-            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getAvoidArea", errCode);
+            HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getAvoidArea",
+                WM_JS_TO_ERROR_CODE_MAP.at(errCode));
             task->Reject(env, JsErrUtils::CreateJsError(env, errCode));
             TLOGNE(WmsLogTag::WMS_IMMS, "%{public}s window is nullptr or get invalid param", where);
             return;
