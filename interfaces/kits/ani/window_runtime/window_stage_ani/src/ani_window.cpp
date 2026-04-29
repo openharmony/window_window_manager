@@ -2078,7 +2078,7 @@ void AniWindow::OnSetWindowMaskWithAlpha(ani_env* env, ani_object windowMaskArra
 }
 
 bool AniWindow::ParseWindowMaskWithAlphaParams(ani_env* env, ani_object windowMaskArray,
-    Window* window, WindowMaskWithAlphaParseParams& params)
+    sptr<Window>& window, WindowMaskWithAlphaParseParams& params)
 {
     if (params.rawMaskWidth <= 0 || params.rawMaskHeight <= 0) {
         TLOGE(WmsLogTag::WMS_PC, "[ANI]Invalid maskWidth %{public}d or maskHeight %{public}d",

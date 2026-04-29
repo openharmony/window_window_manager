@@ -333,7 +333,7 @@ private:
     static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
 
     bool ParseWindowMaskWithAlphaParams(ani_env* env, ani_object windowMaskArray,
-        Window* window, WindowMaskWithAlphaParseParams& params);
+        sptr<Window>& window, WindowMaskWithAlphaParseParams& params);
     bool CheckWindowMaskParams(ani_env* env, ani_array windowMask);
     void OnSetBlur(ani_env* env, ani_double radius);
     void OnSetBackdropBlurStyle(ani_env* env, ani_int blurStyle);
