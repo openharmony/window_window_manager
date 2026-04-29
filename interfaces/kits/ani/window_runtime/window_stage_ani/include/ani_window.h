@@ -40,7 +40,6 @@ struct WindowMaskWithAlphaParseParams {
     uint32_t maskHeight = 0;
 };
 
-
 class AniWindow {
 public:
     explicit AniWindow(const sptr<Window>& window, ani_env* env);
@@ -334,7 +333,6 @@ private:
     static bool ParseScaleOption(ani_env* env, ani_object scaleOptions, Transform& trans);
     static bool ParseTranslateOption(ani_env* env, ani_object translateOptions, Transform& trans);
     static bool ParseRotateOption(ani_env* env, ani_object rotateOptions, Transform& trans);
-
     bool ParseWindowMaskWithAlphaParams(ani_env* env, ani_object windowMaskArray,
         sptr<Window>& window, WindowMaskWithAlphaParseParams& params);
     bool CheckWindowMaskParams(ani_env* env, ani_array windowMask);
