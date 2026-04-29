@@ -62,7 +62,6 @@ ohos_shared_library("floatview_napi") {
     "image_framework:image",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "api_metrics:histogrammanager",
   ]
 
   relative_install_dir = "module/window"
@@ -73,5 +72,8 @@ ohos_shared_library("floatview_napi") {
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
-  defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
+  if (window_manager_feature_support_api_metrics) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
+  }
 }
