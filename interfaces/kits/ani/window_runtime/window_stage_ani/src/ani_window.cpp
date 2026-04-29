@@ -42,8 +42,6 @@
 #include "window_scene.h"
 #include "wm_common.h"
 #include "wm_math.h"
-#include "window_histogram_management.h"
-#include "permission.h"
 
 using OHOS::Rosen::WindowScene;
 
@@ -2547,22 +2545,6 @@ void AniWindow::RegisterWindowCallback(ani_env* env, ani_object obj, ani_long na
     }
 }
 
-void AniWindow::RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
-    ani_long timeout, ani_ref callback)
-{
-    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
-    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnRegisterWindowCallback(env, type, callback, timeout);
-    } else {
-        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]aniWindow is nullptr!");
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.on",
-            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-}
-
 void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout)
 {
     TLOGI(WmsLogTag::DEFAULT, "[ANI]");
@@ -2618,73 +2600,6 @@ void AniWindow::OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_re
     WmErrorCode ret = registerManager_->UnregisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback);
     if (ret != WmErrorCode::WM_OK) {
         HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.off", ret);
-        AniWindowUtils::AniThrowError(env, ret);
-        return;
-    }
-}
-}
-
-void AniWindow::RegisterNoInteractionDetectedCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
-    ani_long timeout, ani_ref callback)
-{
-    TLOGI(WmsLogTag::WMS_EVENT, "[ANI]");
-    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnRegisterWindowCallback(env, type, callback, timeout);
-    } else {
-        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]aniWindow is nullptr!");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-}
-
-void AniWindow::OnRegisterWindowCallback(ani_env* env, ani_string type, ani_ref callback, ani_long timeout)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string cbType;
-    AniWindowUtils::GetStdString(env, type, cbType);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
-    WmErrorCode ret = registerManager_->RegisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback, timeout);
-    if (ret != WmErrorCode::WM_OK) {
-        AniWindowUtils::AniThrowError(env, ret);
-        return;
-    }
-}
-
-void AniWindow::UnregisterWindowCallback(ani_env* env, ani_object obj, ani_long nativeObj, ani_string type,
-    ani_ref callback)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (aniWindow != nullptr) {
-        aniWindow->OnUnregisterWindowCallback(env, type, callback);
-    } else {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] aniWindow is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-}
-
-void AniWindow::OnUnregisterWindowCallback(ani_env* env, ani_string type, ani_ref callback)
-{
-    TLOGI(WmsLogTag::DEFAULT, "[ANI]");
-    auto window = GetWindow();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
-        return;
-    }
-    std::string cbType;
-    AniWindowUtils::GetStdString(env, type, cbType);
-    TLOGI(WmsLogTag::DEFAULT, "[ANI] type:%{public}s", cbType.c_str());
-    WmErrorCode ret = registerManager_->UnregisterListener(window, cbType, CaseType::CASE_WINDOW, env, callback);
-    if (ret != WmErrorCode::WM_OK) {
         AniWindowUtils::AniThrowError(env, ret);
         return;
     }
@@ -4526,32 +4441,6 @@ bool AniWindow::OnIsMainWindowFullScreenAcrossDisplays(ani_env* env)
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win %{public}u isAcrossDisplays %{public}u end",
         windowToken_->GetWindowId(), isAcrossDisplays);
     return isAcrossDisplays;
-}
-    return aniWindow->OnIsMainWindowFullScreenAcrossDisplays(env);
-}
-
-bool AniWindow::OnIsMainWindowFullScreenAcrossDisplays(ani_env* env)
-{
-    if (!windowToken_) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "[ANI] window is nullptr");
-        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-            "[window][setWindowContainerModalColor]msg: invalid window");
-        return false;
-    }
-    bool isAcrossDisplaysPtr = false;
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
-        windowToken_->IsMainWindowFullScreenAcrossDisplays(isAcrossDisplaysPtr));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, isAcrossDisplays: %{public}u, "
-        "result: %{public}d", windowToken_->GetWindowId(), isAcrossDisplaysPtr, ret);
-    if (ret != WmErrorCode::WM_OK) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "failed, ret %{public}d", ret);
-        AniWindowUtils::AniThrowError(env, ret,
-            "[window][IsMainWindowFullScreenAcrossDisplays]msg: get immersive layout failed");
-        return isAcrossDisplaysPtr;
-    }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "winId: %{public}u, isAcrossDisplays: %{public}u, ",
-        windowToken_->GetWindowId(), isAcrossDisplaysPtr);
-    return isAcrossDisplaysPtr;
 }
 
 void AniWindow::SetWindowShadowEnabled(ani_env* env, ani_object obj, ani_long nativeObj, ani_boolean enable)
@@ -7641,8 +7530,6 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetWindowShadowRadius)},
         ani_native_function {"onSync", nullptr,
             reinterpret_cast<void *>(AniWindow::RegisterWindowCallback)},
-        ani_native_function {"onNoInteractionDetected", "lC{std.core.String}lC{std.core.Object}:",
-            reinterpret_cast<void *>(AniWindow::RegisterNoInteractionDetectedCallback)},
         ani_native_function {"offSync", nullptr,
             reinterpret_cast<void *>(AniWindow::UnregisterWindowCallback)},
         ani_native_function {"setWindowTitle", "lC{std.core.String}:",

@@ -20,7 +20,6 @@
 #include "ani_window_utils.h"
 #include "event_handler.h"
 #include "event_runner.h"
-#include "window_histogram_management.h"
 #include "window_manager_hilog.h"
 
 namespace OHOS {
