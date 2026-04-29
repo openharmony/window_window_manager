@@ -457,7 +457,6 @@ napi_value JsPipController::OnGetPiPWindowInfo(napi_env env, napi_callback_info 
         HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONGETPIPWINDOWINFO,
                                          WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR);
     }
-    HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONGETPIPWINDOWINFO, WmErrorCode::WM_OK);
     return result;
 }
 
@@ -497,7 +496,6 @@ napi_value JsPipController::OnGetPiPSettingSwitch(napi_env env, napi_callback_in
         HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONGETPIPSETTINGSWITCH,
                                          WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR);
     }
-    HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_PIP_ONGETPIPSETTINGSWITCH, WmErrorCode::WM_OK);
     return result;
 }
 
