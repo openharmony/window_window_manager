@@ -621,7 +621,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
 	    HISTOGRAM_ENUMERATION_ERROR_CODE(	 
-             isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         HISTOGRAM_ENUMERATION_ERROR_CODE(
             isRegister ? "ArkUI.window.onWindowTitleButtonRectChange.error"
             : "ArkUI.window.offWindowTitleButtonRectChange.error",
@@ -653,7 +653,7 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowWillCloseRegister(const sptr<
     if (window == nullptr) {
         TLOGE(WmsLogTag::DEFAULT, "[ANI]Window is nullptr");
         HISTOGRAM_ENUMERATION_ERROR_CODE(	 
-             isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         HISTOGRAM_ENUMERATION_ERROR_CODE(
             isRegister ? "ArkUI.window.onWindowWillClose.error" : "ArkUI.window.offWindowWillClose.error",
             WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
