@@ -59,7 +59,6 @@ ohos_shared_library("pipwindow_kit") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "api_metrics:histogrammanager",
   ]
 
   innerapi_tags = [ "platformsdk" ]
@@ -70,7 +69,10 @@ ohos_shared_library("pipwindow_kit") {
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
-  defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
+  if (window_manager_feature_support_api_metrics) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
+  }
 }
 
 ohos_shared_library("pipwindow_napi") {
@@ -108,7 +110,6 @@ ohos_shared_library("pipwindow_napi") {
     "hilog:libhilog",
     "ipc:ipc_single",
     "napi:ace_napi",
-    "api_metrics:histogrammanager",
   ]
 
   relative_install_dir = "module"
@@ -119,5 +120,8 @@ ohos_shared_library("pipwindow_napi") {
   if (build_variant == "user") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
-  defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
+  if (window_manager_feature_support_api_metrics) {
+    external_deps += [ "api_metrics:histogrammanager" ]
+    defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
+  }
 }
