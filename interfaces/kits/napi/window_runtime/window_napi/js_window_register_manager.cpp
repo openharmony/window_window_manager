@@ -623,9 +623,9 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(
         , HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         WLOGFE("Window is nullptr");
-    HISTOGRAM_ENUMERATION_ERROR_CODE(
-        isRegister ? "ArkUI.window.onWindowTitleButtonRectChange.error" :
-        "ArkUI.window.offWindowTitleButtonRectChange.error",
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onWindowTitleButtonRectChange.error" :
+            "ArkUI.window.offWindowTitleButtonRectChange.error",
         WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
