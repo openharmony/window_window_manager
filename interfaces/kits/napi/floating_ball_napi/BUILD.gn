@@ -123,7 +123,10 @@ ohos_shared_library("floatingball_napi") {
     defines += [ "IS_RELEASE_VERSION" ]
   }
   if (window_manager_feature_support_api_metrics) {
-    external_deps += [ "api_metrics:histogrammanager" ]
+    external_deps += [
+        "api_metrics:histogrammanager",
+        "hilog:libhilog"
+     ]
     defines += [ "WINDOW_MANAGER_FEATURE_SUPPORT_API_METRICS" ]
   }
 
