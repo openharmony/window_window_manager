@@ -307,7 +307,7 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
     bool GetWindowMaskWithAlphaFromJsValue(napi_env env, napi_value jsObject, uint8_t** data, size_t& byteLength);
-    WmErrorCode ParseSetWindowMaskWithAlphaParams(napi_env env, napi_value* argv, size_t argc,
+    WmErrorCode ParseWindowMaskWithAlphaParams(napi_env env, napi_value* argv, size_t argc,
         WindowMaskWithAlphaParams& params, const sptr<Window>& windowToken);
     bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds);
     bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration);
