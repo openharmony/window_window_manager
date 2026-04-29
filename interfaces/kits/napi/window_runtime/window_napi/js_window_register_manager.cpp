@@ -626,7 +626,7 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(
         HISTOGRAM_ENUMERATION_ERROR_CODE(
             isRegister ? "ArkUI.window.onWindowTitleButtonRectChange.error" :
             "ArkUI.window.offWindowTitleButtonRectChange.error",
-        WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowTitleButtonRectChangedListener> thisListener(listener);
