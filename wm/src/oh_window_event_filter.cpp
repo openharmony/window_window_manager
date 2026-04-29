@@ -79,7 +79,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t wi
     auto mainWindow = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.registerKeyEventFilter",
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.registerKeyEventFilter",
             WindowManager_ErrorCode::INVAILD_WINDOW_ID);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
@@ -88,7 +88,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterKeyEventFilter(int32_t wi
         return WindowManager_ErrorCode::OK;
     }
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::SERVICE_ERROR;
-    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.registerKeyEventFilter", ret);
+    HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.registerKeyEventFilter", ret);
     return ret;
 }
 
@@ -98,7 +98,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t 
     auto mainWindow = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (mainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.unregisterKeyEventFilter",
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.unregisterKeyEventFilter",
             WindowManager_ErrorCode::INVAILD_WINDOW_ID);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
@@ -107,7 +107,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterKeyEventFilter(int32_t 
         return WindowManager_ErrorCode::OK;
     }
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::SERVICE_ERROR;
-    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.unregisterKeyEventFilter", ret);
+    HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.unregisterKeyEventFilter", ret);
     return ret;
 }
 
@@ -159,7 +159,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterMouseEventFilter(int32_t 
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.registerMouseEventFilter",
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.registerMouseEventFilter",
             WindowManager_ErrorCode::INVAILD_WINDOW_ID);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
@@ -168,7 +168,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterMouseEventFilter(int32_t 
         return WindowManager_ErrorCode::OK;
     }
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::SERVICE_ERROR;
-    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.registerMouseEventFilter", ret);
+    HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.registerMouseEventFilter", ret);
     return ret;
 }
 
@@ -178,7 +178,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterMouseEventFilter(int32_
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.unregisterMouseEventFilter",
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.unregisterMouseEventFilter",
             WindowManager_ErrorCode::INVAILD_WINDOW_ID);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
@@ -187,7 +187,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterMouseEventFilter(int32_
         return WindowManager_ErrorCode::OK;
     }
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::SERVICE_ERROR;
-    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.unregisterMouseEventFilter", ret);
+    HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.unregisterMouseEventFilter", ret);
     return ret;
 }
 
@@ -238,7 +238,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterTouchEventFilter(int32_t 
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.registerTouchEventFilter",
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.registerTouchEventFilter",
             WindowManager_ErrorCode::INVAILD_WINDOW_ID);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
@@ -247,7 +247,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_RegisterTouchEventFilter(int32_t 
         return WindowManager_ErrorCode::OK;
     }
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::SERVICE_ERROR;
-    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.registerTouchEventFilter", ret);
+    HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.registerTouchEventFilter", ret);
     return ret;
 }
 
@@ -257,7 +257,7 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterTouchEventFilter(int32_
     auto window = OHOS::Rosen::Window::GetWindowWithId(windowId);
     if (window == nullptr) {
         TLOGE(WmsLogTag::WMS_EVENT, "window is null, wid:%{public}d", windowId);
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.unregisterTouchEventFilter",
+        HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.unregisterTouchEventFilter",
             WindowManager_ErrorCode::INVAILD_WINDOW_ID);
         return WindowManager_ErrorCode::INVAILD_WINDOW_ID;
     }
@@ -266,6 +266,6 @@ WindowManager_ErrorCode OH_NativeWindowManager_UnregisterTouchEventFilter(int32_
         return WindowManager_ErrorCode::OK;
     }
     WindowManager_ErrorCode ret = WindowManager_ErrorCode::SERVICE_ERROR;
-    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.unregisterTouchEventFilter", ret);
+    HISTOGRAM_ENUMERATION_WINDOW_MANAGER_ERROR_CODE("ArkUI.window.unregisterTouchEventFilter", ret);
     return ret;
 }
