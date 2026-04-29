@@ -8966,7 +8966,7 @@ static void SetWindowMaskWithAlphaAsyncTask(wptr<Window> weakToken, uint8_t* mas
 {
     auto window = weakToken.promote();
     if (window == nullptr) {
-        TLOGNE(WmsLogTag::WMS_PC, "window is nullptr");
+        TLOGE(WmsLogTag::WMS_PC, "window is nullptr");
         task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             "[window][setWindowMaskWithAlpha]msg: The window is not created or destroyed"));
         free(maskData);
@@ -8977,12 +8977,12 @@ static void SetWindowMaskWithAlphaAsyncTask(wptr<Window> weakToken, uint8_t* mas
     free(maskData);
     if (ret != WmErrorCode::WM_OK) {
         task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowMaskWithAlpha]"));
-        TLOGNE(WmsLogTag::WMS_PC, "Window [%{public}u, %{public}s]",
+        TLOGE(WmsLogTag::WMS_PC, "Window [%{public}u, %{public}s]",
             window->GetWindowId(), window->GetWindowName().c_str());
         return;
     }
     task->Resolve(env, NapiGetUndefined(env));
-    TLOGNI(WmsLogTag::WMS_PC, "Window [%{public}u, %{public}s] end",
+    TLOGI(WmsLogTag::WMS_PC, "Window [%{public}u, %{public}s] end",
         window->GetWindowId(), window->GetWindowName().c_str());
 }
 
