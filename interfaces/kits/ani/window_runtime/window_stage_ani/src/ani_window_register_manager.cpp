@@ -623,8 +623,8 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister
 	    HISTOGRAM_ENUMERATION_ERROR_CODE(	 
             isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         HISTOGRAM_ENUMERATION_ERROR_CODE(
-            isRegister ? "ArkUI.window.onWindowTitleButtonRectChange.error"
-            : "ArkUI.window.offWindowTitleButtonRectChange.error",
+            isRegister ? "ArkUI.window.onWindowTitleButtonRectChange.error":
+            "ArkUI.window.offWindowTitleButtonRectChange.error",
             WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
