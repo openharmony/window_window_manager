@@ -619,8 +619,8 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowTitleButtonRectChangeRegister(
 {
     WLOGD("called");
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onWindowTitleButtonRectChange" : "ArkUI.window.offWindowTitleButtonRectChange"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onWindowTitleButtonRectChange" : "ArkUI.window.offWindowTitleButtonRectChange",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         WLOGFE("Window is nullptr");
         HISTOGRAM_ENUMERATION_ERROR_CODE(
@@ -1038,8 +1038,8 @@ WmErrorCode JsWindowRegisterManager::ProcessSubWindowCloseRegister(sptr<JsWindow
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onSubWindowClose" : "ArkUI.window.offSubWindowClose"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onSubWindowClose" : "ArkUI.window.offSubWindowClose",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.on", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         HISTOGRAM_ENUMERATION_ERROR_CODE(
@@ -1064,8 +1064,8 @@ WmErrorCode JsWindowRegisterManager::ProcessMainWindowCloseRegister(const sptr<J
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onWindowStageClose" : "ArkUI.window.offWindowStageClose"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onWindowStageClose" : "ArkUI.window.offWindowStageClose",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.on", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         HISTOGRAM_ENUMERATION_ERROR_CODE(
@@ -1086,8 +1086,8 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowWillCloseRegister(const sptr<J
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onWindowWillClose" : "ArkUI.window.offWindowWillClose"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onWindowWillClose" : "ArkUI.window.offWindowWillClose",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.on", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         HISTOGRAM_ENUMERATION_ERROR_CODE(
@@ -1152,8 +1152,8 @@ WmErrorCode JsWindowRegisterManager::ProcessFreeWindowModeChangeRegister(const s
     const sptr<Window>& window, bool isRegister, napi_env env, napi_value parameter)
 {
     HISTOGRAM_BOOLEAN(
-        isRegister ? "ArkUI.window.onFreeWindowModeChange" : "ArkUI.window.offFreeWindowModeChange"
-        , HISTOGRAM_BOOLEAN_COUNTS);
+        isRegister ? "ArkUI.window.onFreeWindowModeChange" : "ArkUI.window.offFreeWindowModeChange",
+        HISTOGRAM_BOOLEAN_COUNTS);
     if (window == nullptr || listener == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(
             isRegister ? "ArkUI.window.onFreeWindowModeChange.error" : "ArkUI.window.offFreeWindowModeChange.error",
