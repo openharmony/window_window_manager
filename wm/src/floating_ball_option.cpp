@@ -106,6 +106,7 @@ void FbOption::GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBas
     fbTemplateBaseInfo.title_ = title_;
     fbTemplateBaseInfo.content_ = content_;
     fbTemplateBaseInfo.backgroundColor_ = backgroundColor_;
+    fbTemplateBaseInfo.isVisibleInApp_ = visibleInApp_;
     fbTemplateBaseInfo.textUpdateAnimationType_ = textUpdateAnimationType_;
     fbTemplateBaseInfo.showWhenCreate_ = showWhenCreate_;
 }

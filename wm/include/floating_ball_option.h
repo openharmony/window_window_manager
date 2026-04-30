@@ -41,7 +41,6 @@ public:
     uint32_t GetTextUpdateAnimationType() const;
 
     bool GetShowWhenCreate() const;
-
     void GetFbTemplateBaseInfo(FloatingBallTemplateBaseInfo& fbTemplateBaseInfo);
     bool IsValid(std::string &errMsg) const;
 private:
@@ -49,6 +48,7 @@ private:
     std::string title_ {};
     std::string content_ {};
     std::string backgroundColor_ {};
+    bool visibleInApp_ = true;
     std::shared_ptr<Media::PixelMap> icon_ {};
     uint32_t textUpdateAnimationType_ {0};
     bool showWhenCreate_ {true};
