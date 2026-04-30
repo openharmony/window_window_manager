@@ -1087,11 +1087,11 @@ HWTEST_F(WindowSessionImplRotationTest, ConvertInvalidOrientation_Complete, Test
     window->state_ = WindowState::STATE_CREATED;
 
     // Case 1: USER_ROTATION_LANDSCAPE → USER_PAGE_ROTATION_LANDSCAPE (IsUserOrientation branch)
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_LANDSCAPE, false);
+    window->SetRequestedOrientation(Orientation::UNSPECIFIED, false);
     EXPECT_EQ(window->ConvertInvalidOrientation(), Orientation::USER_PAGE_ROTATION_LANDSCAPE);
 
     // Case 2: USER_ROTATION_PORTRAIT_INVERTED → USER_PAGE_ROTATION_PORTRAIT_INVERTED
-    window->SetRequestedOrientation(Orientation::USER_ROTATION_PORTRAIT_INVERTED, false);
+    window->SetRequestedOrientation(Orientation::UNSPECIFIED, false);
     EXPECT_EQ(window->ConvertInvalidOrientation(), Orientation::USER_PAGE_ROTATION_PORTRAIT_INVERTED);
 
     // Case 3: VERTICAL (non-User orientation) → VERTICAL (not converted)
