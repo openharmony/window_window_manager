@@ -410,6 +410,7 @@ napi_value JsFloatViewController::OnGetWindowProperties(napi_env env, napi_callb
                                          WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "controller is null.");
     }
+    auto templateType = static_cast<uint32_t>(fvController->GetTemplateType());
     auto state = fvController->GetCurState();
     if (!fvController->IsStateWithWindow(state)) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_FV_GETWINDOWPROPERTIES,
@@ -424,7 +425,7 @@ napi_value JsFloatViewController::OnGetWindowProperties(napi_env env, napi_callb
         return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY, "window is null.");
     }
     auto windowInfo = fvController->GetWindowInfo();
-    auto jsObject = CreateJsFvWindowInfoObject(env, fvWindow, windowInfo, state);
+    auto jsObject = CreateJsFloatViewPropertiesObject(env, templateType, fvWindow, windowInfo, state);
     if (jsObject == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(ARKUI_WINDOW_FV_GETWINDOWPROPERTIES,
                                          WmErrorCode::WM_ERROR_STATE_ABNORMALLY);

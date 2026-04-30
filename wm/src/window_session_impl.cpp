@@ -6910,11 +6910,10 @@ WSError WindowSessionImpl::SyncFvWindowInfo(const FloatViewWindowInfo& windowInf
     return WSError::WS_OK;
 }
 
-WSError WindowSessionImpl::SyncFvLimits(const FloatViewLimits& limits)
+WSError WindowSessionImpl::SyncFvLimits(const std::map<uint32_t, FloatViewLimits>& limits)
 {
     auto windowId = GetWindowId();
-    TLOGI(WmsLogTag::WMS_SYSTEM, "SyncFvLimits, windowId: %{public}u, limits %{public}s", windowId,
-        limits.ToString().c_str());
+    TLOGI(WmsLogTag::WMS_SYSTEM, "SyncFvLimits, windowId: %{public}u", windowId);
     auto task = [limits, windowId]() {
         FloatViewManager::SyncFvLimits(windowId, limits);
     };
