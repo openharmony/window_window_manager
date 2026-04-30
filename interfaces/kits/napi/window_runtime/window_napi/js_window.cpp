@@ -14,6 +14,7 @@
  */
 
 #include "js_window.h"
+#include <memory>
 #include <new>
 #include <optional>
 
@@ -1203,6 +1204,13 @@ napi_value JsWindow::SetWindowMask(napi_env env, napi_callback_info info)
     TLOGD(WmsLogTag::WMS_PC, "[NAPI]");
     JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
     return (me != nullptr) ? me->OnSetWindowMask(env, info) : nullptr;
+}
+
+napi_value JsWindow::SetWindowMaskWithAlpha(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
+    JsWindow* me = CheckParamsAndGetThis<JsWindow>(env, info);
+    return (me != nullptr) ? me->OnSetWindowMaskWithAlpha(env, info) : nullptr;
 }
 
 napi_value JsWindow::ClearWindowMask(napi_env env, napi_callback_info info)
@@ -9912,6 +9920,74 @@ napi_value JsWindow::OnSetWindowMask(napi_env env, napi_callback_info info)
     return result;
 }
 
+static void SetWindowMaskWithAlphaAsyncTask(wptr<Window> weakToken,
+    std::shared_ptr<uint8_t[]> maskData, const WindowMaskWithAlphaParams& params,
+    napi_env env, std::shared_ptr<NapiAsyncTask> task)
+{
+    auto window = weakToken.promote();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "window is nullptr");
+        task->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowMaskWithAlpha]msg: The window is not created or destroyed"));
+        return;
+    }
+    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(
+        window->SetWindowMaskWithAlpha(maskData.get(), params.maskWidth, params.maskHeight));
+    if (ret != WmErrorCode::WM_OK) {
+        task->Reject(env, JsErrUtils::CreateJsError(env, ret, "[window][setWindowMaskWithAlpha]"));
+        TLOGE(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s]",
+            window->GetWindowId(), window->GetWindowName().c_str());
+        return;
+    }
+    task->Resolve(env, NapiGetUndefined(env));
+    TLOGI(WmsLogTag::WMS_EVENT, "Window [%{public}u, %{public}s] end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+}
+
+napi_value JsWindow::OnSetWindowMaskWithAlpha(napi_env env, napi_callback_info info)
+{
+    size_t argc = THREE_PARAMS_SIZE;
+    napi_value argv[THREE_PARAMS_SIZE] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    if (!WindowHelper::IsSubWindow(windowToken_->GetType()) &&
+        !WindowHelper::IsAppFloatingWindow(windowToken_->GetType())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Invalid window type: %{public}u", windowToken_->GetType());
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING,
+            "[window][setWindowMaskWithAlpha]msg: Only subwindows and float windows are supported");
+    }
+
+    WindowMaskWithAlphaParams params;
+    WmErrorCode parseRet = ParseWindowMaskWithAlphaParams(env, argv, argc, params, windowToken_);
+    if (parseRet != WmErrorCode::WM_OK) {
+        return NapiThrowError(env, parseRet, "[window][setWindowMaskWithAlpha]msg: Invalid parameters");
+    }
+
+    std::shared_ptr<uint8_t[]> maskData(new (std::nothrow) uint8_t[params.byteLength]);
+    if (maskData == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "allocate memory failed");
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowMaskWithAlpha]msg: allocate memory failed");
+    }
+    errno_t ret = memcpy_s(maskData.get(), params.byteLength, params.maskData, params.byteLength);
+    if (ret != EOK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "memcpy_s failed, ret: %{public}d", ret);
+        return NapiThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowMaskWithAlpha]msg: memcpy_s failed");
+    }
+
+    napi_value result = nullptr;
+    std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);
+    auto asyncTask = [weakToken = wptr<Window>(windowToken_), maskData, params, env, task = napiAsyncTask] {
+        SetWindowMaskWithAlphaAsyncTask(weakToken, maskData, params, env, task);
+    };
+    if (napi_send_event(env, asyncTask, napi_eprio_high, __func__) != napi_status::napi_ok) {
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][setWindowMaskWithAlpha]msg: Internal task error"));
+    }
+    return result;
+}
+
 napi_value JsWindow::OnClearWindowMask(napi_env env, napi_callback_info info)
 {
     napi_value result = nullptr;
@@ -11754,6 +11830,7 @@ void BindFunctions(napi_env env, napi_value object, const char* moduleName)
     BindNativeFunction(env, object, "setWindowContainerColor", moduleName, JsWindow::SetWindowContainerColor);
     BindNativeFunction(env, object, "setWindowContainerModalColor", moduleName, JsWindow::SetWindowContainerModalColor);
     BindNativeFunction(env, object, "setWindowMask", moduleName, JsWindow::SetWindowMask);
+    BindNativeFunction(env, object, "setWindowMaskWithAlpha", moduleName, JsWindow::SetWindowMaskWithAlpha);
     BindNativeFunction(env, object, "setTitleButtonVisible", moduleName, JsWindow::SetTitleButtonVisible);
     BindNativeFunction(env, object, "clearWindowMask", moduleName, JsWindow::ClearWindowMask);
     BindNativeFunction(env, object, "setWindowGrayScale", moduleName, JsWindow::SetWindowGrayScale);

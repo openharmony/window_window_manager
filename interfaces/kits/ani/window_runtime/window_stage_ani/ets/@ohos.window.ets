@@ -3116,6 +3116,7 @@ export class WindowInternal implements Window {
     private native setWindowTouchableSync(nativeObj: long, isTouchable: boolean): void;
     private native setDialogBackGestureEnabledSync(nativeObj: long, enabled: boolean): void;
     private native setWindowMaskSync(nativeObj: long, windowMask: Array<Array<long>>): void;
+    private native setWindowMaskWithAlphaSync(nativeObj: long, windowMask: Uint8Array, maskWidth: int, maskHeight: int): void;
     private native clearWindowMaskSync(nativeObj: long): void;
     private native getUIContextSync(nativeObj: long): UIContext;
     private native getWindowAvoidAreaSync(nativeObj: long, type: int): AvoidArea;
@@ -4102,6 +4103,18 @@ export class WindowInternal implements Window {
       return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
         taskpool.execute((): void => {
           this.setWindowMaskSync(this.nativeObj, windowMask);
+        }).then((ret: Any) => {
+          resolve(undefined);
+        }).catch((err: Any) => {
+          reject(err as BusinessError);
+        });
+      });
+    }
+
+    public setWindowMaskWithAlpha(windowMask: Uint8Array, maskWidth: int, maskHeight: int): Promise<void> {
+      return new Promise<void>((resolve: (value: undefined) => void, reject: (error: BusinessError) => void): void => {
+        taskpool.execute((): void => {
+          this.setWindowMaskWithAlphaSync(this.nativeObj, windowMask, maskWidth, maskHeight);
         }).then((ret: Any) => {
           resolve(undefined);
         }).catch((err: Any) => {
@@ -5508,6 +5521,7 @@ export interface Window {
     setWindowTouchable(isTouchable: boolean, callback: AsyncCallback<void>): void;
     setDialogBackGestureEnabled(enabled: boolean): Promise<void>;
     setWindowMask(windowMask: Array<Array<long>>): Promise<void>;
+    setWindowMaskWithAlpha(windowMask: Uint8Array, maskWidth: int, maskHeight: int): Promise<void>;
     clearWindowMask(): Promise<void>;
     setTouchableAreas(rects: Array<Rect>): void;
     getUIContext(): UIContext;

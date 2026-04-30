@@ -2137,6 +2137,19 @@ void AniWindow::SetWindowMask(ani_env* env, ani_object obj, ani_long nativeObj, 
     }
 }
 
+void AniWindow::SetWindowMaskWithAlpha(ani_env* env, ani_object obj, ani_long nativeObj,
+    ani_object windowMask, ani_int maskWidth, ani_int maskHeight)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[ANI]");
+    AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
+    if (aniWindow != nullptr) {
+        aniWindow->OnSetWindowMaskWithAlpha(env, windowMask, maskWidth, maskHeight);
+    } else {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]aniWindow is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+    }
+}
+
 void AniWindow::ClearWindowMask(ani_env* env, ani_object obj, ani_long nativeObj)
 {
     TLOGD(WmsLogTag::WMS_PC, "[ANI]");
@@ -2190,6 +2203,73 @@ void AniWindow::OnSetWindowMask(ani_env* env, ani_array windowMaskArray)
     }
     TLOGI(WmsLogTag::WMS_PC, "[ANI]Window [%{public}u, %{public}s] OnSetWindowMask end",
         window->GetWindowId(), window->GetWindowName().c_str());
+}
+
+void AniWindow::OnSetWindowMaskWithAlpha(ani_env* env, ani_object windowMaskArray, ani_int maskWidth,
+    ani_int maskHeight)
+{
+    auto window = GetWindow();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]window is nullptr!");
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        return;
+    }
+    if (!WindowHelper::IsSubWindow(window->GetType()) && !WindowHelper::IsAppFloatingWindow(window->GetType())) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Invalid window type: %{public}u", window->GetType());
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_CALLING, "Invalid window type");
+        return;
+    }
+
+    WindowMaskWithAlphaParseParams params;
+    params.rawMaskWidth = maskWidth;
+    params.rawMaskHeight = maskHeight;
+    if (!ParseWindowMaskWithAlphaParams(env, windowMaskArray, window, params)) {
+        return;
+    }
+
+    WmErrorCode ret = AniWindowUtils::ToErrorCode(
+        window->SetWindowMaskWithAlpha(reinterpret_cast<uint8_t*>(params.maskData),
+            params.maskWidth, params.maskHeight));
+    if (ret != WmErrorCode::WM_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]SetWindowMaskWithAlpha failed, ret: %{public}d", ret);
+        AniWindowUtils::AniThrowError(env, ret);
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_PC, "[ANI]Window [%{public}u, %{public}s] OnSetWindowMaskWithAlpha end",
+        window->GetWindowId(), window->GetWindowName().c_str());
+}
+
+bool AniWindow::ParseWindowMaskWithAlphaParams(ani_env* env, ani_object windowMaskArray,
+    sptr<Window>& window, WindowMaskWithAlphaParseParams& params)
+{
+    if (params.rawMaskWidth <= 0 || params.rawMaskHeight <= 0) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Invalid maskWidth %{public}d or maskHeight %{public}d",
+            params.rawMaskWidth, params.rawMaskHeight);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return false;
+    }
+    if (!AniWindowUtils::GetUint8ArrayBufferData(env, windowMaskArray, params.maskData, params.byteLength)) {
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+        return false;
+    }
+    params.maskWidth = static_cast<uint32_t>(params.rawMaskWidth);
+    params.maskHeight = static_cast<uint32_t>(params.rawMaskHeight);
+    Rect windowRect = window->GetRequestRect();
+    if (params.maskWidth != windowRect.width_ || params.maskHeight != windowRect.height_) {
+        TLOGE(WmsLogTag::WMS_EVENT,
+            "[ANI]maskWidth %{public}u, maskHeight %{public}u not equal to window size %{public}u %{public}u",
+            params.maskWidth, params.maskHeight, windowRect.width_, windowRect.height_);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return false;
+    }
+    size_t expectedSize = static_cast<size_t>(params.maskWidth) * static_cast<size_t>(params.maskHeight);
+    if (expectedSize == 0 || static_cast<size_t>(params.byteLength) != expectedSize) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]windowMask length %{public}zu not equal to %{public}zu",
+            static_cast<size_t>(params.byteLength), expectedSize);
+        AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_ILLEGAL_PARAM);
+        return false;
+    }
+    return true;
 }
 
 bool AniWindow::CheckWindowMaskParams(ani_env* env, ani_array windowMask)
@@ -7610,6 +7690,8 @@ ani_status OHOS::Rosen::ANI_Window_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void *>(AniWindow::SetDialogBackGestureEnabled)},
         ani_native_function {"setWindowMaskSync", "lC{std.core.Array}:",
             reinterpret_cast<void *>(AniWindow::SetWindowMask)},
+        ani_native_function {"setWindowMaskWithAlphaSync", "lC{std.core.Uint8Array}ii:",
+            reinterpret_cast<void *>(AniWindow::SetWindowMaskWithAlpha)},
         ani_native_function {"clearWindowMaskSync", "l:", reinterpret_cast<void *>(AniWindow::ClearWindowMask)},
         ani_native_function {"setTouchableAreas", "lC{std.core.Array}:",
             reinterpret_cast<void *>(AniWindow::SetTouchableAreas)},
