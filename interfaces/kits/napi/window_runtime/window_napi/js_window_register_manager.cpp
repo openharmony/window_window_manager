@@ -399,6 +399,9 @@ WmErrorCode JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowLi
 {
     WLOGI("called");
     if (window == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onTouchOutside" : "ArkUI.window.offTouchOutside",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<ITouchOutsideListener> thisListener(listener);
@@ -408,6 +411,8 @@ WmErrorCode JsWindowRegisterManager::ProcessTouchOutsideRegister(sptr<JsWindowLi
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterTouchOutsideListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onTouchOutside" : "ArkUI.window.offTouchOutside", ret);
     return ret;
 }
 
@@ -521,17 +526,24 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsW
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onNoInteractionDetected" : "ArkUI.window.offNoInteractionDetected",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowNoInteractionListener> thisListener(listener);
 
     if (!isRegister) {
-        return MappingWmErrorCodeSafely(window->UnregisterWindowNoInteractionListener(thisListener));
+        WmErrorCode ret = MappingWmErrorCodeSafely(window->UnregisterWindowNoInteractionListener(thisListener));
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.offNoInteractionDetected", ret);
+        return ret;
     }
 
     int64_t timeout = 0;
     if (parameter == nullptr || !ConvertFromJsNumber(env, parameter, timeout)) {
         WLOGFE("Failed to convert parameter to timeout");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.onNoInteractionDetected",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
@@ -540,12 +552,16 @@ WmErrorCode JsWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<JsW
     if (timeout <= 0 || (timeout > noInteractionMax)) {
         WLOGFE("invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in(0s~%{public}" PRId64,
             timeout, noInteractionMax);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.onNoInteractionDetected",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
 
     thisListener->SetTimeout(timeout * secToMicrosecRatio);
 
-    return MappingWmErrorCodeSafely(window->RegisterWindowNoInteractionListener(thisListener));
+    WmErrorCode ret = MappingWmErrorCodeSafely(window->RegisterWindowNoInteractionListener(thisListener));
+    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.onNoInteractionDetected", ret);
+    return ret;
 }
 
 WmErrorCode JsWindowRegisterManager::ProcessScreenshotRegister(sptr<JsWindowListener> listener,
@@ -587,6 +603,9 @@ WmErrorCode JsWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<JsWin
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onDialogTargetTouch" : "ArkUI.window.offDialogTargetTouch",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IDialogTargetTouchListener> thisListener(listener);
@@ -596,6 +615,8 @@ WmErrorCode JsWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<JsWin
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterDialogTargetTouchListener(thisListener));
     }
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onDialogTargetTouch" : "ArkUI.window.offDialogTargetTouch", ret);
     return ret;
 }
 
@@ -1020,7 +1041,9 @@ WmErrorCode JsWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(s
     sptr<Window> window, bool isRegister, napi_env env, napi_value parameter)
 {
     if (window == nullptr) {
-        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.on", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+        HISTOGRAM_ENUMERATION_ERROR_CODE(
+            isRegister ? "ArkUI.window.onUiExtensionSecureLimitChange" : "ArkUI.window.offUiExtensionSecureLimitChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IExtensionSecureLimitChangeListener> thisListener(listener);
@@ -1030,7 +1053,9 @@ WmErrorCode JsWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(s
     } else {
         ret = MappingWmErrorCodeSafely(window->UnregisterExtensionSecureLimitChangeListener(thisListener));
     }
-    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.on", ret);
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onUiExtensionSecureLimitChange" : "ArkUI.window.offUiExtensionSecureLimitChange",
+        ret);
     return ret;
 }
 
