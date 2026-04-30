@@ -512,7 +512,6 @@ HWTEST_F(WindowRecoverSessionTest, CacheSpecificSessionForRecovering, TestSize.L
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     int32_t parentPersistentId = 1;
     property->SetParentPersistentId(parentPersistentId);
-    sceneSession->SetSessionProperty(property);
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
     ASSERT_EQ(ssm_->recoverSubSessionCacheMap_[parentPersistentId].size(), 1);
     ssm_->CacheSpecificSessionForRecovering(sceneSession, property);
