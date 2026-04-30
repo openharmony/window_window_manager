@@ -1255,12 +1255,12 @@ int SessionStageStub::HandleSetEnableDragBySystem(MessageParcel& data, MessagePa
 int SessionStageStub::HandleSetDragActivated(MessageParcel& data, MessageParcel& reply)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");
-    bool dragActivated = true;
-    if (!data.ReadBool(dragActivated)) {
-        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragActivated failed.");
+    uint32_t dragActivatedBitmap = 0;
+    if (!data.ReadUint32(dragActivatedBitmap)) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "Read dragActivatedBitmap failed.");
         return ERR_INVALID_DATA;
     }
-    SetDragActivated(dragActivated);
+    SetDragActivated(dragActivatedBitmap);
     return ERR_NONE;
 }
 

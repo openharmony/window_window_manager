@@ -2063,7 +2063,7 @@ WSError SessionStageProxy::SetStageKeyFramePolicy(const KeyFramePolicy& keyFrame
     return WSError::WS_OK;
 }
 
-WSError SessionStageProxy::SetDragActivated(bool dragActivated)
+WSError SessionStageProxy::SetDragActivated(uint32_t dragActivatedBitmap)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2072,7 +2072,7 @@ WSError SessionStageProxy::SetDragActivated(bool dragActivated)
         TLOGE(WmsLogTag::WMS_LAYOUT, "WriteInterfaceToken failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }
-    if (!data.WriteBool(dragActivated)) {
+    if (!data.WriteUint32(dragActivatedBitmap)) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Write params failed");
         return WSError::WS_ERROR_IPC_FAILED;
     }

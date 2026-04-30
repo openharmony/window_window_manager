@@ -542,7 +542,7 @@ public:
      * Window Layout
      */
     WMError EnableDrag(bool enableDrag) override;
-    WSError SetDragActivated(bool dragActivated) override;
+    WSError SetDragActivated(uint32_t dragActivatedBitmap) override;
     WSError SetEnableDragBySystem(bool enableDrag) override;
     bool IsWindowDraggable();
     CrossAxisState GetCrossAxisState() override;
@@ -1352,7 +1352,7 @@ private:
     std::atomic_bool windowSizeChanged_ = false;
     std::atomic_bool enableFrameLayoutFinishCb_ = false;
     bool hasNotifyPrelaunchStartingWindow_ = false;
-    std::atomic_bool dragActivated_ = true;
+    std::atomic<uint32_t> dragActivatedBitmap_{DRAG_ACTIVATE_ALL_MASK};
     WindowSizeChangeReason lastSizeChangeReason_ = WindowSizeChangeReason::END;
     std::atomic<bool> postTaskDone_ = false;
     Transform layoutTransform_;
