@@ -16327,7 +16327,9 @@ void SceneSessionManager::FilterForGetAllWindowLayoutInfo(DisplayId displayId, b
             if (session->GetSessionGlobalRect().IsInvalid()) {
                 continue;
             }
-            if (option.excludeSystemWindows && WindowHelper::IsSystemWindow(session->GetWindowType())) {
+            if (option.excludeSystemWindows && WindowHelper::IsApiSystemWindow(session->GetWindowType())) {
+                TLOGD(WmsLogTag::WMS_ATTRIBUTE, "exclude api system: win=[%{public}d, %{public}s], type=%{public}u",
+                    session->GetWindowId(), session->GetWindowName().c_str(), session->GetWindowType());
                 continue;
             }
             if ((zOrderForAboveWin > 0 && session->GetZOrder() <= zOrderForAboveWin) ||
