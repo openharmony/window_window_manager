@@ -431,7 +431,8 @@ WmErrorCode AniWindowRegisterManager::ProcessTouchOutsideRegister(sptr<AniWindow
     TLOGI(WmsLogTag::WMS_EVENT, "called");
     if (window == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(
-            isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            isRegister ? "ArkUI.window.onTouchOutside" : "ArkUI.window.offTouchOutside",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<ITouchOutsideListener> thisListener(listener);
@@ -441,7 +442,8 @@ WmErrorCode AniWindowRegisterManager::ProcessTouchOutsideRegister(sptr<AniWindow
     } else {
         ret = AniWindowUtils::ToErrorCode(window->UnregisterTouchOutsideListener(thisListener));
     }
-    HISTOGRAM_ENUMERATION_ERROR_CODE(isRegister ? "ArkUI.window.on" : "ArkUI.window.off", ret);
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onTouchOutside" : "ArkUI.window.offTouchOutside", ret);
     return ret;
 }
 
@@ -450,7 +452,8 @@ WmErrorCode AniWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<AniW
 {
     if (window == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(
-            isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            isRegister ? "ArkUI.window.onDialogTargetTouch" : "ArkUI.window.offDialogTargetTouch",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IDialogTargetTouchListener> thisListener(listener);
@@ -460,7 +463,8 @@ WmErrorCode AniWindowRegisterManager::ProcessDialogTargetTouchRegister(sptr<AniW
     } else {
         ret = AniWindowUtils::ToErrorCode(window->UnregisterDialogTargetTouchListener(thisListener));
     }
-    HISTOGRAM_ENUMERATION_ERROR_CODE(isRegister ? "ArkUI.window.on" : "ArkUI.window.off", ret);
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onDialogTargetTouch" : "ArkUI.window.offDialogTargetTouch", ret);
     return ret;
 }
 
@@ -469,13 +473,14 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<An
 {
     if (window == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(
-            isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            isRegister ? "ArkUI.window.onNoInteractionDetected" : "ArkUI.window.offNoInteractionDetected",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IWindowNoInteractionListener> thisListener(listener);
     if (!isRegister) {
         WmErrorCode ret = AniWindowUtils::ToErrorCode(window->UnregisterWindowNoInteractionListener(thisListener));
-        HISTOGRAM_ENUMERATION_ERROR_CODE(isRegister ? "ArkUI.window.on" : "ArkUI.window.off", ret);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.offNoInteractionDetected", ret);
         return ret;
     }
     constexpr ani_long secToMicrosecRatio = 1000;
@@ -483,13 +488,13 @@ WmErrorCode AniWindowRegisterManager::ProcessWindowNoInteractionRegister(sptr<An
     if (timeout <= 0 || (timeout > noInteractionMax)) {
         TLOGE(WmsLogTag::WMS_EVENT, "[ANI]invalid parameter: no-interaction-timeout %{public}" PRId64 " is not in "
             "(0s~%{public}" PRId64, timeout, noInteractionMax);
-        HISTOGRAM_ENUMERATION_ERROR_CODE(
-            isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_INVALID_PARAM);
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.onNoInteractionDetected",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
         return WmErrorCode::WM_ERROR_INVALID_PARAM;
     }
     thisListener->SetTimeout(timeout * secToMicrosecRatio);
     WmErrorCode ret = AniWindowUtils::ToErrorCode(window->RegisterWindowNoInteractionListener(thisListener));
-    HISTOGRAM_ENUMERATION_ERROR_CODE(isRegister ? "ArkUI.window.on" : "ArkUI.window.off", ret);
+    HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.onNoInteractionDetected", ret);
     return ret;
 }
 
@@ -1146,7 +1151,8 @@ WmErrorCode AniWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(
 {
     if (window == nullptr || listener == nullptr) {
         HISTOGRAM_ENUMERATION_ERROR_CODE(
-            isRegister ? "ArkUI.window.on" : "ArkUI.window.off", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
+            isRegister ? "ArkUI.window.onUiExtensionSecureLimitChange" : "ArkUI.window.offUiExtensionSecureLimitChange",
+            WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
     }
     sptr<IExtensionSecureLimitChangeListener> thisListener(listener);
@@ -1156,9 +1162,11 @@ WmErrorCode AniWindowRegisterManager::ProcessExtensionSecureLimitChangeRegister(
     } else {
         ret = window->UnregisterExtensionSecureLimitChangeListener(thisListener);
     }
-    WmErrorCode wmRet = AniWindowUtils::ToErrorCode(ret);
-    HISTOGRAM_ENUMERATION_ERROR_CODE(isRegister ? "ArkUI.window.on" : "ArkUI.window.off", wmRet);
-    return wmRet;
+    WmErrorCode errCode = AniWindowUtils::ToErrorCode(ret);
+    HISTOGRAM_ENUMERATION_ERROR_CODE(
+        isRegister ? "ArkUI.window.onUiExtensionSecureLimitChange" : "ArkUI.window.offUiExtensionSecureLimitChange",
+        errCode);
+    return errCode;
 }
 
 WmErrorCode AniWindowRegisterManager::ProcessWindowStatusDidChangeRegister(const sptr<AniWindowListener>& listener,
