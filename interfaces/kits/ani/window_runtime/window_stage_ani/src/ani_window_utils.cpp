@@ -2525,6 +2525,37 @@ bool AniWindowUtils::ParseWindowMaskInnerValue(ani_env* env, ani_array innerArra
     return true;
 }
 
+bool AniWindowUtils::GetUint8ArrayBufferData(ani_env* env, ani_object uint8Array, void*& data, ani_size& byteLength)
+{
+    ani_class clsUint8Array = nullptr;
+    ani_status aniRet = env->FindClass("std.core.Uint8Array", &clsUint8Array);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Find class std.core.Uint8Array failed: %{public}u", aniRet);
+        return false;
+    }
+
+    ani_field bufferField {};
+    aniRet = env->Class_FindField(clsUint8Array, "buffer", &bufferField);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Find field buffer failed: %{public}u", aniRet);
+        return false;
+    }
+
+    ani_ref result {};
+    aniRet = env->Object_GetField_Ref(uint8Array, bufferField, &result);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Get buffer ref failed: %{public}u", aniRet);
+        return false;
+    }
+
+    aniRet = env->ArrayBuffer_GetInfo(static_cast<ani_arraybuffer>(result), &data, &byteLength);
+    if (aniRet != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_EVENT, "[ANI]Get ArrayBuffer info failed: %{public}u", aniRet);
+        return false;
+    }
+    return true;
+}
+
 WmErrorCode AniWindowUtils::ParseTouchableAreas(ani_env* env, ani_array rects, const Rect& windowRect,
     std::vector<Rect>& touchableAreas)
 {

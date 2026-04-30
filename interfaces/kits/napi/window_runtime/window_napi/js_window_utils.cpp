@@ -1634,6 +1634,71 @@ bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std
     return true;
 }
 
+bool GetWindowMaskWithAlphaFromJsValue(napi_env env, napi_value jsObject, uint8_t** data, size_t& byteLength)
+{
+    if (jsObject == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to window mask with alpha, jsObject is nullptr");
+        return false;
+    }
+    bool isTypedArray = false;
+    napi_is_typedarray(env, jsObject, &isTypedArray);
+    if (!isTypedArray) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to window mask with alpha, not typed array");
+        return false;
+    }
+    napi_typedarray_type type;
+    void* arrayData = nullptr;
+    size_t offset = 0;
+    napi_get_typedarray_info(env, jsObject, &type, &byteLength, &arrayData, nullptr, &offset);
+    if (type != napi_uint8_array) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Failed to convert parameter to window mask with alpha, not uint8 array");
+        return false;
+    }
+    *data = static_cast<uint8_t*>(arrayData);
+    return true;
+}
+
+WmErrorCode ParseWindowMaskWithAlphaParams(napi_env env, napi_value* argv, size_t argc,
+    WindowMaskWithAlphaParams& params, const sptr<Window>& windowToken)
+{
+    constexpr size_t minRequiredParams = 3;  // windowMask, maskWidth, maskHeight
+    if (argc < minRequiredParams) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Argc is invalid: %{public}zu, required: %{public}zu", argc, minRequiredParams);
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    if (!GetWindowMaskWithAlphaFromJsValue(env, argv[INDEX_ZERO], &params.maskData, params.byteLength)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "GetWindowMaskWithAlphaFromJsValue failed");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    if (!ConvertFromJsValue(env, argv[INDEX_ONE], params.maskWidth)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Get maskWidth failed");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    if (!ConvertFromJsValue(env, argv[INDEX_TWO], params.maskHeight)) {
+        TLOGE(WmsLogTag::WMS_EVENT, "Get maskHeight failed");
+        return WmErrorCode::WM_ERROR_INVALID_PARAM;
+    }
+    if (windowToken == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowToken is nullptr");
+        return WmErrorCode::WM_ERROR_STATE_ABNORMALLY;
+    }
+    Rect windowRect = windowToken->GetRequestRect();
+    if (params.maskWidth != static_cast<uint32_t>(windowRect.width_) ||
+        params.maskHeight != static_cast<uint32_t>(windowRect.height_)) {
+        TLOGE(WmsLogTag::WMS_EVENT,
+            "maskWidth %{public}u, maskHeight %{public}u not equal to window size %{public}u %{public}u",
+            params.maskWidth, params.maskHeight, windowRect.width_, windowRect.height_);
+        return WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+    }
+    size_t expectedSize = static_cast<size_t>(params.maskWidth) * static_cast<size_t>(params.maskHeight);
+    if (expectedSize == 0 || params.byteLength != expectedSize) {
+        TLOGE(WmsLogTag::WMS_EVENT, "windowMask size %{public}zu not equal to %{public}zu",
+            params.byteLength, expectedSize);
+        return WmErrorCode::WM_ERROR_ILLEGAL_PARAM;
+    }
+    return WmErrorCode::WM_OK;
+}
+
 bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds)
 {
     if (jsObject == nullptr) {

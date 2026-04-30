@@ -180,6 +180,13 @@ inline const std::map<ApiModalityType, ModalityType> JS_TO_NATIVE_MODALITY_TYPE_
     { ApiModalityType::APPLICATION_MODALITY,    ModalityType::APPLICATION_MODALITY },
 };
 
+struct WindowMaskWithAlphaParams {
+    uint8_t* maskData = nullptr;
+    size_t byteLength = 0;
+    uint32_t maskWidth = 0;
+    uint32_t maskHeight = 0;
+};
+
 using AsyncCallbackFunc_ = std::function<void(napi_env env, size_t argc, napi_value* argv)>;
 
 class AsyncCallback : virtual public RefBase {
@@ -300,6 +307,9 @@ std::unique_ptr<WsNapiAsyncTask> CreateEmptyWsNapiAsyncTask(napi_env env, napi_v
     bool ConvertDecorButtonStyleFromJs(napi_env env, napi_value jsObject, DecorButtonStyle& decorButtonStyle);
     bool GetAPI7Ability(napi_env env, AppExecFwk::Ability* &ability);
     bool GetWindowMaskFromJsValue(napi_env env, napi_value jsObject, std::vector<std::vector<uint32_t>>& windowMask);
+    bool GetWindowMaskWithAlphaFromJsValue(napi_env env, napi_value jsObject, uint8_t** data, size_t& byteLength);
+    WmErrorCode ParseWindowMaskWithAlphaParams(napi_env env, napi_value* argv, size_t argc,
+        WindowMaskWithAlphaParams& params, const sptr<Window>& windowToken);
     bool GetWindowIdFromJsValue(napi_env env, napi_value jsObject, std::vector<int32_t>& windowIds);
     bool GetMoveConfigurationFromJsValue(napi_env env, napi_value jsObject, MoveConfiguration& moveConfiguration);
     void ConvertJSSystemBarStyleToSystemBarProperties(napi_env env, napi_value jsObject,
