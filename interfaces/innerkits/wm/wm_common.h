@@ -2185,6 +2185,14 @@ enum class FloatingBallTextUpdateAnimationType : uint32_t {
     ANIMATION_END = 2,
 };
 
+/**
+ * @brief Enumerates floating ball update mode.
+ */
+enum class FloatingBallUpdateMode : uint32_t {
+    DEFAULT = 1,
+    VISIBLE_IN_APP = 2,
+};
+
 struct PiPWindowSize {
     uint32_t width;
     uint32_t height;
@@ -2213,7 +2221,7 @@ enum class FloatViewState : uint32_t {
     FV_IN_FLOATING_BALL = 5,
     FV_ERROR = 6,
 };
- 
+
 /**
  * @brief Enumerates float view template.
  */
