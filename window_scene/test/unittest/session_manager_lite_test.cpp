@@ -563,7 +563,7 @@ HWTEST_F(SessionManagerLiteTest, SMSRecoverListener3, TestSize.Level1)
     data.WriteInt32(wmsUserId);
     data.WriteInt32(screenId);
     data.WriteBool(isConnected);
-    data.WriteBool(pid);
+    data.WriteInt32(pid);
     ret = listener->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, ERR_NONE);
 
@@ -573,7 +573,7 @@ HWTEST_F(SessionManagerLiteTest, SMSRecoverListener3, TestSize.Level1)
     data.WriteInt32(wmsUserId);
     data.WriteInt32(screenId);
     data.WriteBool(isConnected);
-    data.WriteBool(pid);
+    data.WriteInt32(pid);
     ret = listener->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, ERR_NONE);
 
