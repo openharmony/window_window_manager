@@ -1129,6 +1129,338 @@ HWTEST_F(ScreenSessionManagerTest, SetOptionConfig, TestSize.Level1)
     g_logMsg.clear();
     LOG_SetCallback(nullptr);
 }
+
+/**
+ * @tc.name: IsApAodPreBright001
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT reason and SCREEN_AP_DOZE state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright002
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT reason and SCREEN_AP_DOZE_SUSPEND state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright003
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF reason and SCREEN_AP_DOZE state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright003, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright004
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF reason and SCREEN_AP_DOZE_SUSPEND state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright004, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright005
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT reason and SCREEN_ON state (should return false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright005, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright006
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF reason and SCREEN_OFF state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright006, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_OFF);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright007
+ * @tc.desc: Test IsApAodPreBright with invalid reason and SCREEN_AP_DOZE state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright007, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright008
+ * @tc.desc: Test IsApAodPreBright with invalid reason and SCREEN_AP_DOZE_SUSPEND state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright008, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_TIMEOUT;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright009
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT reason and SCREEN_AOD state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright009, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AOD);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright010
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF reason and SCREEN_DOZE state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright010, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright011
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT_AUTH_SUCCESS reason and SCREEN_AP_DOZE state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright011, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_SUCCESS;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright012
+ * @tc.desc: Test IsApAodPreBright with PRE_BRIGHT_AUTH_FAIL_SCREEN_ON reason and SCREEN_AP_DOZE_SUSPEND state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright012, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_ON;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright013
+ * @tc.desc: Test IsApAodPreBright with INIT reason and SCREEN_INIT state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright013, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_INIT);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsApAodPreBright014
+ * @tc.desc: Test IsApAodPreBright with unknown reason and SCREEN_AP_DOZE state
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsApAodPreBright014, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN;
+    bool result = ssm_->IsApAodPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: WakeUpBegin001
+ * @tc.desc: Test WakeUpBegin when IsApAodPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->WakeUpBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: WakeUpBegin002
+ * @tc.desc: Test WakeUpBegin when IsApAodPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE_SUSPEND
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->WakeUpBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: WakeUpBegin003
+ * @tc.desc: Test WakeUpBegin when IsApAodPreBright returns false with PRE_BRIGHT and SCREEN_ON state
+ *           should not be blocked by IsApAodPreBright check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin003, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->WakeUpBegin(reason);
+
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") == std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SuspendBegin001
+ * @tc.desc: Test SuspendBegin when IsApAodPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SuspendBegin001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->SuspendBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SuspendBegin002
+ * @tc.desc: Test SuspendBegin when IsApAodPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE_SUSPEND
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SuspendBegin002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->SuspendBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SuspendBegin003
+ * @tc.desc: Test SuspendBegin when IsApAodPreBright returns false with PRE_BRIGHT and SCREEN_ON state
+ *           should not be blocked by IsApAodPreBright check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SuspendBegin003, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->SuspendBegin(reason);
+
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") == std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
 }
 } // namespace Rosen
 } // namespace OHOS
