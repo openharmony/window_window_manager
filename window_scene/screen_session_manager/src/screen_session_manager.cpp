@@ -5703,7 +5703,7 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
 bool ScreenSessionManager::IsPreBright(PowerStateChangeReason reason)
 {
     return reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
-        reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
+        reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
 }
 
 bool ScreenSessionManager::DoWakeUpBegin(PowerStateChangeReason reason)
@@ -6556,8 +6556,8 @@ void ScreenSessionManager::SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& 
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice()) {
         ScreenId currentScreenId = SuperFoldPolicy::GetInstance().GetCurrentScreenId();
-        CallRsSetScreenPowerStatusSync(currentScreenId, status, reason, isApAod);
-        CallRsSetScreenPowerStatusSyncForExtend(screenIds, status, reason, isApAod);
+        CallRsSetScreenPowerStatusSync(currentScreenId, status, reason);
+        CallRsSetScreenPowerStatusSyncForExtend(screenIds, status, reason);
         SuperFoldPolicy::GetInstance().RecoverDisplayMode();
         return;
     }
