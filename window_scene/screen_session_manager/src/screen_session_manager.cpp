@@ -5684,9 +5684,9 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
         return BlockScreenWaitPictureFrameByCV(false);
     }
     ScreenPowerEvent event = ScreenPowerEvent::WAKEUP_BEGIN;
-    if (IsApAodPreBright(reason)) {
+    if (IsPreBright(reason)) {
         TLOGNFI(WmsLogTag::DMS, "[UL_POWER]ap aod cannot pre bright");
-        event = ScreenPowerEvent::WAKEUP_BEGIN_DOZE;
+        event = ScreenPowerEvent::WAKEUP_BEGIN_PRE_BRIGHT;
     }
     ScreenPowerInfoType type = reason;
     if (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_INIT) {
@@ -5700,18 +5700,16 @@ bool ScreenSessionManager::WakeUpBegin(PowerStateChangeReason reason)
     return ScreenStateMachine::GetInstance().HandlePowerStateChange(event, type);
 }
 
-bool ScreenSessionManager::IsApAodPreBright(PowerStateChangeReason reason)
+bool ScreenSessionManager::IsPreBright(PowerStateChangeReason reason)
 {
-    return (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
-        reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) &&
-        (ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_AP_DOZE ||
-        ScreenStateMachine::GetInstance().GetTransitionState() == ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    return reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT ||
+        reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF);
 }
 
 bool ScreenSessionManager::DoWakeUpBegin(PowerStateChangeReason reason)
 {
     TLOGNFI(WmsLogTag::DMS, "[UL_POWER]reason: %{public}u", reason);
-    if (IsApAodPreBright(reason)) {
+    if (IsPreBright(reason)) {
         TLOGNFI(WmsLogTag::DMS, "[UL_POWER]ap aod cannot pre bright");
         return false;
     }
@@ -5778,9 +5776,9 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
         return false;
     }
     ScreenPowerEvent event = ScreenPowerEvent::SUSPEND_BEGIN;
-    if (IsApAodPreBright(reason)) {
+    if (IsPreBright(reason)) {
         TLOGNFI(WmsLogTag::DMS, "[UL_POWER]ap aod cannot pre bright off");
-        event = ScreenPowerEvent::SUSPEND_BEGIN_DOZE;
+        event = ScreenPowerEvent::SUSPEND_BEGIN_PRE_BRIGHT;
     }
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_START_DREAM) {
         NotifyDisplayPowerEvent(DisplayPowerEvent::DISPLAY_START_DREAM, EventStatus::BEGIN, reason);
@@ -5796,7 +5794,7 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 bool ScreenSessionManager::DoSuspendBegin(PowerStateChangeReason reason)
 {
     TLOGNFI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
-    if (IsApAodPreBright(reason)) {
+    if (IsPreBright(reason)) {
         TLOGNFI(WmsLogTag::DMS, "[UL_POWER]ap aod cannot pre bright off");
         return false;
     }

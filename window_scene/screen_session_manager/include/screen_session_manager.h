@@ -301,7 +301,7 @@ public:
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool DoSuspendBegin(PowerStateChangeReason reason);
     bool SuspendEnd() override;
-    bool IsApAodPreBright(PowerStateChangeReason reason);
+    bool IsPreBright(PowerStateChangeReason reason);
     void BlockScreenOnByCV(void);
     void BlockScreenOffByCV(void);
     bool BlockScreenWaitPictureFrameByCV(bool isStartDream);
