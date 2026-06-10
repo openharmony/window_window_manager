@@ -167,7 +167,7 @@ bool ScreenStateMachine::DoSetScreenPowerForAll(ScreenPowerEvent event, const Sc
         TLOGI(WmsLogTag::DMS, "[ScreenPower FSM] invalid params");
         return false;
     }
-    return ScreenSessionManager::GetInstance().SetScreenPowerForAll(std::get<ScreenPowerState>(*params),
+    return ScreenSessionManager::GetInstance().DoSetScreenPowerForAll(std::get<ScreenPowerState>(*params),
         std::get<PowerStateChangeReason>(*params), std::get<bool>(*params));
 }
 
