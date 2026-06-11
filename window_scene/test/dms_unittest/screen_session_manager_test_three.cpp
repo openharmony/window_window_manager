@@ -1167,7 +1167,7 @@ HWTEST_F(ScreenSessionManagerTest, IsPreBright003, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
     bool result = ssm_->IsPreBright(reason);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -1232,7 +1232,7 @@ HWTEST_F(ScreenSessionManagerTest, WakeUpBegin003, TestSize.Level1)
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
     bool result = ssm_->WakeUpBegin(reason);
 
-    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") != std::string::npos);
 
     g_logMsg.clear();
     LOG_SetCallback(nullptr);
@@ -1300,7 +1300,7 @@ HWTEST_F(ScreenSessionManagerTest, SuspendBegin003, TestSize.Level1)
     PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
     bool result = ssm_->SuspendBegin(reason);
 
-    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") == std::string::npos);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") != std::string::npos);
 
     g_logMsg.clear();
     LOG_SetCallback(nullptr);

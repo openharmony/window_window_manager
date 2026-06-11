@@ -5709,10 +5709,6 @@ bool ScreenSessionManager::IsPreBright(PowerStateChangeReason reason)
 bool ScreenSessionManager::DoWakeUpBegin(PowerStateChangeReason reason)
 {
     TLOGNFI(WmsLogTag::DMS, "[UL_POWER]reason: %{public}u", reason);
-    if (IsPreBright(reason)) {
-        TLOGNFI(WmsLogTag::DMS, "[UL_POWER]ap aod cannot pre bright");
-        return false;
-    }
     currentWakeUpReason_ = reason;
     // 多屏协作灭屏不通知锁屏
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_COLLABORATION) {
@@ -5794,10 +5790,6 @@ bool ScreenSessionManager::SuspendBegin(PowerStateChangeReason reason)
 bool ScreenSessionManager::DoSuspendBegin(PowerStateChangeReason reason)
 {
     TLOGNFI(WmsLogTag::DMS, "[UL_POWER]Reason: %{public}u", static_cast<uint32_t>(reason));
-    if (IsPreBright(reason)) {
-        TLOGNFI(WmsLogTag::DMS, "[UL_POWER]ap aod cannot pre bright off");
-        return false;
-    }
     gotScreenlockFingerprint_ = false;
     lastWakeUpReason_ = PowerStateChangeReason::STATE_CHANGE_REASON_INIT;
     if (reason == PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF) {
