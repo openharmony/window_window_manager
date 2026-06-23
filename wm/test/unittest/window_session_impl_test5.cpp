@@ -58,7 +58,6 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-private:
     static constexpr int32_t PERSISTENT_ID_ONE = 1;
     static constexpr int32_t PERSISTENT_ID_TWO = 2;
 };
@@ -1125,8 +1124,6 @@ HWTEST_F(WindowSessionImplTest5, BeginRSTransaction, Function | SmallTest | Leve
     EXPECT_TRUE(g_errLog.find("rsTransaction is null") != std::string::npos);
     
     std::shared_ptr<RSTransaction> rsTransaction1 = std::make_shared<RSTransaction>();
-    rsTransaction1->syncId_ = 1;
-    rsTransaction1->isOpenSyncTransaction_ = true;
     window->BeginRSTransaction(rsTransaction1);
     EXPECT_TRUE(g_errLog.find("rsTransaction begin") != std::string::npos);
     GTEST_LOG_(INFO) << "WindowSessionImplTest5: BeginRSTransaction end";
@@ -2484,7 +2481,7 @@ HWTEST_F(WindowSessionImplTest5, GetListeners, TestSize.Level1)
     window->property_->SetPersistentId(502);
     window->windowTitleChangeListeners_[502] = std::vector<sptr<IWindowTitleChangeListener>>();
  
-    ASSERT_FALSE(window_->windowTitleChangeListeners_[window_->GetPersistentId()].empty());
+    ASSERT_FALSE(window->windowTitleChangeListeners_[window->GetPersistentId()].empty());
 }
  
 /**
@@ -2652,7 +2649,7 @@ HWTEST_F(WindowSessionImplTest5, GetTitleOrHotAreasListeners, TestSize.Level1)
     window->property_->SetPersistentId(502);
     window->windowTitleOrHotAreasListeners_[502] = std::vector<sptr<IWindowTitleOrHotAreasListener>>();
  
-    ASSERT_FALSE(window_->windowTitleOrHotAreasListeners_[window_->GetPersistentId()].empty());
+    ASSERT_FALSE(window->windowTitleOrHotAreasListeners_[window->GetPersistentId()].empty());
 }
  
 /**

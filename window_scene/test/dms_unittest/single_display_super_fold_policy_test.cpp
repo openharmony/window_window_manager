@@ -133,7 +133,7 @@ HWTEST_F(SingleDisplaySuperFoldPolicyTest, GetSupportedFoldStatus, TestSize.Leve
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SingleDisplaySuperFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
 
-    EXPECT_THAT(policy.GetSupportedFoldStatus(),
+    EXPECT_THAT(policy.GetSupportedFoldStates(),
         UnorderedElementsAre(
             FoldStatus::EXPAND,
             FoldStatus::FOLDED,
@@ -552,7 +552,7 @@ HWTEST_F(SingleDisplaySuperFoldPolicyTest, ChangeScreenDisplayModeInnerTest_fold
     policy.currentDisplayMode_ = FoldDisplayMode::COORDINATION;
     ScreenId screenId = 0;
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr();
-    ScreenSessionManager::GetInstance().screenSessionMap_.insert({screenid, screenSession});
+    ScreenSessionManager::GetInstance().screenSessionMap_.insert({screenId, screenSession});
     FoldDisplayMode displayMode = FoldDisplayMode::FULL;
     DisplayModeChangeReason reason = DisplayModeChangeReason::DEFAULT;
     policy.ChangeScreenDisplayModeInner(displayMode, reason);

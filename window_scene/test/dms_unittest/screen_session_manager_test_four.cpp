@@ -51,8 +51,6 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
-const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
-}
 class ScreenSessionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();

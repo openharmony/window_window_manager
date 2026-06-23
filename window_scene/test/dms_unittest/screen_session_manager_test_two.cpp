@@ -269,7 +269,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDisplayNodeSecurity, TestSize.Level1)
     screenSession->CreateDisplayNode(rsConfig);
     screenSession->SetDisplayNodeSecurity();
     EXPECT_TRUE(g_errLog.find("SetSecurityDisplay success") != std::string::npos);
-    ssm->DestroyVirtualScreen(screenId);
+    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**
@@ -281,39 +281,11 @@ HWTEST_F(ScreenSessionManagerTest, GetForegroundConcurrentUser2, TestSize.Level1
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->displayConcurrentUserMap_.clear();
-    std::shared_ptr<ScreenSessionManager::UserInfo> userInfo = nullptr;
-    ssm_->GetForegroundConcurrentUser(100, userInfo);
-    EXPECT_EQ(userInfo, nullptr);
+    int32_t userId = ssm_->GetForegroundConcurrentUser(1000);
+    EXPECT_EQ(userId, -1);
     ssm_->displayConcurrentUserMap_[1000][100] = {true, 0};
-    ssm_->GetForegroundConcurrentUser(100, userInfo);
-    ASSERT_NE(userInfo, nullptr);
-    EXPECT_EQ(true, userInfo->isForeground);
-}
-
-/**
- * @tc.name: SetVirtualScreenUser
- * @tc.desc: SetVirtualScreenUser
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenUser, TestSize.Level1)
-{
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    ASSERT_NE(ssm_, nullptr);
-    ssm_->displayConcurrentUserMap_.clear();
-    sptr<ScreenSession> screenSession = new ScreenSession(1000, ScreenProperty(), 0);
-    int32_t userId = 100;
-    ssm_->SetVirtualScreenUser(screenSession, userId);
-    EXPECT_TRUE(g_errLog.find("invalid params") != std::string::npos);
-    g_errLog.clear();
-    ssm_->displayConcurrentUserMap_[1000][userId] = {false, 0};
-    ssm_->SetVirtualScreenUser(screenSession, userId);
-    EXPECT_TRUE(g_errLog.find("invalid params") != std::string::npos);
-    g_errLog.clear();
-    ssm_->displayConcurrentUserMap_[1000][userId] = {true, 0};
-    ssm_->SetVirtualScreenUser(screenSession, userId);
-    EXPECT_TRUE(g_errLog.find("invalid params") == std::string::npos);
-    g_errLog.clear();
+    userId = ssm_->GetForegroundConcurrentUser(1000);
+    EXPECT_EQ(userId, 100);
 }
 
 /**
@@ -535,17 +507,14 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode001, TestSize.Level1)
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
 
     MockAccesstokenKit::MockIsSystemApp(false);
-    MockSessionPermission::MockIsStarByHdcd(true);
     auto ret = ssm_->SetScreenActiveMode(screenId, 0);
     EXPECT_EQ(DMError::DM_ERROR_NOT_SYSTEM_APP, ret);
 
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(false);
     ret = ssm_->SetScreenActiveMode(screenId, 0);
     EXPECT_EQ(DMError::DM_ERROR_NOT_SYSTEM_APP, ret);
 
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     ssm_->DestroyVirtualScreen(screenId);
 #endif
 }
@@ -559,7 +528,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode002, TestSize.Level1)
 {
 #ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     ssm_->DestroyVirtualScreen(screenId);
     ScreenId screenId = -1ULL;
     ASSERT_NE(ssm_, nullptr);
@@ -577,7 +545,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode003, TestSize.Level1)
 {
 #ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     ssm_->DestroyVirtualScreen(screenId);
     ScreenId screenId = 501;
     ASSERT_NE(ssm_, nullptr);
@@ -595,7 +562,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode004, TestSize.Level1)
 {
 #ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
     screenSession = nullptr;
     auto ret = ssm_->SetScreenActiveMode(1050, 0);
@@ -615,7 +581,6 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenActiveMode005, TestSize.Level1)
 {
 #ifdef WM_SCREEN_ACTIVE_MODE_ENABLE
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     sptr<IDisplayManagerAgent> displayManagerAgent = new(std::nothrow) DisplayManagerAgentDefault();
     ASSERT_NE(displayManagerAgent, nullptr);
     VirtualScreenOption virtualOption;
@@ -636,7 +601,6 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange001, TestSize.
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     sptr<ScreenSession> screenSession = nullptr;
     RSScreenModeInfo screenMode;
     ssm_->UpdateSessionByActiveModeChange(screenSession, screenMode);
@@ -654,7 +618,6 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange002, TestSize.
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     RSScreenModeInfo screenMode;
     sptr<ScreenSession> screenSession = ssm_->GetOrCreateScreenSession(1050);
     ssm_->UpdateSessionByActiveModeChange(screenSession, screenMode);
@@ -662,8 +625,6 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange002, TestSize.
     g_errLog.clear();
 }
 
-
-RecoverScreenActiveMode
 /**
  * @tc.name: RecoverScreenActiveMode001
  * @tc.desc: RecoverScreenActiveMode001
@@ -674,7 +635,7 @@ HWTEST_F(ScreenSessionManagerTest, RecoverScreenActiveMode001, TestSize.Level1)
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
     ScreenId screenId = 1058;
-    ssm_->RecoverScreenActiveMode(screenId, 0);
+    ssm_->RecoverScreenActiveMode(screenId);
     EXPECT_TRUE(g_errLog.find("screenSession is null") != std::string::npos);
     g_errLog.clear();
 }
@@ -697,11 +658,9 @@ HWTEST_F(ScreenSessionManagerTest, RecoverScreenActiveMode002, TestSize.Level1)
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     ssm_->screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
     MockAccesstokenKit::MockIsSystemApp(false);
-    MockSessionPermission::MockIsStarByHdcd(false);
-    ssm_->RecoverScreenActiveMode(rsScreenId, 0);
+    ssm_->RecoverScreenActiveMode(rsScreenId);
     EXPECT_TRUE(g_errLog.find("recover error") != std::string::npos);
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockSessionPermission::MockIsStarByHdcd(true);
     g_errLog.clear();
 }
 
@@ -896,7 +855,7 @@ HWTEST_F(ScreenSessionManagerTest, CreateExtendVirtualScreen001, TestSize.Level1
 
     sptr<ScreenSession> virtualScreenSession = ssm_->GetScreenSession(virtualScreenId);
     virtualScreenSession->SetScreenType(ScreenType::REAL);
-    ssm_->CreateExtendVirtualScreen(virtualScreenSession->GetRSScreenId());
+    ssm_->CreateExtendVirtualScreen(0, virtualScreenSession->GetRSScreenId());
     ssm_->DestroyVirtualScreen(virtualScreenId);
 }
 
@@ -918,8 +877,9 @@ HWTEST_F(ScreenSessionManagerTest, IsPhysicalExtendScreenInUse001, TestSize.Leve
     ASSERT_NE(virtualScreenSession, nullptr);
 
     virtualScreenSession->SetScreenType(ScreenType::VIRTUAL);
-    DMError ret = ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(), 100);
-    EXPECT_EQ(ret, DMError::DM_ERROR_NULLPTR);
+    bool isInUse = false;
+    ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(), 100, isInUse);
+    EXPECT_FALSE(isInUse);
 
     VirtualScreenOption physicalOption;
     physicalOption.name_ = "createPhysicalOption";
@@ -929,14 +889,16 @@ HWTEST_F(ScreenSessionManagerTest, IsPhysicalExtendScreenInUse001, TestSize.Leve
 
     physicalScreenSession->SetScreenType(ScreenType::REAL);
     physicalScreenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
-    DMError ret1 = ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(),
-        physicalScreenSession->GetRSScreenId());
-    EXPECT_EQ(ret1, DMError::DM_OK);
+    isInUse = false;
+    ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(),
+        physicalScreenSession->GetRSScreenId(), isInUse);
+    EXPECT_TRUE(isInUse);
 
     physicalScreenSession->SetScreenType(ScreenType::VIRTUAL);
-    DMError ret2 = ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(),
-        physicalScreenSession->GetRSScreenId());
-    EXPECT_EQ(ret2, DMError::DM_ERROR_UNKNOWN);
+    isInUse = false;
+    ssm_->IsPhysicalExtendScreenInUse(virtualScreenSession->GetRSScreenId(),
+        physicalScreenSession->GetRSScreenId(), isInUse);
+    EXPECT_FALSE(isInUse);
 
     ssm_->DestroyVirtualScreen(virtualScreenId);
     ssm_->DestroyVirtualScreen(physicalScreenId);
@@ -1442,7 +1404,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation01, Function | Sm
     ScreenId screenId = 0;
     bool enable = true;
     MockAccesstokenKit::MockIsSACalling(false);
-    MockAccesstokenKit::MockIsSASystemApp(false);
+    MockAccesstokenKit::MockIsSystemApp(false);
     auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
     EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PERMISSION);
 }
@@ -1457,7 +1419,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation02, Function | Sm
     ScreenId screenId = 0;
     bool enable = true;
     MockAccesstokenKit::MockIsSACalling(false);
-    MockAccesstokenKit::MockIsSASystemApp(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
     auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
     EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
@@ -1472,7 +1434,7 @@ HWTEST_F(ScreenSessionManagerTest, SetVirtualScreenAutoRotation03, Function | Sm
     ScreenId screenId = 0;
     bool enable = true;
     MockAccesstokenKit::MockIsSACalling(true);
-    MockAccesstokenKit::MockIsSASystemApp(true);
+    MockAccesstokenKit::MockIsSystemApp(true);
     auto ret = ssm_->SetVirtualScreenAutoRotation(screenId, enable);
     EXPECT_EQ(ret, DMError::DM_ERROR_INVALID_PARAM);
 }
@@ -1811,7 +1773,6 @@ HWTEST_F(ScreenSessionManagerTest, TryToCancelScreenOff01, TestSize.Level1)
     g_errLog.clear();
     MockAccesstokenKit::MockIsSACalling(false);
     MockAccesstokenKit::MockIsSystemApp(false);
-    MockSessionPermission::MockIsStarByHdcd(false);
     ssm_->TryToCancelScreenOff();
     EXPECT_TRUE(g_errLog.find("Permission denied!") != std::string::npos);
 }
@@ -1883,7 +1844,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
  * @tc.desc: UpdateAvailableArea WhenDisplayAdd not notify all
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
+HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea03, TestSize.Level1)
 {
     g_errLog.clear();
     LOG_SetCallback(MyLogCallback);
@@ -1897,7 +1858,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateAvailableArea02, TestSize.Level1)
     ssm_->screenSessionMap_[screenId] = screenSession;
     ssm_->UpdateAvailableArea(screenId, area);
     auto screenSession1 = ssm_->GetScreenSession(screenId);
-    EXPECT_EQ(screenSession1->GetAvailabelArea(), area);
+    EXPECT_EQ(screenSession1->GetAvailableArea(), area);
     EXPECT_FALSE(ssm_->needWaitAvailableArea_);
     g_errLog.clear();
     ssm_->SetPcStatus(temp);
@@ -2121,7 +2082,7 @@ HWTEST_F(ScreenSessionManagerTest, RegisterSettingDuringCallStateObserver, Funct
  * @tc.desc: DoAodExitAndSetPowerTest
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenSessionManagerTest, DoAodExitAndSetPowerTest, TestSize.level1)
+HWTEST_F(ScreenSessionManagerTest, DoAodExitAndSetPowerTest, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
 
@@ -2135,7 +2096,7 @@ HWTEST_F(ScreenSessionManagerTest, DoAodExitAndSetPowerTest, TestSize.level1)
     while (!powerState && retry < maxRetry) {
         ssm_->DoAodExitAndSetPower(0, ScreenPowerStatus::POWER_STATUS_OFF);
         usleep(100000);
-        powerState = ssm_->GetScreenPower(0) == ScreenPowerStatE::POWER_OFF;
+        powerState = ssm_->GetScreenPower(0) == ScreenPowerState::POWER_OFF;
         if (powerState)
         {
             break;
@@ -2240,7 +2201,7 @@ HWTEST_F(ScreenSessionManagerTest, SetDuringCallState, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, GetOldDisplayModeRotation, TestSize.Level1)
 {
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
-        ssm_->screenPowerTaskScheduler_, ssm_->taskScheduler_);
+        ssm_->screenPowerTaskScheduler_);
     ASSERT_NE(foldController, nullptr);
     DisplayPhysicalResolution physicalSize_full;
     physicalSize_full.foldDisplayMode_ = FoldDisplayMode::FULL;
@@ -2309,7 +2270,7 @@ HWTEST_F(ScreenSessionManagerTest, SwapScreenWeightAndHeight, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, HandleScreenRotationAndBoundsWhenSetClient, TestSize.Level1)
 {
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
-        ssm_->screenPowerTaskScheduler_, ssm_->taskScheduler_);
+        ssm_->screenPowerTaskScheduler_);
     ASSERT_NE(foldController, nullptr);
     auto foldPolicy = foldController->GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
     ASSERT_NE(foldPolicy, nullptr);
@@ -2521,6 +2482,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchUserDealUserDisplayNode, TestSize.Level
 {
     ASSERT_NE(ssm_, nullptr);
     int32_t userId = 100;
+    int32_t oldUserId = 0;
     ScreenId sc1 = 1;
     ScreenId sc2 = 2;
     ScreenId sc3 = 3;
@@ -2547,7 +2509,7 @@ HWTEST_F(ScreenSessionManagerTest, SwitchUserDealUserDisplayNode, TestSize.Level
     auto presetNode = std::make_shared<RSDisplayNode>(config);
     userNodeMap[sc1] = presetNode;
     userNodeMap[sc4] = presetNode;
-    ssm_->SwitchUserDealUserDisplayNode(userId);
+    ssm_->SwitchUserDealUserDisplayNode(userId, oldUserId);
 
     // 验证结果
     auto& resultMap = ssm_->userDisplayNodeMap_[userId];
@@ -2589,6 +2551,7 @@ HWTEST_F(ScreenSessionManagerTest, AddUserDisplayNodeOnTree, TestSize.Level1)
 HWTEST_F(ScreenSessionManagerTest, RemoveUserDisplayNodeFromTree, TestSize.Level1)
 {
     int32_t userId = 100;
+    int32_t oldUserId = 0;
     ScreenId screenId1 = 1;
     ScreenId screenId2 = 2;
     RSDisplayNodeConfig config;
@@ -2598,7 +2561,7 @@ HWTEST_F(ScreenSessionManagerTest, RemoveUserDisplayNodeFromTree, TestSize.Level
     ssm_->userDisplayNodeMap_[userId].insert_or_assign(screenId2, node2);
     ssm_->AddUserDisplayNodeOnTree(userId);
     g_errLog.clear();
-    ssm_->RemoveUserDisplayNodeFromTree(userId);
+    ssm_->RemoveUserDisplayNodeFromTree(userId, oldUserId);
     EXPECT_TRUE(g_errLog.find("userId: ") != std::string::npos);
     g_errLog.clear();
 }
@@ -2646,7 +2609,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleNewUserDisplayNode, TestSize.Level1) {
     float position = 5.0f;
     oldUserNode->SetPositionZ(position);
     newUserNode->SetPositionZ(position);
-    ssm_->HandleNewUserDisplayNode(newUserId, false);
+    ssm_->HandleNewUserDisplayNode(newUserId, oldUserId, false);
     EXPECT_TRUE(g_errLog.find("deal with userDisplayNode") != std::string::npos);
     g_errLog.clear();
     EXPECT_TRUE(ssm_->userDisplayNodeMap_[newUserId].size() > 0);
@@ -2672,7 +2635,7 @@ HWTEST_F(ScreenSessionManagerTest, HandleFoldDeviceScreenConnect, TestSize.Level
     session = sptr<ScreenSession>::MakeSptr();
     ssm_->clientProxy_ = nullptr;
     ssm_->HandleFoldDeviceScreenConnect(screenId, session, false, screenEvent);
-    EXPECT_FALSE(g_errLog.HandleFoldDeviceScreenConnect("event: connect") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("event: connect") != std::string::npos);
     g_errLog.clear();
  
     ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
@@ -2705,9 +2668,9 @@ HWTEST_F(ScreenSessionManagerTest, FirstSCBConnect, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     ssm_->SetFirstSCBConnect(true);
-    EXPECT_TRUE(ssm_->GetFirstSCBConnect());
+    EXPECT_TRUE(ssm_->IsFirstSCBConnect());
     ssm_->SetFirstSCBConnect(false);
-    EXPECT_FALSE(ssm_->GetFirstSCBConnect());
+    EXPECT_FALSE(ssm_->IsFirstSCBConnect());
 }
 /**
  * @tc.name: HandleResolutionEffectChangeWhenRotate
@@ -3409,19 +3372,19 @@ HWTEST_F(ScreenSessionManagerTest, CheckNeedNotifyTest, TestSize.Level1)
     std::vector<DisplayId> displayIds = {1, 2, 3};
     std::unordered_map<DisplayId, bool> privacyBundleDisplayId;
     
-    bool result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    bool result = ssm_->CheckNeedNotify(displayIds, privacyBundleDisplayId);
     EXPECT_FALSE(result);
 
     privacyBundleDisplayId = {{4, true}, {5, false}};
-    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    result = ssm_->CheckNeedNotify(displayIds, privacyBundleDisplayId);
     EXPECT_FALSE(result);
 
     privacyBundleDisplayId = {{1, true}, {2, false}};
-    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    result = ssm_->CheckNeedNotify(displayIds, privacyBundleDisplayId);
     EXPECT_TRUE(result);
 
     privacyBundleDisplayId = {{1, true}, {2, true}};
-    result = ssm_->CheckNeedNotify(dispalyIds, privacyBundleDisplayId);
+    result = ssm_->CheckNeedNotify(displayIds, privacyBundleDisplayId);
     EXPECT_TRUE(result);
 }
 

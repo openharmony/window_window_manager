@@ -95,7 +95,6 @@ void ScreenSessionManagerClientTest::SetUp()
     {
         std::lock_guard<std::mutex> lock(screenSessionManagerClient_->screenSessionMapMutex_);
         screenSessionManagerClient_->screenSessionMap_.clear();
-        screenSessionManagerClient_->extraScreenSessionMap_.clear();
     }
 }
 
@@ -104,7 +103,6 @@ void ScreenSessionManagerClientTest::TearDown()
     {
         std::lock_guard<std::mutex> lock(screenSessionManagerClient_->screenSessionMapMutex_);
         screenSessionManagerClient_->screenSessionMap_.clear();
-        screenSessionManagerClient_->extraScreenSessionMap_.clear();
     }
     screenSessionManagerClient_ = nullptr;
 }
@@ -180,29 +178,6 @@ HWTEST_F(ScreenSessionManagerClientTest, GetScreenSession, TestSize.Level1)
 
     screenSessionManagerClient_->screenSessionMap_.clear();
     screenSession = screenSessionManagerClient_->GetScreenSession(screenId);
-    EXPECT_EQ(screenSession, nullptr);
-}
-
-/**
- * @tc.name: GetScreenSessionExtra
- * @tc.desc: GetScreenSessionExtra test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerClientTest, GetScreenSessionExtra, TestSize.Level1)
-{
-    ScreenId screenId = 0;
-    sptr<ScreenSession> screenSession = nullptr;
-    screenSession = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
-    EXPECT_EQ(screenSession, nullptr);
-
-    screenSession = new ScreenSession(0, ScreenProperty(), 0);
-    screenSessionManagerClient_->extraScreenSessionMap_.emplace(screenId, screenSession);
-
-    auto screenSession2 = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
-    EXPECT_EQ(screenSession2, screenSession);
-
-    screenSessionManagerClient_->extraScreenSessionMap_.clear();
-    screenSession = screenSessionManagerClient_->GetScreenSessionExtra(screenId);
     EXPECT_EQ(screenSession, nullptr);
 }
 
@@ -710,7 +685,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnFoldPropertyChanged, TestSize.Level1)
     FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
 
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->OnFoldPropertyChanged(screenId, property, reason, displayMode, midProperty);
+    screenSessionManagerClient_->OnFoldPropertyChange(screenId, property, reason, displayMode, midProperty);
 }
 
 /**
@@ -1492,7 +1467,8 @@ HWTEST_F(ScreenSessionManagerClientTest, SetPrivacyStateByDisplayId03, TestSize.
     DisplayId id = 0;
     bool hasPrivate = false;
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->SetPrivacyStateByDisplayId(id, hasPrivate);
+    std::unordered_map<DisplayId, bool> privacyBundleDisplayId = {{id, hasPrivate}};
+    screenSessionManagerClient_->SetPrivacyStateByDisplayId(privacyBundleDisplayId);
 }
 
 /**
@@ -1579,7 +1555,8 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenPrivacyWindowList02, TestSize.
     });
     DisplayManager::GetInstance().RegisterPrivateWindowListChangeListener(listener_);
 
-    screenSessionManagerClient_->SetScreenPrivacyWindowList(id, privacyWindowList);
+    std::unordered_map<DisplayId, std::vector<std::string>> privacyBundleList = {{id, privacyWindowList}};
+    screenSessionManagerClient_->SetScreenPrivacyWindowList(privacyBundleList);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
@@ -1765,7 +1742,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnMainDisplayNodeChange, TestSize.Level
     auto ret = screenSessionManagerClient_->OnMainDisplayNodeChange(53, 50, 50);
     EXPECT_EQ(ret, false);
 
-    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxyMock>::MakeSptr();
+    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxy>::MakeSptr(new IRemoteObjectMocker());
     RSDisplayNodeConfig config;
     std::shared_ptr<RSDisplayNode> node1 = std::make_shared<RSDisplayNode>(config);
     std::shared_ptr<RSDisplayNode> node2 = std::make_shared<RSDisplayNode>(config);
@@ -1821,31 +1798,6 @@ HWTEST_F(ScreenSessionManagerClientTest, SetScreenCombination, TestSize.Level2)
     client->SetScreenCombination(50, 51, combination);
     client->SetScreenCombination(50, 50, combination);
     EXPECT_NE(client, nullptr);
-}
-
-/**
- * @tc.name: ExtraDestroyScreen
- * @tc.desc: ExtraDestroyScreen test
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionManagerClientTest, ExtraDestroyScreen, TestSize.Level2)
-{
-    logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-
-    sptr<ScreenSessionManagerClient> client = new ScreenSessionManagerClient();
-    ASSERT_TRUE(client != nullptr);
-    client->ConnectToServer();
-
-    ScreenId screenId = 1;
-    sptr<ScreenSession> screenSession1 = new ScreenSession(screenId, ScreenProperty(), 0);
-    ASSERT_NE(nullptr, screenSession1);
-    client->extraScreenSessionMap_.emplace(screenId, screenSession1);
-
-    ScreenId screenId11 = 11;
-    client->extraScreenSessionMap_.emplace(screenId11, nullptr);
-    client->ExtraDestroyScreen(screenId11);
-    EXPECT_TRUE(logMsg.find("extra screenSession is null") != std::string::npos);
 }
 
 /**
@@ -1968,7 +1920,7 @@ HWTEST_F(ScreenSessionManagerClientTest, CreateTempScreenSession, TestSize.Level
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(50, 50, "test1", ScreenProperty(), node1);
     ASSERT_NE(nullptr, screenSession);
     screenSessionManagerClient_->screenSessionMap_[50] = screenSession;
-    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxyMock>::MakeSptr();
+    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxy>::MakeSptr(new IRemoteObjectMocker());
  
     auto tempScreenSession = screenSessionManagerClient_->CreateTempScreenSession(50, 51, node2);
     ASSERT_NE(nullptr, tempScreenSession);
@@ -2289,7 +2241,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenPropertyChanged, TestSize.Level
     bounds.rect_.width_ = 1344;
     bounds.rect_.height_ = 2772;
     float rotation = 0.0;
-    sptr<ScreenSession> screenSession1 = sptr<ScreenSession>::MakeSptr(50, ScreenProperty(), 0));
+    sptr<ScreenSession> screenSession1 = sptr<ScreenSession>::MakeSptr(50, ScreenProperty(), 0);
     screenSessionManagerClient_->screenSessionMap_[50] = screenSession1;
     sptr<ScreenSession> screenSession2 = nullptr;
     screenSessionManagerClient_->screenSessionMap_[51] = screenSession2;
@@ -2306,7 +2258,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnScreenPropertyChanged, TestSize.Level
 
     screenSessionManagerClient_->ConnectToServer();
     EXPECT_NE(screenSessionManagerClient_->screenSessionManager_, nullptr);
-    screenSessionManagerClient_->screenSessionManager_ = sptr::MakeSptr();
+    screenSessionManagerClient_->screenSessionManager_ = sptr<ScreenSessionManagerProxy>::MakeSptr(new IRemoteObjectMocker());
     screenSessionManagerClient_->OnScreenPropertyChanged(50, rotation, bounds);
 
     screenSessionManagerClient_->currentstate_ = SuperFoldStatus::KEYBOARD;
@@ -2337,7 +2289,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged01, TestSize.Level1)
     logMsg.clear();
 
     screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::UNDEFINED);
-    screenSession = sptr::MakeSptr(screenId, screenProperty, 0);
+    screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, 0);
     screenSessionManagerClient_->screenSessionMap_.erase(screenId);
     screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
     screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
@@ -2358,7 +2310,7 @@ HWTEST_F(ScreenSessionManagerClientTest, OnPropertyChanged02, TestSize.Level1)
     sptr<ScreenSession> screenSession = nullptr;
     ScreenPropertyChangeReason reason = ScreenPropertyChangeReason::UNDEFINED;
     screenProperty.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED);
-    screenSession = sptr::MakeSptr(screenId, screenProperty, 0);
+    screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, 0);
     screenSessionManagerClient_->screenSessionMap_.erase(screenId);
     screenSessionManagerClient_->screenSessionMap_.insert({screenId, screenSession});
     screenSessionManagerClient_->OnPropertyChanged(screenId, screenProperty, reason);
@@ -2459,14 +2411,14 @@ HWTEST_F(ScreenSessionManagerClientTest, ProcPropertyChangedForSuperFold, TestSi
         bool isInfoLog;
     };
 
-    std::vector testCases = {
+    std::vector<TestCase> testCases = {
         { SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED, "handle extend change to half fold", true },
         { SuperFoldStatusChangeEvents::ANGLE_CHANGE_EXPANDED, "handle half fold change to expanded", true },
         { SuperFoldStatusChangeEvents::KEYBOARD_ON, "handle keyboard on", true },
         { SuperFoldStatusChangeEvents::KEYBOARD_OFF, "handle keyboard off", true },
         { SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON, "handle system keyboard on", true },
         { SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF, "handle system keyboard off", true },
-        { static_cast(999), "nothing to handle changeEvent=", false },
+        { static_cast<SuperFoldStatusChangeEvents>(999), "nothing to handle changeEvent=", false },
     };
 
     eventPara.SetCurrentValidHeight(1080);

@@ -143,7 +143,8 @@ HWTEST_F(SceneSessionManagerTest3, ConfigWindowEffect, TestSize.Level1)
 {
     WindowSceneConfig::ConfigItem* item = new (std::nothrow) WindowSceneConfig::ConfigItem;
     ASSERT_NE(nullptr, item);
-    ssm_->ConfigWindowEffect(*item);
+    AppWindowSceneConfig appWindowSceneConfig;
+    ssm_->ConfigWindowEffect(*item, appWindowSceneConfig);
     delete item;
 }
 
@@ -968,7 +969,7 @@ HWTEST_F(SceneSessionManagerTest3, IsSameDisplayGroupId02, TestSize.Level1)
 HWTEST_F(SceneSessionManagerTest3, GetWindowSceneConfig, TestSize.Level1)
 {
     AppWindowSceneConfig appWindowSceneConfig_ = ssm_->GetWindowSceneConfig();
-    EXPECT_EQ(appWindowSceneConfig.backgroundScreenLock_, ssm_->appWindowSceneConfig_.backgroundScreenLock_);
+    EXPECT_EQ(appWindowSceneConfig_.backgroundScreenLock_, ssm_->appWindowSceneConfig_.backgroundScreenLock_);
 }
 
 /**
@@ -1286,8 +1287,8 @@ HWTEST_F(SceneSessionManagerTest3, UpdateForceHideState, TestSize.Level1)
     SessionInfo info;
     info.abilityName_ = "UpdateForceHideState";
     info.bundleName_ = "UpdateForceHideState";
-    sptr sceneSession = sptr::MakeSptr(info, nullptr);
-    sptr property = sptr::MakeSptr();
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ssm_->systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
     property->SetHideNonSystemFloatingWindows(true);
     sceneSession->property_->windowMode_ = WindowMode::WINDOW_MODE_PIP;

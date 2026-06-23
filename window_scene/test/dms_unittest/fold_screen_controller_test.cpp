@@ -74,7 +74,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         DisplayDeviceType productType = DisplayDeviceType::SINGLE_DISPLAY_DEVICE;
         auto ret = fsc_.GetFoldScreenPolicy(productType);
@@ -102,7 +102,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         FoldDisplayMode displayMode = FoldDisplayMode::FULL;
@@ -122,7 +122,7 @@ namespace {
         }
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
@@ -146,7 +146,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         bool locked = false;
@@ -163,7 +163,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         bool locked = false;
@@ -180,7 +180,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
         fsc_.foldScreenPolicy_ = nullptr;
         DMError ret = fsc_.ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
         ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
@@ -196,18 +196,18 @@ namespace {
         std::recursive_mutex mutex;
         LOG_SetCallback(MyLogCallback);
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         bool wasFoldStatusLocked = fsc_.foldScreenPolicy_->GetPhysicalFoldLockFlag();
-        FoldStatus previousForceFoldStatus = fsc_.foldScreenPolicy_->GetForceFoldStatus();
+        FoldStatus previousForceFoldStatus = fsc_.foldScreenPolicy_->GetForcedFoldStatus();
         DMError ret = fsc_.ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
         if (ret == DMError::DM_OK) {
             ASSERT_EQ(fsc_.foldScreenPolicy_->GetPhysicalFoldLockFlag(), true);
-            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForceFoldStatus(), FoldStatus::FOLDED);
+            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForcedFoldStatus(), FoldStatus::FOLDED);
             fsc_.RestorePhysicalFoldStatus();
         } else {
             ASSERT_EQ(fsc_.foldScreenPolicy_->GetPhysicalFoldLockFlag(), wasFoldStatusLocked);
-            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForceFoldStatus(), previousForceFoldStatus);
+            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForcedFoldStatus(), previousForceFoldStatus);
         }
     }
 
@@ -220,7 +220,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
         fsc_.foldScreenPolicy_ = nullptr;
         DMError ret = fsc_.RestorePhysicalFoldStatus();
         ASSERT_EQ(ret, DMError::DM_ERROR_NULLPTR);
@@ -236,20 +236,20 @@ namespace {
         std::recursive_mutex mutex;
         LOG_SetCallback(MyLogCallback);
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         bool wasFoldStatusLocked = fsc_.foldScreenPolicy_->GetPhysicalFoldLockFlag();
-        FoldStatus previousForcedFoldStatus = fsc_.foldScreenPolicy_->GetForceFoldStatus();
+        FoldStatus previousForcedFoldStatus = fsc_.foldScreenPolicy_->GetForcedFoldStatus();
         g_errLog.clear();
 
         fsc_.ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
         DMError ret = fsc_.RestorePhysicalFoldStatus();
         if (ret == DMError::DM_OK) {
             ASSERT_EQ(fsc_.foldScreenPolicy_->GetPhysicalFoldLockFlag(), false);
-            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForceFoldStatus(), FoldStatus::UNKNOWN);
+            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForcedFoldStatus(), FoldStatus::UNKNOWN);
         } else {
             ASSERT_EQ(fsc_.foldScreenPolicy_->GetPhysicalFoldLockFlag(), wasFoldStatusLocked);
-            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForceFoldStatus(), previousForcedFoldStatus);
+            ASSERT_EQ(fsc_.foldScreenPolicy_->GetForcedFoldStatus(), previousForcedFoldStatus);
         }
 
         g_errLog.clear();
@@ -264,7 +264,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
         auto wasFoldStatus = fsc_.GetFoldStatus();
         fsc_.foldScreenPolicy_ = nullptr;
         ASSERT_EQ(fsc_.GetPhysicalFoldLockFlag(), false);
@@ -280,7 +280,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
         auto wasFoldStatus = fsc_.GetFoldStatus();
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         DMError ret = fsc_.ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
@@ -300,7 +300,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         auto ret = fsc_.GetDisplayMode();
@@ -316,7 +316,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         auto ret = fsc_.GetDisplayMode();
@@ -332,7 +332,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         auto ret = fsc_.GetFoldStatus();
@@ -349,7 +349,7 @@ namespace {
         g_errLog.clear();
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         ASSERT_NE(fsc_.foldScreenPolicy_, nullptr);
@@ -357,7 +357,7 @@ namespace {
         FoldStatus wasFoldStatus = fsc_.GetFoldStatus();
         DMError ret = fsc_.ForceSetFoldStatusAndLock(FoldStatus::FOLDED);
         if (ret == DMError::DM_OK) {
-            EXPECT_EQ(fsc_.GetFoldStatus(), fsc_.foldScreenPolicy_->GetForceFoldStatus());
+            EXPECT_EQ(fsc_.GetFoldStatus(), fsc_.foldScreenPolicy_->GetForcedFoldStatus());
             EXPECT_TRUE(g_errLog.find("foldScreenPolicy_ lock fold status") == std::string::npos);
             fsc_.RestorePhysicalFoldStatus();
         } else {
@@ -375,7 +375,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         FoldStatus foldStatus = FoldStatus::HALF_FOLD;
         fsc_.foldScreenPolicy_ = nullptr;
@@ -393,7 +393,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         FoldStatus foldStatus = FoldStatus::HALF_FOLD;
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
@@ -410,7 +410,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         auto ret = fsc_.GetCurrentFoldCreaseRegion();
@@ -426,7 +426,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         auto ret = fsc_.GetCurrentFoldCreaseRegion();
@@ -442,7 +442,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         auto ret = fsc_.GetCurrentScreenId();
@@ -458,7 +458,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         auto ret = fsc_.GetCurrentScreenId();
@@ -474,7 +474,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         auto ret = fsc_.GetCurrentScreenId();
@@ -494,7 +494,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
@@ -515,7 +515,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
@@ -536,7 +536,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         bool onBootAnimation = true;
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
@@ -557,7 +557,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         fsc_.UpdateForPhyScreenPropertyChange();
@@ -573,7 +573,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         fsc_.UpdateForPhyScreenPropertyChange();
@@ -589,7 +589,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         ScreenId screenId = 1;
         int32_t command = 0;
@@ -608,7 +608,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         ScreenId screenId = 0;
         int32_t command = 1;
@@ -627,7 +627,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         bool status = false;
 
@@ -646,7 +646,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         bool status = true;
 
@@ -665,7 +665,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         FoldDisplayMode displayMode = FoldDisplayMode::UNKNOWN;
         fsc_.SetDisplayMode(displayMode);
@@ -683,7 +683,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         FoldDisplayMode displayMode = FoldDisplayMode::FULL;
         fsc_.SetDisplayMode(displayMode);
@@ -701,7 +701,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         auto ret = fsc_.GetModeChangeRunningStatus();
 
@@ -717,7 +717,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = new FoldScreenPolicy();
         fsc_.ExitCoordination();
@@ -734,7 +734,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController fsc_(mutex, taskScheduler, taskScheduler);
+        FoldScreenController fsc_(mutex, taskScheduler);
 
         fsc_.foldScreenPolicy_ = nullptr;
         fsc_.ExitCoordination();
@@ -801,7 +801,7 @@ namespace {
         //Arrange
         std::recursive_mutex displayInfoMutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController foldScreenController(displayInfoMutex, taskScheduler, taskScheduler);
+        FoldScreenController foldScreenController(displayInfoMutex, taskScheduler);
         foldScreenController.foldScreenPolicy_ = nullptr;
 
         //Act
@@ -822,7 +822,7 @@ namespace {
         //Arrange
         std::recursive_mutex displayInfoMutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController foldScreenController(displayInfoMutex, taskScheduler, taskScheduler);
+        FoldScreenController foldScreenController(displayInfoMutex, taskScheduler);
 
         //Set a mock foldScreenPolicy_
         auto foldScreenPolicy = sptr<FoldScreenPolicy>::MakeSptr();
@@ -844,7 +844,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController controller(mutex, taskScheduler, taskScheduler);
+        FoldScreenController controller(mutex, taskScheduler);
         controller.foldScreenPolicy_ = nullptr;
 
         Drawing::Rect expectedRect = {0, 0, 0, 0};
@@ -865,7 +865,7 @@ namespace {
     {
         std::recursive_mutex mutex;
         std::shared_ptr<TaskScheduler> taskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController controller(mutex, taskScheduler, taskScheduler);
+        FoldScreenController controller(mutex, taskScheduler);
         auto mockPolicy = sptr<FoldScreenPolicy>::MakeSptr();
         controller.foldScreenPolicy_ = mockPolicy;
         Drawing::Rect expectedRect = {0, 0, 0, 0};
@@ -888,8 +888,7 @@ namespace {
         LOG_SetCallback(MyLogCallback);
         std::recursive_mutex displayInfoMutex;
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler,
-            screenPowerTaskScheduler);
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
         DMRect mainScreenRegion = {0, 0, 1920, 1080};
         foldScreenController.foldScreenPolicy_ = nullptr;
 
@@ -912,8 +911,7 @@ namespace {
         LOG_SetCallback(MyLogCallback);
         std::recursive_mutex displayInfoMutex;
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler,
-            screenPowerTaskScheduler);
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
         DMRect mainScreenRegion = {0, 0, 1920, 1080};
         auto mockPolicy = sptr<FoldScreenPolicy>::MakeSptr();
         foldScreenController.foldScreenPolicy_ = mockPolicy;
@@ -935,8 +933,7 @@ namespace {
     {
         std::recursive_mutex displayInfoMutex;
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler,
-            screenPowerTaskScheduler);
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
         foldScreenController.sensorFoldStateManager_ = nullptr;
         EXPECT_FALSE(foldScreenController.GetTentMode());
     }
@@ -951,8 +948,7 @@ namespace {
     {
         std::recursive_mutex displayInfoMutex;
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = std::shared_ptr<TaskScheduler>();
-        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler,
-            screenPowerTaskScheduler);
+        FoldScreenController foldScreenController(displayInfoMutex, screenPowerTaskScheduler);
         foldScreenController.sensorFoldStateManager_ = new SensorFoldStateManager();
         foldScreenController.sensorFoldStateManager_->SetTentMode(1);
         EXPECT_TRUE(foldScreenController.GetTentMode());
@@ -966,8 +962,7 @@ namespace {
     HWTEST_F(FoldScreenControllerTest, SetIsClearingBootAnimation, TestSize.Level1)
     {
         std::recursive_mutex mutex;
-        auto fsc_ = sptr<FoldScreenController>::MakeSptr(mutex, std::shared_ptr<TaskScheduler>(),
-            std::shared_ptr<TaskScheduler>());
+        auto fsc_ = sptr<FoldScreenController>::MakeSptr(mutex, std::shared_ptr<TaskScheduler>());
         fsc_->foldScreenPolicy_ = nullptr;
         fsc_->SetIsClearingBootAnimation(false);
         fsc_->foldScreenPolicy_ = fsc_->GetFoldScreenPolicy(DisplayDeviceType::SINGLE_DISPLAY_DEVICE);
@@ -985,8 +980,7 @@ namespace {
     HWTEST_F(FoldScreenControllerTest, NotifyRunSensorFoldStateManager, TestSize.Level1)
     {
         std::recursive_mutex mutex;
-        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>(),
-            std::shared_ptr<TaskScheduler>());
+        FoldScreenController fsc_(mutex, std::shared_ptr<TaskScheduler>());
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
         fsc_.NotifyRunSensorFoldStateManager();

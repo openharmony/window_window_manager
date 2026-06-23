@@ -5101,22 +5101,22 @@ HWTEST_F(ScreenSessionTest, UpdateScbScreenPropertyForSuperFlod, TestSize.Level1
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(0, property, 0);
 
     property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_ON);
-    session->UpdateScbScreenPropertyForSuperFlod(property);
+    session->UpdateScbScreenPropertyForSuperFold(property);
     EXPECT_TRUE(g_errLog.find("handle keyboard on and keyboard succ") != std::string::npos);
     g_errLog.clear();
 
     property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::KEYBOARD_OFF);
-    session->UpdateScbScreenPropertyForSuperFlod(property);
+    session->UpdateScbScreenPropertyForSuperFold(property);
     EXPECT_TRUE(g_errLog.find("handle keyboard on and keyboard succ") != std::string::npos);
     g_errLog.clear();
 
     property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_ON);
-    session->UpdateScbScreenPropertyForSuperFlod(property);
+    session->UpdateScbScreenPropertyForSuperFold(property);
     EXPECT_TRUE(g_errLog.find("handle system keyboard on and system keyboard succ") != std::string::npos);
     g_errLog.clear();
 
     property.SetSuperFoldStatusChangeEvent(SuperFoldStatusChangeEvents::SYSTEM_KEYBOARD_OFF);
-    session->UpdateScbScreenPropertyForSuperFlod(property);
+    session->UpdateScbScreenPropertyForSuperFold(property);
     EXPECT_TRUE(g_errLog.find("handle system keyboard on and system keyboard succ") != std::string::npos);
     g_errLog.clear();
     LOG_SetCallback(nullptr);

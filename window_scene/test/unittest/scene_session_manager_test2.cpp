@@ -2228,7 +2228,7 @@ HWTEST_F(SceneSessionManagerTest2, GetFocusWindowInfoByAbilityToken_SACalling, T
     FocusChangeInfo info;
     sptr<IRemoteObject> token;
     ssm_->GetFocusWindowInfoByAbilityToken(info, token);
-    EXPECT_EQ(focusInfo.windowId_, INVALID_WINDOW_ID);
+    EXPECT_EQ(info.windowId_, INVALID_WINDOW_ID);
     MockAccesstokenKit::MockIsSACalling(true);
 }
 

@@ -51,8 +51,6 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
-const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
-}
 class ScreenSessionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -159,7 +157,7 @@ HWTEST_F(ScreenSessionManagerTest, OnScreenChangeInner, Function | SmallTest | L
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ScreenChangeReason reason = ScreenChangeReason::HWCDEAD;
     ssm->screenSessionMap_.insert(std::make_pair(id, screenSession));
-    ssm->OnScreenChangeInner(id, screenEvent, reason);
+    ssm->OnScreenChange(id, screenEvent, reason);
     ssm->screenSessionMap_.erase(50);
 }
 
