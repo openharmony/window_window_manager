@@ -269,9 +269,9 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
         }
     };
     session->SetGetStateFromManagerListener(func);
-    MockAccesstokenKit::MockAccessTokenKitRet(-1);
+    //MockAccesstokenKit::MockAccessTokenKitRet(-1);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->Foreground(property, false));
-    MockAccesstokenKit::MockAccessTokenKitRet(0);
+    //MockAccesstokenKit::MockAccessTokenKitRet(0);
 }
 
 /**
@@ -1286,7 +1286,7 @@ HWTEST_F(SceneSessionLifecycleTest, BatchPendingSessionsActivation, TestSize.Lev
     sceneSession->Session::SetBatchPendingSessionsActivationEventListener(func);
     result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos, configs);
     EXPECT_EQ(result, WSError::WS_OK);
-    MockAccesstokenKit::ChangeMockStateToInit();
+    //MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 /**
