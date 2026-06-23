@@ -115,6 +115,7 @@ DMHookInfo ScreenSessionManagerTest::CreateDefaultHookInfo()
     DMHookInfo dmHookInfo = { hookWidth, hookHeight, hookDensity, hookRotation, true, hookDisplayOrientation, true };
     return dmHookInfo;
 }
+} // namespace
 
 namespace {
 /**
