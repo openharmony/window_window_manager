@@ -105,7 +105,7 @@ HWTEST_F(SessionProxyMockTest, UpdateSessionPropertyByAction, TestSize.Level1)
 {
     MockMessageParcel::ClearAllErrorFlag();
     sptr<IRemoteObject> iRemoteObjectMocker = sptr<IRemoteObjectMocker>::MakeSptr();
-    SessionProxy* sessionProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
+    sptr<SessionProxy> sessionProxy = sptr<SessionProxy>::MakeSptr(iRemoteObjectMocker);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ASSERT_EQ(
         WMError::WM_ERROR_IPC_FAILED,

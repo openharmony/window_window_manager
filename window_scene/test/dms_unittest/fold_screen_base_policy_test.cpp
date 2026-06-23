@@ -47,7 +47,7 @@ namespace Rosen {
 namespace DMS {
 constexpr uint32_t SLEEP_TIME_US = 100000;
 
-class MockFoldScreenBasePolicy : public : MockFoldScreenBasePolicy {
+class MockFoldScreenBasePolicy : public FoldScreenBasePolicy {
 public:
     MOCK_METHOD(bool, GetModeChangeRunningStatus, (), (override));
     MOCK_METHOD(FoldStatus, GetFoldStatus, (), (override));
@@ -60,7 +60,7 @@ public:
     MOCK_METHOD(FoldStatus, GetForcedFoldStatus, (), (override, const));
 
     MOCK_METHOD(FoldDisplayMode, GetModeMatchStatus, (), (override));
-    MOCK_METHOD(const std::unordered_set<FoldStatus>&, GetSupportedFoldStates, (override, const));
+    MOCK_METHOD(const std::unordered_set<FoldStatus>&, GetSupportedFoldStates, (), (override, const));
     MOCK_METHOD(bool, IsFoldStatusSupported, (const std::unordered_set<FoldStatus>& supportedFoldStates,
     FoldStatus targetFoldStatus), (override, const));
 };
@@ -439,7 +439,7 @@ HWTEST_F(FoldScreenBasePolicyTest, SetFoldStatusAndLockControl02, TestSize.Level
     FoldStatus targetStatus = FoldStatus::UNKNOWN;
 
     EXPECT_CALL(*mockBasePolicy, GetModeChangeRunningStatus()).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*mockBasePolicy, GetSupportedFoldStatus()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
+    EXPECT_CALL(*mockBasePolicy, GetSupportedFoldStates()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
 
     EXPECT_CALL(*mockBasePolicy, IsFoldStatusSupported(testing::_, targetStatus)).Times(1).WillOnce(Return(false));
     g_logMsg.clear();
@@ -462,7 +462,7 @@ HWTEST_F(FoldScreenBasePolicyTest, SetFoldStatusAndLockControl03, TestSize.Level
     FoldScreenBasePolicy* policy = mockBasePolicy.get();
     FoldStatus targetStatus = FoldStatus::UNKNOWN;
 
-    EXPECT_CALL(*mockBasePolicy, GetModeChangeRuningStatus()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*mockBasePolicy, GetModeChangeRunningStatus()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*mockBasePolicy, GetPhysicalFoldStatus()).Times(1).WillOnce(Return(targetStatus));
     g_logMsg.clear();
     DMError ret = policy->SetFoldStatusAndLockControl(false, targetStatus);
@@ -485,8 +485,8 @@ HWTEST_F(FoldScreenBasePolicyTest, SetFoldStatusAndLockControl04, TestSize.Level
     FoldStatus oldStatus = FoldStatus::FOLDED;
     FoldStatus targetStatus = FoldStatus::UNKNOWN;
 
-    EXPECT_CALL(*mockBasePolicy, GetModeChangeRuningStatus()).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*mockBasePolicy, GetSupportedFoldStatus()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
+    EXPECT_CALL(*mockBasePolicy, GetModeChangeRunningStatus()).Times(1).WillOnce(Return(false));
+    EXPECT_CALL(*mockBasePolicy, GetSupportedFoldStates()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
 
     EXPECT_CALL(*mockBasePolicy, IsFoldStatusSupported(testing::_, targetStatus)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockBasePolicy, GetFoldStatus()).Times(1).WillOnce(Return(oldStatus));
@@ -519,7 +519,7 @@ HWTEST_F(FoldScreenBasePolicyTest, SetFoldStatusAndLockControl05, TestSize.Level
     FoldStatus physicStatus = FoldStatus::UNKNOWN;
 
     EXPECT_CALL(*mockBasePolicy, GetModeChangeRunningStatus()).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*mockBasePolicy, GetSupportedFoldStatus()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
+    EXPECT_CALL(*mockBasePolicy, GetSupportedFoldStates()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
 
     EXPECT_CALL(*mockBasePolicy, IsFoldStatusSupported(testing::_, physicStatus)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockBasePolicy, GetFoldStatus()).Times(1).WillOnce(Return(oldStatus));

@@ -16,7 +16,9 @@
 #ifndef WM_SYS_CAP_UTIL_H
 #define WM_SYS_CAP_UTIL_H
 
-#include <bundle_mgr_interface.h>
+#include <iremote_object.h>
+#include <map>
+#include <memory>
 #include <shared_mutex>
 #include <string>
 

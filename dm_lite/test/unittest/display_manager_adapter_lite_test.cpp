@@ -273,7 +273,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SyncScreenPowerState_NullProxyObject, Te
     SingletonContainer::Get<ScreenManagerAdapterLite>().displayManagerServiceProxy_ = nullptr;
     SingletonContainer::Get<ScreenManagerAdapterLite>().SyncScreenPowerState(
         ScreenPowerState::POWER_ON);
-    EXPECT_TRUE(g_logMsg.find("null proxy object") != std::string::npos)
+    EXPECT_TRUE(g_logMsg.find("null proxy object") != std::string::npos);
     SingletonContainer::Get<ScreenManagerAdapterLite>().displayManagerServiceProxy_ = proxyBak;
     LOG_SetCallback(nullptr);
     #pragma pop_macro("SCREENLESS_ENABLE")
@@ -292,7 +292,7 @@ HWTEST_F(DisplayManagerAdapterLiteTest, SyncScreenPowerState_Success, TestSize.L
     LOG_SetCallback(MyLogCallback);
     SingletonContainer::Get<ScreenManagerAdapterLite>().SyncScreenPowerState(
         ScreenPowerState::POWER_ON);
-    EXPECT_TRUE(g_logMsg.find("sync power state success") != std::string::npos)
+    EXPECT_TRUE(g_logMsg.find("sync power state success") != std::string::npos);
     LOG_SetCallback(nullptr);
     #pragma pop_macro("SCREENLESS_ENABLE")
 }

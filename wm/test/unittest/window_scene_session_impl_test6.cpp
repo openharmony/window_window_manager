@@ -970,7 +970,7 @@ HWTEST_F(WindowSceneSessionImplTest6, maximizeWhenSwitchMultiWindowIfOnlySupport
     window->windowSystemConfig_.freeMultiWindowEnable_ = true;
     window->property_->SetWindowModeSupportType(1);
     window->state_ = WindowState::STATE_SHOWN;
-    maximizeWhenSwitchMultiWindowIfOnlySupportFullScreen();
+    window->maximizeWhenSwitchMultiWindowIfOnlySupportFullScreen();
     EXPECT_EQ(window->IsLayoutFullScreen(), true);
 }
 }

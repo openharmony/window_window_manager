@@ -43,7 +43,7 @@ public:
         sptr<MoveDragProperty>&), (override));
     MOCK_METHOD(void, ProcessPointDown, (uint32_t windowId, bool isPointDown), (override));
     MOCK_METHOD(void, ProcessPointUp, (uint32_t windowId), (override));
-    MOCK_METHOD(WMError, MinimizeAllAppWindows, (DisplayId displayId), (override));
+    MOCK_METHOD(WMError, MinimizeAllAppWindows, (DisplayId displayId, int32_t excludeWindowId), (override));
     MOCK_METHOD(WMError, ToggleShownStateForAllAppWindows, (), (override));
     MOCK_METHOD(WMError, SetWindowLayoutMode, (WindowLayoutMode mode), (override));
     MOCK_METHOD(WMError, NotifyScreenshotEvent, (ScreenshotEventType type), (override));

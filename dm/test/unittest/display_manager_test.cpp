@@ -1935,7 +1935,7 @@ HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalOverflow, TestSize
     displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
     sptr<Display> display2 = new Display("displayMock", displayInfo);
     DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display2));
-    uint64_t tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
+    tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
     DisplayManager::GetInstance().pImpl_->globalDisplayTagMap_[displayId] = tag;
     DisplayManager::GetInstance().pImpl_->currentDisplayTagMap_[displayId] = tag;
     
@@ -1951,7 +1951,7 @@ HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalOverflow, TestSize
     displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
     sptr<Display> display3 = new Display("displayMock", displayInfo);
     DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display3));
-    uint64_t tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
+    tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
     DisplayManager::GetInstance().pImpl_->globalDisplayTagMap_[displayId] = tag;
     DisplayManager::GetInstance().pImpl_->currentDisplayTagMap_[displayId] = tag;
     
@@ -1967,7 +1967,7 @@ HWTEST_F(DisplayManagerTest, ConvertRelativeCoordinateToGlobalOverflow, TestSize
     displayInfo->SetDisplaySourceMode(DisplaySourceMode::MAIN);
     sptr<Display> display4 = new Display("displayMock", displayInfo);
     DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display4));
-    uint64_t tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
+    tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
     DisplayManager::GetInstance().pImpl_->globalDisplayTagMap_[displayId] = tag;
     DisplayManager::GetInstance().pImpl_->currentDisplayTagMap_[displayId] = tag;
     
@@ -2178,7 +2178,7 @@ HWTEST_F(DisplayManagerTest, ConvertGlobalCoordinateToRelativeWithDisplayIdOverf
     sptr<Display> display2 = new Display("displayMock", displayInfo);
 
     DisplayManager::GetInstance().pImpl_->displayMap_.insert(std::make_pair(displayId, display2));
-    uint64_t tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
+    tag = DisplayManager::GetInstance().pImpl_->GetCurrentTimeTagNs();
     DisplayManager::GetInstance().pImpl_->globalDisplayTagMap_[displayId] = tag;
     DisplayManager::GetInstance().pImpl_->currentDisplayTagMap_[displayId] = tag;
     

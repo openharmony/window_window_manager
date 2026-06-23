@@ -518,7 +518,7 @@ HWTEST_F(MainSessionTest, OnRestoreMainWindow03, TestSize.Level1)
     ASSERT_NE(sceneSession, nullptr);
 
     sceneSession->property_->SetIsAppSupportPhoneInPc(true);
-    subSession->RegisterIsAppBoundSystemTrayCallback(
+    subSession->RegisterIsSessionBoundedSystemTrayCallback(
         [](int32_t callingPid, uint32_t callingToken, const std::string &instanceKey) { return false; });
     WSError result = sceneSession->OnRestoreMainWindow();
     EXPECT_EQ(result, WSError::WS_ERROR_INVALID_CALLING);

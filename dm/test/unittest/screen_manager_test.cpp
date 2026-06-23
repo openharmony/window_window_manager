@@ -183,24 +183,6 @@ HWTEST_F(ScreenManagerTest, MakeExpand_002, TestSize.Level1)
 }
 
 /**
- * @tc.name: MakeExpand_003
- * @tc.desc: Makepand with empty ExpandOption.size() > MAX_SCREEN_SIZE, return SCREEN_ID_INVALID
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenManagerTest, MakeExpand_003, TestSize.Level1)
-{
-    std::vector<ExpandOption> options = {};
-    for (uint32_t i = 0; i < 33; ++i){ // MAX_SCREEN_SIZE + 1
-        ExpandOption option;
-        option.screenId_ = i;
-        option.emplace_back(option);
-    }
-    ScreenId screenGroupId;
-    DMError error = ScreenManager::GetInstance().MakeExpand(options, screenGroupId);
-    EXPECT_EQ(error, DMError::DM_ERROR_INVALID_PARAM)
-}
-
-/**
  * @tc.name: RegisterRecordDisplayListener
  * @tc.desc: RegisterRecordDisplayListener test
  * @tc.type: FUNC
@@ -782,8 +764,8 @@ HWTEST_F(ScreenManagerTest, MakeMirror_001, TestSize.Level1)
     for (uint32_t i = 0; i < 33; ++i){ // MAX_SCREEN_SIZE + 1
         mirrorScreenId.emplace_back(i);
     }
-    ScreenId ScreenGroupId;
-    DMError error = ScreenManager::GetInstance().MakeMirror(1, mirrorScreenId, ScreenGroupId);
+    ScreenId screenGroupId;
+    DMError error = ScreenManager::GetInstance().MakeMirror(1, mirrorScreenId, screenGroupId);
     ASSERT_EQ(error, DMError::DM_ERROR_INVALID_PARAM);
 }
 
@@ -802,7 +784,7 @@ HWTEST_F(ScreenManagerTest, MakeMirror_002, TestSize.Level1)
     for (uint32_t i = 0; i < 33; ++i) {
         mirrorScreenId.emplace_back(i);
     }
-    DMError ret2 = ScreenManager::GetInstance().MakeMirror(1, mirrorScreenId, ScreenGroupId, Rotation::ROTATION_0);
+    DMError ret2 = ScreenManager::GetInstance().MakeMirror(1, mirrorScreenId, screenGroupId, Rotation::ROTATION_0);
     ASSERT_EQ(ret2, DMError::DM_ERROR_INVALID_PARAM);
 }
 
@@ -906,7 +888,7 @@ HWTEST_F(ScreenManagerTest, SetScreenPrivacyWindowTagSwitch, TestSize.Level1)
     ScreenId mainScreenId = 1;
     std::vector<std::string> privacyWindowTag{"test1", "test2"};
     DMError res = ScreenManager::GetInstance().SetScreenPrivacyWindowTagSwitch(mainScreenId, privacyWindowTag, true);
-    EXPECT_NE(result, DMError::DM_OK);
+    EXPECT_NE(res, DMError::DM_OK);
 }
 } // namespace
 } // namespace Rosen

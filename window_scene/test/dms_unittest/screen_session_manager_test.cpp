@@ -25,7 +25,6 @@
 #include "fold_screen_state_internel.h"
 #include "common_test_utils.h"
 #include "iremote_object_mocker.h"
-#include "os_account_manager.h"
 #include "screen_session_manager_client.h"
 #include "../mock/mock_accesstoken_kit.h"
 #include "test_client.h"
@@ -50,8 +49,6 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
     const char *msg)
 {
     g_logMsg = msg;
-}
-const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
 }
 class ScreenSessionManagerTest : public testing::Test {
 public:
@@ -157,7 +154,7 @@ HWTEST_F(ScreenSessionManagerTest, CanEnterCoordinationRecording, TestSize.Level
     auto screenId = ssm_->CreateVirtualScreen(virtualOption, displayManagerAgent->AsObject());
     auto ret = ssm_->CanEnterCoordination();
     EXPECT_EQ(ret, DMError::DM_ERROR_NOT_SUPPORT_COOR_WHEN_RECORDING);
-    ssm_->DestroyVirtualScreen(screenId)
+    ssm_->DestroyVirtualScreen(screenId);
 }
 
 /**
@@ -169,15 +166,15 @@ HWTEST_F(ScreenSessionManagerTest, NotifyTentModeChange, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     LOG_SetCallback(MyLogCallback);
-    g_errLog.clear();
+    g_logMsg.clear();
     ssm_->clientProxy_ = nullptr;
     ssm_->NotifyTentModeChange(TentMode::HOVER);
-    EXPECT_TRUE(g_errLog.find("clientProxy null") != std::string::npos);
-    g_errLog.clear();
+    EXPECT_TRUE(g_logMsg.find("clientProxy null") != std::string::npos);
+    g_logMsg.clear();
     ssm_->clientProxy_ = sptr<ScreenSessionManagerClientTest>::MakeSptr();
     ssm_->NotifyTentModeChange(TentMode::HOVER);
-    EXPECT_TRUE(g_errLog.find("clientProxy null") == std::string::npos);
-    g_errLog.clear();
+    EXPECT_TRUE(g_logMsg.find("clientProxy null") == std::string::npos);
+    g_logMsg.clear();
     LOG_SetCallback(nullptr);
 }
 
@@ -745,15 +742,15 @@ HWTEST_F(ScreenSessionManagerTest, ScreenChange, TestSize.Level1)
     ScreenEvent screenEvent = ScreenEvent::CONNECTED;
     ssm_->OnVirtualScreenChange(DEFAULT_SCREEN_ID, screenEvent);
     ssm_->OnVirtualScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChangeInner(DEFAULT_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChangeInner(VIRTUAL_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChange(DEFAULT_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
     EXPECT_TRUE(1);
 
     screenEvent = ScreenEvent::DISCONNECTED;
     ssm_->OnVirtualScreenChange(DEFAULT_SCREEN_ID, screenEvent);
     ssm_->OnVirtualScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChangeInner(DEFAULT_SCREEN_ID, screenEvent);
-    ssm_->OnScreenChangeInner(VIRTUAL_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChange(DEFAULT_SCREEN_ID, screenEvent);
+    ssm_->OnScreenChange(VIRTUAL_SCREEN_ID, screenEvent);
     EXPECT_TRUE(1);
 }
 

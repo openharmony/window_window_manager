@@ -20,6 +20,7 @@
 #include "screen_manager.h"
 #include "window.h"
 #include "window_manager_hilog.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;

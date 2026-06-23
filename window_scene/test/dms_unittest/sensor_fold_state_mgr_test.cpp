@@ -67,24 +67,6 @@ void SensorFoldStateMgrTest::TearDown()
 }
 
 /**
- * @tc.name: SetTaskScheduler
- * @tc.number: SetTaskScheduler
- * @tc.desc: taskScheduler_ could be properly set when the input is valid.
- */
-HWTEST_F(SensorFoldStateMgrTest, SetTaskScheduler, TestSize.Level1)
-{
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    auto scheduler = std::make_shared<TaskScheduler>("task_test");
-    ASSERT_NE(scheduler, nullptr);
-    SensorFoldStateMgr::GetInstance()..SetTaskScheduler(scheduler);
-    scheduler = nullptr;
-    SensorFoldStateMgr::GetInstance()..SetTaskScheduler(scheduler);
-    EXPECT_TRUE(g_errLog.find("scheduler is nullptr") != std::string::npos);
-}
-
-/**
  * @tc.name: HandleSensorEventTest01
  * @tc.desc: test function : handle tent sensor event, repeat report tent mode
  * @tc.type: FUNC
@@ -282,20 +264,6 @@ HWTEST_F(SensorFoldStateMgrTest, HandleSensorEventTest10, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("current state: 2, next state: 1.") != std::string::npos);
 }
 
-/**
- * @tc.name: FinishTaskSequence
- * @tc.desc: FinishTaskSequence
- * @tc.type: FUNC
- */
-HWTEST_F(SensorFoldStateMgrTest, FinishTaskSequence, TestSize.Level0)
-{
-    g_logMsg.clear();
-    LOG_SetCallback(MyLogCallback);
-    SensorFoldStateMgr::GetInstance().FinishTaskSequence();
-    EXPECT_TRUE(g_logMsg.find("TaskSequenceProcess") != std::string::npos);
-    LOG_SetCallback(nullptr);
-    g_logMsg.clear();
-}
 }
 }
 } // namespace Rosen

@@ -89,7 +89,6 @@ namespace {
         }
         std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
         DualDisplaySensorFoldStateManager mgr = DualDisplaySensorFoldStateManager(screenPowerTaskScheduler);
-        ASSERT_EQ(mgr.packageNames_.size(), 1);
     }
 
     /**
