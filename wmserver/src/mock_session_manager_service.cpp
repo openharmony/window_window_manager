@@ -23,6 +23,7 @@
 #include <bundle_mgr_interface.h>
 #include <system_ability_definition.h>
 #include <cinttypes>
+#include <cctype>
 #include <csignal>
 #include <iomanip>
 #include <ipc_skeleton.h>
@@ -57,6 +58,8 @@ const char DEFAULT_STRING[] = "error";
 const std::string ARG_DUMP_HELP = "-h";
 const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
+const std::string ARG_DUMP_USER = "-user";
+const std::string ARG_DUMP_USER_ALL = "all";
 const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string TEST_MODULE_NAME_SUFFIX = "_test";
@@ -652,20 +655,76 @@ sptr<IRemoteObject> MockSessionManagerService::GetSceneSessionManager()
 int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo)
 {
     if (args.empty()) {
-        return -1;  // WMError::WM_ERROR_INVALID_PARAM;
-    }
-    int32_t defaultWMSUserId = GetDefaultWMSUserId();
-    auto sessionManagerService = GetSessionManagerServiceInner(defaultWMSUserId);
-    if (sessionManagerService == nullptr) {
-        TLOGE(WmsLogTag::DEFAULT, "sessionManagerService is null");
         return -1;
     }
-    sptr<IRemoteObject> defaultSSMRemote = GetSceneSessionManager();
-    if (!defaultSSMRemote) {
-        TLOGE(WmsLogTag::DEFAULT, "Get scene session mgr remote failed");
+
+    std::vector<int32_t> targetUserIds;
+    std::vector<std::string> dumpArgs(args);
+    bool hasUserArg = false;
+
+    if (args[0] == ARG_DUMP_USER) {
+        if (args.size() < 2) {
+            TLOGE(WmsLogTag::DEFAULT, "-user requires a value");
+            return -1;
+        }
+        hasUserArg = true;
+        if (args[1] == ARG_DUMP_USER_ALL) {
+            ErrCode errCode = GetActiveUserIds(targetUserIds);
+            if (errCode != ERR_OK || targetUserIds.empty()) {
+                TLOGE(WmsLogTag::DEFAULT, "GetActiveUserIds failed or no active users");
+                return -1;
+            }
+        } else {
+            bool isDigit = true;
+            for (char c : args[1]) {
+                if (!isdigit(c)) {
+                    isDigit = false;
+                    break;
+                }
+            }
+            if (!isDigit) {
+                TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", args[1].c_str());
+                return -1;
+            }
+            int32_t userId = std::stoi(args[1]);
+            targetUserIds.push_back(userId);
+        }
+        dumpArgs.assign(args.begin() + 2, args.end());
+    }
+
+    if (!hasUserArg) {
+        int32_t defaultWMSUserId = GetDefaultWMSUserId();
+        targetUserIds.push_back(defaultWMSUserId);
+    }
+
+    if (dumpArgs.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "No dump command after -user");
         return -1;
     }
-    auto sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(defaultSSMRemote);
+
+    for (int32_t userId : targetUserIds) {
+        std::string userDumpInfo;
+        int errCode = DumpSessionInfoByUserId(userId, dumpArgs, userDumpInfo);
+        if (errCode != 0) {
+            return errCode;
+        }
+        if (hasUserArg) {
+            dumpInfo.append("User ").append(std::to_string(userId)).append(":\n");
+        }
+        dumpInfo.append(userDumpInfo);
+    }
+    return 0;
+}
+
+int MockSessionManagerService::DumpSessionInfoByUserId(int32_t userId,
+    const std::vector<std::string>& args, std::string& dumpInfo)
+{
+    sptr<IRemoteObject> sceneSessionManagerRemote = GetSceneSessionManagerByUserId(userId);
+    if (!sceneSessionManagerRemote) {
+        TLOGE(WmsLogTag::DEFAULT, "Get scene session mgr remote failed for userId: %{public}d", userId);
+        return -1;
+    }
+    auto sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManagerRemote);
     if (sceneSessionManagerProxy == nullptr) {
         WLOGFW("sessionManagerServiceProxy is nullptr");
         return -1;
@@ -675,7 +734,7 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
         WLOGFD("sessionManagerService set success!");
         return -1;
     }
-    return 0; // WMError::WM_OK;
+    return 0;
 }
 
 void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
@@ -687,6 +746,8 @@ void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
         .append("|dump all window information in the system\n")
         .append(" -w {window id} [ArkUI Option]  ")
         .append("|dump specified window information\n")
+        .append(" -user {all|id}                 ")
+        .append("|dump for all foreground users or specified user id\n")
         .append(" ------------------------------------[ArkUI Option]------------------------------------ \n");
     ShowAceDumpHelp(dumpInfo);
 }
