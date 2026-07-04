@@ -1016,6 +1016,73 @@ HWTEST(MockSessionManagerServiceTest, DumpSessionInfoByUserId, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParseUserArg
+ * @tc.desc: test the function of ParseUserArg
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, ParseUserArg, TestSize.Level1)
+{
+    MockMockSessionManagerService mockMockSms;
+    std::vector<int32_t> targetUserIds;
+    std::vector<std::string> dumpArgs;
+    bool hasUserArg = false;
+    int ret;
+
+    // branch 1: -user without value
+    std::vector<std::string> args1 = {"-user"};
+    ret = mockMockSms.ParseUserArg(args1, targetUserIds, dumpArgs, hasUserArg);
+    EXPECT_EQ(-1, ret);
+
+    // branch 2: -user all with no active users
+    mockMockSms.screenId2UserId_.clear();
+    std::vector<std::string> args2 = {"-user", "all", "-a"};
+    ret = mockMockSms.ParseUserArg(args2, targetUserIds, dumpArgs, hasUserArg);
+    EXPECT_EQ(-1, ret);
+
+    // branch 3: -user all with active users
+    mockMockSms.screenId2UserId_[0] = 100;
+    std::vector<std::string> args3 = {"-user", "all", "-a"};
+    ret = mockMockSms.ParseUserArg(args3, targetUserIds, dumpArgs, hasUserArg);
+    EXPECT_EQ(0, ret);
+    EXPECT_TRUE(hasUserArg);
+    EXPECT_EQ(dumpArgs.size(), 1u);
+    EXPECT_EQ(dumpArgs[0], "-a");
+
+    // branch 4: -user with invalid id
+    std::vector<std::string> args4 = {"-user", "abc", "-a"};
+    targetUserIds.clear();
+    dumpArgs.clear();
+    hasUserArg = false;
+    ret = mockMockSms.ParseUserArg(args4, targetUserIds, dumpArgs, hasUserArg);
+    EXPECT_EQ(-1, ret);
+
+    // branch 5: -user with valid id
+    std::vector<std::string> args5 = {"-user", "100", "-a"};
+    targetUserIds.clear();
+    dumpArgs.clear();
+    hasUserArg = false;
+    ret = mockMockSms.ParseUserArg(args5, targetUserIds, dumpArgs, hasUserArg);
+    EXPECT_EQ(0, ret);
+    EXPECT_TRUE(hasUserArg);
+    EXPECT_EQ(targetUserIds[0], 100);
+}
+
+/**
+ * @tc.name: IsDigitString
+ * @tc.desc: test the function of IsDigitString
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, IsDigitString, TestSize.Level1)
+{
+    MockMockSessionManagerService mockMockSms;
+    EXPECT_FALSE(mockMockSms.IsDigitString(""));
+    EXPECT_FALSE(mockMockSms.IsDigitString("abc"));
+    EXPECT_FALSE(mockMockSms.IsDigitString("12a3"));
+    EXPECT_TRUE(mockMockSms.IsDigitString("100"));
+    EXPECT_TRUE(mockMockSms.IsDigitString("0"));
+}
+
+/**
  * @tc.name: GetSceneSessionManager
  * @tc.desc: test the function of GetSceneSessionManager
  * @tc.type: FUNC
