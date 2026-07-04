@@ -24,6 +24,7 @@
 #include <system_ability_definition.h>
 #include <cinttypes>
 #include <cctype>
+#include <algorithm>
 #include <csignal>
 #include <iomanip>
 #include <ipc_skeleton.h>
@@ -663,33 +664,10 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     bool hasUserArg = false;
 
     if (args[0] == ARG_DUMP_USER) {
-        if (args.size() < 2) {
-            TLOGE(WmsLogTag::DEFAULT, "-user requires a value");
-            return -1;
+        int errCode = ParseUserArg(args, targetUserIds, dumpArgs, hasUserArg);
+        if (errCode != 0) {
+            return errCode;
         }
-        hasUserArg = true;
-        if (args[1] == ARG_DUMP_USER_ALL) {
-            ErrCode errCode = GetActiveUserIds(targetUserIds);
-            if (errCode != ERR_OK || targetUserIds.empty()) {
-                TLOGE(WmsLogTag::DEFAULT, "GetActiveUserIds failed or no active users");
-                return -1;
-            }
-        } else {
-            bool isDigit = true;
-            for (char c : args[1]) {
-                if (!isdigit(c)) {
-                    isDigit = false;
-                    break;
-                }
-            }
-            if (!isDigit) {
-                TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", args[1].c_str());
-                return -1;
-            }
-            int32_t userId = std::stoi(args[1]);
-            targetUserIds.push_back(userId);
-        }
-        dumpArgs.assign(args.begin() + 2, args.end());
     }
 
     if (!hasUserArg) {
@@ -709,11 +687,48 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
             return errCode;
         }
         if (hasUserArg) {
-            dumpInfo.append("User ").append(std::to_string(userId)).append(":\n");
+            std::string userHeader = "-------------------------------------user ID: " + std::to_string(userId) +
+                "-------------------------------------\n";
+            dumpInfo.append(userHeader);
         }
         dumpInfo.append(userDumpInfo);
     }
     return 0;
+}
+
+int MockSessionManagerService::ParseUserArg(const std::vector<std::string>& args,
+    std::vector<int32_t>& targetUserIds, std::vector<std::string>& dumpArgs, bool& hasUserArg)
+{
+    if (args.size() < 2) {
+        TLOGE(WmsLogTag::DEFAULT, "-user requires a value");
+        return -1;
+    }
+    hasUserArg = true;
+    if (args[1] == ARG_DUMP_USER_ALL) {
+        ErrCode errCode = GetActiveUserIds(targetUserIds);
+        if (errCode != ERR_OK || targetUserIds.empty()) {
+            TLOGE(WmsLogTag::DEFAULT, "GetActiveUserIds failed or no active users");
+            return -1;
+        }
+        dumpArgs.assign(args.begin() + 2, args.end());
+        return 0;
+    }
+    if (!IsDigitString(args[1])) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", args[1].c_str());
+        return -1;
+    }
+    int32_t userId = std::stoi(args[1]);
+    targetUserIds.push_back(userId);
+    dumpArgs.assign(args.begin() + 2, args.end());
+    return 0;
+}
+
+bool MockSessionManagerService::IsDigitString(const std::string& str) const
+{
+    if (str.empty()) {
+        return false;
+    }
+    return std::all_of(str.begin(), str.end(), [](unsigned char c) { return isdigit(c); });
 }
 
 int MockSessionManagerService::DumpSessionInfoByUserId(int32_t userId,
