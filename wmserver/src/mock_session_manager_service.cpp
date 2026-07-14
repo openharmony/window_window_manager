@@ -23,8 +23,8 @@
 #include <bundle_mgr_interface.h>
 #include <system_ability_definition.h>
 #include <cinttypes>
-#include <cctype>
 #include <algorithm>
+#include <cctype>
 #include <csignal>
 #include <iomanip>
 #include <ipc_skeleton.h>
@@ -687,8 +687,9 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
             return errCode;
         }
         if (hasUserArg) {
-            std::string userHeader = "-------------------------------------user ID: " + std::to_string(userId) +
-                "-------------------------------------\n";
+            const std::string separatorLine = "====";
+            std::string userHeader = separatorLine + "user ID: " + std::to_string(userId) +
+                separatorLine + "\n";
             dumpInfo.append(userHeader);
         }
         dumpInfo.append(userDumpInfo);
@@ -699,27 +700,32 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
 int MockSessionManagerService::ParseUserArg(const std::vector<std::string>& args,
     std::vector<int32_t>& targetUserIds, std::vector<std::string>& dumpArgs, bool& hasUserArg)
 {
-    if (args.size() < 2) {
+    const size_t userArgMinSize = 2;
+    const size_t userArgValueIndex = 1;
+    const size_t userArgDumpOffset = 2;
+
+    if (args.size() < userArgMinSize) {
         TLOGE(WmsLogTag::DEFAULT, "-user requires a value");
         return -1;
     }
     hasUserArg = true;
-    if (args[1] == ARG_DUMP_USER_ALL) {
+    const std::string& userValue = args[userArgValueIndex];
+    if (userValue == ARG_DUMP_USER_ALL) {
         ErrCode errCode = GetActiveUserIds(targetUserIds);
         if (errCode != ERR_OK || targetUserIds.empty()) {
             TLOGE(WmsLogTag::DEFAULT, "GetActiveUserIds failed or no active users");
             return -1;
         }
-        dumpArgs.assign(args.begin() + 2, args.end());
+        dumpArgs.assign(args.begin() + userArgDumpOffset, args.end());
         return 0;
     }
-    if (!IsDigitString(args[1])) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", args[1].c_str());
+    if (!IsDigitString(userValue)) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", userValue.c_str());
         return -1;
     }
-    int32_t userId = std::stoi(args[1]);
+    int32_t userId = std::stoi(userValue);
     targetUserIds.push_back(userId);
-    dumpArgs.assign(args.begin() + 2, args.end());
+    dumpArgs.assign(args.begin() + userArgDumpOffset, args.end());
     return 0;
 }
 
