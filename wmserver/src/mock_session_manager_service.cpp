@@ -723,7 +723,13 @@ int MockSessionManagerService::ParseUserArg(const std::vector<std::string>& args
         TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", userValue.c_str());
         return -1;
     }
-    int32_t userId = std::stoi(userValue);
+    int32_t userId = 0;
+    try {
+        userId = std::stoi(userValue);
+    } catch (const std::exception&) {
+        TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", userValue.c_str());
+        return -1;
+    }
     targetUserIds.push_back(userId);
     dumpArgs.assign(args.begin() + userArgDumpOffset, args.end());
     return 0;
