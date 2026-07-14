@@ -769,6 +769,10 @@ void MockSessionManagerService::ShowHelpInfo(std::string& dumpInfo)
         .append("|dump specified window information\n")
         .append(" -user {all|id}                 ")
         .append("|dump for all foreground users or specified user id\n")
+        .append(" Note: -user must precede other dump options\n")
+        .append(" Examples:\n")
+        .append("   -user all -a\n")
+        .append("   -user 100 -a\n")
         .append(" ------------------------------------[ArkUI Option]------------------------------------ \n");
     ShowAceDumpHelp(dumpInfo);
 }
