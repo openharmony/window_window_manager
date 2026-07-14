@@ -7566,21 +7566,24 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
     return state;
 }
 
-ScreenPowerState ScreenSessionManager::GetFlodScreenPowerstate()
+ScreenPowerState ScreenSessionManager::GetFoldScreenPowerState()
 {
+    ScreenPowerState state = ScreenPowerState::INVALID_STATE;
     std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
     if (phyScreenPropMap_.empty()) {
+        TLOGNFI(WmsLogTag::DMS, "phyScreenPropMap_ is empty");
         return ScreenPowerState::POWER_ON;
     }
     for (const auto& screen : phyScreenPropMap_) {
-        state = static_cast<ScreenPowerState>(RSInterfaces::GetInstances().GetScreenPowerStatus(screen.first));
-        if (state == ScreenPowerState::POWER_ON) {
+        state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screen.first));
+        TLOGNFI(WmsLogTag::DMS, "screenId: %{public}" PRIu64", state: %{public}u",
+            screen.first, static_cast<uint32_t>(state));
+        if (state == ScreenPowerState::POWER_ON || state == ScreenPowerState::POWER_BUTT) {
             break;
         }
-        if (state == ScreenPowerState::POWER_BUTT) {
-            state = ScreenPowerState::POWER_ON;
-            break;
-        }
+    }
+    if (state == ScreenPowerState::POWER_BUTT) {
+        state = ScreenPowerState::POWER_ON;
     }
     return state;
 }
@@ -7604,7 +7607,7 @@ ScreenPowerState ScreenSessionManager::GetScreenPower()
                 .GetScreenPowerStatus(GetDefaultScreenId()));
         }
     } else {
-            state = GetFlodScreenPowerstate();
+            state = GetFoldScreenPowerState();
     }
 #else
     state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance()
