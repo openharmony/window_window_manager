@@ -703,6 +703,7 @@ int MockSessionManagerService::ParseUserArg(const std::vector<std::string>& args
     const size_t userArgMinSize = 2;
     const size_t userArgValueIndex = 1;
     const size_t userArgDumpOffset = 2;
+    const size_t userIdMaxLength = 5;
 
     if (args.size() < userArgMinSize) {
         TLOGE(WmsLogTag::DEFAULT, "-user requires a value");
@@ -719,17 +720,11 @@ int MockSessionManagerService::ParseUserArg(const std::vector<std::string>& args
         dumpArgs.assign(args.begin() + userArgDumpOffset, args.end());
         return 0;
     }
-    if (!IsDigitString(userValue)) {
+    if (!IsDigitString(userValue) || userValue.length() > userIdMaxLength) {
         TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", userValue.c_str());
         return -1;
     }
-    int32_t userId = 0;
-    try {
-        userId = std::stoi(userValue);
-    } catch (const std::exception&) {
-        TLOGE(WmsLogTag::DEFAULT, "Invalid user id: %{public}s", userValue.c_str());
-        return -1;
-    }
+    int32_t userId = std::stoi(userValue);
     targetUserIds.push_back(userId);
     dumpArgs.assign(args.begin() + userArgDumpOffset, args.end());
     return 0;
