@@ -5793,6 +5793,7 @@ public:
     {
         return WMError::WM_OK;
     }
+};
 }
 }
 #endif // OHOS_ROSEN_WINDOW_H
