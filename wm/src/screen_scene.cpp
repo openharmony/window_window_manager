@@ -134,6 +134,13 @@ void ScreenScene::RegisterInputEventListener()
     InputTransferStation::GetInstance().MarkRegisterToMMI();
 }
 
+WMError ScreenScene::UpdateRootDisplayDpi(float dpi, const Rect& rect, WindowSizeChangeReason reason)
+{
+    SetDisplayDensity(dpi);
+    UpdateViewportConfig(rect, reason);
+    return WMError::WM_OK;
+}
+
 void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (g_ssIsDestroyed) {
