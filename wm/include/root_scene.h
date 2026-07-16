@@ -51,6 +51,7 @@ public:
 
     void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
         AbilityRuntime::Context* context);
+    void UpdateDisplayDpi(const sptr<DisplayInfo>& displayInfo, WindowSizeChangeReason reason);
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
@@ -164,7 +165,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     sptr<AppExecFwk::LauncherService> launcherService_;
     float density_ = 1.0f;
-    DisplayId displayId_ = DISPLAY_ID_INVALID;
+    DisplayId displayId_ = DEFAULT_DISPLAY_ID;
     int32_t orientation_ = 0;
     WindowType type_ = WindowType::WINDOW_TYPE_SCENE_BOARD;
     std::string name_ = "EntryView";
