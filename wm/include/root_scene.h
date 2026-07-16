@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "display_info.h"
 #include "vsync_station.h"
 #include "window.h"
 #include "window_helper.h"
