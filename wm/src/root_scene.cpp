@@ -123,6 +123,35 @@ void RootScene::SetDisplayOrientation(int32_t orientation)
     orientation_ = orientation;
 }
 
+void RootScene::UpdateDisplayDpi(const sptr<DisplayInfo>& displayInfo, WindowSizeChangeReason reason)
+{
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr: reason=%{public}u", reason);
+        return;
+    }
+    auto displayId = displayInfo->GetDisplayId();
+    wptr<Window> weakWindow(this);
+    {
+        std::lock_guard<std::mutex> lock(rootSceneMapMutex_);
+        auto iter = rootSceneMap_.find(displayId);
+        if (iter != rootSceneMap_.end()) {
+            weakWindow = iter->second;
+        }
+    }
+    auto window = weakWindow.promote();
+    if (window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no window: reason=%{public}u, displayId=%{public}" PRIu64, reason, displayId);
+        return;
+    }
+    auto dpi = displayInfo->GetVirtualPixelRatio();
+    Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
+                  displayInfo->GetWidth(), displayInfo->GetHeight() };
+    window->SetDisplayDensity(dpi);
+    window->UpdateViewportConfig(rect, reason);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, dpi=%{public}f, rect=%{public}s, displayId=%{public}" PRIu64
+        ", rootDisplayId=%{public}" PRIu64, reason, dpi, rect.ToString().c_str(), displayId, GetDisplayId());
+}
+
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (updateRootSceneRectCallback_ != nullptr) {
@@ -130,7 +159,7 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     }
 
     if (uiContent_ == nullptr) {
-        TLOGD(WmsLogTag::DEFAULT, "uiContent_ is nullptr!");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent_ is nullptr: reason=%{public}u", reason);
         return;
     }
     Ace::ViewportConfig config;
@@ -140,6 +169,8 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
     config.SetOrientation(orientation_);
     config.SetDisplayId(GetDisplayId());
     uiContent_->UpdateViewportConfig(config, reason);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, dpi=%{public}f, rect=%{public}s, displayId=%{public}" PRIu64,
+        reason, density_, rect.ToString().c_str(), GetDisplayId());
 }
 
 void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)

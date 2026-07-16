@@ -14988,25 +14988,14 @@ bool SceneSessionManager::ShouldProcessVirtualPixelRatioChange(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
         return false;
     }
-    auto rootSceneSession = GetRootSceneSession();
-    if (rootSceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rootSceneSession is nullptr");
-        return false;
-    }
     bool isInternal = system::GetIntParameter("const.product.has_buildin_screen", 1);
     auto result = processVirtualPixelRatioChangeFunc_ != nullptr &&
                   ((type == DisplayStateChangeType::RESOLUTION_CHANGE &&
                     displayInfo->GetVirtualPixelRatio() == displayInfo->GetDensityInCurResolution()) ||
-                   (type == DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE && !isInternal &&
-                    displayInfo->GetDisplayId() == rootSceneSession->GetDisplayId()));
+                   (type == DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE && !isInternal));
     TLOGD(WmsLogTag::WMS_ATTRIBUTE,
-          "result=%{public}d isInternal=%{public}d type=%{public}u rootDisplayId=%{public}" PRIu64
-          " inputDisplayId=%{public}" PRIu64,
-          result,
-          isInternal,
-          type,
-          rootSceneSession->GetDisplayId(),
-          displayInfo->GetDisplayId());
+          "result=%{public}d isInternal=%{public}d type=%{public}u inputDisplayId=%{public}" PRIu64,
+          result, isInternal, type, displayInfo->GetDisplayId());
     return result;
 }
 
@@ -15019,9 +15008,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
     }
     taskScheduler_->PostSyncTask([this, displayInfo, type, where = __func__]() {
         if (ShouldProcessVirtualPixelRatioChange(type, displayInfo)) {
-            Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
-                          displayInfo->GetWidth(), displayInfo->GetHeight() };
-            processVirtualPixelRatioChangeFunc_(displayInfo->GetVirtualPixelRatio(), rect);
+            processVirtualPixelRatioChangeFunc_(displayInfo);
         }
         if (onVirtualPixelChangeCallback_ != nullptr && type == DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE) {
             onVirtualPixelChangeCallback_(displayInfo->GetVirtualPixelRatio() * DOT_PER_INCH, displayInfo->GetScreenId());
