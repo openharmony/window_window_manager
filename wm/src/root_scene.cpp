@@ -146,10 +146,16 @@ void RootScene::UpdateDisplayDpi(const sptr<DisplayInfo>& displayInfo, WindowSiz
     auto dpi = displayInfo->GetVirtualPixelRatio();
     Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
                   displayInfo->GetWidth(), displayInfo->GetHeight() };
-    window->SetDisplayDensity(dpi);
-    window->UpdateViewportConfig(rect, reason);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, dpi=%{public}f, rect=%{public}s, displayId=%{public}" PRIu64
-        ", rootDisplayId=%{public}" PRIu64, reason, dpi, rect.ToString().c_str(), displayId, GetDisplayId());
+    auto ret = window->UpdateRootDisplayDpi(dpi, rect, reason);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, dpi=%{public}f, ret=%{public}d, displayId=%{public}" PRIu64,
+        reason, dpi, ret, displayId);
+}
+
+WMError RootScene::UpdateRootDisplayDpi(float dpi, const Rect& rect, WindowSizeChangeReason reason)
+{
+    SetDisplayDensity(dpi);
+    UpdateViewportConfig(rect, reason);
+    return WMError::WM_OK;
 }
 
 void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
