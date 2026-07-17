@@ -954,7 +954,7 @@ DMError SuperFoldStateManager::RefreshMirrorRegionInner(
     secondarySession->SetMirrorScreenRegion(secondarySession->GetScreenId(), mirrorRegion);
     secondarySession->SetIsPhysicalMirrorSwitch(true);
     secondarySession->EnableMirrorScreenRegion();
-    RSDisplayNodeConfig config = { secondarySession->rsId_, true, displayNode->GetId() };
+    RSDisplayNodeConfig config = { secondarySession->rsId_, DisplayModeType::MIRROR, displayNode->GetId() };
     secondarySession->ReuseDisplayNode(config);
     return DMError::DM_OK;
 }
