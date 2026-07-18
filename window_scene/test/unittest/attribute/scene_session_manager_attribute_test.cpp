@@ -718,7 +718,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     displayInfo->SetVirtualPixelRatio(virtualPixelRatio);
     displayInfo->SetDensityInCurResolution(virtualPixelRatio);
 
-    ProcessVirtualPixelRatioChangeFunc func = [](float ratio, const OHOS::Rosen::Rect& rect) {};
+    ProcessVirtualPixelRatioChangeFunc func = [](const sptr<DisplayInfo>& displayInfo) {};
     ssm_->SetVirtualPixelRatioChangeListener(func);
 
     ASSERT_NE(nullptr, ssm_);
@@ -743,7 +743,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     displayInfo->SetDisplayId(defaultDisplayId);
     system::SetParameter("const.product.has_buildin_screen", "0");
 
-    ProcessVirtualPixelRatioChangeFunc func = [](float ratio, const OHOS::Rosen::Rect& rect) {};
+    ProcessVirtualPixelRatioChangeFunc func = [](const sptr<DisplayInfo>& displayInfo) {};
     ssm_->SetVirtualPixelRatioChangeListener(func);
 
     ASSERT_NE(nullptr, ssm_);
