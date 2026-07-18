@@ -217,7 +217,7 @@ void PictureInPictureManager::DetachAutoStartController(int32_t handleId,
         return;
     }
     autoStartControllerMap_.erase(mit);
-    TLOGI(WmsLogTag::WMS_PIP, "autoStartControllerMap_.size: %{public}u", autoStartControllerMap_.size());
+    TLOGI(WmsLogTag::WMS_PIP, "autoStartControllerMap_.size: %{public}zu", autoStartControllerMap_.size());
     auto controller = pipController.promote();
     if (controller != nullptr) {
         uint32_t mainWindowId = controller->GetMainWindowId();
@@ -363,6 +363,24 @@ void PictureInPictureManager::DoLocateSource(uint32_t windowId)
     if (auto controller = GetPipControllerInfo(windowId)) {
         controller->LocateSource();
     }
+}
+
+void PictureInPictureManager::DoCloseByMainWindowId(uint32_t mainWindowId)
+{
+    TLOGI(WmsLogTag::WMS_PIP, "mainWindowId: %{public}u", mainWindowId);
+    std::vector<uint32_t> idList;
+    {
+        std::lock_guard<std::mutex> lock(controllerMapMutex_);
+        for (const auto& controller : windowToControllerMap_) {
+            if (controller.second != nullptr && controller.second->GetMainWindowId() == mainWindowId) {
+                idList.push_back(controller.first);
+            }
+        }
+    }
+    for (const auto& id : idList) {
+        DoClose(id, true, true);
+    }
+    TLOGI(WmsLogTag::WMS_PIP, "done");
 }
 
 void PictureInPictureManager::DoClose(uint32_t windowId, bool destroyWindow, bool byPriority)
