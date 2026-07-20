@@ -226,11 +226,11 @@ void MultiScreenPowerChangeManager::CreateExternalScreenDisplayNodeOnly(sptr<Scr
     sptr<ScreenSession>& externalScreen, ScreenCombination combination)
 {
     TLOGW(WmsLogTag::DMS, "create extend screen rsId=%{public}" PRIu64, innerScreen->rsId_);
-    RSDisplayNodeConfig config = { innerScreen->rsId_, DisplayModeType::EXPAND, INVALID_NODEID};
+    RSDisplayNodeConfig config = { innerScreen->rsId_, DisplayMode::EXPAND, INVALID_NODEID};
     if (combination == ScreenCombination::SCREEN_MIRROR) {
         NodeId nodeId = externalScreen->GetDisplayNode() == nullptr ? 0 : externalScreen->GetDisplayNode()->GetId();
         TLOGW(WmsLogTag::DMS, "config screen mirror displayNodeId=%{public}" PRIu64, nodeId);
-        config = { innerScreen->rsId_, DisplayModeType::MIRROR, nodeId };
+        config = { innerScreen->rsId_, DisplayMode::MIRROR, nodeId };
     }
     innerScreen->ReuseDisplayNode(config);
     TLOGW(WmsLogTag::DMS, "create screen displayNode end.");

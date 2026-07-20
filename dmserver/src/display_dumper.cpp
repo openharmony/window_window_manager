@@ -46,7 +46,6 @@ constexpr int W_SCREEN_ROTATION = 9;
 constexpr int W_ORIENTATION = 12;
 constexpr int W_REQUESTED_ORIENTATION = 19;
 constexpr int W_NODE_ID = 21;
-constexpr int W_MIRROR_TYPE = 11;
 constexpr int W_DISPLAY_MODE_TYPE = 11;
 constexpr int W_MIRROR_NODE_ID = 13;
 // set the output width of display
@@ -227,7 +226,7 @@ DMError DisplayDumper::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& d
         name : name.substr(0, SCREEN_NAME_MAX_LENGTH);
     std::string isGroup = screen->isScreenGroup_ ? "true" : "false";
     std::string screenType = TransferTypeToString(screen->type_);
-    std::string displayModeTypeStr = TransferDisplayModeTypeToString(screen->rSDisplayNodeConfig_.displayNodeType);
+    std::string displayModeStr = TransferDisplayModeToString(screen->rSDisplayNodeConfig_.displayNode);
     NodeId nodeId = (screen->rsDisplayNode_ == nullptr) ? SCREEN_ID_INVALID : screen->rsDisplayNode_->GetId();
     std::ostringstream oss;
     oss << "ScreenName: " << screenName << std::endl;
@@ -242,7 +241,7 @@ DMError DisplayDumper::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& d
     oss << "Orientation: " << static_cast<uint32_t>(screen->orientation_) << std::endl;
     oss << "RequestOrientation: " << static_cast<uint32_t>(screen->screenRequestedOrientation_) << std::endl;
     oss << "NodeId: " << nodeId << std::endl;
-    oss << "DisplayModeTypeStr: " << displayModeTypeStr << std::endl;
+    oss << "DisplayModeStr: " << displayModeStr << std::endl;
     oss << "MirrorNodeId: " << screen->rSDisplayNodeConfig_.mirrorNodeId << std::endl;
     dumpInfo.append(oss.str());
     return DMError::DM_OK;
@@ -325,24 +324,24 @@ std::string DisplayDumper::TransferTypeToString(ScreenType type) const
     return screenType;
 }
 
-std::string DisplayDumper::TransferDisplayModeTypeToString(DisplayModeType type) const
+std::string DisplayDumper::TransferDisplayModeToString(DisplayMode type) const
 {
-    std::string displayModeType;
+    std::string displayMode;
     switch (type) {
-        case DisplayModeType::MIRROR:
-            displayModeType = "MIRROR";
+        case DisplayMode::MIRROR:
+            displayMode = "MIRROR";
             break;
-        case DisplayModeType::EXPAND:
-            displayModeType = "EXPAND";
+        case DisplayMode::EXPAND:
+            displayMode = "EXPAND";
             break;
-        case DisplayModeType::INDEPENDENT:
-            displayModeType = "INDEPENDENT";
+        case DisplayMode::INDEPENDENT:
+            displayMode = "INDEPENDENT";
             break;
         default:
-            displayModeType = "INVALID";
+            displayMode = "INVALID";
             break;
     }
-    return displayModeType;
+    return displayMode;
 }
 
 void DisplayDumper::GetScreenInfo(const sptr<AbstractScreen>& screen, std::ostringstream& oss) const
@@ -357,7 +356,7 @@ void DisplayDumper::GetScreenInfo(const sptr<AbstractScreen>& screen, std::ostri
         name : name.substr(0, SCREEN_NAME_MAX_LENGTH);
     std::string isGroup = screen->isScreenGroup_ ? "true" : "false";
     std::string screenType = TransferTypeToString(screen->type_);
-    std::string displayModeTypeStr = TransferDisplayModeTypeToString(screen->rSDisplayNodeConfig_.displayNodeType);
+    std::string displayModeStr = TransferDisplayModeToString(screen->rSDisplayNodeConfig_.displayMode);
     NodeId nodeId = (screen->rsDisplayNode_ == nullptr) ? SCREEN_ID_INVALID : screen->rsDisplayNode_->GetId();
     // std::setw is used to set the output width and different width values are set to keep the format aligned.
     oss << std::left << std::setw(W_SCREEN_NAME) << screenName
@@ -371,7 +370,7 @@ void DisplayDumper::GetScreenInfo(const sptr<AbstractScreen>& screen, std::ostri
         << std::left << std::setw(W_ORIENTATION) << static_cast<uint32_t>(screen->orientation_)
         << std::left << std::setw(W_REQUESTED_ORIENTATION) << static_cast<uint32_t>(screen->screenRequestedOrientation_)
         << std::left << std::setw(W_NODE_ID) << nodeId
-        << std::left << std::setw(W_DISPLAY_MODE_TYPE) << displayModeTypeStr
+        << std::left << std::setw(W_DISPLAY_MODE_TYPE) << displayModeStr
         << std::left << std::setw(W_MIRROR_NODE_ID) << screen->rSDisplayNodeConfig_.mirrorNodeId
         << std::endl;
 }
