@@ -1324,16 +1324,16 @@ void SceneSession::HandleSessionDragEvent(SessionEvent event)
                 dragResizeType = GetDragResizeTypeDuringDrag();
             }
         }
-        Gravity gravity = moveDragController_->GetGravity();
-        Gravity dragGravity = moveDragController_->GetDragGravity();
+        Gravity scaleResizeAnchorGravity = moveDragController_->GetScaleResizeAnchorGravity();
+        Gravity resizeDirectionGravity = moveDragController_->GetResizeDirectionGravity();
         SetSessionEventParam({rect.posX_, rect.posY_, rect.width_, rect.height_, static_cast<uint32_t>(dragResizeType),
-            static_cast<uint32_t>(gravity), static_cast<uint32_t>(dragGravity)});
+            static_cast<uint32_t>(scaleResizeAnchorGravity), static_cast<uint32_t>(resizeDirectionGravity)});
     } else if (moveDragController_ && event == SessionEvent::EVENT_END_MOVE) {
         const auto& lastDragEndRect = moveDragController_->GetLastDragEndRect();
         SetSessionEventParam({lastDragEndRect.posX_, lastDragEndRect.posY_,
             lastDragEndRect.width_, lastDragEndRect.height_,
             static_cast<uint32_t>(GetDragResizeTypeDuringDrag()),
-            static_cast<uint32_t>(moveDragController_->GetGravity())});
+            static_cast<uint32_t>(moveDragController_->GetScaleResizeAnchorGravity())});
         SetDragResizeTypeDuringDrag(dragResizeType);
     }
 }
@@ -4240,7 +4240,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
             auto surfaceNode = GetSurfaceNode();
             moveDragController_->UpdateGravityWhenDrag(pointerEvent, surfaceNode);
             if (isPointDown) {
-                ReportDragEndDirection(GetSessionInfo().bundleName_, moveDragController_->GetAreaType());
+                ReportDragEndDirection(GetSessionInfo().bundleName_, moveDragController_->GetResizeAreaType());
             }
             PresentFocusIfNeed(pointerEvent->GetPointerAction());
             if (isSubWindow) {
@@ -4273,6 +4273,15 @@ void SceneSession::ReportDragEndDirection(const std::string& bundleName, AreaTyp
 
 void SceneSession::NotifyUpdateGravity()
 {
+    if (!moveDragController_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "moveDragController is null");
+        return;
+    }
+    if (moveDragController_->GetResizeAreaType() == AreaType::UNDEFINED) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "resizeAreaType is UNDEFINED");
+        return;
+    }
+    Gravity resizeAnchorGravity = moveDragController_->GetResizeAnchorGravity();
     std::unordered_map<int32_t, NotifySurfaceBoundsChangeFunc> funcMap;
     {
         std::lock_guard lock(registerNotifySurfaceBoundsChangeMutex_);
@@ -4281,13 +4290,9 @@ void SceneSession::NotifyUpdateGravity()
     for (const auto& [sessionId, _] : funcMap) {
         auto subSession = GetSceneSessionById(sessionId);
         if (!subSession || !subSession->GetIsFollowParentLayout()) {
-            return;
+            continue;
         }
-        auto surfaceNode = subSession->GetSurfaceNode();
-        auto subController = subSession->GetMoveDragController();
-        if (subController && surfaceNode) {
-            subController->UpdateSubWindowGravityWhenFollow(moveDragController_, surfaceNode);
-        }
+        subSession->SetFrameGravity(resizeAnchorGravity, true);
     }
 }
 
@@ -5471,7 +5476,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
     if (reason == SizeChangeReason::DRAG || reason == SizeChangeReason::DRAG_MOVE) {
         WSRect globalRect = moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
         for (const auto displayId : moveDragController_->CollectNewOverlappedDisplayIds()) {
-            if (displayId == moveDragController_->GetStartDisplayId()) {
+            if (displayId == startDisplayId) {
                 continue;
             }
             auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
@@ -5522,7 +5527,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
         }
     } else if (reason == SizeChangeReason::DRAG_END) {
         for (const auto displayId : moveDragController_->GetOverlappedDisplayIds()) {
-            if (displayId == moveDragController_->GetStartDisplayId()) {
+            if (displayId == startDisplayId) {
                 continue;
             }
             auto dragMoveMountedNode = GetWindowDragMoveMountedNode(displayId, this->GetZOrder());
@@ -10214,7 +10219,7 @@ void SceneSession::SetNeedSyncSessionRect(bool needSync)
     }, __func__);
 }
 
-bool SceneSession::SetFrameGravity(Gravity gravity)
+bool SceneSession::SetFrameGravity(Gravity gravity, bool needFlush)
 {
     auto surfaceNode = GetSurfaceNode();
     if (surfaceNode == nullptr) {
@@ -10223,6 +10228,9 @@ bool SceneSession::SetFrameGravity(Gravity gravity)
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d gravity:%{public}d", GetPersistentId(), gravity);
     surfaceNode->SetFrameGravity(gravity);
+    if (needFlush) {
+        RSTransactionAdapter::FlushImplicitTransaction(surfaceNode);
+    }
     return true;
 }
 
