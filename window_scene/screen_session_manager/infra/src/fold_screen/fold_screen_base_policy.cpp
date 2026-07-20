@@ -15,6 +15,7 @@
 
 #include "fold_screen_base_policy.h"
 #include <parameters.h>
+#include "ffrt_queue.h"
 
 #include <hisysevent.h>
 #include <hitrace_meter.h>
@@ -620,6 +621,16 @@ void FoldScreenBasePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, 
     return;
 }
 
+static DMS::FfrtQueue serialQueue_("SetDeviceStatusQueue");
+void FoldScreenBasePolicy::SetDeviceStatusAndParam(uint32_t deviceStatus)
+{
+    TLOGI(WmsLogTag::DMS, "Set device status to: %{public}u", deviceStatus);
+    SetDeviceStatus(deviceStatus);
+    serialQueue_.Submit([deviceStatus] {
+        system::SetParameter("persist.dms.device.status", std::to_string(deviceStatus));
+    });
+}
+
 void FoldScreenBasePolicy::UpdateDeviceStatus(FoldDisplayMode displayMode)
 {
     DMDeviceStatus deviceStatus = DMDeviceStatus::UNKNOWN;
@@ -627,9 +638,7 @@ void FoldScreenBasePolicy::UpdateDeviceStatus(FoldDisplayMode displayMode)
     if (iter != DISPLAYMODE_DEVICESTATUS_MAPPING.end()) {
         deviceStatus = iter->second;
     }
-    TLOGI(WmsLogTag::DMS, "Set device status to: %{public}u", deviceStatus);
-    SetDeviceStatus(static_cast<uint32_t>(deviceStatus));
-    system::SetParameter("persist.dms.device.status", std::to_string(static_cast<uint32_t>(deviceStatus)));
+    SetDeviceStatusAndParam(static_cast<uint32_t>(deviceStatus));
 }
 
 void FoldScreenBasePolicy::ChangeScreenDisplayMode(FoldDisplayMode displayMode, bool isForce,
