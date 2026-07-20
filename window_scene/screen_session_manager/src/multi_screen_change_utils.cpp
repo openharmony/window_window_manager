@@ -405,7 +405,7 @@ void MultiScreenChangeUtils::CreateMirrorSession(sptr<ScreenSession>& mainSessio
         SuperFoldStateManager::GetInstance().RefreshExternalRegion();
     } else {
 #endif
-    RSDisplayNodeConfig config = { screenSession->rsId_, DisplayModeType::MIRROR, displayNode->GetId() };
+    RSDisplayNodeConfig config = { screenSession->rsId_, DisplayMode::MIRROR, displayNode->GetId() };
     screenSession->ReuseDisplayNode(config);
 #ifdef FOLD_ABILITY_ENABLE
     }
@@ -439,7 +439,7 @@ void MultiScreenChangeUtils::CreateExtendSession(sptr<ScreenSession>& screenSess
     }
     screenSession->SetIsExtend(true);
     screenSession->SetScreenCombination(ScreenCombination::SCREEN_EXTEND);
-    RSDisplayNodeConfig config = { screenSession->rsId_, DisplayModeType::EXPAND, INVALID_NODEID };
+    RSDisplayNodeConfig config = { screenSession->rsId_, DisplayMode::EXPAND, INVALID_NODEID };
     screenSession->ReuseDisplayNode(config);
 }
 
