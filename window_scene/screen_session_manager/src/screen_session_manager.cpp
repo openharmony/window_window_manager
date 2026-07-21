@@ -14244,112 +14244,180 @@ DMError ScreenSessionManager::ProxyForFreeze(const std::set<int32_t>& pidList, b
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::NotifyUnfreezedAttributeAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
-    const sptr<ScreenSession>& screenSession)
+void ScreenSessionManager::DisplayEventTask::Execute() { agent->OnDisplayChange(displayInfo, DisplayChangeEvent::DISPLAY_UNFREEZED); }
+void ScreenSessionManager::DisplayModeTask::Execute() { agent->NotifyDisplayModeChanged(displayMode); }
+void ScreenSessionManager::FoldStatusTask::Execute() { agent->NotifyFoldStatusChanged(status); }
+void ScreenSessionManager::FoldAngleTask::Execute()  { agent->NotifyFoldAngleChanged(foldAngles); }
+void ScreenSessionManager::ScreenEventTask::Execute()  { agent->OnScreenChange(screenInfo, event); }
+void ScreenSessionManager::DisplayUpdateTask::Execute()  { agent->NotifyDisplayChangeInfoChanged(displayChangeInfo); }
+void ScreenSessionManager::AvailableAreaTask::Execute()  { agent->NotifyAvailableAreaChanged(area, displayId); }
+void ScreenSessionManager::AttributeTask::Execute()
 {
-    auto attributeAgentsMap = ScreenSessionManagerAdapter::GetInstance().dmAttributeAgentContainer_.GetAttributeAgentsMap();
+    agent->OnDisplayAttributeChange(displayInfo, attributes);
+    manager->UpdateLastDisplayInfo(displayId, displayInfo);
+}
+
+
+void ScreenSessionManager::CollectUnfreezedAttributeTasks(int32_t pid, DisplayManagerAgentType agentType,
+    const UnfreezeNotifyContext& ctx, std::vector<std::unique_ptr<ScreenSessionManager::UnfreezeTask>>& tasks,
+    std::set<DisplayManagerAgentType>& pidAgentTypes)
+{
+    auto displayInfo = ctx.displayInfo;
+    if (displayInfo == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "DisplayInfo is nullptr");
+        return;
+    }
+    DisplayId displayId = displayInfo->GetDisplayId();
+    sptr<DisplayInfo> lastDisplayInfo = new DisplayInfo();
+    if (lastDisplayInfo == nullptr) {
+        TLOGNFE(WmsLogTag::DMS, "LastDisplayInfo of displayId: %{public}" PRIu64 "is nullptr", displayId);
+        return;
+    }
+    std::vector<std::string> attributes;
+    ctx.mgr->GetChangedListenableAttribute(lastDisplayInfo, displayInfo, attributes);
+    if (attributes.empty()) {
+        TLOGNFW(WmsLogTag::DMS, "No attribute changed");
+        return;
+    }
+    auto attributeAgentsMap =
+        ScreenSessionManagerAdapter::GetInstance().dmAttributeAgentContainer_.GetAttributeAgentsMap();
+    bool hasTask = false;
     for (auto& it : attributeAgentsMap) {
         auto agent = it.second.first;
-        int32_t agentPid = ScreenSessionManagerAdapter::GetInstance().dmAttributeAgentContainer_.GetAgentPid(agent);
-        if (agent == nullptr|| agentPid != pid || unfreezedPidList.count(pid) == 0) {
+        int32_t agentPid =
+            ScreenSessionManagerAdapter::GetInstance().dmAttributeAgentContainer_.GetAgentPid(agent);
+        if (agent == nullptr || agentPid != pid) {
             continue;
         }
-        auto displayInfo = screenSession->ConvertToDisplayInfo();
-        if (displayInfo == nullptr) {
-            TLOGNFE(WmsLogTag::DMS, "DisplayInfo is nullptr");
-            continue;
-        }
-        std::vector<std::string> attributes;
-        DisplayId displayId = displayInfo->GetDisplayId();
-        sptr<DisplayInfo> lastDisplayInfo = new DisplayInfo();
-        if (lastDisplayInfo == nullptr) {
-            TLOGNFE(WmsLogTag::DMS, "LastDisplayInfo of displayId: %{public}" PRIu64 "is nullptr", displayId);
-            continue;
-        }
-        GetChangedListenableAttribute(lastDisplayInfo, displayInfo, attributes);
-        if (attributes.empty()) {
-            TLOGNFW(WmsLogTag::DMS, "No attribute changed");
-            continue;
-        }
-        agent->OnDisplayAttributeChange(displayInfo, attributes);
-        pidAgentTypeMap_[pid].erase(DisplayManagerAgentType::DISPLAY_ATTRIBUTE_CHANGED_LISTENER);
-        std::lock_guard<std::mutex> lock(lastDisplayInfoMapMutex_);
+        tasks.push_back(std::make_unique<AttributeTask>(agent, displayInfo, attributes, displayId, ctx.mgr));
+        hasTask = true;
+    }
+    if (hasTask) {
+        pidAgentTypes.erase(agentType);
     }
 }
 
-void ScreenSessionManager::NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
-    const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession)
+void ScreenSessionManager::CollectUnfreezedAgentTasks(int32_t pid, DisplayManagerAgentType agentType,
+    const UnfreezeNotifyContext& ctx, std::vector<std::unique_ptr<ScreenSessionManager::UnfreezeTask>>& tasks,
+    std::set<DisplayManagerAgentType>& pidAgentTypes)
 {
-    bool isAgentTypeNotify = false;
-    for (auto agentType : pidAgentTypes) {
-        if (agentType == DisplayManagerAgentType::DISPLAY_ATTRIBUTE_CHANGED_LISTENER) {
-            NotifyUnfreezedAttributeAgents(pid, unfreezedPidList, screenSession);
+    auto agents = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentsByType(agentType);
+    bool hasTask = false;
+    for (auto agent : agents) {
+        int32_t agentPid = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentPid(agent);
+        if (agent == nullptr || agentPid != pid) {
             continue;
         }
-        auto agents = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentsByType(agentType);
-        for (auto agent : agents) {
-            int32_t agentPid = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentPid(agent);
-            if (agent == nullptr|| agentPid != pid || unfreezedPidList.count(pid) == 0) {
-                continue;
-            }
-            isAgentTypeNotify = true;
-            if (agentType == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER) {
-                agent->OnDisplayChange(screenSession->ConvertToDisplayInfo(), DisplayChangeEvent::DISPLAY_UNFREEZED);
-            } else if (agentType == DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER) {
-                FoldDisplayMode displayMode = GetFoldDisplayMode();
-                agent->NotifyDisplayModeChanged(displayMode);
-            } else if (agentType == DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER) {
-                FoldStatus foldStatus = GetFoldStatus();
-                agent->NotifyFoldStatusChanged(foldStatus);
-            } else if (agentType == DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER) {
-                std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
-                agent->NotifyFoldAngleChanged(lastFoldAngles_);
-            } else if (agentType == DisplayManagerAgentType::SCREEN_EVENT_LISTENER) {
-                auto displayInfo = screenSession->ConvertToDisplayInfo();
-                auto screenInfo = GetScreenInfoById(displayInfo->GetScreenId());
-                std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
-                agent->OnScreenChange(screenInfo, lastScreenChangeEvent_);
-            } else if (agentType ==  DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER) {
-                std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
-                agent->NotifyDisplayChangeInfoChanged(lastDisplayChangeInfo_);
-            } else if (agentType ==  DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER) {
-                auto area = screenSession->GetAvailableArea();
-                auto displayId = screenSession->ConvertToDisplayInfo()->GetDisplayId();
-                std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
-                agent->NotifyAvailableAreaChanged(area, displayId);
+        hasTask = true;
+        if (agentType == DisplayManagerAgentType::DISPLAY_EVENT_LISTENER) {
+            tasks.push_back(std::make_unique<DisplayEventTask>(agent, ctx.displayInfo));
+        } else if (agentType == DisplayManagerAgentType::DISPLAY_MODE_CHANGED_LISTENER) {
+            tasks.push_back(std::make_unique<DisplayModeTask>(agent, ctx.mgr->GetFoldDisplayMode()));
+        } else if (agentType == DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER) {
+            tasks.push_back(std::make_unique<FoldStatusTask>(agent, ctx.mgr->GetFoldStatus()));
+        } else if (agentType == DisplayManagerAgentType::FOLD_ANGLE_CHANGED_LISTENER) {
+            tasks.push_back(std::make_unique<FoldAngleTask>(agent, ctx.lastFoldAngles));
+        } else if (agentType == DisplayManagerAgentType::SCREEN_EVENT_LISTENER) {
+            tasks.push_back(std::make_unique<ScreenEventTask>(agent, ctx.screenInfo, ctx.lastScreenChangeEvent));
+        } else if (agentType == DisplayManagerAgentType::DISPLAY_UPDATE_LISTENER) {
+            tasks.push_back(std::make_unique<DisplayUpdateTask>(agent, ctx.lastDisplayChangeInfo));
+        } else if (agentType == DisplayManagerAgentType::AVAILABLE_AREA_CHANGED_LISTENER) {
+            DisplayId displayId = ctx.displayInfo == nullptr ? DISPLAY_ID_INVALID : ctx.displayInfo->GetDisplayId();
+            tasks.push_back(std::make_unique<AvailableAreaTask>(agent, ctx.availableArea, displayId));
+        } else {
+            hasTask = false;
+            TLOGNFI(WmsLogTag::DMS, "Unknown agentType.");
+        }
+    }
+    if (hasTask) {
+        pidAgentTypes.erase(agentType);
+    }
+}
+
+void ScreenSessionManager::CollectUnfreezedTasks(const std::set<int32_t>& unfreezedPidList,
+    const UnfreezeNotifyContext& ctx, std::vector<std::unique_ptr<ScreenSessionManager::UnfreezeTask>>& tasks,
+    std::vector<std::pair<int32_t, std::set<DisplayManagerAgentType>>>& logData,
+    std::map<int32_t, std::set<DisplayManagerAgentType>>& pidAgentTypeMap)
+{
+    std::lock_guard<std::mutex> lock(ctx.mgr->freezedPidListMutex_);
+    for (auto iter = pidAgentTypeMap.begin(); iter != pidAgentTypeMap.end();) {
+        int32_t pid = iter->first;
+        if (unfreezedPidList.count(pid) == 0) {
+            ++iter;
+            continue;
+        }
+        auto& pidAgentTypes = iter->second;
+        logData.push_back({pid, pidAgentTypes});
+
+        auto agentTypesCopy = pidAgentTypes;
+        for (auto agentType : agentTypesCopy) {
+            if (agentType == DisplayManagerAgentType::DISPLAY_ATTRIBUTE_CHANGED_LISTENER) {
+                CollectUnfreezedAttributeTasks(pid, agentType, ctx, tasks, pidAgentTypes);
             } else {
-                isAgentTypeNotify = false;
-                TLOGNFI(WmsLogTag::DMS, "Unknown agentType.");
+                CollectUnfreezedAgentTasks(pid, agentType, ctx, tasks, pidAgentTypes);
             }
         }
-        if (isAgentTypeNotify) {
-            pidAgentTypeMap_[pid].erase(agentType);
+        if (pidAgentTypes.empty()) {
+            iter = pidAgentTypeMap.erase(iter);
+        } else {
+            ++iter;
         }
     }
 }
+
+void LogUnfreezedInfo(const std::vector<std::pair<int32_t, std::set<DisplayManagerAgentType>>>& logData)
+{
+    std::string result = "pid,type:";
+    for (auto& entry : logData) {
+        result.append(std::to_string(entry.first)).append(",");
+        for (auto type : entry.second) {
+            result.append(std::to_string(static_cast<int32_t>(type))).append(" ");
+        }
+        result.append("|");
+    }
+    TLOGNFW(WmsLogTag::DMS, "%{public}s", result.c_str());
+}
+
+std::vector<std::unique_ptr<ScreenSessionManager::UnfreezeTask>> ScreenSessionManager::BuildUnfreezedTasks(
+    const std::set<int32_t>& unfreezedPidList,
+    const UnfreezeNotifyContext& ctx,
+    std::map<int32_t, std::set<DisplayManagerAgentType>>& pidAgentTypeMap)
+{
+    std::vector<std::unique_ptr<ScreenSessionManager::UnfreezeTask>> tasks;
+    std::vector<std::pair<int32_t, std::set<DisplayManagerAgentType>>> logData;
+    CollectUnfreezedTasks(unfreezedPidList, ctx, tasks, logData, pidAgentTypeMap);
+    LogUnfreezedInfo(logData);
+    return tasks;
+}
+
 
 void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList,
     const sptr<ScreenSession>& screenSession)
 {
-    std::lock_guard<std::mutex> lock(freezedPidListMutex_);
-    std::ostringstream oss;
-    oss << "pid,type:";
-    for (auto iter = pidAgentTypeMap_.begin(); iter != pidAgentTypeMap_.end();) {
-        int32_t pid = iter->first;
-        auto pidAgentTypes = iter->second;
-        NotifyUnfreezedAgents(pid, unfreezedPidList, pidAgentTypes, screenSession);
-        if (pidAgentTypeMap_[pid].empty()) {
-            iter = pidAgentTypeMap_.erase(iter);
-        } else {
-            iter++;
-        }
-        oss << pid << ",";
-        for (auto type : pidAgentTypes) {
-            oss << static_cast<int32_t>(type) << " ";
-        }
-        oss << "|";
+    UnfreezeNotifyContext ctx;
+    ctx.mgr = this;
+    ctx.displayInfo = screenSession->ConvertToDisplayInfo();
+    if (ctx.displayInfo != nullptr) {
+        ctx.screenInfo = GetScreenInfoById(ctx.displayInfo->GetScreenId());
+        ctx.availableArea = screenSession->GetAvailableArea();
     }
-    TLOGNFW(WmsLogTag::DMS, "%{public}s", oss.str().c_str());
+    {
+        std::lock_guard<std::mutex> lock(lastStatusUpdateMutex_);
+        ctx.lastFoldAngles = lastFoldAngles_;
+        ctx.lastScreenChangeEvent = lastScreenChangeEvent_;
+        ctx.lastDisplayChangeInfo = lastDisplayChangeInfo_;
+    }
+
+    auto tasks = BuildUnfreezedTasks(unfreezedPidList, ctx, pidAgentTypeMap_);
+    for (auto& task : tasks) {
+        task->Execute();
+    }
+}
+
+void ScreenSessionManager::UpdateLastDisplayInfo(DisplayId displayId, sptr<DisplayInfo> displayInfo)
+{
+    std::lock_guard<std::mutex> lock(lastDisplayInfoMapMutex_);
+    lastDisplayInfoMap_[displayId] = displayInfo;
 }
 
 DMError ScreenSessionManager::ResetAllFreezeStatus()
