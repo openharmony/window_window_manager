@@ -493,7 +493,7 @@ HWTEST_F(SuperFoldPolicyTest, ChangeScreenDisplayModeToCoordination, TestSize.Le
     bool isScreenOn = true;
     SuperFoldPolicy::GetInstance().ChangeScreenDisplayModeToCoordination(isScreenOn);
     auto coordinationFlag = ScreenSessionManager::GetInstance().GetCoordinationFlag();
- 	EXPECT_TRUE(coordinationFlag);
+    EXPECT_TRUE(coordinationFlag);
     g_logMsg.clear();
 }
 
