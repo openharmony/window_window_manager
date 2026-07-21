@@ -254,11 +254,15 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
     }
 
     bool hasRemoteObj = false;
-    sptr<IRemoteObject> connectToRenderToken;
+    sptr<IRemoteObject> renderSession;
     if (data.ReadBool(hasRemoteObj)) {
         if (hasRemoteObj) {
-            connectToRenderToken = data.ReadRemoteObject();
+            renderSession = data.ReadRemoteObject();
+        } else {
+            TLOGE(WmsLogTag::DMS, "hasRemoteObj is false");
         }
+    } else {
+        TLOGE(WmsLogTag::DMS, "Read hasRemoteObj failed");
     }
 
     SessionOption option = {
@@ -274,7 +278,7 @@ int ScreenSessionManagerClientStub::HandleOnScreenConnectionChanged(MessageParce
         .rotation_ = rotationOptions.rotation_,
         .rotationOrientationMap_ = rotationOrientationMap,
         .isBooting_ = isBooting,
-        .connectToRenderToken_ = connectToRenderToken,
+        .renderSession_ = renderSession,
     };
     TLOGD(WmsLogTag::DMS,
         "ClientStub received callback parameters, isRotationLocked: %{public}d, rotation: %{public}d, "
