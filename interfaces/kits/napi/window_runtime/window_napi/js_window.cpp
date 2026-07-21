@@ -4674,6 +4674,7 @@ napi_value JsWindow::OnSetPreferredOrientationWithResult(napi_env env, napi_call
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnSetPreferredOrientationWithResult") != napi_status::napi_ok) {
         napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
             errMsgPrefix + "Send event failed."));
+        RemoveOrientationPromiseFromMap(promiseId);
     }
     return result;
 }
