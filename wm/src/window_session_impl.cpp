@@ -6084,13 +6084,13 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     if (!IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    uint32_t activeColorValue;
+    uint32_t activeColorValue = 0;
     if (!ColorParser::Parse(activeColor, activeColorValue)) {
         TLOGW(WmsLogTag::WMS_DECOR, "window: %{public}s, value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), activeColor.c_str(), activeColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    uint32_t inactiveColorValue;
+    uint32_t inactiveColorValue = 0;
     if (!ColorParser::Parse(inactiveColor, inactiveColorValue)) {
         TLOGW(WmsLogTag::WMS_DECOR, "window: %{public}s, value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), inactiveColor.c_str(), inactiveColorValue);
