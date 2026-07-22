@@ -42,14 +42,15 @@ public:
     static napi_value OffDestroy(napi_env env, napi_callback_info info);
     static napi_value GetFloatingBallWindowInfo(napi_env env, napi_callback_info info);
     static napi_value SetInApplicationVisible(napi_env env, napi_callback_info info);
+
     napi_value GetFloatingBallOptionFromJs(napi_env env, napi_value optionObject, FbOption& option);
     sptr<FloatingBallController> GetController() const;
 private:
     napi_value OnStartFloatingBall(napi_env env, napi_callback_info info);
     napi_value StartFloatingBallTask(napi_env env, const FbOption& option);
     napi_value OnUpdateFloatingBall(napi_env env, napi_callback_info info);
-    napi_value UpdateFloatingBallTask(napi_env env, const FbOption &option);
     napi_value OnSetInApplicationVisible(napi_env env, napi_callback_info info);
+    napi_value UpdateFloatingBallTask(napi_env env, const FbOption &option);
     napi_value OnStopFloatingBall(napi_env env, napi_callback_info info);
     napi_value OnRestoreMainWindow(napi_env env, napi_callback_info info);
 
@@ -74,8 +75,8 @@ private:
     WMError ProcessDestroyEventUnRegister(const sptr<JsFbWindowListener>& listener);
 
     template <typename T>
- 	void HandleProperty(napi_env env, napi_value optionObject, const char* propertyName,
- 	    void (FbOption::*setter)(const T&), FbOption& option);
+    void HandleProperty(napi_env env, napi_value optionObject, const char* propertyName,
+        void (FbOption::*setter)(const T&), FbOption& option);
     napi_value GetIcon(napi_env env, napi_value value, FbOption& option);
 
     sptr<FloatingBallController> fbController_ = nullptr;

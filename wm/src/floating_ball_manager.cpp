@@ -86,7 +86,7 @@ void FloatingBallManager::DoDestroy()
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "in");
     if (auto controller = GetActiveController()) {
-        controller->DestroyFloatingBallWindow("DoDestroy");
+        controller->DestroyFloatingBallWindow("MAIN_WINDOW_DESTROY_STOP");
     }
 }
 

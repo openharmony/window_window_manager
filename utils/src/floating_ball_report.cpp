@@ -27,7 +27,7 @@ WM_IMPLEMENT_SINGLE_INSTANCE(FloatingBallReporter)
 
 constexpr char EVENT_KEY_TEMPLATE_TYPE[] = "TEMPLATE_TYPE";
 constexpr char EVENT_KEY_PNAMEID[] = "PNAMEID";
-constexpr char EVENT_KEY_PVERSION[] = "PVERSION";
+constexpr char EVENT_KEY_PVERSION[] = "PVERSIONID";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_ERROR_REASON[] = "ERROR_REASON";
 
@@ -43,8 +43,8 @@ std::string FloatingBallReporter::GetPackageName() const
     return packageName_;
 }
 
-void FloatingBallReporter::ReportFbEvent(const std::string& eventName, const uint32_t& templateType,
-    const std::string& errorReason)
+void FloatingBallReporter::ReportFbEvent(const std::string &eventName, const uint32_t& templateType,
+    const std::string &errorReason)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "Report ReportFbEvent, eventName:%{public}s, templateType:%{public}u",
         eventName.c_str(), templateType);

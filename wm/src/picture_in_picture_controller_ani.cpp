@@ -89,7 +89,8 @@ WMError PictureInPictureControllerAni::CreatePictureInPictureWindow(StartPipType
     }
     TLOGI(WmsLogTag::WMS_PIP, "mainWindow:%{public}u, mainWindowState:%{public}u",
         mainWindowId_, mainWindow_->GetWindowState());
-    mainWindowLifeCycleListener_ = sptr<PictureInPictureControllerAni::WindowLifeCycleListener>::MakeSptr();
+    mainWindowLifeCycleListener_ =
+        sptr<PictureInPictureControllerAni::WindowLifeCycleListener>::MakeSptr(mainWindowId_);
     mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
     if (startType != StartPipType::AUTO_START && mainWindow_->GetWindowState() != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is not shown. create failed.");
@@ -140,7 +141,7 @@ WMError PictureInPictureControllerAni::StartPictureInPicture(StartPipType startT
         return WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
     curState_ = PiPWindowState::STATE_STARTING;
-    startTimestamp_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+    startTimestamp_ =  std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     bool reachLimit = PictureInPictureManager::IsPipGroupLimitReached(
         static_cast<PiPTemplateType>(pipOption_->GetPipTemplate()));
