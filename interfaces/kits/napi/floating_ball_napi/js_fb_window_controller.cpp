@@ -205,7 +205,6 @@ napi_value JsFbController::OnUpdateFloatingBall(napi_env env, napi_callback_info
     napi_value argv[1] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
-
         return NapiThrowInvalidParam(env, "[FBWindow][updateFloatingBall]msg: Missing args when update floating ball",
             ARKUI_WINDOW_FB_UPDATEFLOATINGBALL, ARKUI_WINDOW_FB_UPDATEFLOATINGBALL_BOOL);
     }
@@ -405,9 +404,9 @@ napi_value JsFbController::OnRestoreMainWindow(napi_env env, napi_callback_info 
     if (!AppExecFwk::UnwrapWant(env, wantValue, want)) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "unWrap want failed.");
         return NapiThrowInvalidParam(env, "[FBWindow][restoreMainWindow]msg: "
-                                          "Incorrect parameter, parameter must be want.",
-                                          ARKUI_WINDOW_FB_ONRESTOREMAINWINDOW,
-                                          ARKUI_WINDOW_FB_ONRESTOREMAINWINDOW_BOOL);
+                                    "Incorrect parameter, parameter must be want.",
+                                     ARKUI_WINDOW_FB_ONRESTOREMAINWINDOW,
+                                     ARKUI_WINDOW_FB_ONRESTOREMAINWINDOW_BOOL);
     }
 
     std::shared_ptr<AAFwk::Want> abilityWant = std::make_shared<AAFwk::Want>(want);
@@ -457,7 +456,7 @@ void JsFbController::HandleProperty(napi_env env, napi_value optionObject, const
         napi_value propertyValue = nullptr;
         napi_get_named_property(env, optionObject, propertyName, &propertyValue);
         T value;
-        if(ConvertFromJsValue(env, propertyValue, value)) {
+        if (ConvertFromJsValue(env, propertyValue, value)) {
             (option.*setter)(value);
         }
     }

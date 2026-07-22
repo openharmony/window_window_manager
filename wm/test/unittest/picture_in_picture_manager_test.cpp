@@ -610,8 +610,10 @@ HWTEST_F(PictureInPictureManagerTest, GetSameGroupWindowByMainWindowId, TestSize
     pipController->mainWindowId_ = 400;
     PictureInPictureManager::windowToControllerMap_.clear();
     PictureInPictureManager::PutPipControllerInfo(400, pipController);
-    ASSERT_EQ(mw.GetRefPtr(), PictureInPictureManager::GetSameGroupWindowByMainWindowId(400, PiPTemplateType::VIDEO_PLAY).GetRefPtr());
-    ASSERT_EQ(nullptr, PictureInPictureManager::GetSameGroupWindowByMainWindowId(999, PiPTemplateType::VIDEO_PLAY).GetRefPtr());
+    ASSERT_EQ(mw.GetRefPtr(),
+              PictureInPictureManager::GetSameGroupWindowByMainWindowId(400, PiPTemplateType::VIDEO_PLAY).GetRefPtr());
+    ASSERT_EQ(nullptr,
+              PictureInPictureManager::GetSameGroupWindowByMainWindowId(999, PiPTemplateType::VIDEO_PLAY).GetRefPtr());
     PictureInPictureManager::RemovePipControllerInfo(400);
 }
 

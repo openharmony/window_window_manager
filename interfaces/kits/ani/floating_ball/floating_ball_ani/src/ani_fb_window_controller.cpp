@@ -634,7 +634,7 @@ void AniFbController::OnrestoreMainWindowAni(ani_env* env, ani_object want)
 }
 
 bool AniFbController::IsCallbackRegistered(ani_env* env, FbListenerType fbListenerType, ani_ref callback)
-{   
+{
     std::lock_guard<std::mutex> lock(mtxListener_);
     // check typeCallbackListenerMap_
     if (typeCallbackListenerMap_.empty() ||

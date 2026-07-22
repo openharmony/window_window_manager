@@ -338,7 +338,7 @@ ani_status OHOS::Rosen::ANI_Manager_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void*>(AniPipManager::GetCustomUIController)},
         ani_native_function{"GetTypeNode", nullptr, reinterpret_cast<void*>(AniPipManager::GetTypeNode)},
         ani_native_function{"RegisterCallback", nullptr, reinterpret_cast<void*>(AniPipManager::RegisterCallback)},
-        ani_native_function{"UnregisterCallback", nullptr,reinterpret_cast<void*>(AniPipManager::UnregisterCallback)},
+        ani_native_function{"UnregisterCallback", nullptr, reinterpret_cast<void*>(AniPipManager::UnregisterCallback)},
         ani_native_function{"SetTypeNodeEnabled", nullptr, reinterpret_cast<void*>(AniPipManager::SetTypeNodeEnabled)},
         ani_native_function{"SetPipNodeType", nullptr, reinterpret_cast<void*>(AniPipManager::SetPipNodeType)},
     };
