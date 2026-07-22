@@ -2756,16 +2756,16 @@ HWTEST_F(ScreenSessionManagerTest, HandleResolutionEffectChangeWhenRotate, TestS
     screenSession->SetScreenType(ScreenType::REAL);
     screenSession->isInternal_ = true;
 
-    ssm_->HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType::ROTATION_END, 0);
+    ssm_->HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType::ROTATION_END, 0, 0);
     EXPECT_TRUE(g_errLog.find("Internal Session null") != std::string::npos);
     g_errLog.clear();
 
     ssm_->screenSessionMap_[51] = screenSession;
-    ssm_->HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType::ROTATION_BEGIN, 0);
+    ssm_->HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType::ROTATION_BEGIN, 0, 0);
     EXPECT_TRUE(g_errLog.find("recovery") != std::string::npos);
     g_errLog.clear();
 
-    ssm_->HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType::ROTATION_END, 90);
+    ssm_->HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType::ROTATION_END, 90, 0);
     EXPECT_TRUE(g_errLog.find("start") != std::string::npos);
     g_errLog.clear();
     ssm_->screenSessionMap_.erase(51);
@@ -3225,6 +3225,24 @@ HWTEST_F(ScreenSessionManagerTest, GetBrightnessInfo, TestSize.Level1)
     EXPECT_NE(brightnessInfo.maxHeadroom, 0);
     EXPECT_NE(brightnessInfo.sdrNits, 0);
     GTEST_LOG_(INFO) << "GetBrightnessInfo end";
+}
+
+/**
+ * @tc.name: GetBrightnessInfo02
+ * @tc.desc: normal function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, GetBrightnessInfo02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "GetBrightnessInfo02 start";
+    sptr<ScreenSession> screenSession = new ScreenSession(51, ScreenProperty(), 0);
+    ASSERT_NE(nullptr, screenSession);
+    ssm_->screenSessionMap_[51] = screenSession;
+    screenSession->SetScreenAvailableStatus(false);
+    ScreenBrightnessInfo brightnessInfo;
+    auto ret = ssm_->GetBrightnessInfo(51, brightnessInfo);
+    EXPECT_EQ(ret, DMError::DM_ERROR_ILLEGAL_PARAM);
+    GTEST_LOG_(INFO) << "GetBrightnessInfo02 end";
 }
 
 /**

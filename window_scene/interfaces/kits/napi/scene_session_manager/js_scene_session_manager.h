@@ -109,6 +109,7 @@ public:
     static napi_value UnregisterRssData(napi_env env, napi_callback_info info);
     static napi_value NotifySessionRecoverStatus(napi_env env, napi_callback_info info);
     static napi_value UpdateSessionDisplayId(napi_env env, napi_callback_info info);
+    static napi_value UpdateScreenSupportMultiWindow(napi_env env, napi_callback_info info);
     static napi_value NotifyStackEmpty(napi_env env, napi_callback_info info);
     static napi_value SetSystemAnimatedScenes(napi_env env, napi_callback_info info);
     static napi_value GetSessionSnapshotPixelMap(napi_env env, napi_callback_info info);
@@ -215,11 +216,18 @@ public:
      */
     static napi_value SyncFloatViewLimits(napi_env env, napi_callback_info info);
 
+    /**
+     * Config
+     */
+    static napi_value GetConfigByApp(napi_env env, napi_callback_info info);
+    static napi_value GetConfigByKeys(napi_env env, napi_callback_info info);
+
 private:
     napi_value OnSetBehindWindowFilterEnabled(napi_env env, napi_callback_info info);
     napi_value OnRegisterCallback(napi_env env, napi_callback_info info);
     napi_value OnGetRootSceneSession(napi_env env, napi_callback_info info);
     napi_value OnRequestSceneSession(napi_env env, napi_callback_info info);
+    napi_value OnKioskModeChange(napi_env env, napi_callback_info info);
     napi_value OnUpdateSceneSessionWant(napi_env env, napi_callback_info info);
     napi_value OnRequestSceneSessionActivation(napi_env env, napi_callback_info info);
     napi_value OnRequestSceneSessionBackground(napi_env env, napi_callback_info info);
@@ -229,6 +237,7 @@ private:
     napi_value OnRequestSceneSessionByCall(napi_env env, napi_callback_info info);
     napi_value OnStartAbilityBySpecified(napi_env env, napi_callback_info info);
     napi_value OnStartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    napi_value OnNotifyStartWindowsAbility(napi_env env, napi_callback_info info);
     napi_value OnChangeUIAbilityVisibilityBySCB(napi_env env, napi_callback_info info);
     napi_value OnGetWindowSceneConfig(napi_env env, napi_callback_info info);
     napi_value OnGetSystemConfig(napi_env env, napi_callback_info info);
@@ -264,6 +273,7 @@ private:
     napi_value OnRegisterRssData(napi_env env, napi_callback_info info);
     napi_value OnUnregisterRssData(napi_env env, napi_callback_info info);
     napi_value OnUpdateSessionDisplayId(napi_env env, napi_callback_info info);
+    napi_value OnUpdateScreenSupportMultiWindow(napi_env env, napi_callback_info info);
     napi_value OnNotifyStackEmpty(napi_env env, napi_callback_info info);
     napi_value OnUpdateTitleInTargetPos(napi_env env, napi_callback_info info);
     napi_value OnSetSystemAnimatedScenes(napi_env env, napi_callback_info info);
@@ -425,6 +435,7 @@ private:
      * Window Lifecycle
      */
     static napi_value RequestSceneSession(napi_env env, napi_callback_info info);
+    static napi_value KioskModeChange(napi_env env, napi_callback_info info);
     static napi_value UpdateSceneSessionWant(napi_env env, napi_callback_info info);
     static napi_value RequestSceneSessionActivation(napi_env env, napi_callback_info info);
     static napi_value RequestSceneSessionBackground(napi_env env, napi_callback_info info);
@@ -434,6 +445,7 @@ private:
     static napi_value RequestSceneSessionByCall(napi_env env, napi_callback_info info);
     static napi_value StartAbilityBySpecified(napi_env env, napi_callback_info info);
     static napi_value StartUIAbilityBySCB(napi_env env, napi_callback_info info);
+    static napi_value NotifyStartWindowsAbility(napi_env env, napi_callback_info info);
     napi_value OnGetApplicationInfo(napi_env env, napi_callback_info info);
     napi_value OnSupportCreateFloatWindow(napi_env env, napi_callback_info info);
     void RegisterSceneSessionDestructCallback();
@@ -458,7 +470,7 @@ private:
         bool isFromScreenVirtual, bool isToScreenVirtual);
 
     napi_env env_;
-    std::shared_mutex jsCbMapMutex_;
+    std::mutex jsCbMapMutex_;
     std::map<std::string, std::shared_ptr<NativeReference>> jsCbMap_;
 
     sptr<RootScene> rootScene_;
@@ -493,7 +505,13 @@ private:
      */
     napi_value OnSyncFloatViewLimits(napi_env env, napi_callback_info info);
     void RegisterGetFloatViewLimitCallback();
-    bool OnRegisterGetFloatViewLimitCallback(std::map<uint32_t, FloatViewLimits>& fvlimit);
+    void OnGetFloatViewLimitCallback();
+
+    /**
+     * Config
+     */
+    napi_value OnGetConfigByApp(napi_env env, napi_callback_info info);
+    napi_value OnGetConfigByKeys(napi_env env, napi_callback_info info);
 };
 } // namespace OHOS::Rosen
 

@@ -61,11 +61,14 @@ ohos_shared_library("window_static_env_module") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "icu:shared_icuuc",
     "image_framework:image",
     "image_framework:image_native",
     "image_framework:image_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
+    "node:node_header_notice",
+    "libuv:uv",
   ]
 
   innerapi_tags = [ "platformsdk" ]

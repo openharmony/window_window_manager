@@ -123,8 +123,10 @@ enum class ListenerFuncType : uint32_t {
     COMPATIBLE_MODE_CHANGE_CB,
     RECOVER_WINDOW_EFFECT_CB,
     PRE_CALC_WINDOW_PROPERTY_CB,
+    FLOAT_VIEW_CLICK_CB,
     FLOAT_VIEW_STOP_CB,
     FLOAT_VIEW_UPDATE_CB,
+    SPLIT_RATIO_CHANGE_CB,
 };
 
 class SceneSession;
@@ -195,6 +197,7 @@ private:
     static napi_value SetPrivacyMode(napi_env env, napi_callback_info info);
     static napi_value SetFloatingScale(napi_env env, napi_callback_info info);
     static napi_value SetIsMidScene(napi_env env, napi_callback_info info);
+    static napi_value SetIsGamePrelaunch(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value ResetOcclusionAlpha(napi_env env, napi_callback_info info);
     static napi_value SetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
@@ -321,6 +324,7 @@ private:
     napi_value OnSetPrivacyMode(napi_env env, napi_callback_info info);
     napi_value OnSetFloatingScale(napi_env env, napi_callback_info info);
     napi_value OnSetIsMidScene(napi_env env, napi_callback_info info);
+    napi_value OnSetIsGamePrelaunch(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnResetOcclusionAlpha(napi_env env, napi_callback_info info);
     napi_value OnSetSystemSceneForceUIFirst(napi_env env, napi_callback_info info);
@@ -506,7 +510,9 @@ private:
     void ProcessFloatViewStopRegister();
     void OnFloatViewStop(const std::string& reason);
     void ProcessFloatViewUpdateRegister();
+    void ProcessFloatViewClickRegister();
     void OnFloatViewUpdate(const FloatViewTemplateInfo& fvTemplateInfo);
+    void OnFloatViewClick();
 
     /*
      * Window Property
@@ -632,6 +638,8 @@ private:
      */
     void ProcessCompatibleModeChangeRegister();
     void OnCompatibleModeChange(CompatibleStyleMode mode);
+    void ProcessSplitRatioChangeRegister();
+    void OnSplitRatioChange(float newRatio);
 
     bool HandleCloseKeyboardSyncTransactionKeyboardBaseInfo(napi_env env,
         napi_value argv[], int index, KeyboardBaseInfo& keyboardBaseInfo);

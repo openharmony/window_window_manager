@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ const std::string FLOATING_BALL_STOP_CB = "prepareRemoveFb";
 const std::string FLOATING_BALL_RESTORE_MAIN_WINDOW_CB = "restoreFbMainWindow";
 const std::string FLOAT_VIEW_STOP_CB = "prepareRemoveFv";
 const std::string FLOAT_VIEW_UPDATE_CB = "updateFvTemplateInfo";
+const std::string FLOAT_VIEW_CLICK_CB = "clickFloatView";
 const std::string WINDOW_MOVING_CB = "windowMoving";
 const std::string SESSION_PIP_CONTROL_STATUS_CHANGE_CB = "sessionPiPControlStatusChange";
 const std::string SESSION_AUTO_START_PIP_CB = "autoStartPiP";
@@ -126,6 +127,7 @@ const std::string SNAPSHOT_SKIP_CHANGE_CB = "snapshotSkipChange";
 const std::string COMPATIBLE_MODE_CHANGE_CB = "compatibleModeChange";
 const std::string RECOVER_WINDOW_EFFECT_CB = "recoverWindowEffect";
 const std::string PRE_CALC_WINDOW_PROPERTY_CB = "preCalcWindowProperty";
+const std::string SPLIT_RATIO_CHANGE_CB = "splitRatioChange";
 
 constexpr int ARG_COUNT_1 = 1;
 constexpr int ARG_COUNT_2 = 2;
@@ -244,6 +246,8 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {PRE_CALC_WINDOW_PROPERTY_CB,           ListenerFuncType::PRE_CALC_WINDOW_PROPERTY_CB},
     {FLOAT_VIEW_STOP_CB,                    ListenerFuncType::FLOAT_VIEW_STOP_CB},
     {FLOAT_VIEW_UPDATE_CB,                  ListenerFuncType::FLOAT_VIEW_UPDATE_CB},
+    {FLOAT_VIEW_CLICK_CB,                   ListenerFuncType::FLOAT_VIEW_CLICK_CB},
+    {SPLIT_RATIO_CHANGE_CB,                 ListenerFuncType::SPLIT_RATIO_CHANGE_CB},
 };
 
 const std::vector<std::string> g_syncGlobalPositionPermission {
@@ -390,6 +394,8 @@ static napi_value CreateFvTemplateInfo(napi_env env, const FloatViewTemplateInfo
         CreateJsValue(env, fvTemplateInfo.showWhenCreate_));
     napi_set_named_property(env, fvTemplateInfoValue, "id",
         CreateJsValue(env, fvTemplateInfo.id_));
+    napi_set_named_property(env, fvTemplateInfoValue, "isConfirmOnClose",
+        CreateJsValue(env, fvTemplateInfo.closeConfirm_));
 
     napi_value jsRect = CreateJsSessionRect(env, fvTemplateInfo.rect_);
     if (jsRect == nullptr) {
@@ -519,8 +525,8 @@ napi_value JsSceneSession::Create(napi_env env, const sptr<SceneSession>& sessio
         CreateJsValue(env, session->IsSubWindowOutlineEnabled()));
     napi_set_named_property(env, objValue, "zLevelAboveParentLoosened",
         CreateJsValue(env, session->IsSubWindowZLevelAboveParentLoosened()));
-    napi_set_named_property(env, objValue, "requestOrientation",
-        CreateJsValue(env, session->GetSessionInfo().specificSessionRequestOrientation_));
+    napi_set_named_property(env, objValue, "isDecorEnable",
+        CreateJsValue(env, session->GetSessionProperty()->IsDecorEnable()));
     ParseMetadataConfiguration(env, objValue, session);
     sptr<WindowSessionProperty> sessionProperty = session->GetSessionProperty();
     if (sessionProperty != nullptr) {
@@ -636,6 +642,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
         moduleName, JsSceneSession::MarkSystemSceneUIFirst);
     BindNativeFunction(env, objValue, "setFloatingScale", moduleName, JsSceneSession::SetFloatingScale);
     BindNativeFunction(env, objValue, "setIsMidScene", moduleName, JsSceneSession::SetIsMidScene);
+    BindNativeFunction(env, objValue, "setIsGamePrelaunch", moduleName, JsSceneSession::SetIsGamePrelaunch);
     BindNativeFunction(env, objValue, "setScale", moduleName, JsSceneSession::SetScale);
     BindNativeFunction(env, objValue, "setWindowLastSafeRect", moduleName, JsSceneSession::SetWindowLastSafeRect);
     BindNativeFunction(env, objValue, "getParentWindowRect", moduleName, JsSceneSession::GetParentWindowRect);
@@ -1541,7 +1548,7 @@ void JsSceneSession::ProcessClearSubSessionRegister()
         }
         jsSceneSession->OnClearSubSession(subPersistentId);
     });
-    TLOGI(WmsLogTag::WMS_LIFE, "success");
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
 
 void JsSceneSession::ProcessBindDialogTargetRegister()
@@ -1687,6 +1694,24 @@ void JsSceneSession::ProcessFloatViewUpdateRegister()
             return;
         }
         jsSceneSession->OnFloatViewUpdate(fvTemplateInfo);
+    });
+    TLOGD(WmsLogTag::WMS_LIFE, "success");
+}
+
+void JsSceneSession::ProcessFloatViewClickRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->SetFloatViewClickCallback([weakThis = wptr(this)]() {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGE(WmsLogTag::WMS_LIFE, "ProcessFloatViewClickRegister jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnFloatViewClick();
     });
     TLOGD(WmsLogTag::WMS_LIFE, "success");
 }
@@ -2751,6 +2776,7 @@ napi_value JsSceneSession::UpdateFullScreenWaterfallMode(napi_env env, napi_call
 
 napi_value JsSceneSession::UpdateSizeChangeReason(napi_env env, napi_callback_info info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_JsSceneSession::UpdateSizeChangeReason");
     TLOGD(WmsLogTag::WMS_LAYOUT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnUpdateSizeChangeReason(env, info) : nullptr;
@@ -2856,9 +2882,17 @@ napi_value JsSceneSession::SetFloatingScale(napi_env env, napi_callback_info inf
 
 napi_value JsSceneSession::SetIsMidScene(napi_env env, napi_callback_info info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_JsSceneSession::SetIsMidScene");
     TLOGD(WmsLogTag::WMS_MULTI_WINDOW, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetIsMidScene(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::SetIsGamePrelaunch(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnSetIsGamePrelaunch(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetSCBKeepKeyboard(napi_env env, napi_callback_info info)
@@ -3071,6 +3105,7 @@ napi_value JsSceneSession::ActivateDragBySystem(napi_env env, napi_callback_info
 
 napi_value JsSceneSession::SetNeedSyncSessionRect(napi_env env, napi_callback_info info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_JsSceneSession::SetNeedSyncSessionRect");
     TLOGD(WmsLogTag::WMS_PIPELINE, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetNeedSyncSessionRect(env, info) : nullptr;
@@ -3651,14 +3686,20 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
         case static_cast<uint32_t>(ListenerFuncType::RECOVER_WINDOW_EFFECT_CB):
             ProcessRecoverWindowEffectRegister();
             break;
-        case static_cast<uint32_t>(ListenerFuncType::PRE_CALC_WINDOW_PROPERTY_CB):
-            ProcessPreCalcWindowPropertyRegister();
-            break;
         case static_cast<uint32_t>(ListenerFuncType::FLOAT_VIEW_STOP_CB):
             ProcessFloatViewStopRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::FLOAT_VIEW_UPDATE_CB):
             ProcessFloatViewUpdateRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::PRE_CALC_WINDOW_PROPERTY_CB):
+            ProcessPreCalcWindowPropertyRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::FLOAT_VIEW_CLICK_CB):
+            ProcessFloatViewClickRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::SPLIT_RATIO_CHANGE_CB):
+            ProcessSplitRatioChangeRegister();
             break;
         default:
             break;
@@ -4681,6 +4722,26 @@ void JsSceneSession::OnFloatViewUpdate(const FloatViewTemplateInfo& fvTemplateIn
         }
         napi_value argv[] = {jsFvTemplateInfo};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task, __func__);
+}
+
+void JsSceneSession::OnFloatViewClick()
+{
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "OnFloatViewClick jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(FLOAT_VIEW_CLICK_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LAYOUT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
@@ -6205,6 +6266,37 @@ napi_value JsSceneSession::OnSetIsMidScene(napi_env env, napi_callback_info info
     return NapiGetUndefined(env);
 }
 
+napi_value JsSceneSession::OnSetIsGamePrelaunch(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARGC_FOUR;
+    napi_value argv[ARGC_FOUR] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_ONE) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    bool isGamePrelaunch = false;
+    if (!ConvertFromJsValue(env, argv[0], isGamePrelaunch)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isGamePrelaunch");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    session->EditSessionInfo().isGamePrelaunch_ = isGamePrelaunch;
+    TLOGI(WmsLogTag::WMS_LIFE, "[gameprelaunch]id: %{public}d, isGamePrelaunch: %{public}d",
+        session->GetPersistentId(), isGamePrelaunch);
+    return NapiGetUndefined(env);
+}
+
 napi_value JsSceneSession::OnSetSCBKeepKeyboard(napi_env env, napi_callback_info info)
 {
     size_t argc = 4;
@@ -6494,6 +6586,7 @@ napi_value JsSceneSession::SetScale(napi_env env, napi_callback_info info)
     if (Session::IsScbCoreEnabled()) {
         return nullptr;
     }
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_JsSceneSession::SetScale");
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetScale(env, info) : nullptr;
@@ -6606,6 +6699,7 @@ napi_value JsSceneSession::OnSetWindowLastSafeRect(napi_env env, napi_callback_i
 
 napi_value JsSceneSession::SetMovable(napi_env env, napi_callback_info info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_JsSceneSession::SetMovable");
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetMovable(env, info) : nullptr;
 }
@@ -6695,8 +6789,8 @@ napi_value JsSceneSession::OnRequestHideKeyboard(napi_env env, napi_callback_inf
 
 napi_value JsSceneSession::OnSendFbActionEvent(napi_env env, napi_callback_info info)
 {
-    size_t argc = 1;
-    napi_value argv[1] = {nullptr};
+    size_t argc = ARG_COUNT_2;
+    napi_value argv[ARG_COUNT_2] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc < 1) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Argc count is invalid: %{public}zu", argc);
@@ -6706,18 +6800,26 @@ napi_value JsSceneSession::OnSendFbActionEvent(napi_env env, napi_callback_info 
     }
     std::string action;
     if (!ConvertFromJsValue(env, argv[0], action)) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert parameter to string");
+        TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert action parameter to string");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
                                       "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
-
+    std::string reason = "";
+    if (argc == ARG_COUNT_2) {
+        if (!ConvertFromJsValue(env, argv[1], reason)) {
+            TLOGE(WmsLogTag::WMS_SYSTEM, "Failed to convert reason parameter to string");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                                        "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+    }
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->SendFbActionEvent(action);
+    session->SendFbActionEvent(action, reason);
     return NapiGetUndefined(env);
 }
 
@@ -7418,23 +7520,19 @@ napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
 
     bool useFfrt = false;
-    if (argc >= ARGC_ONE && GetType(env, argv[0]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[0], useFfrt)) {
-            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to useFfrt");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
+    if (argc >= ARGC_ONE && GetType(env, argv[0]) == napi_boolean && !ConvertFromJsValue(env, argv[0], useFfrt)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to useFfrt");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
 
     bool needPersist = false;
-    if (argc >= ARGC_TWO && GetType(env, argv[1]) == napi_boolean) {
-        if (!ConvertFromJsValue(env, argv[1], needPersist)) {
-            TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to needPersist");
-            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
-                "Input parameter is missing or invalid"));
-            return NapiGetUndefined(env);
-        }
+    if (argc >= ARGC_TWO && GetType(env, argv[1]) == napi_boolean && !ConvertFromJsValue(env, argv[1], needPersist)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to needPersist");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
     }
 
     std::shared_ptr<NativeReference> jsCallBack = nullptr;
@@ -7453,6 +7551,15 @@ napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
             return NapiGetUndefined(env);
         }
     }
+
+    bool isForAnco = false;
+    if (argc >= ARGC_FOUR && GetType(env, argv[3]) == napi_boolean && !ConvertFromJsValue(env, argv[3], isForAnco)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to isForAnco");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
     auto callback = [weakThis = wptr(this), persistentId = persistentId_, jsCallBack, env = env_, where = __func__] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
@@ -7476,7 +7583,9 @@ napi_value JsSceneSession::OnAddSnapshot(napi_env env, napi_callback_info info)
         return NapiGetUndefined(env);
     }
     session->NotifyAddSnapshot(useFfrt, needPersist, true, std::move(callback));
-    session->SetIsNeedRemoveSnapShot(false);
+    if (isForAnco) {
+        session->SetIsNeedRemoveSnapShot(false);
+    }
     return NapiGetUndefined(env);
 }
 
@@ -7487,8 +7596,20 @@ napi_value JsSceneSession::OnRemoveSnapshot(napi_env env, napi_callback_info inf
         TLOGE(WmsLogTag::WMS_PATTERN, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    bool isForAnco = false;
+    if (argc >= ARGC_ONE && GetType(env, argv[0]) == napi_boolean && !ConvertFromJsValue(env, argv[0], isForAnco)) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to convert parameter to isForAnco");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
     session->NotifyRemoveSnapshot();
-    session->SetIsNeedRemoveSnapShot(true);
+    if (isForAnco) {
+        session->SetIsNeedRemoveSnapShot(true);
+    }
     return NapiGetUndefined(env);
 }
 
@@ -9723,6 +9844,31 @@ void JsSceneSession::ProcessCompatibleModeChangeRegister()
     });
 }
 
+void JsSceneSession::ProcessSplitRatioChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "session is nullptr, id:%{public}d", persistentId_);
+        return;
+    }
+    session->RegisterSplitRatioChangeCallback([weakThis = wptr(this)](float newRatio) {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnSplitRatioChange(newRatio);
+    });
+    auto property = session->GetSessionProperty();
+    if (property != nullptr) {
+        auto ratio = property->GetHookWindowInfo().widthHookRatio;
+        TLOGI(WmsLogTag::WMS_COMPAT, "windowId: %{public}d, ratio: %{public}f", persistentId_, ratio);
+        if (!MathHelper::NearEqual(ratio, HookWindowInfo::DEFAULT_WINDOW_SIZE_HOOK_RATIO)) {
+            session->NotifySplitRatioChanged(ratio);
+        }
+    }
+}
+
 void JsSceneSession::OnCompatibleModeChange(CompatibleStyleMode mode)
 {
     TLOGI(WmsLogTag::WMS_COMPAT, "compatible mode change to: %{public}d", mode);
@@ -9738,6 +9884,25 @@ void JsSceneSession::OnCompatibleModeChange(CompatibleStyleMode mode)
             return;
         }
         napi_value argv[] = { CreateJsValue(env, mode) };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+    }, __func__);
+}
+
+void JsSceneSession::OnSplitRatioChange(float newRatio)
+{
+    TLOGI(WmsLogTag::WMS_COMPAT, "split ratio change to: %{public}f", newRatio);
+    taskScheduler_->PostMainThreadTask([weakThis = wptr(this), persistentId = persistentId_, newRatio, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "jsSceneSession id:%{public}d has been destroyed", persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(SPLIT_RATIO_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_COMPAT, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, newRatio) };
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     }, __func__);
 }
