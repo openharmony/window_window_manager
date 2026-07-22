@@ -59,7 +59,7 @@ ani_status AniPipManager::Init(ani_env* env, ani_namespace nsp)
 AniPipManager::AniPipManager(){TLOGI(WmsLogTag::WMS_PIP, "AniPipManager");}
 AniPipManager::~AniPipManager(){TLOGI(WmsLogTag::WMS_PIP, "~AniPipManager");}
 
-void AniPipManager::InitXComponentController(ani_env* env, ani_long nativeObj,
+void AniPipManager::InitXComponentController(ani_env* env, ani_long nativeObj, 
     ani_int windowId, ani_object xComponentController)
 {
     TLOGI(WmsLogTag::WMS_PIP, "start");
@@ -85,6 +85,12 @@ void AniPipManager::OnInitXComponentController(ani_env* env, ani_int windowId, a
     auto pipController = PictureInPictureManager::GetPipControllerInfo(pipWindowId);
     if (pipController == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pipController");
+        return;
+    }
+    PiPWindowState curControllerState = pipController->GetControllerState();
+    if (curControllerState == PiPWindowState::STATE_STOPPING || curControllerState == PiPWindowState::STATE_STOPPED) {
+        TLOGE(WmsLogTag::WMS_PIP, "PiPWindowState %{public}u, is STATE_STOPPING or STATE_STOPPED, "
+                                  "not to set xComponentController", curControllerState);
         return;
     }
     TLOGI(WmsLogTag::WMS_PIP, "set xComponentController to window: %{public}u", windowId);
@@ -298,7 +304,7 @@ void AniPipManager::OnUnregisterCallback(ani_env* env, ani_int windowId, ani_str
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "UnRegisterPipContentListenerWithType to window:%{public}d", pipWindowId);
+    TLOGI(WmsLogTag::WMS_PIP, "UnRegisterPipContentListenerWithType to window:%{public}d", windowId);
     WMError errCode = pipController->UnRegisterPipContentListenerWithType(cbType);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to set UnRegisterPipContentListenerWithType");
@@ -332,7 +338,7 @@ ani_status OHOS::Rosen::ANI_Manager_Constructor(ani_vm *vm, uint32_t *result)
             reinterpret_cast<void*>(AniPipManager::GetCustomUIController)},
         ani_native_function{"GetTypeNode", nullptr, reinterpret_cast<void*>(AniPipManager::GetTypeNode)},
         ani_native_function{"RegisterCallback", nullptr, reinterpret_cast<void*>(AniPipManager::RegisterCallback)},
-        ani_native_function{"UnregisterCallback", nullptr, reinterpret_cast<void*>(AniPipManager::UnregisterCallback)},
+        ani_native_function{"UnregisterCallback", nullptr,reinterpret_cast<void*>(AniPipManager::UnregisterCallback)},
         ani_native_function{"SetTypeNodeEnabled", nullptr, reinterpret_cast<void*>(AniPipManager::SetTypeNodeEnabled)},
         ani_native_function{"SetPipNodeType", nullptr, reinterpret_cast<void*>(AniPipManager::SetPipNodeType)},
     };

@@ -133,7 +133,7 @@ ani_status CreateBusinessError(ani_env* env, int32_t error, std::string message,
         return status;
     }
     ani_method aniCtor = nullptr;
-    status = env->Class_FindMethod(aniClass, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &aniCtor);
+    status = env->Class_FindMethod(aniClass, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &aniCtor);
     if (status != ANI_OK) {
         TLOGE(WmsLogTag::DEFAULT, "[FB]ctor not found, status:%{public}d", static_cast<int32_t>(status));
         return status;
@@ -222,7 +222,7 @@ void* GetAbilityContext(ani_env *env, ani_object aniObj)
         TLOGE(WmsLogTag::WMS_SYSTEM,  "[FB]get field fail, status : %{public}d", status);
         return nullptr;
     }
-    return (void*)nativeContextLong;
+    return reinterpret_cast<void*>(nativeContextLong);
 }
 
 ani_status GetContextPtr(ani_env* env, ani_object floatingBallConfigurations, void*& contextPtr)
@@ -334,7 +334,7 @@ ani_object AniThrowError(ani_env* env, WMError wmError, const std::string& messa
     WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(wmError);
     return AniThrowError(env, wmErrorCode, message);
 }
-
+ 
 ani_object AniThrowError(ani_env* env, WmErrorCode wmErrorCode, const std::string& message)
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]start");

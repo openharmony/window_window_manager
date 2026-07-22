@@ -176,6 +176,36 @@ void OptionSetBackgroundColor(ani_env* env, ani_object paramsInterface, FbOption
     }
 }
 
+void OptionSetTitleColor(ani_env* env, ani_object paramsInterface, FbOption& option)
+{
+    ani_ref titleColorValue;
+    env->Object_GetPropertyByName_Ref(paramsInterface, "titleColor", &titleColorValue);
+    ani_boolean isTitleColorValueUndefined = false;
+    env->Reference_IsUndefined(titleColorValue, &isTitleColorValueUndefined);
+    if (!isTitleColorValueUndefined) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]option.SetTitleColor begin");
+        ani_string aniTitleColorValue = reinterpret_cast<ani_string>(titleColorValue);
+        std::string titleColor;
+        GetStdString(env, aniTitleColorValue, titleColor);
+        option.SetTitleColor(titleColor);
+    }
+}
+
+void OptionSetContentColor(ani_env* env, ani_object paramsInterface, FbOption& option)
+{
+    ani_ref contentColorValue;
+    env->Object_GetPropertyByName_Ref(paramsInterface, "contentColor", &contentColorValue);
+    ani_boolean isContentColorValueUndefined = false;
+    env->Reference_IsUndefined(contentColorValue, &isContentColorValueUndefined);
+    if (!isContentColorValueUndefined) {
+        TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]option.SetContentColor begin");
+        ani_string aniContentColorValue = reinterpret_cast<ani_string>(contentColorValue);
+        std::string contentColor;
+        GetStdString(env, aniContentColorValue, contentColor);
+        option.SetContentColor(contentColor);
+    }
+}
+
 void OptionSetIcon(ani_env* env, ani_object paramsInterface, FbOption& option)
 {
     ani_ref iconValue;
@@ -199,7 +229,7 @@ bool OptionSetTextUpdateAnimationType(ani_env* env, ani_object paramsInterface, 
     ani_ref textUpdateAnimationTypeValue;
     if (env->Object_GetPropertyByName_Ref(paramsInterface, "textUpdateAnimationType", &textUpdateAnimationTypeValue)
         != ANI_OK) {
-        TLOGI(WmsLogTag::WMS_SYSTEM, "[ANI]textUpdateAnimationType is not provided");
+        TLOGI(WmsLogTag::DMS, "[ANI]textUpdateAnimationType is not provided");
         return true;
     }
     ani_boolean isAnimateTypeValueUndefined = false;
@@ -211,7 +241,7 @@ bool OptionSetTextUpdateAnimationType(ani_env* env, ani_object paramsInterface, 
     ani_int ret;
     ani_status res = env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(textUpdateAnimationTypeValue), &ret);
     if (res != ANI_OK) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]get textUpdateAnimationType failed");
+        TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]get textUpdateAnimationType failed");
         return false;
     }
 
@@ -229,6 +259,8 @@ bool AniFbController::GetFbOption(ani_env* env, ani_object paramsInterface, FbOp
     if (!OptionSetTemplate(env, paramsInterface, option)) {return false;}
     OptionSetContent(env, paramsInterface, option);
     OptionSetBackgroundColor(env, paramsInterface, option);
+    OptionSetTitleColor(env, paramsInterface, option);
+    OptionSetContentColor(env, paramsInterface, option);
     OptionSetIcon(env, paramsInterface, option);
     if (!OptionSetTextUpdateAnimationType(env, paramsInterface, option)) {
         return false;
@@ -260,9 +292,10 @@ bool AniFbController::CheckParams(ani_env* env, const FbOption& option)
         AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "icon size Exceed the limit");
         return false;
     }
-    if (!option.GetBackgroundColor().empty() && !ColorParser::IsValidColorNoAlpha(option.GetBackgroundColor())) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]backgroundColor is invalid");
-        AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "backgroundColor is invalid");
+    if (option.GetTemplate() == static_cast<uint32_t>(FloatingBallTemplate::STATIC) &&
+        option.GetIcon() == nullptr) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]template %{public}u need icon", option.GetTemplate());
+        AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "current template need icon");
         return false;
     }
     if (option.GetTextUpdateAnimationType() >=
@@ -272,10 +305,34 @@ bool AniFbController::CheckParams(ani_env* env, const FbOption& option)
         AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "textUpdateAnimationType is invalid");
         return false;
     }
-    if (option.GetTemplate() == static_cast<uint32_t>(FloatingBallTemplate::STATIC) &&
-        option.GetIcon() == nullptr) {
-        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]template %{public}u need icon", option.GetTemplate());
-        AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "current template need icon");
+
+    return CheckColor(env, option);
+}
+
+bool AniFbController::CheckColor(ani_env* env, const FbOption& option)
+{
+    if (!option.GetBackgroundColor().empty() && !ColorParser::IsValidColorNoAlpha(option.GetBackgroundColor())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]backgroundColor is invalid");
+        AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "backgroundColor is invalid");
+        return false;
+    }
+
+    bool hasTextColor = !option.GetTitleColor().empty() || !option.GetContentColor().empty();
+    if (hasTextColor && option.GetBackgroundColor().empty()) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]When setting the text color, the background color must be set");
+        AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID,
+            "When setting the text color, the background color must be set");
+        return false;
+    }
+
+    if (!option.GetTitleColor().empty() && !ColorParser::IsValidColorNoAlpha(option.GetTitleColor())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]titleColor is invalid");
+        AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "titleColor is invalid");
+        return false;
+    }
+    if (!option.GetContentColor().empty() && !ColorParser::IsValidColorNoAlpha(option.GetContentColor())) {
+        TLOGE(WmsLogTag::WMS_SYSTEM, "[FB]contentColor is invalid");
+        AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "contentColor is invalid");
         return false;
     }
     return true;
@@ -561,6 +618,7 @@ void AniFbController::OnrestoreMainWindowAni(ani_env* env, ani_object want)
         AniThrowError(env, WmErrorCode::WM_ERROR_FB_PARAM_INVALID, "[FB]unWrap want failed");
         return;
     }
+
     // working
     std::shared_ptr<AAFwk::Want> abilityWant = std::make_shared<AAFwk::Want>(wantValue);
     if (abilityWant == nullptr || abilityWant->GetBundle().empty()) {
@@ -576,7 +634,7 @@ void AniFbController::OnrestoreMainWindowAni(ani_env* env, ani_object want)
 }
 
 bool AniFbController::IsCallbackRegistered(ani_env* env, FbListenerType fbListenerType, ani_ref callback)
-{
+{   
     std::lock_guard<std::mutex> lock(mtxListener_);
     // check typeCallbackListenerMap_
     if (typeCallbackListenerMap_.empty() ||
@@ -851,14 +909,12 @@ void AniFbController::UnRegisterFbOnClickCallback(ani_env* env,
                                                   ani_ref callback)
 {
     TLOGI(WmsLogTag::DEFAULT, "[FB]start");
-    // check nullptr
     AniFbController* aniFbController = reinterpret_cast<AniFbController*>(nativeObj);
     if (aniFbController == nullptr) {
         AniThrowError(env, WmErrorCode::WM_ERROR_FB_INTERNAL_ERROR,
             "[FB]AniFbController* aniFbController for nativeObj is nullptr");
         return;
     }
-    // working
     aniFbController->OnUnRegisterCallback(env, FbListenerType::CLICK_CB, callback, aniFbController);
 }
 
