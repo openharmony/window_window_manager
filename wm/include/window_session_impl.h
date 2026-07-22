@@ -979,7 +979,7 @@ protected:
     static std::atomic<int64_t> updateFocusTimeStamp_;
     static std::atomic<int64_t> updateHighlightTimeStamp_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
-    bool shouldReNotifyFocus_ = false;
+    std::atomic_bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     bool useUniqueDensity_ { false };
