@@ -258,9 +258,9 @@ HWTEST_F(KeyboardSessionTest4, OpenKeyboardSyncTransaction01, TestSize.Level1)
     info.bundleName_ = "OpenKeyboardSyncTransaction01";
     sptr<KeyboardSession> keyboardSession = sptr<KeyboardSession>::MakeSptr(info, nullptr, nullptr);
     ASSERT_NE(keyboardSession, nullptr);
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->OpenKeyboardSyncTransaction();
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     keyboardSession->OpenKeyboardSyncTransaction();
     WSRect keyboardPanelRect = {0, 0, 0, 0};
     WindowAnimationInfo animationInfo;
@@ -287,7 +287,7 @@ HWTEST_F(KeyboardSessionTest4, CloseKeyBoardSyncTransaction01, TestSize.Level1)
     CallingWindowInfoData callingWindowInfoData;
 
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [](uint32_t callingSessionId) {};
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     // isKeyBoardSyncTransactionOpen_ is true
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, isKeyboardShow, animationInfo,
         callingWindowInfoData);
@@ -323,11 +323,11 @@ HWTEST_F(KeyboardSessionTest4, CloseKeyboardSyncTransaction02, TestSize.Level1)
     WindowAnimationInfo animationInfo;
     CallingWindowInfoData callingWindowInfoData;
 
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     ASSERT_NE(keyboardSession->property_, nullptr);
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, animationInfo, callingWindowInfoData);
     usleep(WAIT_ASYNC_US);
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->property_->SetCallingSessionId(1);
     keyboardSession->CloseKeyboardSyncTransaction(keyboardPanelRect, false, animationInfo, callingWindowInfoData);
     usleep(WAIT_ASYNC_US);
@@ -478,159 +478,6 @@ HWTEST_F(KeyboardSessionTest4, EnableCallingSessionAvoidArea01, TestSize.Level1)
     };
     keyboardSession->EnableCallingSessionAvoidArea();
     EXPECT_TRUE(g_logMsg.find("Calling session is null") != std::string::npos);
-}
-
-/**
- * @tc.name: CalculateCenterScaledRect
- * @tc.desc: test function: CalculateCenterScaledRect
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest4, CalculateCenterScaledRect, TestSize.Level1)
-{
-    std::string abilityName = "CalculateCenterScaledRect";
-    std::string bundleName = "CalculateCenterScaledRect";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-
-    WSRect rect = {500, 500, 2000, 2000};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1, 1);
-    EXPECT_TRUE(scaledRect == rect);
-
-    scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1, 1.5);
-    WSRect result = {500, 0, 2000, 3000};
-    EXPECT_TRUE(scaledRect == result);
-
-    scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1.5, 1);
-    result = {0, 500, 3000, 2000};
-    EXPECT_TRUE(scaledRect == result);
-
-    rect = {922, 277, 1274, 1387};
-    scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1.399529, 1.399423);
-    result = {667, 0, 1783, 1941};
-    EXPECT_TRUE(scaledRect == result);
-}
-
-/**
- * @tc.name: CalculateLeftTopScaledRect
- * @tc.desc: test function: CalculateLeftTopScaledRect
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest4, CalculateLeftTopScaledRect, TestSize.Level1)
-{
-    std::string abilityName = "CalculateLeftTopScaledRect";
-    std::string bundleName = "CalculateLeftTopScaledRect";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-    CallingWindowInfoData callingWindowInfoData;
-    callingWindowInfoData.scaleX = 2.5;
-    callingWindowInfoData.scaleY = 1;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    WSRect inputRect = {500, 500, 2000, 2000};
-    WSRect expectRect = {500, 500, 5000, 2000};
-    WSRect scaledRect = keyboardSession->CalculateLeftTopScaledRect(inputRect, callingWindowInfoData.scaleX,
-        callingWindowInfoData.scaleY);
-    EXPECT_TRUE(scaledRect == expectRect);
-
-    callingWindowInfoData.scaleX = 1.5;
-    callingWindowInfoData.scaleY = 2;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    inputRect = {500, 500, 2000, 2000};
-    expectRect = {500, 500, 3000, 4000};
-    scaledRect = keyboardSession->CalculateLeftTopScaledRect(inputRect, callingWindowInfoData.scaleX,
-        callingWindowInfoData.scaleY);
-    EXPECT_TRUE(scaledRect == expectRect);
-
-    callingWindowInfoData.scaleX = 0.2;
-    callingWindowInfoData.scaleY = 0.2;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    inputRect = {500, 500, 2000, 2000};
-    expectRect = {500, 500, 400, 400};
-    scaledRect = keyboardSession->CalculateLeftTopScaledRect(inputRect, callingWindowInfoData.scaleX,
-        callingWindowInfoData.scaleY);
-    EXPECT_TRUE(scaledRect == expectRect);
-
-    callingWindowInfoData.scaleX = 1;
-    callingWindowInfoData.scaleY = 1;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    inputRect = {500, 500, 2000, 2000};
-    expectRect = {500, 500, 2000, 2000};
-    scaledRect = keyboardSession->CalculateLeftTopScaledRect(inputRect, callingWindowInfoData.scaleX,
-        callingWindowInfoData.scaleY);
-    EXPECT_TRUE(scaledRect == expectRect);
-
-    callingWindowInfoData.scaleX = 0;
-    callingWindowInfoData.scaleY = 0;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    inputRect = {500, 500, 2000, 2000};
-    expectRect = {500, 500, 0, 0};
-    scaledRect = keyboardSession->CalculateLeftTopScaledRect(inputRect, callingWindowInfoData.scaleX,
-        callingWindowInfoData.scaleY);
-    EXPECT_TRUE(scaledRect == expectRect);
-}
-
-/**
- * @tc.name: CalculateSafeRectForAIWindow
- * @tc.desc: test function: CalculateSafeRectForAIWindow
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest4, CalculateSafeRectForAIWindow, TestSize.Level1)
-{
-    std::string abilityName = "CalculateSafeRectForAIWindow";
-    std::string bundleName = "CalculateSafeRectForAIWindow";
-    sptr<KeyboardSession> keyboardSession = GetKeyboardSession(abilityName, bundleName);
-    CallingWindowInfoData callingWindowInfoData;
-    callingWindowInfoData.scaleX = 1;
-    callingWindowInfoData.scaleY = 1;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    WSRect callingSessionRect = {0, 0, 1000, 2000};
-    WSRect keyboardPanelRect = {0, 1000, 1000, 1000};
-    WSRect expectRect = {0, 1000, 1000, 1000};
-    WSRect safeRect = keyboardSession->CalculateSafeRectForAIWindow(callingSessionRect, keyboardPanelRect);
-    EXPECT_TRUE(safeRect == expectRect);
-
-    callingWindowInfoData.scaleX = 1;
-    callingWindowInfoData.scaleY = 2;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    callingSessionRect = {0, 0, 1000, 2000};
-    keyboardPanelRect = {0, 1000, 1000, 1000};
-    expectRect = {0, 1000, 1000, 500};
-    safeRect = keyboardSession->CalculateSafeRectForAIWindow(callingSessionRect, keyboardPanelRect);
-    EXPECT_TRUE(safeRect == expectRect);
-
-    callingWindowInfoData.scaleX = 0.5;
-    callingWindowInfoData.scaleY = 0.5;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    callingSessionRect = {0, 0, 1000, 2000};
-    keyboardPanelRect = {0, 500, 1000, 1000};
-    expectRect = {0, 500, 500, 1000};
-    safeRect = keyboardSession->CalculateSafeRectForAIWindow(callingSessionRect, keyboardPanelRect);
-    EXPECT_TRUE(safeRect == expectRect);
-
-    callingWindowInfoData.scaleX = 1.5;
-    callingWindowInfoData.scaleY = 1;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    callingSessionRect = {0, 0, 1000, 2000};
-    keyboardPanelRect = {0, 500, 1000, 1000};
-    expectRect = {0, 500, 1000, 1000};
-    safeRect = keyboardSession->CalculateSafeRectForAIWindow(callingSessionRect, keyboardPanelRect);
-    EXPECT_TRUE(safeRect == expectRect);
-
-    callingWindowInfoData.scaleX = 0;
-    callingWindowInfoData.scaleY = 0;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-
-    callingSessionRect = {0, 0, 1000, 2000};
-    keyboardPanelRect = {0, 500, 1000, 1000};
-    expectRect = {0, 0, 0, 0};
-    safeRect = keyboardSession->CalculateSafeRectForAIWindow(callingSessionRect, keyboardPanelRect);
-    EXPECT_TRUE(safeRect == expectRect);
 }
 
 /**
@@ -794,7 +641,7 @@ HWTEST_F(KeyboardSessionTest4, NotifyKeyboardAnimationWillBegin02, TestSize.Leve
     animationInfo.callingId = 100;
 
     keyboardSession->specificCallback_->onUpdateAvoidArea_ = [](uint32_t callingSessionId) {};
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->NotifyKeyboardAnimationWillBegin(isKeyboardShow, animationInfo);
     usleep(WAIT_ASYNC_US);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, true);

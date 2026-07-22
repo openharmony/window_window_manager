@@ -530,130 +530,6 @@ HWTEST_F(KeyboardSessionTest3, IsNeedRaiseSubWindow02, Function | SmallTest | Le
 }
 
 /**
- * @tc.name: CalculateOccupiedArea_AiWindow
- * @tc.desc: check func CalculateOccupiedArea_AiWindow
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_AiWindow, Function | SmallTest | Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalculateOccupiedArea_AiWindow",
-        "CalculateOccupiedArea_AiWindow");
-    SessionInfo info;
-    info.abilityName_ = "CallingSession";
-    info.bundleName_ = "CallingSession";
-    auto callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSRect lastSafeRect = { 0, 0, 0, 0 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    WSRect zeroRect1 = { 0, 0, 0, 0 };
-    WSRect zeroRect2 = { 0, 0, 0, 0 };
-    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
-
-    auto ret = keyboardSession->CalculateOccupiedArea(nullptr, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, false);
-
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, false);
-
-    lastSafeRect = { 1, 2, 3, 4 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-
-    callingSession->SetIsMidScene(true);
-    usleep(SLEEP_TIME_US);
-    EXPECT_EQ(true, callingSession->GetIsMidScene());
-    lastSafeRect = { 1, 2, 3, 4 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-
-    callingSession->SetIsMidScene(false);
-    usleep(SLEEP_TIME_US);
-    EXPECT_EQ(false, callingSession->GetIsMidScene());
-    CallingWindowInfoData callingWindowInfoData;
-    callingWindowInfoData.callingWindowState = CallingWindowState::WINDOW_IN_AI;
-    callingWindowInfoData.scaleX = 0.73;
-    callingWindowInfoData.scaleY = 0.73;
-    keyboardSession->CallingWindowStateChange(callingWindowInfoData);
-    EXPECT_EQ(CallingWindowState::WINDOW_IN_AI, keyboardSession->callingWindowInfoData_.callingWindowState);
-    callingSession->SetScale(0.0, 0.0, 0.0, 0.0);
-    lastSafeRect = { 1, 2, 3, 4 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    zeroRect1 = { 0, 0, 1, 2 };
-    zeroRect2 = { 0, 0, 1, 2 };
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-    callingSession->SetScale(1.0, 1.0, 1.0, 1.0);
-    lastSafeRect = { 1, 1, 1, 1 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    zeroRect1 = { 2, 2, 2, 2 };
-    zeroRect2 = { 3, 3, 3, 3 };
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: CalculateOccupiedArea_MIDSCENE
- * @tc.desc: check func CalculateOccupiedArea_MIDSCENE
- * @tc.type: FUNC
- */
-HWTEST_F(KeyboardSessionTest3, CalculateOccupiedArea_MIDSCENE, Function | SmallTest | Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalculateOccupiedArea_MIDSCENE",
-        "CalculateOccupiedArea_MIDSCENE");
-    SessionInfo info;
-    info.abilityName_ = "CallingSession";
-    info.bundleName_ = "CallingSession";
-    auto callingSession = sptr<SceneSession>::MakeSptr(info, nullptr);
-    WSRect lastSafeRect = { 0, 0, 0, 0 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    WSRect zeroRect1 = { 0, 0, 0, 0 };
-    WSRect zeroRect2 = { 0, 0, 0, 0 };
-    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
-
-    auto ret = keyboardSession->CalculateOccupiedArea(nullptr, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, false);
-
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, false);
-
-    lastSafeRect = { 1, 2, 3, 4 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-
-    callingSession->SetIsMidScene(true);
-    usleep(SLEEP_TIME_US);
-    EXPECT_EQ(true, callingSession->GetIsMidScene());
-    lastSafeRect = { 1, 2, 3, 4 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, zeroRect1, zeroRect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-
-    callingSession->SetIsMidScene(true);
-    usleep(SLEEP_TIME_US);
-    EXPECT_EQ(true, callingSession->GetIsMidScene());
-    callingSession->SetScale(0.0, 0.0, 0.0, 0.0);
-    lastSafeRect = { 0, 0, 0, 0 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    WSRect rect1 = { 0, 0, 1, 2 };
-    WSRect rect2 = { 0, 0, 1, 2 };
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, rect1, rect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, false);
-
-    callingSession->SetIsMidScene(true);
-    usleep(SLEEP_TIME_US);
-    EXPECT_EQ(true, callingSession->GetIsMidScene());
-    callingSession->SetScale(0.0, 0.0, 0.0, 0.0);
-    lastSafeRect = { 1, 2, 3, 4 };
-    callingSession->SetLastSafeRect(lastSafeRect);
-    rect1 = { 0, 0, 1, 2 };
-    rect2 = { 0, 0, 1, 2 };
-    ret = keyboardSession->CalculateOccupiedArea(callingSession, rect1, rect2, occupiedAreaInfo);
-    EXPECT_EQ(ret, true);
-}
-
-/**
  * @tc.name: CalculateOccupiedAreaAfterUIRefresh01
  * @tc.desc: check func CalculateOccupiedAreaAfterUIRefresh
  * @tc.type: FUNC
@@ -817,7 +693,7 @@ HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask, Function | 
     keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
     EXPECT_EQ(false, keyboardSession->isKeyboardSyncTransactionOpen_);
 
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
     EXPECT_NE(false, keyboardSession->isKeyboardSyncTransactionOpen_);
 }
@@ -830,11 +706,11 @@ HWTEST_F(KeyboardSessionTest3, PostKeyboardAnimationSyncTimeoutTask, Function | 
 HWTEST_F(KeyboardSessionTest3, CloseRSTransaction, Function | SmallTest | Level0)
 {
     auto keyboardSession = GetKeyboardSession("CloseRSTransaction", "CloseRSTransaction");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     keyboardSession->CloseRSTransaction();
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->CloseRSTransaction();
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
@@ -854,7 +730,7 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
 
     bool needRecalculateAvoidAreas = true;
     bool needCheckRSTransaction = true;
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 
@@ -866,18 +742,18 @@ HWTEST_F(KeyboardSessionTest3, ProcessKeyboardOccupiedAreaInfo, Function | Small
         return sceneSession;
     };
 
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     needCheckRSTransaction = false;
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
 
     keyboardSession->keyboardCallback_->onGetSceneSession = [&](uint32_t persistentId) {
         return sceneSession;
     };
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     needCheckRSTransaction = true;
     keyboardSession->ProcessKeyboardOccupiedAreaInfo(0, needRecalculateAvoidAreas, needCheckRSTransaction);
     ASSERT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);

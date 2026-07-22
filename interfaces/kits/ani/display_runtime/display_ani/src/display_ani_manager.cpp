@@ -19,8 +19,8 @@
 #include <hitrace_meter.h>
 
 #include "ani.h"
-#include <ani_signature_builder.h>
 #include "ani_err_utils.h"
+#include <ani_signature_builder.h>
 #include "display.h"
 #include "display_ani.h"
 #include "display_ani_listener.h"
@@ -327,8 +327,8 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
     }
     std::lock_guard<std::mutex> lock(mtx_);
     if (IsCallbackRegistered(env, typeString, cbRef)) {
-        TLOGI(WmsLogTag::DMS, "[ANI] type %{public}s callback already registered!", typeString.c_str());
         env->GlobalReference_Delete(cbRef);
+        TLOGE(WmsLogTag::DMS, "[ANI] type %{public}s callback already registered!", typeString.c_str());
         return;
     }
     TLOGI(WmsLogTag::DMS, "[ANI] onRegisterCallback");
@@ -336,10 +336,10 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
     env->Reference_IsUndefined(cbRef, &callbackUndefined);
     DmErrorCode ret;
     if (callbackUndefined) {
-        std::string errMsg = "[ANI] failed to register display listener with type, cbk null or undefined";
-        TLOGE(WmsLogTag::DMS, "callbackNull or undefined");
-        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
+        TLOGE(WmsLogTag::DMS, "callback undefined");
+        std::string errMsg = "[ANI] failed to register display listener with type, callback undefined";
         env->GlobalReference_Delete(cbRef);
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, errMsg);
         return;
     }
     ani_vm* vm = nullptr;
@@ -369,23 +369,6 @@ void DisplayManagerAni::OnRegisterCallback(ani_env* env, ani_string type, ani_re
     }
     // add listener to map
     jsCbMap_[typeString][cbRef] = displayAniListener;
-}
-
-bool DisplayManagerAni::IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback)
-{
-    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "method %{public}s not registered!", type.c_str());
-        return false;
-    }
-    for (const auto& iter : jsCbMap_[type]) {
-        ani_boolean isEquals = false;
-        env->Reference_StrictEquals(callback, iter.first, &isEquals);
-        if (isEquals) {
-            TLOGE(WmsLogTag::DMS, "callback already registered!");
-            return true;
-        }
-    }
-    return false;
 }
 
 DmErrorCode DisplayManagerAni::ProcessRegisterCallback(ani_env* env, std::string& typeStr,
@@ -602,6 +585,23 @@ void DisplayManagerAni::OnUnRegisterCallback(ani_env* env, ani_string type, ani_
     env->GlobalReference_Delete(cbRef);
 }
 
+bool DisplayManagerAni::IsCallbackRegistered(ani_env* env, const std::string& type, ani_ref callback)
+{
+    if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
+        TLOGI(WmsLogTag::DMS, "method %{public}s not registered!", type.c_str());
+        return false;
+    }
+    for (const auto& iter : jsCbMap_[type]) {
+        ani_boolean isEquals = false;
+        env->Reference_StrictEquals(callback, iter.first, &isEquals);
+        if (isEquals) {
+            TLOGE(WmsLogTag::DMS, "callback already registered!");
+            return true;
+        }
+    }
+    return false;
+}
+
 void DisplayManagerAni::UnRegisterAttributeListener(ani_env* env, ani_ref callback)
 {
     std::vector<std::string> attributesNotListened;
@@ -694,22 +694,20 @@ void DisplayManagerAni::UnRegisterAllAttributeListener()
         for (auto it = itAttribute->second.begin(); it != itAttribute->second.end();) {
             sptr<DisplayManager::IDisplayAttributeListener> thisListener(it->second);
             auto ret = SingletonContainer::Get<DisplayManager>().UnRegisterDisplayAttributeListener(thisListener);
-            itAttribute->second.erase(it++);
+            it = itAttribute->second.erase(it);
             TLOGI(WmsLogTag::DMS, "attribute %{public}s  ret: %{public}u", itAttribute->first.c_str(), ret);
         }
-        jsAttributeCbMap_.erase(itAttribute++);
+        itAttribute = jsAttributeCbMap_.erase(itAttribute);
     }
 }
 
 DMError DisplayManagerAni::UnregisterAllDisplayListenerWithType(std::string type)
 {
-    TLOGI(WmsLogTag::DMS, "[ANI] begin");
     if (type == ANI_EVENT_CHANGE) {
         UnRegisterAllAttributeListener();
     }
     if (jsCbMap_.empty() || jsCbMap_.find(type) == jsCbMap_.end()) {
-        TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!",
-            type.c_str());
+        TLOGI(WmsLogTag::DMS, "[ANI] methodName %{public}s not registered!", type.c_str());
         return DMError::DM_OK;
     }
     DMError ret = DMError::DM_OK;
@@ -829,7 +827,11 @@ void DisplayManagerAni::OnConvertGlobalToRelativeCoordinate(
             SingletonContainer::Get<DisplayManager>().ConvertGlobalCoordinateToRelative(
                 globalPosition, relativePosition));
     } else {
-        env->Object_CallMethodByName_Long(displayId, "toLong", ":l", &displayIdTmp);
+        if (ANI_OK != env->Object_CallMethodByName_Long(displayId, "toLong", ":l", &displayIdTmp)) {
+            TLOGE(WmsLogTag::DMS, "Failed to get displayId");
+            AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_SYSTEM_INNORMAL, "Failed to get displayId");
+            return;
+        }
         if (displayIdTmp < 0) {
             AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_ILLEGAL_PARAM, "displayID less than 0");
             return;
@@ -845,8 +847,8 @@ void DisplayManagerAni::OnConvertGlobalToRelativeCoordinate(
     }
     errCode = DisplayAniUtils::SetRelativePostionObj(env, relativePosition, relativePostionObj);
     if (errCode != DmErrorCode::DM_OK) {
-        TLOGE(WmsLogTag::DMS, "Failed to set relative Postion");
-        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to set relative Postion");
+        TLOGE(WmsLogTag::DMS, "Failed to set relative Position");
+        AniErrUtils::ThrowBusinessError(env, errCode, "Failed to set relative Position");
         return;
     }
 }
@@ -932,7 +934,7 @@ ani_long DisplayManagerAni::OnCreateVirtualScreen(ani_env* env, ani_object virtu
         if (screenId == ERROR_ID_NOT_SYSTEM_APP) {
             ret = DmErrorCode::DM_ERROR_NO_PERMISSION;
         } else if (screenId == ERROR_ID_NO_PERMISSION) {
-            ret =  DmErrorCode::DM_ERROR_NO_PERMISSION;
+            ret = DmErrorCode::DM_ERROR_NO_PERMISSION;
         }
         AniErrUtils::ThrowBusinessError(env, ret, "Get screen by id failed.");
         return static_cast<ani_long>(screenId);
@@ -1000,6 +1002,94 @@ void DisplayManagerAni::OnSetVirtualScreenSurface(ani_env* env, ani_long screenI
     if (ret != DmErrorCode::DM_OK) {
         TLOGE(WmsLogTag::DMS, "[ANI] Set virtual screen surface failed.");
         AniErrUtils::ThrowBusinessError(env, ret, "set virtual screen surface failed.");
+    }
+}
+
+void DisplayManagerAni::AddVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId,
+    ani_object surfaceRegionObj, ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnAddVirtualScreenSurface(env, screenId, surfaceId, surfaceRegionObj);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
+}
+
+void DisplayManagerAni::OnAddVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId,
+    ani_object surfaceRegionObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    sptr<Surface> surface;
+    if (!DisplayAniUtils::GetSurfaceFromAni(env, surfaceId, surface) || surface == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert surface.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert surface.");
+        return;
+    }
+    DMRect surfaceRegion = {0, 0, 0, 0};
+    bool hasSurfaceRegion = false;
+    if (surfaceRegionObj != nullptr) {
+        ani_long left = 0;
+        ani_long top = 0;
+        ani_long width = 0;
+        ani_long height = 0;
+        if (ANI_OK == env->Object_GetFieldByName_Long(surfaceRegionObj, "left", &left) &&
+            ANI_OK == env->Object_GetFieldByName_Long(surfaceRegionObj, "top", &top) &&
+            ANI_OK == env->Object_GetFieldByName_Long(surfaceRegionObj, "width", &width) &&
+            ANI_OK == env->Object_GetFieldByName_Long(surfaceRegionObj, "height", &height)) {
+            surfaceRegion.posX_ = static_cast<int32_t>(left);
+            surfaceRegion.posY_ = static_cast<int32_t>(top);
+            surfaceRegion.width_ = static_cast<uint32_t>(width);
+            surfaceRegion.height_ = static_cast<uint32_t>(height);
+            hasSurfaceRegion = true;
+        }
+    }
+    DMRect region = hasSurfaceRegion ? surfaceRegion : DMRect{0, 0, 0, 0};
+    auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().AddVirtualScreenSurface(screenId, surface, region));
+    ret = (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : ret;
+    if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Add virtual screen surface failed.");
+        AniErrUtils::ThrowBusinessError(env, ret, "Add virtual screen surface failed.");
+    }
+}
+
+void DisplayManagerAni::RemoveVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId,
+    ani_long nativeObj)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    if (env == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] env is nullptr");
+        return;
+    }
+    DisplayManagerAni* displayManagerAni = reinterpret_cast<DisplayManagerAni*>(nativeObj);
+    if (displayManagerAni != nullptr) {
+        displayManagerAni->OnRemoveVirtualScreenSurface(env, screenId, surfaceId);
+    } else {
+        TLOGI(WmsLogTag::DMS, "[ANI] null ptr");
+    }
+}
+
+void DisplayManagerAni::OnRemoveVirtualScreenSurface(ani_env* env, ani_long screenId, ani_string surfaceId)
+{
+    TLOGI(WmsLogTag::DMS, "[ANI] begin");
+    sptr<Surface> surface;
+    if (!DisplayAniUtils::GetSurfaceFromAni(env, surfaceId, surface) || surface == nullptr) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Failed to convert surface.");
+        AniErrUtils::ThrowBusinessError(env, DmErrorCode::DM_ERROR_INVALID_PARAM, "Failed to convert surface.");
+        return;
+    }
+    auto ret = DM_JS_TO_ERROR_CODE_MAP.at(
+        SingletonContainer::Get<ScreenManager>().RemoveVirtualScreenSurface(screenId, surface));
+    ret = (ret == DmErrorCode::DM_ERROR_NOT_SYSTEM_APP) ? DmErrorCode::DM_ERROR_NO_PERMISSION : ret;
+    if (ret != DmErrorCode::DM_OK) {
+        TLOGE(WmsLogTag::DMS, "[ANI] Remove virtual screen surface failed.");
+        AniErrUtils::ThrowBusinessError(env, ret, "Remove virtual screen surface failed.");
     }
 }
 

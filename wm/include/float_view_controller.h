@@ -21,6 +21,7 @@
 #include "float_view_option.h"
 #include "float_view_interface.h"
 #include "float_view_model.h"
+#include "floating_view_report.h"
 
 #include <refbase.h>
 #include "window.h"
@@ -40,6 +41,7 @@ public:
     FloatViewController(const FvOption &option, ani_env* env);
     virtual ~FloatViewController();
     void UpdateMainWindow(const sptr<Window>& mainWindow);
+    uint32_t GetMainWindowId() const;
     WMError StartFloatView();
     WMError StartFloatViewSingle(bool showWhenCreate = true);
     WMError StopFloatViewFromClient();
@@ -49,7 +51,7 @@ public:
     WMError SetUIContext(const std::string &contextUrl,
         const std::shared_ptr<NativeReference>& contentStorage, bool isLoadByName);
     WMError SetUIContext(const std::string &contextUrl,
-        const ani_object& contentStorage, bool isLoadByName);
+        const ani_ref& contentStorage, bool isLoadByName);
     WMError SetVisibilityInApp(bool visibleInApp);
     WMError SetWindowSize(const Rect &rect);
     WMError SetTemplateTypeAndSize(const std::shared_ptr<TemplateProperty>& templateProperty);
@@ -79,8 +81,12 @@ private:
     WMError SetFloatViewContext();
     WMError DestroyFloatViewWindow(const std::string& reason);
     WMError SetUIContextInner(bool isLoadByName);
+    WMError SetUIContextNAPI(bool isLoadByName, FvSetUIContentEventParams& params);
+    WMError SetUIContextANI(bool isLoadByName, FvSetUIContentEventParams& params);
     WMError UpdateFloatView();
     ani_env* GetEnv() const;
+    void SetPackageNameFromContext();
+    void FillBaseEventParams(FvBaseEventParams& base) const;
 
     std::mutex listenerMutex_;
     template<typename T> WMError RegisterListener(std::vector<sptr<T>>& holder, const sptr<T>& listener);
@@ -106,7 +112,10 @@ private:
 
     class WindowLifeCycleListener : public IWindowLifeCycle {
     public:
+        explicit WindowLifeCycleListener(uint32_t mainWindowId) : mainWindowId_(mainWindowId) {}
         void AfterDestroyed() override;
+    private:
+        uint32_t mainWindowId_ = 0;
     };
 
     sptr<IWindowLifeCycle> mainWindowLifeCycleListener_ = nullptr;

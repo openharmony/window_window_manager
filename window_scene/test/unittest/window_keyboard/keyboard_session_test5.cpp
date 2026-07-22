@@ -19,6 +19,7 @@
 #include "interfaces/include/ws_common.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_keyboard_session.h"
+#include "session/host/include/move_drag_controller.h"
 #include "session/host/include/session.h"
 #include "session/host/include/scene_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
@@ -432,14 +433,14 @@ HWTEST_F(KeyboardSessionTest5, IsVisibleNotBackground02, TestSize.Level1)
 HWTEST_F(KeyboardSessionTest5, GetIsKeyboardSyncTransactionOpen01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("SyncOpen01", "SyncOpen01");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     EXPECT_EQ(keyboardSession->GetIsKeyboardSyncTransactionOpen(), false);
 }
 
 HWTEST_F(KeyboardSessionTest5, GetIsKeyboardSyncTransactionOpen02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("SyncOpen02", "SyncOpen02");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     EXPECT_EQ(keyboardSession->GetIsKeyboardSyncTransactionOpen(), true);
 }
 
@@ -654,7 +655,7 @@ HWTEST_F(KeyboardSessionTest5, RecalculatePanelRectForAvoidArea05, TestSize.Leve
 HWTEST_F(KeyboardSessionTest5, OpenKeyboardSyncTransaction01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("OpenSync01", "OpenSync01");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     keyboardSession->OpenKeyboardSyncTransaction();
     usleep(WAIT_ASYNC_US);
 }
@@ -662,7 +663,7 @@ HWTEST_F(KeyboardSessionTest5, OpenKeyboardSyncTransaction01, TestSize.Level1)
 HWTEST_F(KeyboardSessionTest5, OpenKeyboardSyncTransaction02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("OpenSync02", "OpenSync02");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->OpenKeyboardSyncTransaction();
     usleep(WAIT_ASYNC_US);
 }
@@ -708,7 +709,7 @@ HWTEST_F(KeyboardSessionTest5, CloseKeyboardSyncTransaction04, TestSize.Level1)
     WindowAnimationInfo animationInfo;
     animationInfo.callingId = 10;
     animationInfo.isGravityChanged = false;
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     CallingWindowInfoData callingWindowInfoData;
     keyboardSession->CloseKeyboardSyncTransaction(rect, true, animationInfo, callingWindowInfoData);
     usleep(WAIT_ASYNC_US);
@@ -763,71 +764,6 @@ HWTEST_F(KeyboardSessionTest5, EnableCallingSessionAvoidArea04, TestSize.Level1)
     keyboardSession->keyboardCallback_->onGetSceneSession = nullptr;
     keyboardSession->EnableCallingSessionAvoidArea();
     usleep(WAIT_ASYNC_US);
-}
-
-HWTEST_F(KeyboardSessionTest5, CalculateCenterScaledRect01, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalcScaled01", "CalcScaled01");
-    WSRect rect = {500, 500, 2000, 2000};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1.0f, 1.0f);
-    EXPECT_EQ(scaledRect.posX_, 500);
-    EXPECT_EQ(scaledRect.posY_, 500);
-    EXPECT_EQ(scaledRect.width_, 2000);
-    EXPECT_EQ(scaledRect.height_, 2000);
-}
-
-HWTEST_F(KeyboardSessionTest5, CalculateCenterScaledRect02, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalcScaled02", "CalcScaled02");
-    WSRect rect = {500, 500, 2000, 2000};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1.5f, 1.0f);
-    EXPECT_EQ(scaledRect.width_, 3000);
-    EXPECT_EQ(scaledRect.height_, 2000);
-}
-
-HWTEST_F(KeyboardSessionTest5, CalculateCenterScaledRect03, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalcScaled03", "CalcScaled03");
-    WSRect rect = {500, 500, 2000, 2000};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1.0f, 1.5f);
-    EXPECT_EQ(scaledRect.width_, 2000);
-    EXPECT_EQ(scaledRect.height_, 3000);
-}
-
-HWTEST_F(KeyboardSessionTest5, CalculateCenterScaledRect04, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalcScaled04", "CalcScaled04");
-    WSRect rect = {0, 0, 1000, 1000};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 2.0f, 2.0f);
-    EXPECT_EQ(scaledRect.width_, 2000);
-    EXPECT_EQ(scaledRect.height_, 2000);
-}
-
-HWTEST_F(KeyboardSessionTest5, CalculateCenterScaledRect05, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalcScaled05", "CalcScaled05");
-    WSRect rect = {100, 100, 500, 500};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 0.5f, 0.5f);
-    EXPECT_EQ(scaledRect.posX_, 100);
-    EXPECT_EQ(scaledRect.posY_, 100);
-}
-
-HWTEST_F(KeyboardSessionTest5, CalculateCenterScaledRect06, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalcScaled06", "CalcScaled06");
-    WSRect rect = {922, 277, 1274, 1387};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 1.399529f, 1.399423f);
-    EXPECT_GT(scaledRect.width_, rect.width_);
-    EXPECT_GT(scaledRect.height_, rect.height_);
-}
-
-HWTEST_F(KeyboardSessionTest5, CalculateCenterScaledRect07, TestSize.Level1)
-{
-    auto keyboardSession = GetKeyboardSession("CalcScaled07", "CalcScaled07");
-    WSRect rect = {0, 0, 100, 100};
-    WSRect scaledRect = keyboardSession->CalculateCenterScaledRect(rect, 10.0f, 10.0f);
-    EXPECT_EQ(scaledRect.width_, 1000);
-    EXPECT_EQ(scaledRect.height_, 1000);
 }
 
 HWTEST_F(KeyboardSessionTest5, NotifyKeyboardPanelInfoChange01, TestSize.Level1)
@@ -1344,7 +1280,7 @@ HWTEST_F(KeyboardSessionTest5, SetSurfaceBounds04, TestSize.Level1)
 HWTEST_F(KeyboardSessionTest5, GetRSTransaction01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("GetRSTrans01", "GetRSTrans01");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     std::shared_ptr<RSTransaction> transaction = keyboardSession->GetRSTransaction();
     EXPECT_EQ(transaction, nullptr);
 }
@@ -1352,21 +1288,21 @@ HWTEST_F(KeyboardSessionTest5, GetRSTransaction01, TestSize.Level1)
 HWTEST_F(KeyboardSessionTest5, GetRSTransaction02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("GetRSTrans02", "GetRSTrans02");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     std::shared_ptr<RSTransaction> transaction = keyboardSession->GetRSTransaction();
 }
 
 HWTEST_F(KeyboardSessionTest5, CloseRSTransaction01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("CloseRSTrans01", "CloseRSTrans01");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     keyboardSession->CloseRSTransaction();
 }
 
 HWTEST_F(KeyboardSessionTest5, CloseRSTransaction02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("CloseRSTrans02", "CloseRSTrans02");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->CloseRSTransaction();
     EXPECT_EQ(keyboardSession->isKeyboardSyncTransactionOpen_, false);
 }
@@ -1374,7 +1310,7 @@ HWTEST_F(KeyboardSessionTest5, CloseRSTransaction02, TestSize.Level1)
 HWTEST_F(KeyboardSessionTest5, CloseRSTransaction03, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("CloseRSTrans03", "CloseRSTrans03");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->CloseRSTransaction();
     usleep(WAIT_ASYNC_US);
 }
@@ -1590,10 +1526,34 @@ HWTEST_F(KeyboardSessionTest5, HandleCrossScreenChild02, TestSize.Level1)
     keyboardSession->HandleCrossScreenChild(false);
 }
 
+HWTEST_F(KeyboardSessionTest5, TestHandleCrossScreenChildWithController, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("CrossScreenController", "CrossScreenController");
+    auto panelSession = GetSceneSession("CrossScreenPanel", "CrossScreenPanel");
+    ASSERT_NE(panelSession, nullptr);
+    RSSurfaceNodeConfig config;
+    config.SurfaceNodeName = "CrossScreenPanel";
+    auto surfaceNode = RSSurfaceNode::Create(config, RSSurfaceNodeType::DEFAULT);
+    ASSERT_NE(surfaceNode, nullptr);
+    panelSession->SetSurfaceNode(surfaceNode);
+    keyboardSession->BindKeyboardPanelSession(panelSession);
+
+    auto callingSession = GetSceneSession("CrossScreenCalling", "CrossScreenCalling");
+    ASSERT_NE(callingSession, nullptr);
+    callingSession->GetSessionProperty()->SetDisplayId(0);
+    keyboardSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(callingSession));
+    ASSERT_NE(keyboardSession->moveDragController_, nullptr);
+    keyboardSession->moveDragController_->InitMoveDragProperty();
+    EXPECT_TRUE(keyboardSession->moveDragController_->AddOverlappedDisplayId(0));
+
+    keyboardSession->HandleCrossScreenChild(false);
+    EXPECT_EQ(keyboardSession->moveDragController_->GetOverlappedDisplayIds().count(0), 1);
+}
+
 HWTEST_F(KeyboardSessionTest5, PostKeyboardAnimationSyncTimeoutTask01, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("PostTimeout01", "PostTimeout01");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = false;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(false);
     keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
     usleep(WAIT_ASYNC_US);
 }
@@ -1601,11 +1561,128 @@ HWTEST_F(KeyboardSessionTest5, PostKeyboardAnimationSyncTimeoutTask01, TestSize.
 HWTEST_F(KeyboardSessionTest5, PostKeyboardAnimationSyncTimeoutTask02, TestSize.Level1)
 {
     auto keyboardSession = GetKeyboardSession("PostTimeout02", "PostTimeout02");
-    keyboardSession->isKeyboardSyncTransactionOpen_ = true;
+    keyboardSession->isKeyboardSyncTransactionOpen_.store(true);
     keyboardSession->PostKeyboardAnimationSyncTimeoutTask();
     usleep(WAIT_ASYNC_US);
 }
 
+HWTEST_F(KeyboardSessionTest5, GetCallingSessionGlobalScaledRect01, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("GetGlobalScaled01", "GetGlobalScaled01");
+    ASSERT_NE(keyboardSession, nullptr);
+    WSRect globalScaledRect;
+    bool result = keyboardSession->GetCallingSessionGlobalScaledRect(nullptr, globalScaledRect);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(KeyboardSessionTest5, GetCallingSessionGlobalScaledRect02, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("GetGlobalScaled02", "GetGlobalScaled02");
+    ASSERT_NE(keyboardSession, nullptr);
+    auto callingSession = GetSceneSession("Calling", "Calling");
+    ASSERT_NE(callingSession, nullptr);
+    WSRect globalScaledRect;
+    bool result = keyboardSession->GetCallingSessionGlobalScaledRect(callingSession, globalScaledRect);
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(KeyboardSessionTest5, GetCallingSessionGlobalScaledRect03, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("GetGlobalScaled03", "GetGlobalScaled03");
+    ASSERT_NE(keyboardSession, nullptr);
+    auto callingSession = GetSceneSession("Calling", "Calling");
+    ASSERT_NE(callingSession, nullptr);
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_NE(property, nullptr);
+    callingSession->SetSessionProperty(property);
+    WSRect sessionRect = {100, 200, 500, 800};
+    callingSession->SetSessionRect(sessionRect);
+    callingSession->SetScale(1.0f, 1.0f, 0.0f, 0.0f);
+    WSRect globalScaledRect;
+    bool result = keyboardSession->GetCallingSessionGlobalScaledRect(callingSession, globalScaledRect);
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(KeyboardSessionTest5, CalculateOccupiedAreaNew01, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("CalcOccupiedNew01", "CalcOccupiedNew01");
+    ASSERT_NE(keyboardSession, nullptr);
+    WSRect callingSessionRect = {0, 0, 1000, 2000};
+    WSRect panelRect = {0, 500, 1000, 500};
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+    bool result = keyboardSession->CalculateOccupiedArea(nullptr, callingSessionRect, panelRect, occupiedAreaInfo);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(KeyboardSessionTest5, CalculateOccupiedAreaNew03, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("CalcOccupiedNew03", "CalcOccupiedNew03");
+    auto callingSession = GetSceneSession("Calling", "Calling");
+    WSRect callingSessionRect = {0, 0, 1000, 2000};
+    WSRect panelRect = {0, 500, 1000, 500};
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+    bool result = keyboardSession->CalculateOccupiedArea(callingSession, callingSessionRect, panelRect,
+        occupiedAreaInfo);
+    EXPECT_EQ(result, true);
+}
+
+HWTEST_F(KeyboardSessionTest5, CalculateOccupiedAreaNew04, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("CalcOccupiedNew04", "CalcOccupiedNew04");
+    auto callingSession = GetSceneSession("Calling", "Calling");
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    callingSession->SetSessionProperty(property);
+    WSRect sessionRect = {0, 0, 1000, 1000};
+    callingSession->SetSessionRect(sessionRect);
+    callingSession->SetScale(1.0f, 1.0f, 0.0f, 0.0f);
+    WSRect callingSessionRect = {0, 0, 1000, 2000};
+    WSRect panelRect = {0, 500, 1000, 500};
+    WSRect safeRect = {0, 500, 1000, 500};
+    callingSession->SetLastSafeRect(safeRect);
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+    bool result = keyboardSession->CalculateOccupiedArea(callingSession, callingSessionRect, panelRect,
+        occupiedAreaInfo);
+    EXPECT_EQ(result, false);
+}
+
+HWTEST_F(KeyboardSessionTest5, CalculateOccupiedAreaNew05, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("CalcOccupiedNew05", "CalcOccupiedNew05");
+    auto callingSession = GetSceneSession("Calling", "Calling");
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    callingSession->SetSessionProperty(property);
+    WSRect sessionRect = {0, 0, 1000, 1000};
+    callingSession->SetSessionRect(sessionRect);
+    callingSession->SetScale(1.0f, 1.0f, 0.0f, 0.0f);
+    WSRect callingSessionRect = {0, 0, 1000, 2000};
+    WSRect panelRect = {0, 500, 1000, 500};
+    WSRect lastSafeRect = {0, 0, 0, 0};
+    callingSession->SetLastSafeRect(lastSafeRect);
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+    bool result = keyboardSession->CalculateOccupiedArea(callingSession, callingSessionRect, panelRect,
+        occupiedAreaInfo);
+    EXPECT_EQ(result, true);
+    EXPECT_NE(occupiedAreaInfo, nullptr);
+}
+
+HWTEST_F(KeyboardSessionTest5, CalculateOccupiedAreaNew06, TestSize.Level1)
+{
+    auto keyboardSession = GetKeyboardSession("CalcOccupiedNew06", "CalcOccupiedNew06");
+    auto callingSession = GetSceneSession("Calling", "Calling");
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    callingSession->SetSessionProperty(property);
+    WSRect sessionRect = {0, 0, 1000, 2000};
+    callingSession->SetSessionRect(sessionRect);
+    WSRect callingSessionRect = {0, 0, 1000, 2000};
+    WSRect panelRect = {0, 500, 1000, 500};
+    WSRect lastSafeRect = {0, 0, 0, 0};
+    callingSession->SetLastSafeRect(lastSafeRect);
+    sptr<OccupiedAreaChangeInfo> occupiedAreaInfo = nullptr;
+    bool result = keyboardSession->CalculateOccupiedArea(callingSession, callingSessionRect, panelRect,
+        occupiedAreaInfo);
+    EXPECT_EQ(result, true);
+    EXPECT_NE(occupiedAreaInfo, nullptr);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
