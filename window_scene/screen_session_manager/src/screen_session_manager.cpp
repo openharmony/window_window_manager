@@ -5723,8 +5723,8 @@ DMError ScreenSessionManager::GetRoundedCorner(DisplayId displayId, int& radius)
 
 void ScreenSessionManager::HookRadius(DisplayId displayId, int& radius)
 {
-    if (!FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice() ||
-        !FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice() || !IsHook()) {
+    if (!(FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice() ||
+        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) || !IsHook()) {
         return;
     }
     sptr<DisplayInfo> displayInfo = GetDisplayInfoById(displayId);
