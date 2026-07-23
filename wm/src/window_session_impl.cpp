@@ -2041,7 +2041,7 @@ void WindowSessionImpl::ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNot
         updateFocusTime, notifyTime, currentTimeStamp);
     if (updateFocusTime <= currentTimeStamp && notifyTime <= updateFocusTime) {
         TLOGW(WmsLogTag::WMS_FOCUS, "check time fail");
-        return WSError::WS_OK;
+        return;
     }
     updateFocusTimeStamp_.store(notifyTime);
     auto otherWindowId = isFocused ? focusNotifyInfo->unfocusWindowId_ : focusNotifyInfo->focusWindowId_;
@@ -3404,7 +3404,7 @@ void WindowSessionImpl::ProcessNotifyHighlightChange(const sptr<HighlightNotifyI
         highlightNotifyInfo->isSyncNotify_, updateHighlightTime, notifyTime, currentTimeStamp);
     if (updateHighlightTime <= currentTimeStamp && notifyTime <= updateHighlightTime) {
         TLOGW(WmsLogTag::WMS_FOCUS, "check time fail");
-        return WSError::WS_OK;
+        return;
     }
     updateHighlightTimeStamp_.store(notifyTime);
     if (!highlightNotifyInfo->isSyncNotify_) {
