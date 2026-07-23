@@ -246,10 +246,6 @@ public:
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     virtual ~SceneSession();
-    SessionType GetSessionType() const override
-    {
-        return SessionType::SceneSession;
-    }
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         uint64_t nodeId, SystemSessionConfig& systemConfig,
         sptr<IRemoteObject>& renderSession, std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -681,6 +677,7 @@ public:
      * Window Watermark
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
+    void SetLeashNodeWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
 
     bool IsDecorEnable() const;
     bool IsAppSession() const;
