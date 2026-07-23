@@ -1405,6 +1405,7 @@ private:
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     WSError CheckPiPCreate(const sptr<WindowSessionProperty>& property, const WindowType& type);
+    WSErrorResult CheckPiPCreateAndLog(const sptr<WindowSessionProperty>& property, const WindowType& type);
     void UpdatePipGroupCount(const PiPTemplateInfo& pipTemplateInfo, bool increase);
     std::vector<PiPGroupConfig> ParsePipMultiConfig();
     bool FindTargetGroup(const std::vector<PiPGroupConfig>& groupConfigs, const PiPTemplateInfo& pipTemplateInfo,
@@ -1776,6 +1777,7 @@ private:
      * Window Watermark
      */
     bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    void SetLeashNodeWatermarkForAppProcess(const sptr<SceneSession>& session);
     std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
     void SetWatermarkForSession(const sptr<SceneSession>& session);
     void ClearWatermarkForSession(const sptr<SceneSession>& session);

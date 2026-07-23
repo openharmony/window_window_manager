@@ -6320,7 +6320,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
                 caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         }
     }
-    if (rsUIContext_ == nullptr && GetSessionType() == SessionType::SceneSession) {
+    if (rsUIContext_ == nullptr) {
         TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
             caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         // extensionSession use
@@ -6394,8 +6394,13 @@ PrelayoutContext Session::GetPrelayoutContext()
         static_cast<int32_t>(preCalc.height)
     };
 
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        return ctx;
+    }
+    const auto displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance()
-        .GetScreenSession(GetSessionProperty()->GetDisplayId());
+        .GetScreenSession(displayId);
     const float density = screenSession ?
         screenSession->GetScreenProperty().GetDensity() : 1.0f; // 1.0: default density
 
