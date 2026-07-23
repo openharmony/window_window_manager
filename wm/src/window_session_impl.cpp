@@ -2014,7 +2014,7 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
             TLOGW(WmsLogTag::WMS_FOCUS, "window is nullptr");
             return;
         }
-        window->ProcessFocusUpdate(focusNotifyInfo, isFocused);
+        window->ProcessUpdateFocus(focusNotifyInfo, isFocused);
     };
     if (handler_ == nullptr) {
         TLOGW(WmsLogTag::WMS_FOCUS, "handler is null");
@@ -2024,7 +2024,7 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
     return WSError::WS_OK;
 }
 
-void WindowSessionImpl::ProcessFocusUpdate(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
+void WindowSessionImpl::ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused)
 {
     auto notifyTime = focusNotifyInfo->timeStamp_;
 
@@ -3384,7 +3384,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
             TLOGW(WmsLogTag::WMS_FOCUS, "window is nullptr");
             return;
         }
-        window->ProcessHighlightUpdate(highlightNotifyInfo, isHighlight);
+        window->ProcessNotifyHighlightChange(highlightNotifyInfo, isHighlight);
     };
     if (handler_ == nullptr) {
         TLOGW(WmsLogTag::WMS_FOCUS, "handler is null");
@@ -3394,7 +3394,7 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
     return WSError::WS_OK;
 }
 
-void WindowSessionImpl::ProcessHighlightUpdate(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight)
+void WindowSessionImpl::ProcessNotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight)
 {
     if (!isHighlight && !highlightNotifyInfo->isSyncNotify_) {
         NotifyHighlightChange(isHighlight);
