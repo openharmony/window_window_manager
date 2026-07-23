@@ -1255,8 +1255,10 @@ private:
     EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> GetListeners();
     template<typename T>
  	EnableIfSame<T, IParentLifecycleEventListener, std::vector<sptr<IParentLifecycleEventListener>>> GetListeners();
-    template<typename T>
- 	EnableIfSame<T, IWindowHoverStateChangeListener, std::vector<sptr<IWindowHoverStateChangeListener>>> GetListeners();
+template<typename T>
+  	EnableIfSame<T, IWindowHoverStateChangeListener, std::vector<sptr<IWindowHoverStateChangeListener>>> GetListeners();
+    void ProcessFocusUpdate(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused);
+    void ProcessHighlightUpdate(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight);
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);

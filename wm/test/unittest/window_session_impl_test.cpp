@@ -603,17 +603,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus01, TestSize.Level1)
     ASSERT_NE(window, nullptr);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    window->updateFocusTimeStamp_.store(currentTimeStamp, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr();
     info->isSyncNotify_ = true;
     info->timeStamp_ = currentTimeStamp - 1000;
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp);
     info->timeStamp_ = currentTimeStamp + 1000;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
 }
@@ -635,26 +635,26 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus02, TestSize.Level1)
     window1->property_->SetPersistentId(2);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    window->updateFocusTimeStamp_.store(currentTimeStamp, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(),
         window1->GetWindowId(), true);
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 2000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
     info->timeStamp_ = currentTimeStamp + 3000;
     info->unfocusWindowId_ = 300;
     res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 3000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 3000);
     info->timeStamp_ = currentTimeStamp + 4000;
     info->focusWindowId_ = 300;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 4000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 4000);
 }
 
 /**
@@ -674,17 +674,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus03, TestSize.Level1)
     window1->property_->SetPersistentId(2);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    window->updateFocusTimeStamp_.store(currentTimeStamp, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(),
         window1->GetWindowId(), true);
     info->isSameCallingPid_ = false;
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 2000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
 }
 
 /**
@@ -701,17 +701,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus04, TestSize.Level1)
     window->property_->SetPersistentId(1);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    window->updateFocusTimeStamp_.store(currentTimeStamp, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, INVALID_SESSION_ID,
         window->GetWindowId(), true);
     info->isSameCallingPid_ = false;
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 2000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
 }
 
 /**
@@ -728,17 +728,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus05, TestSize.Level1)
     window->property_->SetPersistentId(1);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    window->updateFocusTimeStamp_.store(currentTimeStamp, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(),
         INVALID_SESSION_ID, true);
     info->isSameCallingPid_ = false;
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 2000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
 }
 
 /**
@@ -755,11 +755,11 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus06, TestSize.Level1)
     window->property_->SetPersistentId(1);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    window->updateFocusTimeStamp_.store(currentTimeStamp, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, 999, window->GetWindowId(), true);
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
 }
 
 /**
@@ -776,11 +776,11 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus07, TestSize.Level1)
     window->property_->SetPersistentId(1);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
-    window->updateFocusTimeStamp_.store(currentTimeStamp, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(), 999, true);
     WSError res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
 }
 
 /**
@@ -3602,7 +3602,7 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus08, TestSize.Level1)
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
 
-    window->updateFocusTimeStamp_.store(currentTimeStamp + 3000, std::memory_order_release);
+    window->updateFocusTimeStamp_.store(currentTimeStamp + 3000);
 
     auto info = sptr<FocusNotifyInfo>::MakeSptr();
     info->isSyncNotify_ = true;
@@ -3611,7 +3611,7 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus08, TestSize.Level1)
 
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 3000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 3000);
 }
 
 /**
@@ -3635,13 +3635,13 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus09, TestSize.Level1)
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
     EXPECT_TRUE(window->isFocused_.load());
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 1000);
 
     info->timeStamp_ = 2000;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
     EXPECT_FALSE(window->isFocused_.load());
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), 2000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), 2000);
 }
 
 /**
@@ -3668,7 +3668,7 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus10, TestSize.Level1)
 
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), currentTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
 }
 
 /**
@@ -3703,13 +3703,13 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus11, TestSize.Level1)
     info3->timeStamp_ = baseTimeStamp + 3000;
 
     window->UpdateFocus(info1, true);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), baseTimeStamp + 1000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), baseTimeStamp + 1000);
 
     window->UpdateFocus(info2, false);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), baseTimeStamp + 2000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), baseTimeStamp + 2000);
 
     window->UpdateFocus(info3, true);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), baseTimeStamp + 3000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), baseTimeStamp + 3000);
 }
 } // namespace
 } // namespace Rosen
