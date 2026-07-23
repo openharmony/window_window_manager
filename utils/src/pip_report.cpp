@@ -19,7 +19,6 @@
 #include "window_manager_hilog.h"
 #include "perform_reporter.h"
 #include "singleton_container.h"
-#include <unistd.h>
 
 namespace OHOS {
 namespace Rosen {
