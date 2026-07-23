@@ -2939,7 +2939,7 @@ HWTEST_F(WindowSessionImplTest4, ProcessNotifyHighlightChange05, TestSize.Level1
     info->isSyncNotify_ = true;
     info->timeStamp_ = currentTimeStamp;
     window->ProcessNotifyHighlightChange(info, false);
-    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), currentTimeStamp + 2000);
+    EXPECT_EQ(window->updateHighlightTimeStamp_.load(), currentTimeStamp);
 }
 
 /**

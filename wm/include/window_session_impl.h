@@ -975,11 +975,11 @@ protected:
     bool isIgnoreSafeArea_ = false;
     std::atomic_bool isFocused_ = false;
     std::atomic_bool isHighlighted_ = false;
-    std::atomic_bool shouldReNotifyHighlight_ = false;
+    bool shouldReNotifyHighlight_ = false;
     static std::atomic<int64_t> updateFocusTimeStamp_;
     static std::atomic<int64_t> updateHighlightTimeStamp_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
-    std::atomic_bool shouldReNotifyFocus_ = false;
+    bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
     std::shared_ptr<IInputEventConsumer> inputEventConsumer_;
     bool useUniqueDensity_ { false };
@@ -1255,8 +1255,8 @@ private:
     EnableIfSame<T, IFreeWindowModeChangeListener, std::vector<sptr<IFreeWindowModeChangeListener>>> GetListeners();
     template<typename T>
  	EnableIfSame<T, IParentLifecycleEventListener, std::vector<sptr<IParentLifecycleEventListener>>> GetListeners();
-template<typename T>
-  	EnableIfSame<T, IWindowHoverStateChangeListener, std::vector<sptr<IWindowHoverStateChangeListener>>> GetListeners();
+    template<typename T>
+    EnableIfSame<T, IWindowHoverStateChangeListener, std::vector<sptr<IWindowHoverStateChangeListener>>> GetListeners();
     void ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused);
     void ProcessNotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight);
     void NotifyAfterFocused();

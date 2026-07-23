@@ -3402,9 +3402,8 @@ void WindowSessionImpl::ProcessNotifyHighlightChange(const sptr<HighlightNotifyI
         "isSyncNotify:%{public}d, old:%{public}" PRId64 ", new:%{public}" PRId64 ", current:%{public}" PRId64,
         highlightNotifyInfo->timeStamp_, highlightNotifyInfo->highlightId_, isHighlight,
         highlightNotifyInfo->isSyncNotify_, updateHighlightTime, notifyTime, currentTimeStamp);
-
     if (updateHighlightTime <= currentTimeStamp && notifyTime <= updateHighlightTime) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "check time fail");
+        TLOGW(WmsLogTag::WMS_FOCUS, "check time fail");
         return WSError::WS_OK;
     }
     updateHighlightTimeStamp_.store(notifyTime);

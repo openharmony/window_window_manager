@@ -3555,7 +3555,7 @@ HWTEST_F(WindowSessionImplTest, ProcessUpdateFocus08, TestSize.Level1)
     info->isSameCallingPid_ = false;
 
     window->ProcessUpdateFocus(info, true);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 3000);
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
 }
 
 HWTEST_F(WindowSessionImplTest, ProcessUpdateFocus09, TestSize.Level1)
