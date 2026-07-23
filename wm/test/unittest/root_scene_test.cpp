@@ -652,7 +652,7 @@ HWTEST_F(RootSceneTest, GetDisplayDensity, TestSize.Level1)
     sptr<RootScene> rootScene = sptr<RootScene>::MakeSptr();
     float density = 1.5f;
     rootScene->SetDisplayDensity(density, 0);
-    EXPECT_EQ(GetDisplayDensity(0), density);
+    EXPECT_EQ(rootScene->GetDisplayDensity(0), density);
 }
 
 /**
