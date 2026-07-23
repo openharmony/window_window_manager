@@ -474,7 +474,7 @@ HWTEST_F(PictureInPictureManagerTest, AutoStartPipWindow, TestSize.Level1)
     ASSERT_NE(nullptr, option);
     sptr<PictureInPictureController> pipController =
         new (std::nothrow) PictureInPictureController(option, nullptr, 100, nullptr);
-    PictureInPictureManager::mainWindowToAutoStartControllersMap_[100] = 
+    PictureInPictureManager::mainWindowToAutoStartControllersMap_[100] =
         { wptr<PictureInPictureController>(pipController) };
     option->SetTypeNodeEnabled(true);
     PictureInPictureManager::AutoStartPipWindow(100);
