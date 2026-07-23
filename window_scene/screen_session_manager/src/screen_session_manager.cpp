@@ -8663,6 +8663,10 @@ std::vector<uint64_t> ScreenSessionManager::FilterMissionIdsBySurfaceNodeIds(con
 
 bool ScreenSessionManager::RegisterClientDeathListener(sptr<IRemoteObject> reverseDeathAgent)
 {
+    if (!reverseDeathAgent) {
+        TLOGE(WmsLogTag::DMS, "reverseDeathAgent is null");
+        return false;
+    }
     int32_t pid = IPCSkeleton::GetCallingPid();
     if (SessionPermission::IsSACalling()) {
         TLOGI(WmsLogTag::DMS, "pid: %{public}d is SA calling, return", pid);
@@ -8672,10 +8676,6 @@ bool ScreenSessionManager::RegisterClientDeathListener(sptr<IRemoteObject> rever
     auto reverDeathRecipient = new AgentDeathRecipient([this, reverseDeathAgent]
         (const sptr<IRemoteObject>& agent) { SysCapUtil::RemoveBundleInfo(reverseDeathAgent); });
     SysCapUtil::UpdateBundleInfo(pid, reverseDeathAgent);
-    if (!reverseDeathAgent) {
-        TLOGE(WmsLogTag::DMS, "reverseDeathAgent is null");
-        return false;
-    }
     bool result = reverseDeathAgent->AddDeathRecipient(reverDeathRecipient);
     auto bundleInfo = SysCapUtil::GetBundleInfo(pid);
     if (bundleInfo) {
