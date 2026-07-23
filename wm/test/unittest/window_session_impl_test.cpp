@@ -3635,10 +3635,13 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus09, TestSize.Level1)
     WSError res = window->UpdateFocus(info, true);
     EXPECT_EQ(res, WSError::WS_OK);
     EXPECT_TRUE(window->isFocused_.load());
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), 1000);
 
+    info->timeStamp_ = 2000;
     res = window->UpdateFocus(info, false);
     EXPECT_EQ(res, WSError::WS_OK);
     EXPECT_FALSE(window->isFocused_.load());
+    EXPECT_EQ(window->updateFocusTimeStamp_.load(std::memory_order_acquire), 2000);
 }
 
 /**
