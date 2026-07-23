@@ -2008,16 +2008,19 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
         return WSError::WS_ERROR_NULLPTR;
     }
 
-    auto task = [this, focusNotifyInfo, isFocused]() {
-        ProcessFocusUpdate(focusNotifyInfo, isFocused);
+    auto task = [weakThis = wptr(this), focusNotifyInfo, isFocused]() {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "window is nullptr");
+            return;
+        }
+        window->ProcessFocusUpdate(focusNotifyInfo, isFocused);
     };
-
-    if (handler_ != nullptr) {
-        handler_->PostTask(task, "wms:UpdateFocus");
-    } else {
-        TLOGW(WmsLogTag::WMS_FOCUS, "handler is null, process directly");
-        task();
+    if (handler_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "handler is null");
+        return WSError::WS_ERROR_NULLPTR;
     }
+    handler_->PostTask(task, "wms:UpdateFocus");
     return WSError::WS_OK;
 }
 
@@ -3375,16 +3378,19 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
         return WSError::WS_ERROR_NULLPTR;
     }
 
-    auto task = [this, highlightNotifyInfo, isHighlight]() {
-        ProcessHighlightUpdate(highlightNotifyInfo, isHighlight);
+    auto task = [weakThis = wptr(this), highlightNotifyInfo, isHighlight]() {
+        auto window = weakThis.promote();
+        if (window == nullptr) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "window is nullptr");
+            return;
+        }
+        window->ProcessHighlightUpdate(highlightNotifyInfo, isHighlight);
     };
-
-    if (handler_ != nullptr) {
-        handler_->PostTask(task, "wms:NotifyHighlightChange");
-    } else {
-        TLOGW(WmsLogTag::WMS_FOCUS, "handler is null, process directly");
-        task();
+    if (handler_ == nullptr) {
+        TLOGW(WmsLogTag::WMS_FOCUS, "handler is null");
+        return WSError::WS_ERROR_NULLPTR;
     }
+    handler_->PostTask(task, "wms:NotifyHighlightChange");
     return WSError::WS_OK;
 }
 
