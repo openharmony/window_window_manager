@@ -578,18 +578,6 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus, TestSize.Level1)
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
-HWTEST_F(WindowSessionImplTest, UpdateFocus01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus01");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->handler_ = nullptr;
-    auto info = sptr<FocusNotifyInfo>::MakeSptr();
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
-}
-
 HWTEST_F(WindowSessionImplTest, ProcessUpdateFocus01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();

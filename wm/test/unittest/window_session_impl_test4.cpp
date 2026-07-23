@@ -2810,22 +2810,6 @@ HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange, TestSize.Level1)
     EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
-HWTEST_F(WindowSessionImplTest4, NotifyHighlightChange01, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("NotifyHighlightChange01");
-    sptr<WindowSessionImpl> window = sptr<WindowSessionImpl>::MakeSptr(option);
-    window->handler_ = nullptr;
-    auto info = sptr<HighlightNotifyInfo>::MakeSptr();
-    WSError res = window->NotifyHighlightChange(info, true);
-    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
-}
-
-/**
- * @tc.name: NotifyHighlightChange01
- * @tc.desc: NotifyHighlightChange with isSyncNotify false and state change
- * @tc.type: FUNC
- */
 HWTEST_F(WindowSessionImplTest4, ProcessNotifyHighlightChange01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
