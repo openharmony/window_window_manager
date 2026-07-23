@@ -591,6 +591,10 @@ void RootScene::AddRootScene(DisplayId displayId, wptr<Window> window)
 
 void RootScene::RemoveRootScene(DisplayId displayId)
 {
+    {
+        std::unique_lock<std::shared_mutex> lock(displayDpiMapMutex_);
+        displayDpiMap_.erase(displayId);
+    }
     std::lock_guard<std::mutex> lock(rootSceneMapMutex_);
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     auto iter = rootSceneMap_.find(displayId);
