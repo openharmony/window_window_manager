@@ -569,64 +569,51 @@ HWTEST_F(WindowSessionImplTest, SetActive, TestSize.Level1)
  */
 HWTEST_F(WindowSessionImplTest, UpdateFocus, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFocus start";
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateFocus");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     sptr<FocusNotifyInfo> info = nullptr;
     WSError res = window->UpdateFocus(info, true);
-    info = sptr<FocusNotifyInfo>::MakeSptr();
-    info->isSyncNotify_ = false;
-    res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
-
-    info->isSameCallingPid_ = false;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
-
-    GTEST_LOG_(INFO) << "WindowSessionImplTest: UpdateFocus end";
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
-/**
- * @tc.name: UpdateFocus01
- * @tc.desc: UpdateFocus with timestamp check
- * @tc.type: FUNC
- */
 HWTEST_F(WindowSessionImplTest, UpdateFocus01, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("UpdateFocus01");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
+    window->handler_ = nullptr;
+    auto info = sptr<FocusNotifyInfo>::MakeSptr();
+    WSError res = window->UpdateFocus(info, true);
+    EXPECT_EQ(res, WSError::WS_ERROR_NULLPTR);
+}
+
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate01, TestSize.Level1)
+{
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("ProcessFocusUpdate01");
+    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
+    ASSERT_NE(window, nullptr);
+    window->property_->SetPersistentId(1);
     auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count());
     window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr();
     info->isSyncNotify_ = true;
     info->timeStamp_ = currentTimeStamp - 1000;
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp);
     info->timeStamp_ = currentTimeStamp + 1000;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
-    res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
 }
 
-/**
- * @tc.name: UpdateFocus02
- * @tc.desc: UpdateFocus with cross window focus switch
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus02, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate02, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus02");
+    option->SetWindowName("ProcessFocusUpdate02");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
@@ -638,34 +625,25 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus02, TestSize.Level1)
     window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(),
         window1->GetWindowId(), true);
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
     info->timeStamp_ = currentTimeStamp + 3000;
     info->unfocusWindowId_ = 300;
-    res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 3000);
     info->timeStamp_ = currentTimeStamp + 4000;
     info->focusWindowId_ = 300;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 4000);
 }
 
-/**
- * @tc.name: UpdateFocus03
- * @tc.desc: UpdateFocus with isSameCallingPid false in sync notify
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus03, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate03, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus03");
+    option->SetWindowName("ProcessFocusUpdate03");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     sptr<WindowSessionImpl> window1 = new (std::nothrow) WindowSessionImpl(option);
@@ -678,24 +656,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus03, TestSize.Level1)
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(),
         window1->GetWindowId(), true);
     info->isSameCallingPid_ = false;
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
 }
 
-/**
- * @tc.name: UpdateFocus04
- * @tc.desc: UpdateFocus with otherWindowId INVALID in sync mode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus04, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate04, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus04");
+    option->SetWindowName("ProcessFocusUpdate04");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -705,24 +676,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus04, TestSize.Level1)
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, INVALID_SESSION_ID,
         window->GetWindowId(), true);
     info->isSameCallingPid_ = false;
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
 }
 
-/**
- * @tc.name: UpdateFocus05
- * @tc.desc: UpdateFocus with focusWindowId INVALID in sync mode
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus05, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate05, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus05");
+    option->SetWindowName("ProcessFocusUpdate05");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -732,24 +696,17 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus05, TestSize.Level1)
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(),
         INVALID_SESSION_ID, true);
     info->isSameCallingPid_ = false;
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
     info->timeStamp_ = currentTimeStamp + 2000;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 2000);
 }
 
-/**
- * @tc.name: UpdateFocus06
- * @tc.desc: UpdateFocus with otherWindow nullptr in sync mode when isFocused true
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus06, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate06, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus06");
+    option->SetWindowName("ProcessFocusUpdate06");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -757,20 +714,14 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus06, TestSize.Level1)
         std::chrono::system_clock::now().time_since_epoch()).count());
     window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, 999, window->GetWindowId(), true);
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
 }
 
-/**
- * @tc.name: UpdateFocus07
- * @tc.desc: UpdateFocus with otherWindow nullptr in sync mode when isFocused false
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus07, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate07, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus07");
+    option->SetWindowName("ProcessFocusUpdate07");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -778,8 +729,7 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus07, TestSize.Level1)
         std::chrono::system_clock::now().time_since_epoch()).count());
     window->updateFocusTimeStamp_.store(currentTimeStamp);
     auto info = sptr<FocusNotifyInfo>::MakeSptr(currentTimeStamp + 1000, window->GetWindowId(), 999, true);
-    WSError res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
 }
 
@@ -3586,15 +3536,10 @@ HWTEST_F(WindowSessionImplTest, UpdateTitleButtonVisibility03, TestSize.Level1)
     window->UpdateTitleButtonVisibility();
 }
 
-/**
- * @tc.name: UpdateFocus08
- * @tc.desc: UpdateFocus with outdated timestamp should be skipped
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus08, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate08, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus08");
+    option->SetWindowName("ProcessFocusUpdate08");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -3609,20 +3554,14 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus08, TestSize.Level1)
     info->timeStamp_ = currentTimeStamp + 1000;
     info->isSameCallingPid_ = false;
 
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 3000);
 }
 
-/**
- * @tc.name: UpdateFocus09
- * @tc.desc: UpdateFocus sameCallingPid fast path
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus09, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate09, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus09");
+    option->SetWindowName("ProcessFocusUpdate09");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -3632,54 +3571,20 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus09, TestSize.Level1)
     info->isSameCallingPid_ = true;
     info->timeStamp_ = 1000;
 
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, true);
     EXPECT_TRUE(window->isFocused_.load());
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), 1000);
 
     info->timeStamp_ = 2000;
-    res = window->UpdateFocus(info, false);
-    EXPECT_EQ(res, WSError::WS_OK);
+    window->ProcessFocusUpdate(info, false);
     EXPECT_FALSE(window->isFocused_.load());
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), 2000);
 }
 
-/**
- * @tc.name: UpdateFocus10
- * @tc.desc: UpdateFocus with null handler should execute task directly
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus10, TestSize.Level1)
+HWTEST_F(WindowSessionImplTest, ProcessFocusUpdate10, TestSize.Level1)
 {
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus10");
-    sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
-    ASSERT_NE(window, nullptr);
-    window->property_->SetPersistentId(1);
-    window->handler_ = nullptr;
-
-    auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count());
-
-    auto info = sptr<FocusNotifyInfo>::MakeSptr();
-    info->isSyncNotify_ = true;
-    info->isSameCallingPid_ = false;
-    info->timeStamp_ = currentTimeStamp + 1000;
-
-    WSError res = window->UpdateFocus(info, true);
-    EXPECT_EQ(res, WSError::WS_OK);
-    EXPECT_EQ(window->updateFocusTimeStamp_.load(), currentTimeStamp + 1000);
-}
-
-/**
- * @tc.name: UpdateFocus11
- * @tc.desc: UpdateFocus sequential order test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSessionImplTest, UpdateFocus11, TestSize.Level1)
-{
-    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
-    option->SetWindowName("UpdateFocus11");
+    option->SetWindowName("ProcessFocusUpdate10");
     sptr<WindowSessionImpl> window = new (std::nothrow) WindowSessionImpl(option);
     ASSERT_NE(window, nullptr);
     window->property_->SetPersistentId(1);
@@ -3702,13 +3607,13 @@ HWTEST_F(WindowSessionImplTest, UpdateFocus11, TestSize.Level1)
     info3->isSameCallingPid_ = false;
     info3->timeStamp_ = baseTimeStamp + 3000;
 
-    window->UpdateFocus(info1, true);
+    window->ProcessFocusUpdate(info1, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), baseTimeStamp + 1000);
 
-    window->UpdateFocus(info2, false);
+    window->ProcessFocusUpdate(info2, false);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), baseTimeStamp + 2000);
 
-    window->UpdateFocus(info3, true);
+    window->ProcessFocusUpdate(info3, true);
     EXPECT_EQ(window->updateFocusTimeStamp_.load(), baseTimeStamp + 3000);
 }
 } // namespace
