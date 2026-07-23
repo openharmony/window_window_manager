@@ -26,7 +26,6 @@ group("unittest") {
     ":wm_picture_in_picture_option_test",
     ":wm_picture_in_picture_option_ani_test",
     ":wm_screen_scene_test",
-    ":wm_vsync_station_test",
     ":wm_window_display_change_adapter_test",
     ":wm_window_impl_listener_test",
     ":wm_window_inspector_test",
@@ -35,7 +34,6 @@ group("unittest") {
     ":wm_window_stub_test",
     "event_distribution:wm_window_option_event_test",
     "rotation:wm_window_extension_session_impl_rotation_test",
-    "rotation:wm_window_session_impl_rotation_test",
     "window_recover:wm_window_recover_manager_test",
     "wm_pattern:window_manager_pattern_test",
   ]
@@ -77,6 +75,7 @@ group("unittest") {
       ":wm_window_scene_session_impl_test4",
       ":wm_window_scene_session_impl_test5",
       "rotation:wm_window_scene_session_impl_rotation_test",
+      "rotation:wm_window_session_impl_rotation_test",
       ":wm_window_scene_test",
       ":wm_window_session_impl_compatible_mode_test",
       ":wm_window_session_impl_test",
