@@ -33,7 +33,7 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(SessionOption Se
     if (!ScreenConnectWriteParam(SessionOption, screenEvent, data)) {
         return;
     }
-    auto renderSession = SessionOption.connectToRenderToken_;
+    auto renderSession = SessionOption.renderSession_;
     if (renderSession) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(renderSession)) {
             TLOGE(WmsLogTag::DMS, "Write bool or renderSession failed");
@@ -44,6 +44,8 @@ void ScreenSessionManagerClientProxy::OnScreenConnectionChanged(SessionOption Se
                 return;
             }
         }
+    } else {
+        TLOGE(WmsLogTag::DMS, "no renderSession");
     }
     if (remote->SendRequest(
         static_cast<uint32_t>(ScreenSessionManagerClientMessage::TRANS_ID_ON_SCREEN_CONNECTION_CHANGED),
