@@ -59,7 +59,7 @@ ani_status AniPipManager::Init(ani_env* env, ani_namespace nsp)
 AniPipManager::AniPipManager(){TLOGI(WmsLogTag::WMS_PIP, "AniPipManager");}
 AniPipManager::~AniPipManager(){TLOGI(WmsLogTag::WMS_PIP, "~AniPipManager");}
 
-void AniPipManager::InitXComponentController(ani_env* env, ani_long nativeObj, 
+void AniPipManager::InitXComponentController(ani_env* env, ani_long nativeObj,
     ani_int windowId, ani_object xComponentController)
 {
     TLOGI(WmsLogTag::WMS_PIP, "start");
