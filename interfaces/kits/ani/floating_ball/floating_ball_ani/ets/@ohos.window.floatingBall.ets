@@ -91,7 +91,7 @@ export default namespace floatingBall {
 
   function runOnStateChangeEvent(cb: object, cbArg: int): void {
     const func = cb as (cbArg: FloatingBallState) => void;
-    func(cbArg as FloatingBallState);
+    func(FloatingBallState.fromValue(cbArg));
   }
 
   function runOnDestroyEvent(cb: object, cbArg: string): void {
