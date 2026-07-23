@@ -655,7 +655,6 @@ public:
     WMError UnregisterWindowHighlightChangeListeners(const sptr<IWindowHighlightChangeListener>& listener) override;
     WSError NotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight) override;
     void NotifyHighlightChange(bool isHighlight);
-    
     /*
      * Snapshot
      */
