@@ -15073,7 +15073,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
     taskScheduler_->PostSyncTask([this, displayInfo, type, where = __func__]() {
         if (updateDisplayDpiChangeFunc_ != nullptr) {
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s in", where);
-            updateDisplayDpiChangeFunc_(displayInfo->GetDisplayId(), displayInfo->GetDensity());
+            updateDisplayDpiChangeFunc_(displayInfo->GetDisplayId(), displayInfo->GetVirtualPixelRatio());
         }
         if (ShouldProcessVirtualPixelRatioChange(type, displayInfo)) {
             Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
