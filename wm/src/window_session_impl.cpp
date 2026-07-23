@@ -2008,15 +2008,15 @@ WSError WindowSessionImpl::UpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyI
         return WSError::WS_ERROR_NULLPTR;
     }
 
-    auto notifyTime = focusNotifyInfo->timeStamp_;
+    auto task = [this, focusNotifyInfo, isFocused]() {
+        auto notifyTime = focusNotifyInfo->timeStamp_;
 
-    if (focusNotifyInfo->isSameCallingPid_ && !focusNotifyInfo->isSyncNotify_) {
-        UpdateFocusState(isFocused);
-        updateFocusTimeStamp_.store(notifyTime, std::memory_order_release);
-        return WSError::WS_OK;
-    }
+        if (focusNotifyInfo->isSameCallingPid_ && !focusNotifyInfo->isSyncNotify_) {
+            UpdateFocusState(isFocused);
+            updateFocusTimeStamp_.store(notifyTime, std::memory_order_release);
+            return;
+        }
 
-    auto task = [this, focusNotifyInfo, isFocused, notifyTime]() {
         auto lastFocusTimeStamp = updateFocusTimeStamp_.load(std::memory_order_acquire);
         if (notifyTime <= lastFocusTimeStamp) {
             TLOGW(WmsLogTag::WMS_FOCUS,
@@ -3376,45 +3376,63 @@ WSError WindowSessionImpl::NotifyHighlightChange(const sptr<HighlightNotifyInfo>
         TLOGE(WmsLogTag::WMS_FOCUS, "highlight notify info is null");
         return WSError::WS_ERROR_NULLPTR;
     }
-    if (!isHighlight && !highlightNotifyInfo->isSyncNotify_) {
-        NotifyHighlightChange(isHighlight);
-        return WSError::WS_OK;
-    }
-    auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count());
-    auto notifyTime = highlightNotifyInfo->timeStamp_;
-    auto updateHighlightTime = updateHighlightTimeStamp_.load();
-    TLOGI(WmsLogTag::WMS_FOCUS, "timeStamp:%{public}" PRId64 ", highlightId:%{public}d, isHighlight:%{public}d,"
-        "isSyncNotify:%{public}d, old:%{public}" PRId64 ", new:%{public}" PRId64 ", current:%{public}" PRId64,
-        highlightNotifyInfo->timeStamp_, highlightNotifyInfo->highlightId_, isHighlight,
-        highlightNotifyInfo->isSyncNotify_, updateHighlightTime, notifyTime, currentTimeStamp);
-    if (updateHighlightTime <= currentTimeStamp && notifyTime <= updateHighlightTime) {
-        TLOGE(WmsLogTag::WMS_FOCUS, "check time fail");
-        return WSError::WS_OK;
-    }
-    updateHighlightTimeStamp_.store(notifyTime);
-    if (!highlightNotifyInfo->isSyncNotify_) {
-        NotifyHighlightChange(isHighlight);
-        return WSError::WS_OK;
-    }
-    for (auto unHighlightWindowId : highlightNotifyInfo->notHighlightIds_) {
-        if (!isHighlight && static_cast<uint32_t>(unHighlightWindowId) == GetWindowId()) {
+
+    auto task = [this, highlightNotifyInfo, isHighlight]() {
+        if (!isHighlight && !highlightNotifyInfo->isSyncNotify_) {
             NotifyHighlightChange(isHighlight);
-            continue;
+            return;
         }
-        auto unHighlightWindow = GetWindowWithId(unHighlightWindowId);
-        if (unHighlightWindow != nullptr) {
-            unHighlightWindow->NotifyHighlightChange(false);
+
+        auto notifyTime = highlightNotifyInfo->timeStamp_;
+        auto lastHighlightTimeStamp = updateHighlightTimeStamp_.load(std::memory_order_acquire);
+        if (notifyTime <= lastHighlightTimeStamp) {
+            TLOGW(WmsLogTag::WMS_FOCUS, "skip outdated highlight notify, old:%{public}" PRId64 ", new:%{public}" PRId64,
+                lastHighlightTimeStamp, notifyTime);
+            return;
         }
-    }
-    if (isHighlight) {
-        NotifyHighlightChange(isHighlight);
+        updateHighlightTimeStamp_.store(notifyTime, std::memory_order_release);
+
+        auto currentTimeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
+
+        TLOGI(WmsLogTag::WMS_FOCUS, "timeStamp:%{public}" PRId64 ", highlightId:%{public}d, isHighlight:%{public}d,"
+            "isSyncNotify:%{public}d, notifyTime:%{public}" PRId64 ", current:%{public}" PRId64,
+            highlightNotifyInfo->timeStamp_, highlightNotifyInfo->highlightId_, isHighlight,
+            highlightNotifyInfo->isSyncNotify_, notifyTime, currentTimeStamp);
+
+        if (!highlightNotifyInfo->isSyncNotify_) {
+            NotifyHighlightChange(isHighlight);
+            return;
+        }
+
+        for (auto unHighlightWindowId : highlightNotifyInfo->notHighlightIds_) {
+            if (!isHighlight && static_cast<uint32_t>(unHighlightWindowId) == GetWindowId()) {
+                NotifyHighlightChange(isHighlight);
+                continue;
+            }
+            auto unHighlightWindow = GetWindowWithId(unHighlightWindowId);
+            if (unHighlightWindow != nullptr) {
+                unHighlightWindow->NotifyHighlightChange(false);
+            }
+        }
+
+        if (isHighlight) {
+            NotifyHighlightChange(isHighlight);
+        } else {
+            auto highlightWindow = GetWindowWithId(highlightNotifyInfo->highlightId_);
+            if (highlightWindow != nullptr) {
+                highlightWindow->NotifyHighlightChange(true);
+            }
+        }
+    };
+
+    if (handler_ != nullptr) {
+        handler_->PostTask(task, "wms:NotifyHighlightChange");
     } else {
-        auto highlightWindow = GetWindowWithId(highlightNotifyInfo->highlightId_);
-        if (highlightWindow != nullptr) {
-            highlightWindow->NotifyHighlightChange(true);
-        }
+        TLOGW(WmsLogTag::WMS_FOCUS, "handler is null, process directly");
+        task();
     }
+
     return WSError::WS_OK;
 }
 
