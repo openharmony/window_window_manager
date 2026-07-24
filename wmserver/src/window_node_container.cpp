@@ -2636,7 +2636,7 @@ void WindowNodeContainer::SetWindowPairFrameGravity(DisplayId displayId, Gravity
     }
     std::vector<sptr<WindowNode>> windowNodes = windowPair->GetPairedWindows();
     for (auto& windowNode : windowNodes) {
-        if (windowNode->surfaceNode_) {
+        if (windowNode && windowNode->surfaceNode_) {
             windowNode->surfaceNode_->SetFrameGravity(gravity);
         }
     }
