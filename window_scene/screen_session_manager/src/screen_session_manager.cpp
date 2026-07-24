@@ -171,6 +171,7 @@ static float g_extendScreenDpiCoef = EXTEND_SCREEN_DPI_DEFAULT_PARAMETER;
 static uint32_t g_internalWidth = 3120;
 #ifdef WM_MULTI_SCREEN_CTL_ABILITY_ENABLE
 constexpr uint32_t NUMBER_OF_PHYSICAL_SCREEN = 2;
+constexpr uint32_t NUMBER_OF_PHYSICAL_SCREEN_THREE = 3;
 constexpr bool ADD_VOTE = true;
 constexpr bool REMOVE_VOTE = false;
 constexpr uint32_t OLED_60_HZ = 60;
@@ -3093,6 +3094,10 @@ void ScreenSessionManager::SetMultiScreenFrameControl(void)
                 count++;
             }
         }
+    }
+    uint32_t screenNumber = NUMBER_OF_PHYSICAL_SCREEN;
+    if (FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice()) {
+        screenNumber = NUMBER_OF_PHYSICAL_SCREEN_THREE;
     }
     if (count >= NUMBER_OF_PHYSICAL_SCREEN) {
         TLOGNFW(WmsLogTag::DMS, "MultiScreen control frame rate to 60");
