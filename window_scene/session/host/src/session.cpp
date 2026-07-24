@@ -5034,6 +5034,25 @@ void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
     systemConfig_ = systemConfig;
 }
 
+void Session::UpdateSupportMultiWindowScreenSet(const std::set<ScreenId>& supportMultiWindowScreenSet)
+{
+    systemConfig_.supportMultiWindowScreenSet_ = supportMultiWindowScreenSet;
+}
+
+WSError Session::UpdateScreenSupportMultiWindowToClient()
+{
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->UpdateScreenSupportMultiWindow(systemConfig_.supportMultiWindowScreenSet_);
+}
+
 SystemSessionConfig Session::GetSystemConfig() const
 {
     return systemConfig_;
