@@ -5013,6 +5013,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         info.abilityName_ = property->GetSessionInfo().abilityName_;
         info.moduleName_ = property->GetSessionInfo().moduleName_;
         info.screenId_ = property->GetDisplayId();
+        info.appIndex_ = property->GetSessionInfo().appIndex_;
 
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
         if (newSession == nullptr) {
