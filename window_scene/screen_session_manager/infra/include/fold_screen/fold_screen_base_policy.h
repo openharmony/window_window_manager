@@ -144,6 +144,7 @@ public:
     bool GetLockDisplayStatus() const;
     virtual void PowerkeySetScreenActiveRect() {};
     const std::map<FoldDisplayMode, RRect>& GetScreenActiveModeRectMap() const;
+    void SetDeviceStatusAndParam(uint32_t deviceStatus);
 
 protected:
     FoldScreenBasePolicy();
