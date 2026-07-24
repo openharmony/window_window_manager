@@ -79,7 +79,7 @@ void ScreenCutoutController::RecoverDisplayInfo(uint32_t& dwidth, uint32_t& dhei
     int32_t phyWidth = displayInfo->GetPhysicalWidth();
     int32_t phyHeight = displayInfo->GetPhysicalHeight();
     FoldDisplayMode displayMode = ScreenSceneConfig::GetFoldDisplayMode(phyWidth, phyHeight);
-    if (displayMode == FoldDisplayMode::FULL &&
+    if ((displayMode == FoldDisplayMode::FULL || displayMode == FoldDisplayMode::GLOBAL_FULL) &&
         (rotation == Rotation::ROTATION_0 || rotation == Rotation::ROTATION_180)) {
         std::swap(phyWidth, phyHeight);
     }
