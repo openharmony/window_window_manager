@@ -620,14 +620,11 @@ bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
         TLOGE(WmsLogTag::DMS, "dmsScreen is nullptr.");
         return false;
     }
-    config = { dmsScreen->rsId_ , DisplayMode::EXPAND};
+    config = {dmsScreen->rsId_, DisplayMode::EXPAND};
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
             config.displayMode = DisplayMode::INVALID;
             [[fallthrough]];
-        case ScreenCombination::SCREEN_EXTEND:
-            config.displayMode = DisplayMode::INDEPENDENT;
-            break;
         case ScreenCombination::SCREEN_EXPAND:
             break;
         case ScreenCombination::SCREEN_MIRROR: {
