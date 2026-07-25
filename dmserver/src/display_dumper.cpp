@@ -226,7 +226,7 @@ DMError DisplayDumper::DumpSpecifiedScreenInfo(ScreenId screenId, std::string& d
         name : name.substr(0, SCREEN_NAME_MAX_LENGTH);
     std::string isGroup = screen->isScreenGroup_ ? "true" : "false";
     std::string screenType = TransferTypeToString(screen->type_);
-    std::string displayModeStr = TransferDisplayModeToString(screen->rSDisplayNodeConfig_.displayNode);
+    std::string displayModeStr = TransferDisplayModeToString(screen->rSDisplayNodeConfig_.displayMode);
     NodeId nodeId = (screen->rsDisplayNode_ == nullptr) ? SCREEN_ID_INVALID : screen->rsDisplayNode_->GetId();
     std::ostringstream oss;
     oss << "ScreenName: " << screenName << std::endl;
