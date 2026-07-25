@@ -126,7 +126,7 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 {
     TLOGI(WmsLogTag::DMS,
         "[DPNODE]config screenId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64", displayMode: %{public}d",
-        config.screenId, config.mirrorNodeId, config.displayMode);
+        config.screenId, config.mirrorNodeId, static_cast<int32_t>(config.displayMode));
     {
         std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
@@ -155,7 +155,7 @@ void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
     {
         std::unique_lock<std::shared_mutex> lock(displayNodeMutex_);
         if (displayNode_) {
-            displayNode_->SetDisplayMirrorConfig(config);
+            displayNode_->SetDisplayNodeConfig(config);
             RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
             return;
         }
