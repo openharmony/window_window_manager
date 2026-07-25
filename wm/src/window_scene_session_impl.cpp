@@ -467,7 +467,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 
     const WindowType type = GetType();
     TLOGI(WmsLogTag::WMS_LIFE, "AdjustPropertySessionInfo after, appIndex:%{public}d, WindowType:%{public}u",
- 	    property_->GetSessionInfo().appIndex_, GetType());
+        property_->GetSessionInfo().appIndex_, GetType());
 
     bool hasToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
     if (WindowHelper::IsSubWindow(type) && (property_->GetIsUIExtFirstSubWindow() ||
