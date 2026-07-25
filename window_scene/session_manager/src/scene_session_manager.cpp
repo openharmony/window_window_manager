@@ -195,6 +195,7 @@ const std::string STARTUP_PHASE_PRE_FOREGROUND = "pre_foreground";
 const std::string TRUE_VALUE = "true";
 constexpr int32_t MAIN_WINDOW_CREATE = 3;
 constexpr int32_t MAIN_WINDOW_DESTORY = 4;
+const bool SUPPORT_DPI_SCALING = system::GetBoolParameter("const.desktop.is_support_scale_with_dpi", false);
 
 /*
  * sessionexception reason
@@ -15162,17 +15163,16 @@ bool SceneSessionManager::ShouldProcessVirtualPixelRatioChange(
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rootSceneSession is nullptr");
         return false;
     }
-    bool isInternal = system::GetIntParameter("const.product.has_buildin_screen", 1);
     auto result = processVirtualPixelRatioChangeFunc_ != nullptr &&
                   ((type == DisplayStateChangeType::RESOLUTION_CHANGE &&
                     displayInfo->GetVirtualPixelRatio() == displayInfo->GetDensityInCurResolution()) ||
-                   (type == DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE && !isInternal &&
+                   (type == DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE && SUPPORT_DPI_SCALING &&
                     displayInfo->GetDisplayId() == rootSceneSession->GetDisplayId()));
     TLOGD(WmsLogTag::WMS_ATTRIBUTE,
-          "result=%{public}d isInternal=%{public}d type=%{public}u rootDisplayId=%{public}" PRIu64
+          "result=%{public}d SUPPORT_DPI_SCALING=%{public}d type=%{public}u rootDisplayId=%{public}" PRIu64
           " inputDisplayId=%{public}" PRIu64,
           result,
-          isInternal,
+          SUPPORT_DPI_SCALING,
           type,
           rootSceneSession->GetDisplayId(),
           displayInfo->GetDisplayId());

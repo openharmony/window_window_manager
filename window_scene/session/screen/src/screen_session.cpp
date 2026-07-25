@@ -37,6 +37,7 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
 static const std::string PRODUCT_SERIES = system::GetParameter("const.build.product", "");
 static const std::string g_packageName = system::GetParameter("const.display_rotation.package.list", "");
+const bool SUPPORT_DPI_SCALING = system::GetBoolParameter("const.desktop.is_support_scale_with_dpi", false);
 static const int32_t SCAN_TYPE_VERTICAL = 1;
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
@@ -949,7 +950,7 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
-    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
+    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE && !SUPPORT_DPI_SCALING) {
         return;
     }
     auto listeners = GetScreenChangeListenerList();

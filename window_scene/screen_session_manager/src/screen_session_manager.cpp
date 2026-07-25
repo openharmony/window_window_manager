@@ -186,6 +186,7 @@ constexpr uint32_t WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT_MS = 10000;
 
 const int32_t ROTATE_POLICY = system::GetIntParameter("const.window.device.rotate_policy", 0);
 const int32_t DESKTOPPCTYPE = system::GetIntParameter("const.product.has_buildin_screen", 1);
+const bool SUPPORT_DPI_SCALING = system::GetBoolParameter("const.desktop.is_support_scale_with_dpi", false);
 constexpr int32_t FOLDABLE_DEVICE { 2 };
 constexpr float DEFAULT_PIVOT = 0.5f;
 constexpr float DEFAULT_SCALE = 1.0f;
@@ -4267,6 +4268,9 @@ DMError ScreenSessionManager::SetVirtualPixelRatio(ScreenId screenId, float virt
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:SetVirtualPixelRatio(%" PRIu64", %f)", screenId,
         virtualPixelRatio);
     screenSession->SetVirtualPixelRatio(virtualPixelRatio);
+    if (SUPPORT_DPI_SCALING) {
+        screenSession->SetDensityInCurResolution(virtualPixelRatio);
+    }
     SetFakeSessionVirtualPixelRatio(screenSession, virtualPixelRatio);
     std::map<DisplayId, sptr<DisplayInfo>> emptyMap;
     OnPropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE,
