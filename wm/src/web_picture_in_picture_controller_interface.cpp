@@ -703,15 +703,5 @@ WMError WebPictureInPictureControllerInterface::ProcessPipStartUnregister(
     return WMError::WM_ERROR_INVALID_PARAM;
 }
 
-WMError WebPictureInPictureControllerInterface::SetPipAutoStartEnabled(bool enabled)
-{
-    if (auto pipController = sptrWebPipController_) {
-        pipController->SetAutoStartEnabled(enabled);
-        return WMError::WM_OK;
-    } else {
-        TLOGE(WmsLogTag::WMS_PIP, "webPipController is nullptr");
-        return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
-    }
-}
 } // namespace Rosen
 } // namespace OHOS

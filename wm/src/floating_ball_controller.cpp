@@ -168,7 +168,7 @@ WMError FloatingBallController::SetInApplicationVisible(bool isVisible)
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     auto errCode = window_->UpdateFloatingBallForVisible(isVisible);
-
+    
     std::ostringstream ss;
     errCode == WMError::WM_OK ? (ss << "") : (ss << "set floating ball window visibility failed, errCode:"
         << static_cast<uint32_t>(errCode));
@@ -204,11 +204,15 @@ WMError FloatingBallController::PrepareStartFloatingBall(const sptr<FbOption>& o
     std::lock_guard<std::mutex> lock(controllerMutex_);
     if (FloatingBallManager::HasActiveController() && !FloatingBallManager::IsActiveController(this)) {
         TLOGI(WmsLogTag::WMS_SYSTEM, "OnStartFloatingBall abort");
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "Has active controller but not active controller");
         return WMError::WM_ERROR_FB_REPEAT_CONTROLLER;
     }
     TLOGI(WmsLogTag::WMS_SYSTEM, "called");
     if (option == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "fbOption is null");
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "fbOption is null");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
 
@@ -239,12 +243,16 @@ WMError FloatingBallController::StartFloatingBallInner(const sptr<FbOption>& opt
     WMError errCode = CreateFloatingBallWindow(option);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Create fb window failed, err: %{public}u", errCode);
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "Create fb window failed");
         return errCode;
     }
     // LCOV_EXCL_START
     errCode = window_->Show(0, false);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Show fb window failed, err: %{public}u", errCode);
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "Show fb window failed");
         (void)window_->Destroy();
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
@@ -268,6 +276,8 @@ WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& o
 {
     if (option == nullptr || contextPtr_ == nullptr || mainWindow_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "Create fb failed, invalid fbOption");
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "Create fb failed, invalid parameters");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     // LCOV_EXCL_START
@@ -277,6 +287,8 @@ WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& o
         mainWindowId_, mainWindowState, uid);
     if (mainWindowState != WindowState::STATE_SHOWN) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "mainWindow:%{public}u is not shown", mainWindowId_);
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "mainWindow is not shown");
         return WMError::WM_ERROR_FB_CREATE_FAILED;
     }
     auto windowOption = sptr<WindowOption>::MakeSptr();
@@ -286,25 +298,25 @@ WMError FloatingBallController::CreateFloatingBallWindow(const sptr<FbOption>& o
     windowOption->SetTouchable(false);
     FloatingBallTemplateBaseInfo fbTemplateBaseInfo;
     option->GetFbTemplateBaseInfo(fbTemplateBaseInfo);
+    fbTemplateBaseInfo.isVisibleInApp_ = visibleInApp_;
     fbTemplateBaseInfo.isBind_ = bindState_;
     fbTemplateBaseInfo.bindWindowId_ = bindWindowId_;
     fbTemplateBaseInfo.id_ = id_;
     fbTemplateBaseInfo.textUpdateAnimationType_ = 0; // no need animation when create
-    fbTemplateBaseInfo.isVisibleInApp_ = visibleInApp_;
     WMError errCode = WMError::WM_OK;
     auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(contextPtr_);
     sptr<Window> window = FloatWindowManager::CreateFbWindow(windowOption, fbTemplateBaseInfo, option->GetIcon(),
         context->lock(), errCode, weakRef_);
     if (window == nullptr || errCode != WMError::WM_OK) {
         TLOGW(WmsLogTag::WMS_SYSTEM, "Window create failed, reason: %{public}d", errCode);
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "Window create failed");
         return errCode == WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS ? errCode : WMError::WM_ERROR_FB_CREATE_FAILED;
     }
     window_ = window;
     return WMError::WM_OK;
-    // LCOV_EXCL_STOP
 }
 
-// LCOV_EXCL_START
 WMError FloatingBallController::StopFloatingBallFromClient()
 {
     TLOGI(WmsLogTag::WMS_SYSTEM, "StopFloatingBallFromClient called, bindState_ %{public}d, id: %{public}s", bindState_,
@@ -323,10 +335,14 @@ WMError FloatingBallController::StopFloatingBallFromClientSingle()
         if (curState_ == FbWindowState::STATE_STOPPING ||
             curState_ == FbWindowState::STATE_STOPPED) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "Repeat stop request, curState: %{public}u", curState_);
+            SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_REMOVE,
+                templateType_, "Repeat stop request, FromClient curState: stopping or stopped");
             return WMError::WM_ERROR_FB_REPEAT_OPERATION;
         }
         if (window_ == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when stop fb");
+            SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_REMOVE,
+                templateType_, "window is nullptr when stop fb from client");
             return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
         }
         stopFromClient_ = true;
@@ -351,6 +367,8 @@ WMError FloatingBallController::StopFloatingBall(const std::string& reason)
         }
         if (window_ == nullptr) {
             TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when stop fb");
+            SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_REMOVE,
+                templateType_, "window is nullptr when stop fb");
             return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
         }
         curState_ = FbWindowState::STATE_STOPPING;
@@ -364,6 +382,8 @@ WMError FloatingBallController::DestroyFloatingBallWindow(const std::string& rea
     TLOGI(WmsLogTag::WMS_SYSTEM, "called, id: %{public}s, reason: %{public}s", id_.c_str(), reason.c_str());
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "window is nullptr when destroy fb");
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_REMOVE,
+            templateType_, "window is nullptr when destroy fb");
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
     // LCOV_EXCL_START
@@ -371,6 +391,8 @@ WMError FloatingBallController::DestroyFloatingBallWindow(const std::string& rea
     if (ret != WMError::WM_OK) {
         curState_ = FbWindowState::STATE_UNDEFINED;
         TLOGE(WmsLogTag::WMS_SYSTEM, "window destroy failed, err:%{public}u", ret);
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_REMOVE,
+            templateType_, "window destroy failed");
         return WMError::WM_ERROR_FB_INTERNAL_ERROR;
     }
     curState_ = FbWindowState::STATE_STOPPED;
@@ -528,10 +550,14 @@ WMError FloatingBallController::UnRegisterListener(std::vector<sptr<T>>& holder,
 WMError FloatingBallController::GetFloatingBallWindowInfo(uint32_t& windowId)
 {
     if (curState_ != FbWindowState::STATE_STARTED) {
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "state is not started when get floating ball window info");
         return WMError::WM_ERROR_FB_INVALID_STATE;
     }
     if (window_ == nullptr) {
         TLOGE(WmsLogTag::WMS_SYSTEM, "window is null");
+        SingletonContainer::Get<FloatingBallReporter>().ReportFbEvent(FloatingBallEvent::EVENT_KEY_START,
+            templateType_, "window is null when get floating ball window info");
         return WMError::WM_ERROR_FB_STATE_ABNORMALLY;
     }
     return window_->GetFloatingBallWindowId(windowId);

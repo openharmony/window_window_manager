@@ -73,6 +73,8 @@ export default namespace floatingBall {
     title: string;
     content?: string;
     backgroundColor?: string;
+    titleColor?: string;
+    contentColor?: string;
     icon?: image.PixelMap;
     textUpdateAnimationType?: FloatingBallTextUpdateAnimationType;
   }
