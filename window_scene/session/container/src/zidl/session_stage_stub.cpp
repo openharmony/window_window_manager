@@ -309,7 +309,7 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_LS_STATE):
             return HandleUpdateLSState(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SCREEN_SUPPORT_MULTI_WINDOW):
-            return HandleUpdateScreenSupportMultiWindow(data, reply);    
+            return HandleUpdateScreenSupportMultiWindow(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
