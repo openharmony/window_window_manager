@@ -81,6 +81,7 @@ private:
     static inline std::mutex mtxListener_;
 
     bool CheckParams(ani_env* env, const FbOption& option);
+    bool CheckColor(ani_env* env, const FbOption& option);
     void OnstartFloatingBallAni(ani_env *env, ani_object paramsInterface);
     void OnSetInApplicationVisibleAni(ani_env* env, ani_boolean isVisible);
     void OnupdateFloatingBallAni(ani_env *env, ani_object paramsInterface);

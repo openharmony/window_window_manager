@@ -49,7 +49,6 @@ public:
     WMError UnregisterAllPiPLifecycle();
     WMError UnregisterAllPiPControlObserver();
     WMError UnregisterAllPiPWindowSize();
-    WMError SetPipAutoStartEnabled(bool enabled);
     bool IsStarted() const { return isStarted_; }
 
 private:

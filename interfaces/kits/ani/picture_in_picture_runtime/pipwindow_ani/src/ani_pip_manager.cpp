@@ -304,7 +304,7 @@ void AniPipManager::OnUnregisterCallback(ani_env* env, ani_int windowId, ani_str
         TLOGE(WmsLogTag::WMS_PIP, "Failed to get pictureInPictureController");
         return;
     }
-    TLOGI(WmsLogTag::WMS_PIP, "UnRegisterPipContentListenerWithType to window:%{public}d", pipWindowId);
+    TLOGI(WmsLogTag::WMS_PIP, "UnRegisterPipContentListenerWithType to window:%{public}d", windowId);
     WMError errCode = pipController->UnRegisterPipContentListenerWithType(cbType);
     if (errCode != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PIP, "Failed to set UnRegisterPipContentListenerWithType");
