@@ -143,6 +143,10 @@ bool KeyboardSession::GetSkipFlagForCallingSession(const sptr<SceneSession>& cal
     if (!callingSession) {
         return false;
     }
+    if (WindowHelper::IsFvWindow(callingSession->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "fv window use fv session flag");
+        return callingSession->isSkipSelfWhenShowOnVirtualScreen_.load();
+    }
     auto mainSession = callingSession->GetMainSession();
     if (!mainSession) {
         return false;
