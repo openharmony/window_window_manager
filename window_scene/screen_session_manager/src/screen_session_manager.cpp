@@ -402,9 +402,9 @@ ScreenSessionManager::ScreenSessionManager()
     }
     SetFirstSCBConnect(true);
     SetOnBootAnimation(true);
-    isBoot_ = (ScreenSceneConfig::GetUptimeSeconds() <= ScreenSceneConfig::GetBootTimeThreshold());
+    isBoot_ = ScreenSceneConfig::GetIsBoot();
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedCallback, this);
-    WatchParameter(BOOT_ANIMATION_FINISHED.c_str(), BootAnimateFinishedCallback, this);
+
     isSupportCapture_ = IsSupportCapture();
     if (SUPPORT_COMPATIBLE_MODE) {
         InitExtendScreenDpiOptions();
@@ -4321,8 +4321,8 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
     NotifyScreenChanged(screenInfo, ScreenChangeEvent::CHANGE_MODE);
     NotifyDisplayStateChange(screenId, displayInfo, emptyMap, DisplayStateChangeType::RESOLUTION_CHANGE);
     screenSession->PropertyChange(screenSession->GetScreenProperty(), ScreenPropertyChangeReason::CHANGE_MODE);
-    ScreenSceneConfig::SetRogResolution(RogResolution{ true, false, 0, virtualPixelRatio, width, height });
-    SetRogParameter(width, height, virtualPixelRatio, 1);
+    ScreenSceneConfig::SetRogResolution(RogResolution{ true, false, 0, defaultResolutionDpi, width, height });
+    SetRogParameter(width, height, defaultResolutionDpi, 1);
     // unfreeze screen when system boot completed
     WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), BootFinishedUnfreezeCallback, this);
     // add asyc task to judge when to unfreeze screen
@@ -5405,6 +5405,7 @@ sptr<ScreenSession> ScreenSessionManager::GetOrCreateScreenSession(ScreenId scre
         TLOGNFI(WmsLogTag::DMS, "rogDpi_: %{public}f, densityDpi_: %{public}f, rogScaleRatio: %{public}f", rogDpi_, densityDpi_, rogScaleRatio);
         session->SetVprScaleRatio(rogScaleRatio);
         ScreenSceneConfig::UpdateCutoutBoundRect(static_cast<uint64_t>(screenId), rogScaleRatio);
+        SetRogToRs(screenId, rogSize);
     }
     SetHdrFormats(GetPhyScreenId(screenId), session);
     SetColorSpaces(GetPhyScreenId(screenId), session);
@@ -6843,23 +6844,6 @@ void ScreenSessionManager::UnregisterInHandlerSensorWithPowerOff(PowerStateChang
         TLOGD(WmsLogTag::DMS, "not fold product, failed unregister posture.");
     }
 #endif
-}
-
-void ScreenSessionManager::BootAnimateFinishedCallback(const char *key, const char *value, void *context)
-{
-    if (strcmp(key, BOOT_ANIMATION_FINISHED.c_str()) == 0 && strcmp(value, "true") == 0) {
-        TLOGNFI(WmsLogTag::DMS, "boot animation finished");
-        auto& that = *reinterpret_cast<ScreenSessionManager*>(context);
-        auto screenSession = that.GetDefaultScreenSession();
-        if (screenSession == nullptr || !that.isBoot_) {
-            TLOGNFE(WmsLogTag::DMS, "screen session is null!");
-            return;
-        }
-        ScreenId screenId = screenSession->GetScreenId();
-        RogResolution rogSize = ScreenSceneConfig::GetRogResolution(0, 0);
-        TLOGNFI(WmsLogTag::DMS, "SetRogScreenResolution while BootFinish");
-        that.SetRogToRs(screenId, rogSize);
-    }
 }
 
 void ScreenSessionManager::BootFinishedCallback(const char *key, const char *value, void *context)
