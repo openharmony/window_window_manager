@@ -2438,7 +2438,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
 {
     std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
-        displayNode_->SetDisplayMirrorConfig(config);
+        displayNode_->SetDisplayNodeConfig(config);
         if (screenId_ == 0 && isFold_) {
             TLOGI(WmsLogTag::DMS, "Return InitRSDisplayNode foldScreen0");
             return;
