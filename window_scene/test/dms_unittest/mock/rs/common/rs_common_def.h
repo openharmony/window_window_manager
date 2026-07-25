@@ -550,7 +550,7 @@ enum class DisplayMode : uint8_t {
     MIRROR,
     EXPAND,
     INDEPENDENT,
-}
+};
 struct RSDisplayNodeConfig {
     uint64_t screenId = 0;
     DisplayMode displayMode = DisplayMode::INVALID;
