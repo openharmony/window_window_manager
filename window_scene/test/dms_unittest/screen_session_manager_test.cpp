@@ -1789,7 +1789,7 @@ HWTEST_F(ScreenSessionManagerTest, SetScreenSessionScale_WithDisplayNode, TestSi
     // Create displayNode first so GetDisplayNode returns non-null
     RSDisplayNodeConfig rsConfig;
     rsConfig.screenId = screenId;
-    rsConfig.isMirrored = false;
+    rsConfig.displayMode = DisplayMode::EXPAND;
     screenSession->CreateDisplayNode(rsConfig);
     ASSERT_NE(screenSession->GetDisplayNode(), nullptr);
     float scaleX = 1.5f;
