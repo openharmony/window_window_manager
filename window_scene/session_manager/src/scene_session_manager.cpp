@@ -16058,13 +16058,16 @@ WSError SceneSessionManager::UpdateScreenSupportMultiWindow(uint64_t screenId, S
     }
     {
         std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        std::vector<std::shared_ptr<SceneSession>> sessions;
         for (const auto& [_, sceneSession] : sceneSessionMap_) {
-            if (sceneSession == nullptr) {
-                continue;
+            if (sceneSession != nullptr) {
+                sessions.push_back(sceneSession);
             }
-            sceneSession->UpdateSupportMultiWindowScreenSet(systemConfig_.supportMultiWindowScreenSet_);
-            sceneSession->UpdateScreenSupportMultiWindowToClient();
         }
+    }
+    for (const auto& sceneSession : sessions) {
+        sceneSession->UpdateSupportMultiWindowScreenSet(systemConfig_.supportMultiWindowScreenSet_);
+        sceneSession->UpdateScreenSupportMultiWindowToClient();
     }
     return WSError::WS_OK;
 }
