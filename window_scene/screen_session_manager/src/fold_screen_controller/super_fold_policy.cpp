@@ -558,11 +558,11 @@ void SuperFoldPolicy::ExitCoordination()
         return;
     }
     CloseCoordination();
-    ScreenSessionManager::GetInstance().NotifyDisplayModeChanged();
+    ScreenSessionManager::GetInstance().NotifyScreenModeChange();
     RecoverDisplayMode();
 }
 
-void FoldScreenBasePolicy::NotifyRefreshRateEvent(bool isEventStatus)
+void SuperFoldPolicy::NotifyRefreshRateEvent(bool isEventStatus)
 {
     EventInfo eventInfo = {
         .eventName = "VOTER_MULTISELFOWNEDSCREEN",
