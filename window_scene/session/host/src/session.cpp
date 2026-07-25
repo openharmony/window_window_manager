@@ -567,6 +567,8 @@ DisplayId Session::GetScreenId() const
 
 void Session::SetScreenId(uint64_t screenId)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], hasStage=%{public}d, screenId=%{public}" PRIu64,
+        GetPersistentId(), GetWindowName().c_str(), sessionStage_ != nullptr, screenId);
     sessionInfo_.screenId_ = screenId;
     if (sessionStage_) {
         sessionStage_->UpdateDisplayId(screenId);
@@ -1794,6 +1796,13 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
+    DisplayId screenId = GetSessionProperty()->GetDisplayId();
+    if (screenId == DEFAULT_DISPLAY_ID && PcFoldScreenManager::GetInstance().IsHalfFolded(screenId)) {
+        property->SetDisplayId(GetClientDisplayId());
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "win=[%{public}d, %{public}s], screenId=%{public}" PRIu64 ", clientScreenId=%{public}" PRIu64,
+        GetWindowId(), GetWindowName().c_str(), screenId, property->GetDisplayId());
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
@@ -6311,7 +6320,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
                 caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         }
     }
-    if (rsUIContext_ == nullptr && GetSessionType() == SessionType::SceneSession) {
+    if (rsUIContext_ == nullptr) {
         TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
             caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         // extensionSession use
@@ -6385,8 +6394,13 @@ PrelayoutContext Session::GetPrelayoutContext()
         static_cast<int32_t>(preCalc.height)
     };
 
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        return ctx;
+    }
+    const auto displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance()
-        .GetScreenSession(GetSessionProperty()->GetDisplayId());
+        .GetScreenSession(displayId);
     const float density = screenSession ?
         screenSession->GetScreenProperty().GetDensity() : 1.0f; // 1.0: default density
 

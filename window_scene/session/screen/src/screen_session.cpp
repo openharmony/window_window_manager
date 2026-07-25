@@ -37,6 +37,7 @@ static const int32_t g_screenRotationOffSet = system::GetIntParameter<int32_t>("
 static const int32_t g_screenScanType = system::GetIntParameter<int32_t>("const.window.screen.scan_type", 0);
 static const std::string PRODUCT_SERIES = system::GetParameter("const.build.product", "");
 static const std::string g_packageName = system::GetParameter("const.display_rotation.package.list", "");
+const bool SUPPORT_DPI_SCALING = system::GetBoolParameter("const.desktop.is_support_scale_with_dpi", false);
 static const int32_t SCAN_TYPE_VERTICAL = 1;
 static const int32_t ROTATION_90 = 1;
 static const int32_t ROTATION_270 = 3;
@@ -126,23 +127,25 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
     TLOGI(WmsLogTag::DMS,
         "[DPNODE]config screenId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64", displayMode: %{public}d",
         config.screenId, config.mirrorNodeId, config.displayMode);
-    std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
-    displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
-    TLOGD(WmsLogTag::WMS_SCB, "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
-    if (displayNode_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
-        return;
-    }
-    RSAdapterUtil::SetSkipCheckInMultiInstance(displayNode_, true);
-    const auto& rect = property_.GetBounds().rect_;
-    displayNode_->SetFrame(rect.left_, rect.top_, rect.width_, rect.height_);
-    displayNode_->SetBounds(rect.left_, rect.top_, rect.width_, rect.height_);
-    if (config.displayMode == DisplayMode::MIRROR) {
-        EnableMirrorScreenRegion();
-    }
-    if (property_.GetNeedCastScale()) {
-        displayNode_->SetPivot(0.0F, 0.0F);
-        displayNode_->SetScale(property_.GetCastScaleX(), property_.GetCastScaleY());
+    {
+        std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
+        displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
+        TLOGD(WmsLogTag::WMS_SCB, "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
+        if (displayNode_ == nullptr) {
+            TLOGE(WmsLogTag::DMS, "Failed to create displayNode, displayNode is null!");
+            return;
+        }
+        RSAdapterUtil::SetSkipCheckInMultiInstance(displayNode_, true);
+        const auto& rect = property_.GetBounds().rect_;
+        displayNode_->SetFrame(rect.left_, rect.top_, rect.width_, rect.height_);
+        displayNode_->SetBounds(rect.left_, rect.top_, rect.width_, rect.height_);
+        if (config.displayMode == DisplayMode::MIRROR) {
+            EnableMirrorScreenRegion();
+        }
+        if (property_.GetNeedCastScale()) {
+            displayNode_->SetPivot(0.0F, 0.0F);
+            displayNode_->SetScale(property_.GetCastScaleX(), property_.GetCastScaleY());
+        }
     }
     RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
 }
@@ -947,7 +950,7 @@ void ScreenSession::Disconnect()
 
 void ScreenSession::NotifyListenerPropertyChange(const ScreenProperty& newProperty, ScreenPropertyChangeReason reason)
 {
-    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE) {
+    if (reason == ScreenPropertyChangeReason::VIRTUAL_PIXEL_RATIO_CHANGE && !SUPPORT_DPI_SCALING) {
         return;
     }
     auto listeners = GetScreenChangeListenerList();

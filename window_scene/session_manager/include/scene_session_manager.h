@@ -454,7 +454,9 @@ public:
         int32_t fingerId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     std::vector<std::string> trayAppList_;
-    WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
+    WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits, float targetDensity = 0.0f);
+    WindowLimits RecalcWindowLimitsByDensity(const sptr<SceneSession>& sceneSession,
+        float targetDensity) const;
     void RegisterVirtualPixelChangeCallback(NotifyVirtualPixelChangeFunc&& func);
     NotifyVirtualPixelChangeFunc onVirtualPixelChangeCallback_;
     void ConfigDockAutoHide(bool isDockAutoHide);
@@ -1403,6 +1405,7 @@ private:
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     WSError CheckPiPCreate(const sptr<WindowSessionProperty>& property, const WindowType& type);
+    WSErrorResult CheckPiPCreateAndLog(const sptr<WindowSessionProperty>& property, const WindowType& type);
     void UpdatePipGroupCount(const PiPTemplateInfo& pipTemplateInfo, bool increase);
     std::vector<PiPGroupConfig> ParsePipMultiConfig();
     bool FindTargetGroup(const std::vector<PiPGroupConfig>& groupConfigs, const PiPTemplateInfo& pipTemplateInfo,
@@ -1773,6 +1776,7 @@ private:
      * Window Watermark
      */
     bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    void SetLeashNodeWatermarkForAppProcess(const sptr<SceneSession>& session);
     std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
     void SetWatermarkForSession(const sptr<SceneSession>& session);
     void ClearWatermarkForSession(const sptr<SceneSession>& session);

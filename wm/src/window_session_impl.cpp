@@ -6084,13 +6084,13 @@ WMError WindowSessionImpl::SetWindowContainerColor(const std::string& activeColo
     if (!IsDecorEnable()) {
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
-    uint32_t activeColorValue;
+    uint32_t activeColorValue = 0;
     if (!ColorParser::Parse(activeColor, activeColorValue)) {
         TLOGW(WmsLogTag::WMS_DECOR, "window: %{public}s, value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), activeColor.c_str(), activeColorValue);
         return WMError::WM_ERROR_INVALID_PARAM;
     }
-    uint32_t inactiveColorValue;
+    uint32_t inactiveColorValue = 0;
     if (!ColorParser::Parse(inactiveColor, inactiveColorValue)) {
         TLOGW(WmsLogTag::WMS_DECOR, "window: %{public}s, value: [%{public}s, %{public}u]",
             GetWindowName().c_str(), inactiveColor.c_str(), inactiveColorValue);
@@ -7319,9 +7319,11 @@ WMError WindowSessionImpl::GetFloatingBallWindowId(uint32_t& windowId)
 
 WSError WindowSessionImpl::SendFvActionEvent(const std::string& action, const std::string& reason)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "action: %{public}s, reason: %{public}s", action.c_str(), reason.c_str());
-    auto task = [action, reason]() {
-        FloatViewManager::DoActionEvent(action, reason);
+    auto windowId = GetWindowId();
+    TLOGI(WmsLogTag::WMS_SYSTEM, "SendFvActionEvent, windowId: %{public}u, action: %{public}s, reason: %{public}s",
+        windowId, action.c_str(), reason.c_str());
+    auto task = [windowId, action, reason]() {
+        FloatViewManager::DoActionEvent(windowId, action, reason);
     };
     handler_->PostTask(task, "WMS_WindowSessionImpl_SendFvActionEvent");
     return WSError::WS_OK;
