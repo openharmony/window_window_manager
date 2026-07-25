@@ -3099,7 +3099,7 @@ void ScreenSessionManager::SetMultiScreenFrameControl(void)
     if (FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice()) {
         screenNumber = NUMBER_OF_PHYSICAL_SCREEN_THREE;
     }
-    if (count >= NUMBER_OF_PHYSICAL_SCREEN) {
+    if (count >= screenNumber) {
         TLOGNFW(WmsLogTag::DMS, "MultiScreen control frame rate to 60");
         EventInfo event = { "VOTER_MUTIPHYSICALSCREEN", ADD_VOTE, OLED_60_HZ, OLED_60_HZ };
         rsInterface_.NotifyRefreshRateEvent(event);
