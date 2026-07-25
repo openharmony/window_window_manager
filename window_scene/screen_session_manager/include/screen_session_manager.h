@@ -547,6 +547,9 @@ public:
     void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
     void OnGetHdrFormats(ScreenId screenId, const sptr<ScreenSession>& session,
         const std::vector<ScreenHDRFormat>& rsHdrFormats);
+    void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
+    void SetHoverBlockList(const std::vector<std::string>& hoverBlockList) override;
+    bool IsHoverBlockPid(const int32_t agentPid);
     /*
      * multi user
      */

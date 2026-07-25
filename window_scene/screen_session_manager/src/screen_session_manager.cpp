@@ -95,6 +95,7 @@
 #include "product_ext_wrapper.h"
 #include "screen_manager/rs_surface_region_config.h"
 #include "screen_power_mgr.h"
+#include "bundle_info_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -224,8 +225,8 @@ const bool IS_COORDINATION_SUPPORT =
 const static uint32_t MAX_INTERVAL_US = 1800000000; //30分钟
 const int32_t MAP_SIZE = 300;
 const int32_t PRODUCT_CODE_SIZE = 4;
-const std::string NO_EXIST_BUNDLE_MANE = "null";
-ScreenCache<int32_t, std::string> g_uidVersionMap(MAP_SIZE, NO_EXIST_BUNDLE_MANE);
+const std::string NO_EXIST_BUNDLE_NAME = "null";
+ScreenCache<int32_t, std::string> g_uidVersionMap(MAP_SIZE, NO_EXIST_BUNDLE_NAME);
 
 const std::string FAULT_DESCRIPTION = "842003014";
 const std::string FAULT_SUGGESTION = "542003014";
@@ -15845,12 +15846,12 @@ bool ScreenSessionManager::IsSpecialApp()
     static std::chrono::steady_clock::time_point lastRequestTime = std::chrono::steady_clock::now();
     auto currentTime = std::chrono::steady_clock::now();
     auto interval = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - lastRequestTime).count();
-    std::string bundleName = NO_EXIST_BUNDLE_MANE;
+    std::string bundleName = NO_EXIST_BUNDLE_NAME;
     int32_t currentPid = IPCSkeleton::GetCallingPid();
     if (interval < MAX_INTERVAL_US) {
         bundleName = g_uidVersionMap.Get(currentPid);
     }
-    if (bundleName == NO_EXIST_BUNDLE_MANE) {
+    if (bundleName == NO_EXIST_BUNDLE_NAME) {
         bundleName = SysCapUtil::GetBundleName();
         TLOGNFI(WmsLogTag::DMS, "Get BundleName from IPC pid: %{public}d name: %{public}s",
             currentPid, bundleName.c_str());
@@ -17859,6 +17860,27 @@ void ScreenSessionManager::OnMotionRotationChanged(float sensorRotation)
         return;
     }
     screenSession->HandleSensorRotation(sensorRotation);
+}
+void ScreenSessionManager::SetHoverBlockList(const std::vector<std::string>& hoverBlockList)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ == nullptr) {
+        return;
+    }
+    foldScreenController_->SetHoverBlockList(hoverBlockList);
+#endif
+}
+
+bool ScreenSessionManager::IsHoverBlockPid(const int32_t agentPid)
+{
+#ifdef FOLD_ABILITY_ENABLE
+    if (foldScreenController_ == nullptr) {
+        return false;
+    }
+    return foldScreenController_->IsHoverBlockPid(agentPid);
+#else
+    return false;
+#endif
 }
 // LCOV_EXCL_STOP
 } // namespace OHOS::Rosen
