@@ -565,6 +565,7 @@ HWTEST_F(SuperFoldPolicyTest, SetdisplayModeChangeStatus02, TestSize.Level1)
     bool isOnBootAnimation = false;
     SuperFoldPolicy::GetInstance().SetdisplayModeChangeStatus(status, isOnBootAnimation);
     EXPECT_FALSE(SuperFoldPolicy::GetInstance().displayModeChangeRunning_.load());
+    usleep(SLEEP_TIME_US*20);
 }
 
 HWTEST_F(SuperFoldPolicyTest, SetdisplayModeChangeStatus03, TestSize.Level1)
