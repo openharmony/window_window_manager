@@ -1165,7 +1165,6 @@ private:
 
     // Fold Screen
     static void BootFinishedCallback(const char *key, const char *value, void *context);
-    static void BootAnimateFinishedCallback(const char *key, const char *value, void *context);
     std::function<void()> foldScreenPowerInit_ = nullptr;
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
