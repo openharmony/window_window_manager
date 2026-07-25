@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "screen_session_manager/include/screen_session_manager.h"
+#include "screen_session_manager/include/screen_power_fsm/screen_state_machine.h"
 #include "display_manager_agent_default.h"
 #include "iconsumer_surface.h"
 #include "connection/screen_cast_connection.h"
@@ -1128,6 +1129,376 @@ HWTEST_F(ScreenSessionManagerTest, SetOptionConfig, TestSize.Level1)
     EXPECT_TRUE(g_logMsg.find("screenSession is nullptr") != std::string::npos);
     g_logMsg.clear();
     LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: IsPreBright001
+ * @tc.desc: Test IsPreBright with PRE_BRIGHT reason
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsPreBright001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->IsPreBright(reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsPreBright002
+ * @tc.desc: Test IsPreBright with PRE_BRIGHT reason
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsPreBright002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF;
+    bool result = ssm_->IsPreBright(reason);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsPreBright003
+ * @tc.desc: Test IsPreBright with PRE_BRIGHT_AUTH_FAIL_SCREEN_OFF reason
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, IsPreBright003, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_POWER_KEY;
+    bool result = ssm_->IsPreBright(reason);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: WakeUpBegin001
+ * @tc.desc: Test WakeUpBegin when IsPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->WakeUpBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: WakeUpBegin002
+ * @tc.desc: Test WakeUpBegin when IsPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE_SUSPEND
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->WakeUpBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: WakeUpBegin003
+ * @tc.desc: Test WakeUpBegin when IsPreBright returns false with PRE_BRIGHT and SCREEN_ON state
+ *           should not be blocked by IsPreBright check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, WakeUpBegin003, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->WakeUpBegin(reason);
+
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SuspendBegin001
+ * @tc.desc: Test SuspendBegin when IsPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SuspendBegin001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->SuspendBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SuspendBegin002
+ * @tc.desc: Test SuspendBegin when IsPreBright returns true with PRE_BRIGHT and SCREEN_AP_DOZE_SUSPEND
+ *           should return false and log "ap aod cannot pre bright"
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SuspendBegin002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->SuspendBegin(reason);
+
+    EXPECT_FALSE(result);
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: SuspendBegin003
+ * @tc.desc: Test SuspendBegin when IsPreBright returns false with PRE_BRIGHT and SCREEN_ON state
+ *           should not be blocked by IsPreBright check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, SuspendBegin003, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ScreenStateMachine::GetInstance().SetTransitionState(ScreenTransitionState::SCREEN_ON);
+    PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_PRE_BRIGHT;
+    bool result = ssm_->SuspendBegin(reason);
+
+    EXPECT_TRUE(g_logMsg.find("ap aod cannot pre bright off") != std::string::npos);
+
+    g_logMsg.clear();
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState001
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_OFF
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_OFF;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_OFF);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState002
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_OFF_FAKE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState002, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_OFF_FAKE;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_OFF);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState003
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_OFF_ADVANCED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState003, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_OFF_ADVANCED;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_OFF);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState004
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_ON
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState004, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_ON;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_ON);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState005
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_SUSPEND
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState005, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_SUSPEND;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::WAIT_SCREEN_CTRL_RSP);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState006
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_ON_ADVANCED
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState006, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_ON_ADVANCED;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_ADVANCED_ON);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState007
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_DOZE and isApAod true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState007, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_DOZE;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, true);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_AP_DOZE);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState008
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_DOZE and isApAod false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState008, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_DOZE;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_DOZE);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState009
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_DOZE_SUSPEND and isApAod true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState009, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, true);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_AP_DOZE_SUSPEND);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState010
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_DOZE_SUSPEND and isApAod false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState010, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_DOZE_SUSPEND);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState011
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_STANDBY (default case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState011, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_STANDBY;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_ON);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState012
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with INVALID_POWER_STATUS (default case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState012, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::INVALID_POWER_STATUS;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_ON);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState013
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_BUTT (default case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState013, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_BUTT;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status, false);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_ON);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState014
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_DOZE and default isApAod
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState014, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_DOZE;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_DOZE);
+}
+
+/**
+ * @tc.name: ConvertPowerStatus2ScreenState015
+ * @tc.desc: Test ConvertPowerStatus2ScreenState with POWER_STATUS_DOZE_SUSPEND and default isApAod
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionManagerTest, ConvertPowerStatus2ScreenState015, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    ScreenPowerStatus status = ScreenPowerStatus::POWER_STATUS_DOZE_SUSPEND;
+    ScreenTransitionState result = ssm_->ConvertPowerStatus2ScreenState(status);
+    EXPECT_EQ(result, ScreenTransitionState::SCREEN_DOZE_SUSPEND);
 }
 }
 } // namespace Rosen

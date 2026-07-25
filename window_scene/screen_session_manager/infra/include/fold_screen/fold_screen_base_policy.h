@@ -144,10 +144,13 @@ public:
     bool GetLockDisplayStatus() const;
     virtual void PowerkeySetScreenActiveRect() {};
     const std::map<FoldDisplayMode, RRect>& GetScreenActiveModeRectMap() const;
+    void SetDeviceStatusAndParam(uint32_t deviceStatus);
 
 protected:
     FoldScreenBasePolicy();
     virtual ~FoldScreenBasePolicy();
+
+    virtual void PreProcessTP() {};
 
     // Avoid fold to expand process queues private variable
     std::atomic<int> pendingTask_{FOLD_TASK_NUM};
