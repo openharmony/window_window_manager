@@ -34,13 +34,15 @@ static constexpr int32_t INVALID_PID = -1;
 std::shared_mutex SysCapUtil::pidBundleNameMutex_;
 std::map<uint32_t, std::shared_ptr<BundleInfo>>& SysCapUtil::GetPidBundleInfoMap()
 {
-    static std::map<uint32_t, std::shared_ptr<BundleInfo>>* map = new static std::map<uint32_t, std::shared_ptr<BundleInfo>>();
-    return *map
+    static std::map<uint32_t, std::shared_ptr<BundleInfo>>* map =
+        new std::map<uint32_t, std::shared_ptr<BundleInfo>>();
+    return *map;
 }
 
 std::map<sptr<IRemoteObject>, uint32_t>& SysCapUtil::GetAgentPidMap()
 {
-    static std::map<sptr<IRemoteObject>, uint32_t> *map = new static std::map<sptr<IRemoteObject>, uint32_t>();
+    static std::map<sptr<IRemoteObject>, uint32_t>* map =
+        new std::map<sptr<IRemoteObject>, uint32_t>();
     return *map;
 }
 
@@ -172,7 +174,7 @@ std::shared_ptr<BundleInfo> SysCapUtil::GetBundleInfo(uint32_t pid)
 {
     TLOGD(WmsLogTag::DEFAULT, "get pid:%{public}d bundle info", pid);
     std::shared_lock<std::shared_mutex> lock(pidBundleNameMutex_);
-    auto& map = GetPidBundleInfoMap(pid);
+    auto& map = GetPidBundleInfoMap();
     auto it = map.find(pid);
     if (it == map.end()) {
         return nullptr;
@@ -185,7 +187,7 @@ void SysCapUtil::RemoveBundleInfo(sptr<IRemoteObject> agent)
 {
     int32_t pid;
     std::unique_lock<std::shared_mutex> lock(pidBundleNameMutex_);
-    auto& agentPidMap = GetAgentPidMap(agent);
+    auto& agentPidMap = GetAgentPidMap();
     auto it = agentPidMap.find(agent);
     if (it == agentPidMap.end()) {
         return;
