@@ -10493,6 +10493,22 @@ void WindowSessionImpl::SwitchSystemWindow(bool freeMultiWindowEnable, int32_t p
     }
 }
 
+void WindowSessionImpl::UpdateSubWindowPropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property, int32_t parentId)
+{
+    std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
+    if (subWindowSessionMap_.count(parentId) == 0) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "subWindowSessionMap is empty");
+        return;
+    }
+    for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {
+        if (subWindowSession) {
+            subWindowSession->property_->SetIsPcAppInPad(property->GetIsPcAppInPad());
+            subWindowSession->property_->SetPcAppInpadCompatibleMode(property->GetPcAppInpadCompatibleMode());
+            subWindowSession->UpdateSubWindowPropertyWhenTriggerMode(property, subWindowSession->GetPersistentId());
+        }
+    }
+}
+
 void WindowSessionImpl::SetNotifySizeChangeFlag(bool flag)
 {
     // Support for all system windows

@@ -851,18 +851,29 @@ void SceneSessionManager::RegisterAppListener()
 void SceneSessionManager::LoadWindowParameter()
 {
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
-    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
     if (multiWindowUIType == "HandsetSmartWindow") {
         systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
     } else if (multiWindowUIType == "FreeFormMultiWindow" || isPcMode) {
         systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
+        FixWindowUITypeInSupportModeChange();
     } else if (multiWindowUIType == "TabletSmartWindow") {
         systemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+        FixWindowUITypeInSupportModeChange();
     } else {
         TLOGE(WmsLogTag::DEFAULT, "unknown multiWindowUIType:%{public}s.", multiWindowUIType.c_str());
     }
     appWindowSceneConfig_.multiWindowUIType_ = multiWindowUIType;
     appWindowSceneConfig_.deviceType_ = system::GetParameter("const.product.devicetype", "unknown");
+}
+
+void SceneSessionManager::FixWindowUITypeInSupportModeChange()
+{
+    if (!system::GetBoolParameter("const.window.support_window_pcmode_switch", false)) {
+        return;
+    }
+    const bool isPcMode = system::GetBoolParameter("persist.sceneboard.ispcmode", false);
+    systemConfig_.windowUIType_ = isPcMode ? WindowUIType::PC_WINDOW : WindowUIType::PAD_WINDOW;
+    TLOGI(WmsLogTag::DEFAULT, "windowUIType_: %{public}hhu.", systemConfig_.windowUIType_);
 }
 
 void SceneSessionManager::LoadWindowSceneXml()
