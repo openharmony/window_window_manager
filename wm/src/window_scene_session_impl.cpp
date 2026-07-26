@@ -3784,6 +3784,7 @@ WMError WindowSceneSessionImpl::SetTitleAndDockHoverShown(
     }
     titleHoverShowEnabled_ = isTitleHoverShown;
     dockHoverShowEnabled_ = isDockHoverShown;
+    property_->SetTitleAndDockHoverEnabled(isTitleHoverShown, isDockHoverShown);
     if (auto hostSession = GetHostSession()) {
         hostSession->OnTitleAndDockHoverShowChange(isTitleHoverShown, isDockHoverShown);
     }
@@ -8915,7 +8916,17 @@ WSError WindowSceneSessionImpl::UpdatePropertyWhenTriggerMode(const sptr<WindowS
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "property invalid!");
         return WSError::WS_ERROR_INVALID_PARAM;
     }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "enable: %{public}d, isPcAppInpadCompatibleMode: %{public}d, "
+        "isPcAppInpadSpecificSystemBarInvisible: %{public}d, isPcAppInpadOrientationLandscape: %{public}d, "
+        "isMobileAppInPadLayoutFullScreen: %{public}d", property->GetIsPcAppInPad(),
+        property->GetPcAppInpadCompatibleMode(), property->GetPcAppInpadSpecificSystemBarInvisible(),
+        property->GetPcAppInpadOrientationLandscape(), property->GetMobileAppInPadLayoutFullScreen());
+    property_->SetIsPcAppInPad(property->GetIsPcAppInPad());
+    property_->SetPcAppInpadCompatibleMode(property->GetPcAppInpadCompatibleMode());
+    property_->SetPcAppInpadSpecificSystemBarInvisible(property->GetPcAppInpadSpecificSystemBarInvisible());
+    property_->SetPcAppInpadOrientationLandscape(property->GetPcAppInpadOrientationLandscape());
     property_->SetMobileAppInPadLayoutFullScreen(property->GetMobileAppInPadLayoutFullScreen());
+    UpdateSubWindowPropertyWhenTriggerMode(property, GetPersistentId());
     return WSError::WS_OK;
 }
 

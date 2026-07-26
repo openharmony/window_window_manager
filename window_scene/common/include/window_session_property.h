@@ -455,6 +455,9 @@ public:
 
     void SetIsCrossProcessWindow(bool isCrossProcess);
     bool GetIsCrossProcessWindow() const;
+    void SetTitleAndDockHoverEnabled(bool titleHoverEnabled, bool dockHoverEnabled);
+    bool GetTitleHoverShowEnabled() const;
+    bool GetDockHoverShowEnabled() const;
 
 private:
     void setTouchHotAreasInner(const std::vector<Rect>& rects, std::vector<Rect>& touchHotAreas);
@@ -766,7 +769,8 @@ private:
     int32_t frameNum_ = 0;
     bool isAppBufferReady_ = false;
     bool isCrossProcessWindow_ = false;
-    bool titleHoverShowEnabled_ = true；
+    bool titleHoverShowEnabled_ = true;
+    bool dockHoverShowEnabled_ = true;
 };
 
 class CompatibleModeProperty : public Parcelable {

@@ -595,6 +595,7 @@ public:
     virtual void UpdateSubWindowDragEnabledByDecorVisible() {}
     void SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId);
     void SwitchSystemWindow(bool freeMultiWindowEnable, int32_t parentId);
+    void UpdateSubWindowPropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property, int32_t parentId);
 
     /*
      * Window Immersive

@@ -1736,6 +1736,8 @@ bool WindowSessionProperty::Marshalling(Parcel& parcel) const
         parcel.WriteBool(isFollowParentLayout_) &&
         parcel.WriteBool(isCrossProcessWindow_) &&
         parcel.WriteFloat(GetSurfaceNodeAlpha()) &&
+        parcel.WriteBool(titleHoverShowEnabled_) &&
+        parcel.WriteBool(dockHoverShowEnabled_) &&
         MarshallingFvTemplateInfo(parcel);
 }
 
@@ -1866,6 +1868,7 @@ WindowSessionProperty* WindowSessionProperty::Unmarshalling(Parcel& parcel)
     property->SetFollowParentLayout(parcel.ReadBool());
     property->SetIsCrossProcessWindow(parcel.ReadBool());
     property->SetSurfaceNodeAlpha(parcel.ReadFloat());
+    property->SetTitleAndDockHoverEnabled(parcel.ReadBool(), parcel.ReadBool());
     UnmarshallingFvTemplateInfo(parcel, property);
     return property;
 }
@@ -1992,6 +1995,8 @@ void WindowSessionProperty::CopyFrom(const sptr<WindowSessionProperty>& property
     pageCompatibleMode_ = property->pageCompatibleMode_;
     isCrossProcessWindow_ = property->isCrossProcessWindow_;
     SetWidthHookRatio(property->GetHookWindowInfo().widthHookRatio);
+    titleHoverShowEnabled_ = property->titleHoverShowEnabled_;
+    dockHoverShowEnabled_ = property->dockHoverShowEnabled_;
 }
 
 bool WindowSessionProperty::Write(Parcel& parcel, WSPropertyChangeAction action)
@@ -3306,6 +3311,22 @@ void WindowSessionProperty::SetIsCrossProcessWindow(bool isCrossProcess)
 bool WindowSessionProperty::GetIsCrossProcessWindow() const
 {
     return isCrossProcessWindow_;
+}
+
+void WindowSessionProperty::SetTitleAndDockHoverEnabled(bool titleHoverEnabled, bool dockHoverEnabled)
+{
+titleHoverShowEnabled_ = titleHoverEnabled;
+dockHoverShowEnabled_ = dockHoverEnabled;
+}
+
+bool WindowSessionProperty::GetTitleHoverShowEnabled() const
+{
+return titleHoverShowEnabled_;
+}
+
+bool WindowSessionProperty::GetDockHoverShowEnabled() const
+{
+return dockHoverShowEnabled_;
 }
 } // namespace Rosen
 } // namespace OHOS

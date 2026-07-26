@@ -2873,6 +2873,30 @@ HWTEST_F(WindowSessionPropertyTest, GetWindowModeCompat005, TestSize.Level1)
     property->SetWindowModeInfo(splitInfo);
     EXPECT_EQ(property->GetWindowModeCompat(), WindowMode::WINDOW_MODE_SPLIT);
 }
+
+/**
+ * @tc.name: SetTitleAndDockHoverEnabled
+ * @tc.desc: SetTitleAndDockHoverEnabled
+ * @tc.type: FUNC
+*/
+HWTEST_F(WindowSessionPropertyTest, SetTitleAndDockHoverEnabled, TestSize.Level1)
+{
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    ASSERT_EQ(property->GetTitleHoverShowEnabled(), true);
+    ASSERT_EQ(property->GetDockHoverShowEnabled(), true);
+
+    property->SetTitleAndDockHoverEnabled(true, false);
+    ASSERT_EQ(property->GetTitleHoverShowEnabled(), true);
+    ASSERT_EQ(property->GetDockHoverShowEnabled(), false);
+
+    property->SetTitleAndDockHoverEnabled(false, true);
+    ASSERT_EQ(property->GetTitleHoverShowEnabled(), false);
+    ASSERT_EQ(property->GetDockHoverShowEnabled(), true);
+
+    property->SetTitleAndDockHoverEnabled(false, false);
+    ASSERT_EQ(property->GetTitleHoverShowEnabled(), false);
+    ASSERT_EQ(property->GetDockHoverShowEnabled(), false);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS

@@ -1029,6 +1029,7 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+    void FixWindowUITypeInSupportModeChange();
     WSErrorResult CleanupSessionByType(const sptr<SceneSession>& sceneSession);
     WSErrorResult FinalizeSessionDestruction(const int32_t persistentId);
     /**
