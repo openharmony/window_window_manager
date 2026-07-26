@@ -766,6 +766,7 @@ private:
     int32_t frameNum_ = 0;
     bool isAppBufferReady_ = false;
     bool isCrossProcessWindow_ = false;
+    bool titleHoverShowEnabled_ = true；
 };
 
 class CompatibleModeProperty : public Parcelable {
