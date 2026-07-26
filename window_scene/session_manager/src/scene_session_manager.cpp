@@ -853,7 +853,7 @@ void SceneSessionManager::LoadWindowParameter()
     const std::string multiWindowUIType = system::GetParameter("const.window.multiWindowUIType", "HandsetSmartWindow");
     if (multiWindowUIType == "HandsetSmartWindow") {
         systemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
-    } else if (multiWindowUIType == "FreeFormMultiWindow" || isPcMode) {
+    } else if (multiWindowUIType == "FreeFormMultiWindow") {
         systemConfig_.windowUIType_ = WindowUIType::PC_WINDOW;
         FixWindowUITypeInSupportModeChange();
     } else if (multiWindowUIType == "TabletSmartWindow") {
