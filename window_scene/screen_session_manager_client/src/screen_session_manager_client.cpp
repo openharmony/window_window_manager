@@ -1105,7 +1105,8 @@ void ScreenSessionManagerClient::UpdateDisplayScale(ScreenId id, float scaleX, f
     session->SetScreenScale(scaleX, scaleY, pivotX, pivotY, translateX, translateY);
 }
 
-void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName,
+    uint32_t tokenId, const std::vector<std::string>& permissions)
 {
     sptr<ScreenSession> screenSession = GetScreenSession(mainScreenId);
     if (!screenSession) {
@@ -1113,7 +1114,7 @@ void ScreenSessionManagerClient::ScreenCaptureNotify(ScreenId mainScreenId, int3
         return;
     }
     TLOGI(WmsLogTag::DMS, "capture screenId: %{public}" PRIu64", uid=%{public}d", mainScreenId, uid);
-    screenSession->ScreenCaptureNotify(mainScreenId, uid, clientName);
+    screenSession->ScreenCaptureNotify(mainScreenId, uid, clientName, tokenId, permissions);
 }
 
 void ScreenSessionManagerClient::OnSuperFoldStatusChanged(ScreenId screenId, SuperFoldStatus superFoldStatus)

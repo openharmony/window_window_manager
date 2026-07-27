@@ -566,7 +566,8 @@ public:
         DmErrorCode* errorCode = nullptr) override;
     bool checkCaptureParam(const CaptureOption& captureOption,
         DmErrorCode* errorCode = nullptr);
-    void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName,
+        uint32_t tokenId, const std::vector<std::string>& permissions) override;
     void ConvertWindowIdsToSurfaceNodeList(std::vector<uint64_t> windowIdList,
         std::vector<uint64_t>& surfaceNodesList, DmErrorCode* errorCode);
     bool IsSupportCapture();
