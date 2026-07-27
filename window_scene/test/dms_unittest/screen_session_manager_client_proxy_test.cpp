@@ -334,7 +334,7 @@ HWTEST_F(ScreenSessionManagerClientProxyTest, ScreenCaptureNotify, TestSize.Leve
     std::string clientName = "test";
 
     ASSERT_TRUE(screenSessionManagerClientProxy_ != nullptr);
-    screenSessionManagerClientProxy_->ScreenCaptureNotify(screenId, uid, clientName);
+    screenSessionManagerClientProxy_->ScreenCaptureNotify(screenId, uid, clientName, 0, {});
 }
 
 /**

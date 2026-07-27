@@ -1659,7 +1659,7 @@ HWTEST_F(ScreenSessionManagerClientTest, ScreenCaptureNotify, TestSize.Level1)
     int32_t uid = 0;
     std::string clientName = "test";
     ASSERT_TRUE(screenSessionManagerClient_ != nullptr);
-    screenSessionManagerClient_->ScreenCaptureNotify(screenId, uid, clientName);
+    screenSessionManagerClient_->ScreenCaptureNotify(screenId, uid, clientName, 0, {});
 }
 
 /**
