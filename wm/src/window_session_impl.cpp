@@ -10498,7 +10498,7 @@ void WindowSessionImpl::UpdateSubWindowPropertyWhenTriggerMode(const sptr<Window
 {
     std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
     if (subWindowSessionMap_.count(parentId) == 0) {
-        TLOGD(WmsLogTag::WMS_LAYOUT, "subWindowSessionMap is empty");
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "subWindowSession is empty");
         return;
     }
     for (auto& subWindowSession : subWindowSessionMap_.at(parentId)) {

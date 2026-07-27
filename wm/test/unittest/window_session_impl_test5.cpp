@@ -3047,8 +3047,13 @@ HWTEST_F(WindowSessionImplTest5, UpdateSubWindowPropertyWhenTriggerMode, TestSiz
     subWindow->UpdateSubWindowPropertyWhenTriggerMode(property, 10000);
     EXPECT_EQ(subWindow->property_->GetIsPcAppInPad(), false);
 
+    std::vector<sptr<WindowSessionImpl>> vec;
     WindowSessionImpl::subWindowSessionMap_.insert(std::pair<int32_t,
-        std::vector<sptr<WindowSessionImpl>>>(10000, { subWindow }));
+        std::vector<sptr<WindowSessionImpl>>>(10000, vec));
+    subWindow->UpdateSubWindowPropertyWhenTriggerMode(property, 10000);
+    EXPECT_EQ(subWindow->property_->GetIsPcAppInPad(), false);
+
+    WindowSessionImpl::subWindowSessionMap_[10000].push_back(subWindow);
     subWindow->UpdateSubWindowPropertyWhenTriggerMode(property, 10000);
     EXPECT_EQ(subWindow->property_->GetIsPcAppInPad(), true);
 

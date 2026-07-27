@@ -3315,18 +3315,18 @@ bool WindowSessionProperty::GetIsCrossProcessWindow() const
 
 void WindowSessionProperty::SetTitleAndDockHoverEnabled(bool titleHoverEnabled, bool dockHoverEnabled)
 {
-titleHoverShowEnabled_ = titleHoverEnabled;
-dockHoverShowEnabled_ = dockHoverEnabled;
+    titleHoverShowEnabled_ = titleHoverEnabled;
+    dockHoverShowEnabled_ = dockHoverEnabled;
 }
 
 bool WindowSessionProperty::GetTitleHoverShowEnabled() const
 {
-return titleHoverShowEnabled_;
+    return titleHoverShowEnabled_;
 }
 
 bool WindowSessionProperty::GetDockHoverShowEnabled() const
 {
-return dockHoverShowEnabled_;
+    return dockHoverShowEnabled_;
 }
 } // namespace Rosen
 } // namespace OHOS
