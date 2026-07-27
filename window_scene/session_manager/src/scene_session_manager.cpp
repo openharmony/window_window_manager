@@ -702,6 +702,8 @@ void SceneSessionManager::OnSessionRecoverStateChange(const SessionRecoverState&
             }
             sceneSession->NotifyIsFullScreenInForceSplitMode(property->IsFullScreenInForceSplitMode());
             sceneSession->NotifyModeSwitchInfo();
+            RecoverSupportedWindowModes(sceneSession, property);
+            sessionInfo = property->GetSessionInfo();
             if (SessionHelper::IsMainWindow(sceneSession->GetWindowType())) {
                 sceneSession->SetRecovered(true);
                 recoverSceneSessionFunc_(sceneSession, sessionInfo);
@@ -5715,8 +5717,6 @@ void SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& 
     sessionInfo.appIndex_ = property->GetAppIndex();
     sessionInfo.screenId_ = property->GetDisplayId();
     sessionInfo.isAbilityHook_ = property->GetIsAbilityHook();
-    sessionInfo.supportedWindowModes =
-        WindowHelper::ConvertSupportTypeToSupportModes(property->GetWindowModeSupportType());
     TLOGI(WmsLogTag::WMS_RECOVER,
         "Recover and reconnect session with: bundleName=%{public}s, moduleName=%{public}s, "
         "abilityName=%{public}s, windowMode=%{public}d, windowType=%{public}u, persistentId=%{public}d, "
@@ -5726,6 +5726,20 @@ void SceneSessionManager::RecoverSessionInfo(const sptr<WindowSessionProperty>& 
         sessionInfo.windowMode, sessionInfo.windowType_, sessionInfo.persistentId_, sessionInfo.sessionState_,
         sessionInfo.appInstanceKey_.c_str(), sessionInfo.appIndex_, sessionInfo.isFollowParentMultiScreenPolicy,
         sessionInfo.screenId_, sessionInfo.isAbilityHook_);
+}
+
+void SceneSessionManager::RecoverSupportedWindowModes(const sptr<SceneSession>& sceneSession,
+                                                      const sptr<WindowSessionProperty>& property)
+{
+    std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
+    property->GetSupportedWindowModes(supportedWindowModes);
+    auto size = supportedWindowModes.size();
+    TLOGI(WmsLogTag::WMS_RECOVER, "size=%{public}zu, ispcWindow=%{public}d", size, systemConfig_.IsPcWindow());
+    if (!(systemConfig_.IsPcWindow() && size > 0 && size <= WINDOW_SUPPORT_MODE_MAX_SIZE)) {
+        supportedWindowModes = ExtractSupportWindowModeFromMetaData(sceneSession->GetSessionInfo().abilityInfo);
+    }
+    sceneSession->SetSessionInfoSupportedWindowModes(supportedWindowModes);
+    property->EditSessionInfo().supportedWindowModes = supportedWindowModes;
 }
 
 void SceneSessionManager::SetAlivePersistentIds(const std::vector<int32_t>& alivePersistentIds)

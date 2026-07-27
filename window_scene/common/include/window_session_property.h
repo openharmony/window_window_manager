@@ -228,6 +228,8 @@ public:
     static void UnmarshallingWindowAnchorInfo(Parcel& parcel, WindowSessionProperty* property);
     bool MarshallingHookWindowInfo(Parcel& parcel) const;
     static void UnmarshallingHookWindowInfo(Parcel& parcel, WindowSessionProperty* property);
+    bool MarshallingSupportWindowModes(Parcel& parcel) const;
+    static void UnmarshallingSupportWindowModes(Parcel& parcel, WindowSessionProperty* property);
 
     void SetTextFieldPositionY(double textFieldPositionY);
     void SetTextFieldHeight(double textFieldHeight);
