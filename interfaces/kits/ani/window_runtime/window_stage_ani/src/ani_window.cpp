@@ -6648,7 +6648,7 @@ void AniWindow::SetWindowTransitionAnimation(ani_env* env, ani_object obj, ani_l
 {
     TLOGI(WmsLogTag::WMS_ANIMATION, "[ANI]");
     AniWindow* aniWindow = reinterpret_cast<AniWindow*>(nativeObj);
-    if (!aniWindow || !aniWindow->GetWindow()) {
+    if (!aniWindow || !aniWindow->GetWindow() || animation == nullptr) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "[ANI] windowToken is nullptr");
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;

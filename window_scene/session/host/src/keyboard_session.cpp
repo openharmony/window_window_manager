@@ -224,11 +224,9 @@ WSError KeyboardSession::NotifyClientToUpdateRect(const std::string& updateReaso
         auto session = weakThis.promote();
         if (!session) {
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Session is null");
-            return WSError::WS_ERROR_DESTROYED_OBJECT;
+            return;
         }
-
-        WSError ret = session->NotifyClientToUpdateRectTask(updateReason, updateRect, rsTransaction);
-        return ret;
+        session->NotifyClientToUpdateRectTask(updateReason, updateRect, rsTransaction);
     }, "NotifyClientToUpdateRect");
     return WSError::WS_OK;
 }
@@ -424,7 +422,11 @@ bool KeyboardSession::GetCallingSessionGlobalScaledRect(const sptr<SceneSession>
         return false;
     }
     Rect globalScaledRect;
-    callingSession->GetGlobalScaledRect(globalScaledRect);
+    WMError errorCode = callingSession->GetGlobalScaledRect(globalScaledRect);
+    if (errorCode != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "get global scaled rect failed");
+        return false;
+    }
     callingSessionGlobalScaledRect = {
         globalScaledRect.posX_,
         globalScaledRect.posY_,
