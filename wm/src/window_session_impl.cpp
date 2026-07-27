@@ -8947,6 +8947,11 @@ WSError WindowSessionImpl::SwitchFreeMultiWindow(bool enable, const std::set<Scr
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::UpdateScreenSupportMultiWindow(const std::set<ScreenId>& supportMultiWindowScreenSet)
+{
+    return WSError::WS_OK;
+}
+
 WSError WindowSessionImpl::ConfigDockAutoHide(bool isDockAutoHide)
 {
     return WSError::WS_OK;
