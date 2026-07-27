@@ -15035,7 +15035,7 @@ void ScreenSessionManager::CreateExtendVirtualScreen(ScreenId mainScreenId, Scre
     }
     if (secondarySession->GetDisplayNode() == nullptr) {
         ScreenId rsScreenId = secondarySession->GetRSScreenId();
-        Rosen::RSDisplayNodeConfig rsConfig = {rsScreenId, DisplayMode::MIRROR, mianDisplayNode->GetId()};
+        Rosen::RSDisplayNodeConfig rsConfig = { rsScreenId, DisplayMode::MIRROR, mianDisplayNode->GetId() };
         secondarySession->CreateDisplayNode(rsConfig);
         secondarySession->SetDisplayNodeScreenId(rsScreenId);
         secondarySession->SetDisplayNodeSecurity();

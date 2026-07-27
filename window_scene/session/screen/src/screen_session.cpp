@@ -215,7 +215,7 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     property_.SetRsId(rsId_);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession_);
     Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .displayMode = DisplayMode::MIRROR,
-        .mirrorNodeId = nodeId, .isSync = true};
+        .mirrorNodeId = nodeId, .isSync = true };
     displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
     TLOGD(WmsLogTag::WMS_SCB,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
