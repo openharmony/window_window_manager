@@ -185,7 +185,7 @@ HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level0)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
         ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
@@ -242,7 +242,7 @@ HWTEST_F(ScreenSessionTest, SetMirrorScreenType, TestSize.Level1)
         .name = "OpenHarmony",
     };
     Rosen::RSDisplayNodeConfig rsConfig;
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
         ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
@@ -3387,7 +3387,7 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
     ASSERT_EQ(screenSession->isExtended_, false);
 
     Rosen::RSDisplayNodeConfig rsConfig;
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     screenSession->CreateDisplayNode(rsConfig);
     screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
@@ -3552,7 +3552,7 @@ HWTEST_F(ScreenSessionTest, ReuseDisplayNode, TestSize.Level1)
     screenSession->SetDisplayNode(nullptr);
     screenSession->ReuseDisplayNode(rsConfig);
 
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(rsConfig);
     screenSession->SetDisplayNode(displayNode);

@@ -96,7 +96,7 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
         }
         case ScreenSessionReason::CREATE_SESSION_FOR_MIRROR: {
             rsConfig.screenId = rsId_;
-            rsConfig.isMirrored = true;
+            rsConfig.displayMode = DisplayMode::MIRROR;
             rsConfig.mirrorNodeId = config.mirrorNodeId;
             rsConfig.isSync = true;
             break;
@@ -125,8 +125,8 @@ ScreenSession::ScreenSession(const ScreenSessionConfig& config, ScreenSessionRea
 void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
 {
     TLOGI(WmsLogTag::DMS,
-        "[DPNODE]config screenId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64", isMirrored: %{public}d",
-        config.screenId, config.mirrorNodeId, config.isMirrored);
+        "[DPNODE]config screenId: %{public}" PRIu64", mirrorNodeId: %{public}" PRIu64", displayMode: %{public}d",
+        config.screenId, config.mirrorNodeId, static_cast<int32_t>(config.displayMode));
     {
         std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
         displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
@@ -139,7 +139,7 @@ void ScreenSession::CreateDisplayNode(const Rosen::RSDisplayNodeConfig& config)
         const auto& rect = property_.GetBounds().rect_;
         displayNode_->SetFrame(rect.left_, rect.top_, rect.width_, rect.height_);
         displayNode_->SetBounds(rect.left_, rect.top_, rect.width_, rect.height_);
-        if (config.isMirrored) {
+        if (config.displayMode == DisplayMode::MIRROR) {
             EnableMirrorScreenRegion();
         }
         if (property_.GetNeedCastScale()) {
@@ -155,7 +155,7 @@ void ScreenSession::ReuseDisplayNode(const RSDisplayNodeConfig& config)
     {
         std::unique_lock<std::shared_mutex> lock(displayNodeMutex_);
         if (displayNode_) {
-            displayNode_->SetDisplayNodeMirrorConfig(config);
+            displayNode_->SetDisplayNodeConfig(config);
             RSTransactionAdapter::FlushImplicitTransaction(displayNode_);
             return;
         }
@@ -214,8 +214,8 @@ ScreenSession::ScreenSession(ScreenId screenId, const ScreenProperty& property,
     rsId_ = screenId;
     property_.SetRsId(rsId_);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession_);
-    Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .isMirrored = true, .mirrorNodeId = nodeId,
-        .isSync = true};
+    Rosen::RSDisplayNodeConfig config = { .screenId = screenId_, .displayMode = DisplayMode::MIRROR,
+        .mirrorNodeId = nodeId, .isSync = true };
     displayNode_ = Rosen::RSDisplayNode::Create(config, GetRSUIContext());
     TLOGD(WmsLogTag::WMS_SCB,
           "Create RSDisplayNode: %{public}s", RSAdapterUtil::RSNodeToStr(displayNode_).c_str());
@@ -2438,7 +2438,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
 {
     std::unique_lock<std::shared_mutex> displayNodeLock(displayNodeMutex_);
     if (displayNode_ != nullptr) {
-        displayNode_->SetDisplayNodeMirrorConfig(config);
+        displayNode_->SetDisplayNodeConfig(config);
         if (screenId_ == 0 && isFold_) {
             TLOGI(WmsLogTag::DMS, "Return InitRSDisplayNode foldScreen0");
             return;
@@ -2489,7 +2489,7 @@ void ScreenSession::InitRSDisplayNode(RSDisplayNodeConfig& config, Point& startP
         displayNode_->SetPivot(0.0F, 0.0F);
         displayNode_->SetScale(property_.GetCastScaleX(), property_.GetCastScaleY());
     }
-    if (config.isMirrored) {
+    if (config.displayMode == DisplayMode::MIRROR) {
         EnableMirrorScreenRegion();
     }
     RSTransactionAdapter::FlushImplicitTransaction(GetRSUIContext());
@@ -2519,13 +2519,15 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
         TLOGE(WmsLogTag::DMS, "screenSession is nullptr.");
         return false;
     }
-    config = { screenSession->rsId_ };
+    config = { screenSession->rsId_, DisplayMode::EXPAND};
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
+            config = { screenSession->rsId_, DisplayMode::INVALID};
             [[fallthrough]];
         case ScreenCombination::SCREEN_EXPAND:
             break;
         case ScreenCombination::SCREEN_UNIQUE:
+            config = { screenSession->rsId_, DisplayMode::INDEPENDENT};
             break;
         case ScreenCombination::SCREEN_MIRROR: {
             if (GetChildCount() == 0 || mirrorScreenId_ == screenSession->screenId_) {
@@ -2544,7 +2546,7 @@ bool ScreenSessionGroup::GetRSDisplayNodeConfig(sptr<ScreenSession>& screenSessi
             NodeId nodeId = displayNode->GetId();
             TLOGI(WmsLogTag::DMS, "mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", \
                 nodeId:%{public}" PRIu64"", mirrorScreenId_, screenSession->rsId_, nodeId);
-            config = {screenSession->rsId_, true, nodeId, true};
+            config = {screenSession->rsId_, DisplayMode::MIRROR, nodeId, true};
             break;
         }
         default:
