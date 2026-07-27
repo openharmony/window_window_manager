@@ -620,7 +620,7 @@ bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
         TLOGE(WmsLogTag::DMS, "dmsScreen is nullptr.");
         return false;
     }
-    config = {dmsScreen->rsId_, DisplayMode::EXPAND};
+    config = { dmsScreen->rsId_, DisplayMode::EXPAND };
     switch (combination_) {
         case ScreenCombination::SCREEN_ALONE:
             config.displayMode = DisplayMode::INVALID;
@@ -648,7 +648,7 @@ bool AbstractScreenGroup::GetRSDisplayNodeConfig(sptr<AbstractScreen>& dmsScreen
             NodeId nodeId = displayNode->GetId();
             TLOGI(WmsLogTag::DMS, "AddChild, mirrorScreenId_:%{public}" PRIu64", rsId_:%{public}" PRIu64", "
                 "nodeId:%{public}" PRIu64"", mirrorScreenId_, dmsScreen->rsId_, nodeId);
-            config = {dmsScreen->rsId_, DisplayMode::MIRROR, nodeId};
+            config = { dmsScreen->rsId_, DisplayMode::MIRROR, nodeId };
             break;
         }
         default:

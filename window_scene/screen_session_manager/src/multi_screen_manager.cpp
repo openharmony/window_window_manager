@@ -137,7 +137,7 @@ DMError MultiScreenManager::PhysicalScreenMirrorSwitch(const ScreenId mainScreen
             TLOGW(WmsLogTag::DMS, "already mirror and get a same region.");
             return DMError::DM_OK;
         }
-        RSDisplayNodeConfig config = { screenSession->rsId_, DisplayMode::MIRROR, nodeId, true};
+        RSDisplayNodeConfig config = { screenSession->rsId_, DisplayMode::MIRROR, nodeId, true };
         if (rotationOption.needSetRotation_) {
             config.mirrorSourceRotation = static_cast<uint32_t>(rotationOption.rotation_);
         }
