@@ -380,7 +380,7 @@ void PictureInPictureManager::DoCloseByMainWindowId(uint32_t mainWindowId)
     for (const auto& id : idList) {
         DoClose(id, true, true);
     }
-    TLOGI(WmsLogTag::WMS_PIP, "DoCloseByMainWindowId done");
+    TLOGI(WmsLogTag::WMS_PIP, "done");
 }
 
 void PictureInPictureManager::DoClose(uint32_t windowId, bool destroyWindow, bool byPriority)
