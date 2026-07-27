@@ -6077,7 +6077,12 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         napi_value animationValue = CreateJsValue(env, needAnimation);
         napi_value promiseIdValue = CreateJsValue(env, promiseId);
         napi_value argv[] = { rotationValue, animationValue, promiseIdValue };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv,
+            nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "napi_call_function fail, ret: %{public}d", ret);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d orientation:%{public}u promiseId:%{public}u end",
             where, persistentId, rotation, promiseId);
     };
@@ -6135,7 +6140,12 @@ void JsSceneSession::OnGetTargetOrientationConfigInfo(uint32_t targetOrientation
         }
         napi_value orientationValue = CreateJsValue(env, targetOrientation);
         napi_value argv[] = {orientationValue};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv,
+            nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "napi_call_function fail, ret: %{public}d", ret);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_ROTATION, "Get target orientation(%{public}u) success", targetOrientation);
     };
     taskScheduler_->PostMainThreadTask(task, "OnGetTargetOrientationConfigInfo" + std::to_string(targetOrientation));
@@ -8754,7 +8764,11 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
             jsKeyboardTargetDisplayId,
         };
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        auto status = napi_open_handle_scope(env, &scope);
+        if ((status != napi_ok) || (scope == nullptr)) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_open_handle_scope fail", where);
+            return;
+        }
         auto value = jsCallBack->GetNapiValue();
         if (value == nullptr) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: jsCallBack->GetNapiValue() is null", where);
@@ -9940,7 +9954,11 @@ void JsSceneSession::OnPreCalcWindowProperty()
             return;
         }
         napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "napi_call_function fail, ret: %{public}d", ret);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_ROTATION, "OnPreCalcWindowProperty success");
     };
     taskScheduler_->PostMainThreadTask(task, "OnPreCalcWindowProperty");
