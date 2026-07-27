@@ -489,7 +489,13 @@ void AniWindowStage::OnSetWindowRectAutoSave(ani_env* env, ani_boolean enabled, 
         AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
         return;
     }
-    WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(mainWindow->SetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag));
+    WmErrorCode ret = WmErrorCode::WM_ERROR_SYSTEM_ABNORMALLY;
+    auto iter = WM_JS_TO_ERROR_CODE_MAP.find(mainWindow->SetWindowRectAutoSave(enabled, isSaveBySpecifiedFlag));
+    if (iter != WM_JS_TO_ERROR_CODE_MAP.end()) {
+        ret = iter->second;
+    } else {
+        TLOGE(WmsLogTag::WMS_PC, "[ANI] SetWindowRectAutoSave error code out of range");
+    }
     if (ret != WmErrorCode::WM_OK) {
         HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setWindowRectAutoSave.error", ret);
         AniWindowUtils::AniThrowError(env, ret);
