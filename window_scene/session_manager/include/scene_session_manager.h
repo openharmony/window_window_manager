@@ -1029,6 +1029,7 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+    void FixWindowUITypeInSupportModeChange();
     WSErrorResult CleanupSessionByType(const sptr<SceneSession>& sceneSession);
     WSErrorResult FinalizeSessionDestruction(const int32_t persistentId);
     /**
@@ -1464,6 +1465,8 @@ private:
     void RemoveFailRecoveredSession();
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds) REQUIRES(SCENE_GUARD);
     void RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
+    void RecoverSupportedWindowModes(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     void UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property);
