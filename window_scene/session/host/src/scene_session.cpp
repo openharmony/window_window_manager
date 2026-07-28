@@ -9282,7 +9282,10 @@ void SceneSession::SyncAllAttachedLimitsToAttachingChild(const sptr<Session>& pa
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "Sync parent id=%{public}d to attaching child id=%{public}d, total=%{public}zu",
         parentWinId, GetPersistentId(), limitsList.size());
-    sessionStage_->SyncAllAttachedLimitsToChild(limitsList, optionsList);
+    WSError ret = sessionStage_->SyncAllAttachedLimitsToChild(limitsList, optionsList);
+    if (ret != WSError::WS_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT, "SyncAllAttachedLimitsToChild failed: %{public}d", ret);
+    }
 }
 
 /** @note @window.layout */
