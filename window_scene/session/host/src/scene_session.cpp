@@ -2243,6 +2243,8 @@ void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHove
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or TitleAndDockHoverShowChangeFunc is null", where);
             return;
         }
+        func(session->GetSessionProperty()->GetTitleHoverShowEnabled(),
+            session->GetSessionProperty()->GetDockHoverShowEnabled());
         session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d",
             where, session->GetPersistentId());
