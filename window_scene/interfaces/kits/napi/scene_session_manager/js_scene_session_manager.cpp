@@ -6685,7 +6685,12 @@ void JsSceneSessionManager::OnMinimizeAll(DisplayId displayId, int32_t excludeWi
         napi_value jsDisplayIdObj = CreateJsNumber(env, static_cast<int64_t>(displayId));
         napi_value jsExcludeWindowIdObj = CreateJsValue(env, excludeWindowId);
         napi_value argv[] = { jsDisplayIdObj, jsExcludeWindowIdObj };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        napi_status ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
+            ArraySize(argv), argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnMinimizeAll:napi call exception ret: %{public}d", ret);
+            return;
+        }
         }, __func__);
 }
 
