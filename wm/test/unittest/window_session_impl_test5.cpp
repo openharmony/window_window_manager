@@ -3060,6 +3060,7 @@ HWTEST_F(WindowSessionImplTest5, UpdateSubWindowPropertyWhenTriggerMode, TestSiz
     property->SetIsPcAppInPad(false);
     subWindow->UpdateSubWindowPropertyWhenTriggerMode(property, 10000);
     EXPECT_EQ(subWindow->property_->GetIsPcAppInPad(), false);
+    WindowSessionImpl::subWindowSessionMap_.erase(10000);
 }
 } // namespace
 } // namespace Rosen

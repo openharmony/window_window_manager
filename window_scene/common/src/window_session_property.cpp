@@ -3180,7 +3180,7 @@ bool WindowSessionProperty::MarshallingSupportWindowModes(Parcel& parcel) const
 {
     std::lock_guard<std::mutex> lock(supportWindowModesMutex_);
     auto size = supportedWindowModes_.size();
-    if (size < 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
+    if (size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
         return false;
     }
     if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
@@ -3198,7 +3198,7 @@ void WindowSessionProperty::UnmarshallingSupportWindowModes(Parcel& parcel, Wind
 {
     std::vector<AppExecFwk::SupportWindowMode> supportedWindowModes;
     uint32_t size = parcel.ReadUint32();
-    if (size < 0 || size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
+    if (size > WINDOW_SUPPORT_MODE_MAX_SIZE) {
         return;
     }
     for (uint32_t i = 0; i < size; i++) {
