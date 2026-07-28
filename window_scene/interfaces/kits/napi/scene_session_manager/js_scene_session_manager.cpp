@@ -2500,11 +2500,26 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
     }
 
     bool isNewActive = true;
-    ConvertFromJsValue(env, argv[1], isNewActive);
+    if (!ConvertFromJsValue(env, argv[1], isNewActive)) {
+        TLOGE("Faile to convert parameter to isNewActive.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
     bool isShowAbility = false;
-    ConvertFromJsValue(env, argv[2], isShowAbility);
+    if (!ConvertFromJsValue(env, argv[2], isShowAbility)) {
+        TLOGE("Faile to convert parameter to isShowAbility.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
     int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
-    ConvertFromJsValue(env, argv[ARG_INDEX_THREE], requestId);
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], requestId)) {
+        TLOGE("Faile to convert parameter to requestId.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
 
     SceneSessionManager::GetInstance().RequestSceneSessionActivation(sceneSession, isNewActive, isShowAbility,
         requestId);

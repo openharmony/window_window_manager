@@ -5928,7 +5928,7 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     for (const auto& rect : touchHotAreas) {
         rectStr = rectStr + " " + rect.ToString();
     }
-    GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
+    property->SetTouchHotAreas(touchHotAreas);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)

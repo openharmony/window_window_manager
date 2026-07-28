@@ -688,6 +688,8 @@ napi_value JsWindowStage::OnGetSubWindow(napi_env env, napi_callback_info info)
     };
     if (napi_send_event(env, asyncTask, napi_eprio_high, "OnGetSubWindow") != napi_status::napi_ok) {
         TLOGE(WmsLogTag::WMS_LIFE, "napi send event failed, window state is abnormal");
+        napiAsyncTask->Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
+            "[window][getSubWindow]msg: send event failed"));
     }
     return result;
 }
@@ -811,8 +813,14 @@ napi_value JsWindowStage::OnSetShowOnLockScreen(napi_env env, napi_callback_info
             WmErrorCode::WM_ERROR_INVALID_PARAM);
         napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
         return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
-    } else {
-        napi_get_value_bool(env, nativeVal, &showOnLockScreen);
+    }
+    napi_status status = napi_get_value_bool(env, nativeVal, &showOnLockScreen);
+    if (status != napi_ok) {
+        WLOGFE("Failed to convert parameter to showOnLockScreen");
+        HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.setShowOnLockScreen",
+            WmErrorCode::WM_ERROR_INVALID_PARAM);
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM));
+        return CreateJsValue(env, static_cast<int32_t>(WmErrorCode::WM_ERROR_INVALID_PARAM));
     }
 
     auto window = weakScene->GetMainWindow();
