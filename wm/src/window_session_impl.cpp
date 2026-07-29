@@ -2821,12 +2821,12 @@ void WindowSessionImpl::SetForceSplitConfig(const AppForceLandscapeConfig& confi
         return;
     }
     ForceSplitConfig forceSplitConfig;
-    if (config.hasChanged_) {
-        if (config.containsConfig_) {
-            forceSplitConfig.isRouter = config.isRouter_;
-            forceSplitConfig.configJsonStr = config.configJsonStr_;
-        }
+    if (config.containsConfig_) {
+        forceSplitConfig.isRouter = config.isRouter_;
+        forceSplitConfig.configJsonStr = config.configJsonStr_;
     }
+    TLOGI(WmsLogTag::WMS_COMPAT, "containsConfig:%{public}u isRouter:[%{public}u] size:[%{public}zu]",
+        config.containsConfig_, forceSplitConfig.isRouter, forceSplitConfig.configJsonStr.size());
     uiContent->SetForceSplitConfig(
         config.containsConfig_ ? std::make_optional(forceSplitConfig) : std::nullopt);
 }
