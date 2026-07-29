@@ -389,7 +389,7 @@ WSError SessionStageProxy::HandleBackEvent()
     return static_cast<WSError>(ret);
 }
 
-WSError SessionStageProxy::SwitchFreeMultiWindow(bool enable)
+WSError SessionStageProxy::SwitchFreeMultiWindow(bool enable, const std::set<ScreenId>& supportMultiWindowScreenSet)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -401,6 +401,16 @@ WSError SessionStageProxy::SwitchFreeMultiWindow(bool enable)
     if (!data.WriteBool(enable)) {
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write enable failed");
         return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(supportMultiWindowScreenSet.size())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write screenSet size failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    for (const auto& screenId : supportMultiWindowScreenSet) {
+        if (!data.WriteUint64(screenId)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write screenId failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
     }
 
     sptr<IRemoteObject> remote = Remote();
@@ -416,6 +426,42 @@ WSError SessionStageProxy::SwitchFreeMultiWindow(bool enable)
     }
     int32_t ret = reply.ReadInt32();
     return static_cast<WSError>(ret);
+}
+
+WSError SessionStageProxy::UpdateScreenSupportMultiWindow(
+    const std::set<ScreenId>& supportMultiWindowScreenSet)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "WriteInterfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteUint32(supportMultiWindowScreenSet.size())) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write screenSet size failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    for (const auto& screenId : supportMultiWindowScreenSet) {
+        if (!data.WriteUint64(screenId)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Write screenId failed");
+            return WSError::WS_ERROR_IPC_FAILED;
+        }
+    }
+ 
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+ 
+    if (remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_UPDATE_SCREEN_SUPPORT_MULTI_WINDOW),
+        data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    return WSError::WS_OK;
 }
 
 WSError SessionStageProxy::ConfigDockAutoHide(bool isDockAutoHide)
