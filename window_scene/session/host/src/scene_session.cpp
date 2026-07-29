@@ -570,7 +570,6 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
         session->DisableUIFirstIfNeed();
-        session->SyncUISessionState();
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
@@ -597,16 +596,6 @@ void SceneSession::DisableUIFirstIfNeed()
     }
     isUIFirstEnabled_ = false;
     TLOGI(WmsLogTag::WMS_ANIMATION, "leashWinShadowSurfaceNode disable UIFirst id:%{public}d!", GetPersistentId());
-}
-
-void SceneSession::SyncUISessionState()
-{
-    // Sync when session state and UI state are inconsistent.
-    if (GetNeedBackgroundAfterConnect() && IsPcWindow()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Need background after connect, id:%{public}d", GetPersistentId());
-        SetNeedBackgroundAfterConnect(false);
-        NotifySessionBackground(1, true, true);
-    }
 }
 
 void SceneSession::CheckAndMoveDisplayIdRecursively(uint64_t displayId)
@@ -862,7 +851,6 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot, boo
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Notify scene session id: %{public}d paused", where,
                 session->GetPersistentId());
             session->UpdateLifecyclePausedInner();
-            session->SetNeedBackgroundAfterConnect(false);
         }
         if (session->sessionInfo_.isPrelaunch_) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Remove prelaunch session id: %{public}d", where,
@@ -2243,6 +2231,8 @@ void SceneSession::SetTitleAndDockHoverShowChangeCallback(NotifyTitleAndDockHove
             TLOGNE(WmsLogTag::WMS_LAYOUT_PC, "%{public}s session or TitleAndDockHoverShowChangeFunc is null", where);
             return;
         }
+        func(session->GetSessionProperty()->GetTitleHoverShowEnabled(),
+            session->GetSessionProperty()->GetDockHoverShowEnabled());
         session->onTitleAndDockHoverShowChangeFunc_ = std::move(func);
         TLOGND(WmsLogTag::WMS_LAYOUT_PC, "%{public}s id: %{public}d",
             where, session->GetPersistentId());
@@ -9770,7 +9760,7 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
         dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::SCALE)) {
         NotifyGlobalScaledRectChange();
     }
-    if (!isPcScenePanel_ || !IsPcWindow()) {
+    if (!isPcScenePanel_ || !IsPcWindow() || !systemConfig_.IsDisplayInFreeMultiWindow(GetDisplayId())) {
         dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
     }
     if (!lastVisible && IsVisible() && !isFocused_ && !postProcessFocusState_.enabled_ &&

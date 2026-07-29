@@ -143,6 +143,10 @@ bool KeyboardSession::GetSkipFlagForCallingSession(const sptr<SceneSession>& cal
     if (!callingSession) {
         return false;
     }
+    if (WindowHelper::IsFvWindow(callingSession->GetWindowType())) {
+        TLOGI(WmsLogTag::WMS_KEYBOARD, "fv window use fv session flag");
+        return callingSession->isSkipSelfWhenShowOnVirtualScreen_.load();
+    }
     auto mainSession = callingSession->GetMainSession();
     if (!mainSession) {
         return false;
@@ -614,9 +618,7 @@ void KeyboardSession::RestoreCallingSession(uint32_t callingId, const std::share
     if (oriPosYBeforeRaisedByKeyboard != 0 &&
         callingSession->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         WSRect callingSessionRestoringRect = callingSession->GetSessionRect();
-        if (oriPosYBeforeRaisedByKeyboard != 0) {
-            callingSessionRestoringRect.posY_ = oriPosYBeforeRaisedByKeyboard;
-        }
+        callingSessionRestoringRect.posY_ = oriPosYBeforeRaisedByKeyboard;
         TLOGI(WmsLogTag::WMS_KEYBOARD, "OriPosYBeforeRaisedByKeyboard: %{public}d, sessionMode: %{public}d",
             oriPosYBeforeRaisedByKeyboard, callingSession->GetWindowMode());
         if (!IsSystemKeyboard()) {
@@ -1189,6 +1191,10 @@ void KeyboardSession::CalculateOccupiedAreaAfterUIRefresh()
 WMError KeyboardSession::HandleActionUpdateKeyboardTouchHotArea(const sptr<WindowSessionProperty>& property,
     WSPropertyChangeAction action)
 {
+    if (keyboardPanelSession_ == nullptr) {
+        TLOGE(WmsLogTag::WMS_KEYBOARD, "keyboardPanelSession_ is null");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     if (GetWindowType() != WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT) {
         return WMError::WM_ERROR_INVALID_TYPE;
     }

@@ -4744,6 +4744,10 @@ WMError SceneSessionManagerProxy::CreateUIEffectController(const sptr<IUIEffectC
         return WMError::WM_ERROR_IPC_FAILED;
     }
     controller = iface_cast<IUIEffectController>(controllerObject);
+    if (controller == nullptr) {
+        TLOGE(WmsLogTag::WMS_ANIMATION, "iface_cast controller failed");
+        return WMError::WM_ERROR_NULLPTR;
+    }
     return err;
 }
 
