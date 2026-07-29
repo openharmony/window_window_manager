@@ -5030,7 +5030,6 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         ResetWantInfo(sceneSession);
         sceneSession->ResetSessionInfoResultCode();
         sceneSession->EditSessionInfo().isSetStartWindowType_ = false;
-        sceneSession->SetNeedBackgroundAfterConnect(false);
     }
     ClearRequestTaskInfo(persistentId);
     NotifySessionForCallback(sceneSession, needRemoveSession, reason);
