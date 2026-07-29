@@ -193,7 +193,19 @@ export namespace PiPWindow {
   }
   
   export native function createSync(nativeObj: long, config: PiPConfiguration, contentNode?: typeNode.XComponent): PiPController;
-  export function create(config: PiPConfiguration, contentNode?: typeNode.XComponent): Promise<PiPController> {
+  function create(config: PiPConfiguration): Promise<PiPController> {
+    return new Promise<PiPController>((resolve: (value: PiPController) => void, reject: (error: BusinessError) => void ) => {
+        taskpool.execute((): PiPController => {
+            return createSync(nativeObj, config, undefined);
+        }).then((ret: Any) => {
+            resolve(ret as PiPController);
+        }).catch((err: Any) => {
+            reject(err as BusinessError);
+        });
+    });
+  }
+
+  function create(config: PiPConfiguration, contentNode: typeNode.XComponent): Promise<PiPController> {
     return new Promise<PiPController>((resolve: (value: PiPController) => void, reject: (error: BusinessError) => void ) => {
         taskpool.execute((): PiPController => {
             return createSync(nativeObj, config, contentNode);
@@ -217,7 +229,7 @@ export namespace PiPWindow {
   export function runOnControlEvent(cb: Object, controlType: int, status: int): void {
     const param: ControlEventParam = {
       controlType: PiPControlType.fromValue(controlType),
-      status: PiPControlStatus.fromValue(status),
+ 	    status: PiPControlStatus.fromValue(status),
     };
     (cb as Callback<ControlEventParam>)(param);
   }

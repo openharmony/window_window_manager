@@ -1668,6 +1668,24 @@ HWTEST_F(WindowSessionPropertyTest, UnMarshallingSessionInfo, TestSize.Level1)
     ASSERT_EQ(result, true);
 }
 
+ /**
+ * @tc.name: UnMarshallingSessionInfoFail
+ * @tc.desc: UnMarshallingSessionInfo test when appIndex read fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionPropertyTest, UnMarshallingSessionInfoFail, TestSize.Level1)
+{
+    Parcel parcel;
+    parcel.WriteString("testBundleName");
+    parcel.WriteString("testModuleName");
+    parcel.WriteString("testAbilityName");
+    parcel.WriteInt32(0);
+    WindowSessionProperty windowSessionProperty;
+    sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    bool result = windowSessionProperty.UnmarshallingSessionInfo(parcel, property);
+    ASSERT_EQ(result, false);
+}
+
 /**
  * @tc.name: MarshallingTransitionAnimationMap
  * @tc.desc: MarshallingTransitionAnimationMap test

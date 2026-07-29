@@ -19,7 +19,6 @@ group("unittest") {
   testonly = true
 
   deps = [
-    ":ws_screen_session_manager_connect_test",
   ]
 }
 

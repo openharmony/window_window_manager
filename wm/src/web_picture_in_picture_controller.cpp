@@ -81,6 +81,8 @@ WMError WebPictureInPictureController::CreatePictureInPictureWindow(StartPipType
         TLOGW(WmsLogTag::WMS_PIP, "Window create failed, reason: %{public}d", errCode);
         return errCode == WMError::WM_ERROR_FLOAT_CONFLICT_WITH_OTHERS ? errCode : WMError::WM_ERROR_PIP_CREATE_FAILED;
     }
+    mainWindowLifeCycleListener_ = sptr<PictureInPictureController::WindowLifeCycleListener>::MakeSptr(mainWindowId_);
+    mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
     window_ = window;
     window_->UpdatePiPRect(windowRect_, WindowSizeChangeReason::PIP_START);
     PictureInPictureManager::PutPipControllerInfo(window_->GetWindowId(), this);
@@ -127,6 +129,13 @@ void WebPictureInPictureController::UpdateContentSize(int32_t width, int32_t hei
         TLOGE(WmsLogTag::WMS_PIP, "pipOption is nullptr");
         return;
     }
+    if (mainWindow_ != nullptr) {
+        TLOGI(WmsLogTag::WMS_PIP, "mainWindow width:%{public}u height:%{public}u", width, height);
+        uint32_t priority = pipOption_->GetPipPriority(pipOption_->GetPipTemplate());
+        uint32_t contentWidth = static_cast<uint32_t>(width);
+        uint32_t contentHeight = static_cast<uint32_t>(height);
+        mainWindow_->SetAutoStartPiP(isAutoStartEnabled_, priority, contentWidth, contentHeight);
+    }
     pipOption_->SetContentSize(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     if (curState_ != PiPWindowState::STATE_STARTED) {
         TLOGD(WmsLogTag::WMS_PIP, "UpdateContentSize is disabled when state: %{public}u", curState_);
@@ -154,7 +163,7 @@ void WebPictureInPictureController::SetPipInitialSurfaceRect(int32_t positionX, 
 
 void WebPictureInPictureController::RestorePictureInPictureWindow()
 {
-    StopPictureInPicture(true, StopPipType::NULL_STOP, false);
+    StopPictureInPicture(true, StopPipType::NULL_STOP, true);
     SingletonContainer::Get<PiPReporter>().ReportPiPRestore();
     TLOGI(WmsLogTag::WMS_PIP, "restore pip main window finished");
 }
@@ -219,6 +228,7 @@ WMError WebPictureInPictureController::SetPipParentWindowId(uint32_t windowId)
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow is null");
         return WMError::WM_ERROR_PIP_INTERNAL_ERROR;
     }
+    mainWindow_->UnregisterLifeCycleListener(mainWindowLifeCycleListener_);
     auto newMainWindow = WindowSceneSessionImpl::GetMainWindowWithId(windowId);
     if (newMainWindow == nullptr) {
         TLOGE(WmsLogTag::WMS_PIP, "mainWindow not found: %{public}u", windowId);
@@ -226,6 +236,7 @@ WMError WebPictureInPictureController::SetPipParentWindowId(uint32_t windowId)
     }
     mainWindow_ = newMainWindow;
     mainWindowId_ = windowId;
+    mainWindow_->RegisterLifeCycleListener(mainWindowLifeCycleListener_);
     if (window_ == nullptr) {
         TLOGI(WmsLogTag::WMS_PIP, "window is null");
         return WMError::WM_OK;
