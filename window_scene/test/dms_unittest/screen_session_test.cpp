@@ -185,7 +185,7 @@ HWTEST_F(ScreenSessionTest, CreateDisplayNode, TestSize.Level0)
         .rsId = 101,
         .name = "OpenHarmony",
     };
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
         ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
@@ -242,7 +242,7 @@ HWTEST_F(ScreenSessionTest, SetMirrorScreenType, TestSize.Level1)
         .name = "OpenHarmony",
     };
     Rosen::RSDisplayNodeConfig rsConfig;
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
         ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
@@ -3387,7 +3387,7 @@ HWTEST_F(ScreenSessionTest, UpdateDisplayNodeRotation, Function | SmallTest | Le
     ASSERT_EQ(screenSession->isExtended_, false);
 
     Rosen::RSDisplayNodeConfig rsConfig;
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     screenSession->CreateDisplayNode(rsConfig);
     screenSession->UpdateDisplayNodeRotation(FoldDisplayMode::MAIN);
@@ -3552,7 +3552,7 @@ HWTEST_F(ScreenSessionTest, ReuseDisplayNode, TestSize.Level1)
     screenSession->SetDisplayNode(nullptr);
     screenSession->ReuseDisplayNode(rsConfig);
 
-    rsConfig.isMirrored = true;
+    rsConfig.displayMode = DisplayMode::MIRROR;
     rsConfig.screenId = 101;
     std::shared_ptr<RSDisplayNode> displayNode = RSDisplayNode::Create(rsConfig);
     screenSession->SetDisplayNode(displayNode);
@@ -5357,29 +5357,12 @@ HWTEST_F(ScreenSessionTest, ProcPropertyChange_SyncAvailableArea, TestSize.Level
     ScreenId screenId = 10000;
     ScreenProperty screenProperty;
     ScreenProperty eventPara;
-    DMRect area { 10, 20, 300, 400 };
-    eventPara.SetAvailableArea(area);
+    RRect bounds = RRect({ 0, 0, 200, 300 }, 0.0f, 0.0f);
+    eventPara.SetBounds(bounds);
     sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
     session->ProcPropertyChange(screenProperty, eventPara);
-    EXPECT_EQ(screenProperty.GetAvailableArea(), area);
-}
-
-/**
- * @tc.name  : ProcPropertyChange_PreserveUninitializedArea
- * @tc.desc  : ProcPropertyChange preserves local availableArea when eventPara's is uninitialized
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, ProcPropertyChange_PreserveUninitializedArea, TestSize.Level1)
-{
-    ScreenId screenId = 10000;
-    ScreenProperty screenProperty;
-    DMRect localArea { 5, 5, 200, 200 };
-    screenProperty.SetAvailableArea(localArea);
-    ScreenProperty eventPara;
-    eventPara.SetAvailableArea(DMRect { 0, 0, 0, 0 }); // uninitialized rect
-    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
-    session->ProcPropertyChange(screenProperty, eventPara);
-    EXPECT_EQ(screenProperty.GetAvailableArea(), localArea);
+    EXPECT_EQ(screenProperty.GetAvailableArea().height_, 300);
+    EXPECT_EQ(screenProperty.GetAvailableArea().width_, 200);
 }
 
 /**

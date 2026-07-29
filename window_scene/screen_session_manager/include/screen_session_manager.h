@@ -25,7 +25,6 @@
 #include "common/include/task_scheduler.h"
 #include "dm_common.h"
 #include "event_tracker.h"
-#include "session_option.h"
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
@@ -312,6 +311,7 @@ public:
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool DoSuspendBegin(PowerStateChangeReason reason);
     bool SuspendEnd() override;
+    bool IsPreBright(PowerStateChangeReason reason);
     void BlockScreenOnByCV(void);
     void BlockScreenOffByCV(void);
     bool BlockScreenWaitPictureFrameByCV(bool isStartDream);
@@ -322,7 +322,7 @@ public:
     bool SetDisplayState(DisplayState state) override;
     bool DoSetDisplayState(DisplayState state);
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
-    bool DoSetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
+    bool DoSetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason, bool isApAod = false);
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
@@ -381,14 +381,13 @@ public:
     void HandleFoldStatusChangeWhenSwitchUser(sptr<ScreenSession>& screenSession, FoldDisplayMode oldScbDisplayMode);
     void HandleMotionSensorRotationWhenSwitchUser(sptr<ScreenSession>& screenSession);
 
-    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
+    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason, bool isApAod = false);
     void SetScreenPowerForFold(ScreenPowerStatus status);
     void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
     void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
-    void CallRsSetScreenPowerStatusSync(
-        ScreenId screenId, ScreenPowerStatus status,
-        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
-    void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status);
+    void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN, bool isApAod = false);
+    void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status, bool isApAod = false);
     void TryToRecoverFoldDisplayMode(ScreenPowerStatus status);
     bool GetScreenLcdStatus(ScreenId screenId, PanelPowerStatus& status);
     bool WaitAodOpNotify();
@@ -1201,9 +1200,8 @@ private:
     void CallRsSetScreenPowerStatusSyncForExtend(
         const std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
         PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
-    void SetRsSetScreenPowerStatusSync(
-        std::vector<ScreenId> screenIds, ScreenPowerStatus status,
-        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
+    void SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN, bool isApAod = false);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
     AodStatus aodNotifyFlag_ { AodStatus::UNKNOWN };
     bool IsFakeDisplayExist();
@@ -1257,7 +1255,7 @@ private:
     // Fold Screen duringcall
     bool duringCallState_ = false;
     ScreenPowerEvent ConvertScreenStateEvent(ScreenPowerStatus status);
-    ScreenTransitionState ConvertPowerStatus2ScreenState(ScreenPowerStatus status);
+    ScreenTransitionState ConvertPowerStatus2ScreenState(ScreenPowerStatus status, bool isApAod = false);
 
     mutable std::recursive_mutex userDisplayNodeMapMutex_;
     std::map<int32_t, std::map<ScreenId, std::shared_ptr<RSDisplayNode>>> userDisplayNodeMap_;
