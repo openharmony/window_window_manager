@@ -22,7 +22,7 @@
 #include <iremote_object.h>
 #include <message_parcel.h>
 
-#include "common/include/task_scheduler.h"
+#include <event_handler.h>
 #include "perform_reporter.h"
 #include "singleton_container.h"
 #include "window_manager_hilog.h"
@@ -72,7 +72,7 @@ bool ModalSystemUiExtension::CreateModalUIExtension(const AAFwk::Want& want, con
 
 ModalSystemUiExtension::DialogAbilityConnection::DialogAbilityConnection(const AAFwk::Want& want) : want_(want)
 {
-    taskScheduler_ = std::make_shared<TaskScheduler>("OS_ModalSystemUiExtension");
+    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::Create("OS_ModalSystemUiExtension"));
 }
 
 std::string ModalSystemUiExtension::DialogAbilityConnection::ToString(const AAFwk::Want& want)
@@ -106,7 +106,7 @@ void ModalSystemUiExtension::DialogAbilityConnection::ReportJsonStringParamsUsag
 {
     TLOGI(WmsLogTag::WMS_UIEXT, "Report json string params usage, bundleName:%{public}s, abilityName:%{public}s",
         bundleName.c_str(), abilityName.c_str());
-    taskScheduler_->PostAsyncTask([bundleName, abilityName]() {
+    handler_->PostTask([bundleName, abilityName]() {
         std::ostringstream oss;
         oss << "The uiextensionAbility is started by the modal system and uses the json string to transfer parameters";
         oss << ", bundleName: " << bundleName;
