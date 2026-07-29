@@ -53,6 +53,13 @@ void PictureInPictureManagerTest::SetUp()
 
 void PictureInPictureManagerTest::TearDown()
 {
+    PictureInPictureManager::windowToControllerMap_.clear();
+    PictureInPictureManager::autoStartControllerMap_.clear();
+    PictureInPictureManager::mainWindowToAutoStartControllersMap_.clear();
+    PictureInPictureManager::pipMultiConfig_.groups = {
+        { 1, { PiPTemplateType::VIDEO_PLAY, PiPTemplateType::VIDEO_CALL,
+               PiPTemplateType::VIDEO_MEETING, PiPTemplateType::VIDEO_LIVE }, 1 }
+    };
 }
 
 namespace {
@@ -107,6 +114,7 @@ HWTEST_F(PictureInPictureManagerTest, PictureInPictureController, TestSize.Level
     sptr<PipOption> option = new PipOption();
     sptr<PictureInPictureController> pipController =
         new PictureInPictureController(option, nullptr, 100, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::windowToControllerMap_.clear();
     ASSERT_FALSE(PictureInPictureManager::HasActiveController());
     PictureInPictureManager::RemovePipControllerInfo(200);
@@ -365,6 +373,44 @@ HWTEST_F(PictureInPictureManagerTest, DoRestore, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoCloseByMainWindowId
+ * @tc.desc: DoCloseByMainWindowId
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoCloseByMainWindowId, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController1 = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    ASSERT_NE(pipController1, nullptr);
+    pipController1->curState_ = PiPWindowState::STATE_STARTED;
+    pipController1->window_ = mw;
+    auto pipController2 = sptr<PictureInPictureController>::MakeSptr(option, mw, 100, nullptr);
+    ASSERT_NE(pipController2, nullptr);
+    pipController2->curState_ = PiPWindowState::STATE_STARTED;
+    pipController2->window_ = mw;
+    auto mw2 = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw2);
+    auto pipController3 = sptr<PictureInPictureController>::MakeSptr(option, mw2, 200, nullptr);
+    ASSERT_NE(pipController3, nullptr);
+    pipController3->curState_ = PiPWindowState::STATE_STARTED;
+    pipController3->window_ = mw2;
+    PictureInPictureManager::windowToControllerMap_.clear();
+    ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
+    PictureInPictureManager::PutPipControllerInfo(101, pipController1);
+    PictureInPictureManager::PutPipControllerInfo(102, pipController2);
+    PictureInPictureManager::PutPipControllerInfo(103, nullptr);
+    PictureInPictureManager::PutPipControllerInfo(201, pipController3);
+
+    PictureInPictureManager::DoCloseByMainWindowId(100);
+    ASSERT_EQ(pipController1->curState_, PiPWindowState::STATE_STOPPED);
+    ASSERT_EQ(pipController2->curState_, PiPWindowState::STATE_STOPPED);
+    ASSERT_EQ(pipController3->curState_, PiPWindowState::STATE_STARTED);
+}
+
+/**
  * @tc.name: DoClose
  * @tc.desc: DoClose
  * @tc.type: FUNC
@@ -400,6 +446,7 @@ HWTEST_F(PictureInPictureManagerTest, DoActionEvent, TestSize.Level1)
     ASSERT_NE(nullptr, option);
     auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::windowToControllerMap_.clear();
     ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
     std::string actionName = "test";
@@ -490,6 +537,7 @@ HWTEST_F(PictureInPictureManagerTest, DoCloseWithReason, TestSize.Level1)
     ASSERT_NE(nullptr, option);
     auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
     ASSERT_NE(pipController, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
     PictureInPictureManager::windowToControllerMap_.clear();
     ASSERT_EQ(false, PictureInPictureManager::HasActiveController());
     PictureInPictureManager::DoCloseWithReason(214, true, true, PiPStateChangeReason::REQUEST_DELETE);
@@ -504,6 +552,344 @@ HWTEST_F(PictureInPictureManagerTest, DoCloseWithReason, TestSize.Level1)
     PictureInPictureManager::PutPipControllerInfo(214, pipController);
     PictureInPictureManager::DoActionCloseByDumpster(214);
     PictureInPictureManager::RemovePipControllerInfo(214);
+}
+
+/**
+ * @tc.name: IsControllerStateActive
+ * @tc.desc: IsControllerStateActive - test all PiPWindowState branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, IsControllerStateActive, TestSize.Level1)
+{
+    ASSERT_FALSE(PictureInPictureManager::IsControllerStateActive(PiPWindowState::STATE_UNDEFINED));
+    ASSERT_TRUE(PictureInPictureManager::IsControllerStateActive(PiPWindowState::STATE_STARTING));
+    ASSERT_TRUE(PictureInPictureManager::IsControllerStateActive(PiPWindowState::STATE_STARTED));
+    ASSERT_TRUE(PictureInPictureManager::IsControllerStateActive(PiPWindowState::STATE_RESTORING));
+    ASSERT_FALSE(PictureInPictureManager::IsControllerStateActive(PiPWindowState::STATE_STOPPING));
+    ASSERT_FALSE(PictureInPictureManager::IsControllerStateActive(PiPWindowState::STATE_STOPPED));
+}
+
+/**
+ * @tc.name: GetCurrentWindowByMainWindowId
+ * @tc.desc: GetCurrentWindowByMainWindowId - found and not found cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, GetCurrentWindowByMainWindowId, TestSize.Level1)
+{
+    ASSERT_EQ(nullptr, PictureInPictureManager::GetCurrentWindowByMainWindowId(999));
+    
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    pipController->window_ = mw;
+    pipController->mainWindowId_ = 300;
+    PictureInPictureManager::windowToControllerMap_.clear();
+    PictureInPictureManager::PutPipControllerInfo(300, pipController);
+    auto result = PictureInPictureManager::GetCurrentWindowByMainWindowId(300);
+    ASSERT_EQ(mw.GetRefPtr(), result.GetRefPtr());
+    ASSERT_EQ(nullptr, PictureInPictureManager::GetCurrentWindowByMainWindowId(301));
+    PictureInPictureManager::RemovePipControllerInfo(300);
+}
+
+/**
+ * @tc.name: GetSameGroupWindowByMainWindowId
+ * @tc.desc: GetSameGroupWindowByMainWindowId - found and not found cases
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, GetSameGroupWindowByMainWindowId, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    pipController->window_ = mw;
+    pipController->mainWindowId_ = 400;
+    PictureInPictureManager::windowToControllerMap_.clear();
+    PictureInPictureManager::PutPipControllerInfo(400, pipController);
+    ASSERT_EQ(mw.GetRefPtr(),
+              PictureInPictureManager::GetSameGroupWindowByMainWindowId(400, PiPTemplateType::VIDEO_PLAY).GetRefPtr());
+    ASSERT_EQ(nullptr,
+              PictureInPictureManager::GetSameGroupWindowByMainWindowId(999, PiPTemplateType::VIDEO_PLAY).GetRefPtr());
+    PictureInPictureManager::RemovePipControllerInfo(400);
+}
+
+/**
+ * @tc.name: DoActionEventWithUnknownAction
+ * @tc.desc: DoActionEvent - action not found in PIP_ACTION_MAP
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoActionEventWithUnknownAction, TestSize.Level1)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::windowToControllerMap_.clear();
+    pipController->window_ = sptr<MockWindow>::MakeSptr();
+    PictureInPictureManager::PutPipControllerInfo(500, pipController);
+    std::string unknownAction = "unknown_action_xyz";
+    PictureInPictureManager::DoActionEvent(500, unknownAction, 0);
+    PictureInPictureManager::RemovePipControllerInfo(500);
+}
+
+/**
+ * @tc.name: DoActionEventWithControlEvent
+ * @tc.desc: DoActionEvent - trigger controller DoActionEvent with status
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoActionEventWithControlEvent, TestSize.Level1)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::windowToControllerMap_.clear();
+    pipController->window_ = sptr<MockWindow>::MakeSptr();
+    PictureInPictureManager::PutPipControllerInfo(501, pipController);
+    std::string actionName = "nextVideo";
+    PictureInPictureManager::DoActionEvent(501, actionName, 1);
+    PictureInPictureManager::RemovePipControllerInfo(501);
+}
+
+/**
+ * @tc.name: DoControlEvent
+ * @tc.desc: DoControlEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoControlEvent, TestSize.Level1)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::windowToControllerMap_.clear();
+    pipController->window_ = sptr<MockWindow>::MakeSptr();
+    PictureInPictureManager::PutPipControllerInfo(502, pipController);
+    PictureInPictureManager::DoControlEvent(502, PiPControlType::VIDEO_PLAY_PAUSE, PiPControlStatus::PLAY);
+    PictureInPictureManager::RemovePipControllerInfo(502);
+}
+
+/**
+ * @tc.name: PipSizeChange
+ * @tc.desc: PipSizeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, PipSizeChange, TestSize.Level1)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::windowToControllerMap_.clear();
+    pipController->window_ = sptr<MockWindow>::MakeSptr();
+    PictureInPictureManager::PutPipControllerInfo(503, pipController);
+    PictureInPictureManager::PipSizeChange(503, 1920.0, 1080.0, 1.0);
+    PictureInPictureManager::RemovePipControllerInfo(503);
+}
+
+/**
+ * @tc.name: AttachAutoStartControllerWithControllerPromoteFail
+ * @tc.desc: AttachAutoStartController - nullptr controller after promote
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, AttachAutoStartControllerWithControllerPromoteFail, TestSize.Level1)
+{
+    wptr<PictureInPictureControllerBase> invalidController;
+    PictureInPictureManager::AttachAutoStartController(0, invalidController);
+    ASSERT_TRUE(PictureInPictureManager::autoStartControllerMap_.empty());
+}
+
+/**
+ * @tc.name: AttachAutoStartControllerWithMaxCount
+ * @tc.desc: AttachAutoStartController - reach max count in group
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, AttachAutoStartControllerWithMaxCount, TestSize.Level1)
+{
+    PictureInPictureManager::autoStartControllerMap_.clear();
+    PictureInPictureManager::mainWindowToAutoStartControllersMap_.clear();
+    PictureInPictureManager::windowToControllerMap_.clear();
+    
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController1 = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController1, nullptr);
+    pipController1->mainWindowId_ = 600;
+    pipController1->handleId_ = 601;
+    
+    auto pipController2 = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController2, nullptr);
+    pipController2->mainWindowId_ = 600;
+    pipController2->handleId_ = 602;
+    
+    PictureInPictureManager::AttachAutoStartController(601, pipController1);
+    PictureInPictureManager::AttachAutoStartController(602, pipController2);
+    
+    PictureInPictureManager::autoStartControllerMap_.clear();
+    PictureInPictureManager::mainWindowToAutoStartControllersMap_.clear();
+}
+
+/**
+ * @tc.name: DetachAutoStartControllerWithNullPromote
+ * @tc.desc: DetachAutoStartController - nullptr after promote
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DetachAutoStartControllerWithNullPromote, TestSize.Level1)
+{
+    wptr<PictureInPictureControllerBase> invalidController;
+    PictureInPictureManager::DetachAutoStartController(0, invalidController);
+    ASSERT_TRUE(PictureInPictureManager::autoStartControllerMap_.empty());
+}
+
+/**
+ * @tc.name: IsActiveControllerWithPromoteFail
+ * @tc.desc: IsActiveController - nullptr after promote
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, IsActiveControllerWithPromoteFail, TestSize.Level1)
+{
+    wptr<PictureInPictureControllerBase> invalidController;
+    ASSERT_FALSE(PictureInPictureManager::IsActiveController(invalidController));
+}
+
+/**
+ * @tc.name: IsActiveControllerWithControllerInMap
+ * @tc.desc: IsActiveController - controller found in map but not active state
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, IsActiveControllerWithControllerInMap, TestSize.Level1)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STOPPED;
+    PictureInPictureManager::windowToControllerMap_.clear();
+    PictureInPictureManager::PutPipControllerInfo(700, pipController);
+    ASSERT_FALSE(PictureInPictureManager::IsActiveController(pipController));
+    PictureInPictureManager::RemovePipControllerInfo(700);
+}
+
+/**
+ * @tc.name: SetMultiPipConfig
+ * @tc.desc: SetMultiPipConfig and GetMultiPipConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, SetMultiPipConfig, TestSize.Level1)
+{
+    PiPMultiConfig config;
+    config.groups.clear();
+    PiPGroupConfig group;
+    group.groupId = 1;
+    group.types = { PiPTemplateType::VIDEO_PLAY };
+    group.maxCount = 2;
+    config.groups.push_back(group);
+    
+    PictureInPictureManager::SetMultiPipConfig(config);
+    const PiPMultiConfig& retrievedConfig = PictureInPictureManager::GetMultiPipConfig();
+    ASSERT_EQ(retrievedConfig.groups.size(), 1);
+    ASSERT_EQ(retrievedConfig.groups[0].groupId, 1);
+}
+
+/**
+ * @tc.name: IsTemplateTypeSupported
+ * @tc.desc: IsTemplateTypeSupported
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, IsTemplateTypeSupported, TestSize.Level1)
+{
+    ASSERT_TRUE(PictureInPictureManager::IsTemplateTypeSupported(PiPTemplateType::VIDEO_PLAY));
+    ASSERT_FALSE(PictureInPictureManager::IsTemplateTypeSupported(PiPTemplateType::VIDEO_DRIVE));
+}
+
+/**
+ * @tc.name: IsPipGroupLimitReached
+ * @tc.desc: IsPipGroupLimitReached
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, IsPipGroupLimitReached, TestSize.Level1)
+{
+    ASSERT_FALSE(PictureInPictureManager::IsPipGroupLimitReached(PiPTemplateType::VIDEO_PLAY));
+}
+
+/**
+ * @tc.name: IsPipGroupLimitReachedWithUnsupportedType
+ * @tc.desc: IsPipGroupLimitReached - unsupported template type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, IsPipGroupLimitReachedWithUnsupportedType, TestSize.Level1)
+{
+    ASSERT_FALSE(PictureInPictureManager::IsPipGroupLimitReached(PiPTemplateType::VIDEO_DRIVE));
+}
+
+/**
+ * @tc.name: UpdatePipGroupCountLockedWithNullController
+ * @tc.desc: UpdatePipGroupCountLocked - nullptr controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, UpdatePipGroupCountLockedWithNullController, TestSize.Level1)
+{
+    PictureInPictureManager::UpdatePipGroupCountLocked(nullptr, true);
+    PictureInPictureManager::UpdatePipGroupCountLocked(nullptr, false);
+}
+
+/**
+ * @tc.name: UpdatePipGroupCountLockedWithUnsupportedType
+ * @tc.desc: UpdatePipGroupCountLocked - template type not in any group
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, UpdatePipGroupCountLockedWithUnsupportedType, TestSize.Level1)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    PictureInPictureManager::UpdatePipGroupCountLocked(pipController, true);
+    PictureInPictureManager::UpdatePipGroupCountLocked(pipController, false);
+}
+
+/**
+ * @tc.name: HasActiveControllerWithDifferentStates
+ * @tc.desc: HasActiveController - test STATE_STOPPED (not active)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, HasActiveControllerWithDifferentStates, TestSize.Level1)
+{
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    pipController->curState_ = PiPWindowState::STATE_STOPPED;
+    PictureInPictureManager::windowToControllerMap_.clear();
+    PictureInPictureManager::PutPipControllerInfo(800, pipController);
+    ASSERT_FALSE(PictureInPictureManager::HasActiveController());
+    PictureInPictureManager::RemovePipControllerInfo(800);
+}
+
+/**
+ * @tc.name: DoCloseWithReasonByPriority
+ * @tc.desc: DoCloseWithReason - test byPriority=true branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(PictureInPictureManagerTest, DoCloseWithReasonByPriority, TestSize.Level1)
+{
+    auto mw = sptr<MockWindow>::MakeSptr();
+    ASSERT_NE(nullptr, mw);
+    auto option = sptr<PipOption>::MakeSptr();
+    ASSERT_NE(nullptr, option);
+    auto pipController = sptr<PictureInPictureController>::MakeSptr(option, nullptr, 100, nullptr);
+    ASSERT_NE(pipController, nullptr);
+    pipController->window_ = mw;
+    pipController->curState_ = PiPWindowState::STATE_STARTED;
+    PictureInPictureManager::windowToControllerMap_.clear();
+    PictureInPictureManager::PutPipControllerInfo(900, pipController);
+    PictureInPictureManager::DoCloseWithReason(900, true, true, PiPStateChangeReason::OTHER);
+    PictureInPictureManager::RemovePipControllerInfo(900);
 }
 } // namespace
 } // namespace Rosen

@@ -86,7 +86,7 @@ void AniFbWindowListener::OnFloatingBallStop() {OnFbListenerCallback(FloatingBal
 
 void AniFbWindowListener::OnDestroyEvent(const std::string& reason)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]called, onDestroyEvent, reason: %{public}s", reason.c_str());
+    TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]called, onDestoryEvent, reason: %{public}s", reason.c_str());
     OnDestroyCallback(reason);
 }
 
@@ -122,9 +122,9 @@ void AniFbWindowListener::OnFbListenerCallback(const FloatingBallState& state)
 
 void AniFbWindowListener::OnDestroyCallback(const std::string& reason)
 {
-    TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]called, onDestroyCallback, reason: %{public}s", reason.c_str());
+    TLOGI(WmsLogTag::WMS_SYSTEM, "[FB]called, onDestoryCallback, reason: %{public}s", reason.c_str());
     auto task = [self = weakRef_, vm = vm_, reason] () {
-        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[FB]AniFbWindowListener::onDestroyEvent");
+        HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "[FB]AniFbWindowListener::onDestoryEvent");
         // check Listener
         auto thisListener = self.promote();
         if (thisListener == nullptr || vm == nullptr) {
@@ -146,7 +146,7 @@ void AniFbWindowListener::OnDestroyCallback(const std::string& reason)
         TLOGE(WmsLogTag::DEFAULT, "[FB]get main event handler failed!");
         return;
     }
-    eventHandler_->PostTask(task, "AniFbWindowListener::onDestroyEvent", 0,
+    eventHandler_->PostTask(task, "AniFbWindowListener::onDestoryEvent", 0,
                             AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 } // namespace Rosen
