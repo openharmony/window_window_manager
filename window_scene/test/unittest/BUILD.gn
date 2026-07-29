@@ -176,7 +176,6 @@ test_external_deps = [
   "accessibility:accessibility_interface",
   "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
-  "cJSON:cjson",
   "ffrt:libffrt",
   "googletest:gmock",
   "googletest:gtest",
@@ -209,6 +208,7 @@ ohos_unittest("ws_ability_info_manager_test") {
     "bundle_framework:appexecfwk_core",
     "bundle_framework:libappexecfwk_common",
     "hilog:libhilog",
+    "cJSON:cjson",
   ]
 }
 
