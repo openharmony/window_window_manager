@@ -176,6 +176,7 @@ test_external_deps = [
   "accessibility:accessibility_interface",
   "bundle_framework:libappexecfwk_common",
   "c_utils:utils",
+  "cJSON:cjson",
   "ffrt:libffrt",
   "googletest:gmock",
   "googletest:gtest",
