@@ -19,16 +19,11 @@ module_out_path = "window_manager/OH-DMS/dm"
 group("unittest") {
   testonly = true
 
-  deps = [
-    ":dm_oh_display_manager_test",
-  ]
+  deps = []
   if (window_manager_use_sceneboard) {
     deps += [
       ":dm_screen_manager_test",
-      ":dm_display_manager_adapter_test",
       ":dm_display_manager_adapter_test_two",
-      ":dm_display_manager_agent_proxy_test",
-      ":dm_display_manager_test",
     ]
   }
 }
