@@ -566,8 +566,8 @@ void RootScene::AddRootScene(DisplayId displayId, wptr<Window> window)
 
 void RootScene::RemoveRootScene(DisplayId displayId)
 {
-    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     std::lock_guard<std::mutex> lock(rootSceneMapMutex_);
+    TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     auto iter = rootSceneMap_.find(displayId);
     if (iter == rootSceneMap_.end()) {
         TLOGE(WmsLogTag::WMS_FOCUS, "Can not find rootScene, displayId: %{public}" PRIu64, displayId);
