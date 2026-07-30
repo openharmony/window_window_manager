@@ -6453,7 +6453,7 @@ void SceneSessionManager::ReportMainWindowStateChange(const sptr<SceneSession>& 
         };
         OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(
             OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_WINDOW_STATE, value, payload);
-    }
+    });
 }
 
 WSErrorResult SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId)
