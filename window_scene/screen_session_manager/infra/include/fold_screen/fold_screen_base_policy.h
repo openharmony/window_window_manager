@@ -146,6 +146,9 @@ public:
     bool IsHoverBlockPid(const int32_t agentPid);
     bool GetLockDisplayStatus() const;
     virtual void PowerkeySetScreenActiveRect() {};
+    virtual bool CheckBackSelfNeedChange(FoldDisplayMode displayMode) {return true;};
+    void SetBackSelf(bool isBackSelf);
+    bool GetBackSelf();
     const std::map<FoldDisplayMode, RRect>& GetScreenActiveModeRectMap() const;
     void SetDeviceStatusAndParam(uint32_t deviceStatus);
 protected:
@@ -174,6 +177,7 @@ protected:
     mutable std::recursive_mutex displayModeMutex_;
     mutable std::mutex liveCreaseRegionMutex_;
     mutable std::mutex hoverBlockListMutex_;
+    mutable std::mutex displayBackSelfMutex_;
     FoldDisplayMode currentDisplayMode_ = FoldDisplayMode::UNKNOWN;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     FoldDisplayMode lastDisplayMode_ = FoldDisplayMode::UNKNOWN;
@@ -187,6 +191,7 @@ protected:
     std::map<FoldDisplayMode, RRect> screenActiveModeRectMap_ = {};
     std::vector<uint32_t> screenParams_ = {};
     std::vector<std::string> hoverBlockList_ = {};
+    bool isBackSelf_ = false;
 };
 } // namespace OHOS::Rosen
 #endif //OHOS_ROSEN_WINDOW_SCENE_FOLD_SCREEN_BASE_POLICY_H
