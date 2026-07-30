@@ -1985,7 +1985,7 @@ DisplayOrientation ScreenSession::CalcDeviceOrientationWithBounds(Rotation rotat
     if (foldDisplayMode == FoldDisplayMode::GLOBAL_FULL) {
         uint32_t temp = (static_cast<uint32_t>(rotation) + SECONDARY_ROTATION_270) % SECONDARY_ROTATION_MOD;
         rotation = static_cast<Rotation>(temp);
-    } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN) {
+    } else if (foldDisplayMode == FoldDisplayMode::UNKNOWN || !GetIsInternal()) {
         rotation = GetTargetRotationWithBounds(rotation, bounds, static_cast<uint32_t>(ROTATION_90));
     } else if (FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) {
         rotation = GetTargetRotationWithBounds(rotation, bounds, static_cast<uint32_t>(ROTATION_270));

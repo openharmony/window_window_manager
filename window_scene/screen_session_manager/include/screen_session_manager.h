@@ -691,6 +691,7 @@ public:
     void SetOnBootAnimation(const bool onBootAnimation);
     bool IsOnBootAnimation() const;
     void NotifyBootAnimationFinished() override;
+    bool IsSuperFoldMultiPadMode();
 
     int32_t CountRealPhysicalScreensNotInternal();
 
