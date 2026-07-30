@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
 #include <iservice_registry.h>
 #include <parameters.h>
 #include <refbase.h>
@@ -31,13 +30,15 @@
 #include "fold_screen_controller/fold_screen_controller_config.h"
 #include "screen_setting_helper.h"
 
-
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/dual_display_sensor_fold_state_manager.h"
 #include "fold_screen_controller/sensor_fold_state_manager/sensor_fold_state_manager.h"
 #include "fold_screen_state_internel.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_scene_config.h"
+#include "singleton.h"
+#include "singleton_container.h"
+
 #include "iremote_object.h"
 #include "window_manager_hilog.h"
 #include "dms_global_mutex.h"
@@ -62,24 +63,23 @@ constexpr int32_t HALL_THRESHOLD = 1;
 constexpr int32_t HALL_FOLDED_THRESHOLD = 0;
 constexpr float INWARD_FOLDED_LOWER_THRESHOLD = 10.0F;
 constexpr float INWARD_FOLDED_UPPER_THRESHOLD = 20.0F;
-constexpr float ANGLE_BUFFER = 0.001F;
 constexpr float HALL_ZERO_INVALID_POSTURE = 170.0F;
-constexpr uint32_t FULL_WAIT_TIMES = 300;
-std::mutex foldStatusChangeMutex_;
-std::condition_variable angleChangeCv_;
 constexpr float TENT_MODE_EXIT_MAX_THRESHOLD = 110.0F;
 constexpr int32_t TENT_MODE_OFF = 0;
 constexpr int32_t TENT_MODE_ON = 1;
+constexpr uint32_t FULL_WAIT_TIMES = 300;
+std::mutex foldStatusChangeMutex_;
+std::condition_variable angleChangeCv_;
 } // namespace
 
 DualDisplaySensorFoldStateManager::DualDisplaySensorFoldStateManager(
     const std::shared_ptr<TaskScheduler>& screenPowerTaskScheduler)
-    : screenPowerTaskScheduler_(screenPowerTaskScheduler), currentAngle_(0), currentHall_(0)
+    :screenPowerTaskScheduler_(screenPowerTaskScheduler)
 {
     ffrtQueue_ = std::make_shared<DMS::FfrtQueue>("DualDisplaySensorFoldStateManager");
     auto stringListConfig = ScreenSceneConfig::GetStringListConfig();
     if (stringListConfig.count("hallSwitchApp") != 0) {
-        hallSwitchPackageNameList_ = stringListConfig["hallSwitchApp"];
+        packageNames_ = stringListConfig["hallSwitchApp"];
     }
 }
 
@@ -95,13 +95,14 @@ void DualDisplaySensorFoldStateManager::UpdateHallSwitchAppInfo(FoldStatus foldS
 void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    currentAngle_.store(static_cast<int32_t>(angle));
+    currentAngle_ = angle;
     if (IsTentMode()) {
         return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
     }
     if (!CheckUpdateAngle(angle, hall)) {
         return;
     }
+
     {
         std::unique_lock<std::mutex> lock(foldStatusChangeMutex_);
         isInTask_.store(true);
@@ -118,19 +119,14 @@ void DualDisplaySensorFoldStateManager::HandleAngleChange(float angle, int hall,
 void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
     sptr<FoldScreenPolicy> foldScreenPolicy)
 {
-    TLOGI(WmsLogTag::DMS, "HandleHallChange angle: %{public}f, hall: %{public}d.", angle, hall);
-    currentHall_.store(static_cast<int32_t>(hall));
-    if (IsTentMode()) {
-        return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
-    }
     if (hall == HALL_THRESHOLD || angle < HALL_ZERO_INVALID_POSTURE) {
         {
             std::unique_lock<std::mutex> lock(foldStatusChangeMutex_);
             isInTask_.store(true);
         }
         angleChangeCv_.notify_one();
-        TLOGI(WmsLogTag::DMS,
-            "angle: %{public}f, hall: %{public}d. hall is threshold or sensor less than 170.", angle, hall);
+        TLOGI(WmsLogTag::DMS, "angle: %{public}f, hall: %{public}d. hall is threshold or sensor less than 170.",
+            angle, hall);
         HandleHallChangeInner(angle, hall, foldScreenPolicy);
         return;
     }
@@ -146,6 +142,7 @@ void DualDisplaySensorFoldStateManager::HandleHallChange(float angle, int hall,
             SensorReportTimeOutPro(angle, hall, foldScreenPolicy);
             return;
         }
+
         TLOGI(WmsLogTag::DMS, "taskDualChangeFoldStatus was notified and not change foldStatus by hall.");
     };
     ffrtQueue_->Submit(taskDualChangeFoldStatus);
@@ -185,9 +182,14 @@ void DualDisplaySensorFoldStateManager::SensorReportTimeOutPro(float angle, int 
 void DualDisplaySensorFoldStateManager::HandleHallChangeInner(float angle, int hall,
     const sptr<FoldScreenPolicy>& foldScreenPolicy)
 {
-    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD
-        && PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
-        if (std::count(hallSwitchPackageNameList_.begin(), hallSwitchPackageNameList_.end(),
+    TLOGI(WmsLogTag::DMS, "HandleHallChange angle: %{public}f, hall: %{public}d.", angle, hall);
+    currentHall_ = hall;
+    if (IsTentMode()) {
+        return TentModeHandleSensorChange(angle, hall, foldScreenPolicy);
+    }
+    if (applicationStateObserver_ != nullptr && hall == HALL_THRESHOLD &&
+        PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
+        if (std::count(packageNames_.begin(), packageNames_.end(),
             applicationStateObserver_->GetForegroundApp())) {
             isHallSwitchApp_ = false;
             return;
@@ -206,13 +208,13 @@ void DualDisplaySensorFoldStateManager::HandleHallChangeInner(float angle, int h
 
 bool DualDisplaySensorFoldStateManager::CheckUpdateAngle(float& angle, int hall)
 {
-    if (std::islessequal(angle, INWARD_FOLDED_THRESHOLD + ANGLE_BUFFER) && hall == HALL_THRESHOLD) {
+    if (std::islessequal(angle, INWARD_FOLDED_THRESHOLD) && hall == HALL_THRESHOLD) {
         return false;
     }
-    if (std::isgreaterequal(angle, HALL_ZERO_INVALID_POSTURE + ANGLE_BUFFER) && hall == HALL_FOLDED_THRESHOLD) {
+    if (std::isgreaterequal(angle, HALL_ZERO_INVALID_POSTURE) && hall == HALL_FOLDED_THRESHOLD) {
         return false;
     }
-    if (std::isless(angle, ANGLE_MIN_VAL + ANGLE_BUFFER)) {
+    if (std::isless(angle, ANGLE_MIN_VAL)) {
         return false;
     }
     if (hall == HALL_FOLDED_THRESHOLD) {
@@ -238,51 +240,41 @@ void DualDisplaySensorFoldStateManager::HandleAngleChangeInTask(float angle, int
 FoldStatus DualDisplaySensorFoldStateManager::GetNextFoldState(float angle, int hall)
 {
     FoldStatus state = GetCurrentState();
-
-    // EXPAND
-    if (std::isgreaterequal(angle, INWARD_EXPAND_THRESHOLD + ANGLE_BUFFER)) {
+    if (std::isgreaterequal(angle, INWARD_EXPAND_THRESHOLD)) {
         state = FoldStatus::EXPAND;
     }
-    // FOLDED
-    if (std::islessequal(angle, INWARD_FOLDED_LOWER_THRESHOLD + ANGLE_BUFFER)) {
+    if (std::islessequal(angle, INWARD_FOLDED_LOWER_THRESHOLD)) {
         state = FoldStatus::FOLDED;
     }
-    // HALF_FOLD
     if (isHallSwitchApp_) {
-        ProcessHalfFoldState(state, angle, INWARD_FOLDED_UPPER_THRESHOLD, INWARD_HALF_FOLDED_MAX_THRESHOLD);
+        if (std::isgreaterequal(angle, INWARD_FOLDED_UPPER_THRESHOLD)
+            && std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD)) {
+            isHallSwitchApp_ = true;
+            return FoldStatus::HALF_FOLD;
+        }
     } else {
-        ProcessHalfFoldState(state, angle, INWARD_HALF_FOLDED_MIN_THRESHOLD, INWARD_HALF_FOLDED_MAX_THRESHOLD);
+        if (std::isgreaterequal(angle, INWARD_HALF_FOLDED_MIN_THRESHOLD)
+            && std::islessequal(angle, INWARD_HALF_FOLDED_MAX_THRESHOLD)) {
+            return FoldStatus::HALF_FOLD;
+        }
     }
     return state;
-}
-
-void DualDisplaySensorFoldStateManager::ProcessHalfFoldState(FoldStatus& state, float angle,
-    float halfFoldMinThreshold, float halfFoldMaxThreshold)
-{
-    if (std::isgreaterequal(angle, halfFoldMinThreshold + ANGLE_BUFFER)
-        && std::islessequal(angle, halfFoldMaxThreshold + ANGLE_BUFFER)) {
-        state = FoldStatus::HALF_FOLD;
-    }
 }
 
 void DualDisplaySensorFoldStateManager::RegisterApplicationStateObserver()
 {
     applicationStateObserver_ = new (std::nothrow) ApplicationStateObserver();
-    if (applicationStateObserver_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "applicationStateObserver_ is nullptr.");
-        return;
-    }
     auto appMgrClient_ = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient_ == nullptr) {
         TLOGE(WmsLogTag::DMS, "appMgrClient_ is nullptr.");
-        return;
-    }
-    int32_t flag =
-        appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, hallSwitchPackageNameList_);
-    if (flag != ERR_OK) {
-        TLOGE(WmsLogTag::DMS, "Register app state listener failed, flag = %{public}d", flag);
     } else {
-        TLOGI(WmsLogTag::DMS, "Register app state listener success.");
+        auto flag = static_cast<int32_t>(
+            appMgrClient_->RegisterApplicationStateObserver(applicationStateObserver_, packageNames_));
+        if (flag != ERR_OK) {
+            TLOGE(WmsLogTag::DMS, "Register app debug listener failed.");
+        } else {
+            TLOGI(WmsLogTag::DMS, "Register app debug listener success.");
+        }
     }
 }
 
@@ -292,7 +284,6 @@ void ApplicationStateObserver::OnForegroundApplicationChanged(const AppStateData
 {
     if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND)) {
         foregroundBundleName_ = appStateData.bundleName;
-        TLOGI(WmsLogTag::DMS, "APP_STATE_FOREGROUND, packageName= %{public}s", foregroundBundleName_.c_str());
     }
     if (appStateData.state == static_cast<int32_t>(ApplicationState::APP_STATE_BACKGROUND)
         && foregroundBundleName_.compare(appStateData.bundleName) == 0) {
@@ -315,16 +306,10 @@ void DualDisplaySensorFoldStateManager::HandleTentChange(int tentType,
     } else {
         TLOGW(WmsLogTag::DMS, "tent mode read setting wallpaperAodDisplay failed ");
     }
-    if (isopen == 1) {
-        HandleTentChangeInner(tentType, foldScreenPolicy, hall);
+    if (isopen == 0) {
+        TLOGI(WmsLogTag::DMS, "tent mode wallpaperAodDisplay close, return");
+        return;
     }
-}
-
-void DualDisplaySensorFoldStateManager::HandleTentChangeInner(int tentType,
-    sptr<FoldScreenPolicy> foldScreenPolicy, int32_t hall)
-{
-    float currentAngle = static_cast<float>(currentAngle_.load());
-    int32_t currentHall = currentHall_.load();
     if (tentType == tentModeType_) {
         TLOGI(WmsLogTag::DMS, "Repeat reporting tent mode:%{public}d, no processing", tentModeType_);
         return;
@@ -336,19 +321,19 @@ void DualDisplaySensorFoldStateManager::HandleTentChangeInner(int tentType,
     SetTentMode(tentType);
     if (tentType == TENT_MODE_ON) {
         ReportTentStatusChange(ReportDualTentModeStatus::NORMAL_ENTER_TENT_MODE);
-        HandleSensorChange(FoldStatus::FOLDED, currentAngle, foldScreenPolicy);
+        HandleSensorChange(FoldStatus::FOLDED, currentAngle_, foldScreenPolicy);
         foldScreenPolicy->ChangeOnTentMode(FoldStatus::FOLDED);
     } else if (tentType == TENT_MODE_OFF) {
         if (hall == HALL_FOLDED_THRESHOLD) {
-            currentAngle = ANGLE_MIN_VAL;
+            currentAngle_ = ANGLE_MIN_VAL;
         }
         FoldStatus nextState = FoldStatus::UNKNOWN;
         if (hall == -1) {
-            nextState = GetNextFoldState(currentAngle, currentHall);
+            nextState = GetNextFoldState(currentAngle_, currentHall_);
         } else {
-            nextState = GetNextFoldState(currentAngle, hall);
+            nextState = GetNextFoldState(currentAngle_, hall);
         }
-        HandleSensorChange(nextState, currentAngle, foldScreenPolicy);
+        HandleSensorChange(nextState, currentAngle_, foldScreenPolicy);
         ReportTentStatusChange(ReportDualTentModeStatus::NORMAL_EXIT_TENT_MODE);
         foldScreenPolicy->ChangeOffTentMode();
     }

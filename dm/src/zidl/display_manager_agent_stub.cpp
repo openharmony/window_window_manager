@@ -36,134 +36,52 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
     }
     switch (code) {
         case TRANS_ID_NOTIFY_DISPLAY_POWER_EVENT: {
-            DisplayPowerEvent event = static_cast<DisplayPowerEvent>(data.ReadUint32());
-            EventStatus status = static_cast<EventStatus>(data.ReadUint32());
-            NotifyDisplayPowerEvent(event, status);
-            break;
+            return ProcNotifyDisplayPowerEvent(data);
         }
         case TRANS_ID_NOTIFY_DISPLAY_STATE_CHANGED: {
-            DisplayState state = static_cast<DisplayState>(data.ReadUint32());
-            DisplayId id = static_cast<DisplayId>(data.ReadUint64());
-            NotifyDisplayStateChanged(id, state);
-            break;
+            return ProcNotifyDisplayStateChanged(data);
         }
         case TRANS_ID_ON_SCREEN_CONNECT: {
-            sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
-            OnScreenConnect(screenInfo);
-            break;
+            return ProcScreenConnect(data);
         }
         case TRANS_ID_ON_SCREEN_DISCONNECT: {
-            ScreenId screenId;
-            if (!data.ReadUint64(screenId)) {
-                TLOGE(WmsLogTag::DMS, "Read ScreenId failed");
-                return -1;
-            }
-            OnScreenDisconnect(screenId);
-            break;
+            return ProcScreenDisconnect(data);
         }
         case TRANS_ID_ON_SCREEN_CHANGED: {
-            sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
-            uint32_t event;
-            if (!data.ReadUint32(event)) {
-                TLOGE(WmsLogTag::DMS, "Read ScreenChangeEvent failed");
-                return -1;
-            }
-            OnScreenChange(screenInfo, static_cast<ScreenChangeEvent>(event));
-            break;
+            return ProcScreenChanged(data);
         }
         case TRANS_ID_ON_SCREENGROUP_CHANGED: {
-            std::string trigger;
-            if (!data.ReadString(trigger)) {
-                TLOGE(WmsLogTag::DMS, "Read trigger failed");
-                return -1;
-            }
-            std::vector<sptr<ScreenInfo>> screenInfos;
-            if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
-                TLOGE(WmsLogTag::DMS, "Read ScreenInfo failed");
-                return -1;
-            }
-            uint32_t event;
-            if (!data.ReadUint32(event)) {
-                TLOGE(WmsLogTag::DMS, "Read ScreenChangeEvent failed");
-                return -1;
-            }
-            OnScreenGroupChange(trigger, screenInfos, static_cast<ScreenGroupChangeEvent>(event));
-            break;
+            return ProcScreenGroupChanged(data);
         }
         case TRANS_ID_ON_DISPLAY_CONNECT: {
-            sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
-            OnDisplayCreate(displayInfo);
-            break;
+            return ProcDisplayConnect(data);
         }
         case TRANS_ID_ON_DISPLAY_DISCONNECT: {
-            DisplayId displayId;
-            if (!data.ReadUint64(displayId)) {
-                TLOGE(WmsLogTag::DMS, "Read DisplayId failed");
-                return -1;
-            }
-            OnDisplayDestroy(displayId);
-            break;
+            return ProcDisplayDisconnect(data);
         }
         case TRANS_ID_ON_DISPLAY_CHANGED: {
-            sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
-            uint32_t event;
-            if (!data.ReadUint32(event)) {
-                TLOGE(WmsLogTag::DMS, "Read DisplayChangeEvent failed");
-                return -1;
-            }
-            OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
-            break;
+            return ProcDisplayChanged(data);
         }
         case TRANS_ID_ON_SCREEN_SHOT: {
-            sptr<ScreenshotInfo> snapshotInfo = data.ReadParcelable<ScreenshotInfo>();
-            OnScreenshot(snapshotInfo);
-            break;
+            return ProcScreenShot(data);
         }
         case TRANS_ID_ON_PRIVATE_WINDOW: {
-            bool hasPrivate = data.ReadBool();
-            NotifyPrivateWindowStateChanged(hasPrivate);
-            break;
+            return ProcPrivateWindow(data);
         }
         case TRANS_ID_ON_PRIVATE_WINDOW_LIST: {
             return ProcPrivateWindowList(data);
         }
         case TRANS_ID_ON_FOLD_STATUS_CHANGED: {
-            uint32_t foldStatus;
-            if (!data.ReadUint32(foldStatus)) {
-                TLOGE(WmsLogTag::DMS, "Read FoldStatus failed");
-                return -1;
-            }
-            NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
-            break;
+            return ProcFoldStatusChanged(data);
         }
         case TRANS_ID_ON_DISPLAY_CHANGE_INFO_CHANGED: {
-            sptr<DisplayChangeInfo> info;
-            info = DisplayChangeInfo::Unmarshalling(data);
-            if (!info) {
-                TLOGE(WmsLogTag::DMS, "Read DisplayChangeInfo failed");
-                return -1;
-            }
-            NotifyDisplayChangeInfoChanged(info);
-            break;
+            return ProcDisplayChangeInfoChanged(data);
         }
         case TRANS_ID_ON_DISPLAY_MODE_CHANGED: {
-            uint32_t displayMode;
-            if (!data.ReadUint32(displayMode)) {
-                TLOGE(WmsLogTag::DMS, "Read FoldDisplayMode failed");
-                return -1;
-            }
-            NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));
-            break;
+            return ProcDisplayModechanged(data);
         }
         case TRANS_ID_ON_AVAILABLE_AREA_CHANGED: {
-            DMRect rect;
-            DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
-            rect.posX_ = data.ReadInt32();
-            rect.posY_ = data.ReadInt32();
-            rect.width_ = data.ReadUint32();
-            rect.height_ = data.ReadUint32();
-            NotifyAvailableAreaChanged(rect, displayId);
-            break;
+            return ProcAvailableAreaChanged(data);
         }
         case TRANS_ID_ON_FOLD_ANGLE_CHANGED: {
             return ProcFoldAngleChanged(data);
@@ -172,9 +90,7 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             return ProcCaptureStatusChanged(data);
         }
         case TRANS_ID_ON_SCREEN_MAGNETIC_STATE_CHANGED: {
-            bool isMagneticState = data.ReadBool();
-            NotifyScreenMagneticStateChanged(isMagneticState);
-            break;
+            return ProcScreenMagneticStatechanged(data);
         }
         case TRANS_ID_ON_BRIGHTNESS_INFO_CHANGED: {
             DisplayId id;
@@ -206,6 +122,15 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
             NotifyAbnormalScreenConnectChange(screenId);
             break;
         }
+        case TRANS_ID_ON_RECORDING_DISPLAY_CHANGED: {
+            std::vector<DisplayId> displayIds;
+            if (!data.ReadUInt64Vector(&displayIds)) {
+                TLOGE(WmsLogTag::DMS, "Read screenId failed");
+                return -1;
+            }
+            NotifyRecordingDisplayChanged(displayIds);
+            break;
+        }
         case TRANS_ID_ON_DISPLAY_ATTRIBUTE_CHANGED: {
             sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
             std::vector<std::string> attributes;
@@ -214,15 +139,6 @@ int32_t DisplayManagerAgentStub::OnRemoteRequest(uint32_t code, MessageParcel& d
                 return -1;
             }
             OnDisplayAttributeChange(displayInfo, attributes);
-            break;
-        }
-        case TRANS_ID_ON_RECORDING_DISPLAY_CHANGED: {
-            std::vector<DisplayId> displayIds;
-            if (!data.ReadUInt64Vector(&displayIds)) {
-                TLOGE(WmsLogTag::DMS, "Read screenId failed");
-                return -1;
-            }
-            NotifyRecordingDisplayChanged(displayIds);
             break;
         }
         default: {
@@ -251,12 +167,176 @@ int32_t DisplayManagerAgentStub::ProcCaptureStatusChanged(MessageParcel& data)
     return 0;
 }
 
+int32_t DisplayManagerAgentStub::ProcNotifyDisplayPowerEvent(MessageParcel& data)
+{
+    DisplayPowerEvent event = static_cast<DisplayPowerEvent>(data.ReadUint32());
+    EventStatus status = static_cast<EventStatus>(data.ReadUint32());
+    NotifyDisplayPowerEvent(event, status);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcNotifyDisplayStateChanged(MessageParcel& data)
+{
+    DisplayState state = static_cast<DisplayState>(data.ReadUint32());
+    DisplayId id = static_cast<DisplayId>(data.ReadUint64());
+    NotifyDisplayStateChanged(id, state);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcScreenConnect(MessageParcel& data)
+{
+    sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
+    OnScreenConnect(screenInfo);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcScreenDisconnect(MessageParcel& data)
+{
+    ScreenId screenId;
+    if (!data.ReadUint64(screenId)) {
+        TLOGE(WmsLogTag::DMS, "Read ScreenId failed");
+        return -1;
+    }
+    OnScreenDisconnect(screenId);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcScreenChanged(MessageParcel& data)
+{
+    sptr<ScreenInfo> screenInfo = data.ReadParcelable<ScreenInfo>();
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        TLOGE(WmsLogTag::DMS, "Read ScreenChangeEvent failed");
+        return -1;
+    }
+    OnScreenChange(screenInfo, static_cast<ScreenChangeEvent>(event));
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcScreenGroupChanged(MessageParcel& data)
+{
+    std::string trigger;
+    if (!data.ReadString(trigger)) {
+        TLOGE(WmsLogTag::DMS, "Read trigger failed");
+        return -1;
+    }
+    std::vector<sptr<ScreenInfo>> screenInfos;
+    if (!MarshallingHelper::UnmarshallingVectorParcelableObj<ScreenInfo>(data, screenInfos)) {
+        TLOGE(WmsLogTag::DMS, "Read ScreenInfo failed");
+        return -1;
+    }
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        TLOGE(WmsLogTag::DMS, "Read ScreenChangeEvent failed");
+        return -1;
+    }
+    OnScreenGroupChange(trigger, screenInfos, static_cast<ScreenGroupChangeEvent>(event));
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcDisplayConnect(MessageParcel& data)
+{
+    sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
+    OnDisplayCreate(displayInfo);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcDisplayDisconnect(MessageParcel& data)
+{
+    DisplayId displayId;
+    if (!data.ReadUint64(displayId)) {
+        TLOGE(WmsLogTag::DMS, "Read DisplayId failed");
+        return -1;
+    }
+    OnDisplayDestroy(displayId);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcDisplayChanged(MessageParcel& data)
+{
+    sptr<DisplayInfo> displayInfo = data.ReadParcelable<DisplayInfo>();
+    uint32_t event;
+    if (!data.ReadUint32(event)) {
+        TLOGE(WmsLogTag::DMS, "Read DisplayChangeEvent failed");
+        return -1;
+    }
+    OnDisplayChange(displayInfo, static_cast<DisplayChangeEvent>(event));
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcScreenShot(MessageParcel& data)
+{
+    sptr<ScreenshotInfo> snapshotInfo = data.ReadParcelable<ScreenshotInfo>();
+    OnScreenshot(snapshotInfo);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcPrivateWindow(MessageParcel& data)
+{
+    bool hasPrivate = data.ReadBool();
+    NotifyPrivateWindowStateChanged(hasPrivate);
+    return 0;
+}
+
 int32_t DisplayManagerAgentStub::ProcPrivateWindowList(MessageParcel& data)
 {
     DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
     std::vector<std::string> privacyWindowList;
     data.ReadStringVector(&privacyWindowList);
     NotifyPrivateStateWindowListChanged(displayId, privacyWindowList);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcFoldStatusChanged(MessageParcel& data)
+{
+    uint32_t foldStatus;
+    if (!data.ReadUint32(foldStatus)) {
+        TLOGE(WmsLogTag::DMS, "Read FoldStatus failed");
+        return -1;
+    }
+    NotifyFoldStatusChanged(static_cast<FoldStatus>(foldStatus));
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcDisplayChangeInfoChanged(MessageParcel& data)
+{
+    sptr<DisplayChangeInfo> info;
+    info = DisplayChangeInfo::Unmarshalling(data);
+    if (!info) {
+        TLOGE(WmsLogTag::DMS, "Read DisplayChangeInfo failed");
+        return -1;
+    }
+    NotifyDisplayChangeInfoChanged(info);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcDisplayModechanged(MessageParcel& data)
+{
+    uint32_t displayMode;
+    if (!data.ReadUint32(displayMode)) {
+        TLOGE(WmsLogTag::DMS, "Read FoldDisplayMode failed");
+        return -1;
+    }
+    NotifyDisplayModeChanged(static_cast<FoldDisplayMode>(displayMode));
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcAvailableAreaChanged(MessageParcel& data)
+{
+    DMRect rect;
+    DisplayId displayId = static_cast<DisplayId>(data.ReadUint64());
+    rect.posX_ = data.ReadInt32();
+    rect.posY_ = data.ReadInt32();
+    rect.width_ = data.ReadUint32();
+    rect.height_ = data.ReadUint32();
+    NotifyAvailableAreaChanged(rect, displayId);
+    return 0;
+}
+
+int32_t DisplayManagerAgentStub::ProcScreenMagneticStatechanged(MessageParcel& data)
+{
+    bool isMagneticState = data.ReadBool();
+    NotifyScreenMagneticStateChanged(isMagneticState);
     return 0;
 }
 } // namespace OHOS::Rosen

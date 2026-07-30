@@ -15,7 +15,6 @@
 
 #include "screen_sensor_connector.h"
 #include "screen_session_manager.h"
-#include "dms_global_mutex.h"
 #include <chrono>
 #include <securec.h>
 #include <parameters.h>
@@ -242,7 +241,7 @@ void MotionSubscriber::UnsubscribeMotionSensor()
 {
     return;
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS, "dms: Unsubscribe motion sensor");
+        TLOGI(WmsLogTag::DMS, "start");
         return;
     }
 
@@ -284,7 +283,6 @@ void RotationMotionEventCallback(const MotionSensorEvent& motionData)
             break;
         }
     }
-    DmUtils::HoldLock callbackLock;
     ScreenRotationProperty::HandleSensorEventInput(motionRotation);
 }
 
@@ -306,7 +304,7 @@ void MotionTentSubscriber::SubscribeMotionSensor()
 void MotionTentSubscriber::UnsubscribeMotionSensor()
 {
     if (!isMotionSensorSubscribed_) {
-        TLOGI(WmsLogTag::DMS, "dms: Unsubscribe tent motion sensor");
+        TLOGI(WmsLogTag::DMS, "start");
         return;
     }
     

@@ -78,6 +78,15 @@ void SecondaryFoldSensorManager::SetSensorFoldStateManager(sptr<SensorFoldStateM
     sensorFoldStateManager_ = sensorFoldStateManager;
 }
 
+void SecondaryFoldSensorManager::SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler)
+{
+    if (scheduler == nullptr) {
+        TLOGE(WmsLogTag::DMS, "scheduler is nullptr.");
+        return;
+    }
+    sensorFoldStateManager_->SetTaskScheduler(scheduler);
+}
+
 void SecondaryFoldSensorManager::RegisterPostureCallback()
 {
     int32_t ret = DMS::ScreenSensorMgr::GetInstance().SubscribeSensorCallback(
@@ -90,7 +99,7 @@ void SecondaryFoldSensorManager::RegisterPostureCallback()
 
 void SecondaryFoldSensorManager::UnRegisterPostureCallback()
 {
-    int32_t ret = DMS::ScreenSensorMgr::GetInstance().UnSubscribeSensorCallback(SENSOR_TYPE_ID_POSTURE);
+    int ret = DMS::ScreenSensorMgr::GetInstance().UnSubscribeSensorCallback(SENSOR_TYPE_ID_POSTURE);
     if (ret == SENSOR_SUCCESS) {
         registerPosture_ = false;
         TLOGI(WmsLogTag::DMS, "success.");
@@ -101,8 +110,11 @@ void SecondaryFoldSensorManager::UnRegisterPostureCallback()
 
 void SecondaryFoldSensorManager::RegisterHallCallback()
 {
-    DMS::ScreenSensorMgr::GetInstance().SubscribeSensorCallback(
+    int32_t ret = DMS::ScreenSensorMgr::GetInstance().SubscribeSensorCallback(
         SENSOR_TYPE_ID_HALL_EXT, POSTURE_INTERVAL, SecondarySensorHallDataCallbackExt);
+    if (ret == SENSOR_SUCCESS) {
+        TLOGI(WmsLogTag::DMS, "RegisterHallCallback: success.");
+    }
 }
 
 void SecondaryFoldSensorManager::UnRegisterHallCallback()
@@ -246,7 +258,8 @@ bool SecondaryFoldSensorManager::GetHallInner(const SensorEvent * const event, u
         TLOGW(WmsLogTag::DMS, "SensorEvent dataLen less than hall data size.");
         return false;
     }
-    DMS::ExtHallData *extHallData = reinterpret_cast<DMS::ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
+    DMS::ExtHallData *extHallData =
+        reinterpret_cast<DMS::ExtHallData *>(event[SENSOR_EVENT_FIRST_DATA].data);
     uint16_t flag = static_cast<uint16_t>((*extHallData).flag);
     if (!(flag & (1 << HALL_B_C_COLUMN_ORDER)) || !(flag & (1 << HALL_A_B_COLUMN_ORDER))) {
         TLOGW(WmsLogTag::DMS, "not support Extend Hall.");

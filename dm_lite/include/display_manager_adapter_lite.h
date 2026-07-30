@@ -19,9 +19,6 @@
 #include <map>
 #include <mutex>
 
-#include <iremote_stub.h>
-#include <iremote_proxy.h>
-#include <iremote_object.h>
 #include "display_lite.h"
 #include "display_manager_lite_proxy.h"
 #include "dm_common.h"
@@ -29,20 +26,6 @@
 #include "zidl/idisplay_manager_agent.h"
 
 namespace OHOS::Rosen {
-
-class IReverseDeathAgent : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ReverseDeathAgent");
-};
-
-class ReverseDeathStub : public IRemoteStub<IReverseDeathAgent> {
-public:
-};
-
-class ReverseDeathProxy : public IRemoteProxy<IReverseDeathAgent> {
-public:
-};
-
 class BaseAdapterLite {
 public:
     virtual ~BaseAdapterLite();
@@ -53,13 +36,11 @@ public:
     virtual void Clear();
     virtual bool IsScreenLessDevice();
 protected:
-    virtual bool InitDMSProxy();
-    virtual bool RegisterClientDeathListener();
+    bool InitDMSProxy();
     std::recursive_mutex mutex_;
     sptr<DisplayManagerLiteProxy> displayManagerServiceProxy_ = nullptr;
     sptr<IRemoteObject::DeathRecipient> dmsDeath_ = nullptr;
     bool isProxyValid_ { false };
-    sptr<ReverseDeathStub> reverseDeathStub_ = nullptr;
 };
 
 class DMSDeathRecipientLite : public IRemoteObject::DeathRecipient {
@@ -79,6 +60,7 @@ public:
     virtual FoldStatus GetFoldStatus();
     virtual FoldDisplayMode GetFoldDisplayMode();
     virtual void SetFoldDisplayMode(const FoldDisplayMode);
+    virtual void SetFoldDisplayModeAsync(const FoldDisplayMode);
     virtual sptr<DisplayInfo> GetDisplayInfo(DisplayId displayId);
     virtual sptr<CutoutInfo> GetCutoutInfo(DisplayId displayId);
     virtual VirtualScreenFlag GetVirtualScreenFlag(ScreenId screenId);
@@ -106,8 +88,6 @@ public:
         const sptr<IDisplayManagerAgent>& displayManagerAgent);
 private:
     static inline SingletonDelegator<DisplayManagerAdapterLite> delegator;
-protected:
-    bool RegisterClientDeathListener() override;
 };
 
 class ScreenManagerAdapterLite : public BaseAdapterLite {

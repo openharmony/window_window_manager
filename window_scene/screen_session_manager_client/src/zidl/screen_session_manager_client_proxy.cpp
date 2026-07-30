@@ -846,7 +846,7 @@ void ScreenSessionManagerClientProxy::SetVirtualPixelRatioSystem(ScreenId screen
 
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
+    MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
@@ -1017,7 +1017,7 @@ void ScreenSessionManagerClientProxy::OnSecondaryReflexionChanged(ScreenId scree
     }
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
@@ -1026,8 +1026,8 @@ void ScreenSessionManagerClientProxy::OnSecondaryReflexionChanged(ScreenId scree
         TLOGE(WmsLogTag::DMS, "Write screenId failed");
         return;
     }
-    if (!data.WriteBool(isSecondaryReflexion)) {
-        TLOGE(WmsLogTag::DMS, "Write isSecondaryReflexion failed");
+    if (!data.WriteUint32(static_cast<uint32_t>(isSecondaryReflexion))) {
+        TLOGE(WmsLogTag::DMS, "Write secondaryReflexion failed");
         return;
     }
     if (remote->SendRequest(
@@ -1083,7 +1083,7 @@ bool ScreenSessionManagerClientProxy::OnExtendDisplayNodeChange(ScreenId firstId
         return false;
     }
     if (!data.WriteUint64(firstId) || !data.WriteUint64(secondId)) {
-        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
@@ -1112,7 +1112,7 @@ bool ScreenSessionManagerClientProxy::OnMainDisplayNodeChange(ScreenId mainScree
         return false;
     }
     if (!data.WriteUint64(mainScreenId) || !data.WriteUint64(extendScreenId) || !data.WriteUint64(extendRSId)) {
-        TLOGE(WmsLogTag::DMS, "Write screenId failed");
+        TLOGE(WmsLogTag::DMS, "Write screenId/virtualPixelRatio failed");
         return false;
     }
     if (remote->SendRequest(static_cast<uint32_t>(
@@ -1128,7 +1128,7 @@ void ScreenSessionManagerClientProxy::SetScreenCombination(ScreenId mainScreenId
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return;
     }
     MessageParcel data;
@@ -1146,7 +1146,7 @@ void ScreenSessionManagerClientProxy::SetScreenCombination(ScreenId mainScreenId
         TLOGE(WmsLogTag::DMS, "Write extend screenId failed");
         return;
     }
-    if (!data.WriteUint32(static_cast<uint32_t>(extendCombination))) {
+    if (!data.WriteUint64(static_cast<uint32_t>(extendCombination))) {
         TLOGE(WmsLogTag::DMS, "Write combination failed");
         return;
     }
@@ -1253,7 +1253,7 @@ void ScreenSessionManagerClientProxy::OnAnimationFinish()
         return;
     }
 }
-
+ 
 void ScreenSessionManagerClientProxy::SetInternalClipToBounds(ScreenId screenId, bool clipToBounds)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -1261,7 +1261,7 @@ void ScreenSessionManagerClientProxy::SetInternalClipToBounds(ScreenId screenId,
         TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return;
     }
-
+ 
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);

@@ -39,8 +39,6 @@ public:
     bool UnRegisterLowTempSubscriber();
     bool RegisterUserSwitchedSubscriber();
     bool UnRegisterUserSwitchedSubscriber();
-    bool RegisterOnehopDeviceDownSubscriber();
-    bool UnRegisterOnehopDeviceDownSubscriber();
 
 private:
     explicit ScreenSessionPublish() = default;
@@ -62,7 +60,6 @@ private:
     static std::map<std::string, sptr<EventFwk::Want>> cesWantMap_;
     std::shared_ptr<EventSubscriber> subscriber_ = nullptr;
     std::shared_ptr<EventSubscriber> userSwitchedSubscriber_ = nullptr;
-    std::shared_ptr<EventSubscriber> oneHopDeviceDownSubscriber_ = nullptr;
 };
 } // namespace OHOS::Rosen
 
