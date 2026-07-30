@@ -3241,6 +3241,20 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
         getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_PAGE_ROTATION_TIMEOUT);
     OrientationInfo info = infoResult.first;
     OrientationInfo currentInfo = infoResult.second;
+    Rect displayRect = { 0, 0, static_cast<uint32_t>(displayInfo->GetWidth()),
+        static_cast<uint32_t>(displayInfo->GetHeight()) };
+    bool isTargetInfoInDisplay = info.rect.IsInsideOf(displayRect);
+    bool isTargetFullDisplay = info.rect == displayRect;
+    bool isCurrentInfoStale = !currentInfo.rect.IsInsideOf(displayRect) ||
+        (isTargetFullDisplay && currentInfo.rect != displayRect && currentInfo.rotation != info.rotation);
+    if (isCurrentInfoStale && isTargetInfoInDisplay) {
+        TLOGW(WmsLogTag::WMS_ROTATION,
+            "GetTargetOrientationConfigInfo: current info is stale, win:%{public}u, "
+            "displayRect:%{public}s, target[%{public}u,%{public}s], current[%{public}u,%{public}s]",
+            GetWindowId(), displayRect.ToString().c_str(), info.rotation, info.rect.ToString().c_str(),
+            currentInfo.rotation, currentInfo.rect.ToString().c_str());
+        info = currentInfo;
+    }
     //Handle timeout gracefully:if rect is empty, use display size as fallback.
     if (info.rect.IsUninitializedRect() && displayInfo !=nullptr) {
         TLOGW(WmsLogTag::WMS_ROTATION, "GetTargetOrientationResult timeout, using display size as fallback");
