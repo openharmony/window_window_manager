@@ -26,7 +26,6 @@
 #include "display_change_info.h"
 #include "dm_common.h"
 #include "session/screen/include/screen_session.h"
-#include "session_option.h"
 #include "ffrt_queue_helper.h"
 #include "interfaces/include/ws_common.h"
 #include "wm_single_instance.h"
@@ -172,6 +171,7 @@ public:
     std::shared_ptr<RSUIContext> GetRSUIContext(ScreenId screenId);
     sptr<IRemoteObject> GetRenderSessionToken();
     bool GetSupportsFocus(DisplayId displayId);
+    void SetHoverBlockList(const std::vector<std::string>& hoverBlockList);
 
 protected:
     ScreenSessionManagerClient() = default;

@@ -567,6 +567,8 @@ DisplayId Session::GetScreenId() const
 
 void Session::SetScreenId(uint64_t screenId)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], hasStage=%{public}d, screenId=%{public}" PRIu64,
+        GetPersistentId(), GetWindowName().c_str(), sessionStage_ != nullptr, screenId);
     sessionInfo_.screenId_ = screenId;
     if (sessionStage_) {
         sessionStage_->UpdateDisplayId(screenId);
@@ -604,18 +606,6 @@ const SessionInfo& Session::GetSessionInfo() const
 SessionInfo& Session::EditSessionInfo()
 {
     return sessionInfo_;
-}
-
-bool Session::GetNeedBackgroundAfterConnect() const
-{
-    return needBackgroundAfterConnect_;
-}
-
-void Session::SetNeedBackgroundAfterConnect(bool isNeed)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, need background after connect:%{public}d",
-        GetPersistentId(), isNeed);
-    needBackgroundAfterConnect_ = isNeed;
 }
 
 void Session::RecordLifecycleSessionStateError(SessionState expectState, SessionState currentState) const
@@ -1794,6 +1784,13 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
+    DisplayId screenId = GetSessionProperty()->GetDisplayId();
+    if (screenId == DEFAULT_DISPLAY_ID && PcFoldScreenManager::GetInstance().IsHalfFolded(screenId)) {
+        property->SetDisplayId(GetClientDisplayId());
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "win=[%{public}d, %{public}s], screenId=%{public}" PRIu64 ", clientScreenId=%{public}" PRIu64,
+        GetWindowId(), GetWindowName().c_str(), screenId, property->GetDisplayId());
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
@@ -1859,7 +1856,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
-        SetNeedBackgroundAfterConnect(false);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
@@ -1945,9 +1941,6 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken,
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background state invalid! state: %{public}u",
             GetPersistentId(), state);
-        if (state == SessionState::STATE_DISCONNECT && systemConfig_.IsPcWindow()) {
-            SetNeedBackgroundAfterConnect(true);
-        }
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -5025,6 +5018,25 @@ void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
     systemConfig_ = systemConfig;
 }
 
+void Session::UpdateSupportMultiWindowScreenSet(const std::set<ScreenId>& supportMultiWindowScreenSet)
+{
+    systemConfig_.supportMultiWindowScreenSet_ = supportMultiWindowScreenSet;
+}
+
+WSError Session::UpdateScreenSupportMultiWindowToClient()
+{
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->UpdateScreenSupportMultiWindow(systemConfig_.supportMultiWindowScreenSet_);
+}
+
 SystemSessionConfig Session::GetSystemConfig() const
 {
     return systemConfig_;
@@ -6311,7 +6323,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
                 caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         }
     }
-    if (rsUIContext_ == nullptr && GetSessionType() == SessionType::SceneSession) {
+    if (rsUIContext_ == nullptr) {
         TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
             caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         // extensionSession use
@@ -6385,8 +6397,13 @@ PrelayoutContext Session::GetPrelayoutContext()
         static_cast<int32_t>(preCalc.height)
     };
 
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        return ctx;
+    }
+    const auto displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance()
-        .GetScreenSession(GetSessionProperty()->GetDisplayId());
+        .GetScreenSession(displayId);
     const float density = screenSession ?
         screenSession->GetScreenProperty().GetDensity() : 1.0f; // 1.0: default density
 

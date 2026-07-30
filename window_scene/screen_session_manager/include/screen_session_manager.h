@@ -25,7 +25,6 @@
 #include "common/include/task_scheduler.h"
 #include "dm_common.h"
 #include "event_tracker.h"
-#include "session_option.h"
 #include "session/screen/include/screen_session.h"
 #include "zidl/screen_session_manager_stub.h"
 #include "client_agent_container.h"
@@ -312,6 +311,7 @@ public:
     bool SuspendBegin(PowerStateChangeReason reason) override;
     bool DoSuspendBegin(PowerStateChangeReason reason);
     bool SuspendEnd() override;
+    bool IsPreBright(PowerStateChangeReason reason);
     void BlockScreenOnByCV(void);
     void BlockScreenOffByCV(void);
     bool BlockScreenWaitPictureFrameByCV(bool isStartDream);
@@ -322,7 +322,7 @@ public:
     bool SetDisplayState(DisplayState state) override;
     bool DoSetDisplayState(DisplayState state);
     bool SetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason) override;
-    bool DoSetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason);
+    bool DoSetScreenPowerForAll(ScreenPowerState state, PowerStateChangeReason reason, bool isApAod = false);
     ScreenPowerState GetScreenPower(ScreenId screenId) override;
     void NotifyDisplayEvent(DisplayEvent event) override;
     bool NotifyDisplayPowerEvent(DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason);
@@ -381,14 +381,13 @@ public:
     void HandleFoldStatusChangeWhenSwitchUser(sptr<ScreenSession>& screenSession, FoldDisplayMode oldScbDisplayMode);
     void HandleMotionSensorRotationWhenSwitchUser(sptr<ScreenSession>& screenSession);
 
-    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason);
+    bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason, bool isApAod = false);
     void SetScreenPowerForFold(ScreenPowerStatus status);
     void SetScreenPowerForFold(ScreenId screenId, ScreenPowerStatus status);
     void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
-    void CallRsSetScreenPowerStatusSync(
-        ScreenId screenId, ScreenPowerStatus status,
-        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
-    void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status);
+    void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN, bool isApAod = false);
+    void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status, bool isApAod = false);
     void TryToRecoverFoldDisplayMode(ScreenPowerStatus status);
     bool GetScreenLcdStatus(ScreenId screenId, PanelPowerStatus& status);
     bool WaitAodOpNotify();
@@ -548,6 +547,9 @@ public:
     void OnScreenModeChange(ScreenModeChangeEvent screenModeChangeEvent) override;
     void OnGetHdrFormats(ScreenId screenId, const sptr<ScreenSession>& session,
         const std::vector<ScreenHDRFormat>& rsHdrFormats);
+    void SetLastScreenMode(sptr<ScreenSession> firstSession, sptr<ScreenSession> secondarySession);
+    void SetHoverBlockList(const std::vector<std::string>& hoverBlockList) override;
+    bool IsHoverBlockPid(const int32_t agentPid);
     /*
      * multi user
      */
@@ -841,7 +843,7 @@ private:
     void SetPhysicalRotationClientInner(ScreenId screenId, int rotation);
     void ExitOuterOnlyMode(ScreenId mainScreenId, ScreenId secondaryScreenId, MultiScreenMode screenMode);
 
-    bool checkSavePermission(bool& isUserSave);
+    bool CheckSavePermission(bool& isUserSave);
     void NotifyDisplayStateChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void NotifyCaptureStatusChanged();
@@ -975,7 +977,116 @@ private:
     bool needReinstallExemptionList_ = true;
     std::unordered_map<DisplayId, bool> hasPrivateWindowForeground_;
     std::atomic<bool> isRecoveringDisplayMode_ = { false };
+    void UpdateLastDisplayInfo(DisplayId displayId, sptr<DisplayInfo> displayInfo);
+    struct UnfreezeNotifyContext {
+        sptr<DisplayInfo> displayInfo;
+        sptr<ScreenInfo> screenInfo;
+        DMRect availableArea {};
+        std::vector<float> lastFoldAngles;
+        ScreenChangeEvent lastScreenChangeEvent = ScreenChangeEvent::UNKNOWN;
+        sptr<DisplayChangeInfo> lastDisplayChangeInfo;
+        ScreenSessionManager* mgr;
+    };
 
+    class UnfreezeTask {
+    public:
+        explicit UnfreezeTask(sptr<IDisplayManagerAgent> ag) : agent(ag) {}
+        virtual ~UnfreezeTask() = default;
+        virtual void Execute() = 0;
+    protected:
+        sptr<IDisplayManagerAgent> agent;
+    };
+
+    class DisplayEventTask : public UnfreezeTask {
+    public:
+        DisplayEventTask(sptr<IDisplayManagerAgent> ag, sptr<DisplayInfo> info)
+            : UnfreezeTask(ag), displayInfo(info) {}
+        void Execute() override;
+    private:
+        sptr<DisplayInfo> displayInfo;
+    };
+
+    class DisplayModeTask : public UnfreezeTask {
+    public:
+        DisplayModeTask(sptr<IDisplayManagerAgent> ag, FoldDisplayMode mode)
+            : UnfreezeTask(ag), displayMode(mode) {}
+        void Execute() override;
+    private:
+        FoldDisplayMode displayMode;
+    };
+
+    class FoldStatusTask : public UnfreezeTask {
+    public:
+        FoldStatusTask(sptr<IDisplayManagerAgent> ag, FoldStatus st)
+            : UnfreezeTask(ag), status(st) {}
+        void Execute() override;
+    private:
+        FoldStatus status;
+    };
+
+    class FoldAngleTask : public UnfreezeTask {
+    public:
+        FoldAngleTask(sptr<IDisplayManagerAgent> ag, const std::vector<float>& angles)
+            : UnfreezeTask(ag), foldAngles(angles) {}
+        void Execute() override;
+    private:
+        std::vector<float> foldAngles;
+    };
+
+    class ScreenEventTask : public UnfreezeTask {
+    public:
+        ScreenEventTask(sptr<IDisplayManagerAgent> ag, sptr<ScreenInfo> info, ScreenChangeEvent evt)
+            : UnfreezeTask(ag), screenInfo(info), event(evt) {}
+        void Execute() override;
+    private:
+        sptr<ScreenInfo> screenInfo;
+        ScreenChangeEvent event;
+    };
+
+    class DisplayUpdateTask : public UnfreezeTask {
+    public:
+        DisplayUpdateTask(sptr<IDisplayManagerAgent> ag, sptr<DisplayChangeInfo> info)
+            : UnfreezeTask(ag), displayChangeInfo(info) {}
+        void Execute() override;
+    private:
+        sptr<DisplayChangeInfo> displayChangeInfo;
+    };
+
+    class AvailableAreaTask : public UnfreezeTask {
+    public:
+        AvailableAreaTask(sptr<IDisplayManagerAgent> ag, DMRect rect, DisplayId id)
+            : UnfreezeTask(ag), area(rect), displayId(id) {}
+        void Execute() override;
+    private:
+        DMRect area;
+        DisplayId displayId;
+    };
+
+    class AttributeTask : public UnfreezeTask {
+    public:
+        AttributeTask(sptr<IDisplayManagerAgent> ag, sptr<DisplayInfo> info,
+            const std::vector<std::string>& attrs, DisplayId id, ScreenSessionManager* mgr)
+            : UnfreezeTask(ag), displayInfo(info), attributes(attrs), displayId(id), manager(mgr) {}
+        void Execute() override;
+    private:
+        sptr<DisplayInfo> displayInfo;
+        std::vector<std::string> attributes;
+        DisplayId displayId;
+        ScreenSessionManager* manager;
+    };
+    void CollectUnfreezedAttributeTasks(int32_t pid, DisplayManagerAgentType agentType,
+        const UnfreezeNotifyContext& ctx, std::vector<std::unique_ptr<UnfreezeTask>>& tasks,
+        std::set<DisplayManagerAgentType>& pidAgentTypes);
+    void CollectUnfreezedAgentTasks(int32_t pid, DisplayManagerAgentType agentType,
+        const UnfreezeNotifyContext& ctx, std::vector<std::unique_ptr<UnfreezeTask>>& tasks,
+        std::set<DisplayManagerAgentType>& pidAgentTypes);
+    void CollectUnfreezedTasks(const std::set<int32_t>& unfreezedPidList,
+        const UnfreezeNotifyContext& ctx, std::vector<std::unique_ptr<UnfreezeTask>>& tasks,
+        std::vector<std::pair<int32_t, std::set<DisplayManagerAgentType>>>& logData,
+        std::map<int32_t, std::set<DisplayManagerAgentType>>& pidAgentTypeMap);
+    std::vector<std::unique_ptr<UnfreezeTask>> BuildUnfreezedTasks(
+        const std::set<int32_t>& unfreezedPidList, const UnfreezeNotifyContext& ctx,
+        std::map<int32_t, std::set<DisplayManagerAgentType>>& pidAgentTypeMap);
     class ScreenIdManager {
     friend class ScreenSessionGroup;
     public:
@@ -1166,7 +1277,6 @@ private:
 
     // Fold Screen
     static void BootFinishedCallback(const char *key, const char *value, void *context);
-    static void BootAnimateFinishedCallback(const char *key, const char *value, void *context);
     std::function<void()> foldScreenPowerInit_ = nullptr;
     void HandleFoldScreenPowerInit();
     void SetFoldScreenPowerInit(std::function<void()> foldScreenPowerInit);
@@ -1201,9 +1311,8 @@ private:
     void CallRsSetScreenPowerStatusSyncForExtend(
         const std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
         PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
-    void SetRsSetScreenPowerStatusSync(
-        std::vector<ScreenId> screenIds, ScreenPowerStatus status,
-        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
+    void SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN, bool isApAod = false);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };
     AodStatus aodNotifyFlag_ { AodStatus::UNKNOWN };
     bool IsFakeDisplayExist();
@@ -1257,7 +1366,7 @@ private:
     // Fold Screen duringcall
     bool duringCallState_ = false;
     ScreenPowerEvent ConvertScreenStateEvent(ScreenPowerStatus status);
-    ScreenTransitionState ConvertPowerStatus2ScreenState(ScreenPowerStatus status);
+    ScreenTransitionState ConvertPowerStatus2ScreenState(ScreenPowerStatus status, bool isApAod = false);
 
     mutable std::recursive_mutex userDisplayNodeMapMutex_;
     std::map<int32_t, std::map<ScreenId, std::shared_ptr<RSDisplayNode>>> userDisplayNodeMap_;
