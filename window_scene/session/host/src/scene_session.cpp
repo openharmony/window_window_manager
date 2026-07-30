@@ -52,7 +52,6 @@
 #include "process_options.h"
 #include "rate_limited_logger.h"
 #include "rs_adapter.h"
-#include "session_coordinate_helper.h"
 #include "session/screen/include/screen_session.h"
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session/host/include/move_drag_bounds_applier.h"
@@ -61,6 +60,8 @@
 #include "session/host/include/session_utils.h"
 #include "display_manager.h"
 #include "session_helper.h"
+#include "window_coordinate_helper.h"
+#include "window_display_isolation_policy.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_math.h"
@@ -2548,8 +2549,12 @@ WSError SceneSession::UpdateGlobalDisplayRectFromClient(const WSRect& rect, Size
         }
         // Convert global coordinates to screen-relative coordinates to be
         // compatible with the original logic of UpdateSessionRectInner.
+        const auto fromDisplayId = session->GetScreenId();
+        WindowCoordinateHelper::ScreenCandidateFilter filter = [fromDisplayId](ScreenId candidateScreenId) {
+            return WindowDisplayIsolationPolicy::IsMoveEnable(fromDisplayId, candidateScreenId);
+        };
         const auto& [screenId, screenRelativeRect] =
-            SessionCoordinateHelper::GlobalToScreenRelativeRect(session->GetScreenId(), rect);
+            WindowCoordinateHelper::ConvertToScreenRelativeRect(session->GetScreenId(), rect, filter);
         MoveConfiguration moveConfig = { screenId };
         session->SetRequestMoveConfiguration(moveConfig);
         session->UpdateSessionRectInner(screenRelativeRect, reason, moveConfig);

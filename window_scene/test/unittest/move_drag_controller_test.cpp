@@ -30,6 +30,7 @@
 #include "screen_session_manager_client/include/screen_session_manager_client.h"
 #include "session.h"
 #include "session/screen/include/screen_session.h"
+#include "window_display_isolation_policy.h"
 #include "window_manager_hilog.h"
 #include "window_scene.h"
 
@@ -51,9 +52,7 @@ public:
 
 void MoveDragControllerTest::SetUpTestCase() {}
 
-void MoveDragControllerTest::TearDownTestCase()
-{
-}
+void MoveDragControllerTest::TearDownTestCase() {}
 
 void MoveDragControllerTest::SetUp()
 {
@@ -2734,6 +2733,42 @@ HWTEST_F(MoveDragControllerTest, TestRefreshGlobalScreenRectsFiltersDisplayGroup
     EXPECT_EQ(moveDragController->globalScreenRectMap_[screenId], expectedScreenRect);
     EXPECT_EQ(moveDragController->globalScreenRectMap_.count(otherGroupScreenId), 0);
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+}
+
+/**
+ * @tc.name: TestRefreshGlobalScreenRectsFiltersIsolatedDisplay
+ * @tc.desc: Verify isolated screens are excluded from drag-move screen rect caches
+ * @tc.type: FUNC
+ */
+HWTEST_F(MoveDragControllerTest, TestRefreshGlobalScreenRectsFiltersIsolatedDisplay, TestSize.Level1)
+{
+    constexpr ScreenId startScreenId = 0;
+    constexpr ScreenId isolatedScreenId = 5;
+    constexpr DisplayGroupId displayGroupId = 10;
+    const auto originalConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    DisplayIsolationConfig testConfig = originalConfig;
+    testConfig.dragIsolatedDisplayIds = { isolatedScreenId };
+    WindowDisplayIsolationPolicy::SaveDisplayIsolationSystemConfig(testConfig);
+
+    moveDragController->startDisplayId_ = startScreenId;
+    moveDragController->startDisplayGroupId_ = displayGroupId;
+
+    ScreenProperty screenProperty;
+    screenProperty.SetDisplayGroupId(displayGroupId);
+    screenProperty.SetBounds(RRect({ 0, 0, 300, 200 }, 0.0f, 0.0f));
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[startScreenId] =
+        sptr<ScreenSession>::MakeSptr(startScreenId, screenProperty, 0);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_[isolatedScreenId] =
+        sptr<ScreenSession>::MakeSptr(isolatedScreenId, screenProperty, 0);
+
+    moveDragController->RefreshGlobalScreenRects();
+
+    EXPECT_EQ(moveDragController->globalScreenRectMap_.count(startScreenId), 1);
+    EXPECT_EQ(moveDragController->globalAvailableScreenRectMap_.count(startScreenId), 1);
+    EXPECT_EQ(moveDragController->globalScreenRectMap_.count(isolatedScreenId), 0);
+    EXPECT_EQ(moveDragController->globalAvailableScreenRectMap_.count(isolatedScreenId), 0);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.clear();
+    WindowDisplayIsolationPolicy::SaveDisplayIsolationSystemConfig(originalConfig);
 }
 
 /**

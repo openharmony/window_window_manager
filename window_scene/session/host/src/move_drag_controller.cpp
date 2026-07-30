@@ -40,6 +40,7 @@
 #include "session_helper.h"
 #include "session_utils.h"
 #include "string_util.h"
+#include "window_display_isolation_policy.h"
 #include "window_helper.h"
 #include "window_manager_hilog.h"
 #include "wm_common_inner.h"
@@ -2236,6 +2237,12 @@ void MoveDragController::RefreshGlobalScreenRects()
         if (screenProp.GetDisplayGroupId() != startDisplayGroupId_) {
             TLOGD(WmsLogTag::WMS_LAYOUT, "Skip screenId: %{public}" PRIu64 ", displayGroupId: %{public}" PRIu64,
                   screenId, screenProp.GetDisplayGroupId());
+            continue;
+        }
+        if (!WindowDisplayIsolationPolicy::IsDragEnable(startDisplayId_, screenId)) {
+            TLOGD(WmsLogTag::WMS_LAYOUT,
+                  "Skip isolated screen, fromDisplayId: %{public}" PRIu64 ", toDisplayId: %{public}" PRIu64,
+                  startDisplayId_, screenId);
             continue;
         }
         const WSRect screenRect = BuildScreenRect(screenProp);

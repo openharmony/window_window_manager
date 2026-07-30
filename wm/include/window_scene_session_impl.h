@@ -603,7 +603,7 @@ private:
     /*
      * Window Layout
      */
-    void CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
+    WMError CheckMoveConfiguration(MoveConfiguration& moveConfiguration);
     void UpdateEnableDragWhenSwitchMultiWindow(bool enable);
     void UpdateSubWindowDragEnabledByDecorVisible() override;
     WMError GetSelectMode(SelectMode& selectMode) override;
