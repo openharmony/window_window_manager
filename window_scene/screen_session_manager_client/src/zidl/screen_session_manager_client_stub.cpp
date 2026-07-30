@@ -593,8 +593,11 @@ int ScreenSessionManagerClientStub::HandleScreenCaptureNotify(MessageParcel& dat
     auto screenId = static_cast<ScreenId>(data.ReadUint64());
     auto uid = data.ReadInt32();
     auto clientName = data.ReadString();
+    auto tokenId = data.ReadUint32();
+    std::vector<std::string> permissions;
+    data.ReadStringVector(&permissions);
     TLOGI(WmsLogTag::DMS, "notify scb capture screenId=%{public}" PRIu64", uid=%{public}d.", screenId, uid);
-    ScreenCaptureNotify(screenId, uid, clientName);
+    ScreenCaptureNotify(screenId, uid, clientName, tokenId, permissions);
     return ERR_NONE;
 }
 

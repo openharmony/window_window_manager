@@ -62,7 +62,8 @@ public:
     MOCK_METHOD(void, OnScreenExtendChange, (ScreenId mainScreenId, ScreenId extendScreenId), (override));
     MOCK_METHOD(void, OnHoverStatusChange, (int32_t hoverStatus, bool needRotate, ScreenId screenId), (override));
     MOCK_METHOD(void, OnScreenCaptureNotify,
-        (ScreenId mainScreenId, int32_t uid, const std::string& clientName), (override));
+        (ScreenId mainScreenId, int32_t uid, const std::string& clientName, uint32_t tokenId,
+        const std::vector<std::string>& permissions), (override));
     MOCK_METHOD(void, OnCameraBackSelfieChange, (bool isCameraBackSelfie, ScreenId screenId), (override));
     MOCK_METHOD(void, OnSuperFoldStatusChange, (ScreenId screenId, SuperFoldStatus superFoldStatus), (override));
     MOCK_METHOD(void, OnSecondaryReflexionChange, (ScreenId screenId, bool isSecondaryReflexion), (override));
@@ -2860,7 +2861,7 @@ HWTEST_F(ScreenSessionTest, ScreenCaptureNotify, TestSize.Level1)
     ScreenId screenId = 0;
     int32_t uid = 0;
     std::string clientName = "test";
-    session->ScreenCaptureNotify(screenId, uid, clientName);
+    session->ScreenCaptureNotify(screenId, uid, clientName, 0, {});
 }
 
 /**
