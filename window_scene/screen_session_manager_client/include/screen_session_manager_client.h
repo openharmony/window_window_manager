@@ -207,7 +207,8 @@ private:
 
     void SetDisplayNodeScreenId(ScreenId screenId, ScreenId displayNodeScreenId) override;
     void SetDisplayNodeRSScreenId(ScreenId screenId, ScreenId rsScreenId) override;
-    void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName) override;
+    void ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName,
+        uint32_t tokenId, const std::vector<std::string>& permissions) override;
     void NotifyClientScreenConnect(sptr<ScreenSession>& screenSession);
 
     void NotifyScreenConnect(const sptr<ScreenSession>& screenSession);

@@ -15483,14 +15483,15 @@ DMError ScreenSessionManager::SetVirtualScreenMaxRefreshRate(ScreenId id, uint32
     return DMError::DM_OK;
 }
 
-void ScreenSessionManager::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+void ScreenSessionManager::OnScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName,
+    uint32_t tokenId, const std::vector<std::string>& permissions)
 {
     auto clientProxy = GetClientProxy();
     if (!clientProxy) {
         TLOGNFI(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy->ScreenCaptureNotify(mainScreenId, uid, clientName);
+    clientProxy->ScreenCaptureNotify(mainScreenId, uid, clientName, tokenId, permissions);
 }
 
 void ScreenSessionManager::AddPermissionUsedRecord(const std::string& permission, int32_t successCount,
@@ -15533,7 +15534,8 @@ std::shared_ptr<Media::PixelMap> ScreenSessionManager::GetScreenCapture(const Ca
     *errorCode = DmErrorCode::DM_OK;
     isScreenShot_ = true;
     /* notify scb to do toast */
-    OnScreenCaptureNotify(GetDefaultScreenId(), IPCSkeleton::GetCallingUid(), SysCapUtil::GetClientName());
+    OnScreenCaptureNotify(GetDefaultScreenId(), IPCSkeleton::GetCallingUid(), SysCapUtil::GetClientName(),
+        IPCSkeleton::GetCallingTokenID(), {CUSTOM_SCREEN_CAPTURE_PERMISSION, CUSTOM_SCREEN_RECORDING_PERMISSION});
     /* notify application capture happend */
     NotifyCaptureStatusChanged();
     return res;

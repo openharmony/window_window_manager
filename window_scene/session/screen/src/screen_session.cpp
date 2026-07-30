@@ -2955,7 +2955,8 @@ void ScreenSession::SetXYPosition(int32_t x, int32_t y)
         GetScreenId(), GetRSScreenId(), x, y);
 }
 
-void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName)
+void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, const std::string& clientName,
+    uint32_t tokenId, const std::vector<std::string>& permissions)
 {
     std::lock_guard<std::mutex> lock(screenChangeListenerListMutex_);
     if (screenChangeListenerList_.empty()) {
@@ -2967,7 +2968,7 @@ void ScreenSession::ScreenCaptureNotify(ScreenId mainScreenId, int32_t uid, cons
             TLOGE(WmsLogTag::DMS, "screenChangeListener is null.");
             continue;
         }
-        listener->OnScreenCaptureNotify(mainScreenId, uid, clientName);
+        listener->OnScreenCaptureNotify(mainScreenId, uid, clientName, tokenId, permissions);
     }
 }
 
