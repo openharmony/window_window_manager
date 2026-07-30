@@ -371,6 +371,8 @@ napi_value JsSceneSessionManager::Init(napi_env env, napi_value exportObj)
         JsSceneSessionManager::SupportPreloadStartingWindow);
     BindNativeFunction(env, exportObj, "preloadStartingWindow", moduleName,
         JsSceneSessionManager::PreloadStartingWindow);
+    BindNativeFunction(env, exportObj, "setPreloadStartingWindowPixelMap", moduleName,
+        JsSceneSessionManager::SetPreloadStartingWindowPixelMap);
     BindNativeFunction(env, exportObj, "setUIEffectControllerAliveInUI", moduleName,
         JsSceneSessionManager::SetUIEffectControllerAliveInUI);
     BindNativeFunction(env, exportObj, "setPiPSettingSwitchStatus", moduleName,
@@ -4517,6 +4519,66 @@ napi_value JsSceneSessionManager::OnPreloadStartingWindow(napi_env env, napi_cal
     }
 
     SceneSessionManager::GetInstance().PreLoadStartingWindow(sceneSession);
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSessionManager::SetPreloadStartingWindowPixelMap(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
+    return (me != nullptr) ? me->OnSetPreloadStartingWindowPixelMap(env, info) : nullptr;
+}
+
+napi_value JsSceneSessionManager::OnSetPreloadStartingWindowPixelMap(napi_env env, napi_callback_info info)
+{
+    HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "JsSceneSessionManager::OnSetPreloadStartingWindowPixelMap");
+    size_t argc = 2;
+    napi_value argv[2] = {nullptr};
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc < ARGC_TWO) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    napi_value jsSceneSessionObj = argv[0];
+    if (jsSceneSessionObj == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get js scene session object");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Failed to get js scene session object"));
+        return NapiGetUndefined(env);
+    }
+
+    void* pointerResult = nullptr;
+    napi_unwrap(env, jsSceneSessionObj, &pointerResult);
+    auto jsSceneSession = static_cast<JsSceneSession*>(pointerResult);
+    if (jsSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get scene session from js object");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Failed to get scene session from js object"));
+        return NapiGetUndefined(env);
+    }
+
+    sptr<SceneSession> sceneSession = jsSceneSession->GetNativeSession();
+    if (sceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession is nullptr");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_SYSTEM_ABNORMALLY),
+            "sceneSession is nullptr"));
+        return NapiGetUndefined(env);
+    }
+
+    std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMapNapi::GetPixelMap(env, argv[1]);
+    if (pixelMap == nullptr) {
+        TLOGE(WmsLogTag::WMS_PATTERN, "Failed to get pixelMap from js object");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Failed to get pixelMap from js object"));
+        return NapiGetUndefined(env);
+    }
+
+    sceneSession->SetPreloadStartingWindow(pixelMap);
+    TLOGI(WmsLogTag::WMS_PATTERN, "SetPreloadStartingWindowPixelMap success, persistentId: %{public}d",
+        sceneSession->GetPersistentId());
     return NapiGetUndefined(env);
 }
 
