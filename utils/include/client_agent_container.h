@@ -317,7 +317,7 @@ bool ClientAgentContainer<T1, T2>::GetAgentSystem(const sptr<T1>& agent)
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     if (agent == nullptr) {
         WLOGFE("agent is invalid");
-       return false;
+        return false;
     }
     if (agentSystemMap_.count(agent) == 0) {
         WLOGFE("agent pid not found");
