@@ -484,7 +484,7 @@ void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus,
             foldStatusNew = FoldStatusTrans(foldStatusNew);
         }
         if (ScreenSessionManager::GetInstance().IsFreezed(agentPid,
-                                                           DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER)) {
+            DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER)) {
             continue;
         }
         bool isBlocked = ScreenSessionManager::GetInstance().IsHoverBlockPid(agentPid);
