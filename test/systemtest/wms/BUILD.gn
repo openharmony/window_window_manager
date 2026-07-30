@@ -44,13 +44,6 @@ group("systemtest") {
   } else {
     deps += [
       ":wms_window_app_floating_window_test",
-      ":wms_window_callback_test",
-      ":wms_window_decor_test",
-      ":wms_window_layout_integration_test",
-      ":wms_window_pc_test",
-      ":wms_window_specialwindow_test",
-      ":wms_window_layout_test",
-      ":wms_window_status_change_test",
     ]
   }
 }

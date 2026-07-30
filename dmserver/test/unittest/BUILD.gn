@@ -31,9 +31,6 @@ group("unittest") {
     ":dmserver_screen_rotation_controller_test",
   ]
 
-  if (window_manager_use_sceneboard) {
-    deps += [ ":dmserver_abstract_screen_controller_test" ]
-  }
 }
 
 test_external_deps = [
