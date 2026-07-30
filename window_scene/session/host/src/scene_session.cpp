@@ -5889,7 +5889,7 @@ void SceneSession::NotifyPrivacyModeChange()
         "session property privacyMode:%{public}d, last privacyMode:%{public}d",
         GetPersistentId(), GetWindowName().c_str(), curExtPrivacyMode, GetSessionProperty()->GetPrivacyMode(),
         isPrivacyMode_);
-
+     
     if (curPrivacyMode != isPrivacyMode_) {
         isPrivacyMode_ = curPrivacyMode;
         if (privacyModeChangeNotifyFunc_) {
@@ -7117,7 +7117,7 @@ void SceneSession::OnWaterfallButtonChange(bool isShow)
         if (session->pcFoldScreenController_ == nullptr) {
             return;
         }
-        session->pcFoldScreenController_->UpdateSupportEnterWaterfallMode(isShow);
+        session->pcFoldScreenController_->UpdateSupportEnterWaterfallMode();
     }, __func__);
 }
 
@@ -9701,7 +9701,7 @@ uint32_t SceneSession::UpdateUIParam(const SessionUIParam& uiParam)
         dirtyFlags_ & static_cast<uint32_t>(SessionUIDirtyFlag::SCALE)) {
         NotifyGlobalScaledRectChange();
     }
-    if (!isPcScenePanel_) {
+    if (!isPcScenePanel_ || !IsPcWindow() || !systemConfig_.IsDisplayInFreeMultiWindow(GetDisplayId())) {
         dirtyFlags_ |= UpdateZOrderInner(uiParam.zOrder_) ? static_cast<uint32_t>(SessionUIDirtyFlag::Z_ORDER) : 0;
     }
     if (!lastVisible && IsVisible() && !isFocused_ && !postProcessFocusState_.enabled_ &&

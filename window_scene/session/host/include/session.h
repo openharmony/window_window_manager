@@ -812,6 +812,8 @@ public:
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(const SystemSessionConfig& config);
+    void UpdateSupportMultiWindowScreenSet(const std::set<ScreenId>& supportMultiWindowScreenSet);
+    WSError UpdateScreenSupportMultiWindowToClient();
     bool haveSetSupportedWindowModes_ = false;
 
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
