@@ -448,6 +448,22 @@ void ScreenSessionManagerAdapter::OnScreenshot(sptr<ScreenshotInfo> info)
     }
 }
 
+FoldStatus ScreenSessionManagerAdapter::FoldStatusTrans(FoldStatus foldStatus)
+{
+    FoldStatus transfoldstatus = foldStatus;
+    switch (foldStatus) {
+        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED:
+        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND:
+            transfoldstatus = FoldStatus::EXPAND;
+            break;
+        default : {
+            TLOGW(WmsLogTag::DMS, "foldStatus is unknown.");
+        }
+    }
+    TLOGNFI(WmsLogTag::DMS,   "transfoldstatus:%{public}d ", transfoldstatus);
+    return transfoldstatus;
+}
+
 void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus)
 {
     INIT_PROXY_CHECK_RETURN();
@@ -458,11 +474,18 @@ void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus)
         TLOGE(WmsLogTag::DMS, "agent is null");
         return;
     }
+    FoldStatus foldStatusNew = foldStatus::UNKNOWN;
+    bool isSysCall = false;
     for (auto& agent : agents) {
+        foldStatusNew = foldStatus;
         int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        isSysCall = dmAgentContainer_.GetAgentSystem(agent);
+        if (!isSysCall) {
+            foldStatusNew = FoldStatusTrans(foldStatusNew);
+        }
         if (!ScreenSessionManager::GetInstance().IsFreezed(agentPid,
                                                            DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER)) {
-            agent->NotifyFoldStatusChanged(foldStatus);
+            agent->NotifyFoldStatusChanged(foldStatusNew);
         }
     }
 }
