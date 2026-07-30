@@ -80,7 +80,6 @@ group("unittest") {
       ":ws_fold_screen_controller_test",
       ":ws_fold_screen_policy_test",
       ":ws_fold_screen_sensor_manager_test",
-      ":ws_fold_screen_state_internel_test",
       ":ws_fold_screen_state_machine_test",
       ":ws_secondary_display_fold_policy_test",
       ":ws_secondary_display_sensor_fold_state_manager_test",
@@ -1430,16 +1429,6 @@ if (window_manager_fold_ability) {
 
     external_deps = test_external_deps
     external_deps += [ "init:libbegetutil" ]
-  }
-
-  ohos_unittest("ws_fold_screen_state_internel_test") {
-    module_out_path = module_out_path
-
-    sources = [ "fold_screen_state_internel_test.cpp" ]
-
-    deps = [ ":ws_unittest_common" ]
-
-    external_deps = test_external_deps
   }
 
   ohos_unittest("ws_fold_screen_state_machine_test") {

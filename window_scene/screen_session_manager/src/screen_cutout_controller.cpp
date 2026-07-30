@@ -67,8 +67,7 @@ sptr<CutoutInfo> ScreenCutoutController::GetScreenCutoutInfo(DisplayId displayId
 void ScreenCutoutController::RecoverDisplayInfo(uint32_t& dwidth, uint32_t& dheight,
     sptr<DisplayInfo> displayInfo, Rotation rotation) const
 {
-    if (!(FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) || !ScreenSessionManager::GetInstance().IsHook()) {
+    if (!ScreenSessionManager::GetInstance().IsHook()) {
         TLOGD(WmsLogTag::DMS, "no need hook");
         return;
     }
@@ -92,8 +91,7 @@ void ScreenCutoutController::RecoverDisplayInfo(uint32_t& dwidth, uint32_t& dhei
 void ScreenCutoutController::HookCutoutInfo(uint32_t hookWidth, uint32_t hookHeight,
     std::vector<DMRect>& boundaryRects, sptr<DisplayInfo> displayInfo) const
 {
-    if (!(FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice() ||
-        FoldScreenStateInternel::IsSingleDisplaySuperFoldDevice()) || !ScreenSessionManager::GetInstance().IsHook()) {
+    if (!ScreenSessionManager::GetInstance().IsHook()) {
         TLOGD(WmsLogTag::DMS, "no need hook");
         return;
     }
