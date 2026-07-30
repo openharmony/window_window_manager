@@ -4524,7 +4524,7 @@ napi_value JsSceneSessionManager::OnPreloadStartingWindow(napi_env env, napi_cal
 
 napi_value JsSceneSessionManager::SetPreloadStartingWindowPixelMap(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    TLOGD(WmsLogTag::WMS_PATTERN, "[NAPI]");
     JsSceneSessionManager* me = CheckParamsAndGetThis<JsSceneSessionManager>(env, info);
     return (me != nullptr) ? me->OnSetPreloadStartingWindowPixelMap(env, info) : nullptr;
 }
