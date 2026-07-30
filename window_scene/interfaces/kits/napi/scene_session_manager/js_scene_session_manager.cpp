@@ -444,7 +444,7 @@ void JsSceneSessionManager::OnSetSpecificWindowZIndex(WindowType windowType, int
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "windowType: %{public}d, zIndex: %{public}d, reason: %{public}d",
         windowType, zIndex, reason);
-    auto task = [this, windowType, zIndex, reason, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDEX_CB),
+    auto task = [windowType, zIndex, reason, jsCallBack = GetJSCallback(SET_SPECIFIC_SESSION_ZINDEX_CB),
         env = env_]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
@@ -662,7 +662,7 @@ void JsSceneSessionManager::OnShiftFocus(int32_t persistentId, DisplayId display
     TLOGD(WmsLogTag::WMS_FOCUS, "persistentId: %{public}d, displayGroupId: %{public}" PRIu64,
           persistentId, displayGroupId);
 
-    auto task = [this, persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_, displayGroupId]() {
+    auto task = [persistentId, jsCallBack = GetJSCallback(SHIFT_FOCUS_CB), env = env_, displayGroupId]() {
         if (jsCallBack == nullptr) {
             TLOGNE(WmsLogTag::WMS_FOCUS, "jsCallBack is nullptr");
             return;
@@ -867,6 +867,9 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     });
     SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc([] {
         RootScene::staticRootScene_->OnFlushUIParams();
+    });
+    SceneSessionManager::GetInstance().SetUpdateDisplayDpiChangeCallback([](DisplayId displayId, float density) {
+        RootScene::staticRootScene_->SetDisplayDensity(density, displayId);
     });
     SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
         return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
@@ -4862,8 +4865,19 @@ napi_value JsSceneSessionManager::OnGetWindowLimits(napi_env env, napi_callback_
             "Input parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
+    float targetDensity = 0.0f;
+    if (argc >= ARGC_TWO) {
+        double densityValue = 0.0;
+        if (!ConvertFromJsValue(env, argv[1], densityValue)) {
+            TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Failed to convert parameter to targetDensity");
+            napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+                "Input parameter is missing or invalid"));
+            return NapiGetUndefined(env);
+        }
+        targetDensity = static_cast<float>(densityValue);
+    }
     WindowLimits windowLimits;
-    WMError ret = SceneSessionManager::GetInstance().GetWindowLimits(windowId, windowLimits);
+    WMError ret = SceneSessionManager::GetInstance().GetWindowLimits(windowId, windowLimits, targetDensity);
     if (ret != WMError::WM_OK) {
         WmErrorCode wmErrorCode = WM_JS_TO_ERROR_CODE_MAP.at(ret);
         TLOGE(WmsLogTag::WMS_LAYOUT_PC, "Get window limits failed, return %{public}d", wmErrorCode);
@@ -6674,7 +6688,12 @@ void JsSceneSessionManager::OnMinimizeAll(DisplayId displayId, int32_t excludeWi
         napi_value jsDisplayIdObj = CreateJsNumber(env, static_cast<int64_t>(displayId));
         napi_value jsExcludeWindowIdObj = CreateJsValue(env, excludeWindowId);
         napi_value argv[] = { jsDisplayIdObj, jsExcludeWindowIdObj };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        napi_status ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
+            ArraySize(argv), argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnMinimizeAll:napi call exception ret: %{public}d", ret);
+            return;
+        }
         }, __func__);
 }
 
