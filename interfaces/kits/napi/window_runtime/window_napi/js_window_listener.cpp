@@ -71,7 +71,7 @@ const std::string WINDOW_HIGHLIGHT_CHANGE_CB = "windowHighlightChange";
 const std::string WINDOW_WILL_CLOSE_CB = "windowWillClose";
 const std::string WINDOW_ROTATION_CHANGE_CB = "rotationChange";
 const std::string FREE_WINDOW_MODE_CHANGE_CB = "freeWindowModeChange";
-const std::string APPLICATION_FOCUS_STATE_CHANGE_CB = "applicationFocusStageChange";
+const std::string APPLICATION_FOCUS_STATE_CHANGE_CB = "applicationFocusStateChange";
 const std::string PARENT_LIFECYCLE_EVENT_CB = "parentLifecycleEvent";
 
 JsWindowListener::~JsWindowListener()
