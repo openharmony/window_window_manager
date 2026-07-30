@@ -868,6 +868,9 @@ void JsSceneSessionManager::RegisterRootSceneCallbacksOnSSManager()
     SceneSessionManager::GetInstance().SetOnFlushUIParamsFunc([] {
         RootScene::staticRootScene_->OnFlushUIParams();
     });
+    SceneSessionManager::GetInstance().SetUpdateDisplayDpiChangeCallback([](DisplayId displayId, float density) {
+        RootScene::staticRootScene_->SetDisplayDensity(density, displayId);
+    });
     SceneSessionManager::GetInstance().SetIsRootSceneLastFrameLayoutFinishedFunc([] {
         return RootScene::staticRootScene_->IsLastFrameLayoutFinished();
     });
