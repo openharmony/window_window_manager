@@ -58,6 +58,7 @@
 #include "color_parser.h"
 #include "common/include/fold_screen_state_internel.h"
 #include "common/include/session_permission.h"
+#include "common/include/window_display_isolation_policy.h"
 #include "display_manager.h"
 #ifdef WINDOW_MANAGER_FEATURE_SUPPORT_DMSFWK
 #include "distributed_client.h"
@@ -1855,6 +1856,7 @@ bool SceneSessionManager::ConfigWindowLayout(const WindowSceneConfig::ConfigItem
         return false;
     }
     ConfigMoveDrag(windowLayoutConfig["moveDrag"]);
+    ConfigDisplayIsolation(windowLayoutConfig["displayIsolation"]);
     return true;
 }
 
@@ -1979,6 +1981,47 @@ bool SceneSessionManager::ConfigMovingEvent(const WindowSceneConfig::ConfigItem&
         return false;
     }
     MoveDragController::SaveMovingEventThrottleSystemConfig(static_cast<uint32_t>(interval));
+    return true;
+}
+
+/**
+ * @brief Parses isolated display IDs from a window scene XML configuration item.
+ *
+ * @param configItem XML configuration item containing display IDs.
+ * @param configName Configuration name used in validation logs.
+ * @param isolatedDisplayIds Output set of parsed display IDs.
+ */
+void ParseIsolatedDisplayIdsConfig(const WindowSceneConfig::ConfigItem& configItem,
+                                   const std::string& configName,
+                                   std::set<DisplayId>& isolatedDisplayIds)
+{
+    if (!configItem.IsInts() || !configItem.intsValue_ || configItem.intsValue_->empty()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "The %{public}s config is invalid (expect non-empty int array).",
+              configName.c_str());
+        return;
+    }
+    for (const auto displayId : *configItem.intsValue_) {
+        if (displayId < 0) {
+            TLOGW(WmsLogTag::WMS_LAYOUT, "The %{public}s config contains negative display id.", configName.c_str());
+            continue;
+        }
+        isolatedDisplayIds.insert(static_cast<DisplayId>(displayId));
+    }
+}
+
+bool SceneSessionManager::ConfigDisplayIsolation(const WindowSceneConfig::ConfigItem& displayIsolationConfig)
+{
+    if (!displayIsolationConfig.IsMap()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT, "The displayIsolation config is invalid (not a map).");
+        return false;
+    }
+    DisplayIsolationConfig config;
+    ParseIsolatedDisplayIdsConfig(
+        displayIsolationConfig["moveIsolatedDisplayIds"], "moveIsolatedDisplayIds", config.moveIsolatedDisplayIds);
+    ParseIsolatedDisplayIdsConfig(
+        displayIsolationConfig["dragIsolatedDisplayIds"], "dragIsolatedDisplayIds", config.dragIsolatedDisplayIds);
+    WindowDisplayIsolationPolicy::SaveDisplayIsolationSystemConfig(config);
     return true;
 }
 

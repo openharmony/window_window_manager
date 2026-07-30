@@ -1098,6 +1098,25 @@ private:
      */
     bool ConfigMovingEvent(const WindowSceneConfig::ConfigItem& movingEventConfig);
 
+    /**
+     * @brief Configure isolated displays for window operations.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <displayIsolation>
+     *       <moveIsolatedDisplayIds>5</moveIsolatedDisplayIds>
+     *       <dragIsolatedDisplayIds>5</dragIsolatedDisplayIds>
+     *     </displayIsolation>
+     *   </windowLayout>
+     *
+     * The move and drag ID lists are independent. A missing or empty list disables
+     * isolation for the corresponding operation.
+     *
+     * @param displayIsolationConfig The display-isolation configuration item.
+     * @return Returns true if the config is valid and applied; returns false otherwise.
+     */
+    bool ConfigDisplayIsolation(const WindowSceneConfig::ConfigItem& displayIsolationConfig);
+
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
     void ConfigSubWindowSizeLimits(const WindowSceneConfig::ConfigItem& subWindowSizeConifg);

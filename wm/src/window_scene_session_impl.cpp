@@ -49,6 +49,7 @@
 #include "singleton_container.h"
 #include "sys_cap_util.h"
 #include "window_adapter.h"
+#include "window_display_isolation_policy.h"
 #include "window_helper.h"
 #include "window_inspector.h"
 #include "window_manager_hilog.h"
@@ -2739,15 +2740,22 @@ WMError WindowSceneSessionImpl::Destroy(bool needNotifyServer, bool needClearLis
 }
 
 /** @note @window.layout */
-void WindowSceneSessionImpl::CheckMoveConfiguration(MoveConfiguration& moveConfiguration)
+WMError WindowSceneSessionImpl::CheckMoveConfiguration(MoveConfiguration& moveConfiguration)
 {
     std::vector<DisplayId> displayIds = SingletonContainer::Get<DisplayManagerAdapter>().GetAllDisplayIds();
     if (std::find(displayIds.begin(), displayIds.end(), moveConfiguration.displayId) ==
         displayIds.end()) { // need to be found in displayIds, otherwise the value is DISPLAY_ID_INVALID
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id:%{public}d not find displayId moveConfiguration %{public}s",
-            property_->GetPersistentId(), moveConfiguration.ToString().c_str());
+            GetWindowId(), moveConfiguration.ToString().c_str());
         moveConfiguration.displayId = DISPLAY_ID_INVALID;
     }
+    if (!WindowDisplayIsolationPolicy::IsMoveEnable(property_->GetDisplayId(), moveConfiguration.displayId)) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "Move is disabled, id: %{public}d, fromDisplayId: %{public}" PRIu64 ", toDisplayId: %{public}" PRIu64,
+              GetWindowId(), property_->GetDisplayId(), moveConfiguration.displayId);
+        return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
+    }
+    return WMError::WM_OK;
 }
 
 /** @note @window.layout */
@@ -2772,12 +2780,14 @@ WMError WindowSceneSessionImpl::MoveTo(int32_t x, int32_t y, bool isMoveToGlobal
         "Id:%{public}d state:%{public}d type:%{public}d mode:%{public}d rect:"
         "%{public}s->%{public}s req=%{public}s", property_->GetPersistentId(), state_, GetType(), GetWindowMode(),
         windowRect.ToString().c_str(), newRect.ToString().c_str(), requestRect.ToString().c_str());
-    property_->SetRequestRect(newRect);
-
-    CheckMoveConfiguration(moveConfiguration);
+    WMError error = CheckMoveConfiguration(moveConfiguration);
+    if (error != WMError::WM_OK) {
+        return error;
+    }
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    property_->SetRequestRect(newRect);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, isMoveToGlobal, false, moveConfiguration);
     return static_cast<WMError>(ret);
 }
@@ -2796,6 +2806,9 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y, MoveConfigurat
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     auto ret = MoveTo(x, y, false, moveConfiguration);
+    if (ret != WMError::WM_OK) {
+        return ret;
+    }
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetMoveToLock();
         auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -2809,7 +2822,7 @@ WMError WindowSceneSessionImpl::MoveToAsync(int32_t x, int32_t y, MoveConfigurat
             layoutCallback_->GetMoveToAsyncResult(WINDOW_LAYOUT_TIMEOUT);
         }
     }
-    return static_cast<WMError>(ret);
+    return ret;
 }
 
 WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveConfiguration moveConfiguration)
@@ -2817,34 +2830,33 @@ WMError WindowSceneSessionImpl::MoveWindowToGlobal(int32_t x, int32_t y, MoveCon
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_WindowSceneSessionImpl::MoveWindowToGlobal");
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
-            "[WindowRectUpdate:ClientReq] MoveWindowToGlobal skip: session invalid, id:%{public}d",
-            property_->GetPersistentId());
+            "[WindowRectUpdate:ClientReq] skip: session invalid, id:%{public}d", GetWindowId());
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING) {
         TLOGW(WmsLogTag::WMS_LAYOUT,
-            "[WindowRectUpdate:ClientReq] MoveWindowToGlobal skip: not floating, id:%{public}d, mode:%{public}u",
+            "[WindowRectUpdate:ClientReq] skip: not floating, id:%{public}d, mode:%{public}u",
             GetWindowId(), static_cast<uint32_t>(GetWindowMode()));
         return WMError::WM_ERROR_INVALID_OP_IN_CUR_STATUS;
     }
     if (property_->GetWindowType() == WindowType::WINDOW_TYPE_PIP) {
-        TLOGW(WmsLogTag::WMS_LAYOUT, "[WindowRectUpdate:ClientReq] MoveWindowToGlobal skip: pip window, id:%{public}d",
-            property_->GetPersistentId());
+        TLOGW(WmsLogTag::WMS_LAYOUT, "[WindowRectUpdate:ClientReq] skip: pip window, id:%{public}d", GetWindowId());
         return WMError::WM_ERROR_INVALID_OPERATION;
     }
     const auto& windowRect = GetRect();
     const auto& requestRect = GetRequestRect();
     Rect newRect = { x, y, requestRect.width_, requestRect.height_ }; // must keep x/y
     TLOGI(WmsLogTag::WMS_LAYOUT,
-        "[WindowRectUpdate:ClientReq] MoveWindowToGlobal id:%{public}d, curRect=%{public}s, newRect=%{public}s, "
-        "moveConfig=%{public}s",
-        property_->GetPersistentId(), windowRect.ToString().c_str(), newRect.ToString().c_str(),
-        moveConfiguration.ToString().c_str());
-    property_->SetRequestRect(newRect);
-    CheckMoveConfiguration(moveConfiguration);
+        "[WindowRectUpdate:ClientReq] id:%{public}d, curRect=%{public}s, newRect=%{public}s, moveConfig=%{public}s",
+        GetWindowId(), windowRect.ToString().c_str(), newRect.ToString().c_str(), moveConfiguration.ToString().c_str());
+    WMError error = CheckMoveConfiguration(moveConfiguration);
+    if (error != WMError::WM_OK) {
+        return error;
+    }
     WSRect wsRect = { newRect.posX_, newRect.posY_, newRect.width_, newRect.height_ };
     auto hostSession = GetHostSession();
     CHECK_HOST_SESSION_RETURN_ERROR_IF_NULL(hostSession, WMError::WM_ERROR_INVALID_WINDOW);
+    property_->SetRequestRect(newRect);
     auto ret = hostSession->UpdateSessionRect(wsRect, SizeChangeReason::MOVE, false, true, moveConfiguration);
     if (state_ == WindowState::STATE_SHOWN) {
         layoutCallback_->ResetMoveToLock();

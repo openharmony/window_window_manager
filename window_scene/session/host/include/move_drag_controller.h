@@ -1041,19 +1041,19 @@ private:
     WSRect movingAvoidRect_ = WSRect::EMPTY_RECT;
 
     /**
-     * @brief Cached full-screen rectangles for all connected screens
+     * @brief Cached full-screen rectangles for screens eligible for the current move-drag operation
      *        in the legacy global coordinate system.
      */
     std::unordered_map<ScreenId, WSRect> globalScreenRectMap_;
 
     /**
-     * @brief Cached available rectangles for all connected screens
+     * @brief Cached available rectangles for screens eligible for the current move-drag operation
      *        in the legacy global coordinate system.
      */
     std::unordered_map<ScreenId, WSRect> globalAvailableScreenRectMap_;
 
     /**
-     * @brief Refresh cached full-screen and available rectangles for all connected screens.
+     * @brief Refresh cached full-screen and available rectangles for eligible screens.
      */
     void RefreshGlobalScreenRects();
 
