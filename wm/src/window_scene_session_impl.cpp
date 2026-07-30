@@ -2134,14 +2134,12 @@ bool WindowSceneSessionImpl::isNeedWindowShow(uint32_t reason)
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
         NotifyAfterForeground(true, false);
         NotifyAfterDidForeground(reason);
-        RecordWindowLifecycleChange("user switch show");
         return true;
     }
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::PC_APP_IN_PAD)) {
         TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, PcAppInPad when unlock.", GetPersistentId());
         NotifyAfterForeground(true, false);
         NotifyAfterDidForeground(reason);
-        RecordWindowLifecycleChange("PcAppInPad when unlock");
         return true;
     }
     return false;
