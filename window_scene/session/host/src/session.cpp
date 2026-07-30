@@ -1978,15 +1978,27 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken,
     if (mainHandler_ && !IsSystemSession()) {
         std::shared_ptr<RSSurfaceNode> surfaceNode;
         std::shared_ptr<RSSurfaceNode> shadowSurfaceNode;
+        std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode;
+        std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode;
         {
             std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
             surfaceNode_.swap(surfaceNode);
             shadowSurfaceNode.swap(shadowSurfaceNode_);
         }
-        mainHandler_->PostTask([surfaceNode = std::move(surfaceNode),
-                                shadowSurfaceNode = std::move(shadowSurfaceNode)]() mutable {
+        {
+            std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+            leashWinSurfaceNode.swap(leashWinSurfaceNode_);
+            leashWinShadowSurfaceNode.swap(leashWinShadowSurfaceNode_);
+        }
+        mainHandler_->PostTask([id = GetPersistentId(), surfaceNode = std::move(surfaceNode),
+                                shadowSurfaceNode = std::move(shadowSurfaceNode),
+                                leashWinSurfaceNode = std::move(leashWinSurfaceNode),
+                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode)]() mutable {
+            TLOGNI(WmsLogTag::WMS_LIFE, "[id: %{public}d] release surfaceNode when disconnect", id);
             surfaceNode.reset();
             shadowSurfaceNode.reset();
+            leashWinSurfaceNode.reset();
+            leashWinShadowSurfaceNode.reset();
         });
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
