@@ -15175,6 +15175,12 @@ void SceneSessionManager::SetVirtualPixelRatioChangeListener(const ProcessVirtua
     TLOGI(WmsLogTag::DEFAULT, "end");
 }
 
+void SceneSessionManager::SetUpdateDisplayDpiChangeCallback(const UpdateDisplayDpiChangeFunc& func)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "in");
+    updateDisplayDpiChangeFunc_ = func;
+}
+
 bool SceneSessionManager::ShouldProcessVirtualPixelRatioChange(
     DisplayStateChangeType type, sptr<DisplayInfo> displayInfo)
 {
@@ -15211,6 +15217,10 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
         return;
     }
     taskScheduler_->PostSyncTask([this, displayInfo, type, where = __func__]() {
+        if (updateDisplayDpiChangeFunc_ != nullptr) {
+            TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s in", where);
+            updateDisplayDpiChangeFunc_(displayInfo->GetDisplayId(), displayInfo->GetVirtualPixelRatio());
+        }
         if (ShouldProcessVirtualPixelRatioChange(type, displayInfo)) {
             Rect rect = { displayInfo->GetOffsetX(), displayInfo->GetOffsetY(),
                           displayInfo->GetWidth(), displayInfo->GetHeight() };

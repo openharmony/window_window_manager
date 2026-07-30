@@ -464,7 +464,7 @@ FoldStatus ScreenSessionManagerAdapter::FoldStatusTrans(FoldStatus foldStatus)
     return transfoldstatus;
 }
 
-void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus)
+void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus, FoldStatus lastStatus)
 {
     INIT_PROXY_CHECK_RETURN();
     auto agents = dmAgentContainer_.GetAgentsByType(DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER);
@@ -485,8 +485,21 @@ void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus)
         }
         if (!ScreenSessionManager::GetInstance().IsFreezed(agentPid,
                                                            DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER)) {
-            agent->NotifyFoldStatusChanged(foldStatusNew);
+            continue;
         }
+        bool isBlocked = ScreenSessionManager::GetInstance().IsHoverBlockPid(agentPid);
+        if (!isBlocked) {
+            agent->NotifyFoldStatusChanged(foldStatusNew);
+            continue;
+        }
+        FoldStatus actualNewStatus =
+            (isBlocked && foldStatusNew == FoldStatus::HALF_FOLD) ? FoldStatus::EXPAND : foldStatusNew;
+        FoldStatus actualOldStatus =
+            (isBlocked && lastStatus == FoldStatus::HALF_FOLD) ? FoldStatus::EXPAND : lastStatus;
+        if (actualNewStatus == actualOldStatus) {
+            continue;
+        }
+        agent->NotifyFoldStatusChanged(actualNewStatus);
     }
 }
 
