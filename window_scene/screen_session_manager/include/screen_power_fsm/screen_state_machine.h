@@ -136,7 +136,7 @@ private:
     static bool ActionScreenPowerOff(ScreenPowerEvent event, const ScreenPowerInfoType& type);
     static bool DoSetScreenFoldPowerFunc(ScreenPowerEvent event, const ScreenPowerInfoType& type);
 
-    sptr<ScreenStateTimer> timer_;
+    ScreenStateTimer timer_;
     std::mutex mtx;
     bool isForceTrans_ = false;
     uint32_t initRefCnt_ = 0;

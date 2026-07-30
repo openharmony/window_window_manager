@@ -37,17 +37,19 @@ class FoldScreenSensorManager : public RefBase {
 public:
     void RegisterPostureCallback();
 
-    void RegisterHallCallback();
+    void RegisterApplicationStateObserver();
 
     void UnRegisterPostureCallback();
 
     void UnRegisterHallCallback();
 
-    void RegisterApplicationStateObserver();
+    void RegisterHallCallback();
 
     void SetFoldScreenPolicy(sptr<FoldScreenPolicy> foldScreenPolicy);
 
     void SetSensorFoldStateManager(sptr<SensorFoldStateManager> sensorFoldStateManager);
+
+    void SetTaskScheduler(std::shared_ptr<TaskScheduler> scheduler);
 
     void HandlePostureData(const SensorEvent* const event);
 
@@ -70,8 +72,7 @@ private:
 
     sptr<SensorFoldStateManager> sensorFoldStateManager_;
 
-    void notifyFoldAngleChanged(float foldAngle);
-
+    void NotifyFoldAngleChanged(float foldAngle);
     bool HandleAbnormalAngle();
 
     FoldScreenSensorManager();

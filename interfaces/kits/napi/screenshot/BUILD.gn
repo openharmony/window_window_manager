@@ -30,10 +30,11 @@ ohos_shared_library("screenshot") {
 
   deps = [
     "../../../../dm:libdm",
-    "../common:dm_napi_common",
+    "../common:wm_napi_util",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",

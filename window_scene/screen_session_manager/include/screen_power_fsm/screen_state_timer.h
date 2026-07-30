@@ -21,10 +21,9 @@
 #include <future>
 
 #include "common/include/task_scheduler.h"
-#include "dms_global_mutex.h"
 
 namespace OHOS::Rosen {
-class ScreenStateTimer : public RefBase {
+class ScreenStateTimer {
 public:
     ScreenStateTimer() = default;
     ~ScreenStateTimer() = default;

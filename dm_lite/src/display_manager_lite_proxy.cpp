@@ -45,7 +45,6 @@ DMError DisplayManagerLiteProxy::RegisterDisplayManagerAgent(
         TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -54,22 +53,18 @@ DMError DisplayManagerLiteProxy::RegisterDisplayManagerAgent(
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-
     if (displayManagerAgent == nullptr) {
         TLOGE(WmsLogTag::DMS, "IDisplayManagerAgent is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
         TLOGE(WmsLogTag::DMS, "Write IDisplayManagerAgent failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         TLOGE(WmsLogTag::DMS, "Write DisplayManagerAgent type failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
@@ -83,35 +78,6 @@ DMError DisplayManagerLiteProxy::RegisterDisplayManagerAgent(
 #endif
 }
 
-bool DisplayManagerLiteProxy::RegisterClientDeathListener(sptr<IRemoteObject> reverseDeathObject)
-{
-    TLOGI(WmsLogTag::DMS, "ENTER");
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        TLOGW(WmsLogTag::DMS, "remote is nullptr");
-        return false;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!data.WriteInterfaceToken(GetDescriptor())) {
-        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
-        return false;
-    }
-    if (!data.WriteRemoteObject(reverseDeathObject)) {
-        TLOGE(WmsLogTag::DMS, "Write reverseDeathAgent failed");
-        return false;
-    }
-    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_REGISTER_DEATH_LISTENER),
-        data, reply, option) != ERR_NONE) {
-        TLOGW(WmsLogTag::DMS, "sendRequest failed");
-        return false;
-    }
-    bool res = static_cast<bool>(reply.ReadBool());
-    return res;
-}
-
 DMError DisplayManagerLiteProxy::UnregisterDisplayManagerAgent(
     const sptr<IDisplayManagerAgent>& displayManagerAgent, DisplayManagerAgentType type)
 {
@@ -121,7 +87,6 @@ DMError DisplayManagerLiteProxy::UnregisterDisplayManagerAgent(
         TLOGW(WmsLogTag::DMS, "remote is null");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -130,22 +95,18 @@ DMError DisplayManagerLiteProxy::UnregisterDisplayManagerAgent(
         TLOGE(WmsLogTag::DMS, "WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
     }
-
     if (displayManagerAgent == nullptr) {
         TLOGE(WmsLogTag::DMS, "IDisplayManagerAgent is null");
         return DMError::DM_ERROR_INVALID_PARAM;
     }
-
     if (!data.WriteRemoteObject(displayManagerAgent->AsObject())) {
         TLOGE(WmsLogTag::DMS, "Write IWindowManagerAgent failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-
     if (!data.WriteUint32(static_cast<uint32_t>(type))) {
         TLOGE(WmsLogTag::DMS, "Write DisplayManagerAgent type failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
-
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_UNREGISTER_DISPLAY_MANAGER_AGENT),
         data, reply, option) != ERR_NONE) {
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
@@ -287,6 +248,32 @@ void DisplayManagerLiteProxy::SetFoldDisplayMode(const FoldDisplayMode displayMo
 #endif
 }
 
+void DisplayManagerLiteProxy::SetFoldDisplayModeAsync(const FoldDisplayMode displayMode)
+{
+#ifdef SCENE_BOARD_ENABLED
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGW(WmsLogTag::DMS, "remote is null");
+        return;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::DMS, "WriteInterfaceToken Failed");
+        return;
+    }
+    if (!data.WriteUint32(static_cast<uint32_t>(displayMode))) {
+        TLOGE(WmsLogTag::DMS, "Write displayMode failed");
+        return;
+    }
+    if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE),
+                            data, reply, option) != ERR_NONE) {
+        TLOGE(WmsLogTag::DMS, "Send TRANS_ID_SCENE_BOARD_SET_FOLD_DISPLAY_MODE request failed");
+    }
+#endif
+}
+
 bool DisplayManagerLiteProxy::IsFoldable()
 {
 #ifdef SCENE_BOARD_ENABLED
@@ -321,7 +308,6 @@ FoldStatus DisplayManagerLiteProxy::GetFoldStatus()
         TLOGW(WmsLogTag::DMS, "remote is null");
         return FoldStatus::UNKNOWN;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -348,7 +334,6 @@ sptr<DisplayInfo> OHOS::Rosen::DisplayManagerLiteProxy::GetDefaultDisplayInfo(in
         TLOGW(WmsLogTag::DMS, "remote is null");
         return nullptr;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -365,7 +350,6 @@ sptr<DisplayInfo> OHOS::Rosen::DisplayManagerLiteProxy::GetDefaultDisplayInfo(in
         TLOGE(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
-
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
         TLOGW(WmsLogTag::DMS, "read display info failed, info is nullptr.");
@@ -391,7 +375,6 @@ sptr<DisplayInfo> DisplayManagerLiteProxy::GetDisplayInfoById(DisplayId displayI
         TLOGW(WmsLogTag::DMS, "remote is nullptr");
         return nullptr;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -408,7 +391,6 @@ sptr<DisplayInfo> DisplayManagerLiteProxy::GetDisplayInfoById(DisplayId displayI
         TLOGW(WmsLogTag::DMS, "SendRequest failed");
         return nullptr;
     }
-
     sptr<DisplayInfo> info = reply.ReadParcelable<DisplayInfo>();
     if (info == nullptr) {
         TLOGW(WmsLogTag::DMS, "SendRequest nullptr.");
@@ -435,7 +417,6 @@ sptr<CutoutInfo> DisplayManagerLiteProxy::GetCutoutInfo(DisplayId displayId)
         TLOGW(WmsLogTag::DMS, "remote is null");
         return nullptr;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -474,7 +455,6 @@ VirtualScreenFlag DisplayManagerLiteProxy::GetVirtualScreenFlag(ScreenId screenI
         TLOGE(WmsLogTag::DMS, "remote is null");
         return VirtualScreenFlag::DEFAULT;
     }
-
     if (screenId == SCREEN_ID_INVALID) {
         return VirtualScreenFlag::DEFAULT;
     }
@@ -513,11 +493,9 @@ bool DisplayManagerLiteProxy::WakeUpBegin(PowerStateChangeReason reason)
         TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin remote is nullptr");
         return false;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpBegin: WriteInterfaceToken failed");
         return false;
@@ -547,11 +525,9 @@ bool DisplayManagerLiteProxy::WakeUpEnd()
         TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd remote is nullptr");
         return false;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "[UL_POWER]WakeUpEnd: WriteInterfaceToken failed");
         return false;
@@ -577,11 +553,9 @@ bool DisplayManagerLiteProxy::SuspendBegin(PowerStateChangeReason reason)
         TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendBegin remote is nullptr");
         return false;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendBegin: WriteInterfaceToken failed");
         return false;
@@ -611,11 +585,9 @@ bool DisplayManagerLiteProxy::SuspendEnd()
         TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendEnd remote is nullptr");
         return false;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "[UL_POWER]SuspendEnd: WriteInterfaceToken failed");
         return false;
@@ -675,11 +647,9 @@ ScreenId DisplayManagerLiteProxy::GetInternalScreenId()
         TLOGE(WmsLogTag::DMS, "[UL_POWER]GetInternalScreenId remote is nullptr");
         return SCREEN_ID_INVALID;
     }
-    
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
-
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "[UL_POWER]GetInternalScreenId: WriteInterfaceToken failed");
         return SCREEN_ID_INVALID;
@@ -704,7 +674,6 @@ bool DisplayManagerLiteProxy::SetScreenPowerById(ScreenId screenId, ScreenPowerS
         TLOGE(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerById remote is nullptr");
         return false;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -744,7 +713,6 @@ bool DisplayManagerLiteProxy::SetSpecifiedScreenPower(ScreenId screenId, ScreenP
         TLOGE(WmsLogTag::DMS, "[UL_POWER]SetSpecifiedScreenPower remote is nullptr");
         return false;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -785,7 +753,6 @@ bool DisplayManagerLiteProxy::SetScreenPowerForAll(ScreenPowerState state, Power
         TLOGE(WmsLogTag::DMS, "[UL_POWER]SetScreenPowerForAll remote is nullptr");
         return false;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -822,7 +789,6 @@ ScreenPowerState DisplayManagerLiteProxy::GetScreenPower(ScreenId dmsScreenId)
         TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return ScreenPowerState::INVALID_STATE;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -860,7 +826,6 @@ ScreenPowerState DisplayManagerLiteProxy::GetScreenPower()
         TLOGE(WmsLogTag::DMS, "remote is nullptr");
         return ScreenPowerState::INVALID_STATE;
     }
-
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1078,7 +1043,7 @@ std::vector<DisplayId> DisplayManagerLiteProxy::GetAllDisplayIds(int32_t userId)
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "[UL_POWER]GetAllDisplayIds remote is nullptr");
+        TLOGE(WmsLogTag::DMS, "[UL_POWER]remote is nullptr");
         return {};
     }
     std::vector<DisplayId> allDisplayIds;
@@ -1243,6 +1208,7 @@ DMError DisplayManagerLiteProxy::IsOnboardDisplay(DisplayId displayId, bool& isO
         TLOGE(WmsLogTag::DMS, "read isOnboardDisplay failed");
         return DMError::DM_ERROR_IPC_FAILED;
     }
+    TLOGI(WmsLogTag::DMS, "res %{public}u", res);
     return DMError::DM_OK;
 }
 
@@ -1300,7 +1266,7 @@ bool DisplayManagerLiteProxy::GetKeyboardState()
 #ifdef SCENE_BOARD_ENABLED
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TLOGE(WmsLogTag::DMS, "GetKeyboardState: remote is null");
+        TLOGE(WmsLogTag::DMS, "remote is null");
         return false;
     }
 

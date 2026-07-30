@@ -16,24 +16,23 @@
 #include "screen_scene.h"
 
 #include <event_handler.h>
+#include <transaction/rs_interfaces.h>
 #include <ui_content.h>
 #include <viewport_config.h>
 
 #include "app_mgr_client.h"
+#include "singleton.h"
+#include "singleton_container.h"
 
 #include "dm_common.h"
 #include "display_manager.h"
 #include "rs_adapter.h"
 #include "screen_session_manager_client.h"
-#include "singleton.h"
-#include "singleton_container.h"
+#include "intention_event_manager.h"
+#include "input_transfer_station.h"
 #include "window_manager_hilog.h"
 #include "root_scene.h"
 #include "load_intention_event.h"
-
-#include <transaction/rs_interfaces.h>
-#include "intention_event_manager.h"
-#include "input_transfer_station.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -75,7 +74,7 @@ WMError ScreenScene::Destroy(uint32_t reason, bool isFromInnerkits)
         task = [uiContent]() {
             if (uiContent != nullptr) {
                 uiContent->Destroy();
-                TLOGW(WmsLogTag::DMS, "ScreenScene: uiContent destroy success!");
+                TLOGD(WmsLogTag::DMS, "ScreenScene: uiContent destroy success!");
             }
         };
     }
@@ -109,7 +108,7 @@ void ScreenScene::LoadContent(const std::string& contentUrl, napi_env env, napi_
     uiContent_->Foreground();
     uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
     wptr<Window> weakWindow(this);
-    RootScene::staticRootScene_->AddRootScene(displayId_, weakWindow);
+    RootScene::staticRootScene_->AddRootScene(DEFAULT_DISPLAY_ID, weakWindow);
     RegisterInputEventListener();
 }
 
@@ -181,6 +180,21 @@ void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configur
     }
 }
 
+void ScreenScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
+{
+    TLOGI(WmsLogTag::DMS, "update configuration.");
+    UpdateConfiguration(configuration);
+    if (configurationUpdateCallback_) {
+        configurationUpdateCallback_(configuration);
+    }
+}
+
+void ScreenScene::SetOnConfigurationUpdatedCallback(
+    const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback)
+{
+    configurationUpdateCallback_ = callback;
+}
+
 void ScreenScene::RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
 {
     vsyncStation_->RequestVsync(vsyncCallback);
@@ -209,21 +223,6 @@ void ScreenScene::OnBundleUpdated(const std::string& bundleName)
     }
 }
 
-void ScreenScene::UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
-{
-    TLOGI(WmsLogTag::DMS, "in");
-    UpdateConfiguration(configuration);
-    if (configurationUpdateCallback_) {
-        configurationUpdateCallback_(configuration);
-    }
-}
-
-void ScreenScene::SetOnConfigurationUpdatedCallback(
-    const std::function<void(const std::shared_ptr<AppExecFwk::Configuration>&)>& callback)
-{
-    configurationUpdateCallback_ = callback;
-}
-
 void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
 {
     if (g_ssIsDestroyed) {
@@ -234,6 +233,7 @@ void ScreenScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_) {
         uiContent_->SetFrameLayoutFinishCallback(std::move(frameLayoutFinishCb_));
+        frameLayoutFinishCb_ = nullptr;
     }
     TLOGI(WmsLogTag::WMS_LAYOUT, "SetFrameLayoutFinishCallback end");
 }

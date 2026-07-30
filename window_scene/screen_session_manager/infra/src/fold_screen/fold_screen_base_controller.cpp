@@ -251,6 +251,7 @@ void FoldScreenBaseController::SetIsClearingBootAnimation(bool isClearingBootAni
 void FoldScreenBaseController::NotifyRunSensorFoldStateManager()
 {
     TLOGI(WmsLogTag::DMS, "TaskSequenceProcess FoldScreenBaseController::NotifyRunSensorFoldStateManager");
+    DMS::SensorFoldStateMgr::GetInstance().FinishTaskSequence();
 }
 
 float FoldScreenBaseController::GetSpecialVirtualPixelRatio()

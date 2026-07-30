@@ -33,6 +33,12 @@
 namespace OHOS {
 
 namespace Rosen {
+enum class ScreenDirectionType : uint32_t {
+    LEFT,
+    TOP,
+    RIGHT,
+    BOTTOM
+};
 
 class RSInterfaces;
 
@@ -67,11 +73,10 @@ public:
 
     SuperFoldStatus GetCurrentStatus();
 
-    bool GetSystemKeyboardStatus();
-
     FoldStatus MatchSuperFoldStatusToFoldStatus(SuperFoldStatus superFoldStatus);
 
     void SetSystemKeyboardStatus(bool isTpKeyboardOn = false);
+    bool GetSystemKeyboardStatus();
 
     bool GetKeyboardState();
 
@@ -83,14 +88,13 @@ public:
 
     void HandleSuperFoldDisplayCallback(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent);
 
-    void AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
+    void AddMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds, const DMRect& rect);
     void ClearMirrorVirtualScreenIds(const std::vector<ScreenId>& screenIds);
     void HandleSuperFoldDisplayInServer(sptr<ScreenSession>& screenSession,
         SuperFoldStatusChangeEvents changeEvent);
 
 private:
     std::atomic<SuperFoldStatus> curState_ = SuperFoldStatus::UNKNOWN;
-
     sptr<FoldCreaseRegion> currentSuperFoldCreaseRegion_ = nullptr;
     FoldCreaseRegion liveCreaseRegion_ = FoldCreaseRegion(0, {});
     FoldCreaseRegion GetFoldCreaseRegion(bool isVertical, bool isNeedReverse) const;
@@ -98,7 +102,6 @@ private:
         std::vector<DMRect>& foldCreaseRect) const;
     std::mutex superStatusMutex_;
     std::vector<SuperFoldCreaseRegionItem> superFoldCreaseRegionItems_;
-
     struct Transition {
         SuperFoldStatus nextState;
         std::function<void (SuperFoldStatusChangeEvents)> action;
@@ -134,11 +137,6 @@ private:
     void HandleKeyboardOffDisplayNotify(sptr<ScreenSession>& screenSession);
     void HandleSystemKeyboardStatusDisplayNotify(sptr<ScreenSession>& screenSession, bool isTpKeyboardOn = false);
     void ReportNotifySuperFoldStatusChange(int32_t currentStatus, int32_t nextStatus, float postureAngle);
-    static void BootFinishedCallback(const char *key, const char *value, void *context);
-    void InitHalfScreen();
-    void RegisterHalfScreenSwitchesObserver();
-    void UnregisterHalfScreenSwitchesObserver();
-    void OnHalfScreenSwitchesStateChanged();
     void UpdateScreenHalfState(sptr<ScreenSession>& screenSession, SuperFoldStatusChangeEvents changeEvent);
 
     void HandleExtendToHalfFoldDisplayNotifyInServer(sptr<ScreenSession>& screenSession);
@@ -157,7 +155,7 @@ private:
     void ModifyMirrorScreenVisibleRectInner(const OHOS::Rect& rsRect, std::vector<DisplayId>& displayIds);
     std::vector<DisplayId> CalculateReCordingDisplayIds(const OHOS::Rect& nextRect);
 
-    std::vector<ScreenId> mirrorScreenIds_;
+    std::map<ScreenId, OHOS::Rect> mirrorScreenVisibleRectMap_;
 
     std::mutex mirrorScreenIdsMutex_;
 

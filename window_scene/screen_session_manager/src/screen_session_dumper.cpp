@@ -32,24 +32,23 @@
 #include "fold_screen_state_internel.h"
 #include "window_helper.h"
 #include "fold_screen_controller/secondary_fold_sensor_manager.h"
-
-#include "fold_screen_common.h"
 #include "screen_sensor_mgr.h"
+#include "fold_screen_common.h"
 
 namespace OHOS {
 namespace Rosen {
 namespace {
 constexpr int LINE_WIDTH = 30;
-constexpr int MAX_DUMPER_PARAM_NUMBER = 10;
-const std::string ARG_DUMP_HELP = "-h";
-const std::string ARG_DUMP_ALL = "-a";
-const std::string ARG_DUMP_FOLD_STATUS = "-f";
 constexpr int DUMPER_PARAM_INDEX_ONE = 1;
 constexpr int DUMPER_PARAM_INDEX_TWO = 2;
 constexpr int DUMPER_PARAM_INDEX_THREE = 3;
 constexpr int DUMPER_PARAM_INDEX_FOUR = 4;
 constexpr int DUMPER_PARAM_INDEX_FIVE = 5;
 constexpr int DUMPER_PARAM_INDEX_SIX = 6;
+constexpr int MAX_DUMPER_PARAM_NUMBER = 10;
+const std::string ARG_DUMP_HELP = "-h";
+const std::string ARG_DUMP_ALL = "-a";
+const std::string ARG_DUMP_FOLD_STATUS = "-f";
 const std::string ARG_DUMP_LCD_STATUS = "-lcd";
 
 constexpr int MOTION_SENSOR_PARAM_SIZE = 2;
@@ -72,15 +71,15 @@ const std::vector<std::string> displayModeCommands = {"-f", "-m", "-sub", "-coor
 const std::string ARG_LOCK_FOLD_DISPLAY_STATUS = "-l";
 const std::string ARG_UNLOCK_FOLD_DISPLAY_STATUS = "-u";
 const std::string ARG_FORCE_SET_FOLD_STATUS_AND_LOCK = "-ln";
-const std::string ARG_RESTORE_PHYSICAL_FOLD_STATUS = "-un";
+const std::string ARG_RESTORE_PHYSICAL_FOLD_STATUS = "-u";
 const std::string ARG_SET_ON_TENT_MODE = "-ontent";
 const std::string ARG_SET_OFF_TENT_MODE = "-offtent";
 const std::string ARG_SET_HOVER_STATUS = "-hoverstatus";
 const std::string ARG_SET_SUPER_FOLD_STATUS = "-supertrans";
 const std::string ARG_SET_POSTURE_HALL = "-posture";
 const std::string ARG_SET_POSTURE_HALL_STATUS = "-registerhall"; // 关闭开合sensor报值
-const std::string ARG_CHANGE_OUTER_CMD = "outer";
 const std::string ARG_SET_SECONDARY_FOLD_STATUS = "-secondary";
+const std::string ARG_CHANGE_OUTER_CMD = "outer";
 const std::string ANGLE_STR = "angle";
 const std::string HALL_STR = "hall";
 const std::string ARG_SET_LANDSCAPE_LOCK = "-landscapelock";
@@ -436,7 +435,7 @@ void ScreenSessionDumper::ShowHelpInfo()
             "eg. -rotationlock,0 \n")
         .append(" -motion                        ")
         .append("|set the sensor rotation angle clockwise, "\
-            "0 is 0 degree, 1 is 90 degree, 2 is 180 degree, 3 is 270 degree, eg. -motion,1\n");
+            "0 means 0 degree, 1 means 90 degree, 2 means 180 degree, 3 means 270 degree, eg. -motion,1\n");
     if (!system::GetBoolParameter("dms.hidumper.supportdebug", false)) {
         return;
     }
@@ -481,9 +480,9 @@ void ScreenSessionDumper::ShowUserScreenRelation()
 {
     std::ostringstream oss;
     dumpInfo_.append("------- ConcurrentUser-Screen Relation --------\n");
-    std::vector<DisplayId> displayIds = ScreenSessionManager::GetInstance().GetAllScreenIds();
-    for (auto displayId : displayIds) {
-        DumpDisplayUserRelation(displayId);
+    std::vector<ScreenId> screenIds = ScreenSessionManager::GetInstance().GetAllScreenIds();
+    for (auto screenId : screenIds) {
+        DumpScreenUserRelation(screenId);
     }
 }
 
@@ -497,7 +496,7 @@ void ScreenSessionDumper::ShowVisibleAreaDisplayInfo()
     std::vector<DisplayId> displayIds = ScreenSessionManager::GetInstance().GetAllDisplayIds();
     for (auto displayId : displayIds) {
         std::ostringstream oss;
-        oss << "---------------- Display ID: " << displayId << " ----------------" << std::endl;
+        oss << "-------------- Display ID: " << displayId << " --------------" << std::endl;
         dumpInfo_.append(oss.str());
         DumpVisibleAreaDisplayInfoById(displayId);
     }
@@ -518,7 +517,7 @@ void ScreenSessionDumper::DumpFoldStatus()
     dumpInfo_.append(oss.str());
 }
 
-std::string ScreenSessionDumper::ConvertFoldStatusToString(FoldStatus status) const
+std::string ScreenSessionDumper::ConvertFoldStatusToString(FoldStatus status)
 {
     auto it = statusMap_.find(status);
     return it != statusMap_.end() ? it->second : "UNKNOWN";
@@ -686,6 +685,16 @@ void ScreenSessionDumper::DumpRsInfoById01(sptr<ScreenSession> screenSession)
     dumpInfo_.append(oss.str());
 }
 
+void ScreenSessionDumper::DumpCutoutInfoPrint(std::ostringstream& oss,
+    const DMRect& areaRect, const std::string& label)
+{
+    oss << std::left << std::setw(LINE_WIDTH) << label
+        << areaRect.posX_ << ", "
+        << areaRect.posY_ << ", "
+        << areaRect.width_ << ", "
+        << areaRect.height_ << std::endl;
+}
+
 void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
 {
     std::ostringstream oss;
@@ -695,29 +704,10 @@ void ScreenSessionDumper::DumpCutoutInfoById(ScreenId id)
         TLOGE(WmsLogTag::DMS, "cutoutInfo nullptr. screen id: %{public}" PRIu64"", id);
         return;
     }
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_L<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().left.height_ << std::endl;
-
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_T<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().top.height_ << std::endl;
-
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_R<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().right.height_ << std::endl;
-
-    oss << std::left << std::setw(LINE_WIDTH) << "WaterFall_B<X,Y,W,H>: "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posX_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.posY_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.width_ << ", "
-        << cutoutInfo->GetWaterfallDisplayAreaRects().bottom.height_ << std::endl;
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().left, "WaterFall_L<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().top, "WaterFall_T<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().right, "WaterFall_R<X,Y,W,H>: ");
+    DumpCutoutInfoPrint(oss, cutoutInfo->GetWaterfallDisplayAreaRects().bottom, "WaterFall_B<X,Y,W,H>: ");
 
     std::vector<DMRect> boundingRects = cutoutInfo->GetBoundingRects();
     oss << std::left << std::setw(LINE_WIDTH) << "BoundingRects<X,Y,W,H>: ";
@@ -769,9 +759,9 @@ void ScreenSessionDumper::DumpVisibleAreaDisplayInfoById(DisplayId id)
         TLOGE(WmsLogTag::DMS, "displayInfo nullptr. display id: %{public}" PRIu64"", id);
         return;
     }
-    oss << std::left << std::setw(LINE_WIDTH) << "Width: "
+    oss << std::left << std::setw(LINE_WIDTH) << "visibleAreaWidth: "
         << displayInfo->GetWidth() << std::endl;
-    oss << std::left << std::setw(LINE_WIDTH) << "Height: "
+    oss << std::left << std::setw(LINE_WIDTH) << "visibleAreaHeight: "
         << displayInfo->GetHeight() << std::endl;
     dumpInfo_.append(oss.str());
 }
@@ -811,29 +801,30 @@ void ScreenSessionDumper::DumpScreenPropertyById(ScreenId id)
     dumpInfo_.append(oss.str());
 }
 
-void ScreenSessionDumper::DumpDisplayUserRelation(DisplayId id)
+void ScreenSessionDumper::DumpScreenUserRelation(ScreenId id)
 {
     const auto& manager = ScreenSessionManager::GetInstance();
-    const auto tempMap = manager.GetDisplayConcurrentUserMap();
+    const std::map<DisplayId, std::map<int32_t, ScreenSessionManager::UserInfo>> tempMap
+        = manager.GetDisplayConcurrentUserMap();
     std::vector<int32_t> userVector;
     auto it = tempMap.find(id);
     if (it == tempMap.end()) {
         return;
     }
     const auto& userMap = it->second;
-    for (const auto& [userId, userInfo] : userMap) {
-        if (!manager.CheckPidInDeathPidVector(userInfo.pid)) {
+    for (const auto& [userId, UserInfo] : userMap) {
+        if (!manager.CheckPidInDeathPidVector(UserInfo.pid)) {
             userVector.push_back(userId);
         }
     }
     if (userVector.empty()) {
         return;
     }
-
+ 
     std::ostringstream oss;
     oss << std::left << std::setw(LINE_WIDTH) << "DisplayId:" << id << std::endl;
     oss << std::left << std::setw(LINE_WIDTH) << "User:";
-    for (size_t i = 0; i < userVector.size(); ++i) {
+    for (size_t i = 0; i < userVector.size(); i++) {
         if (i != 0) {
             oss << " ";
         }
@@ -1003,11 +994,11 @@ int ScreenSessionDumper::ForceSetFoldStatusAndLock(std::string& input)
     std::string prefix = input.substr(0, commaPos);
     std::string valueStr = input.substr(commaPos + 1);
     if (prefix != ARG_FORCE_SET_FOLD_STATUS_AND_LOCK) {
-        TLOGW(WmsLogTag::DMS, "Invalid prefix, expected '-ln'");
+        TLOGW(WmsLogTag::DMS, "Invalid prefix, expect '-ln'");
         return -1;
     }
 
-    std::unordered_map<std::string, FoldStatus> stringToEnum = {
+    std::unordered_map<std::string, FoldStatus> stringToEnmu = {
         {"1", FoldStatus::EXPAND},
         {"2", FoldStatus::FOLDED},
         {"3", FoldStatus::HALF_FOLD},
@@ -1016,14 +1007,13 @@ int ScreenSessionDumper::ForceSetFoldStatusAndLock(std::string& input)
         {"12", FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_EXPAND},
         {"22", FoldStatus::FOLD_STATE_FOLDED_WITH_SECOND_HALF_FOLDED},
         {"13", FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND},
-        {"23", FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED}
+        {"23", FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED},
     };
-    if (stringToEnum.find(valueStr) == stringToEnum.end()) {
-        TLOGW(WmsLogTag::DMS, "Illegal input: %{public}s fold status param!", valueStr.c_str());
+    if (stringToEnmu.find(valueStr) == stringToEnmu.end()) {
+        TLOGW(WmsLogTag::DMS, "Illeagle input: %{public}s fold status param!", valueStr.c_str());
         return -1;
     }
-
-    DMError ret = ScreenSessionManager::GetInstance().ForceSetFoldStatusAndLock(stringToEnum[valueStr]);
+    DMError ret = ScreenSessionManager::GetInstance().ForceSetFoldStatusAndLock(stringToEnmu[valueStr]);
     if (ret != DMError::DM_OK) {
         return -1;
     }
@@ -1044,10 +1034,8 @@ void ScreenSessionDumper::SetEnterOrExitTentMode(std::string input)
 #ifdef FOLD_ABILITY_ENABLE
     if (input == ARG_SET_ON_TENT_MODE) {
         ScreenSessionManager::GetInstance().OnTentModeChanged(true);
-        ScreenSessionManager::GetInstance().NotifyTentModeChange(TentMode::TENT_MODE);
     } else if (input == ARG_SET_OFF_TENT_MODE) {
         ScreenSessionManager::GetInstance().OnTentModeChanged(false);
-        ScreenSessionManager::GetInstance().NotifyTentModeChange(TentMode::UNKNOWN);
     }
 #endif
 }
@@ -1183,13 +1171,13 @@ void ScreenSessionDumper::SetSuperFoldStatusChange(std::string input)
             TLOGE(WmsLogTag::DMS, "params is invalid: %{public}d", value);
             return;
         }
-        SuperFoldStatusChangeEvents superFoldStatus = static_cast<SuperFoldStatusChangeEvents>(value);
+        auto superFoldStatus = static_cast<SuperFoldStatusChangeEvents>(value);
         if (superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_ON ||
             superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_OFF) {
-            int hallVal = (superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_ON)?
+            int halVal = (superFoldStatus == SuperFoldStatusChangeEvents::KEYBOARD_ON)?
                 HALL_HAVE_KEYBOARD_THRESHOLD: HALL_REMOVE_KEYBOARD_THRESHOLD;
             HallData hallData{
-                .status = hallVal,
+                .status = halVal,
             };
             SensorEvent hallEvent = {
                 .data = reinterpret_cast<uint8_t*>(&hallData),
@@ -1279,6 +1267,7 @@ void ScreenSessionDumper::SetLandscapeLock(std::string input)
 
 void ScreenSessionDumper::SetDuringCallState(std::string input)
 {
+#ifdef FOLD_ABILITY_ENABLE
     size_t commaPos = input.find_last_of(',');
     if ((commaPos != std::string::npos) && (input.substr(0, commaPos) == ARG_SET_DURINGCALL_STATE)) {
         std::string valueStr = input.substr(commaPos + 1);
@@ -1298,6 +1287,7 @@ void ScreenSessionDumper::SetDuringCallState(std::string input)
         ScreenSessionManager::GetInstance().SetDuringCallState(value);
         TLOGI(WmsLogTag::DMS, "SetDuringCallState: %{public}d", value);
     }
+#endif
 }
 
 void ScreenSessionDumper::SetMultiScreenRelativePositionCmd(std::string input)
