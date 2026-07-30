@@ -474,7 +474,7 @@ void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus,
         TLOGE(WmsLogTag::DMS, "agent is null");
         return;
     }
-    FoldStatus foldStatusNew = foldStatus::UNKNOWN;
+    FoldStatus foldStatusNew = FoldStatus::UNKNOWN;
     bool isSysCall = false;
     for (auto& agent : agents) {
         foldStatusNew = foldStatus;
