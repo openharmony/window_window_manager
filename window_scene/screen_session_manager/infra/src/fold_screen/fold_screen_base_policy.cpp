@@ -586,6 +586,10 @@ bool FoldScreenBasePolicy::CheckDisplayModeChange(FoldDisplayMode displayMode, b
         TLOGI(WmsLogTag::DMS, "clearing bootAnimation not change displayMode");
         return false;
     }
+    if (!CheckBackSelfNeedChange(displayMode)) {
+        TLOGI(WmsLogTag::DMS, "check no need change displayMode when backself");
+        return false;
+    }
     if (reason == DisplayModeChangeReason::RECOVER_FROM_CACHE_MODE) {
         TLOGI(WmsLogTag::DMS, "recover mode to %{public}d", GetLastCacheDisplayMode());
         displayMode = GetLastCacheDisplayMode();
@@ -1062,6 +1066,17 @@ FoldDisplayMode FoldScreenBasePolicy::GetCurrentDisplayMode() const
 {
     std::lock_guard<std::recursive_mutex> lock_mode(displayModeMutex_);
     return currentDisplayMode_;
+}
+
+void FoldScreenBasePolicy::SetBackSelf(bool isBackSelf)
+{
+    std::lock_guard<std::mutex> lock_mode(displayBackSelfMutex_);
+    isBackSelf_ = isBackSelf;
+}
+
+bool FoldScreenBasePolicy::GetBackSelf()
+{
+    return isBackSelf_;
 }
 
 const std::map<FoldDisplayMode, RRect>& FoldScreenBasePolicy::GetScreenActiveModeRectMap() const
