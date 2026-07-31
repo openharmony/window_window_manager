@@ -921,6 +921,7 @@ private:
     void SetDragWindowScreenId(ScreenId screenId, ScreenId displayNodeScreenId);
 #endif // DEVICE_STATUS_ENABLE
     void NotifyUnfreezed(const std::set<int32_t>& unfreezedPidList, const sptr<ScreenSession>& screenSession);
+    void SubmitUnfreezeBatch();
     void NotifyUnfreezedAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
         const std::set<DisplayManagerAgentType>& pidAgentTypes, const sptr<ScreenSession>& screenSession);
     void NotifyUnfreezedAttributeAgents(const int32_t& pid, const std::set<int32_t>& unfreezedPidList,
@@ -994,6 +995,7 @@ private:
         explicit UnfreezeTask(sptr<IDisplayManagerAgent> ag) : agent(ag) {}
         virtual ~UnfreezeTask() = default;
         virtual void Execute() = 0;
+        bool IsAgentAlive() const;
     protected:
         sptr<IDisplayManagerAgent> agent;
     };
@@ -1256,6 +1258,8 @@ private:
 
     std::mutex freezedPidListMutex_;
     std::set<int32_t> freezedPidList_;
+    std::deque<std::unique_ptr<UnfreezeTask>> unfreezeTaskQueue_;
+    static constexpr size_t UNFREEZE_BATCH_SIZE = 10;
 
     std::mutex lastDisplayInfoMapMutex_;
     std::map<DisplayId, sptr<DisplayInfo>> lastDisplayInfoMap_;
