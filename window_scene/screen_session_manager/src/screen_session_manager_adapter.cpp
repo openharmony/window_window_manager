@@ -448,6 +448,22 @@ void ScreenSessionManagerAdapter::OnScreenshot(sptr<ScreenshotInfo> info)
     }
 }
 
+FoldStatus ScreenSessionManagerAdapter::FoldStatusTrans(FoldStatus foldStatus)
+{
+    FoldStatus transfoldstatus = foldStatus;
+    switch (foldStatus) {
+        case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED:
+        case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND:
+            transfoldstatus = FoldStatus::EXPAND;
+            break;
+        default : {
+            TLOGW(WmsLogTag::DMS, "foldStatus is unknown.");
+        }
+    }
+    TLOGNFI(WmsLogTag::DMS,   "transfoldstatus:%{public}d ", transfoldstatus);
+    return transfoldstatus;
+}
+
 void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus, FoldStatus lastStatus)
 {
     INIT_PROXY_CHECK_RETURN();
@@ -458,19 +474,26 @@ void ScreenSessionManagerAdapter::NotifyFoldStatusChanged(FoldStatus foldStatus,
         TLOGE(WmsLogTag::DMS, "agent is null");
         return;
     }
+    FoldStatus foldStatusNew = FoldStatus::UNKNOWN;
+    bool isSysCall = false;
     for (auto& agent : agents) {
+        foldStatusNew = foldStatus;
         int32_t agentPid = dmAgentContainer_.GetAgentPid(agent);
+        isSysCall = dmAgentContainer_.GetAgentSystem(agent);
+        if (!isSysCall) {
+            foldStatusNew = FoldStatusTrans(foldStatusNew);
+        }
         if (ScreenSessionManager::GetInstance().IsFreezed(agentPid,
-                                                          DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER)) {
+            DisplayManagerAgentType::FOLD_STATUS_CHANGED_LISTENER)) {
             continue;
         }
         bool isBlocked = ScreenSessionManager::GetInstance().IsHoverBlockPid(agentPid);
         if (!isBlocked) {
-            agent->NotifyFoldStatusChanged(foldStatus);
+            agent->NotifyFoldStatusChanged(foldStatusNew);
             continue;
         }
         FoldStatus actualNewStatus =
-            (isBlocked && foldStatus == FoldStatus::HALF_FOLD) ? FoldStatus::EXPAND : foldStatus;
+            (isBlocked && foldStatusNew == FoldStatus::HALF_FOLD) ? FoldStatus::EXPAND : foldStatusNew;
         FoldStatus actualOldStatus =
             (isBlocked && lastStatus == FoldStatus::HALF_FOLD) ? FoldStatus::EXPAND : lastStatus;
         if (actualNewStatus == actualOldStatus) {
