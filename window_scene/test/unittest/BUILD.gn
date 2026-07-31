@@ -208,6 +208,7 @@ ohos_unittest("ws_ability_info_manager_test") {
     "bundle_framework:appexecfwk_core",
     "bundle_framework:libappexecfwk_common",
     "hilog:libhilog",
+    "cJSON:cjson",
   ]
 }
 
