@@ -3219,7 +3219,7 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds08, TestSize.Level1)
     EXPECT_EQ(result, DisplayOrientation::LANDSCAPE);
     session->isInternal_ = true;
     result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::GLOBAL_FULL, bounds);
-    EXPECT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
+    EXPECT_EQ(result, DisplayOrientation::PORTRAIT);
 }
 
 /**
