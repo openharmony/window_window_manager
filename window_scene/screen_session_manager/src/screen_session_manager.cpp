@@ -14282,6 +14282,18 @@ void ScreenSessionManager::AttributeTask::Execute()
     manager->UpdateLastDisplayInfo(displayId, displayInfo);
 }
 
+bool ScreenSessionManager::UnfreezeTask::IsAgentAlive() const
+{
+    if (agent == nullptr) {
+        return false;
+    }
+    auto obj = agent->AsObject();
+    if (obj == nullptr) {
+        return false;
+    }
+    return !obj->IsObjectDead();
+}
+
 
 void ScreenSessionManager::CollectUnfreezedAttributeTasks(int32_t pid, DisplayManagerAgentType agentType,
     const UnfreezeNotifyContext& ctx, std::vector<std::unique_ptr<ScreenSessionManager::UnfreezeTask>>& tasks,
@@ -14392,7 +14404,10 @@ void ScreenSessionManager::CollectUnfreezedTasks(const std::set<int32_t>& unfree
 
 void LogUnfreezedInfo(const std::vector<std::pair<int32_t, std::set<DisplayManagerAgentType>>>& logData)
 {
-    std::string result = "pid,type:";
+    if (logData.empty()) {
+        return;
+    }
+    std::string result = "pid, agentType:";
     for (auto& entry : logData) {
         result.append(std::to_string(entry.first)).append(",");
         for (auto type : entry.second) {
@@ -14435,7 +14450,27 @@ void ScreenSessionManager::NotifyUnfreezed(const std::set<int32_t>& unfreezedPid
 
     auto tasks = BuildUnfreezedTasks(unfreezedPidList, ctx, pidAgentTypeMap_);
     for (auto& task : tasks) {
-        task->Execute();
+        unfreezeTaskQueue_.push_back(std::move(task));
+    }
+    SubmitUnfreezeBatch();
+}
+
+void ScreenSessionManager::SubmitUnfreezeBatch()
+{
+    size_t count = std::min(UNFREEZE_BATCH_SIZE, unfreezeTaskQueue_.size());
+    for (size_t i = 0; i < count; i++) {
+        auto task = std::move(unfreezeTaskQueue_.front());
+        unfreezeTaskQueue_.pop_front();
+        bool isLastInBatch = (i == count - 1);
+        auto sharedTask = std::shared_ptr<UnfreezeTask>(std::move(task));
+        taskScheduler_->PostAsyncTask([this, sharedTask, isLastInBatch] {
+            if (sharedTask->IsAgentAlive()) {
+                sharedTask->Execute();
+            }
+            if (isLastInBatch && !unfreezeTaskQueue_.empty()) {
+                SubmitUnfreezeBatch();
+            }
+        }, "UnfreezeTask");
     }
 }
 
