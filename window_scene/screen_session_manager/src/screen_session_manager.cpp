@@ -11406,10 +11406,16 @@ DMError ScreenSessionManager::SetFoldDisplayModeInner(const FoldDisplayMode disp
         UpdateCameraBackSelfie(true);
     }
     if (reason == "exitCoordinationMode" || reason == "exitBackSelfie") {
+        TLOGNFW(WmsLogTag::DMS, "SetBackSelf false");
+        foldScreenController_->SetBackSelf(false);
         ExitCoordinationAndRecoverDisplayMode();
         return DMError::DM_OK;
     }
     foldScreenController_->SetDisplayMode(displayMode);
+    if (reason.compare("backSelfie") == 0) {
+        TLOGNFW(WmsLogTag::DMS, "SetBackSelf true");
+        foldScreenController_->SetBackSelf(true);
+    }
     NotifyClientProxyUpdateFoldDisplayMode(displayMode);
 #endif
     return DMError::DM_OK;
