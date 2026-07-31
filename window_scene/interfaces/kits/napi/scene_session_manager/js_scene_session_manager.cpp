@@ -2477,7 +2477,7 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "InputInvalid"));
         return NapiGetUndefined(env);
     }
-    napi_value jsSceneSessionObj = argv[0];
+    napi_value jsSceneSessionObj = argv[ARG_INDEX_ZERO];
     if (jsSceneSessionObj == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to get js session object");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM), "InputInvalid"));
@@ -2500,14 +2500,14 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
     }
 
     bool isNewActive = true;
-    if (!ConvertFromJsValue(env, argv[1], isNewActive)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], isNewActive)) {
         TLOGE("Faile to convert parameter to isNewActive.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid."));
         return NapiGetUndefined(env);
     }
     bool isShowAbility = false;
-    if (!ConvertFromJsValue(env, argv[2], isShowAbility)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isShowAbility)) {
         TLOGE("Faile to convert parameter to isShowAbility.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid."));
