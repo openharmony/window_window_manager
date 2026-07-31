@@ -1460,14 +1460,14 @@ HWTEST_F(WindowSceneSessionImplTest, Hide04, TestSize.Level0)
 {
     g_logMsg.clear();
     LOG_SetCallback(LogCallback);
-    sptr option = sptr::MakeSptr();
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     option->SetWindowName("Hide04");
-    sptr window = sptr::MakeSptr(option);
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
 
     window->property_->SetPersistentId(1);
     window->property_->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
     SessionInfo sessionInfo = { "CreateTestBundle", "CreateTestModule", "CreateTestAbility"};
-    sptr session = sptr::MakeSptr(sessionInfo);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(sessionInfo);
     window->hostSession_ = session;
 
     EXPECT_EQ(WMError::WM_OK, window->Hide(0, false, false, false));

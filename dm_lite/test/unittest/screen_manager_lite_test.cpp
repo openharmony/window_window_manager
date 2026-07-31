@@ -87,7 +87,7 @@ HWTEST_F(ScreenManagerLiteTest, SetResolution, TestSize.Level1)
 
     dpi = 10;
     EXPECT_EQ(sml_.SetResolution(width, height, dpi), DMError::DM_ERROR_INVALID_PARAM);
-+}
+}
 }
 } // namespace Rosen
 } // namespace OHOS

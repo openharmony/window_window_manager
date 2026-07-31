@@ -157,7 +157,7 @@ HWTEST_F(SingleDisplayPocketFoldPolicyTest, GetSupportedFoldStatus, TestSize.Lev
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SingleDisplayPocketFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
 
-    EXPECT_THAT(policy.GetSupportedFoldStatus(),
+    EXPECT_THAT(policy.GetSupportedFoldStates(),
         UnorderedElementsAre(
             FoldStatus::EXPAND,
             FoldStatus::FOLDED,

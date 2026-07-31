@@ -583,11 +583,11 @@ HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_015, TestSiz
 }
 
 /**
- * @tc.name: TestCheckSystemWindowPermission_014
+ * @tc.name: TestCheckSystemWindowPermission_017
  * @tc.desc: Test CheckSystemWindowPermission with windowType FLOAT in pad
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_016, TestSize.Level1)
+HWTEST_F(SceneSessionManagerTest12, TestCheckSystemWindowPermission_017, TestSize.Level1)
 {
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     property->SetWindowType(WindowType::WINDOW_TYPE_FLOAT);

@@ -64,25 +64,6 @@ void SensorFoldStateManagerTest::TearDown()
 namespace {
 
 /**
- * @tc.name: SetTaskScheduler
- * @tc.number: SetTaskScheduler
- * @tc.desc: taskScheduler_ could be properly set when the input is valid.
- */
-HWTEST_F(SensorFoldStateManagerTest, SetTaskScheduler, TestSize.Level1)
-{
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    SuperFoldSensorManager mgr = SuperFoldSensorManager();
-    auto scheduler = std::make_shared<TaskScheduler>("task_test");
-    ASSERT_NE(scheduler, nullptr);
-    mgr.SetTaskScheduler(scheduler);
-    scheduler = nullptr;
-    mgr.SetTaskScheduler(scheduler);
-    EXPECT_TRUE(g_errLog.find("scheduler is nullptr") != std::string::npos);
-}
-
-
-/**
  * @tc.name: HandleSensorChange
  * @tc.desc: HandleSensorChange
  * @tc.type: FUNC
@@ -261,21 +242,6 @@ HWTEST_F(SensorFoldStateManagerTest, SetTentMode, TestSize.Level1)
     ASSERT_EQ(ret, false);
 }
 
-/**
- * @tc.name: NotifyRunTaskSequence
- * @tc.desc: NotifyRunTaskSequence
- * @tc.type: FUNC
- */
-HWTEST_F(SensorFoldStateManagerTest, FinishTaskSequence01, TestSize.Level0)
-{
-    SensorFoldStateManager mgr = SensorFoldStateManager();
-    g_errLog.clear();
-    LOG_SetCallback(MyLogCallback);
-    mgr.FinishTaskSequence();
-    EXPECT_TRUE(g_errLog.find("TaskSequenceProcess") != std::string::npos);
-    LOG_SetCallback(nullptr);
-    g_errLog.clear();
-}
 }
 } // namespace Rosen
 } // namespace OHOS

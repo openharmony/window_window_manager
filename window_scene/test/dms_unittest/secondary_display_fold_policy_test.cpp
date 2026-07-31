@@ -151,7 +151,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, GetSupportedFoldStatus, TestSize.Level1
         FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND,
         FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_HALF_FOLDED
     };
-    EXPECT_EQ(policy.GetSupportedFoldStatus(), supportedFoldStates_);
+    EXPECT_EQ(policy.GetSupportedFoldStates(), supportedFoldStates_);
 }
 
 /**
@@ -418,7 +418,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusFullActiveRectAndTpFeature, Te
     ScreenProperty property = policy.screenProperty_;
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
 
-    policy.SetStatusFullActiveRectAndTpFeature(screenSession, property, true);
+    policy.SetStatusFullActiveRectAndTpFeature(property, true);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
@@ -436,7 +436,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusMainActiveRectAndTpFeature, Te
     ScreenProperty property = policy.screenProperty_;
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
 
-    policy.SetStatusMainActiveRectAndTpFeature(screenSession, property);
+    policy.SetStatusMainActiveRectAndTpFeature(property);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 
@@ -454,7 +454,7 @@ HWTEST_F(SecondaryDisplayFoldPolicyTest, SetStatusGlobalFullActiveRectAndTpFeatu
     ScreenProperty property = policy.screenProperty_;
     sptr<ScreenSession> screenSession = ScreenSessionManager::GetInstance().GetScreenSession(0);
 
-    policy.SetStatusGlobalFullActiveRectAndTpFeature(screenSession, property);
+    policy.SetStatusGlobalFullActiveRectAndTpFeature(property);
     EXPECT_FALSE(policy.onBootAnimation_);
 }
 

@@ -432,7 +432,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfoByAbilityToken, TestSiz
     MockMessageParcel::ClearAllErrorFlag();
     sptr<MockIRemoteObject> remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
     sptr<SceneSessionManagerProxy> proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
-    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+    ASSERT_NE(proxy, nullptr);
 
     FocusChangeInfo focusInfo{};
     sptr<IRemoteObject> token = nullptr;
@@ -469,7 +469,7 @@ HWTEST_F(sceneSessionManagerProxyTest, GetFocusWindowInfoByAbilityToken_NullRemo
     MockMessageParcel::ClearAllErrorFlag();
     sptr<MockIRemoteObject> remoteMocker = nullptr;
     sptr<SceneSessionManagerProxy> proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
-    ASSERT_NE(sceneSessionManagerProxy, nullptr);
+    ASSERT_NE(proxy, nullptr);
 
     FocusChangeInfo focusInfo{};
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
@@ -2466,7 +2466,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateExtended01, Te
     sptr<MockIRemoteObject> remoteMocker = nullptr;
     auto proxy = sptr<SceneSessionManagerProxy>::MakeSptr(remoteMocker);
     auto ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
-    EXPECT_EQ(ret, WMError::WS_ERROR_NULLPTR);
+    EXPECT_EQ(ret, WMError::WM_ERROR_NULLPTR);
     ASSERT_NE(proxy, nullptr);
 
     remoteMocker = sptr<MockIRemoteObject>::MakeSptr();
@@ -2476,7 +2476,7 @@ HWTEST_F(sceneSessionManagerProxyTest, ConvertToRelativeCoordinateExtended01, Te
     MockMessageParcel::ClearAllErrorFlag();
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(true);
     ret = proxy->ConvertToRelativeCoordinateExtended(rect, newRect, newDisplayId);
-    EXPECT_EQ(WMError::WS_ERROR_NULLPTR, ret);
+    EXPECT_EQ(WMError::WM_ERROR_NULLPTR, ret);
     MockMessageParcel::SetWriteInterfaceTokenErrorFlag(false);
     
     MockMessageParcel::SetWriteInt32ErrorFlag(true);

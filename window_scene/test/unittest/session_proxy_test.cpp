@@ -2374,11 +2374,11 @@ HWTEST_F(SessionProxyTest, NotifyWindowStatusDidChangeAfterShowWindow, TestSize.
 {
     GTEST_LOG_(INFO) << "SessionProxyTest: NotifyWindowStatusDidChangeAfterShowWindow start";
     logMsg.clear();
-    LOG_SetCallBack(MyLogCallback);
+    LOG_SetCallback(MyLogCallback);
 
     auto mockRemote = sptr<MockIRemoteObject>::MakeSptr();
 
-    auto sProxy = sptr<MockIRemoteObject>::MakeSptr(nullptr);
+    auto sProxy = sptr<SessionProxy>::MakeSptr(nullptr);
     sProxy->NotifyWindowStatusDidChangeAfterShowWindow();
     EXPECT_TRUE(logMsg.find("remote is null") != std::string::npos);
 

@@ -1759,14 +1759,14 @@ HWTEST_F(WindowSceneSessionImplTest5, GetTargetOrientationConfigInfo, Function |
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> targetProperties;
     Rosen::SystemBarProperty targetStatusBarProperty;
     targetProperties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = targetStatusBarProperty;
-    std::make_shared<Ace::ViewportConfig> targetConfig;
+    auto targetConfig = std::make_shared<Ace::ViewportConfig>();
     std::map<AvoidAreaType, AvoidArea> targetAvoidAreas;
     Rosen::ViewportConfigAndAvoidArea targetViewportConfigAndAvoidArea = { targetConfig, targetAvoidAreas };
 
     std::map<Rosen::WindowType, Rosen::SystemBarProperty> currentProperties;
     Rosen::SystemBarProperty currentStatusBarProperty;
     currentProperties[Rosen::WindowType::WINDOW_TYPE_STATUS_BAR] = currentStatusBarProperty;
-    std::make_shared<Ace::ViewportConfig> currentConfig;
+    auto currentConfig = std::make_shared<Ace::ViewportConfig>();
     std::map<AvoidAreaType, AvoidArea> currentAvoidAreas;
     Rosen::ViewportConfigAndAvoidArea currentViewportConfigAndAvoidArea = { currentConfig, currentAvoidAreas };
 

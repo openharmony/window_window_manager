@@ -1046,18 +1046,23 @@ HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode, TestSize.L
  */
 HWTEST_F(PcFoldScreenControllerTest, UpdateSupportEnterWaterfallMode02, TestSize.Level1)
 {
-    controller_->UpdateSupportEnterWaterfallMode(false);
+    controller_->lastSupportEnterWaterfallMode_ = true;
+    controller_->maskSupportEnterWaterfallMode_ = false;
+    controller_->supportEnterWaterfallMode_ = false;
+    controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_FALSE(controller_->lastSupportEnterWaterfallMode_);
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
 
-    controller_->UpdateSupportEnterWaterfallMode(true);
+    controller_->lastSupportEnterWaterfallMode_ = false;
+    controller_->supportEnterWaterfallMode_ = true;
+    controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_TRUE(controller_->lastSupportEnterWaterfallMode_);
     EXPECT_TRUE(controller_->supportEnterWaterfallMode_);
 
     controller_->lastSupportEnterWaterfallMode_ = false;
     controller_->supportEnterWaterfallMode_ = false;
     mainSession_ = nullptr;
-    controller_->UpdateSupportEnterWaterfallMode(true);
+    controller_->UpdateSupportEnterWaterfallMode();
     EXPECT_FALSE(controller_->lastSupportEnterWaterfallMode_);
     EXPECT_FALSE(controller_->supportEnterWaterfallMode_);
 }

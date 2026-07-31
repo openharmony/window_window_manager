@@ -72,6 +72,7 @@ public:
     MOCK_METHOD1(SetIsShowDecorInFreeMultiWindow, WSError(bool isShow));
     MOCK_METHOD(WSError, SetContentAspectRatio, (float ratio, bool isPersistent, bool needUpdateRect), (override));
     MOCK_METHOD1(GetGlobalScaledRect, WMError(Rect& globalScaledRect));
+    void SetMockLayoutController(const sptr<LayoutController>& layoutController) { layoutController_ = layoutController; }
 };
 } // namespace Rosen
 } // namespace OHOS

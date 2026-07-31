@@ -616,7 +616,7 @@ HWTEST_F(WindowPatternStartingWindowTest, GetPreloadStartingWindow_WithInvalidPi
  * @tc.desc: release preload starting window when EraseSceneSessionMapById
  * @tc.type: FUNC
  */
-HETEST_F(WindowPatternStartingWindowTest, EraseSceneSessionMapById, TestSize.Level1)
+HWTEST_F(WindowPatternStartingWindowTest, EraseSceneSessionMapById, TestSize.Level1)
 {
     ASSERT_NE(ssm_, nullptr);
     SessionInfo sessionInfo;

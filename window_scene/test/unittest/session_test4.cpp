@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <regex>
 #include <pointer_event.h>
+#include <transaction/rs_transaction.h>
 #include <ui/rs_surface_node.h>
 
 #include "iremote_object_mocker.h"
