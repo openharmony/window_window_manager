@@ -3203,6 +3203,26 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds07, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcDeviceOrientationWithBounds08
+ * @tc.desc: Test CalcDeviceOrientationWithBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds08, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 2772;
+    bounds.rect_.height_ = 1344;
+    session->isInternal_ = false;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::GLOBAL_FULL, bounds);
+    EXPECT_EQ(result, DisplayOrientation::LANDSCAPE);
+    session->isInternal_ = true;
+    result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::GLOBAL_FULL, bounds);
+    EXPECT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
+}
+
+/**
  * @tc.name: GetIsPhysicalMirrorSwitch01
  * @tc.desc: Test when isPhysicalMirrorSwitch is true, GetIsPhysicalMirrorSwitch should return true
  * @tc.type: FUNC
