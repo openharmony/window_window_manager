@@ -370,7 +370,7 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         isTransfer = true;
     }
     if (ScreenSessionManager::GetInstance().IsSuperFoldMultiPadMode()) {
-        TLOGD(WmsLogTag::DMS, "pad mode cannot transfer state", curAngle);
+        TLOGD(WmsLogTag::DMS, "pad mode cannot transfer state");
         isTransfer = false;
     }
     float curAngle = SuperFoldSensorManager::GetInstance().GetCurAngle();
