@@ -11959,7 +11959,21 @@ FoldStatus ScreenSessionManager::GetFoldStatus()
     if (IsSpecialApp()) {
         return FoldStatus::UNKNOWN;
     }
-    return foldScreenController_->GetFoldStatus();
+    FoldStatus foldStatusNew = foldScreenController_->GetFoldStatus();
+    if (!Permission::IsSystemCalling()) {
+        if (FoldScreenStateInternel::IsSecondaryDisplaySuperFoldDevice()) {
+            switch (foldStatusNew) {
+                case FoldStatus::FOLD_STATE_EXPAND_WITH_SECOND_HALF_FOLDED:
+                case FoldStatus::FOLD_STATE_HALF_FOLDED_WITH_SECOND_EXPAND:
+                    foldStatusNew = FoldStatus::EXPAND;
+                    break;
+                default : {
+                    TLOGW(WmsLogTag::DMS, "foldStatus is unknown.");
+                }
+           }
+        }
+    }
+    return foldStatusNew;
 #else
     return FoldStatus::UNKNOWN;
 #endif
