@@ -369,7 +369,7 @@ void SuperFoldStateManager::HandleSuperFoldStatusChange(SuperFoldStatusChangeEve
         action = item->second.action;
         isTransfer = true;
     }
-    if (ScreenSessionManager::GetInstance().IsSuperFoldMultiPadMode) {
+    if (ScreenSessionManager::GetInstance().IsSuperFoldMultiPadMode()) {
         TLOGD(WmsLogTag::DMS, "pad mode cannot transfer state", curAngle);
         isTransfer = false;
     }
