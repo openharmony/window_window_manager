@@ -3215,10 +3215,10 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds08, TestSize.Level1)
     bounds.rect_.width_ = 2772;
     bounds.rect_.height_ = 1344;
     session->isInternal_ = false;
-    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::GLOBAL_FULL, bounds);
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::FULL, bounds);
     EXPECT_EQ(result, DisplayOrientation::LANDSCAPE);
     session->isInternal_ = true;
-    result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::GLOBAL_FULL, bounds);
+    result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::FULL, bounds);
     EXPECT_EQ(result, DisplayOrientation::PORTRAIT);
 }
 
