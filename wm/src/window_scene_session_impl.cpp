@@ -8175,7 +8175,7 @@ void WindowSceneSessionImpl::HandleDownForCompatibleMode(const std::shared_ptr<M
 
     if (IsInMappingRegionForCompatibleMode(displayX, displayY)) {
         int32_t pointerId = pointerEvent->GetPointerId();
-        if (pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
+        if (pointerId < 0 || pointerId >= GetValueByKey(eventMapTriggerByDisplay_, displayId).size() ||
             pointerId >= GetValueByKey(eventMapDeltaXByDisplay_, displayId).size() ||
             pointerId >= GetValueByKey(downPointerByDisplay_, displayId).size()) {
             TLOGE(WmsLogTag::DEFAULT, "pointerId: %{public}d out of range", pointerId);
