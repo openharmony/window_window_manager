@@ -147,6 +147,7 @@ ohos_unittest("ws_screen_session_publish_test") {
   external_deps += [
     "common_event_service:cesfwk_innerkits",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 }
 
@@ -163,6 +164,7 @@ ohos_unittest("ws_screen_setting_helper_test") {
   external_deps += [
     "ability_runtime:dataobs_manager",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 }
 
@@ -597,6 +599,7 @@ ohos_unittest("ws_screen_session_manager_test") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 
   defines = []
@@ -686,6 +689,7 @@ ohos_unittest("ws_screen_session_manager_test_three") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 
   defines = []
@@ -752,6 +756,7 @@ ohos_unittest("ws_screen_session_manager_test_four") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 
   defines = []
@@ -818,6 +823,7 @@ ohos_unittest("ws_screen_session_manager_test_five") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 
   defines = []
@@ -884,6 +890,7 @@ ohos_unittest("ws_screen_session_manager_test_six") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 
   defines = []
@@ -950,6 +957,7 @@ ohos_unittest("ws_screen_session_manager_test_seven") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 
   defines = []
@@ -1016,6 +1024,7 @@ ohos_unittest("ws_screen_session_manager_test_eight") {
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
     "init:libbegetutil",
+    "os_account:os_account_innerkits",
   ]
 
   defines = []

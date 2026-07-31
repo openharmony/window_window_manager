@@ -2321,7 +2321,7 @@ HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Lev
         MessageParcel data;
         MessageParcel reply;
         MockMessageParcel::SetReadBoolErrorFlag(true);
-        EXPECT_EQ(session->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_INVALID_DATA);
+        EXPECT_EQ(session_->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_INVALID_DATA);
         MockMessageParcel::SetReadBoolErrorFlag(false);
     }
     {
@@ -2331,7 +2331,7 @@ HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Lev
         bool isFullScreen = true;
         data.WriteBool(isFullScreen);
         MockMessageParcel::SetWriteInt32ErrorFlag(true);
-        EXPECT_EQ(session->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_INVALID_DATA);
+        EXPECT_EQ(session_->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_INVALID_DATA);
         MockMessageParcel::SetWriteInt32ErrorFlag(false);
     }
     {
@@ -2340,7 +2340,7 @@ HWTEST_F(SessionStubTest, HandleNotifyIsFullScreenInForceSplitMode, TestSize.Lev
         MessageParcel reply;
         bool isFullScreen = true;
         data.WriteBool(isFullScreen);
-        EXPECT_EQ(session->HandleNotifyIsFullScreenInForceSplitMode(code, data, reply, option), ERR_NONE);
+        EXPECT_EQ(session_->HandleNotifyIsFullScreenInForceSplitMode(data, reply), ERR_NONE);
     }
 }
 

@@ -54,8 +54,6 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
-const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
-}
 class ScreenSessionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -119,6 +117,7 @@ DMHookInfo ScreenSessionManagerTest::CreateDefaultHookInfo()
     DMHookInfo dmHookInfo = { hookWidth, hookHeight, hookDensity, hookRotation, true, hookDisplayOrientation, true };
     return dmHookInfo;
 }
+} // namespace
 
 namespace {
 /**
@@ -919,7 +918,7 @@ HWTEST_F(ScreenSessionManagerTest, NotifyFoldStatusChanged02, TestSize.Level1)
     }
     if (!(ssm_->IsFoldable())) {
         ssm_->foldScreenController_ = new FoldScreenController(
-            ssm_->displayInfoMutex_, ssm_->screenPowerTaskScheduler_, ssm_->taskScheduler_);
+            ssm_->displayInfoMutex_, ssm_->screenPowerTaskScheduler_);
     }
     ASSERT_NE(ssm_->foldScreenController_, nullptr);
     statusParam = "-y";
@@ -1055,7 +1054,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds01, TestSize.Level1)
     }
     if (!(ssm_->IsFoldable())) {
         ssm_->foldScreenController_ = new FoldScreenController(
-            ssm_->displayInfoMutex_, ssm_->screenPowerTaskScheduler_, ssm_->taskScheduler_);
+            ssm_->displayInfoMutex_, ssm_->screenPowerTaskScheduler_);
     }
 
     ASSERT_NE(ssm_->foldScreenController_, nullptr);
@@ -1078,7 +1077,7 @@ HWTEST_F(ScreenSessionManagerTest, GetCurrentScreenPhyBounds02, TestSize.Level1)
     ScreenId screenId = 0;
     ssm_->GetCurrentScreenPhyBounds(phyWidth, phyHeight, isReset, screenId);
     auto foldController = sptr<FoldScreenController>::MakeSptr(ssm_->displayInfoMutex_,
-        ssm_->screenPowerTaskScheduler_, ssm_->taskScheduler_);
+        ssm_->screenPowerTaskScheduler_);
     ASSERT_NE(foldController, nullptr);
     DisplayPhysicalResolution physicalSize_full;
     physicalSize_full.foldDisplayMode_ = FoldDisplayMode::FULL;
@@ -1193,7 +1192,9 @@ HWTEST_F(ScreenSessionManagerTest, WaitForCoordinationReady, TestSize.Level1)
     ASSERT_NE(ssm_, nullptr);
     ssm_->isCoordinationReady_ = true;
     ssm_->waitCoordinationReadyMaxTime_ = 0; //ms
-    ssm_->WaitForCoordinationReady();
+    std::mutex coordMutex;
+    std::unique_lock<std::mutex> coordLock(coordMutex);
+    ssm_->WaitForCoordinationReady(coordLock);
     EXPECT_FALSE(ssm_->GetWaitingForCoordinationReady());
 }
 
@@ -1208,7 +1209,9 @@ HWTEST_F(ScreenSessionManagerTest, NotifyCoordinationReadyCV, TestSize.Level1)
     ssm_->isCoordinationReady_ = false;
     ssm_->waitCoordinationReadyMaxTime_ = 1000; //ms
     auto ssm = ssm_;
-    std::thread waitThread([ssm]() { ssm->WaitForCoordinationReady(); });
+    std::mutex coordMutex;
+    std::unique_lock<std::mutex> coordLock(coordMutex);
+    std::thread waitThread([ssm, &coordLock]() { ssm->WaitForCoordinationReady(coordLock); });
     for (int i = 0; i < 50; ++i) {
         if (ssm_->GetWaitingForCoordinationReady()) {
             break;

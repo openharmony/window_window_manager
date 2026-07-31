@@ -378,7 +378,7 @@ HWTEST_F(SceneSessionManagerTest7, RegisterIAbilityManagerCollaborator01, TestSi
     ASSERT_NE(nullptr, ssm_);
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockAccesstokenKit::VerifyCallingPermission(true);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
     auto ret = ssm_->RegisterIAbilityManagerCollaborator(type, nullptr);
     EXPECT_EQ(ret, WSError::WS_ERROR_NULLPTR);
 
@@ -413,7 +413,7 @@ HWTEST_F(SceneSessionManagerTest7, UnregisterIAbilityManagerCollaborator01, Test
 
     MockAccesstokenKit::MockIsSACalling(true);
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockAccesstokenKit::VerifyCallingPermission(true);
+    MockAccesstokenKit::MockAccessTokenKitRet(0);
     auto ret = ssm_->UnregisterIAbilityManagerCollaborator(type);
     EXPECT_TRUE(ssm_->collaboratorMap_.size() == 0);
     EXPECT_TRUE(ssm_->collaboratorDeathRecipientMap_.size() == 0);

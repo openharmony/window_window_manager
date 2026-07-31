@@ -626,7 +626,7 @@ HWTEST_F(SubSessionTest, HandleCrossMoveToSurfaceNode, TestSize.Level1)
     screenProperty.SetScreenType(ScreenType::REAL);
     sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(screenId, screenProperty, screenId);
     ASSERT_NE(screenSession, nullptr);
-    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(ScreenId, screenSession);
+    ScreenSessionManagerClient::GetInstance().screenSessionMap_.emplace(screenId, screenSession);
     //Set screen type
     screenSession->GetScreenProperty().SetScreenType(ScreenType::REAL);
     //test can not find drag move mounted node

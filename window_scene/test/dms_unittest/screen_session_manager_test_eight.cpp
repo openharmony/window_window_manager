@@ -53,8 +53,6 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
-const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
-}
 class ScreenSessionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -119,6 +117,7 @@ DMHookInfo ScreenSessionManagerTest::CreateDefaultHookInfo()
     DMHookInfo dmHookInfo = { hookWidth, hookHeight, hookDensity, hookRotation, true, hookDisplayOrientation, true };
     return dmHookInfo;
 }
+} // namespace
 
 namespace {
 /**
@@ -1111,14 +1110,14 @@ HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState001, Function 
 {
     ScreenId mainScreenId = 1051;
     sptr<ScreenSession> staticSession = sptr<ScreenSession>::MakeSptr(mainScreenId, ScreenProperty(), 0);
-    DMRect staticScreenBounds = {{0, 0, 1920, 1080}, 0.0f, 0.0f};
+    RRect staticScreenBounds = RRect({0, 0, 1920, 1080}, 0.0f, 0.0f);
     ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
     staticSession->SetBounds(staticScreenBounds);
     staticSession->SetRSScreenId(mainScreenId);
     staticSession->SetStartPosition(0, 0);
     ScreenId dynamicScreenId = 1052;
     sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
-    DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
+    RRect dynamicScreenBounds = RRect({0, 0, 3296, 2472}, 0.0f, 0.0f);
     ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
     dynamicSession->SetBounds(dynamicScreenBounds);
     dynamicSession->SetRSScreenId(dynamicScreenId);
@@ -1148,14 +1147,14 @@ HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState002, Function 
 {
     ScreenId mainScreenId = 1051;
     sptr<ScreenSession> staticSession = sptr<ScreenSession>::MakeSptr(mainScreenId, ScreenProperty(), 0);
-    DMRect staticScreenBounds = {{0, 0, 1920, 1080}, 0.0f, 0.0f};
+    RRect staticScreenBounds = RRect({0, 0, 1920, 1080}, 0.0f, 0.0f);
     ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
     staticSession->SetBounds(staticScreenBounds);
     staticSession->SetRSScreenId(mainScreenId);
     staticSession->SetStartPosition(0, 0);
     ScreenId dynamicScreenId = 1052;
     sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
-    DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
+    RRect dynamicScreenBounds = RRect({0, 0, 3296, 2472}, 0.0f, 0.0f);
     ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
     dynamicSession->SetBounds(dynamicScreenBounds);
     dynamicSession->SetRSScreenId(dynamicScreenId);
@@ -1185,14 +1184,14 @@ HWTEST_F(ScreenSessionManagerTest, CalculateStartWhenTransferState003, Function 
 {
     ScreenId mainScreenId = 1051;
     sptr<ScreenSession> staticSession = sptr<ScreenSession>::MakeSptr(mainScreenId, ScreenProperty(), 0);
-    DMRect staticScreenBounds = {{0, 0, 1920, 1080}, 0.0f, 0.0f};
+    RRect staticScreenBounds = RRect({0, 0, 1920, 1080}, 0.0f, 0.0f);
     ssm_->screenSessionMap_.insert(std::make_pair(mainScreenId, staticSession));
     staticSession->SetBounds(staticScreenBounds);
     staticSession->SetRSScreenId(mainScreenId);
     staticSession->SetStartPosition(0, 0);
     ScreenId dynamicScreenId = 1052;
     sptr<ScreenSession> dynamicSession = sptr<ScreenSession>::MakeSptr(dynamicScreenId, ScreenProperty(), 0);
-    DMRect dynamicScreenBounds = {{0, 0, 3296, 2472}, 0.0f, 0.0f};
+    RRect dynamicScreenBounds = RRect({0, 0, 3296, 2472}, 0.0f, 0.0f);
     ssm_->screenSessionMap_.insert(std::make_pair(dynamicScreenId, dynamicSession));
     dynamicSession->SetBounds(dynamicScreenBounds);
     dynamicSession->SetRSScreenId(dynamicScreenId);

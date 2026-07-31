@@ -131,7 +131,7 @@ HWTEST_F(SingleDisplayFoldPolicyTest, GetSupportedFoldStatus, TestSize.Level1)
     std::recursive_mutex displayInfoMutex;
     std::shared_ptr<TaskScheduler> screenPowerTaskScheduler = nullptr;
     SingleDisplayFoldPolicy policy(displayInfoMutex, screenPowerTaskScheduler);
-    EXPECT_THAT(policy.GetSupportedFoldStatus(),
+    EXPECT_THAT(policy.GetSupportedFoldStates(),
         UnorderedElementsAre(
             FoldStatus::EXPAND,
             FoldStatus::FOLDED,

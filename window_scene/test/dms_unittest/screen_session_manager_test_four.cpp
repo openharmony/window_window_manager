@@ -51,8 +51,6 @@ void MyLogCallback(const LogType type, const LogLevel level, const unsigned int 
 {
     g_logMsg = msg;
 }
-const bool IS_SUPPORT_PC_MODE = system::GetBoolParameter("const.window.support_window_pcmode_switch", false);
-}
 class ScreenSessionManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -117,6 +115,7 @@ DMHookInfo ScreenSessionManagerTest::CreateDefaultHookInfo()
     DMHookInfo dmHookInfo = { hookWidth, hookHeight, hookDensity, hookRotation, true, hookDisplayOrientation, true };
     return dmHookInfo;
 }
+} // namespace
 
 namespace {
 /**

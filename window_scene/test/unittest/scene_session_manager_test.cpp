@@ -1799,7 +1799,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, TestSize.Level1)
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, property);
     property->SetParentPersistentId(persistentId);
-    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_EQ(ssm_->CheckAndNotifyPiPForbidden(*property, WindowType::WINDOW_TYPE_PIP), WSError::WS_OK);
 
     SessionInfo sessionInfo;
     sessionInfo.persistentId_ = persistentId;
@@ -1810,7 +1810,7 @@ HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, TestSize.Level1)
     property->SetDisplayId(-1ULL);
     sceneSession->SetSessionProperty(property);
     ssm_->sceneSessionMap_.insert({ persistentId, sceneSession });
-    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
+    ASSERT_EQ(ssm_->CheckAndNotifyPiPForbidden(*property, WindowType::WINDOW_TYPE_PIP), WSError::WS_OK);
 
     uint64_t displayId = 1001;
     property->SetDisplayId(displayId);
@@ -1819,13 +1819,13 @@ HWTEST_F(SceneSessionManagerTest, TestIsPiPForbidden, TestSize.Level1)
     sptr<ScreenSession> screenSession = new ScreenSession();
     screenSession->SetName("HiCar");
     ScreenSessionManagerClient::GetInstance().screenSessionMap_.insert({ displayId, screenSession });
-    ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
-    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FLOAT));
+    ASSERT_NE(ssm_->CheckAndNotifyPiPForbidden(*property, WindowType::WINDOW_TYPE_PIP), WSError::WS_OK);
+    ASSERT_EQ(ssm_->CheckAndNotifyPiPForbidden(*property, WindowType::WINDOW_TYPE_FLOAT), WSError::WS_OK);
 
-    screenSessionForPad->SetName("CustomScbScreen");
-    ssm_->SetPipEnableByScreenId(displayIdForPad, false);
-    ASSERT_TRUE(ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_PIP));
-    ASSERT_TRUE(!ssm_->IsPiPForbidden(property, WindowType::WINDOW_TYPE_FB));
+    screenSession->SetName("CustomScbScreen");
+    ssm_->SetPipEnableByScreenId(displayId, false);
+    ASSERT_NE(ssm_->CheckAndNotifyPiPForbidden(*property, WindowType::WINDOW_TYPE_PIP), WSError::WS_OK);
+    ASSERT_EQ(ssm_->CheckAndNotifyPiPForbidden(*property, WindowType::WINDOW_TYPE_FB), WSError::WS_OK);
 }
 
 /**
@@ -2219,9 +2219,9 @@ HWTEST_F(SceneSessionManagerTest, IsAppBoundSystemTray001, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
 
     ssm_->UpdateAppBoundSystemTrayStatus("2000-app_instance_0", 1000, true);
-    ASSERT_EQ(ssm_->IsAppBoundSystemTray(1000, 2000, "app_instance_0"), true);
+    ASSERT_EQ(ssm_->IsSessionBoundedSystemTray(1000, 2000, "app_instance_0"), true);
 
-    ASSERT_EQ(ssm_->IsAppBoundSystemTray(1001, 2001, "app_instance_0"), false);
+    ASSERT_EQ(ssm_->IsSessionBoundedSystemTray(1001, 2001, "app_instance_0"), false);
     ssm_->appsWithBoundSystemTrayMap_.clear();
     LOG_SetCallback(nullptr);
 }

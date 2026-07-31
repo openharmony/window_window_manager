@@ -42,6 +42,7 @@ ohos_unittest("dm_display_lite_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -55,6 +56,7 @@ ohos_unittest("dm_display_manager_adapter_lite_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -70,6 +72,7 @@ ohos_unittest("dm_display_manager_lite_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -85,6 +88,7 @@ ohos_unittest("dm_display_lite_power_unit_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -100,6 +104,7 @@ ohos_unittest("dm_display_lite_proxy_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -121,6 +126,7 @@ ohos_unittest("dm_display_manager_proxy_mock_test") {
     "googletest:gmock",
     "googletest:gtest",
     "googletest:gtest_main",
+    "ipc:ipc_single",
   ]
 }
 
@@ -136,6 +142,7 @@ ohos_unittest("dm_display_manager_lite_proxy_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -151,6 +158,7 @@ ohos_unittest("dm_screen_manager_lite_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
 
@@ -169,6 +177,7 @@ config("dm_unittest_common_public_config") {
     "../../../test/common/utils/include",
     "../../../utils/include",
     "../../../window_scene/session_manager/include",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
   ]
 }
 

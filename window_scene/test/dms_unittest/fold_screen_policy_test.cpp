@@ -101,7 +101,7 @@ HWTEST_F(FoldScreenPolicyTest, SetFoldStatusAndLockControl01, TestSize.Level1)
 {
     LOG_SetCallback(MyLogCallback);
     FoldStatus targetStatus = FoldStatus::UNKNOWN;
-    EXPECT_CALL(*mockPolicy, GetSupportedFoldStatus()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
+    EXPECT_CALL(*mockPolicy, GetSupportedFoldStates()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
     EXPECT_CALL(*mockPolicy, IsFoldStatusSupported(testing::_, targetStatus)).Times(1).WillOnce(Return(false));
     g_errLog.clear();
     DMError ret = mockPolicy->SetFoldStatusAndLockControl(true, targetStatus);
@@ -138,7 +138,7 @@ HWTEST_F(FoldScreenPolicyTest, SetFoldStatusAndLockControl03, TestSize.Level1)
     LOG_SetCallback(MyLogCallback);
     FoldStatus oldStatus = FoldStatus::FOLDED;
     FoldStatus targetStatus = FoldStatus::UNKNOWN;
-    EXPECT_CALL(*mockPolicy, GetSupportedFoldStatus()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
+    EXPECT_CALL(*mockPolicy, GetSupportedFoldStates()).Times(1).WillOnce(ReturnRef(supportedFoldStatusForTest));
     EXPECT_CALL(*mockPolicy, IsFoldStatusSupported(testing::_, targetStatus)).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*mockPolicy, GetFoldStatus()).Times(1).WillOnce(Return(oldStatus));
 

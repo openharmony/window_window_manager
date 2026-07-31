@@ -373,28 +373,28 @@ namespace {
     }
 
     /**
-     * @tc.name: GetSettingRotationScreenID01
-     * @tc.desc: GetSettingRotationScreenID01
+     * @tc.name: GetSettingRotationScreenId01
+     * @tc.desc: GetSettingRotationScreenId01
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenID01, TestSize.Level1)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenId01, TestSize.Level1)
     {
         int32_t screenId = 0;
         std::string key = "test";
-        auto result = ScreenSettingHelper::GetSettingRotationScreenID(screenId, key);
+        auto result = ScreenSettingHelper::GetSettingRotationScreenId(screenId, key);
         ASSERT_EQ(result, false);
     }
 
     /**
-     * @tc.name: GetSettingRotationScreenID02
-     * @tc.desc: GetSettingRotationScreenID02
+     * @tc.name: GetSettingRotationScreenId02
+     * @tc.desc: GetSettingRotationScreenId02
      * @tc.type: FUNC
      */
-    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenID02, TestSize.Level1)
+    HWTEST_F(ScreenSettingHelperTest, GetSettingRotationScreenId02, TestSize.Level1)
     {
         int32_t screenId = 0;
         std::string key = "screen_rotation_screen_id_value";
-        auto result = ScreenSettingHelper::GetSettingRotationScreenID(screenId, key);
+        auto result = ScreenSettingHelper::GetSettingRotationScreenId(screenId, key);
         ASSERT_EQ(result, false);
     }
 
@@ -520,48 +520,6 @@ namespace {
         std::string test_str = "test";
         auto ret = screenSettingHelper.IsNumber(test_str);
         ASSERT_FALSE(ret);
-    }
-
-    /**
-     * @tc.name: ConvertStrToUInt64Test01
-     * @tc.desc: ConvertStrToUInt64Test01
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUInt64Test01, TestSize.Level1)
-    {
-        uint64_t num = 0;
-        std::string str = "fvcea";
-        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
-        ASSERT_FALSE(ret);
-        ASSERT_EQ(num, 0);
-    }
-
-    /**
-     * @tc.name: ConvertStrToUInt64Test02
-     * @tc.desc: ConvertStrToUInt64Test02
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUInt64Test02, TestSize.Level1)
-    {
-        uint64_t num = 0;
-        std::string str = "2349z";
-        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
-        ASSERT_FALSE(ret);
-        ASSERT_EQ(num, 0);
-    }
-
-    /**
-     * @tc.name: ConvertStrToUInt64Test03
-     * @tc.desc: ConvertStrToUInt64Test03
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, ConvertStrToUint64Test03, TestSize.Level1)
-    {
-        uint64_t num = 0;
-        std::string str = "2349";
-        bool ret = ScreenSettingHelper::ConvertStrToUint64(str, num);
-        ASSERT_TRUE(ret);
-        ASSERT_EQ(num, 2349);
     }
 
     /**
@@ -1142,50 +1100,6 @@ namespace {
         g_errLog.clear();
         LOG_SetCallback(MyLogCallback);
         ScreenSettingHelper::UnregisterSettingBorderingAreaPercentObserver();
-        EXPECT_TRUE(g_errLog.find("setting observer is nullptr") != std::string::npos);
-        LOG_SetCallback(nullptr);
-    }
-
-    /**
-     * @tc.name: RegisterSettingWiredScreenGamutObserver
-     * @tc.desc: RegisterSettingWiredScreenGamutObserver
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, RegisterSettingWiredScreenGamutObserver, TestSize.Level1)
-    {
-        bool flag = false;
-        auto func = [&flag] (const std::string&) {
-            TLOGI(WmsLogTag::DMS, "UT test");
-            flag = true;
-        };
-        ScreenSettingHelper::RegisterSettingWiredScreenGamutObserver(func);
-        ASSERT_EQ(ScreenSettingHelper::wiredScreenGamutObserver_, nullptr);
-
-        g_errLog.clear();
-        LOG_SetCallback(MyLogCallback);
-        bool flag1 = false;
-        auto func1 = [&flag1] (const std::string&) {
-            TLOGI(WmsLogTag::DMS, "UT test");
-            flag1 = true;
-        };
-        ScreenSettingHelper::RegisterSettingWiredScreenGamutObserver(func1);
-        EXPECT_FALSE(g_errLog.find("setting wired screen gamut observer is registered") != std::string::npos);
-        LOG_SetCallback(nullptr);
-    }
-
-    /**
-     * @tc.name: UnregisterSettingWiredScreenGamutObserver
-     * @tc.desc: UnregisterSettingWiredScreenGamutObserver
-     * @tc.type: FUNC
-     */
-    HWTEST_F(ScreenSettingHelperTest, UnregisterSettingWiredScreenGamutObserver, TestSize.Level1)
-    {
-        ScreenSettingHelper::UnregisterSettingWiredScreenGamutObserver();
-        ASSERT_EQ(ScreenSettingHelper::wiredScreenGamutObserver_, nullptr);
-
-        g_errLog.clear();
-        LOG_SetCallback(MyLogCallback);
-        ScreenSettingHelper::UnregisterSettingWiredScreenGamutObserver();
         EXPECT_TRUE(g_errLog.find("setting observer is nullptr") != std::string::npos);
         LOG_SetCallback(nullptr);
     }
@@ -1824,7 +1738,7 @@ HWTEST_F(ScreenSettingHelperTest, ParseJsonObjectToEnumMap, Function | SmallTest
         ScreenSettingHelper::RegisterSettingExtendScreenDpiObserver(func);
         EXPECT_TRUE(g_errLog.find("setting extend dpi observer is registered") == std::string::npos ||
             g_errLog.find("create observer failed") == std::string::npos ||
-            g_errLog.find("failed, ret=") = std::string::npos);
+            g_errLog.find("failed, ret=") == std::string::npos);
         LOG_SetCallback(nullptr);
     }
 }

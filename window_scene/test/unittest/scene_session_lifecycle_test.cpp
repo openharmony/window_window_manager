@@ -26,6 +26,7 @@
 #include "screen_session_manager_client.h"
 #include "wm_common.h"
 #include "mock/mock_session_stage.h"
+#include "mock/mock_accesstoken_kit.h"
 #include "input_event.h"
 #include <pointer_event.h>
 #include "process_options.h"
@@ -268,9 +269,7 @@ HWTEST_F(SceneSessionLifecycleTest, Foreground07, TestSize.Level0)
         }
     };
     session->SetGetStateFromManagerListener(func);
-    MockAccesstokenKit::MockAccessTokenKitRet(-1);
     EXPECT_EQ(WSError::WS_ERROR_INVALID_SESSION, session->Foreground(property, false));
-    MockAccesstokenKit::MockAccessTokenKitRet(0);
 }
 
 /**
@@ -942,7 +941,7 @@ HWTEST_F(SceneSessionLifecycleTest, ConnectInner03, TestSize.Level0)
  * @tc.desc: ConnectInner04
  * @tc.type: FUNC
  */
-HWTEST_F(SceneSessionLifecycleTest, ConnectInner03, TestSize.Level0)
+HWTEST_F(SceneSessionLifecycleTest, ConnectInner04, TestSize.Level0)
 {
     SessionInfo info;
     info.bundleName_ = "ConnectInner04";
@@ -1285,7 +1284,6 @@ HWTEST_F(SceneSessionLifecycleTest, BatchPendingSessionsActivation, TestSize.Lev
     sceneSession->Session::SetBatchPendingSessionsActivationEventListener(func);
     result = sceneSession->BatchPendingSessionsActivation(abilitySessionInfos, configs);
     EXPECT_EQ(result, WSError::WS_OK);
-    MockAccesstokenKit::ChangeMockStateToInit();
 }
 
 /**
@@ -1302,7 +1300,7 @@ HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType01, TestSize.Level0
     ASSERT_NE(sceneSession, nullptr);
     SessionInfo info2;
 
-    sceneSession->CalculatedStartWindowType(info2, false);
+    sceneSession->CalculateStartWindowType(info2, false);
     EXPECT_EQ(info2.startWindowType_, StartWindowType::DEFAULT);
 }
 
@@ -1323,7 +1321,7 @@ HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType02, TestSize.Level0
     };
     SessionInfo info2;
 
-    sceneSession->CalculatedStartWindowType(info2, true);
+    sceneSession->CalculateStartWindowType(info2, true);
     EXPECT_EQ(info2.startWindowType_, StartWindowType::RETAIN_AND_INVISIBLE);
 }
 
@@ -1344,7 +1342,7 @@ HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType03, TestSize.Level0
     };
     SessionInfo info2;
 
-    sceneSession->CalculatedStartWindowType(info2, false);
+    sceneSession->CalculateStartWindowType(info2, false);
     EXPECT_EQ(info2.startWindowType_, StartWindowType::DEFAULT);
 }
 
@@ -1365,7 +1363,7 @@ HWTEST_F(SceneSessionLifecycleTest, CalculatedStartWindowType04, TestSize.Level0
     };
     SessionInfo info2;
 
-    sceneSession->CalculatedStartWindowType(info2, false);
+    sceneSession->CalculateStartWindowType(info2, false);
     EXPECT_EQ(info2.startWindowType_, StartWindowType::DEFAULT);
 }
 } // namespace

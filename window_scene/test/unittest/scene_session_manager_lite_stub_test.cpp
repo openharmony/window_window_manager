@@ -1619,7 +1619,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandlePendingSessionToBackgroundTest_0
     sptr<IRemoteObject> token = sptr<IRemoteObjectMocker>::MakeSptr();
     data.WriteRemoteObject(token);
     data.WriteInt32(1);
-    data.writebool(true);
+    data.WriteBool(true);
 
     int result = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandlePendingSessionToBackground(data, reply);
@@ -1734,7 +1734,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnRegPipChgListener_ReadIntFaile
 {
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleUnRegisterPipChgListener(data, reply), ERR_INVALID_DATA);
+    EXPECT_EQ(sceneSessionManagerLiteStub_->HandleUnregisterPipChgListener(data, reply), ERR_INVALID_DATA);
 }
 
 HWTEST_F(SceneSessionManagerLiteStubTest, HandleUnRegPipChgListener_Success, Function | SmallTest | Level1)
@@ -1872,7 +1872,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleGetDisplayIdByWindowId01, TestSi
 {
     MessageParcel data;
     MessageParcel reply;
-    const std::vector<uint64_t> windowIds = (200, 0);
+    const std::vector<uint64_t> windowIds = {200, 0};
     data.WriteUInt64Vector(windowIds);
 
     int res = sceneSessionManagerLiteStub_->HandleGetDisplayIdByWindowId(data, reply);
