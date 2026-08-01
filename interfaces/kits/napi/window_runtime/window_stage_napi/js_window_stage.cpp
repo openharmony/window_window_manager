@@ -159,7 +159,7 @@ napi_value JsWindowStage::LoadContentByName(napi_env env, napi_callback_info inf
 
 napi_value JsWindowStage::GetWindowMode(napi_env env, napi_callback_info info)
 {
-    TLOGD(WmsLogTag::WMS_LIFE,"[NAPI]");
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
     JsWindowStage* me = CheckParamsAndGetThis<JsWindowStage>(env, info);
     return (me != nullptr) ? me->OnGetWindowMode(env, info) : nullptr;
 }
