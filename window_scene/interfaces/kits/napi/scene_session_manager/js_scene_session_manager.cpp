@@ -2501,21 +2501,21 @@ napi_value JsSceneSessionManager::OnRequestSceneSessionActivation(napi_env env, 
 
     bool isNewActive = true;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], isNewActive)) {
-        TLOGE("Faile to convert parameter to isNewActive.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isNewActive.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid."));
         return NapiGetUndefined(env);
     }
     bool isShowAbility = false;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], isShowAbility)) {
-        TLOGE("Faile to convert parameter to isShowAbility.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isShowAbility.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid."));
         return NapiGetUndefined(env);
     }
     int32_t requestId = DEFAULT_REQUEST_FROM_SCB_ID;
     if (!ConvertFromJsValue(env, argv[ARG_INDEX_THREE], requestId)) {
-        TLOGE("Faile to convert parameter to requestId.");
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to requestId.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid."));
         return NapiGetUndefined(env);
