@@ -2188,6 +2188,12 @@ WSError WindowSessionImpl::UpdateWindowMode(const WindowModeInfo& windowModeInfo
     return WSError::WS_OK;
 }
 
+float WindowSessionImpl::AdaptToHookedDensity(float density)
+{
+    // Todo:
+    return density;
+}
+
 /** @note @window.layout */
 float WindowSessionImpl::GetVirtualPixelRatio()
 {
@@ -2201,7 +2207,16 @@ float WindowSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayIn
     if (useUniqueDensity_) {
         return virtualPixelRatio_;
     }
-    return displayInfo->GetVirtualPixelRatio();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr, vpr=%{public}f", virtualPixelRatio_);
+        return virtualPixelRatio_;
+    }
+    auto dpi = displayInfo->GetVirtualPixelRatio();
+    auto hookedDpi = AdaptToHookedDensity(dpi);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "id=%{public}u, type=%{public}u, systemDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
+        GetWindowId(), GetType(), dpi, hookedDpi, displayInfo->GetDisplayId());
+    return hookedDpi;
 }
 
 void WindowSessionImpl::NotifyGlobalScaledRectChange(const Rect& globalScaledRect)
@@ -2353,8 +2368,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     } else {
         TLOGI_LMT(TEN_SECONDS, RECORD_100_TIMES, WmsLogTag::WMS_LAYOUT,
             "Id: %{public}d, reason: %{public}d, viewportRect: %{public}s, displayOrientation: %{public}d, "
-            "config[%{public}u, %{public}u, %{public}u, %{public}f]", GetPersistentId(), reason,
-            viewportRect.ToString().c_str(), orientation, rotation, deviceRotation, transformHint, virtualPixelRatio_);
+            "config[%{public}u, %{public}u, %{public}u, %{public}f], displayId: %{public}" PRIu64,
+            GetPersistentId(), reason, viewportRect.ToString().c_str(), orientation, rotation, deviceRotation,
+            transformHint, virtualPixelRatio_, GetDisplayId());
     }
 }
 
