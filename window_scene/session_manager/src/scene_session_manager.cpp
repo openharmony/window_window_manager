@@ -307,17 +307,6 @@ int32_t GetPid()
     return pid;
 }
 
-void ReportMainWindowStateChange(const sptr<SceneSession>& sceneSession ,int32_t userId, int32_t value)
-{
-    std::unordered_map<std::string, std::string> payload = {
-        { "bundleName", sceneSession->GetSessionInfo().bundleName_ },
-        { "windowId", std::to_string(sceneSession->GetPersistentId()) },
-        { "userId", std::to_string(userId) },
-    };
-    OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(
-        OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_WINDOW_STATE, value, payload);
-}
-
 bool GetEnableRemoveStartingWindowFromBMS(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
 {
     auto& metadata = abilityInfo->metadata;
@@ -6449,6 +6438,24 @@ WSErrorResult SceneSessionManager::FinalizeSessionDestruction(const int32_t pers
     return WSErrorResult{WSError::WS_OK, "Destroy specific session end"};
 }
 
+
+void SceneSessionManager::ReportMainWindowStateChange(const sptr<SceneSession>& sceneSession ,int32_t userId, int32_t value)
+{
+    ffrtQueueHelper_->SubmitTask([weakSceneSession = wptr(sceneSession), userId, value] {
+        auto sceneSession = weakSceneSession.promote();
+        if (!sceneSession) {
+            return;
+        }
+        std::unordered_map<std::string, std::string> payload = {
+            { "bundleName", sceneSession->GetSessionInfo().bundleName_ },
+            { "windowId", std::to_string(sceneSession->GetPersistentId()) },
+            { "userId", std::to_string(userId) },
+        };
+        OHOS::ResourceSchedule::ResSchedClient::GetInstance().ReportData(
+            OHOS::ResourceSchedule::ResType::RES_TYPE_REPORT_WINDOW_STATE, value, payload);
+    });
+}
+
 WSErrorResult SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
@@ -8527,7 +8534,6 @@ void SceneSessionManager::NotifySessionForCallback(const sptr<SceneSession>& sce
         return;
     }
     if (sceneSession->GetWindowType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
-        TLOGI(WmsLogTag::DEFAULT, "windowId: %{public}d main window destory", sceneSession->GetPersistentId());
         ReportMainWindowStateChange(sceneSession, currentUserId_, MAIN_WINDOW_DESTORY);
     }
     TLOGI(WmsLogTag::DEFAULT, "id: %{public}d, needRemoveSession: %{public}u", sceneSession->GetPersistentId(),
