@@ -55,7 +55,6 @@ constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t FOUR_PARAMS_SIZE = 4;
 constexpr int32_t HISTOGRAM_BOOLEAN_COUNTS = 1;
-constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "JsWindowStage"};
 
 WmErrorCode ParseImageSourceForRecent(napi_env env, napi_value imageSource, uint32_t& imgResourceId,
     std::shared_ptr<Media::PixelMap>& pixelMap)
