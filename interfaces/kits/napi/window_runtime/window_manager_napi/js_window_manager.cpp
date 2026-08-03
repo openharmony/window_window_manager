@@ -2441,7 +2441,13 @@ napi_value JsWindowManager::OnCreateSubWindowAndBindParent(napi_env env, napi_ca
         return NapiGetUndefined(env);
     }
     napi_ref callbackRef;
-    napi_create_reference(env, callback, 1, &callbackRef);
+    napi_status status = napi_create_reference(env, callback, 1, &callbackRef);
+    if (status != napi_ok) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to napi create reference.");
+        napi_throw(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_INVALID_PARAM,
+            "[window][OnCreateSubWindowAndBindParent]msg: Failed to parse window event listener."));
+        return NapiGetUndefined(env);
+    }
 
     napi_value result = nullptr;
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, nullptr, &result);

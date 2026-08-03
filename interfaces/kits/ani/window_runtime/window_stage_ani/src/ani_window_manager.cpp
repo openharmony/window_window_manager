@@ -237,8 +237,15 @@ ani_object AniWindowManager::OnGetMainWindowSnapshot(
         });
     std::vector<int32_t> windowIdList;
     WindowSnapshotConfiguration windowSnapshotConfiguration;
-    AniWindowUtils::GetIntVector(env, windowId, windowIdList);
-    AniWindowUtils::GetWindowSnapshotConfiguration(env, config, windowSnapshotConfiguration);
+    ani_status status = AniWindowUtils::GetIntVector(env, windowId, windowIdList);
+    if (status != ANI_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE, "GetIntVector failed");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
+    if (!AniWindowUtils::GetWindowSnapshotConfiguration(env, config, windowSnapshotConfiguration)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to config");
+        return AniWindowUtils::AniThrowError(env, WmErrorCode::WM_ERROR_INVALID_PARAM);
+    }
     TLOGI(WmsLogTag::WMS_LIFE, "windowIdList size: %{public}d", static_cast<int32_t>(windowIdList.size()));
     WmErrorCode ret = WM_JS_TO_ERROR_CODE_MAP.at(SingletonContainer::Get<WindowManager>().
         GetMainWindowSnapshot(windowIdList, windowSnapshotConfiguration, getSnapshotCallback->AsObject()));
