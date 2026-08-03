@@ -13131,6 +13131,17 @@ void ScreenSessionManager::RecoverMultiScreenModeWhenSwitchUser(std::vector<int3
     }
 }
 
+bool ScreenSessionManager::IsSuperFoldMultiPadMode()
+{
+    if (!FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice()) {
+        return false;
+    }
+    if (!IS_SUPPORT_PC_MODE) {
+        return false;
+    }
+    return !g_isPcDevice;
+}
+
 bool ScreenSessionManager::HandleSwitchPcMode(bool isTargetPcMode)
 {
     if (!IS_SUPPORT_PC_MODE) {
