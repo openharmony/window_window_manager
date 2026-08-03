@@ -953,11 +953,11 @@ void KeyboardSession::HandleCrossScreenChild(bool isMoveOrDrag)
     auto keyboardPanelSurfaceNode = keyboardPanelSession_->GetSurfaceNode();
     RETURN_IF_NULL(keyboardPanelSurfaceNode);
     RETURN_IF_NULL(moveDragController_);
-    auto displayIds = isMoveOrDrag ?
-        moveDragController_->CollectNewOverlappedDisplayIds() :
-        moveDragController_->GetOverlappedDisplayIds();
+    auto startDisplayId = moveDragController_->GetStartDisplayId();
+    auto displayIds = isMoveOrDrag ? moveDragController_->CollectNewOverlappedDisplayIds() :
+                                     moveDragController_->GetOverlappedDisplayIds();
     for (const auto displayId : displayIds) {
-        if (displayId == moveDragController_->GetStartDisplayId()) {
+        if (displayId == startDisplayId) {
             continue;
         }
         auto screenSession = ScreenSessionManagerClient::GetInstance().GetScreenSessionById(displayId);
