@@ -9608,13 +9608,15 @@ WMError WindowSessionImpl::GetCallingWindowRect(uint32_t callingWindowId, Rect& 
     return SingletonContainer::Get<WindowAdapter>().GetCallingWindowRect(callingWindowId, rect);
 }
 
-void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void WindowSessionImpl::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
+    TLOGI(WmsLogTag::WMS_MAIN, "SetUiDvsyncSwitch id: %{public}u, dvsyncSwitch: %{public}d, fromWhom: %{public}u", 
+        GetPersistentId(), dvsyncSwitch, static_cast<uint8_t>(fromWhom));
     if (vsyncStation_ == nullptr) {
         TLOGW(WmsLogTag::WMS_MAIN, "vsyncStation is null");
         return;
     }
-    vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+    vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch, fromWhom);
 }
 
 void WindowSessionImpl::SetTouchEvent(int32_t touchType)
