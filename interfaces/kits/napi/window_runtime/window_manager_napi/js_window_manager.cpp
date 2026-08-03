@@ -1196,7 +1196,7 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
     }
     NapiAsyncTask::ExecuteCallback execute = [lists, isOldApi, newApi, contextPtr, ctxRef]() {
         if (isOldApi) {
-            if (lists->ability->GetWindow() == nullptr) {
+            if (lists->ability == nullptr || lists->ability->GetWindow() == nullptr) {
                 lists->errorCode = newApi ? static_cast<int32_t>(WmErrorCode::WM_ERROR_STATE_ABNORMALLY) :
                     static_cast<int32_t>(WMError::WM_ERROR_NULLPTR);
                 lists->errMsg = "[window][getLastWindow]msg: FA mode can not get ability window";
