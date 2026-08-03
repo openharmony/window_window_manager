@@ -33,7 +33,6 @@
 #include "fold_screen_state_internel.h"
 #include "image_source.h"
 #include "rs_adapter.h"
-#include "session_coordinate_helper.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "window_helper.h"
@@ -46,6 +45,7 @@
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "screen_manager.h"
+#include "window_coordinate_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -1536,7 +1536,7 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         updateRect.width_, updateRect.height_);
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), updateRect);
+    auto globalDisplayRect = WindowCoordinateHelper::ConvertToGlobalDisplayRect(GetScreenId(), updateRect);
     UpdateGlobalDisplayRect(globalDisplayRect, reason);
 
     if (sessionStage_ != nullptr) {
