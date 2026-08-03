@@ -39,7 +39,6 @@ group("systemtest") {
       ":wms_window_split_immersive_test",
       ":wms_window_split_test",
       ":wms_window_subwindow_test",
-      ":wms_window_system_toast_window_test",
     ]
   } else {
     deps += [

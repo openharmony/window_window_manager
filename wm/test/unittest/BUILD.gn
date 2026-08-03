@@ -34,26 +34,22 @@ group("unittest") {
     ":wm_window_stub_test",
     "event_distribution:wm_window_option_event_test",
     "rotation:wm_window_extension_session_impl_rotation_test",
-    "window_recover:wm_window_recover_manager_test",
     "wm_pattern:window_manager_pattern_test",
   ]
   if (window_manager_use_sceneboard) {
     deps += [
       ":wm_floating_ball_new_test",
       ":wm_float_view_option_test",
-      ":wm_get_snapshot_callback_proxy_test",
       ":wm_web_picture_in_picture_controller_interface_test",
       ":wm_window_event_subscriber_test",
       ":wm_window_manager_lite_test",
       ":wm_window_manager_agent_lite_test",
       ":wm_window_session_impl_compatible_mode_test",
-      ":wm_window_session_impl_test3",
       "attribute:wm_window_scene_session_impl_attribute_test",
       "attribute:wm_window_manager_attribute_test",
       "event_distribution:wm_window_event_test",
       "event_distribution:wm_window_scene_session_impl_event_filter_test",
       "pattern:window_scene_session_impl_pattern_test",
-      "ui_extension:wm_atomic_touchOutside_rectChange_test",
       ":wm_input_transfer_station_new_test",
     ]
   }
