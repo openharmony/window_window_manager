@@ -357,7 +357,7 @@ sptr<DisplayInfo> ScreenSession::ConvertToDisplayInfo()
     if (displayInfo == nullptr) {
         return displayInfo;
     }
-    if (!IsScreenAvailable()) {
+    if (!isInUse()) {
         TLOGE(WmsLogTag::DMS, "screenId: %{public}" PRIu64" is unavailable.", screenId_);
         return nullptr;
     }
@@ -519,17 +519,7 @@ void ScreenSession::SetIsCurrentInUse(bool isInUse)
 
 bool ScreenSession::GetIsCurrentInUse() const
 {
-    return isInUse_;
-}
-
-void ScreenSession::SetScreenInUseStatus(bool isInUse)
-{
-    property_.SetIsInUse(isInUse);
-}
-
-bool ScreenSession::isInUse()
-{
-    return property_.GetIsInUse();
+    return isCurrentInUse_ ;
 }
 
 uint64_t ScreenSession::GetSessionId() const
@@ -2190,13 +2180,19 @@ Orientation ScreenSession::CalcDisplayOrientationToOrientation(DisplayOrientatio
     return orientation;
 }
 
-sptr<ScreenInfo> ScreenSession::ConvertToScreenInfo() const
+
+sptr<ScreenInfo> ScreenSession::ConvertToScreenInfo(bool isNeedUnused) const
 {
     sptr<ScreenInfo> info = new(std::nothrow) ScreenInfo();
     if (info == nullptr) {
         return nullptr;
     }
-    if (!IsScreenAvailable()) {
+    if (isNeedUnused) {
+        TLOGE(WmsLogTag::DMS, "is need Unused is true");
+        FillScreenInfo(info);
+        return info;
+    }
+    if (!FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice() && !isInUse()) {
         TLOGE(WmsLogTag::DMS, "screenId: %{public}" PRIu64" is unavailable.", screenId_);
         return nullptr;
     }
@@ -3185,7 +3181,7 @@ DisplayId ScreenSession::GetDisplayId()
 
 DisplayId ScreenSession::GetAvailableDisplayId() const
 {
-    if (!IsScreenAvailable()) {
+    if (!isInUse()) {
         TLOGE(WmsLogTag::DMS, "screenId: %{public}" PRIu64" is unavailable.", screenId_);
         return DISPLAY_ID_INVALID;
     }
@@ -3204,14 +3200,14 @@ void ScreenSession::SetDisplayNode(std::shared_ptr<RSDisplayNode> displayNode)
     RSAdapterUtil::SetRSUIContext(displayNode_, GetRSUIContext(), true);
 }
 
-void ScreenSession::SetScreenAvailableStatus(bool isScreenAvailable)
+void ScreenSession::SetScreenInUseStatus(bool isInUse)
 {
-    isScreenAvailable_ = isScreenAvailable;
+    isInUse_ = isInUse;
 }
-
-bool ScreenSession::IsScreenAvailable() const
+ 
+bool ScreenSession::isInUse() const
 {
-    return isScreenAvailable_;
+    return isInUse_;
 }
 
 void ScreenSession::SetRSScreenId(ScreenId rsId)

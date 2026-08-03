@@ -192,8 +192,8 @@ public:
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
-    virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
-    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
+    virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId, bool isNeedUnused = false) override;
+    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos, bool isNeedUnused = false) override;
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
         std::vector<ScreenColorGamut>& colorGamuts) override;
     DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds) override;
@@ -686,6 +686,7 @@ public:
     void SetNeedAnotherScreenKeepOffFake(bool needAnotherScreenKeepOffFake);
     bool GetNeedAnotherScreenKeepOffFake();
     bool IsHook(int32_t uid = INVALID_UID);
+    bool HasInternalScreen();
     void HookRadius(DisplayId displayId, int& radius);
 
     void SetOnBootAnimation(const bool onBootAnimation);
@@ -720,6 +721,8 @@ protected:
     ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
     EventTracker screenEventTracker_;
     sptr<ScreenSession> GetInternalScreenSession();
+    sptr<ScreenSession> GetLastMainScreenSession(ScreenId screenId);
+    sptr<ScreenSession> GetUnuseScreenSession();
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property,
         sptr<IRemoteObject> connectToRenderToken = nullptr);
     std::mutex screenChangeMutex_;
@@ -788,7 +791,6 @@ private:
         ScreenId screenId, bool& needChangeScreenSession);
     bool OneScreenDisconnect(ScreenId disconnectedScreenId, ScreenEvent screenEvent);
     void NotifyInfoChange(sptr<ScreenSession> screenSession);
-    bool HasInternalScreen();
     bool HasRealScreenConnect();
     void ExtendScreenChangetoMainScreen(sptr<ScreenSession> screenSession);
     void DeleteScreen(sptr<ScreenSession> screenSession);

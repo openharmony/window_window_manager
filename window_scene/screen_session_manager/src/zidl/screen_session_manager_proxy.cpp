@@ -2365,7 +2365,7 @@ std::vector<DisplayId> ScreenSessionManagerProxy::GetAllDisplayIds(int32_t userI
     return allDisplayIds;
 }
 
-sptr<ScreenInfo> ScreenSessionManagerProxy::GetScreenInfoById(ScreenId screenId)
+sptr<ScreenInfo> ScreenSessionManagerProxy::GetScreenInfoById(ScreenId screenId, bool isNeedUnused)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2402,7 +2402,7 @@ sptr<ScreenInfo> ScreenSessionManagerProxy::GetScreenInfoById(ScreenId screenId)
     return info;
 }
 
-DMError ScreenSessionManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos)
+DMError ScreenSessionManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos, bool isNeedUnused)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2416,6 +2416,10 @@ DMError ScreenSessionManagerProxy::GetAllScreenInfos(std::vector<sptr<ScreenInfo
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::DMS, "GetAllScreenInfos: WriteInterfaceToken failed");
         return DMError::DM_ERROR_WRITE_INTERFACE_TOKEN_FAILED;
+    }
+    if (!data.WriteBool(isNeedUnused)) {
+        TLOGW(WmsLogTag::DMS, "Write isFromNapi failed");
+        return DMError::DM_ERROR_IPC_FAILED;
     }
     if (remote->SendRequest(static_cast<uint32_t>(DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS),
         data, reply, option) != ERR_NONE) {
