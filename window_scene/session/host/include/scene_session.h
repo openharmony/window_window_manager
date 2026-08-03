@@ -994,12 +994,20 @@ public:
         const WSRect& globalRect, bool isGlobal, bool needFlush, bool needSetBoundsNextVsync);
 
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
-    bool SetFrameGravity(Gravity gravity);
+
+    /**
+     * @brief Sets the frame gravity of the session surface.
+     *
+     * @param gravity The frame gravity to set.
+     * @param needFlush Whether to flush the implicit transaction immediately.
+     * @return true if the gravity is set; false if the surface is unavailable.
+     */
+    bool SetFrameGravity(Gravity gravity, bool needFlush = false);
+
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     WSError GetCrossAxisState(CrossAxisState& state) override;
     virtual void UpdateCrossAxis();
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
-    sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
