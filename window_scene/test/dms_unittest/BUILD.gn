@@ -31,7 +31,6 @@ group("unittest") {
     ":ws_screen_session_manager_lite_proxy_test",
     ":ws_screen_session_manager_lite_stub_test",
     ":ws_screen_session_manager_lite_proxy_mock_test",
-    ":ws_screen_session_manager_stub_test",
     ":ws_screen_session_publish_test",
     ":ws_screen_snapshot_picker_connection_test",
     ":ws_setting_observer_test",
