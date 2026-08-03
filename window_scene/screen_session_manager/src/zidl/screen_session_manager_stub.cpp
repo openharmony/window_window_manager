@@ -215,7 +215,8 @@ int32_t ScreenSessionManagerStub::OnRemoteRequestInner(uint32_t code, MessagePar
         }
         case DisplayManagerMessage::TRANS_ID_GET_ALL_SCREEN_INFOS: {
             std::vector<sptr<ScreenInfo>> screenInfos;
-            DMError ret  = GetAllScreenInfos(screenInfos);
+            bool isNeedUnused = data.ReadBool();
+            DMError ret  = GetAllScreenInfos(screenInfos, isNeedUnused);
             reply.WriteInt32(static_cast<int32_t>(ret));
             if (!MarshallingHelper::MarshallingVectorParcelableObj<ScreenInfo>(reply, screenInfos)) {
                 TLOGE(WmsLogTag::DMS, "fail to marshalling screenInfos in stub.");
