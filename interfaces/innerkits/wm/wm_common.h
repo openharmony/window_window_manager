@@ -2238,7 +2238,6 @@ struct PiPTemplateInfo : public Parcelable {
             info.status = static_cast<PiPControlStatus>(status);
             pipTemplateInfo->pipControlStatusInfoList.emplace_back(info);
         }
-        return true;
         uint32_t controlEnableSize = 0;
         if (!parcel.ReadUint32(controlEnableSize) || controlEnableSize > MAX_SIZE_PIP_CONTROL) {
             return false;
