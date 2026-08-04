@@ -4844,12 +4844,8 @@ void SceneSession::CompatibilityModeWindowScaleTransfer(WSRect& rect, bool isSca
         return;
     }
     if (!isScale) {
-        if (!MathHelper::NearZero(scaleX)) {
             scaleX = 1 / scaleX;
-        }
-        if (!MathHelper::NearZero(scaleY)) {
             scaleY = 1 / scaleY;
-        }
     }
     if (IsCompatibilityModeScale(scaleX, scaleY)) {
         WindowScaleTransfer(rect, scaleX, scaleY);
@@ -4904,8 +4900,9 @@ bool SceneSession::MoveUnderInteriaAndNotifyRectChange(WSRect& rect, SizeChangeR
         return false;
     }
     bool isDockAutoHide = onGetIsDockAutoHideFunc_ ? onGetIsDockAutoHideFunc_() : false;
-    int32_t statusBarHeight = (IsLayoutFullScreen() || isDockAutoHide || IsAncoInFullScreen()) ? 0 : GetStatusBarHeight();
-    int32_t dockHeight = (IsLayoutFullScreen() || isDockAutoHide || IsAncoInFullScreen()) ? 0 : GetDockHeight();
+    bool isFullScreenOrHide = IsLayoutFullScreen() || isDockAutoHide || IsAncoInFullScreen();
+    int32_t statusBarHeight = isFullScreenOrHide ? 0 : GetStatusBarHeight();
+    int32_t dockHeight = isFullScreenOrHide ? 0 : GetDockHeight();
     CompatibilityModeWindowScaleTransfer(rect, true);
     bool ret = pcFoldScreenController_->ThrowSlip(GetScreenId(), rect, statusBarHeight, dockHeight);
     if (!ret) {
@@ -4961,13 +4958,14 @@ void SceneSession::NotifyFullScreenAfterThrowSlip(const WSRect& rect)
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session go background when throw", where);
             return;
         }
-        if (session->throwSlipToFullScreenAnimCount_.load() == 0) {
+        uint32_t animCount = session->throwSlipToFullScreenAnimCount_.load();
+        if (animCount == 0) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s session moved when throw", where);
             return;
         }
-        if (session->throwSlipToFullScreenAnimCount_.load() > 1) {
+        if (animCount > 1) {
             TLOGNW(WmsLogTag::WMS_LAYOUT, "%{public}s throw-slip fullscreen animation count: %{public}u",
-                where, session->throwSlipToFullScreenAnimCount_.load());
+                where, animCount);
             session->throwSlipToFullScreenAnimCount_.fetch_sub(1);
             return;
         }
