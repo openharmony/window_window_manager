@@ -695,7 +695,7 @@ public:
     bool IsSuperFoldMultiPadMode();
 
     int32_t CountRealPhysicalScreensNotInternal();
-    bool IsNotifyBrightnessInfoForFakeDisplayNeeded(const ScreenId& logicalScreenId) 
+    bool IsNotifyFakeDisplayBrightnessInfoNeeded(const ScreenId& logicalScreenId);
 
 protected:
     ScreenSessionManager();
