@@ -12538,7 +12538,7 @@ void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const Brig
     screenBrightnessInfo.brightnessPosition = info.brightnessPosition;
     for (auto& agent : agents) {
         int32_t agentPid = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentPid(agent);
-        if (!IsFreezed(agentPid, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) && agent != nullptr) { 
+        if (!IsFreezed(agentPid, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) && agent != nullptr) {
             if (IsNotifyFakeDisplayBrightnessInfoNeeded(logicalScreenId)) {
                 agent->NotifyBrightnessInfoChanged(SCREEN_ID_FAKE, screenBrightnessInfo);
             }
