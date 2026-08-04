@@ -5625,7 +5625,17 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
 {
     TLOGD(WmsLogTag::DMS, "start");
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
-    if (displayId == SCREEN_ID_FAKE) {
+    if (displayId == DISPLAY_ID_FAKE) {
+        if (GetSuperFoldStatus() == SuperFoldStatus::EXPANDED) {
+            TLOGNFE(WmsLogTag::DMS, "GetScreenSession failed");
+            return DMError::DM_ERROR_ILLEGAL_PARAM;
+        }
+        std::vector<DisplayId> displayIds = GetAllDisplayIds();
+        auto iter = std::find(displayIds.begin(), displayIds.end(), DISPLAY_ID_FAKE);
+        if (iter == displayIds.end()) {
+            TLOGNFE(WmsLogTag::DMS, "GetScreenSession failed");
+            return DMError::DM_ERROR_ILLEGAL_PARAM;
+        }
         screenSession = GetScreenSession(SCREEN_ID_FULL);
     }
     if (screenSession == nullptr) {
@@ -12473,6 +12483,20 @@ void ScreenSessionManager::UnRegisterBrightnessInfoChangeListener()
     }
 }
 
+bool ScreenSessionManager::IsNotifyFakeDisplayBrightnessInfoNeeded(const ScreenId& logicalScreenId) 
+{
+    if (!(GetSuperFoldStatus() == SuperFoldStatus::HALF_FOLDED) || !(logicalScreenId == SCREEN_ID_FULL)) 
+    {
+        return false;
+    }
+    std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    auto iter = std::find(displayIds.begin(), displayIds.end(), DISPLAY_ID_FAKE);
+    if (iter == displayIds.end()) {
+        return false;
+    }
+    return true;
+}
+
 void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const BrightnessInfo& info)
 {
     TLOGD(WmsLogTag::DMS, "notify brightness info rsId %{public}" PRIu64"", rsId);
@@ -12514,7 +12538,10 @@ void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const Brig
     screenBrightnessInfo.brightnessPosition = info.brightnessPosition;
     for (auto& agent : agents) {
         int32_t agentPid = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentPid(agent);
-        if (!IsFreezed(agentPid, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) && agent != nullptr) {
+        if (!IsFreezed(agentPid, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) && agent != nullptr) { 
+            if (IsNotifyFakeDisplayBrightnessInfoNeeded(logicalScreenId)) {
+                agent->NotifyBrightnessInfoChanged(SCREEN_ID_FAKE, screenBrightnessInfo);
+            }
             agent->NotifyBrightnessInfoChanged(logicalScreenId, screenBrightnessInfo);
         }
     }
