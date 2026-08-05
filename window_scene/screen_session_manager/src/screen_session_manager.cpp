@@ -5623,7 +5623,6 @@ void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>
 
 DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
 {
-    TLOGD(WmsLogTag::DMS, "start");
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
     if (displayId == DISPLAY_ID_FAKE) {
         if (GetSuperFoldStatus() == SuperFoldStatus::EXPANDED) {
@@ -5642,8 +5641,7 @@ DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrigh
         TLOGNFE(WmsLogTag::DMS, "GetScreenSession failed");
         return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
-    TLOGD(WmsLogTag::DMS, "brightnessinfo displayId:%{public}" PRIu64", rsId_:%{public}" PRIu64"",
-          displayId, screenSession->rsId_);
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64", rsId:%{public}" PRIu64"", displayId, screenSession->rsId_);
     BrightnessInfo rsBrightnessInfo;
     auto rsUIContext = screenSession->GetRSUIContext();
     if (rsUIContext == nullptr) {
@@ -12530,7 +12528,6 @@ void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const Brig
         TLOGD(WmsLogTag::DMS, "ignore transform rsId %{public}" PRIu64"to logicalScreenId %{public}" PRIu64" ", rsId, logicalScreenId);
         return;
     }
-    TLOGD(WmsLogTag::DMS, "transform final rsId %{public}" PRIu64" to screenId %{public}" PRIu64" ", rsId, logicalScreenId);
     ScreenBrightnessInfo screenBrightnessInfo;
     screenBrightnessInfo.currentHeadroom = info.currentHeadroom;
     screenBrightnessInfo.maxHeadroom = info.maxHeadroom;
