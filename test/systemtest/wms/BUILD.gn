@@ -22,7 +22,6 @@ group("systemtest") {
   deps = [
     ":wms_window_animate_to_test",
     ":wms_window_multi_ability_test",
-    ":wms_window_systemsubwindow_test",
   ]
   if (!window_manager_use_sceneboard) {
     deps += [
@@ -39,6 +38,7 @@ group("systemtest") {
       ":wms_window_split_immersive_test",
       ":wms_window_split_test",
       ":wms_window_subwindow_test",
+      ":wms_window_system_toast_window_test",
     ]
   } else {
     deps += [
