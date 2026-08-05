@@ -5801,16 +5801,9 @@ WSError SceneSessionManager::CheckSessionPropertyOnRecovery(const sptr<WindowSes
         TLOGE(WmsLogTag::WMS_RECOVER, "create system window permission denied!");
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
     }
-    if (isSpecificSession) {
-        if (property->GetParentPersistentId() == INVALID_SESSION_ID) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
-    } else {
-        if (property->GetPersistentId() > 0 && !IsNeedRecover(property->GetPersistentId())) {
-            TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
-            return WSError::WS_ERROR_INVALID_PARAM;
-        }
+    if (!isSpecificSession && property->GetPersistentId() > 0 && !IsNeedRecover(property->GetPersistentId())) {
+        TLOGE(WmsLogTag::WMS_RECOVER, "no need to recover.");
+        return WSError::WS_ERROR_INVALID_PARAM;
     }
     return WSError::WS_OK;
 }
@@ -5826,7 +5819,7 @@ WSError SceneSessionManager::RecoverAndConnectSpecificSession(const sptr<ISessio
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto task = [this, sessionStage, eventChannel, surfaceNode, property, &session, token, pid, uid]() {
-        if (recoveringFinished_ || sessionRecoverStateChangeFunc_ == nullptr) {
+        if (sessionRecoverStateChangeFunc_ == nullptr) {
             TLOGNW(WmsLogTag::WMS_RECOVER, "Recover finished, not recovery anymore");
             return WSError::WS_ERROR_INVALID_OPERATION;
         }
