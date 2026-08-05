@@ -5623,17 +5623,25 @@ void ScreenSessionManager::SetColorSpaces(ScreenId screenId, sptr<ScreenSession>
 
 DMError ScreenSessionManager::GetBrightnessInfo(DisplayId displayId, ScreenBrightnessInfo& brightnessInfo)
 {
-    TLOGD(WmsLogTag::DMS, "start");
     sptr<ScreenSession> screenSession = GetScreenSession(displayId);
-    if (displayId == SCREEN_ID_FAKE) {
+    if (displayId == DISPLAY_ID_FAKE) {
+        if (GetSuperFoldStatus() == SuperFoldStatus::EXPANDED) {
+            TLOGNFE(WmsLogTag::DMS, "GetScreenSession failed");
+            return DMError::DM_ERROR_ILLEGAL_PARAM;
+        }
+        std::vector<DisplayId> displayIds = GetAllDisplayIds();
+        auto iter = std::find(displayIds.begin(), displayIds.end(), DISPLAY_ID_FAKE);
+        if (iter == displayIds.end()) {
+            TLOGNFE(WmsLogTag::DMS, "GetScreenSession failed");
+            return DMError::DM_ERROR_ILLEGAL_PARAM;
+        }
         screenSession = GetScreenSession(SCREEN_ID_FULL);
     }
     if (screenSession == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "GetScreenSession failed");
         return DMError::DM_ERROR_ILLEGAL_PARAM;
     }
-    TLOGD(WmsLogTag::DMS, "brightnessinfo displayId:%{public}" PRIu64", rsId_:%{public}" PRIu64"",
-          displayId, screenSession->rsId_);
+    TLOGD(WmsLogTag::DMS, "displayId:%{public}" PRIu64", rsId:%{public}" PRIu64"", displayId, screenSession->rsId_);
     BrightnessInfo rsBrightnessInfo;
     auto rsUIContext = screenSession->GetRSUIContext();
     if (rsUIContext == nullptr) {
@@ -12473,6 +12481,20 @@ void ScreenSessionManager::UnRegisterBrightnessInfoChangeListener()
     }
 }
 
+bool ScreenSessionManager::IsNotifyFakeDisplayBrightnessInfoNeeded(const ScreenId& logicalScreenId) 
+{
+    if (!(GetSuperFoldStatus() == SuperFoldStatus::HALF_FOLDED) || !(logicalScreenId == SCREEN_ID_FULL)) 
+    {
+        return false;
+    }
+    std::vector<DisplayId> displayIds = GetAllDisplayIds();
+    auto iter = std::find(displayIds.begin(), displayIds.end(), DISPLAY_ID_FAKE);
+    if (iter == displayIds.end()) {
+        return false;
+    }
+    return true;
+}
+
 void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const BrightnessInfo& info)
 {
     TLOGD(WmsLogTag::DMS, "notify brightness info rsId %{public}" PRIu64"", rsId);
@@ -12506,7 +12528,6 @@ void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const Brig
         TLOGD(WmsLogTag::DMS, "ignore transform rsId %{public}" PRIu64"to logicalScreenId %{public}" PRIu64" ", rsId, logicalScreenId);
         return;
     }
-    TLOGD(WmsLogTag::DMS, "transform final rsId %{public}" PRIu64" to screenId %{public}" PRIu64" ", rsId, logicalScreenId);
     ScreenBrightnessInfo screenBrightnessInfo;
     screenBrightnessInfo.currentHeadroom = info.currentHeadroom;
     screenBrightnessInfo.maxHeadroom = info.maxHeadroom;
@@ -12515,6 +12536,9 @@ void ScreenSessionManager::NotifyBrightnessInfoChanged(ScreenId rsId, const Brig
     for (auto& agent : agents) {
         int32_t agentPid = ScreenSessionManagerAdapter::GetInstance().dmAgentContainer_.GetAgentPid(agent);
         if (!IsFreezed(agentPid, DisplayManagerAgentType::BRIGHTNESS_INFO_CHANGED_LISTENER) && agent != nullptr) {
+            if (IsNotifyFakeDisplayBrightnessInfoNeeded(logicalScreenId)) {
+                agent->NotifyBrightnessInfoChanged(SCREEN_ID_FAKE, screenBrightnessInfo);
+            }
             agent->NotifyBrightnessInfoChanged(logicalScreenId, screenBrightnessInfo);
         }
     }
