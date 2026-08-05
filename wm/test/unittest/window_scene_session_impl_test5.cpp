@@ -2612,6 +2612,366 @@ HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnable, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateDecorEnable02
+ * @tc.desc: UpdateDecorEnable - isFreeMultiWindowMode true branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnable02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnable02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnable02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = true: IsPadWindow() && freeMultiWindowEnable_ && freeMultiWindowSupport_
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+
+    // isFreeMultiWindowMode true -> decorVisible = false, IsDecorEnable = false
+    window->UpdateDecorEnable(true, mode);
+    ASSERT_FALSE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnable03
+ * @tc.desc: UpdateDecorEnable - isFreeMultiWindowMode false, statusBar enable true branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnable03, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnable03 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnable03");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = false: IsPadWindow() true, but freeMultiWindowEnable_ false
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+
+    // statusBar enable_ defaults to true -> decorVisible = true, IsDecorEnable = true
+    window->UpdateDecorEnable(true, mode);
+    ASSERT_TRUE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnable04
+ * @tc.desc: UpdateDecorEnable - isFreeMultiWindowMode false, statusBar false, IsAdaptToImmersive true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnable04, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnable04 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnable04");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = false
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+
+    // statusBar enable_ = false, IsAdaptToImmersive = true -> decorVisible = true, IsDecorEnable = true
+    SystemBarProperty statusBarProperty(false, 0, 0);
+    window->property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
+    window->UpdateDecorEnable(true, mode);
+    ASSERT_TRUE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnable05
+ * @tc.desc: UpdateDecorEnable - isFreeMultiWindowMode false, both statusBar and IsAdaptToImmersive false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnable05, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnable05 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnable05");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = false
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+
+    // statusBar enable_ = false, IsAdaptToImmersive = false -> decorVisible = false, IsDecorEnable = false
+    SystemBarProperty statusBarProperty(false, 0, 0);
+    window->property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
+    window->UpdateDecorEnable(true, mode);
+    ASSERT_FALSE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnable06
+ * @tc.desc: UpdateDecorEnable - isFreeMultiWindowMode true with PHONE_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnable06, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnable06 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnable06");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = true: IsPhoneWindow() && freeMultiWindowEnable_ && freeMultiWindowSupport_
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+
+    // isFreeMultiWindowMode true -> decorVisible = false, IsDecorEnable = false
+    window->UpdateDecorEnable(true, mode);
+    ASSERT_FALSE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnableToAce01
+ * @tc.desc: UpdateDecorEnableToAce - isFreeMultiWindowMode true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnableToAce01, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnableToAce01 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce01");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = true
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+
+    // isFreeMultiWindowMode true -> decorVisible = false, IsDecorEnable = false
+    window->UpdateDecorEnableToAce(true);
+    ASSERT_FALSE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnableToAce02
+ * @tc.desc: UpdateDecorEnableToAce - isFreeMultiWindowMode false, statusBar enable true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnableToAce02, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnableToAce02 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce02");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = false
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+
+    // statusBar enable_ defaults to true -> decorVisible = true, IsDecorEnable = true
+    window->UpdateDecorEnableToAce(true);
+    ASSERT_TRUE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnableToAce03
+ * @tc.desc: UpdateDecorEnableToAce - isFreeMultiWindowMode false, statusBar false, IsAdaptToImmersive true
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnableToAce03, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnableToAce03 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce03");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = true;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    compatibleModeProperty->SetIsAdaptToImmersive(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = false
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+
+    // statusBar enable_ = false, IsAdaptToImmersive = true -> decorVisible = true, IsDecorEnable = true
+    SystemBarProperty statusBarProperty(false, 0, 0);
+    window->property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
+    window->UpdateDecorEnableToAce(true);
+    ASSERT_TRUE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnableToAce04
+ * @tc.desc: UpdateDecorEnableToAce - isFreeMultiWindowMode false, both false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnableToAce04, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnableToAce04 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce04");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PAD_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = false
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = false;
+
+    // statusBar enable_ = false, IsAdaptToImmersive = false -> decorVisible = false, IsDecorEnable = false
+    SystemBarProperty statusBarProperty(false, 0, 0);
+    window->property_->SetSystemBarProperty(WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
+    window->UpdateDecorEnableToAce(true);
+    ASSERT_FALSE(window->IsDecorEnable());
+}
+
+/**
+ * @tc.name: UpdateDecorEnableToAce05
+ * @tc.desc: UpdateDecorEnableToAce - isFreeMultiWindowMode true with PHONE_WINDOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplTest5, UpdateDecorEnableToAce05, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "WindowSceneSessionImpl: UpdateDecorEnableToAce05 start";
+    sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
+    option->SetWindowName("UpdateDecorEnableToAce05");
+    sptr<WindowSceneSessionImpl> window = sptr<WindowSceneSessionImpl>::MakeSptr(option);
+    window->uiContent_ = std::make_unique<Ace::UIContentMocker>();
+
+    window->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_BASE);
+    window->property_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    window->windowSystemConfig_.windowUIType_ = WindowUIType::PHONE_WINDOW;
+    window->windowSystemConfig_.isSystemDecorEnable_ = false;
+    window->property_->SetCollaboratorType(static_cast<int32_t>(CollaboratorType::DEFAULT_TYPE));
+
+    // Set isCompatibleFullScreen conditions
+    sptr<CompatibleModeProperty> compatibleModeProperty = sptr<CompatibleModeProperty>::MakeSptr();
+    ASSERT_NE(compatibleModeProperty, nullptr);
+    compatibleModeProperty->SetIsSupportRotateFullScreen(true);
+    window->property_->SetCompatibleModeProperty(compatibleModeProperty);
+    window->windowSystemConfig_.supportMultiWindowScreenSet_.insert(0);
+
+    // isFreeMultiWindowMode = true: IsPhoneWindow() && freeMultiWindowEnable_ && freeMultiWindowSupport_
+    window->windowSystemConfig_.freeMultiWindowSupport_ = true;
+    window->windowSystemConfig_.freeMultiWindowEnable_ = true;
+
+    // isFreeMultiWindowMode true -> decorVisible = false, IsDecorEnable = false
+    window->UpdateDecorEnableToAce(true);
+    ASSERT_FALSE(window->IsDecorEnable());
+}
+
+/**
  * @tc.name: TestMoveWindowToGlobalDisplay
  * @tc.desc: Test MoveWindowToGlobalDisplay under multiple conditions
  * @tc.type: FUNC
