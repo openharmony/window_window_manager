@@ -696,8 +696,8 @@ void ScreenSessionManager::WaitForDefaultDisplayReady()
             TLOGNFW(WmsLogTag::DMS, "has hotpluged screen");
             return;
         }
-        TLOGNFW(WmsLogTag::DMS, "timeout waiting for default display");
-        OnScreenChange(INVALID_SCREEN_ID, ScreenEvent::CONNECTED);
+        TLOGNFW(WmsLogTag::DMS, "timeout waiting for physical screen, active screen change callback");
+        OnScreenChange(NONE_PHYSICAL_SCREEN_ID, ScreenEvent::CONNECTED);
     };
     taskScheduler_->RemoveTask("WaitForDefaultDisplayReady");
     taskScheduler_->PostAsyncTask(task, "WaitForDefaultDisplayReady", WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT_MS);
@@ -706,10 +706,6 @@ void ScreenSessionManager::WaitForDefaultDisplayReady()
 
 void ScreenSessionManager::CreateScreenForBoot()
 {
-    if (HasInternalScreen()) {
-        TLOGNFW(WmsLogTag::DMS, "has build in screen");
-        return;
-    }
     if (HasRealScreenConnect()) {
         TLOGNFW(WmsLogTag::DMS, "has hotpluged screen");
         return;
@@ -721,7 +717,6 @@ void ScreenSessionManager::CreateScreenForBoot()
         return;
     }
     ScreenId rsScreenId = defaultScreenSession->GetRSScreenId();
-
     if (GetClientProxy() == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "boot client proxy is nullptr");
 #ifdef POWERMGR_DISPLAY_MANAGER_ENABLE
@@ -1760,10 +1755,9 @@ void ScreenSessionManager::ClearAllVirtualScreens()
 void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenEvent, ScreenChangeReason reason,
     sptr<IRemoteObject> connectToRenderToken)
 {
-    if(screenId == INVALID_SCREEN_ID && screenEvent == ScreenEvent::CONNECTED) {
+    if(screenId == NONE_PHYSICAL_SCREEN_ID && screenEvent == ScreenEvent::CONNECTED) {
         if (!g_isVirtualScreenBoot && reason == ScreenChangeReason::DEFAULT){
             TLOGNFW(WmsLogTag::DMS, "invaild screenid,Create virtual screen for boot");
-            taskScheduler_->RemoveTask("WaitForDefaultDisplayReady");
             CreateScreenForBoot();
             return;
         }
@@ -1771,6 +1765,7 @@ void ScreenSessionManager::OnScreenChange(ScreenId screenId, ScreenEvent screenE
             ClearAllVirtualScreens();
             g_isVirtualScreenBoot = false;
             CreateScreenForBoot();
+            TLOGNFW(WmsLogTag::DMS, "HWCDEAD");
             return;
         }
         if (g_isVirtualScreenBoot && reason == ScreenChangeReason::DEFAULT){
