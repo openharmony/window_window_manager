@@ -2414,17 +2414,17 @@ void WindowSessionImpl::UpdateTitleButtonVisibility()
     bool isSubWindow = WindowHelper::IsSubWindow(windowType);
     bool isDialogWindow = WindowHelper::IsDialogWindow(windowType);
     bool onlySupportFullScreen = WindowHelper::IsOnlySupportFullScreen(windowModeSupportType);
-    if (IsPcOrFreeMultiWindowCapabilityEnabled() && (isSubWindow || isDialogWindow) &&
-        !IsZLevelAboveParentLoosened()) {
+    if (IsPcOrFreeMultiWindowCapabilityEnabled() && (isSubWindow || isDialogWindow) && !IsZLevelAboveParentLoosened()) {
         uiContent->HideWindowTitleButton(true, onlySupportFullScreen ? true : !IsSubWindowMaximizeSupported(), !onlySupportFullScreen, false);
         TLOGI(WmsLogTag::WMS_LAYOUT, "HideWindowTitleButton");
         return;
     }
     bool hideSplitButton = !(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_SPLIT_PRIMARY);
+    WindowMode windowMode = GetWindowMode();
     bool hideMaximizeButton = (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FULLSCREEN) &&
-        (GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(GetWindowMode()))) ||
+        (windowMode == WindowMode::WINDOW_MODE_FLOATING || WindowHelper::IsSplitWindowMode(windowMode))) ||
         (!(windowModeSupportType & WindowModeSupport::WINDOW_MODE_SUPPORT_FLOATING) &&
-        (GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN || WindowHelper::IsSplitWindowMode(GetWindowMode())));
+        (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN || WindowHelper::IsSplitWindowMode(windowMode)));
     bool hideMinimizeButton = false;
     bool hideCloseButton = false;
     GetTitleButtonVisible(hideMaximizeButton, hideMinimizeButton, hideSplitButton, hideCloseButton);
