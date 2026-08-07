@@ -240,7 +240,8 @@ bool WindowController::CheckParentWindowValid(const sptr<WindowProperty>& proper
             return false;
         }
     } else {
-        if (property->GetParentId() != INVALID_WINDOW_ID) {
+        if (property->GetParentId() != INVALID_WINDOW_ID &&
+            property->GetWindowType()!= WindowType::WINDOW_TYPE_DIALOG) {
             WLOGFE("failed, type is error");
             return false;
         }

@@ -103,7 +103,7 @@ union WSColorParam {
 
 namespace {
 constexpr HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HILOG_DOMAIN_WINDOW, "WindowSceneSessionImpl"};
-constexpr int32_t WINDOW_DETACH_TIMEOUT = 3000;
+constexpr int32_t WINDOW_DETACH_TIMEOUT = 1500;
 constexpr int32_t WINDOW_LAYOUT_TIMEOUT = 30;
 constexpr int32_t WINDOW_PAGE_ROTATION_TIMEOUT = 2000;
 const std::string PARAM_DUMP_HELP = "-h";
@@ -446,13 +446,15 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->GetSessionInfo().appIndex_, GetType());
 
     bool hasToastFlag = property_->GetWindowFlags() & static_cast<uint32_t>(WindowFlag::WINDOW_FLAG_IS_TOAST);
+    WMErrorResult result;
     if (WindowHelper::IsSubWindow(type) && (property_->GetIsUIExtFirstSubWindow() ||
                                             (property_->GetIsUIExtAnySubWindow() && hasToastFlag))) {
         property_->SetParentPersistentId(property_->GetParentId());
         SetDefaultDisplayIdIfNeed();
         property_->SetIsUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
         // create sub session by parent session
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel, nodeId_,
+        result = SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(
+            iSessionStage, eventChannel, nodeId_,
             property_, persistentId, session, windowSystemConfig_, renderSession, surfaceNode_, token);
         if (!hasToastFlag) {
             AddSubWindowMapForExtensionWindow();
@@ -470,7 +472,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             property_->SetDisplayId(crossProcessWindowInfo.displayId);
             property_->SetIsPcAppInPad(crossProcessWindowInfo.isPcAppInPad);
             property_->SetPcAppInpadCompatibleMode(crossProcessWindowInfo.isPcAppInpadCompatibleMode);
-            SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            result = SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(
+                iSessionStage, eventChannel,
                 nodeId_, property_, persistentId, session, windowSystemConfig_, renderSession, surfaceNode_, token);
         } else {
             sptr<WindowSessionImpl> parentSession = nullptr;
@@ -485,7 +488,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
             property_->SetPcAppInpadCompatibleMode(parentSession->GetProperty()->GetPcAppInpadCompatibleMode());
             // creat sub session by parent session
-            SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+            result = SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(
+                iSessionStage, eventChannel,
                 nodeId_, property_, persistentId, session, windowSystemConfig_, renderSession, surfaceNode_, token);
             {
                 std::lock_guard<std::recursive_mutex> lock(subWindowSessionMutex_);
@@ -504,7 +508,8 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             property_->SetIsPcAppInPad(parentSession->GetProperty()->GetIsPcAppInPad());
         }
         PreProcessCreate();
-        SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(iSessionStage, eventChannel,
+        result = SingletonContainer::Get<WindowAdapter>().CreateAndConnectSpecificSession(
+            iSessionStage, eventChannel,
             nodeId_, property_, persistentId, session, windowSystemConfig_, renderSession, surfaceNode_, token);
     }
     property_->SetPersistentId(persistentId);
@@ -531,9 +536,10 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         hostSession_ = session;
     }
     TLOGI(WmsLogTag::WMS_LIFE, "name:%{public}s,id:%{public}d,parentId:%{public}d,type:%{public}u,"
-        "touchable:%{public}d,displayId:%{public}" PRIu64, property_->GetWindowName().c_str(),
+        "touchable:%{public}d,displayId:%{public}" PRIu64 ", errCode: %{public}d, msg: %{public}s",
+        property_->GetWindowName().c_str(),
         property_->GetPersistentId(), property_->GetParentPersistentId(), GetType(),
-        property_->GetTouchable(), property_->GetDisplayId());
+        property_->GetTouchable(), property_->GetDisplayId(), result.errCode, result.errMsg.c_str());
     return WMError::WM_OK;
 }
 
@@ -1176,6 +1182,7 @@ void WindowSceneSessionImpl::OnWindowRecoverStateChange(bool isSpecificSession, 
             if (isHighlighted_) {
                 NotifyHighlightChange(false);
             }
+            SetIsStartMoving(false);
             break;
         case WindowRecoverState::WINDOW_FINISH_RECONNECT:
             UpdateFinishRecoverProperty(isSpecificSession);
@@ -2127,14 +2134,29 @@ WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool w
     return Show(reason, withAnimation, withFocus, false, requestId, scbRequestId);
 }
 
-WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach,
-    int32_t requestId, int32_t scbRequestId)
+bool WindowSceneSessionImpl::isNeedWindowShow(uint32_t reason)
 {
     if (reason == static_cast<uint32_t>(WindowStateChangeReason::USER_SWITCH)) {
         TLOGI(WmsLogTag::WMS_MULTI_USER, "Switch to current user, NotifyAfterForeground");
         NotifyAfterForeground(true, false);
         NotifyAfterDidForeground(reason);
         RecordWindowLifecycleChange("user switch show");
+        return true;
+    }
+    if (reason == static_cast<uint32_t>(WindowStateChangeReason::PC_APP_IN_PAD)) {
+        TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, PcAppInPad when unlock.", GetPersistentId());
+        NotifyAfterForeground(true, false);
+        NotifyAfterDidForeground(reason);
+        RecordWindowLifecycleChange("PcAppInPad when unlock");
+        return true;
+    }
+    return false;
+}
+
+WMError WindowSceneSessionImpl::Show(uint32_t reason, bool withAnimation, bool withFocus, bool waitAttach,
+    int32_t requestId, int32_t scbRequestId)
+{
+    if (isNeedWindowShow(reason)) {
         return WMError::WM_OK;
     }
     const auto type = GetType();
@@ -2581,25 +2603,38 @@ WMError WindowSceneSessionImpl::SyncDestroyAndDisconnectSpecificSession(int32_t 
     WMError ret = WMError::WM_OK;
     if (SysCapUtil::GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME) {
         TLOGI(WmsLogTag::WMS_LIFE, "Destroy window is scb window");
-        ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
+        WMErrorResult result =
+            SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSession(persistentId);
+        ret = result.errCode;
+        if (ret != WMError::WM_OK) {
+            TLOGE(WmsLogTag::WMS_LIFE,
+                "DestroyAndDisconnectSpecificSession failed, errCode: %{public}d, msg: %{public}s",
+                result.errCode, result.errMsg.c_str());
+        }
         return ret;
     }
     sptr<PatternDetachCallback> callback = sptr<PatternDetachCallback>::MakeSptr();
-    ret = SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
+    WMErrorResult result =
+        SingletonContainer::Get<WindowAdapter>().DestroyAndDisconnectSpecificSessionWithDetachCallback(persistentId,
         callback->AsObject());
+    ret = result.errCode;
     if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LIFE,
+            "DestroyAndDisconnectSpecificSessionWithDetachCallback failed, errCode: %{public}d, msg: %{public}s",
+            result.errCode, result.errMsg.c_str());
         return ret;
     }
     auto startTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
-    callback->GetResult(WINDOW_DETACH_TIMEOUT);
+    if (!WindowHelper::IsSubWindow(GetType())) {
+        callback->GetResult(WINDOW_DETACH_TIMEOUT);
+    }
     auto endTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     auto waitTime = endTime - startTime;
     if (waitTime >= WINDOW_DETACH_TIMEOUT) {
         TLOGW(WmsLogTag::WMS_LIFE, "Destroy window timeout, persistentId:%{public}d", persistentId);
         RecordLifeCycleExceptionEvent(ret, WMErrorReason::WM_REASON_WINDOW_DESTROY_ERR, "window detach timeout");
-        callback->GetResult(std::numeric_limits<int>::max());
     }
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy window persistentId:%{public}d waitTime:%{public}lld", persistentId, waitTime);
     return ret;
@@ -3218,6 +3253,20 @@ WMError WindowSceneSessionImpl::GetTargetOrientationConfigInfo(Orientation targe
         getTargetInfoCallback_->GetTargetOrientationResult(WINDOW_PAGE_ROTATION_TIMEOUT);
     OrientationInfo info = infoResult.first;
     OrientationInfo currentInfo = infoResult.second;
+    Rect displayRect = { 0, 0, static_cast<uint32_t>(displayInfo->GetWidth()),
+        static_cast<uint32_t>(displayInfo->GetHeight()) };
+    bool isTargetInfoInDisplay = info.rect.IsInsideOf(displayRect);
+    bool isTargetFullDisplay = info.rect == displayRect;
+    bool isCurrentInfoStale = !currentInfo.rect.IsInsideOf(displayRect) ||
+        (isTargetFullDisplay && currentInfo.rect != displayRect && currentInfo.rotation != info.rotation);
+    if (isCurrentInfoStale && isTargetInfoInDisplay) {
+        TLOGW(WmsLogTag::WMS_ROTATION,
+            "GetTargetOrientationConfigInfo: current info is stale, win:%{public}u, "
+            "displayRect:%{public}s, target[%{public}u,%{public}s], current[%{public}u,%{public}s]",
+            GetWindowId(), displayRect.ToString().c_str(), info.rotation, info.rect.ToString().c_str(),
+            currentInfo.rotation, currentInfo.rect.ToString().c_str());
+        info = currentInfo;
+    }
     //Handle timeout gracefully:if rect is empty, use display size as fallback.
     if (info.rect.IsUninitializedRect() && displayInfo != nullptr) {
         TLOGW(WmsLogTag::WMS_ROTATION, "GetTargetOrientationResult timeout, using display size as fallback");
@@ -4934,9 +4983,9 @@ void WindowSceneSessionImpl::UpdateWindowModeWhenSupportTypeChange(uint32_t wind
         "onlyFullScreen:%{public}d onlyFloating:%{public}d",
         GetPersistentId(), windowModeSupportType, onlySupportFullScreen, onlySupportFloating);
     bool disableFullScreen = property_->IsFullScreenDisabled();
-    if (onlySupportFullScreen && !property_->IsLayoutFullScreen() && !disableFullScreen) {
-        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d IsLayoutFullScreen:%{public}d",
-            onlySupportFullScreen, property_->IsLayoutFullScreen());
+    if (onlySupportFullScreen && !disableFullScreen) {
+        TLOGI(WmsLogTag::WMS_LAYOUT_PC, "onlySupportFullScreen:%{public}d disableFullScreen:%{public}d",
+            onlySupportFullScreen, disableFullScreen);
         Maximize(MaximizePresentation::ENTER_IMMERSIVE);
         return;
     }

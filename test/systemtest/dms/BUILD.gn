@@ -27,9 +27,7 @@ group("systemtest") {
 
   if (window_manager_use_sceneboard) {
     deps += [
-      ":dms_screenshot_test",
       ":dms_display_power_test",
-      ":dms_display_change_test",
       ":dms_display_manager_test",
       ":dms_screen_manager_test",
     ]

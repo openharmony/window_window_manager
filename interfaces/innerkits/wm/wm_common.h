@@ -115,6 +115,11 @@ constexpr uint32_t OUTLINE_COLOR_OPAQUE_OFFSET = 24; // Shift right 24 bits.
 constexpr uint32_t OUTLINE_COLOR_OPAQUE = 0xff; // Color opaque byte.
 
 constexpr uint32_t MAX_RATIO_LIMITS_COUNT = 10; // Max ratio limits count.
+
+/*
+ * ability manager err
+ */
+constexpr uint32_t ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK = 2097253;
 }
 
 /**
@@ -452,6 +457,14 @@ enum class WMErrorReason : int32_t {
     WM_REASON_SUB_WINDOW_IPC_BIND_DIALOG_TARGET_ERR,
 };
 
+
+/**
+ * @brief Error result structure for window operations.
+ */
+struct WMErrorResult {
+    WMError errCode = WMError::WM_OK;
+    std::string errMsg = "";
+};
 
 /**
  * @brief Enumerates error code of window only used for js api.
@@ -2219,7 +2232,6 @@ struct PiPTemplateInfo : public Parcelable {
             info.status = static_cast<PiPControlStatus>(status);
             pipTemplateInfo->pipControlStatusInfoList.emplace_back(info);
         }
-        return true;
         uint32_t controlEnableSize = 0;
         if (!parcel.ReadUint32(controlEnableSize) || controlEnableSize > MAX_SIZE_PIP_CONTROL) {
             return false;
@@ -2746,6 +2758,17 @@ enum WindowVisibilityState : uint32_t {
     WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION,
     WINDOW_LAYER_STATE_MAX,
     END = WINDOW_LAYER_STATE_MAX,
+};
+
+/**
+ * @enum WindowPostureMode
+ *
+ * @brief Posture mode of a window
+ */
+enum class WindowPostureMode : uint32_t {
+    START = 0,
+    DESKTOP_MODE = START,
+    END,
 };
 
 /**

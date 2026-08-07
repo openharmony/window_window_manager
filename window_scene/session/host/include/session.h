@@ -832,8 +832,6 @@ public:
     std::string GetAppInstanceKey() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetSessionInfoAbilityInfo();
     virtual void NotifyWindowSceneDetach() {};
-    bool GetNeedBackgroundAfterConnect() const;
-    void SetNeedBackgroundAfterConnect(bool isNeed);
     void RecordLifecycleSessionStateError(SessionState expectState, SessionState currentState) const;
 
     /*
@@ -863,7 +861,6 @@ public:
     std::shared_ptr<AppExecFwk::EventHandler> GetEventHandler() const;
     WSError UpdateClientDisplayId(DisplayId displayId);
     DisplayId TransformGlobalRectToRelativeRect(WSRect& rect) const;
-    void TransformRelativeRectToGlobalRect(WSRect& rect) const;
     void UpdateClientRectPosYAndDisplayId(WSRect& rect);
     bool IsDragAccessible() const;
     void SetSingleHandTransform(const SingleHandTransform& transform);
@@ -1393,7 +1390,6 @@ private:
 
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
-    bool needBackgroundAfterConnect_ { false };
 
     /*
      * Starting Window

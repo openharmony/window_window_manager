@@ -91,7 +91,9 @@ DisplayInfo *DisplayInfo::Unmarshalling(Parcel &parcel)
         parcel.ReadInt32(displayInfo->y_) && parcel.ReadUint32(displaySourceMode) &&
         parcel.ReadUInt32Vector(&(displayInfo->supportedRefreshRate_)) &&
         parcel.ReadBool(displayInfo->supportsFocus_) && parcel.ReadBool(displayInfo->supportsInput_) &&
-        parcel.ReadString(displayInfo->bundleName_);
+        parcel.ReadString(displayInfo->bundleName_) && parcel.ReadInt32(displayInfo->actualPosX_) &&
+        parcel.ReadInt32(displayInfo->actualPosY_) && parcel.ReadUint32(displayInfo->actualWidth_) &&
+        parcel.ReadUint32(displayInfo->actualHeight_);
     if (!res) {
         delete displayInfo;
         return nullptr;
