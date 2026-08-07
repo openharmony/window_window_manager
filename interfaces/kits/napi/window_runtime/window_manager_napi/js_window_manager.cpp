@@ -1237,13 +1237,14 @@ static napi_value GetTopWindowTask(napi_value nativeContext, napi_env env, napi_
             return;
         }
         if (lists->window == nullptr || lists->window->GetWindowState() == WindowState::STATE_DESTROYED) {
+            std::string windowName = (lists->window != nullptr) ? lists->window->GetWindowName() : "";
             if (newApi) {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WmErrorCode::WM_ERROR_STATE_ABNORMALLY,
-                    "[window][getLatsWindow]msg: Get top window failed"));
+                    "[window][getLatsWindow]msg: Get top window failed, windowName='" + windowName + "'"));
                 HISTOGRAM_ENUMERATION_ERROR_CODE("ArkUI.window.getLastWindow", WmErrorCode::WM_ERROR_STATE_ABNORMALLY);
             } else {
                 task.Reject(env, JsErrUtils::CreateJsError(env, WMError::WM_ERROR_NULLPTR,
-                    "[window][getLatsWindow]msg: Get top window failed"));
+                    "[window][getLatsWindow]msg: Get top window failed, windowName='" + windowName + "'"));
             }
             WLOGFE("Get top window failed, %{public}d", lists->window == nullptr);
             return;
@@ -2588,6 +2589,7 @@ napi_value JsWindowManagerInit(napi_env env, napi_value exportObj)
     napi_set_named_property(env, exportObj, "MaximizePresentation", MaximizePresentationInit(env));
     napi_set_named_property(env, exportObj, "AcrossDisplayPresentation", AcrossDisplayPresentationInit(env));
     napi_set_named_property(env, exportObj, "ExtensionWindowAttribute", ExtensionWindowAttributeInit(env));
+    napi_set_named_property(env, exportObj, "WindowPostureMode", WindowPostureModeInit(env));
     napi_set_named_property(env, exportObj, "ModalityType", ModalityTypeInit(env));
     napi_set_named_property(env, exportObj, "RotationChangeType", RotationChangeTypeInit(env));
     napi_set_named_property(env, exportObj, "RotationInfoType", RotationInfoTypeInit(env));

@@ -194,6 +194,12 @@ const std::string STARTUP_PHASE_PRE_WINDOW = "pre_window";
 const std::string STARTUP_PHASE_PRE_FOREGROUND = "pre_foreground";
 const std::string TRUE_VALUE = "true";
 
+/*
+ * sessionexception reason
+*/
+const std::string ERR_REASON_DEFAULT = "startFailed";
+const std::string ERR_REASON_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK = "startFirstBootScreenUnlock";
+
 const std::map<std::string, OHOS::AppExecFwk::DisplayOrientation> STRING_TO_DISPLAY_ORIENTATION_MAP = {
     {"unspecified",                         OHOS::AppExecFwk::DisplayOrientation::UNSPECIFIED},
     {"landscape",                           OHOS::AppExecFwk::DisplayOrientation::LANDSCAPE},
@@ -2474,7 +2480,8 @@ sptr<SceneSession::SpecificSessionCallback> SceneSessionManager::CreateSpecificS
         return this->RequestSceneSession(sessionInfo, property);
     };
     specificCb->onDestroy_ = [this](const int32_t persistentId) {
-        return this->DestroyAndDisconnectSpecificSessionInner(persistentId);
+        WSErrorResult result = this->DestroyAndDisconnectSpecificSessionInner(persistentId);
+        return result.errCode;
     };
     specificCb->onCameraFloatSessionChange_ = [this](uint32_t accessTokenId, bool isShowing) {
         this->UpdateCameraFloatWindowStatus(accessTokenId, isShowing);
@@ -2918,12 +2925,14 @@ void SceneSessionManager::SchedulePcAppInPadLifecycleByPersistentId(bool isBackg
         if (!isPcAppInPad) {
             return;
         }
-        StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession, isBackground);
+        StartOrMinimizePcAppInPadUIAbilityBySCB(sceneSession, isBackground,
+            WindowStateChangeReason::PC_APP_IN_PAD);
     };
     return taskScheduler_->PostAsyncTask(task, __func__);
 }
 
-WSError SceneSessionManager::StartOrMinimizePcAppInPadUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isBackground)
+WSError SceneSessionManager::StartOrMinimizePcAppInPadUIAbilityBySCB(const sptr<SceneSession>& sceneSession, bool isBackground,
+    WindowStateChangeReason reason)
 {
     auto sessionState = sceneSession->GetSessionState();
     auto isInvalidMainSession = sessionState == SessionState::STATE_DISCONNECT ||
@@ -2952,18 +2961,23 @@ WSError SceneSessionManager::StartOrMinimizePcAppInPadUIAbilityBySCB(const sptr<
         }
     } else {
         TLOGI(WmsLogTag::WMS_LIFE,
-            "StartPcAppInPadUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d", persistentId,
-            sceneSession->GetWindowType(), sceneSession->GetSessionState());
+            "StartPcAppInPadUIAbilityBySCB with persistentId: %{public}d, type: %{public}d, state: %{public}d,"
+            "reason:%{public}u", persistentId,sceneSession->GetWindowType(), sceneSession->GetSessionState(), reason);
         bool isColdStart = false;
         abilitySessionInfo->isNewWant = false;
         int32_t errCode = StartUIAbilityBySCBTimeoutCheck(sceneSession,
-            abilitySessionInfo, static_cast<uint32_t>(WindowStateChangeReason::NORMAL), isColdStart);
+            abilitySessionInfo, static_cast<uint32_t>(reason), isColdStart);
         if (errCode != ERR_OK) {
             TLOGE(WmsLogTag::WMS_LIFE, "start failed! errCode: %{public}d", errCode);
             RecordLifeCycleExceptionEvent(sceneSession, errCode,
                 WSErrorReason::WS_REASON_WINDOW_START_ERR, "start pcappinpad failed");
             ExceptionInfo exceptionInfo;
             exceptionInfo.needRemoveSession = true;
+            if (errCode == ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK) {
+                abilitySessionInfo->errorReason = ERR_REASON_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
+            } else {
+                abilitySessionInfo->errorReason = ERR_REASON_DEFAULT;
+            }
             sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
             if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
                 startUIAbilityErrorFunc_(
@@ -4234,6 +4248,11 @@ WSError SceneSessionManager::RequestSceneSessionActivationInner(
             "start ability failed");
         ExceptionInfo exceptionInfo;
         exceptionInfo.needRemoveSession = true;
+        if (errCode == ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK) {
+            sceneSessionInfo->errorReason = ERR_REASON_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
+        } else {
+            sceneSessionInfo->errorReason = ERR_REASON_DEFAULT;
+        }
         sceneSession->NotifySessionExceptionInner(sceneSessionInfo, exceptionInfo, false, true);
         if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
             startUIAbilityErrorFunc_(
@@ -4983,7 +5002,6 @@ WSError SceneSessionManager::RequestSceneSessionDestructionInner(sptr<SceneSessi
         ResetWantInfo(sceneSession);
         sceneSession->ResetSessionInfoResultCode();
         sceneSession->EditSessionInfo().isSetStartWindowType_ = false;
-        sceneSession->SetNeedBackgroundAfterConnect(false);
     }
     ClearRequestTaskInfo(persistentId);
     NotifySessionForCallback(sceneSession, needRemoveSession, reason);
@@ -5038,7 +5056,7 @@ void SceneSessionManager::AddPermissionUsedRecord(const std::string& permission,
     }
 }
 
-WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
+WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISessionStage>& sessionStage,
     const sptr<IWindowEventChannel>& eventChannel, uint64_t nodeId,
     sptr<WindowSessionProperty> property, int32_t& persistentId, sptr<ISession>& session,
     SystemSessionConfig& systemConfig, sptr<IRemoteObject>& renderSession,
@@ -5046,7 +5064,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
 {
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
-        return WSError::WS_ERROR_NOT_SYSTEM_APP;
+        return WSErrorResult{WSError::WS_ERROR_NOT_SYSTEM_APP, "create system window or modal subwindow permission denied!"};
     }
 
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
@@ -5055,7 +5073,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         if (parentProperty->GetSubWindowLevel() >= MAX_SUB_WINDOW_LEVEL &&
             !WindowHelper::IsToastSubWindow(property->GetWindowType(), property->GetWindowFlags())) {
             TLOGE(WmsLogTag::WMS_SUB, "sub window level exceeds limit");
-            return WSError::WS_ERROR_INVALID_WINDOW;
+            return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "sub window level exceeds limit"};
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
         if (parentSession->GetSessionInfo().isSystem_ && property->GetIsUIExtFirstSubWindow() &&
@@ -5075,38 +5093,47 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     }
     if (shouldBlock) {
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
-        return WSError::WS_ERROR_INVALID_OPERATION;
+        auto infos = parentSession->GetExtInfoWithHideNonSecureWindowFlag();
+        std::ostringstream oss;
+        oss << "It is not allowed to create non-secure window when secure extension exists. Maybe blocked by:";
+        for(const auto& tokenInfo: infos) {
+            AAFwk::UIExtensionSessionInfo extInfo;
+            AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(tokenInfo.abilityToken, extInfo);
+            oss << " " << extInfo.elementName.GetBundleName();
+        }
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, oss.str()};
     }
     bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     if (!isPhoneOrPad && property->GetWindowType() == WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION) {
         TLOGE(WmsLogTag::WMS_LIFE, "only phone or pad can create mutiScreen collaboration window");
-        return WSError::WS_ERROR_INVALID_OPERATION;
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "only phone or pad can create mutiScreen collaboration window"};
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
         WSError err = CheckSubSessionStartedByExtension(token, property);
         if (err != WSError::WS_OK) {
-            return err;
+            return WSErrorResult{err,
+                "The extension ability type or the parent of extension subwindow is invalid!"};
         }
         SetExtensionSubSessionDisplayId(property, sessionStage);
     }
     // WINDOW_TYPE_SYSTEM_ALARM_WINDOW has been deprecated, will be deleted after 5 versions.
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
         TLOGE(WmsLogTag::DEFAULT, "The alarm window has been deprecated!");
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "The alarm window has been deprecated!"};
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_FB) {
         auto ret = IsFloatingBallValid(parentSession);
         if (ret != WSError::WS_OK) {
-            return ret;
+            return WSErrorResult{ret, "parent is null or state invalid when create float view"};
         }
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_FV) {
         auto ret = CanCreateFloatView(parentSession);
         if (ret != WSError::WS_OK) {
-            return ret;
+            return WSErrorResult{ret, "parent is null when create float view"};
         }
     }
 
@@ -5118,10 +5145,10 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     auto uid = IPCSkeleton::GetCallingUid();
     auto tokenId = IPCSkeleton::GetCallingTokenID();
     auto task = [this, sessionStage, eventChannel, nodeId, &surfaceNode, property, &persistentId, &session, &systemConfig, token,
-                &renderSession, pid, uid, isSystemCalling, initClientDisplayId, parentSession, tokenId]() {
+                &renderSession, pid, uid, isSystemCalling, initClientDisplayId, parentSession, tokenId]() -> WSErrorResult {
         if (property == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "property is nullptr");
-            return WSError::WS_ERROR_NULLPTR;
+            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "property is nullptr"};
         }
         const auto type = property->GetWindowType();
         if (type == WindowType::WINDOW_TYPE_PIP) {
@@ -5132,7 +5159,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
                 TLOGNE(WmsLogTag::WMS_PIP, "pip window is not enabled to create.");
             }
             if (checkResult != WSError::WS_OK) {
-                return checkResult;
+                return WSErrorResult{checkResult, "pip window check error"};
             }
         }
         // create specific session
@@ -5147,7 +5174,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
         if (newSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
-            return WSError::WS_ERROR_NULLPTR;
+            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "session is nullptr"};
         }
         newSession->SetClientDisplayId(initClientDisplayId);
         property->SetSystemCalling(isSystemCalling);
@@ -5178,7 +5205,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
         TLOGNI(WmsLogTag::WMS_LIFE, "create specific session success, id: %{public}d, "
             "parentId: %{public}d, type: %{public}d",
             newSession->GetPersistentId(), newSession->GetParentPersistentId(), type);
-        return errCode;
+        return WSErrorResult{errCode, "create specific session success"};
     };
 
     return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
@@ -6303,7 +6330,7 @@ void SceneSessionManager::ClearSpecificSessionRemoteObjectMap(int32_t persistent
     }
 }
 
-WSError SceneSessionManager::CleanupSessionByType(const sptr<SceneSession>& sceneSession)
+WSErrorResult SceneSessionManager::CleanupSessionByType(const sptr<SceneSession>& sceneSession)
 {
     auto ret = sceneSession->UpdateActiveStatus(false);
     RemoveSessionFromBlackList(sceneSession);
@@ -6331,15 +6358,15 @@ WSError SceneSessionManager::CleanupSessionByType(const sptr<SceneSession>& scen
     } else if (windowType == WindowType::WINDOW_TYPE_FLOAT) {
         DestroySubSession(sceneSession);
     }
-    return ret;
+    return WSErrorResult{ret, "cleanup session by type success"};
 }
 
-WSError SceneSessionManager::FinalizeSessionDestruction(const int32_t persistentId)
+WSErrorResult SceneSessionManager::FinalizeSessionDestruction(const int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr, persistentId:%{public}d", persistentId);
-        return WSError::WS_ERROR_NULLPTR;
+        return WSErrorResult{WSError::WS_ERROR_NULLPTR, "session is nullptr"};
     }
     auto ret = sceneSession->Disconnect();
     sceneSession->ClearSpecificSessionCbMap();
@@ -6364,23 +6391,23 @@ WSError SceneSessionManager::FinalizeSessionDestruction(const int32_t persistent
     }
     ClearSpecificSessionRemoteObjectMap(persistentId);
     TLOGI(WmsLogTag::WMS_LIFE, "Destroy specific session end, id: %{public}d", persistentId);
-    return WSError::WS_OK;
+    return WSErrorResult{WSError::WS_OK, "Destroy specific session end"};
 }
 
-WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId)
+WSErrorResult SceneSessionManager::DestroyAndDisconnectSpecificSessionInner(const int32_t persistentId)
 {
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
+        return WSErrorResult{WSError::WS_ERROR_NULLPTR, "sceneSession is nullptr"};
     }
     auto ret = CleanupSessionByType(sceneSession);
-    if (ret != WSError::WS_OK) {
+    if (ret.errCode != WSError::WS_OK) {
         return ret;
     }
     return FinalizeSessionDestruction(persistentId);
 }
 
-WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
+WSErrorResult SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t persistentId)
 {
     const auto& callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, callingPid]() {
@@ -6388,14 +6415,14 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t p
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr, persistentId:%{public}d", persistentId);
-            return WSError::WS_ERROR_NULLPTR;
+            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "session is nullptr"};
         }
 
         if (callingPid != sceneSession->GetCallingPid()) {
             TLOGNE(WmsLogTag::WMS_LIFE, 
                 "Permission denied, not destroy by the same process. CallingPid:%{public}d, "
                 "sceneSession callingPid:%{public}d", callingPid, sceneSession->GetCallingPid());
-            return WSError::WS_ERROR_INVALID_PERMISSION;
+            return WSErrorResult{WSError::WS_ERROR_INVALID_PERMISSION, "Permission denied, not destroy by the same process"};
         }
         return DestroyAndDisconnectSpecificSessionInner(persistentId);
     };
@@ -6403,11 +6430,11 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSession(const int32_t p
     return taskScheduler_->PostSyncTask(task, "DestroyAndDisConnect:PID:" + std::to_string(persistentId));
 }
 
-WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
+WSErrorResult SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallback(const int32_t persistentId,
     const sptr<IRemoteObject>& callback)
 {
     if (callback == nullptr) {
-        return WSError::WS_ERROR_NULLPTR;
+        return WSErrorResult{WSError::WS_ERROR_NULLPTR, "callback is nullptr"};
     }
     const auto callingPid = IPCSkeleton::GetCallingRealPid();
     auto task = [this, persistentId, callingPid, callback]() {
@@ -6415,14 +6442,14 @@ WSError SceneSessionManager::DestroyAndDisconnectSpecificSessionWithDetachCallba
         auto sceneSession = GetSceneSession(persistentId);
         if (sceneSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr, persistentId:%{public}d", persistentId);
-            return WSError::WS_ERROR_NULLPTR;
+            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "session is nullptr"};
         }
 
         if (callingPid != sceneSession->GetCallingPid()) {
             TLOGNE(WmsLogTag::WMS_LIFE, 
                 "Permission denied, not destroy by the same process. CallingPid:%{public}d, "
                 "sceneSession callingPid:%{public}d", callingPid, sceneSession->GetCallingPid());
-            return WSError::WS_ERROR_INVALID_PERMISSION;
+            return WSErrorResult{WSError::WS_ERROR_INVALID_PERMISSION, "Permission denied, not destroy by the same process"};
         }
         sceneSession->RegisterDetachCallback(iface_cast<IPatternDetachCallback>(callback));
         return DestroyAndDisconnectSpecificSessionInner(persistentId);
@@ -6605,6 +6632,11 @@ WSError SceneSessionManager::StartOrMinimizeUIAbilityBySCB(const sptr<SceneSessi
                 WSErrorReason::WS_REASON_WINDOW_START_ERR, "start ability failed");
             ExceptionInfo exceptionInfo;
             exceptionInfo.needRemoveSession = true;
+            if (errCode == ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK) {
+                abilitySessionInfo->errorReason = ERR_REASON_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK;
+            } else {
+                abilitySessionInfo->errorReason = ERR_REASON_DEFAULT;
+            }
             sceneSession->NotifySessionExceptionInner(abilitySessionInfo, exceptionInfo, false, true);
             if (startUIAbilityErrorFunc_ && static_cast<WSError>(errCode) == WSError::WS_ERROR_EDM_CONTROLLED) {
                 startUIAbilityErrorFunc_(
@@ -12616,6 +12648,10 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
         if (result == ERR_OK) {
             return;
         } else {
+            if (result == ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK) {
+                TLOGNI(WmsLogTag::WMS_LIFE, "start specified ability by SCB failed, errReason: %{public}s",
+                    ERR_REASON_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK.c_str());
+            }
             auto sceneSession = GetSceneSession(sessionInfo.persistentId_);
             RecordLifeCycleExceptionEvent(sceneSession, result,
                 WSErrorReason::WS_REASON_WINDOW_SPECIFIED_ERR, "start specified failed");
@@ -17398,17 +17434,17 @@ void SceneSessionManager::UpdateModalExtensionRect(const sptr<IRemoteObject>& to
             where, pid, persistentId, parentId, rect.posX_, rect.posY_, rect.width_, rect.height_);
         auto parentSession = GetSceneSession(parentId);
         if (parentSession) {
-            auto parentTransX = parentSession->GetSessionGlobalRect().posX_ - parentSession->GetClientRect().posX_;
-            auto parentTransY = parentSession->GetSessionGlobalRect().posY_ - parentSession->GetClientRect().posY_;
-            Rect globalRect = { rect.posX_ + parentTransX, rect.posY_ + parentTransY, rect.width_, rect.height_ };
-            WSRect transRect = { globalRect.posX_, globalRect.posY_, globalRect.width_, globalRect.height_ };
-            parentSession->TransformRelativeRectToGlobalRect(transRect);
-            globalRect.posY_ = transRect.posY_;
+            Rect globalRect = { rect.posX_, rect.posY_, rect.width_, rect.height_ };
+            globalRect.posX_ = ceil(parentSession->GetSessionGlobalRect().posX_ +
+                (globalRect.posX_ - parentSession->GetClientRect().posX_) * parentSession->GetScaleX());
+            globalRect.posY_ = ceil(parentSession->GetSessionGlobalRect().posY_ +
+                (globalRect.posY_ - parentSession->GetClientRect().posY_) * parentSession->GetScaleY());
             ExtensionWindowEventInfo extensionInfo { persistentId, pid, -1, globalRect, rect, true };
             TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: pid: %{public}d, persistentId: %{public}d, "
-                "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s",
-                where, pid, persistentId, parentId, rect.ToString().c_str(), globalRect.ToString().c_str(),
-                parentSession->GetSessionGlobalRect().ToString().c_str());
+                "parentId: %{public}d, rect: %{public}s, globalRect: %{public}s, parentGlobalRect: %{public}s, "
+                "scale:[%{public}f,%{public}f]", where, pid, persistentId, parentId, rect.ToString().c_str(),
+                globalRect.ToString().c_str(), parentSession->GetSessionGlobalRect().ToString().c_str(),
+                parentSession->GetScaleX(), parentSession->GetScaleY());
             parentSession->UpdateNormalModalUIExtension(extensionInfo);
         }
     };
@@ -17496,6 +17532,7 @@ void SceneSessionManager::AddExtensionWindowStageToSCB(const sptr<ISessionStage>
         tokenInfo.pid = pid;
         tokenInfo.canShowOnLockScreen = IsUIExtCanShowOnLockScreen(info.elementName, callingTokenId,
             info.extensionAbilityType);
+        tokenInfo.persistentId = persistentId;
         parentSession->AddExtensionTokenInfo(tokenInfo);
         FlushWindowInfoToMMI(true);
         parentSession->AddUIExtSurfaceNodeId(surfaceNodeId, persistentId);
@@ -19097,18 +19134,19 @@ WSError SceneSessionManager::SetAppForceLandscapeConfig(const std::string& bundl
         TLOGE(WmsLogTag::WMS_COMPAT, "bundle name is empty");
         return WSError::WS_ERROR_NULLPTR;
     }
-    AppForceLandscapeConfig preConfig;
     {
         std::unique_lock<std::shared_mutex> lock(appForceLandscapeMutex_);
-        if (appForceLandscapeMap_.count(bundleName)) {
-            preConfig = appForceLandscapeMap_[bundleName];
-        } else {
-            preConfig = {};
-        }
-        config.hasChanged_ = !AppForceLandscapeConfig::IsSameForceSplitConfig(preConfig, config);
         appForceLandscapeMap_[bundleName] = config;
     }
-
+    {
+        std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+        for (const auto& iter : sceneSessionMap_) {
+            auto& session = iter.second;
+            if (session && session->GetSessionInfo().bundleName_ == bundleName) {
+                session->NotifyAppForceLandscapeConfigUpdated();
+            }
+        }
+    }
     TLOGI(WmsLogTag::WMS_COMPAT,
         "bundleName:%{public}s, config:[containsConfig_%{public}d, isRouter_%{public}d, configJsonStr_%{public}s",
         bundleName.c_str(), config.containsConfig_, config.isRouter_, config.configJsonStr_.c_str());
@@ -21440,6 +21478,7 @@ WMError SceneSessionManager::EnterKioskMode(const sptr<IRemoteObject>& token)
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     return taskScheduler_->PostSyncTask([this, token, where = __func__] {
         auto session = FindSessionByToken(token, WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
         if (session == nullptr) {
@@ -21462,6 +21501,7 @@ WMError SceneSessionManager::ExitKioskMode()
         TLOGE(WmsLogTag::WMS_LIFE, "The caller is neither a system app nor an SA.");
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
     taskScheduler_->PostAsyncTask([this, where = __func__] {
         if (kioskModeChangeFunc_ != nullptr) {
             kioskModeChangeFunc_(false, INVALID_SESSION_ID);
@@ -21472,6 +21512,16 @@ WMError SceneSessionManager::ExitKioskMode()
         return WMError::WM_OK;
     }, __func__);
     return WMError::WM_OK;
+}
+
+void SceneSessionManager::KioskModeChange(bool isKioskMode, int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "isKiosMode:%{public}u, persistentId:%{public}d", isKioskMode, persistentId);
+    taskScheduler_->PostAsyncTask([this, isKioskMode, persistentId, where = __func__] {
+        isKioskMode_ = isKioskMode;
+        kioskAppPersistentId_ = persistentId;
+        return WMError::WM_OK;
+    }, __func__);
 }
 
 void SceneSessionManager::RegisterKioskModeChangeCallback(KioskModeChangeFunc&& func)

@@ -570,7 +570,6 @@ WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s foreground specific callback is null", where);
         }
         session->DisableUIFirstIfNeed();
-        session->SyncUISessionState();
         return WSError::WS_OK;
     }, __func__);
     return WSError::WS_OK;
@@ -597,16 +596,6 @@ void SceneSession::DisableUIFirstIfNeed()
     }
     isUIFirstEnabled_ = false;
     TLOGI(WmsLogTag::WMS_ANIMATION, "leashWinShadowSurfaceNode disable UIFirst id:%{public}d!", GetPersistentId());
-}
-
-void SceneSession::SyncUISessionState()
-{
-    // Sync when session state and UI state are inconsistent.
-    if (GetNeedBackgroundAfterConnect() && IsPcWindow()) {
-        TLOGI(WmsLogTag::WMS_LIFE, "Need background after connect, id:%{public}d", GetPersistentId());
-        SetNeedBackgroundAfterConnect(false);
-        NotifySessionBackground(1, true, true);
-    }
 }
 
 void SceneSession::CheckAndMoveDisplayIdRecursively(uint64_t displayId)
@@ -862,7 +851,6 @@ WSError SceneSession::DisconnectTask(bool isFromClient, bool isSaveSnapshot, boo
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Notify scene session id: %{public}d paused", where,
                 session->GetPersistentId());
             session->UpdateLifecyclePausedInner();
-            session->SetNeedBackgroundAfterConnect(false);
         }
         if (session->sessionInfo_.isPrelaunch_) {
             TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s Remove prelaunch session id: %{public}d", where,
@@ -3667,8 +3655,8 @@ Vector2f SceneSession::GetSessionGlobalPosition(bool useUIExtension)
     if (useUIExtension) {
         if (auto modalUIExtensionEventInfo = GetLastModalUIExtensionEventInfo()) {
             const auto& rect = modalUIExtensionEventInfo.value().windowRect;
-            windowRect.posX_ = ceil(windowRect.posX_ + (rect.posX_ - windowRect.posX_) * GetScaleX());
-            windowRect.posY_ = ceil(windowRect.posY_ + (rect.posY_ - windowRect.posY_) * GetScaleY());
+            windowRect.posX_ = rect.posX_;
+            windowRect.posY_ = rect.posY_;
         }
     }
     Vector2f position(windowRect.posX_, windowRect.posY_);
@@ -4597,20 +4585,21 @@ void SceneSession::HandleMoveDragSurfaceBounds(
     throwSlipToFullScreenAnimCount_.store(0);
     UpdateSizeChangeReason(reason);
 
+    const WSRect& targetRect = isGlobal ? globalRect : rect;
     const bool isTouchDrag = moveDragController_ &&
                              moveDragController_->GetPointerType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
     const bool allowThrowSlip = pcFoldScreenController_ && pcFoldScreenController_->IsAllowThrowSlip(GetScreenId());
     const bool isDragMoveOrEnd = reason == SizeChangeReason::DRAG_MOVE || reason == SizeChangeReason::DRAG_END;
 
     if (isTouchDrag && allowThrowSlip && isDragMoveOrEnd) {
-        SetSurfaceBounds(globalRect, isGlobal, needFlush);
+        SetSurfaceBounds(targetRect, isGlobal, needFlush);
         pcFoldScreenController_->RecordMoveRects(rect);
     } else if (reason == SizeChangeReason::DRAG_START) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Drag-start event doesn't set surface bounds");
     } else {
         if (mode != TargetRectUpdateMode::RESAMPLE_SCHEDULED &&
             (reason != SizeChangeReason::DRAG || GetKeyFramePolicy().running_)) {
-            SetSurfaceBounds(globalRect, isGlobal, needFlush);
+            SetSurfaceBounds(targetRect, isGlobal, needFlush);
         } else {
             needSetBoundsNextVsync = true;
         }
@@ -4618,7 +4607,7 @@ void SceneSession::HandleMoveDragSurfaceBounds(
 
     if (reason != SizeChangeReason::DRAG_MOVE && !KeyFrameNotifyFilter(rect, reason)) {
         UpdateRectForDrag(rect);
-        RequestNextVsyncWhenDrag(globalRect, isGlobal, needFlush, needSetBoundsNextVsync);
+        RequestNextVsyncWhenDrag(targetRect, isGlobal, needFlush, needSetBoundsNextVsync);
     }
 
     // Request resample on next vsync if needed.
@@ -5062,9 +5051,7 @@ void SceneSession::OnMoveDragCallback(SizeChangeReason reason, TargetRectUpdateM
     WSRect relativeRect = moveDragController_->GetTargetRect(isRelatedToEndDisplay ?
         MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
         MoveDragController::TargetRectCoordinate::RELATED_TO_START_DISPLAY);
-    WSRect globalRect = moveDragController_->GetTargetRect(isRelatedToEndDisplay ?
-        MoveDragController::TargetRectCoordinate::RELATED_TO_END_DISPLAY :
-        MoveDragController::TargetRectCoordinate::GLOBAL);
+    WSRect globalRect = moveDragController_->GetTargetRect(MoveDragController::TargetRectCoordinate::GLOBAL);
     HandleMoveDragSurfaceNode(reason);
     HandleMoveDragSurfaceBounds(relativeRect, globalRect, reason, mode);
     if (reason == SizeChangeReason::DRAG_END) {
@@ -5479,7 +5466,7 @@ void SceneSession::HandleMoveDragSurfaceNode(SizeChangeReason reason)
             // When the drag-to-move or drag-to-scale operation ends, if the window's current screen
             // is the same as the starting screen, the cloned node is removed immediately. Otherwise,
             // the removal of the cloned node is submitted along with the vsync refresh.
-            if (moveDragController_->ShouldFlushOnDragEnd()) {
+            if (moveDragController_->IsDragEndedOnSameDisplay()) {
                 TLOGD(WmsLogTag::WMS_LAYOUT, "Cloned node removed immediately");
                 RSTransactionAdapter::FlushImplicitTransaction({ targetSurfaceNode, dragMoveMountedNode });
             }
@@ -5612,16 +5599,6 @@ void SceneSession::SetSurfaceBounds(const WSRect& rect, bool isGlobal, bool need
 
     NotifySubAndDialogFollowRectChange(rect, isGlobal, needFlush);
     SetSubWindowBoundsDuringCross(rect, isGlobal, needFlush);
-
-    // When drag ends (needFlush == false) and the window is crossing screens,
-    // surface node property changes will be committed together with the ArkUI
-    // relayout triggered on the next vsync, so no explicit flush is required here.
-    // If the window is NOT crossing screens, the changes should be flushed
-    // immediately to avoid affecting the next drag operation.
-    if (!needFlush && moveDragController_) {
-        needFlush = moveDragController_->ShouldFlushOnDragEnd();
-        TLOGD(WmsLogTag::WMS_LAYOUT, "On drag end, needFlush: %{public}d", needFlush);
-    }
 
     moveDragBoundsApplier_->Apply(rect, isGlobal, needFlush);
 }
@@ -8536,6 +8513,18 @@ ExtensionWindowFlags SceneSession::GetCombinedExtWindowFlags()
     return combinedExtWindowFlags;
 }
 
+std::vector<UIExtensionTokenInfo> SceneSession::GetExtInfoWithHideNonSecureWindowFlag()
+{
+    std::vector<UIExtensionTokenInfo> filteredInfo;
+    std::copy_if(extensionTokenInfos_.begin(), extensionTokenInfos_.end(), std::back_inserter(filteredInfo),
+        [this](auto& info) {
+            auto iter = this->extWindowFlagsMap_.find(info.persistentId);
+            return iter != this->extWindowFlagsMap_.end() && iter->second.hideNonSecureWindowsFlag;    
+        });
+
+    return filteredInfo;
+}
+
 void SceneSession::NotifyDisplayMove(DisplayId from, DisplayId to)
 {
     if (sessionStage_) {
@@ -10303,8 +10292,6 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
             TLOGNE(WmsLogTag::WMS_UIEXT, "%{public}s session is null", where);
             return;
         }
-        auto parentTransX = globalRect.posX_ - session->GetClientRect().posX_;
-        auto parentTransY = globalRect.posY_ - session->GetClientRect().posY_;
         {
             std::unique_lock<std::shared_mutex> lock(session->modalUIExtensionInfoListMutex_);
             for (auto& extensionInfo : session->modalUIExtensionInfoList_) {
@@ -10312,18 +10299,18 @@ void SceneSession::UpdateAllModalUIExtensions(const WSRect& globalRect)
                     continue;
                 }
                 extensionInfo.windowRect = extensionInfo.uiExtRect;
-                extensionInfo.windowRect.posX_ += parentTransX;
-                extensionInfo.windowRect.posY_ += parentTransY;
-                WSRect transRect = { extensionInfo.windowRect.posX_, extensionInfo.windowRect.posY_,
-                    extensionInfo.windowRect.width_, extensionInfo.windowRect.height_ };
-                session->TransformRelativeRectToGlobalRect(transRect);
-                extensionInfo.windowRect.posY_ = transRect.posY_;
+                extensionInfo.windowRect.posX_ = ceil(globalRect.posX_ +
+                    (extensionInfo.windowRect.posX_ - session->GetClientRect().posX_) * session->GetScaleX());
+                extensionInfo.windowRect.posY_ =  ceil(globalRect.posY_ +
+                    (extensionInfo.windowRect.posY_ - session->GetClientRect().posY_) * session->GetScaleY());
             }
         }
         session->NotifySessionInfoChange();
-        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: id: %{public}d, globalRect: %{public}s, parentTransX: %{public}d, "
-            "parentTransY: %{public}d", where, session->GetPersistentId(), globalRect.ToString().c_str(),
-            parentTransX, parentTransY);
+        TLOGNI(WmsLogTag::WMS_UIEXT, "%{public}s: id: %{public}d, globalRect: %{public}s, "
+            "ClientRect:[%{public}d,%{public}d], scale:[%{public}f,%{public}f]", 
+            where, session->GetPersistentId(), globalRect.ToString().c_str(),
+            session->GetClientRect().posX_, session->GetClientRect().posY_,
+            session->GetScaleX(), session->GetScaleY());
     }, __func__);
 }
 
