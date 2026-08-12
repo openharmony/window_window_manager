@@ -4403,7 +4403,7 @@ WSError SceneSessionManager::CreateAndConnectSpecificSession(const sptr<ISession
     WSError processCheckRet = CheckSubWindowCallingProcess(property, parentSession);
     if (processCheckRet != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "sub window calling process check failed!");
-        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "sub window calling process check failed"};
+        return WSError::WS_ERROR_INVALID_OPERATION;
     }
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
