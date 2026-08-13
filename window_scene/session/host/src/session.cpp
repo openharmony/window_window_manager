@@ -33,7 +33,6 @@
 #include "fold_screen_state_internel.h"
 #include "image_source.h"
 #include "rs_adapter.h"
-#include "session_coordinate_helper.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "window_helper.h"
@@ -46,6 +45,7 @@
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "screen_manager.h"
+#include "window_coordinate_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -1536,7 +1536,7 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         updateRect.width_, updateRect.height_);
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), updateRect);
+    auto globalDisplayRect = WindowCoordinateHelper::ConvertToGlobalDisplayRect(GetScreenId(), updateRect);
     UpdateGlobalDisplayRect(globalDisplayRect, reason);
 
     if (sessionStage_ != nullptr) {
@@ -5923,7 +5923,7 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     for (const auto& rect : touchHotAreas) {
         rectStr = rectStr + " " + rect.ToString();
     }
-    GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
+    property->SetTouchHotAreas(touchHotAreas);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
@@ -6395,7 +6395,7 @@ PrelayoutContext Session::GetPrelayoutContext()
 
     // Enable prelayout only for game prelaunch to improve launch experience.
     ctx.enable = sessionInfo_.isGamePrelaunch_;
-    if (!ctx.enable) {
+    if (!ctx.enable && !sessionInfo_.isPrelaunch_) {
         return ctx;
     }
 
@@ -6408,6 +6408,11 @@ PrelayoutContext Session::GetPrelayoutContext()
         static_cast<int32_t>(preCalc.height)
     };
 
+    if (sessionInfo_.isPrelaunch_ && !ctx.enable) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, only initialize winRect, ctx: %{public}s",
+            GetPersistentId(), ctx.ToString().c_str());
+        return ctx;
+    }
     auto sessionProperty = GetSessionProperty();
     if (sessionProperty == nullptr) {
         return ctx;
@@ -6437,7 +6442,7 @@ void Session::HandleInitialRect(const PrelayoutContext& ctx)
     }
 
     const std::optional<WSRect> rect =
-        ctx.enable ? std::make_optional(ctx.winRect) : std::nullopt;
+        (ctx.enable || GetSessionInfo().isPrelaunch_) ? std::make_optional(ctx.winRect) : std::nullopt;
 
     NotifyClientToUpdateRect("Connect", rect, nullptr);
 }
@@ -6473,5 +6478,10 @@ WSError Session::UpdateLSStateInfo(bool isLSState)
         return WSError::WS_DO_NOTHING;
     }
     return sessionStage_->UpdateLSState(isLSState);
+}
+
+bool Session::IsSuperMultiFoldOuterScreen() const
+{
+    return FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice() && GetDisplayId() == SCREEN_ID_MAIN;
 }
 } // namespace OHOS::Rosen

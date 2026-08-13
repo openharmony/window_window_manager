@@ -41,7 +41,6 @@
 #include "fold_screen_controller/fold_screen_controller.h"
 #include "fold_screen_controller/fold_screen_sensor_manager.h"
 #include "fold_screen_controller/super_fold_state_manager.h"
-#include "motion_manager.h"
 
 namespace OHOS::Rosen {
 class RSInterfaces;
@@ -62,8 +61,7 @@ struct ScaleProperty {
                                                                             pivotX(pivotX), pivotY(pivotY) {}
 };
 
-class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener,
-    public IMotionEventListener {
+class ScreenSessionManager : public SystemAbility, public ScreenSessionManagerStub, public IScreenChangeListener {
 DECLARE_SYSTEM_ABILITY(ScreenSessionManager)
 WM_DECLARE_SINGLE_INSTANCE_BASE(ScreenSessionManager)
 
@@ -192,8 +190,8 @@ public:
     virtual sptr<DisplayInfo> GetVisibleAreaDisplayInfoById(DisplayId displayId) override;
     sptr<DisplayInfo> GetDisplayInfoByScreen(ScreenId screenId) override;
     std::vector<DisplayId> GetAllDisplayIds(int32_t userId = CONCURRENT_USER_ID_DEFAULT) override;
-    virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId) override;
-    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos) override;
+    virtual sptr<ScreenInfo> GetScreenInfoById(ScreenId screenId, bool isNeedUnused = false) override;
+    virtual DMError GetAllScreenInfos(std::vector<sptr<ScreenInfo>>& screenInfos, bool isNeedUnused = false) override;
     virtual DMError GetScreenSupportedColorGamuts(ScreenId screenId,
         std::vector<ScreenColorGamut>& colorGamuts) override;
     DMError GetPhysicalScreenIds(std::vector<ScreenId>& screenIds) override;
@@ -205,8 +203,6 @@ public:
         const OrientationOptions& options, bool isFromNapi) override;
     bool SetRotation(ScreenId screenId, Rotation rotationAfter, bool isFromWindow);
     void SetSensorSubscriptionEnabled();
-    void SubscribeMotionSensor(int32_t motionType) override;
-    void UnsubscribeMotionSensor(int32_t motionType) override;
     bool SetRotationFromWindow(Rotation targetRotation);
     sptr<SupportedScreenModes> GetScreenModesByDisplayId(DisplayId displayId);
     sptr<ScreenInfo> GetScreenInfoByDisplayId(DisplayId displayId);
@@ -379,7 +375,6 @@ public:
     void SetIsOuterOnlyModeBeforePowerOff(bool isOuterOnlyModeBeforePowerOff);
     void OnVerticalChangeBoundsWhenSwitchUser(sptr<ScreenSession>& screenSession, FoldDisplayMode oldScbDisplayMode);
     void HandleFoldStatusChangeWhenSwitchUser(sptr<ScreenSession>& screenSession, FoldDisplayMode oldScbDisplayMode);
-    void HandleMotionSensorRotationWhenSwitchUser(sptr<ScreenSession>& screenSession);
 
     bool SetScreenPower(ScreenPowerStatus status, PowerStateChangeReason reason, bool isApAod = false);
     void SetScreenPowerForFold(ScreenPowerStatus status);
@@ -428,15 +423,12 @@ public:
     void OnPowerStatusChange(DisplayPowerEvent event, EventStatus status,
         PowerStateChangeReason reason) override;
     void OnSensorRotationChange(float sensorRotation, ScreenId screenId, bool isSwitchUser) override;
-    void OnSmartSensorRotationChange(float sensorRotation, ScreenId screenId, bool isSwitchUser) override;
     void OnHoverStatusChange(int32_t hoverStatus, bool needRotate, ScreenId screenId) override;
     void OnScreenOrientationChange(float screenOrientation, ScreenId screenId) override;
     void OnScreenOrientationChangeWithOptions(float screenOrientation,
         const OrientationOptions& options, ScreenId screenId) override;
     void OnScreenRotationLockedChange(bool isLocked, ScreenId screenId) override;
     void OnCameraBackSelfieChange(bool isCameraBackSelfie, ScreenId screenId) override;
-
-    void OnMotionRotationChanged(float sensorRotation) override;
 
     void SetHdrFormats(ScreenId screenId, sptr<ScreenSession>& session);
     void SetColorSpaces(ScreenId screenId, sptr<ScreenSession>& session);
@@ -686,13 +678,16 @@ public:
     void SetNeedAnotherScreenKeepOffFake(bool needAnotherScreenKeepOffFake);
     bool GetNeedAnotherScreenKeepOffFake();
     bool IsHook(int32_t uid = INVALID_UID);
+    bool HasInternalScreen();
     void HookRadius(DisplayId displayId, int& radius);
 
     void SetOnBootAnimation(const bool onBootAnimation);
     bool IsOnBootAnimation() const;
     void NotifyBootAnimationFinished() override;
+    bool IsSuperFoldMultiPadMode();
 
     int32_t CountRealPhysicalScreensNotInternal();
+    bool IsNotifyFakeDisplayBrightnessInfoNeeded(const ScreenId& logicalScreenId);
 
 protected:
     ScreenSessionManager();
@@ -720,6 +715,8 @@ protected:
     ScreenId GenerateSmsScreenId(ScreenId rsScreenId);
     EventTracker screenEventTracker_;
     sptr<ScreenSession> GetInternalScreenSession();
+    sptr<ScreenSession> GetLastMainScreenSession(ScreenId screenId);
+    sptr<ScreenSession> GetUnuseScreenSession();
     sptr<ScreenSession> GetScreenSessionInner(ScreenId screenId, ScreenProperty property,
         sptr<IRemoteObject> connectToRenderToken = nullptr);
     std::mutex screenChangeMutex_;
@@ -788,7 +785,6 @@ private:
         ScreenId screenId, bool& needChangeScreenSession);
     bool OneScreenDisconnect(ScreenId disconnectedScreenId, ScreenEvent screenEvent);
     void NotifyInfoChange(sptr<ScreenSession> screenSession);
-    bool HasInternalScreen();
     bool HasRealScreenConnect();
     void ExtendScreenChangetoMainScreen(sptr<ScreenSession> screenSession);
     void DeleteScreen(sptr<ScreenSession> screenSession);
