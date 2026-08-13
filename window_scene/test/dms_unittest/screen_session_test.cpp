@@ -55,8 +55,6 @@ public:
         (DisplayPowerEvent event, EventStatus status, PowerStateChangeReason reason), (override));
     MOCK_METHOD(void, OnSensorRotationChange,
         (float sensorRotation, ScreenId screenId, bool isSwitchUser), (override));
-    MOCK_METHOD(void, OnSmartSensorRotationChange,
-        (float sensorRotation, ScreenId screenId, bool isSwitchUser), (override));
     MOCK_METHOD(void, OnScreenOrientationChange, (float screenOrientation, ScreenId screenId), (override));
     MOCK_METHOD(void, OnScreenRotationLockedChange, (bool isLocked, ScreenId screenId), (override));
     MOCK_METHOD(void, OnScreenExtendChange, (ScreenId mainScreenId, ScreenId extendScreenId), (override));
@@ -403,62 +401,6 @@ HWTEST_F(ScreenSessionTest, HandleSensorRotation, TestSize.Level1)
     float sensorRotation = 0.0f;
     screenSession->HandleSensorRotation(sensorRotation);
     GTEST_LOG_(INFO) << "HandleSensorRotation end";
-}
-
-/**
- * @tc.name: HandleSmartRotation
- * @tc.desc: test HandleSmartRotation function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, HandleSmartRotation, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "HandleSmartRotation start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    EXPECT_NE(nullptr, screenSession);
-    
-    MockScreenChangeListener* listener = new MockScreenChangeListener();
-    screenSession->RegisterScreenChangeListener(listener);
-    
-    float sensorRotation = 90.0f;
-    EXPECT_CALL(*listener, OnSmartSensorRotationChange(sensorRotation, config.screenId, false)).Times(1);
-    screenSession->HandleSmartRotation(sensorRotation);
-    
-    EXPECT_EQ(screenSession->GetValidSmartSensorRotation(), sensorRotation);
-    GTEST_LOG_(INFO) << "HandleSmartRotation end";
-}
-
-/**
- * @tc.name: SmartSensorRotationChange
- * @tc.desc: test SmartSensorRotationChange function
- * @tc.type: FUNC
- */
-HWTEST_F(ScreenSessionTest, SmartSensorRotationChange, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "SmartSensorRotationChange start";
-    ScreenSessionConfig config = {
-        .screenId = 100,
-        .rsId = 101,
-        .name = "OpenHarmony",
-    };
-    sptr<ScreenSession> screenSession = sptr<ScreenSession>::MakeSptr(config,
-        ScreenSessionReason::CREATE_SESSION_FOR_VIRTUAL);
-    EXPECT_NE(nullptr, screenSession);
-    
-    MockScreenChangeListener* listener = new MockScreenChangeListener();
-    screenSession->RegisterScreenChangeListener(listener);
-    
-    float sensorRotation = 180.0f;
-    EXPECT_CALL(*listener, OnSmartSensorRotationChange(sensorRotation, config.screenId, false)).Times(1);
-    screenSession->SmartSensorRotationChange(sensorRotation);
-    
-    EXPECT_EQ(screenSession->GetValidSmartSensorRotation(), sensorRotation);
-    GTEST_LOG_(INFO) << "SmartSensorRotationChange end";
 }
 
 /**
@@ -3200,6 +3142,26 @@ HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds07, TestSize.Level1)
     bounds.rect_.height_ = 2772;
     result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_90, FoldDisplayMode::UNKNOWN, bounds);
     EXPECT_EQ(result, DisplayOrientation::PORTRAIT_INVERTED);
+}
+
+/**
+ * @tc.name: CalcDeviceOrientationWithBounds08
+ * @tc.desc: Test CalcDeviceOrientationWithBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScreenSessionTest, CalcDeviceOrientationWithBounds08, TestSize.Level1)
+{
+    sptr<ScreenSession> session = sptr<ScreenSession>::MakeSptr();
+    ASSERT_NE(session, nullptr);
+    RRect bounds;
+    bounds.rect_.width_ = 2772;
+    bounds.rect_.height_ = 1344;
+    session->isInternal_ = false;
+    auto result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::FULL, bounds);
+    EXPECT_EQ(result, DisplayOrientation::LANDSCAPE);
+    session->isInternal_ = true;
+    result = session->CalcDeviceOrientationWithBounds(Rotation::ROTATION_0, FoldDisplayMode::FULL, bounds);
+    EXPECT_EQ(result, DisplayOrientation::PORTRAIT);
 }
 
 /**
