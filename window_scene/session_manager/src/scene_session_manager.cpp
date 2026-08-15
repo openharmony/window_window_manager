@@ -8751,7 +8751,7 @@ void SceneSessionManager::NotifyNewSessionDpiHookScale(const sptr<SceneSession>&
 {
     taskScheduler_->PostAsyncTask([this, weakSession = wptr(session), where = __func__] {
         sptr<SceneSession> sceneSession = weakSession.promote();
-        NotifySpecificSessionHookScale(sceneSession);
+        NotifySpecificSessionDpiHookScale(sceneSession);
     }, __func__);
 }
 
@@ -8765,7 +8765,7 @@ void SceneSessionManager::NotifyAllSessionDpiHookScale()
             sceneSessionMapCopy = sceneSessionMap_;
         }
         for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
-            NotifySpecificSessionHookScale(sceneSession);
+            NotifySpecificSessionDpiHookScale(sceneSession);
         }
     }, __func__);
 }
