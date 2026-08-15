@@ -2267,7 +2267,7 @@ float WindowSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayIn
     TLOGD(WmsLogTag::WMS_ATTRIBUTE,
         "id=%{public}u, type=%{public}u, systemDpi=%{public}f, hookDpi=%{public}f, displayId=%{public}" PRIu64,
         GetWindowId(), GetType(), dpi, hookDpi, displayInfo->GetDisplayId());
-    return hookedDpi;
+    return hookDpi;
 }
 
 void WindowSessionImpl::NotifyGlobalScaledRectChange(const Rect& globalScaledRect)
