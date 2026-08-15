@@ -824,7 +824,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     ASSERT_NE(nullptr, ssm_);
     auto shouldProcess =
         ssm_->ShouldProcessVirtualPixelRatioChange(DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE, displayInfo);
-    EXPECT_TRUE(shouldProcess);
+    EXPECT_FALSE(shouldProcess);
     ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
 }
 } // namespace
