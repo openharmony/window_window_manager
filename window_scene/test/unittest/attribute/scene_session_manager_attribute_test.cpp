@@ -717,9 +717,9 @@ HWTEST_F(SceneSessionManagerAttributeTest, NotifyAllSessionDpiHookScale001, Test
 {
     ASSERT_NE(ssm_, nullptr);
     auto oldSceneSessionMap = ssm_->sceneSessionMap_;
-    auto oldXhDpiAppList = ssm_->xhdpiAppList_;
+    auto oldXhDpiAppList = ssm_->rogWindowConfig_.xhdpiAppList;
     ssm_->sceneSessionMap_.clear();
-    ssm_->xhdpiAppList_.clear();
+    ssm_->rogWindowConfig_.xhdpiAppList.clear();
     SessionInfo sessionInfo;
     sessionInfo.bundleName_ = "test.bundle";
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
@@ -727,12 +727,12 @@ HWTEST_F(SceneSessionManagerAttributeTest, NotifyAllSessionDpiHookScale001, Test
     sceneSession->property_->SetPersistentId(100);
     ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
     ssm_->NotifyNewSessionDpiHookScale(nullptr);
-    ssm_->xhdpiAppList_.push_back(sessionInfo.bundleName_);
+    ssm_->rogWindowConfig_.xhdpiAppList.push_back(sessionInfo.bundleName_);
     ssm_->NotifyAllSessionDpiHookScale();
     ssm_->sceneSessionMap_.clear();
-    ssm_->xhdpiAppList_.clear();
+    ssm_->rogWindowConfig_.xhdpiAppList.clear();
     ssm_->sceneSessionMap_ = oldSceneSessionMap;
-    ssm_->xhdpiAppList_ = oldXhDpiAppList;
+    ssm_->rogWindowConfig_.xhdpiAppList = oldXhDpiAppList;
 }
 
 /**
