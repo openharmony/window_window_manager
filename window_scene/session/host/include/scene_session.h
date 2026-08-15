@@ -1829,8 +1829,8 @@ private:
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
-    std::atomic<float> dpiHookScale_ = 0.0f;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
+    std::atomic<float> dpiHookScale_ = 0.0f;
     void OnSurfaceNodeChanged() override;
     void UpdateSurfaceDarkMode();
     bool GetDarkMode() const;
