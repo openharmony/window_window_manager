@@ -8732,8 +8732,9 @@ void SceneSessionManager::NotifySpecificSessionDpiHookScale(const sptr<SceneSess
     bool found = false;
     {
         auto bundleName = session->GetSessionInfo().bundleName_;
-        std::lock_guard<std::mutex> lock(customWindowConfigMutex_);
-        if (std::find(xhdpiAppList_.begin(), xhdpiAppList_.end(), bundleName) != xhdpiAppList_.end()) {
+        std::lock_guard<std::mutex> lock(rogWindowConfigMutex_);
+        if (std::find(rogWindowConfig_.xhdpiAppList.begin(), rogWindowConfig_.xhdpiAppList.end(),
+            bundleName) != rogWindowConfig_.xhdpiAppList.end()) {
             scale = rogWindowConfig_.scale;
             needNotify = true;
             found = true;
