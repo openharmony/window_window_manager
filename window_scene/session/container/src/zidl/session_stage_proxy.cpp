@@ -1064,7 +1064,7 @@ WSError SessionStageProxy::NotifyDpiHookScale(float scale)
         return WSError::WS_ERROR_IPC_FAILED;
     }
     auto errCode = remote->SendRequest(
-        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HOOK_SCALE),
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DPI_HOOK_SCALE),
         data, reply, option);
     if (errCode != ERR_NONE) {
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");

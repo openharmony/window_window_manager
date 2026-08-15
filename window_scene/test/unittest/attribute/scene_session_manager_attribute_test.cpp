@@ -709,6 +709,33 @@ HWTEST_F(SceneSessionManagerAttributeTest, FilterForGetAllWindowLayoutInfo004, T
 }
 
 /**
+ * @tc.name: NotifyAllSessionDpiHookScale001
+ * @tc.desc: test NotifyAllSessionDpiHookScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, NotifyAllSessionDpiHookScale001, TestSize.Level1)
+{
+    ASSERT_NE(ssm_, nullptr);
+    auto oldSceneSessionMap = ssm_->sceneSessionMap_;
+    auto oldXhDpiAppList = ssm_->xhdpiAppList_;
+    ssm_->sceneSessionMap_.clear();
+    ssm_->xhdpiAppList_.clear();
+    SessionInfo sessionInfo;
+    sessionInfo.bundleName_ = "test.bundle";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(sessionInfo, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->property_->SetPersistentId(100);
+    ssm_->sceneSessionMap_.insert(std::make_pair(sceneSession->GetPersistentId(), sceneSession));
+    ssm_->NotifyNewSessionDpiHookScale(nullptr);
+    ssm_->xhdpiAppList_.push_back(sessionInfo.bundleName_);
+    ssm_->NotifyAllSessionDpiHookScale();
+    ssm_->sceneSessionMap_.clear();
+    ssm_->xhdpiAppList_.clear();
+    ssm_->sceneSessionMap_ = oldSceneSessionMap;
+    ssm_->xhdpiAppList_ = oldXhDpiAppList;
+}
+
+/**
  * @tc.name: ProcessVirtualPixelRatioChange
  * @tc.desc: test ProcessVirtualPixelRatioChange.
  * @tc.type: FUNC

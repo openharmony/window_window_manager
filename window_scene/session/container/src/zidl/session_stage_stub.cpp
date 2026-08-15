@@ -139,8 +139,8 @@ int SessionStageStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             return HandleUpdateWindowMode(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_GET_TOP_NAV_DEST_NAME):
             return HandleGetTopNavDestinationName(data, reply);
-        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_HOOK_SCALE):
-            return HandleNotifyHookScale(data, reply);
+        case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DPI_HOOK_SCALE):
+            return HandleNotifyDpiHookScale(data, reply);
         case static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_LAYOUT_FINISH_AFTER_WINDOW_MODE_CHANGE):
             return HandleNotifyLayoutFinishAfterWindowModeChange(data, reply);
         case static_cast<uint32_t>
@@ -706,7 +706,7 @@ int SessionStageStub::HandleGetTopNavDestinationName(MessageParcel& data, Messag
     return ERR_NONE;
 }
 
-int SessionStageStub::HandleNotifyHookScale(MessageParcel& data, MessageParcel& reply)
+int SessionStageStub::HandleNotifyDpiHookScale(MessageParcel& data, MessageParcel& reply)
 {
     float scale = 0.0f;
     if (!data.ReadFloat(scale)) {
