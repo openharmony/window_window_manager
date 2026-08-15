@@ -864,23 +864,6 @@ HWTEST_F(SessionStageStubTest, HandleNotifyWindowVisibilityChange, TestSize.Leve
 }
 
 /**
- * @tc.name: HandleNotifyWindowOcclusionState
- * @tc.desc: test function : HandleNotifyWindowOcclusionState
- * @tc.type: FUNC
- */
-HWTEST_F(SessionStageStubTest, HandleNotifyWindowOcclusionState, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_OCCLUSION_STATE);
-    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
-    data.WriteUint32(static_cast<uint32_t>(WindowVisibilityState::END) + 1);
-    ASSERT_TRUE((sessionStageStub_ != nullptr));
-    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
-}
-
-/**
  * @tc.name: HandleNotifyDpiHookScale
  * @tc.desc: test function : HandleNotifyDpiHookScale
  * @tc.type: FUNC
@@ -895,6 +878,23 @@ HWTEST_F(SessionStageStubTest, HandleNotifyDpiHookScale, TestSize.Level1)
     data.WriteFloat(1.0f);
     ASSERT_TRUE((sessionStageStub_ != nullptr));
     EXPECT_NE(sessionStageStub_->OnRemoteRequest(code, data, reply, option), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: HandleNotifyWindowOcclusionState
+ * @tc.desc: test function : HandleNotifyWindowOcclusionState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionStageStubTest, HandleNotifyWindowOcclusionState, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    uint32_t code = static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_WINDOW_OCCLUSION_STATE);
+    data.WriteInterfaceToken(SessionStageStub::GetDescriptor());
+    data.WriteUint32(static_cast<uint32_t>(WindowVisibilityState::END) + 1);
+    ASSERT_TRUE((sessionStageStub_ != nullptr));
+    EXPECT_EQ(sessionStageStub_->OnRemoteRequest(code, data, reply, option), ERR_INVALID_DATA);
 }
 
 /**
