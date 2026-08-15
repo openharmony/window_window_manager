@@ -2224,10 +2224,25 @@ WSError WindowSessionImpl::UpdateWindowMode(const WindowModeInfo& windowModeInfo
     return WSError::WS_OK;
 }
 
-float WindowSessionImpl::AdaptToHookedDensity(float density)
+WSError WindowSessionImpl::NotifyDpiHookScale(float scale)
 {
-    // Todo:
-    return density;
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, oldScale=%{public}f, scale=%{public}f",
+        GetPersistentId(), dpiHookScale_, scale);
+    if (!MathHelper::NearZero(dpiHookScale_ - scale)) {
+        dpiHookScale_ = scale;
+        UpdateDensity();
+    }
+    return WSError::WS_OK;
+}
+
+float WindowSessionImpl::AdaptToHookedDensity(float density, bool needHook)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}u, density=%{public}f, needHook=%{public}d, hookScale=%{public}f",
+        GetWindowId(), density, needHook, dpiHookScale_);
+    if (!needHook || dpiHookScale_ <= 0.0f) {
+        return density;
+    }
+    return density * dpiHookScale_;
 }
 
 /** @note @window.layout */
@@ -2248,10 +2263,10 @@ float WindowSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayIn
         return virtualPixelRatio_;
     }
     auto dpi = displayInfo->GetVirtualPixelRatio();
-    auto hookedDpi = AdaptToHookedDensity(dpi);
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
-        "id=%{public}u, type=%{public}u, systemDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
-        GetWindowId(), GetType(), dpi, hookedDpi, displayInfo->GetDisplayId());
+    auto hookDpi = AdaptToHookedDensity(dpi);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+        "id=%{public}u, type=%{public}u, systemDpi=%{public}f, hookDpi=%{public}f, displayId=%{public}" PRIu64,
+        GetWindowId(), GetType(), dpi, hookDpi, displayInfo->GetDisplayId());
     return hookedDpi;
 }
 

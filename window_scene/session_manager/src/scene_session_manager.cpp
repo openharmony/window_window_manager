@@ -8721,6 +8721,55 @@ bool SceneSessionManager::IsSessionVisibleAndRealForeground(const sptr<SceneSess
     return false;
 }
 
+void SceneSessionManager::NotifySpecificSessionDpiHookScale(const sptr<SceneSession>& session)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+        return;
+    }
+    float scale = 0.0f;
+    bool needNotify = session->GetDpiHookScale() > 0.0f;
+    bool found = false;
+    {
+        auto bundleName = session->GetSessionInfo().bundleName_;
+        std::lock_guard<std::mutex> lock(customWindowConfigMutex_);
+        if (std::find(xhdpiAppList_.begin(), xhdpiAppList_.end(), bundleName) != xhdpiAppList_.end()) {
+            scale = rogWindowConfig_.scale;
+            needNotify = true;
+            found = true;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "win=[%{public}d, %{public}s], needNotify=%{public}d, found=%{public}d, scale=%{public}f",
+        session->GetWindowId(), session->GetWindowName().c_str(), needNotify, found, scale);
+    if (needNotify) {
+        session->NotifyDpiHookScale(scale);
+    }
+}
+
+void SceneSessionManager::NotifyNewSessionDpiHookScale(const sptr<SceneSession>& session)
+{
+    taskScheduler_->PostAsyncTask([this, weakSession = wptr(session), where = __func__] {
+        sptr<SceneSession> sceneSession = weakSession.promote();
+        NotifySpecificSessionHookScale(sceneSession);
+    }, __func__);
+}
+
+// TODO: call this function in UpdateRogWindowConfig
+void SceneSessionManager::NotifyAllSessionDpiHookScale()
+{
+    taskScheduler_->PostAsyncTask([this, where = __func__] {
+        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMapCopy = sceneSessionMap_;
+        }
+        for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
+            NotifySpecificSessionHookScale(sceneSession);
+        }
+    }, __func__);
+}
+
 void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss)
 {
     if (session == nullptr) {
@@ -11107,6 +11156,7 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             break;
         case SessionState::STATE_CONNECT:
+            NotifyNewSessionDpiHookScale(sceneSession);
             SetSessionSnapshotSkipForAppProcess(sceneSession);
             SetSessionSnapshotSkipForAppBundleName(sceneSession);
             SetSessionWatermarkForAppProcess(sceneSession);

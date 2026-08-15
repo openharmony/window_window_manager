@@ -1093,6 +1093,9 @@ public:
     void SetWindowShadowsCallback(NotifySetWindowShadowsFunc&& func);
     WSError SetWindowShadows(const ShadowsInfo& shadowsInfo) override;
     virtual WSError GetTopNavDestinationName(std::string& topNavDestName);
+    void NotifyDpiHookScale(float scale);
+    void SetDpiHookScale(float scale) { dpiHookScale_.store(scale); }
+    float GetDpiHookScale() const { return dpiHookScale_.load(); }
     void RegisterWindowShadowEnableChangeCallback(NotifyWindowShadowEnableChangeFunc&& callback);
     void SetNotifyScreenshotAppEventRegisteredFunc(UpdateScreenshotAppEventRegisteredFunc&& func);
     WMError UpdateScreenshotAppEventRegistered(int32_t persistentId, bool isRegister) override;
@@ -1826,6 +1829,7 @@ private:
     bool isPrivacyMode_ { false };
     bool isAncoForFloatingWindow_ = false;
     bool subWindowOutlineEnabled_ = false;
+    std::atomic<float> dpiHookScale_ = 0.0f;
     std::atomic_bool isRegisterAcrossDisplaysChanged_ = false;
     void OnSurfaceNodeChanged() override;
     void UpdateSurfaceDarkMode();

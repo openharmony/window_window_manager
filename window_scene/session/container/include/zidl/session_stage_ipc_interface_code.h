@@ -139,6 +139,7 @@ enum class SessionStageInterfaceCode {
 
     TRANS_ID_UPDATE_LS_STATE,
     TRANS_ID_UPDATE_SCREEN_SUPPORT_MULTI_WINDOW,
+    TRANS_ID_NOTIFY_HOOK_SCALE,
 };
 }   // namespace Rosen
 }   // namespace OHOS

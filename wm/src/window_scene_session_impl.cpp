@@ -7547,8 +7547,8 @@ float WindowSceneSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& disp
     }
     if (IsDefaultDensityEnabled()) {
         auto dpi = displayInfo->GetDefaultVirtualPixelRatio();
-        auto hookedDpi = AdaptToHookedDensity(dpi);
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        auto hookedDpi = AdaptToHookedDensity(dpi, true);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE,
             "id=%{public}u, type=%{public}u, defaultDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
             GetWindowId(), GetType(), dpi, hookedDpi, displayInfo->GetDisplayId());
         return hookedDpi;
@@ -7559,7 +7559,7 @@ float WindowSceneSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& disp
     auto vpr = GetMainWindowCustomDensity();
     auto hookedDpi = (vpr >= MINIMUM_CUSTOM_DENSITY && vpr <= MAXIMUM_CUSTOM_DENSITY ?
         vpr : AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio()));
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE,
         "id=%{public}u, type=%{public}u, customDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
         GetWindowId(), GetType(), vpr, hookedDpi, displayInfo->GetDisplayId());
     return hookedDpi;
@@ -8819,7 +8819,7 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
         return WMError::WM_ERROR_NULLPTR;
     }
     densityInfo.systemDensity = AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio());
-    densityInfo.defaultDensity = AdaptToHookedDensity(displayInfo->GetDefaultVirtualPixelRatio());
+    densityInfo.defaultDensity = AdaptToHookedDensity(displayInfo->GetDefaultVirtualPixelRatio(), true);
     auto customDensity = UNDEFINED_DENSITY;
     if (IsDefaultDensityEnabled()) {
         customDensity = densityInfo.defaultDensity;
