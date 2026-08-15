@@ -69,6 +69,7 @@
             OHOS::Rosen::SceneSession::ActivateDragBySystem*;
             OHOS::Rosen::SceneSession::MarkAvoidAreaAsDirty*;
             OHOS::Rosen::SceneSession::NotifyOcclusionState*;
+            OHOS::Rosen::SceneSession::NotifyDpiHookScale*;
             OHOS::Rosen::SceneSession::NotifyRotationChange*;
             OHOS::Rosen::SceneSession::RemoveExtWindowFlags*;
             OHOS::Rosen::SceneSession::SendPointerEventToUI*;
