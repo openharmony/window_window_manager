@@ -169,6 +169,7 @@ public:
         DMRect mainScreenRegion, ScreenId& screenGroupId) override;
     virtual DMError SetMultiScreenMode(ScreenId mainScreenId, ScreenId secondaryScreenId,
         MultiScreenMode screenMode) override;
+    DMError CheckMultiScreen(ScreenId mainScreenId, ScreenId secondaryScreenId, MultiScreenMode screenMode);
     virtual DMError SetMultiScreenRelativePosition(MultiScreenPositionOptions mainScreenOptions,
         MultiScreenPositionOptions secondScreenOption) override;
     virtual DMError StopMirror(const std::vector<ScreenId>& mirrorScreenIds) override;
@@ -744,6 +745,7 @@ protected:
     int32_t connectScreenNumber_ = 0;
 
 private:
+    void SaveScreenCapabilityToDB();
     void UpdateSessionByActiveModeChange(sptr<ScreenSession> screenSession, RSScreenModeInfo screenMode);
     int32_t GetActiveIdxInModes(const std::vector<sptr<SupportedScreenModes>>& modes,
                           const SupportedScreenModes& edidInfo);
@@ -802,6 +804,7 @@ private:
     void UpdateSuperFoldRefreshRate(sptr<ScreenSession> screenSession, uint32_t refreshRate);
     void GetInternalWidth();
     bool HasExtendVirtualScreen();
+    bool IsExtendVirtualScreenExist();
     void InitExtendScreenProperty(ScreenId screenId, sptr<ScreenSession> session, ScreenProperty property);
     sptr<ScreenSession> CreatePhysicalMirrorSessionInner(ScreenId screenId, ScreenId defaultScreenId,
         ScreenProperty property, sptr<IRemoteObject> connectToRenderToken = nullptr);
