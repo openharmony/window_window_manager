@@ -1843,6 +1843,7 @@ void ScreenSessionManager::OnScreenChangeForPC(ScreenId screenId, ScreenEvent sc
     } else {
         TLOGNFE(WmsLogTag::DMS, "screenEvent error!");
     }
+    SaveScreenCapabilityToDB();
     NotifyScreenModeChange();
 }
 
@@ -15044,11 +15045,9 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
             SysCapUtil::GetClientName().c_str(), IPCSkeleton::GetCallingPid());
         return DMError::DM_ERROR_NOT_SYSTEM_APP;
     }
-    bool isInUse = false;
-    IsPhysicalExtendScreenInUse(mainScreenId, secondaryScreenId, isInUse);
-    if (isInUse) {
-        TLOGNFI(WmsLogTag::DMS, "physical extend screen in use");
-        return DMError::DM_ERROR_INVALID_MODE_ID;
+    auto ret = CheckMultiScreen(mainScreenId, secondaryScreenId, screenMode);
+    if (ret != DMError::DM_OK) {
+        return ret;
     }
     CreateExtendVirtualScreen(mainScreenId, secondaryScreenId);
     {
@@ -15079,6 +15078,28 @@ DMError ScreenSessionManager::SetMultiScreenMode(ScreenId mainScreenId, ScreenId
     NotifyScreenModeChange();
     ReportMultScreenChange(mainScreenId, secondaryScreenId, screenMode);
 #endif
+    return DMError::DM_OK;
+}
+
+DMError ScreenSessionManager::CheckMultiScreen(ScreenId mainScreenId, ScreenId secondaryScreenId,
+    MultiScreenMode screenMode)
+{
+    if (!g_isPcDevice) {
+        return DMError::DM_ERROR_INVALID_MODE_ID;
+    }
+    bool isInUse = false;
+    IsPhysicalExtendScreenInUse(mainScreenId, secondaryScreenId, isInUse);
+    if (isInUse) {
+        TLOGNFW(WmsLogTag::DMS, "physical extend screen in use");
+        return DMError::DM_ERROR_INVALID_MODE_ID;
+    }
+    auto screenSession = GetScreenSessionByRsId(secondaryScreenId);
+    auto screenType = screenSession->GetScreenProperty().GetScreenType();
+    if (screenMode == MultiScreenMode::SCREEN_EXTEND && screenType == ScreenType::VIRTUAL &&
+        IsExtendVirtualScreenExist()) {
+        TLOGNFW(WmsLogTag::DMS, "extend virtual screen in use");
+        return DMError::DM_ERROR_INVALID_MODE_ID;
+    }
     return DMError::DM_OK;
 }
 
@@ -15536,6 +15557,32 @@ bool ScreenSessionManager::HasExtendVirtualScreen()
         }
     }
     return hasExtendVirtualScreen;
+}
+
+bool ScreenSessionManager::IsExtendVirtualScreenExist()
+{
+    TLOGNFI(WmsLogTag::DMS, "start");
+    bool isExtendVirtualScreenExist = false;
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMap;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMap = screenSessionMap_;
+    }
+    for (const auto& sessionIt : screenSessionMap) {
+        sptr<ScreenSession> screenSession = sessionIt.second;
+        if (screenSession == nullptr) {
+            TLOGNFE(WmsLogTag::DMS, "screenSession is nullptr, ScreenId: %{public}" PRIu64,
+                sessionIt.first);
+            continue;
+        }
+        if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL &&
+            screenSession->GetScreenCombination() == ScreenCombination::SCREEN_EXTEND) {
+            isExtendVirtualScreenExist = true;
+            TLOGNFI(WmsLogTag::DMS, "is true, screenId: %{public}" PRIu64, screenSession->GetScreenId());
+            break;
+        }
+    }
+    return isExtendVirtualScreenExist;
 }
 
 void ScreenSessionManager::SwitchScrollParam(FoldDisplayMode displayMode)
@@ -18069,6 +18116,43 @@ DMError ScreenSessionManager::GetScreenCapability(ScreenId screenId, ScreenCapab
         static_cast<uint32_t>(capability.interfaceType_), capability.colorBitDepth_);
 #endif
     return DMError::DM_OK;
+}
+
+void ScreenSessionManager::SaveScreenCapabilityToDB()
+{
+    if (!g_isPcDevice) {
+        return;
+    }
+    TLOGNFI(WmsLogTag::DMS, "save capability");
+    nlohmann::json jsonArray = nlohmann::json::array();
+    std::map<ScreenId, sptr<ScreenSession>> screenSessionMapCopy;
+    {
+        std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+        screenSessionMapCopy = screenSessionMap_;
+    }
+    for (const auto& [screenId, session] : screenSessionMapCopy) {
+        if (session == nullptr || session->GetScreenProperty().GetScreenType() != ScreenType::REAL) {
+            continue;
+        }
+        ScreenCapability capability;
+        if (GetScreenCapability(screenId, capability) != DMError::DM_OK) {
+            TLOGNFW(WmsLogTag::DMS, "get capability failed for screen:%{public}" PRIu64, screenId);
+            continue;
+        }
+        ScreenId rsId = screenIdManager_.ConvertToRsScreenId(screenId);
+        nlohmann::json item;
+        item["bpc"] = capability.colorBitDepth_;
+        item["interfaceType"] = static_cast<uint32_t>(capability.interfaceType_);
+        item["phyHeight"] = capability.phyHeight_;
+        item["phyWidth"] = capability.phyWidth_;
+        item["rsId"] = rsId;
+        jsonArray.push_back(item);
+        TLOGNFI(WmsLogTag::DMS, "Save capability for screen:%{public}" PRIu64", rsId: %{public}" PRIu64", "
+        "phyWidth: %{public}u, phyHeight: %{public}u, interfaceType: %{public}u, bpc: %{public}u",
+            screenId, rsId, capability.phyWidth_, capability.phyHeight_,
+            static_cast<uint32_t>(capability.interfaceType_), static_cast<uint32_t>(capability.colorBitDepth_));
+    }
+    ScreenSettingHelper::SaveScreenCapability(jsonArray.dump());
 }
 
 void ScreenSessionManager::SetHoverBlockList(const std::vector<std::string>& hoverBlockList)
