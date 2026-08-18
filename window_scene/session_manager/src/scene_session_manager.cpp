@@ -8730,8 +8730,8 @@ void SceneSessionManager::NotifySpecificSessionDpiHookScale(const sptr<SceneSess
     float scale = 0.0f;
     bool needNotify = session->GetDpiHookScale() > 0.0f;
     bool found = false;
+    auto bundleName = session->GetSessionInfo().bundleName_;
     {
-        auto bundleName = session->GetSessionInfo().bundleName_;
         std::lock_guard<std::mutex> lock(rogWindowConfigMutex_);
         if (std::find(rogWindowConfig_.xhdpiAppList.begin(), rogWindowConfig_.xhdpiAppList.end(),
             bundleName) != rogWindowConfig_.xhdpiAppList.end()) {
@@ -8741,8 +8741,8 @@ void SceneSessionManager::NotifySpecificSessionDpiHookScale(const sptr<SceneSess
         }
     }
     TLOGI(WmsLogTag::WMS_ATTRIBUTE,
-        "win=[%{public}d, %{public}s], needNotify=%{public}d, found=%{public}d, scale=%{public}f",
-        session->GetWindowId(), session->GetWindowName().c_str(), needNotify, found, scale);
+        "win=[%{public}d, %{public}s], needNotify=%{public}d, found=%{public}d, scale=%{public}f, bundle=%{public}s",
+        session->GetWindowId(), session->GetWindowName().c_str(), needNotify, found, scale, bundleName.c_str());
     if (needNotify) {
         session->NotifyDpiHookScale(scale);
     }
