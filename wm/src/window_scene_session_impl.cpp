@@ -1446,7 +1446,8 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
     }
     RefreshNoInteractionTimeoutMonitor();
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
-         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && isConsumed &&
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER ||
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_WRIST_TURN) && isConsumed &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
         TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, isConsumed:%{public}d", GetWindowId(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
