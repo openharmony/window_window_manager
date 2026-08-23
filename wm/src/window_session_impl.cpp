@@ -2245,7 +2245,7 @@ float WindowSessionImpl::AdaptToHookedDensity(float density, bool needHook)
     if (!needHook || dpiHookScale_ <= 0.0f) {
         return density;
     }
-    return density * dpiHookScale_;
+    return density / dpiHookScale_;
 }
 
 /** @note @window.layout */
