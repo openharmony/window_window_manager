@@ -163,6 +163,7 @@ constexpr uint32_t FORCE_LIMIT_MIN_FLOATING_HEIGHT = 40;
 constexpr int32_t API_VERSION_18 = 18;
 constexpr uint32_t REASON_MAXIMIZE_MODE_CHANGE = 1;
 constexpr int32_t SIDEBAR_BLUR_ANIMATION_DURATION = 150;
+const std::string COOPERATION_DISPLAY_NAME = "Cooperation";
 constexpr float NAG_NUM = -1.0f;
 
 bool IsValueInRange(double value, double lowerBound, double upperBound)
@@ -2110,7 +2111,7 @@ void WindowSceneSessionImpl::PreLayoutOnShow(WindowType type, const sptr<Display
             TLOGE(WmsLogTag::WMS_KEYBOARD, "Update prelayout failed, %{public}" PRIu64, screenId);
         } else {
             std::string dispName = info->GetName();
-            Rect newRect = (info->GetWidth() > info->GetHeight()) ?
+            Rect newRect = (info->GetWidth() > info->GetHeight() || dispName == COOPERATION_DISPLAY_NAME) ?
                             params.LandscapeKeyboardRect_ : params.PortraitKeyboardRect_;
             property_->SetRequestRect(newRect);
         }
@@ -6945,7 +6946,7 @@ void WindowSceneSessionImpl::UpdateEnableDragWhenSwitchMultiWindow(bool enable)
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
 }
 
-void WindowSceneSessionImpl::UpdateSubWindowDragEnabledByDecorVisible()
+void WindowSceneSessionImpl::UpdateSubWindowDragEnabledByDecorVisible(bool decorVisible)
 {
     if (hasSetEnableDrag_.load() || property_->IsDragResizeDisabled()) {
         return;
@@ -6953,8 +6954,6 @@ void WindowSceneSessionImpl::UpdateSubWindowDragEnabledByDecorVisible()
     if (!WindowHelper::IsSubWindow(GetType())) {
         return;
     }
-    bool decorVisible = false;
-    GetDecorVisible(decorVisible);
     property_->SetDragEnabled(decorVisible);
     UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
     TLOGI(WmsLogTag::WMS_LAYOUT, "id: %{public}d, decorVisible: %{public}d", GetPersistentId(), decorVisible);
@@ -8037,11 +8036,13 @@ bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
 {
     int32_t displayWidth = 0;
     int32_t displayHeight = 0;
+    std::string dispName = "UNKNOWN";
     displayId = (displayId == DISPLAY_ID_INVALID) ? property_->GetDisplayId() : displayId;
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(displayId);
     if (display != nullptr) {
         displayWidth = display->GetWidth();
         displayHeight = display->GetHeight();
+        dispName = display->GetName();
     } else {
         auto defaultDisplayInfo = DisplayManager::GetInstance().GetDefaultDisplay();
         if (defaultDisplayInfo != nullptr) {
@@ -8067,8 +8068,9 @@ bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
         isLandscape = (orientation == DisplayOrientation::LANDSCAPE ||
             orientation == DisplayOrientation::LANDSCAPE_INVERTED);
     }
-    TLOGI(WmsLogTag::WMS_KEYBOARD, "c-displayInfo: %{public}" PRIu64 ", %{public}d|%{public}d|%{public}d",
-        displayId, displayWidth, displayHeight, isLandscape);
+    isLandscape = isLandscape || (dispName == COOPERATION_DISPLAY_NAME);
+    TLOGI(WmsLogTag::WMS_KEYBOARD, "c-displayInfo: %{public}" PRIu64 ", %{public}d|%{public}d|%{public}d, %{public}s",
+        displayId, displayWidth, displayHeight, isLandscape, dispName.c_str());
     return isLandscape;
 }
 

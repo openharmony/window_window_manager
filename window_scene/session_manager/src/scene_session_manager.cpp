@@ -5252,7 +5252,12 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
             UpdatePipGroupCount(property->GetPiPTemplateInfo(), true);
         }
 
-        NotifyCreateSpecificSession(newSession, property, type);
+        bool isBoundedSystemTray = false;
+        if (parentSession) {
+            std::string appInstanceKey = parentSession->GetSessionProperty()->GetAppInstanceKey();
+            isBoundedSystemTray = parentSession->GetSessionBoundedSystemTray(pid, tokenId, appInstanceKey);
+        }
+        NotifyCreateSpecificSession(newSession, property, type, isBoundedSystemTray);
         session = newSession;
         renderSession = ScreenSessionManagerClient::GetInstance().GetRenderSessionToken();
         AddClientDeathRecipient(sessionStage, newSession);
@@ -6173,7 +6178,7 @@ void SceneSessionManager::SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>&
 }
 
 void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSession,
-    sptr<WindowSessionProperty> property, const WindowType& type)
+    sptr<WindowSessionProperty> property, const WindowType& type, bool isBoundedSystemTray)
 {
     if (newSession == nullptr || property == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "newSession or property is nullptr");
@@ -6208,7 +6213,7 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
             return;
         }
     } else if (SessionHelper::IsSubWindow(type)) {
-        NotifyCreateSubSession(property->GetParentPersistentId(), newSession);
+        NotifyCreateSubSession(property->GetParentPersistentId(), newSession, 0, isBoundedSystemTray);
         TLOGD(WmsLogTag::WMS_LIFE, "Notify sub jsSceneSession, id:%{public}d, parentId:%{public}d, type:%{public}d",
             newSession->GetPersistentId(), property->GetParentPersistentId(), type);
     } else {
@@ -6217,7 +6222,8 @@ void SceneSessionManager::NotifyCreateSpecificSession(sptr<SceneSession> newSess
     }
 }
 
-void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags)
+void SceneSessionManager::NotifyCreateSubSession(
+    int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags, bool isBoundedSystemTray)
 {
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "SubSession is nullptr");
@@ -6245,7 +6251,7 @@ void SceneSessionManager::NotifyCreateSubSession(int32_t persistentId, sptr<Scen
     parentSession->AddSubSession(session);
     session->SetParentSession(parentSession);
     if (createSubSessionFunc) {
-        createSubSessionFunc(session);
+        createSubSessionFunc(session, isBoundedSystemTray);
     }
     TLOGD(WmsLogTag::WMS_LIFE, "Notify success, parentId: %{public}d, subId: %{public}d",
         persistentId, session->GetPersistentId());
@@ -14574,7 +14580,13 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
                 TLOGI(WmsLogTag::WMS_LIFE, "Modify window mode: %{public}d", windowMode);
                 session->SetSessionInfoWindowMode(windowMode);
             }
-            return session->PendingSessionToForeground();
+            auto displayId = session->GetSessionProperty()->GetDisplayId();
+            auto focusedSessionId = GetFocusedSessionId(displayId);
+            auto focusedSession = GetSceneSession(focusedSessionId);
+            if (focusedSession != nullptr && WindowHelper::IsMainWindow(focusedSession->GetWindowType())) {
+                return focusedSession->PendingSessionToForeground(session->EditSessionInfo());
+            }
+            return session->PendingSessionToForeground(session->EditSessionInfo());
         }
         TLOGNE(WmsLogTag::DEFAULT, "PendingForeground: fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
@@ -19073,9 +19085,25 @@ WMError SceneSessionManager::UpdateDisplayHookInfo(int32_t uid, uint32_t width, 
     return WMError::WM_OK;
 }
 
-WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable)
+WMError SceneSessionManager::UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable,
+    int32_t persistentId)
 {
-    TLOGI(WmsLogTag::WMS_COMPAT, "hookInfo: [%{private}s], enable: %{public}d", hookInfo.ToString().c_str(), enable);
+    TLOGI(WmsLogTag::WMS_COMPAT, "uid: %{public}d, hookInfo: [%{private}s], enable: %{public}d, "
+        "persistentId: %{public}d", uid, hookInfo.ToString().c_str(), enable, persistentId);
+    if (uid <= 0 && persistentId > 0) {
+        if (enable && (hookInfo.width_ <= 0 || hookInfo.height_ <= 0 || hookInfo.density_ <= 0)) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "App hookInfo param error.");
+            return WMError::WM_ERROR_INVALID_PARAM;
+        }
+        auto session = GetSceneSession(persistentId);
+        if (session == nullptr) {
+            TLOGE(WmsLogTag::WMS_COMPAT, "Session not found for persistentId: %{public}d", persistentId);
+            return WMError::WM_ERROR_NULLPTR;
+        }
+        TLOGI(WmsLogTag::WMS_COMPAT, "Session not connected, hook display info need pending");
+        session->SetPendingAppHookDisplayInfo(hookInfo, enable);
+        return WMError::WM_OK;
+    }
     if (enable && (uid <= 0 || hookInfo.width_ <= 0 || hookInfo.height_ <= 0 || hookInfo.density_ <= 0)) {
         TLOGE(WmsLogTag::WMS_COMPAT, "App hookInfo param error.");
         return WMError::WM_ERROR_INVALID_PARAM;
@@ -20705,11 +20733,13 @@ void SceneSessionManager::ReportRssFloatWindowV1(const bool isForeground, const 
         return;
     }
     // report background
+    bool isEmpty = false;
     {
         std::unique_lock<std::shared_mutex> lock(foregroundSessionFloatWindowV1SetMutex_);
         foregroundSessionFloatWindowV1Set_.erase(session);
+        isEmpty = foregroundSessionFloatWindowV1Set_.empty();
     }
-    if (foregroundSessionFloatWindowV1Set_.empty()) {
+    if (isEmpty) {
         ResourceSchedule::ResSchedClient::GetInstance().ReportData(reportType, 0, payload);
         TLOGI(WmsLogTag::WMS_SYSTEM, "report background successfully, window ResType is RES_TYPE_FLOATING_WINDOW_V1");
     }
@@ -20731,11 +20761,13 @@ void SceneSessionManager::ReportRssFB(const bool isForeground, const sptr<SceneS
         return;
     }
     // report background
+    bool isEmpty = false;
     {
         std::unique_lock<std::shared_mutex> lock(foregroundSessionFloatBallSetMutex_);
         foregroundSessionFloatBallSet_.erase(session);
+        isEmpty = foregroundSessionFloatBallSet_.empty();
     }
-    if (foregroundSessionFloatBallSet_.empty()) {
+    if (isEmpty) {
         ResourceSchedule::ResSchedClient::GetInstance().ReportData(reportType, 0, payload);
         TLOGI(WmsLogTag::WMS_SYSTEM, "report background successfully, window ResType is RES_TYPE_FLOATING_BALL");
     }
