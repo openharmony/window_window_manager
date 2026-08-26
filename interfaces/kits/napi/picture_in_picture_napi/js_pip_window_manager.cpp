@@ -18,10 +18,13 @@
 #include "js_pip_controller.h"
 #include "js_pip_utils.h"
 #include "js_runtime_utils.h"
+#include "permission.h"
+#include "js_err_utils.h"
 #include "window_manager_hilog.h"
 #include "picture_in_picture_manager.h"
 #include "window.h"
 #include "xcomponent_controller.h"
+#include "float_window_error_msg.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -50,12 +53,14 @@ namespace {
         PiPControlGroup::VIDEO_LIVE_MUTE_SWITCH,
     };
     const std::set<PiPControlGroup> VIDEO_DRIVE_CONTROLS {};
+    const std::set<PiPControlGroup> VIDEO_NAVIGATION_CONTROLS {};
     const std::map<PiPTemplateType, std::set<PiPControlGroup>> TEMPLATE_CONTROL_MAP {
         {PiPTemplateType::VIDEO_PLAY, VIDEO_PLAY_CONTROLS},
         {PiPTemplateType::VIDEO_CALL, VIDEO_CALL_CONTROLS},
         {PiPTemplateType::VIDEO_MEETING, VIDEO_MEETING_CONTROLS},
         {PiPTemplateType::VIDEO_LIVE, VIDEO_LIVE_CONTROLS},
         {PiPTemplateType::VIDEO_DRIVE, VIDEO_DRIVE_CONTROLS},
+        {PiPTemplateType::VIDEO_NAVIGATION, VIDEO_NAVIGATION_CONTROLS},
     };
     const char* ARKUI_WINDOW_PIP_CREATE = "ArkUI.window.pip.create";
 
@@ -126,6 +131,12 @@ static int32_t checkOptionParams(PipOption& option)
         return -1;
     }
     uint32_t pipTemplateType = option.GetPipTemplate();
+    if (IsSystemOnlyPiPTemplateType(static_cast<PiPTemplateType>(pipTemplateType)) &&
+        !Permission::IsSystemCalling(true)) {
+        TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, templateType %{public}u requires system app",
+            pipTemplateType);
+        return -1;
+    }
     if (!PictureInPictureManager::IsTemplateTypeSupported(static_cast<PiPTemplateType>(pipTemplateType))) {
         TLOGE(WmsLogTag::WMS_PIP, "pipOption param error, pipTemplateType not supported.");
         return -1;
@@ -351,23 +362,24 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
     std::shared_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, &result);
     auto asyncTask = [this, env, task = napiAsyncTask, pipOption]() mutable {
         if (!PictureInPictureManager::IsSupportPiP()) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
-                WMError::WM_ERROR_DEVICE_NOT_SUPPORT), "device not support pip."));
+            task->Reject(env, JsErrUtils::CreateFloatWindowJsError(env, FloatWindowModule::PIP,
+                "create", WmErrorCode::WM_ERROR_DEVICE_NOT_SUPPORT,
+                "Failed to call the API due to limited device capabilities."));
             HISTOGRAM_BOOLEAN(ARKUI_WINDOW_PIP_CREATE_BOOL, 0);
             return;
         }
         sptr<PipOption> pipOptionPtr = new PipOption(pipOption);
         auto context = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(pipOptionPtr->GetContext());
         if (context == nullptr) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
-                WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid context"));
+            task->Reject(env, JsErrUtils::CreateFloatWindowJsError(env, FloatWindowModule::PIP,
+                "create", WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR, "The context is invalid."));
             HISTOGRAM_BOOLEAN(ARKUI_WINDOW_PIP_CREATE_BOOL, 0);
             return;
         }
         sptr<Window> mainWindow = Window::GetMainWindowWithContext(context->lock());
         if (mainWindow == nullptr) {
-            task->Reject(env, CreateJsError(env, static_cast<int32_t>(
-                WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Invalid mainWindow"));
+            task->Reject(env, JsErrUtils::CreateFloatWindowJsError(env, FloatWindowModule::PIP,
+                "create", WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR, "The main window is invalid."));
             HISTOGRAM_BOOLEAN(ARKUI_WINDOW_PIP_CREATE_BOOL, 0);
             return;
         }
@@ -380,8 +392,8 @@ napi_value JsPipWindowManager::NapiSendTask(napi_env env, PipOption& pipOption)
         HISTOGRAM_BOOLEAN(ARKUI_WINDOW_PIP_CREATE_BOOL, 1);
     };
     if (napi_send_event(env, asyncTask, napi_eprio_immediate, "NapiSendTask") != napi_status::napi_ok) {
-        napiAsyncTask->Reject(env, CreateJsError(env,
-            static_cast<int32_t>(WMError::WM_ERROR_PIP_INTERNAL_ERROR), "Send event failed"));
+        napiAsyncTask->Reject(env, JsErrUtils::CreateFloatWindowJsError(env, FloatWindowModule::PIP,
+            "create", WmErrorCode::WM_ERROR_PIP_INTERNAL_ERROR, "Internal task error"));
     }
     return result;
 }

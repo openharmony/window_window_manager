@@ -358,13 +358,13 @@ void SessionManagerLite::OnWMSConnectionChanged(
         if (shouldUpdateCurrentState) {
             isWMSConnected_ = isConnected;
         }
+        TLOGI(WmsLogTag::WMS_MULTI_USER,
+            "State updated: inst=%{public}d, shouldUpdate=%{public}d, "
+            "currentServer userId=%{public}d screenId=%{public}d pid=%{public}d, isWMSConnected=%{public}d",
+            userId_, shouldUpdateCurrentState,
+            currentServer_.userId, currentServer_.screenId, currentServer_.pid, isWMSConnected_);
     }
     bool isUserSwitched = fromUserId != INVALID_USER_ID;
-    TLOGI(WmsLogTag::WMS_MULTI_USER,
-        "State updated: inst=%{public}d, shouldUpdate=%{public}d, isUserSwitched=%{public}d, "
-        "currentServer userId=%{public}d screenId=%{public}d pid=%{public}d, isWMSConnected=%{public}d",
-        userId_, shouldUpdateCurrentState, isUserSwitched,
-        currentServer_.userId, currentServer_.screenId, currentServer_.pid, isWMSConnected_);
     if (isConnected && isUserSwitched) {
         // Notify the user that the old wms has been disconnected.
         OnWMSConnectionChangedCallback(fromUserId, screenId, false, fromPid);
@@ -484,14 +484,16 @@ WMError SessionManagerLite::InitSceneSessionManagerLiteProxy()
     }
     // Begin init.
     sptr<IRemoteObject> remoteObject = nullptr;
+    sptr<ISessionManagerService> proxy = nullptr;
     {
         std::lock_guard<std::mutex> lock(smsProxyMutex_);
         if (!sessionManagerServiceProxy_) {
             TLOGE(WmsLogTag::DEFAULT, "Session manager proxy is null, userId=%{public}d", userId_);
             return WMError::WM_ERROR_NULLPTR;
         }
-        remoteObject = sessionManagerServiceProxy_->GetSceneSessionManagerLite();
+        proxy = sessionManagerServiceProxy_;
     }
+    remoteObject = proxy->GetSceneSessionManagerLite();
     if (!remoteObject) {
         TLOGE(WmsLogTag::DEFAULT, "Get remote object failed, userId=%{public}d", userId_);
         return WMError::WM_ERROR_NULLPTR;

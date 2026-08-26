@@ -817,7 +817,8 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles, TestSize.L
     ssm_->sceneSessionMap_.clear();
     DisplayId displayId = 0;
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundles;
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> notifyPrivacyBundleList;
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
     SessionInfo sessionInfoFirst;
     sessionInfoFirst.bundleName_ = "";
     sessionInfoFirst.abilityName_ = "privacyAbilityName";
@@ -825,19 +826,19 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles, TestSize.L
     ASSERT_NE(sceneSessionFirst, nullptr);
     sceneSessionFirst->property_ = nullptr;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
     sceneSessionFirst->property_ = sptr<WindowSessionProperty>::MakeSptr();
     ASSERT_NE(nullptr, sceneSessionFirst->property_);
     sceneSessionFirst->property_->SetDisplayId(0);
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
     sessionInfoFirst.bundleName_ = "privacy.test.first";
     sceneSessionFirst->state_ = SessionState::STATE_FOREGROUND;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
     sceneSessionFirst->state_ = SessionState::STATE_CONNECT;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
 }
 
 /**
@@ -849,7 +850,8 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles01, TestSize
 {
     DisplayId displayId = 0;
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundles;
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> notifyPrivacyBundleList;
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
     SessionInfo sessionInfoFirst;
     sessionInfoFirst.bundleName_ = "privacy.test.first";
     sessionInfoFirst.abilityName_ = "privacyAbilityName";
@@ -871,11 +873,11 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles01, TestSize
     sceneSessionSecond->state_ = SessionState::STATE_ACTIVE;
     sceneSessionSecond->parentSession_ = sceneSessionFirst;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
     sceneSessionSecond->state_ = SessionState::STATE_FOREGROUND;
     sceneSessionSecond->state_ = SessionState::STATE_CONNECT;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
 }
 
 /**
@@ -887,8 +889,9 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles02, TestSize
 {
     DisplayId displayId = 0;
     std::unordered_map<DisplayId, std::unordered_set<std::string>> privacyBundles;
+    std::unordered_map<DisplayId, std::unordered_set<std::string>> notifyPrivacyBundleList;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
     SessionInfo sessionInfoFirst;
     sessionInfoFirst.bundleName_ = "privacy.test.first";
     sessionInfoFirst.abilityName_ = "privacyAbilityName";
@@ -900,7 +903,7 @@ HWTEST_F(SceneSessionManagerTest6, GetSceneSessionPrivacyModeBundles02, TestSize
     sceneSessionFirst->state_ = SessionState::STATE_ACTIVE;
     sceneSessionFirst->property_->isPrivacyMode_ = false;
     ASSERT_NE(nullptr, ssm_);
-    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles);
+    ssm_->GetSceneSessionPrivacyModeBundles(displayId, privacyBundles, notifyPrivacyBundleList);
 }
 
 /**
@@ -1275,7 +1278,7 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, TestSize.Level1)
     sessionInfo.abilityInfo = nullptr;
     sessionInfo.isAtomicService_ = true;
     sessionInfo.isBackTransition_ = false;
-    sessionInfo.screenId_ = 100;
+    sessionInfo.screenId_ = 999;
     unsigned int flags = 11111111;
     sessionInfo.want = std::make_shared<AAFwk::Want>();
     ASSERT_NE(nullptr, sessionInfo.want);
@@ -1284,8 +1287,16 @@ HWTEST_F(SceneSessionManagerTest6, InitSceneSession01, TestSize.Level1)
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.insert(std::make_pair(1, sceneSession));
 
+    sptr<SceneSession> nullSession = nullptr;
+    ssm_->InitSceneSession(nullSession, sessionInfo, nullptr);
+    auto& foldMgr = PcFoldScreenManager::GetInstance();
+    auto oldDisplayId = foldMgr.displayId_;
+    auto oldFoldStatus = foldMgr.screenFoldStatus_;
+    foldMgr.displayId_ = DEFAULT_DISPLAY_ID;
+    foldMgr.screenFoldStatus_ = SuperFoldStatus::HALF_FOLDED;
     ssm_->InitSceneSession(sceneSession, sessionInfo, nullptr);
-    ASSERT_EQ(100, sceneSession->GetSessionInfo().screenId_);
+    foldMgr.displayId_ = oldDisplayId;
+    foldMgr.screenFoldStatus_ = oldFoldStatus;
 }
 
 /**

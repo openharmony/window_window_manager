@@ -46,6 +46,7 @@
 #include "scene_session_converter.h"
 #include "screen_fold_data.h"
 #include "screen_session_manager_client.h"
+#include "motion_manager.h"
 #include "session/host/include/keyboard_session.h"
 #include "session/host/include/session.h"
 #include "session/host/include/root_scene_session.h"
@@ -126,7 +127,7 @@ class IUIEffectControllerClient;
 using NotifyCreateSystemSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
 using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSession>& keyboardSession,
     const sptr<SceneSession>& panelSession)>;
-using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& session)>;
+using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& session, bool isBoundedSystemTray)>;
 using NotifyRecoverSceneSessionFunc =
     std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
 using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
@@ -146,6 +147,7 @@ using NotifySCBAfterUpdateFocusFunc = std::function<void(DisplayId displayId)>;
 using NotifyDiffSCBAfterUpdateFocusFunc = std::function<void(DisplayId prevDisplayId, DisplayId currDisplayId)>;
 using FlushWindowInfoTask = std::function<void()>;
 using ProcessVirtualPixelRatioChangeFunc = std::function<void(const sptr<DisplayInfo>& displayInfo)>;
+using UpdateDisplayDpiChangeFunc = std::function<void(DisplayId displayId, float density)>;
 using DumpUITreeFunc = std::function<void(std::string& dumpInfo)>;
 using RootSceneProcessBackEventFunc = std::function<void()>;
 using ProcessCloseTargetFloatWindowFunc = std::function<void(const std::string& bundleName)>;
@@ -158,6 +160,8 @@ using NotifyAppUseControlListFunc =
 using NotifyRootSceneAvoidAreaChangeFunc = std::function<void(const sptr<AvoidArea>& avoidArea, AvoidAreaType type,
     const sptr<OccupiedAreaChangeInfo>& info)>;
 using NotifySupportRotationRegisteredFunc = std::function<void()>;
+using NotifySensorRotationChangeFunc = std::function<void(float sensorRotation)>;
+using NotifySmartSensorRotationChangeFunc = std::function<void(float sensorRotation)>;
 using NotifyWatchGestureConsumeResultFunc = std::function<void(int32_t keyCode, bool isConsumed)>;
 using NotifyWatchFocusActiveChangeFunc = std::function<void(bool isActive)>;
 using GetRSNodeByStringIDFunc = std::function<std::shared_ptr<Rosen::RSNode>(const std::string& id)>;
@@ -187,6 +191,7 @@ using MinimizeAllFunc = std::function<void(DisplayId displayId, int32_t excludeW
 using PageEnableFunc = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
 using GetFloatViewLimitFunc = std::function<void()>;
+using UpdateRogWindowConfigCallbackFunc = std::function<void(const RogWindowConfig&)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
@@ -226,7 +231,7 @@ private:
     NotifyAppProcessDiedFunc procDiedCallback_;
 };
 
-class SceneSessionManager : public SceneSessionManagerStub {
+class SceneSessionManager : public SceneSessionManagerStub, public IMotionEventListener {
 WM_DECLARE_SINGLE_INSTANCE_BASE(SceneSessionManager)
 public:
     friend class AnomalyDetection;
@@ -454,7 +459,9 @@ public:
         int32_t fingerId) override;
     void SetFocusedSessionDisplayIdIfNeeded(sptr<SceneSession>& newSession);
     std::vector<std::string> trayAppList_;
-    WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits);
+    WMError GetWindowLimits(int32_t windowId, WindowLimits& windowLimits, float targetDensity = 0.0f);
+    WindowLimits RecalcWindowLimitsByDensity(const sptr<SceneSession>& sceneSession,
+        float targetDensity) const;
     void RegisterVirtualPixelChangeCallback(NotifyVirtualPixelChangeFunc&& func);
     NotifyVirtualPixelChangeFunc onVirtualPixelChangeCallback_;
     void ConfigDockAutoHide(bool isDockAutoHide);
@@ -485,6 +492,7 @@ public:
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     void SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func);
     bool ShouldProcessVirtualPixelRatioChange(DisplayStateChangeType type, sptr<DisplayInfo> displayInfo);
+    void SetUpdateDisplayDpiChangeCallback(const UpdateDisplayDpiChangeFunc& func);
     void ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
         const std::map<DisplayId, sptr<DisplayInfo>>& displayInfoMap, DisplayStateChangeType type);
     void ProcessUpdateRotationChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
@@ -505,7 +513,8 @@ public:
 
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId,
-        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles,
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& notifyPrivacyBundleList);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     BrokerStates NotifyStartWindowsAbility(SessionInfo& sessionInfo);
     sptr<SceneSession> FindSessionByAffinity(const std::string& affinity);
@@ -640,7 +649,7 @@ public:
     WSError NotifyEnterRecentTask(bool enterRecent);
     void NotifySCBRecentStateChange(bool isRecent);
     WMError UpdateDisplayHookInfo(int32_t uid, uint32_t width, uint32_t height, float_t density, bool enable);
-    WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable);
+    WMError UpdateAppHookDisplayInfo(int32_t uid, const HookInfo& hookInfo, bool enable, int32_t persistentId = -1);
     WMError NotifyHookOrientationChange(int32_t persistentId);
     void InitScheduleUtils();
     void ProcessDisplayScale(sptr<DisplayInfo>& displayInfo);
@@ -757,6 +766,8 @@ public:
      * Window Rotation
      */
     void SetSupportRotationRegisteredListener(NotifySupportRotationRegisteredFunc&& func);
+    void SetSensorRotationChangeListener(NotifySensorRotationChangeFunc&& func);
+    void SetSmartSensorRotationChangeListener(NotifySmartSensorRotationChangeFunc&& func);
     WMError NotifyRotationProperty(int32_t persistentId, uint32_t rotation, uint32_t width, uint32_t height);
 
     /*
@@ -839,6 +850,8 @@ public:
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
     WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
         std::vector<AppWindowShowingInfo>& windowInfos) override;
+    WMError UpdateRogWindowConfig(const RogWindowConfig& windowConfig);
+    void RegisterUpdateRogWindowConfigCallback(UpdateRogWindowConfigCallbackFunc&& func);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
@@ -978,6 +991,11 @@ public:
     void NotifySupportRotationChange(const SupportRotationInfo& supportRotationInfo);
     WMError NotifySupportRotationRegistered() override;
 
+    bool RegisterMotionSensor(int32_t motionType);
+    bool UnregisterMotionSensor(int32_t motionType);
+    void OnMotionRotationChanged(float sensorRotation) override;
+    void OnMotionSmartRotationChanged(float sensorRotation) override;
+
     std::vector<sptr<SceneSession>> GetSceneSessions(ScreenId screenId);
     WMError UpdateScreenLockState(int32_t persistentId);
 
@@ -1007,6 +1025,8 @@ private:
     std::unordered_map<std::string, ConvertSystemConfigFunc> convertConfigMap_;
     static sptr<SceneSessionManager> CreateInstance();
     void Init();
+    std::shared_ptr<PowerMgr::RunningLock> CreateKeepScreenRunningLock(
+        const sptr<SceneSession>& sceneSession, const std::string& screenLockPrefix);
     void RegisterAppListener();
     bool IsPrepareTerminateEnabled() const;
     void InitPrepareTerminateConfig();
@@ -1027,6 +1047,8 @@ private:
     void ConfigDecor(const WindowSceneConfig::ConfigItem& decorConfig, bool mainConfig = true);
     void ConfigWindowAnimation(const WindowSceneConfig::ConfigItem& windowAnimationConfig);
     void ConfigStartingWindowAnimation(const WindowSceneConfig::ConfigItem& startingWindowConfig);
+    void FixWindowUITypeInSupportModeChange();
+    void ReportMainWindowStateChange(const sptr<SceneSession>& sceneSession, int32_t userId, int32_t value);
     WSErrorResult CleanupSessionByType(const sptr<SceneSession>& sceneSession);
     WSErrorResult FinalizeSessionDestruction(const int32_t persistentId);
     /**
@@ -1094,6 +1116,25 @@ private:
      * @return Returns true if the config is valid and applied; returns false otherwise.
      */
     bool ConfigMovingEvent(const WindowSceneConfig::ConfigItem& movingEventConfig);
+
+    /**
+     * @brief Configure isolated displays for window operations.
+     *
+     * XML example:
+     *   <windowLayout>
+     *     <displayIsolation>
+     *       <moveIsolatedDisplayIds>5</moveIsolatedDisplayIds>
+     *       <dragIsolatedDisplayIds>5</dragIsolatedDisplayIds>
+     *     </displayIsolation>
+     *   </windowLayout>
+     *
+     * The move and drag ID lists are independent. A missing or empty list disables
+     * isolation for the corresponding operation.
+     *
+     * @param displayIsolationConfig The display-isolation configuration item.
+     * @return Returns true if the config is valid and applied; returns false otherwise.
+     */
+    bool ConfigDisplayIsolation(const WindowSceneConfig::ConfigItem& displayIsolationConfig);
 
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
@@ -1348,6 +1389,7 @@ private:
     void WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession);
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSessionSaveSnapshotCompleteFunc(const sptr<SceneSession>& sceneSession);
+    bool CheckAndGetRogScale(const std::string bundleName, float& scale);
 
     /*
      * Window Property
@@ -1403,6 +1445,7 @@ private:
     void UpdatePrivateStateAndNotifyForAllScreens();
 
     WSError CheckPiPCreate(const sptr<WindowSessionProperty>& property, const WindowType& type);
+    WSErrorResult CheckPiPCreateAndLog(const sptr<WindowSessionProperty>& property, const WindowType& type);
     void UpdatePipGroupCount(const PiPTemplateInfo& pipTemplateInfo, bool increase);
     std::vector<PiPGroupConfig> ParsePipMultiConfig();
     bool FindTargetGroup(const std::vector<PiPGroupConfig>& groupConfigs, const PiPTemplateInfo& pipTemplateInfo,
@@ -1461,6 +1504,8 @@ private:
     void RemoveFailRecoveredSession();
     void ClearUnrecoveredSessions(const std::vector<int32_t>& recoveredPersistentIds) REQUIRES(SCENE_GUARD);
     void RecoverSessionInfo(const sptr<WindowSessionProperty>& property);
+    void RecoverSupportedWindowModes(const sptr<SceneSession>& sceneSession,
+        const sptr<WindowSessionProperty>& property);
     bool IsNeedRecover(const int32_t persistentId);
     WSError CheckSessionPropertyOnRecovery(const sptr<WindowSessionProperty>& property, bool isSpecificSession);
     void UpdateRecoverPropertyForSuperFold(const sptr<WindowSessionProperty>& property);
@@ -1525,6 +1570,7 @@ private:
     DumpRootSceneElementInfoFunc dumpRootSceneFunc_;
     DumpUITreeFunc dumpUITreeFunc_;
     ProcessVirtualPixelRatioChangeFunc processVirtualPixelRatioChangeFunc_ = nullptr;
+    UpdateDisplayDpiChangeFunc updateDisplayDpiChangeFunc_ = nullptr;
     ProcessCloseTargetFloatWindowFunc closeTargetFloatWindowFunc_;
     SetForegroundWindowNumFunc setForegroundWindowNumFunc_;
     MinimizeByWindowIdFunc minimizeByWindowIdFunc_;
@@ -1543,6 +1589,8 @@ private:
      */
     RotateAnimationConfig rotateAnimationConfig_;
     NotifySupportRotationRegisteredFunc supportRotationRegisteredListener_;
+    NotifySensorRotationChangeFunc sensorRotationChangeListener_;
+    NotifySmartSensorRotationChangeFunc smartSensorRotationChangeListener_;
 
     /*
      * PiP Window
@@ -1700,11 +1748,12 @@ private:
 
     void DestroySubSession(const sptr<SceneSession>& sceneSession);
     void DestroyToastSession(const sptr<SceneSession>& sceneSession);
-    void NotifyCreateSubSession(int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0);
+    void NotifyCreateSubSession(
+        int32_t persistentId, sptr<SceneSession> session, uint32_t windowFlags = 0, bool isBoundedSystemTray = false);
     void NotifyCreateToastSession(int32_t persistentId, sptr<SceneSession> session);
     void NotifySessionUnfocusedToClient(int32_t persistentId);
     void NotifyCreateSpecificSession(sptr<SceneSession> session,
-        sptr<WindowSessionProperty> property, const WindowType& type);
+        sptr<WindowSessionProperty> property, const WindowType& type, bool isBoundedSystemTray = false);
     sptr<SceneSession> CreateSceneSession(const SessionInfo& sessionInfo, sptr<WindowSessionProperty> property);
     void AddPermissionUsedRecord(const std::string& permission, int32_t successCount, int32_t failCount,
         int32_t tokenId);
@@ -1733,6 +1782,8 @@ private:
     WSError HandleSecureSessionShouldHide(const sptr<SceneSession>& sceneSession);
     bool CheckSystemWindowPermission(const sptr<WindowSessionProperty>& property);
     bool CheckModalSubWindowPermission(const sptr<WindowSessionProperty>& property);
+    WSError CheckSubWindowCallingProcess(const sptr<WindowSessionProperty>& property,
+        const sptr<SceneSession>& parentSession);
 
     /*
      * Window Snapshot
@@ -1773,6 +1824,7 @@ private:
      * Window Watermark
      */
     bool SetSessionWatermarkForAppProcess(const sptr<SceneSession>& sceneSession);
+    void SetLeashNodeWatermarkForAppProcess(const sptr<SceneSession>& session);
     std::vector<NodeId> GetSessionNodeIdsAndWatermarkNameByPid(int32_t pid, std::string& watermarkName);
     void SetWatermarkForSession(const sptr<SceneSession>& session);
     void ClearWatermarkForSession(const sptr<SceneSession>& session);
@@ -2126,6 +2178,11 @@ private:
     GetFloatViewLimitFunc getFloatViewLimitFunc_;
     std::map<uint32_t, FloatViewLimits> floatViewLimits_{};
     std::condition_variable getLimitsFinishCv_;
+
+    std::mutex rogWindowConfigMutex_;
+    RogWindowConfig rogWindowConfig_;
+    std::mutex updateRogWindowConfigCallbackMutex_;
+    UpdateRogWindowConfigCallbackFunc updateRogWindowConfigCallback_;
 };
 } // namespace OHOS::Rosen
 

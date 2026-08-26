@@ -197,6 +197,7 @@ extern const std::string DETACH_EVENT_NAME;
 class Session : public SessionStub {
 public:
     friend class HidumpController;
+    static constexpr ScreenId SCREEN_ID_MAIN = 5;
     using Task = std::function<void()>;
     class SessionLifeCycleTask : public virtual RefBase {
     public:
@@ -210,10 +211,6 @@ public:
     };
     explicit Session(const SessionInfo& info);
     virtual ~Session();
-    virtual SessionType GetSessionType() const
-    {
-        return SessionType::Session;
-    };
     bool isKeyboardPanelEnabled_ = false;
     virtual void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler>& handler,
         const std::shared_ptr<AppExecFwk::EventHandler>& exportHandler = nullptr);
@@ -237,7 +234,7 @@ public:
     WSError DrawingCompleted() override;
     void ResetSessionConnectState() REQUIRES(SCENE_GUARD);
     void ResetIsActive();
-    WSError PendingSessionToForeground();
+    WSError PendingSessionToForeground(SessionInfo& info);
     WSError PendingSessionToBackground(const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(bool shouldBackToCaller,
         LifeCycleChangeReason reason = LifeCycleChangeReason::DEFAULT);
@@ -507,6 +504,7 @@ public:
     WSRect GetLayoutRect() const;
     bool GetSkipSelfWhenShowOnVirtualScreen() const;
     DisplayId GetDisplayId() const { return GetSessionProperty()->GetDisplayId(); }
+    bool IsSuperMultiFoldOuterScreen() const;
     void SetRestartApp(bool restartApp);
     bool GetRestartApp() const;
     void SetRestartInSameProcess(bool restartInSameProcess);
@@ -708,6 +706,7 @@ public:
     int32_t GetAppIndex() const;
     void SetCallingPid(int32_t id) REQUIRES(SCENE_GUARD);
     void SetCallingUid(int32_t id);
+    void SetPendingAppHookDisplayInfo(const HookInfo& hookInfo, bool enable);
     int32_t GetCallingPid() const;
     int32_t GetCallingUid() const;
     void SetAbilityToken(sptr<IRemoteObject> token);
@@ -812,6 +811,8 @@ public:
     std::string GetWindowDetectTaskName() const;
     void RemoveWindowDetectTask();
     WSError SwitchFreeMultiWindow(const SystemSessionConfig& config);
+    void UpdateSupportMultiWindowScreenSet(const std::set<ScreenId>& supportMultiWindowScreenSet);
+    WSError UpdateScreenSupportMultiWindowToClient();
     bool haveSetSupportedWindowModes_ = false;
 
     virtual bool CheckGetAvoidAreaAvailable(AvoidAreaType type) { return true; }
@@ -830,8 +831,6 @@ public:
     std::string GetAppInstanceKey() const;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetSessionInfoAbilityInfo();
     virtual void NotifyWindowSceneDetach() {};
-    bool GetNeedBackgroundAfterConnect() const;
-    void SetNeedBackgroundAfterConnect(bool isNeed);
     void RecordLifecycleSessionStateError(SessionState expectState, SessionState currentState) const;
 
     /*
@@ -1360,6 +1359,10 @@ private:
     WSRect preRect_;
     int32_t callingPid_ = -1;
     int32_t callingUid_ = -1;
+    std::mutex pendingAppHookDisplayInfoMutex_;
+    HookInfo pendingAppHookDisplayInfo_;
+    bool pendingAppHookDisplayInfoEnable_ = false;
+    bool hasPendingAppHookDisplayInfo_ = false;
     int32_t appIndex_ = { 0 };
     std::string callingBundleName_ { "unknown" };
     std::string sceneLastUsedPosition_;
@@ -1390,7 +1393,6 @@ private:
 
     DetectTaskInfo detectTaskInfo_;
     mutable std::shared_mutex detectTaskInfoMutex_;
-    bool needBackgroundAfterConnect_ { false };
 
     /*
      * Starting Window
@@ -1433,6 +1435,7 @@ private:
      * @param ctx Prelayout context containing display info.
      */
     void HandleHookDisplay(const PrelayoutContext& ctx);
+    void NotifyPendingAppHookDisplayInfo();
 
     std::optional<bool> clientDragEnable_;
     uint32_t dragActivatedBitmap_ = DRAG_ACTIVATE_ALL_MASK;

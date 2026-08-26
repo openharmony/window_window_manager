@@ -1329,18 +1329,19 @@ void JsSceneSession::OnAdjustKeyboardLayout(const KeyboardLayoutParams& params)
     auto task = [weakThis = wptr(this), persistentId = persistentId_, params, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "OnAdjustKeyboardLayout jsSceneSession id:%{public}d has been destroyed",
+            TLOGE(WmsLogTag::WMS_LIFE, "OnAdjustKeyboardLayout jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(ADJUST_KEYBOARD_LAYOUT_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "OnAdjustKeyboardLayout jsCallBack is nullptr");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "OnAdjustKeyboardLayout jsCallBack is nullptr");
             return;
         }
         napi_value keyboardLayoutParamsObj = CreateJsKeyboardLayoutParams(env, params);
         if (keyboardLayoutParamsObj == nullptr) {
-            TLOGNE(WmsLogTag::WMS_KEYBOARD, "OnAdjustKeyboardLayout this keyboard layout params obj is nullptr");
+            TLOGE(WmsLogTag::WMS_KEYBOARD, "OnAdjustKeyboardLayout this keyboard layout params obj is nullptr");
+            return;
         }
         napi_value argv[] = {keyboardLayoutParamsObj};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
@@ -1522,13 +1523,13 @@ void JsSceneSession::ProcessCreateSubSessionRegister()
         return;
     }
     SceneSessionManager::GetInstance().RegisterCreateSubSessionListener(session->GetPersistentId(),
-        [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession) {
+        [weakThis = wptr(this)](const sptr<SceneSession>& sceneSession, bool isBoundedSystemTray) {
             auto jsSceneSession = weakThis.promote();
             if (!jsSceneSession) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "ProcessCreateSubSessionRegister jsSceneSession is null");
                 return;
             }
-            jsSceneSession->OnCreateSubSession(sceneSession);
+            jsSceneSession->OnCreateSubSession(sceneSession, isBoundedSystemTray);
         });
     TLOGD(WmsLogTag::DEFAULT, "success, id: %{public}d", session->GetPersistentId());
 }
@@ -4361,7 +4362,7 @@ napi_value JsSceneSession::OnNotifyKeyboardAnimationWillBegin(napi_env env, napi
     return NapiGetUndefined(env);
 }
 
-void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
+void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession, bool isBoundedSystemTray)
 {
     if (sceneSession == nullptr) {
         WLOGFE("sceneSession is nullptr");
@@ -4371,31 +4372,36 @@ void JsSceneSession::OnCreateSubSession(const sptr<SceneSession>& sceneSession)
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d, parentId: %{public}d",
         sceneSession->GetPersistentId(), sceneSession->GetParentPersistentId());
     wptr<SceneSession> weakSession(sceneSession);
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, weakSession, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, weakSession, isBoundedSystemTray, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGE(WmsLogTag::WMS_LIFE, "OnCreateSubSession jsSceneSession id:%{public}d has been destroyed",
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnCreateSubSession jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(CREATE_SUB_SESSION_CB);
         if (jsCallBack == nullptr) {
-            WLOGFE("jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
             return;
         }
         auto specificSession = weakSession.promote();
         if (specificSession == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "root session or target session or env is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "root session or target session or env is nullptr");
             return;
         }
         napi_value jsSceneSessionObj = Create(env, specificSession);
         if (jsSceneSessionObj == nullptr) {
-            TLOGE(WmsLogTag::WMS_LIFE, "jsSceneSessionObj or jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSessionObj or jsCallBack is nullptr");
             return;
         }
-        TLOGI(WmsLogTag::WMS_LIFE, "CreateJsSceneSessionObject success, id: %{public}d, parentId: %{public}d",
+        napi_value jsIsBoundedSystemTray = CreateJsValue(env, isBoundedSystemTray);
+        if (jsIsBoundedSystemTray == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsIsBoundedSystemTray is nullptr");
+            return;
+        }
+        TLOGNI(WmsLogTag::WMS_LIFE, "CreateJsSceneSessionObject success, id: %{public}d, parentId: %{public}d",	 
             specificSession->GetPersistentId(), specificSession->GetParentPersistentId());
-        napi_value argv[] = {jsSceneSessionObj};
+        napi_value argv[] = {jsSceneSessionObj, jsIsBoundedSystemTray};
         napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
     };
     std::string info = "OnCreateSpecificSession PID:" + std::to_string(sceneSession->GetPersistentId());
@@ -6076,7 +6082,12 @@ void JsSceneSession::OnReuqestedOrientationChange(uint32_t orientation, bool nee
         napi_value animationValue = CreateJsValue(env, needAnimation);
         napi_value promiseIdValue = CreateJsValue(env, promiseId);
         napi_value argv[] = { rotationValue, animationValue, promiseIdValue };
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv,
+            nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "napi_call_function fail, ret: %{public}d", ret);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_ROTATION, "%{public}s winId:%{public}d orientation:%{public}u promiseId:%{public}u end",
             where, persistentId, rotation, promiseId);
     };
@@ -6134,7 +6145,12 @@ void JsSceneSession::OnGetTargetOrientationConfigInfo(uint32_t targetOrientation
         }
         napi_value orientationValue = CreateJsValue(env, targetOrientation);
         napi_value argv[] = {orientationValue};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv,
+            nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "napi_call_function fail, ret: %{public}d", ret);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_ROTATION, "Get target orientation(%{public}u) success", targetOrientation);
     };
     taskScheduler_->PostMainThreadTask(task, "OnGetTargetOrientationConfigInfo" + std::to_string(targetOrientation));
@@ -8753,7 +8769,11 @@ void JsSceneSession::OnKeyboardStateChange(SessionState state, const KeyboardEff
             jsKeyboardTargetDisplayId,
         };
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
+        auto status = napi_open_handle_scope(env, &scope);
+        if ((status != napi_ok) || (scope == nullptr)) {
+            TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: napi_open_handle_scope fail", where);
+            return;
+        }
         auto value = jsCallBack->GetNapiValue();
         if (value == nullptr) {
             TLOGNE(WmsLogTag::WMS_KEYBOARD, "%{public}s: jsCallBack->GetNapiValue() is null", where);
@@ -9939,7 +9959,11 @@ void JsSceneSession::OnPreCalcWindowProperty()
             return;
         }
         napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        auto ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_ROTATION, "napi_call_function fail, ret: %{public}d", ret);
+            return;
+        }
         TLOGNI(WmsLogTag::WMS_ROTATION, "OnPreCalcWindowProperty success");
     };
     taskScheduler_->PostMainThreadTask(task, "OnPreCalcWindowProperty");

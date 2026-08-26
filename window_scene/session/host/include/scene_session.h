@@ -185,6 +185,8 @@ using NotifyRecoverWindowEffectFunc = std::function<void(bool recoverCorner, boo
 using NotifySessionBlackListFunc = std::function<WMError(int32_t persistentId,
     const std::unordered_set<std::string>& privacyWindowTags)>;
 using NotifyPreCalcWindowPropertyFunc = std::function<void()>;
+using CheckAndGetRogScaleFunc = std::function<bool(const std::string bundleName,
+    float& scale)>;
 
 struct UIExtensionTokenInfo {
     bool canShowOnLockScreen { false };
@@ -237,6 +239,7 @@ public:
         CheckAndGetAbilityInfoByWantCallback onCheckAndGetAbilityInfoByWantCallback_;
         NotifyFollowScreenChangeFunc onUpdateFollowScreenChange_;
         NotifyRotationLockChangeFunc onRotationLockChange_;
+        CheckAndGetRogScaleFunc onCheckAndGetRogScaleCallback_;
     };
 
     // func for change window scene pattern property
@@ -246,10 +249,6 @@ public:
 
     SceneSession(const SessionInfo& info, const sptr<SpecificSessionCallback>& specificCallback);
     virtual ~SceneSession();
-    SessionType GetSessionType() const override
-    {
-        return SessionType::SceneSession;
-    }
     WSError Connect(const sptr<ISessionStage>& sessionStage, const sptr<IWindowEventChannel>& eventChannel,
         uint64_t nodeId, SystemSessionConfig& systemConfig,
         sptr<IRemoteObject>& renderSession, std::shared_ptr<RSSurfaceNode>& surfaceNode,
@@ -681,6 +680,7 @@ public:
      * Window Watermark
      */
     void SetWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
+    void SetLeashNodeWatermarkEnabled(const std::string& watermarkName, bool isEnabled);
 
     bool IsDecorEnable() const;
     bool IsAppSession() const;
@@ -859,6 +859,8 @@ public:
         const std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>& callback);
     std::function<bool(int32_t callingPid, uint32_t callingToken, const std::string &instanceKey)>
         isSessionBoundedSystemTrayCallback_;
+    virtual bool GetSessionBoundedSystemTray(
+        int32_t callingPid, uint32_t callingToken, const std::string &instanceKey) const { return false; }
 
     /*
      * Window Decor
@@ -997,12 +999,20 @@ public:
         const WSRect& globalRect, bool isGlobal, bool needFlush, bool needSetBoundsNextVsync);
 
     void RegisterLayoutFullScreenChangeCallback(NotifyLayoutFullScreenChangeFunc&& callback);
-    bool SetFrameGravity(Gravity gravity);
+
+    /**
+     * @brief Sets the frame gravity of the session surface.
+     *
+     * @param gravity The frame gravity to set.
+     * @param needFlush Whether to flush the implicit transaction immediately.
+     * @return true if the gravity is set; false if the surface is unavailable.
+     */
+    bool SetFrameGravity(Gravity gravity, bool needFlush = false);
+
     void RegisterSessionEventCallback(NotifySessionEventFunc&& callback);
     WSError GetCrossAxisState(CrossAxisState& state) override;
     virtual void UpdateCrossAxis();
     bool GetIsFollowParentLayout() const { return isFollowParentLayout_; }
-    sptr<MoveDragController> GetMoveDragController() const { return moveDragController_; }
     void NotifyUpdateGravity();
     void SetFollowParentRectFunc(NotifyFollowParentRectFunc&& func);
     WSError SetFollowParentWindowLayoutEnabled(bool isFollow) override;
@@ -1367,6 +1377,8 @@ protected:
 
 private:
     bool ShouldNotifyTouchOutside() const;
+    bool ShouldNotifyOutsideDownXY() const;
+
     void NotifyAccessibilityVisibilityChange();
     void CalculateCombinedExtWindowFlags();
     WSError ValidateWindowAnchorInfo(const WindowAnchorInfo& windowAnchorInfo,
@@ -1397,6 +1409,9 @@ private:
         const std::map<WindowType, SystemBarProperty>& properties, AvoidAreaType type);
     template<typename T>
     Rect CalculateAvoidAreaByScale(WSRectT<T>& avoidAreaRect) const;
+    WSError GetScale(float& scaleX, float& scaleY) const;
+    bool CheckAndGetRogScale(float& scale) const;
+    WSError GetScaleInRog(float& scaleX, float& scaleY) const;
 
     /*
      * Window Lifecycle
@@ -1579,6 +1594,7 @@ private:
     /*
      * PiP Window
      */
+    bool needUpdatePiPControl_ = false;
     NotifySessionPiPControlStatusChangeFunc sessionPiPControlStatusChangeFunc_;
     NotifyAutoStartPiPStatusChangeFunc autoStartPiPStatusChangeFunc_;
     NotifyUpdatePiPTemplateInfoFunc updatePiPTemplateInfoCallbackFunc_;
@@ -1719,6 +1735,7 @@ private:
     bool KeyFrameRectAlmostSame(const WSRect& rect1, const WSRect& rect2);
     KeyFramePolicy GetKeyFramePolicy() const;
     void UpdateKeyFramePolicy(bool running, bool stopping);
+    std::shared_ptr<RSWindowKeyFrameNode> UpdateKeyFrameDragState(const WSRect& rect);
     mutable std::mutex keyFrameMutex_;
     KeyFramePolicy keyFramePolicy_;
     std::shared_ptr<RSWindowKeyFrameNode> keyFrameCloneNode_ = nullptr;
@@ -1837,7 +1854,6 @@ private:
     * Window Lifecycle
     */
     NotifyHookSceneSessionActivationFunc hookSceneSessionActivationFunc_;
-    void SyncUISessionState();
 
     /**
      * Window Transition Animation For PC
