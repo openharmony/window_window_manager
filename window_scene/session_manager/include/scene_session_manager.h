@@ -191,6 +191,7 @@ using MinimizeAllFunc = std::function<void(DisplayId displayId, int32_t excludeW
 using PageEnableFunc = std::function<void(const std::string& bundleName, int32_t windowId,
     const std::string& action, const std::string& message)>;
 using GetFloatViewLimitFunc = std::function<void()>;
+using UpdateRogWindowConfigCallbackFunc = std::function<void(const RogWindowConfig&)>;
 class AppAnrListener : public IRemoteStub<AppExecFwk::IAppDebugListener> {
 public:
     void OnAppDebugStarted(const std::vector<AppExecFwk::AppDebugInfo>& debugInfos) override;
@@ -512,7 +513,8 @@ public:
 
     WMError CheckWindowId(int32_t windowId, int32_t& pid) override;
     void GetSceneSessionPrivacyModeBundles(DisplayId displayId,
-        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles);
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& privacyBundles,
+        std::unordered_map<DisplayId, std::unordered_set<std::string>>& notifyPrivacyBundleList);
     BrokerStates CheckIfReuseSession(SessionInfo& sessionInfo);
     BrokerStates NotifyStartWindowsAbility(SessionInfo& sessionInfo);
     sptr<SceneSession> FindSessionByAffinity(const std::string& affinity);
@@ -848,6 +850,8 @@ public:
     WMError MinimizeMainSession(const std::string& bundleName, int32_t appIndex, int32_t userId);
     WMError GetAppWindowShowingInfosByBundleName(const ApplicationInfo& appInfo,
         std::vector<AppWindowShowingInfo>& windowInfos) override;
+    WMError UpdateRogWindowConfig(const RogWindowConfig& windowConfig);
+    void RegisterUpdateRogWindowConfigCallback(UpdateRogWindowConfigCallbackFunc&& func);
     sptr<SceneSession> RequestSceneSession(const SessionInfo& sessionInfo,
         sptr<WindowSessionProperty> property = nullptr);
     void UpdateSceneSessionWant(const SessionInfo& sessionInfo);
@@ -1021,6 +1025,8 @@ private:
     std::unordered_map<std::string, ConvertSystemConfigFunc> convertConfigMap_;
     static sptr<SceneSessionManager> CreateInstance();
     void Init();
+    std::shared_ptr<PowerMgr::RunningLock> CreateKeepScreenRunningLock(
+        const sptr<SceneSession>& sceneSession, const std::string& screenLockPrefix);
     void RegisterAppListener();
     bool IsPrepareTerminateEnabled() const;
     void InitPrepareTerminateConfig();
@@ -1383,6 +1389,7 @@ private:
     void WindowDestroyNotifyVisibility(const sptr<SceneSession>& sceneSession);
     void RegisterSessionSnapshotFunc(const sptr<SceneSession>& sceneSession);
     void RegisterSessionSaveSnapshotCompleteFunc(const sptr<SceneSession>& sceneSession);
+    bool CheckAndGetRogScale(const std::string bundleName, float& scale);
 
     /*
      * Window Property
@@ -2174,6 +2181,11 @@ private:
     GetFloatViewLimitFunc getFloatViewLimitFunc_;
     std::map<uint32_t, FloatViewLimits> floatViewLimits_{};
     std::condition_variable getLimitsFinishCv_;
+
+    std::mutex rogWindowConfigMutex_;
+    RogWindowConfig rogWindowConfig_;
+    std::mutex updateRogWindowConfigCallbackMutex_;
+    UpdateRogWindowConfigCallbackFunc updateRogWindowConfigCallback_;
 };
 } // namespace OHOS::Rosen
 
