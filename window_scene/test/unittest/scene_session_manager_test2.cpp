@@ -28,6 +28,7 @@
 #include "session/host/include/session_utils.h"
 #include "session/host/include/main_session.h"
 #include "session/host/include/move_drag_controller.h"
+#include "window_display_isolation_policy.h"
 #include "window_manager_agent.h"
 #include "window_manager_hilog.h"
 #include "session_manager.h"
@@ -574,6 +575,117 @@ HWTEST_F(SceneSessionManagerTest2, ConfigMovingEventValid, TestSize.Level1)
 
     uint32_t interval = MoveDragController::LoadMovingEventThrottleSystemConfig();
     EXPECT_EQ(interval, 16u);
+}
+
+/**
+ * @tc.name: ConfigDisplayIsolationInvalid
+ * @tc.desc: Verify invalid display isolation items are skipped without blocking valid items
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigDisplayIsolationInvalid, TestSize.Level1)
+{
+    const auto originalConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    ConfigItem invalidType;
+    invalidType.SetValue(std::vector<int>{5});
+    EXPECT_FALSE(ssm_->ConfigDisplayIsolation(invalidType));
+    auto policyConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    EXPECT_EQ(policyConfig.moveIsolatedDisplayIds, originalConfig.moveIsolatedDisplayIds);
+    EXPECT_EQ(policyConfig.dragIsolatedDisplayIds, originalConfig.dragIsolatedDisplayIds);
+
+    ConfigItem negativeDisplayIds;
+    negativeDisplayIds.SetValue(std::vector<int> { -1, 5 });
+    ConfigItem validDisplayIds;
+    validDisplayIds.SetValue(std::vector<int> { 7 });
+    ConfigItem displayIsolation;
+    displayIsolation.SetValue({
+        { "moveIsolatedDisplayIds", negativeDisplayIds },
+        { "dragIsolatedDisplayIds", validDisplayIds },
+    });
+    EXPECT_TRUE(ssm_->ConfigDisplayIsolation(displayIsolation));
+    policyConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    EXPECT_EQ(policyConfig.moveIsolatedDisplayIds, (std::set<DisplayId> { 5 }));
+    EXPECT_EQ(policyConfig.dragIsolatedDisplayIds, (std::set<DisplayId> { 7 }));
+
+    ConfigItem invalidDisplayIds;
+    invalidDisplayIds.SetValue(std::string("5"));
+    displayIsolation.SetValue({
+        { "moveIsolatedDisplayIds", negativeDisplayIds },
+        { "dragIsolatedDisplayIds", invalidDisplayIds },
+    });
+    EXPECT_TRUE(ssm_->ConfigDisplayIsolation(displayIsolation));
+    policyConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    EXPECT_EQ(policyConfig.moveIsolatedDisplayIds, (std::set<DisplayId> { 5 }));
+    EXPECT_TRUE(policyConfig.dragIsolatedDisplayIds.empty());
+
+    WindowDisplayIsolationPolicy::SaveDisplayIsolationSystemConfig(originalConfig);
+}
+
+/**
+ * @tc.name: ConfigDisplayIsolationIndependentEmptySets
+ * @tc.desc: Verify move and drag isolation sets can be configured independently or left empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigDisplayIsolationIndependentEmptySets, TestSize.Level1)
+{
+    const auto originalConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    ConfigItem emptyDisplayIds;
+    emptyDisplayIds.SetValue(std::vector<int> {});
+    ConfigItem isolatedDisplayIds;
+    isolatedDisplayIds.SetValue(std::vector<int> { 5 });
+    ConfigItem displayIsolation;
+
+    displayIsolation.SetValue({
+        { "moveIsolatedDisplayIds", isolatedDisplayIds },
+        { "dragIsolatedDisplayIds", emptyDisplayIds },
+    });
+    EXPECT_TRUE(ssm_->ConfigDisplayIsolation(displayIsolation));
+    auto policyConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    EXPECT_EQ(policyConfig.moveIsolatedDisplayIds, (std::set<DisplayId> { 5 }));
+    EXPECT_TRUE(policyConfig.dragIsolatedDisplayIds.empty());
+
+    displayIsolation.SetValue({
+        { "dragIsolatedDisplayIds", isolatedDisplayIds },
+    });
+    EXPECT_TRUE(ssm_->ConfigDisplayIsolation(displayIsolation));
+    policyConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    EXPECT_TRUE(policyConfig.moveIsolatedDisplayIds.empty());
+    EXPECT_EQ(policyConfig.dragIsolatedDisplayIds, (std::set<DisplayId> { 5 }));
+
+    displayIsolation.SetValue(std::map<std::string, ConfigItem> {});
+    EXPECT_TRUE(ssm_->ConfigDisplayIsolation(displayIsolation));
+    policyConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    EXPECT_TRUE(policyConfig.moveIsolatedDisplayIds.empty());
+    EXPECT_TRUE(policyConfig.dragIsolatedDisplayIds.empty());
+
+    WindowDisplayIsolationPolicy::SaveDisplayIsolationSystemConfig(originalConfig);
+}
+
+/**
+ * @tc.name: ConfigDisplayIsolationValid
+ * @tc.desc: Verify display isolation XML config is saved to system parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, ConfigDisplayIsolationValid, TestSize.Level1)
+{
+    const auto originalConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    const std::string xmlStr =
+        "<?xml version='1.0' encoding=\"utf-8\"?>"
+        "<Configs>"
+        "<windowLayout>"
+        "<displayIsolation>"
+        "<moveIsolatedDisplayIds>5 7</moveIsolatedDisplayIds>"
+        "<dragIsolatedDisplayIds>5 8</dragIsolatedDisplayIds>"
+        "</displayIsolation>"
+        "</windowLayout>"
+        "</Configs>";
+    const ConfigItem config = ReadConfig(xmlStr);
+
+    EXPECT_TRUE(ssm_->ConfigWindowLayout(config["windowLayout"]));
+    const auto policyConfig = WindowDisplayIsolationPolicy::LoadDisplayIsolationSystemConfig();
+    EXPECT_EQ(policyConfig.moveIsolatedDisplayIds, (std::set<DisplayId>{5, 7}));
+    EXPECT_EQ(policyConfig.dragIsolatedDisplayIds, (std::set<DisplayId>{5, 8}));
+
+    WindowDisplayIsolationPolicy::SaveDisplayIsolationSystemConfig(originalConfig);
 }
 
 /**
@@ -2668,6 +2780,83 @@ HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground, TestSize.Level1)
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ssm_->sceneSessionMap_.insert({ 100, sceneSession });
     ssm_->PendingSessionToForeground(nullptr);
+}
+
+/**
+ * @tc.name: PendingSessionToForeground01
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground01, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession1});
+    ssm_->sceneSessionMap_.insert({ssm_->GetFocusedSessionId(0), sceneSession2});
+    const sptr<IRemoteObject>& token = sptr<ISession>(sceneSession1)->AsObject();
+    ssm_->PendingSessionToForeground(token);
+    std::string log = "PendingSessionToForeground: id: " + std::to_string(sceneSession2->GetPersistentId());
+    EXPECT_TRUE(g_logMsg.find(log) != std::string::npos);
+
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: PendingSessionToForeground02
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground02, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ssm_->sceneSessionMap_.insert({100, sceneSession});
+    const sptr<IRemoteObject>& token = sptr<ISession>(sceneSession)->AsObject();
+    ssm_->PendingSessionToForeground(token);
+    std::string log = "PendingSessionToForeground: id: " + std::to_string(sceneSession->GetPersistentId());
+    EXPECT_TRUE(g_logMsg.find(log) != std::string::npos);
+
+    LOG_SetCallback(nullptr);
+}
+
+/**
+ * @tc.name: PendingSessionToForeground03
+ * @tc.desc: Test if pip window can be created;
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerTest2, PendingSessionToForeground03, TestSize.Level1)
+{
+    g_logMsg.clear();
+    LOG_SetCallback(MyLogCallback);
+
+    ASSERT_NE(nullptr, ssm_);
+    SessionInfo info;
+    info.abilityName_ = "BackgroundTask02";
+    info.bundleName_ = "BackgroundTask02";
+    sptr<SceneSession> sceneSession1 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sptr<SceneSession> sceneSession2 = sptr<SceneSession>::MakeSptr(info, nullptr);
+    sceneSession2->property_->SetWindowType(WindowType::APP_MAIN_WINDOW_END);
+    ssm_->sceneSessionMap_.insert({100, sceneSession1});
+    ssm_->sceneSessionMap_.insert({ssm_->GetFocusedSessionId(0), sceneSession2});
+    const sptr<IRemoteObject>& token = sptr<ISession>(sceneSession1)->AsObject();
+    ssm_->PendingSessionToForeground(token);
+    std::string log = "PendingSessionToForeground: id: " + std::to_string(sceneSession1->GetPersistentId());
+    EXPECT_TRUE(g_logMsg.find(log) != std::string::npos);
+
+    LOG_SetCallback(nullptr);
 }
 
 /**

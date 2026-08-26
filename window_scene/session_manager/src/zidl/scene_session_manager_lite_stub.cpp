@@ -227,6 +227,8 @@ int SceneSessionManagerLiteStub::ProcessRemoteRequest(uint32_t code, MessageParc
         case static_cast<uint32_t>(
             SceneSessionManagerLiteMessage::TRANS_ID_GET_APP_WINDOW_SHOWING_INFOS_BY_BUNDLE_NAME):
             return HandleGetAppWindowShowingInfosByBundleName(data, reply);
+        case static_cast<uint32_t>(SceneSessionManagerLiteMessage::TRANS_ID_UPDATE_ROG_WINDOW_CONFIG):
+            return HandleUpdateRogWindowConfig(data, reply);
         default:
             WLOGFE("Failed to find function handler!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -885,10 +887,13 @@ int SceneSessionManagerLiteStub::HandleRegisterWindowManagerAgent(MessageParcel&
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    int32_t instanceUserId = data.ReadInt32();
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    int32_t instanceUserId = INVALID_USER_ID;
+    if (!data.ReadInt32(instanceUserId)) {
+        instanceUserId = INVALID_USER_ID;
+    }
     WMError errCode = RegisterWindowManagerAgent(type, windowManagerAgentProxy, instanceUserId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -903,10 +908,13 @@ int SceneSessionManagerLiteStub::HandleUnregisterWindowManagerAgent(MessageParce
         return ERR_INVALID_DATA;
     }
     WindowManagerAgentType type = static_cast<WindowManagerAgentType>(typeId);
-    int32_t instanceUserId = data.ReadInt32();
     sptr<IRemoteObject> windowManagerAgentObject = data.ReadRemoteObject();
     sptr<IWindowManagerAgent> windowManagerAgentProxy =
             iface_cast<IWindowManagerAgent>(windowManagerAgentObject);
+    int32_t instanceUserId = INVALID_USER_ID;
+    if (!data.ReadInt32(instanceUserId)) {
+        instanceUserId = INVALID_USER_ID;
+    }
     WMError errCode = UnregisterWindowManagerAgent(type, windowManagerAgentProxy, instanceUserId);
     reply.WriteInt32(static_cast<int32_t>(errCode));
     return ERR_NONE;
@@ -2076,6 +2084,26 @@ int SceneSessionManagerLiteStub::HandleGetAppWindowShowingInfosByBundleName(Mess
                 return ERR_INVALID_DATA;
             }
         }
+    }
+    return ERR_NONE;
+}
+
+int SceneSessionManagerLiteStub::HandleUpdateRogWindowConfig(MessageParcel& data, MessageParcel& reply)
+{
+    TLOGD(WmsLogTag::WMS_COMPAT, "in");
+    RogWindowConfig windowConfig;
+    if (!data.ReadUint32(windowConfig.width) ||
+        !data.ReadUint32(windowConfig.height) ||
+        !data.ReadUint32(windowConfig.dpi) ||
+        !data.ReadFloat(windowConfig.scale) ||
+        !data.ReadStringVector(&windowConfig.xhdpiAppList)) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "read windowConfig failed");
+        return ERR_INVALID_DATA;
+    }
+    WMError ret = UpdateRogWindowConfig(windowConfig);
+    if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
+        TLOGE(WmsLogTag::WMS_COMPAT, "write ret failed");
+        return ERR_INVALID_DATA;
     }
     return ERR_NONE;
 }

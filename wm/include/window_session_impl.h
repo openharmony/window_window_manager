@@ -92,6 +92,8 @@ using IKBWillHideListener = IKeyboardWillHideListener;
 
 class WindowSessionImpl : public Window, public virtual SessionStageStub {
 public:
+    static constexpr ScreenId SCREEN_ID_MAIN = 5;
+
     explicit WindowSessionImpl(const sptr<WindowOption>& option,
         const std::shared_ptr<RSUIContext>& rsUIContext = nullptr);
     ~WindowSessionImpl();
@@ -104,6 +106,9 @@ public:
         const sptr<Rosen::ISession>& iSession,
         const std::string& identityToken = "", bool isModuleAbilityHookEnd = false,
         bool isBlockSubwindow = false) { return WMError::WM_OK; }
+    virtual WMError Create(const std::shared_ptr<AbilityRuntime::Context>& context,
+        const sptr<Rosen::ISession>& iSession, std::string& errMsg, const std::string& identityToken = "",
+        bool isModuleAbilityHookEnd = false, bool isBlockSubwindow = false) { return WMError::WM_OK; }
 
     /*
      * inherits from window
@@ -228,6 +233,7 @@ public:
     bool GetTouchable() const override;
     uint32_t GetWindowId() const override;
     uint64_t GetDisplayId() const override;
+    bool IsSuperMultiFoldOuterScreen() const;
     Rect GetRect() const override;
     Rect GetRect(bool useHookedSize) const override;
     bool GetFocusable() const override;
@@ -485,7 +491,7 @@ public:
     WMError SetWindowContainerColor(const std::string& activeColor, const std::string& inactiveColor) override;
     WMError SetWindowContainerModalColor(const std::string& activeColor, const std::string& inactiveColor) override;
     nlohmann::json SetContainerButtonStyle(const DecorButtonStyle& decorButtonStyle);
-    void UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
+    bool UpdateDecorEnable(bool needNotify = false, WindowMode mode = WindowMode::WINDOW_MODE_UNDEFINED);
     void SetDockAutoHide(bool isDockAutoHide)
     {
         windowSystemConfig_.isDockAutoHide_ = isDockAutoHide;
@@ -505,8 +511,10 @@ public:
     WMError RegisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
     WMError UnregisterMainWindowCloseListeners(const sptr<IMainWindowCloseListener>& listener) override;
     WMError NotifyMainWindowClose(bool& terminateCloseProcess);
-    WMError RegisterWindowWillCloseListeners(const sptr<IWindowWillCloseListener>& listener) override;
-    WMError UnRegisterWindowWillCloseListeners(const sptr<IWindowWillCloseListener>& listener) override;
+    WMError RegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener, std::string& errMsg) override;
+    WMError UnRegisterWindowWillCloseListeners(
+        const sptr<IWindowWillCloseListener>& listener, std::string& errMsg) override;
     WMError NotifyWindowWillClose(sptr<Window> window);
 
     WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
@@ -530,7 +538,7 @@ public:
         const sptr<IExtensionSecureLimitChangeListener>& listener) override;
     virtual WMError GetCallingWindowWindowStatus(uint32_t callingWindowId, WindowStatus& windowStatus) const override;
     virtual WMError GetCallingWindowRect(uint32_t callingWindowId, Rect& rect) const override;
-    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch) override;
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom = DEFAULT_FROMWHOM) override;
     virtual void SetTouchEvent(int32_t touchType) override;
     WMError SetContinueState(int32_t continueState) override;
     virtual WMError CheckAndModifyWindowRect(uint32_t& width, uint32_t& height)
@@ -592,9 +600,10 @@ public:
     {
         windowSystemConfig_.freeMultiWindowEnable_ = enable;
     }
-    virtual void UpdateSubWindowDragEnabledByDecorVisible() {}
+    virtual void UpdateSubWindowDragEnabledByDecorVisible(bool decorVisible) {}
     void SwitchSubWindow(bool freeMultiWindowEnable, int32_t parentId);
     void SwitchSystemWindow(bool freeMultiWindowEnable, int32_t parentId);
+    void UpdateSubWindowPropertyWhenTriggerMode(const sptr<WindowSessionProperty>& property, int32_t parentId);
 
     /*
      * Window Immersive
@@ -853,7 +862,7 @@ protected:
 
     void ClearVsyncStation();
     void ReleaseSurfaceNode();
-    WMError WindowSessionCreateCheck();
+    WMError WindowSessionCreateCheck(std::string& errMsg);
     void UpdateDecorEnableToAce(bool isDecorEnable);
     bool NeedShowDecorInOtherDisplay(bool decorVisible);
     bool updateDecorWhenDockAutoHide(bool decorVisible);
@@ -978,6 +987,8 @@ protected:
     std::atomic_bool shouldReNotifyHighlight_ = false;
     static std::atomic<int64_t> updateFocusTimeStamp_;
     static std::atomic<int64_t> updateHighlightTimeStamp_;
+    static std::mutex focusTimeStampMutex_;
+    static std::mutex highlightTimeStampMutex_;
     std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
     bool shouldReNotifyFocus_ = false;
     std::shared_ptr<VsyncStation> vsyncStation_ = nullptr;
@@ -989,6 +1000,7 @@ protected:
     // Check whether the UIExtensionAbility process is started
     static bool isUIExtensionAbilityProcess_;
     WSError SwitchFreeMultiWindow(bool enable, const std::set<ScreenId>& supportMultiWindowScreenSet) override;
+    WSError UpdateScreenSupportMultiWindow(const std::set<ScreenId>& supportMultiWindowScreenSet) override;
     WSError ConfigDockAutoHide(bool isDockAutoHide) override;
     std::string identityToken_ = { "" };
     void MakeSubOrDialogWindowDragableAndMoveble();
@@ -1054,8 +1066,12 @@ protected:
      * Window Layout
      */
     std::atomic_bool isDragTaskPostDone_ = true;
+    // Pending request to enable background force-flush vsync; set when uiContent is not yet
+    // ready and retried once in InitUIContent after uiContent is created.
+    std::atomic_bool needBackgroundForceFlushVsync_ = false;
     void FlushLayoutSize(int32_t width, int32_t height) override;
     void FlushVsync() override;
+    void SetBackgroundForceFlushVsync() override;
     sptr<FutureCallback> layoutCallback_ = nullptr;
     sptr<FutureCallback> getTargetInfoCallback_ = nullptr;
     sptr<FutureCallback> getRotationResultFuture_ = nullptr;
@@ -1256,7 +1272,9 @@ private:
     template<typename T>
  	EnableIfSame<T, IParentLifecycleEventListener, std::vector<sptr<IParentLifecycleEventListener>>> GetListeners();
     template<typename T>
- 	EnableIfSame<T, IWindowHoverStateChangeListener, std::vector<sptr<IWindowHoverStateChangeListener>>> GetListeners();
+    EnableIfSame<T, IWindowHoverStateChangeListener, std::vector<sptr<IWindowHoverStateChangeListener>>> GetListeners();
+    void ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNotifyInfo, bool isFocused);
+    void ProcessNotifyHighlightChange(const sptr<HighlightNotifyInfo>& highlightNotifyInfo, bool isHighlight);
     void NotifyAfterFocused();
     void NotifyUIContentFocusStatus();
     void NotifyAfterUnfocused(bool needNotifyUiContent = true);

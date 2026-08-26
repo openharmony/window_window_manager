@@ -33,7 +33,6 @@
 #include "fold_screen_state_internel.h"
 #include "image_source.h"
 #include "rs_adapter.h"
-#include "session_coordinate_helper.h"
 #include "session_helper.h"
 #include "surface_capture_future.h"
 #include "window_helper.h"
@@ -46,6 +45,7 @@
 #include "perform_reporter.h"
 #include "session/host/include/scene_persistent_storage.h"
 #include "screen_manager.h"
+#include "window_coordinate_helper.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -567,6 +567,8 @@ DisplayId Session::GetScreenId() const
 
 void Session::SetScreenId(uint64_t screenId)
 {
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], hasStage=%{public}d, screenId=%{public}" PRIu64,
+        GetPersistentId(), GetWindowName().c_str(), sessionStage_ != nullptr, screenId);
     sessionInfo_.screenId_ = screenId;
     if (sessionStage_) {
         sessionStage_->UpdateDisplayId(screenId);
@@ -604,18 +606,6 @@ const SessionInfo& Session::GetSessionInfo() const
 SessionInfo& Session::EditSessionInfo()
 {
     return sessionInfo_;
-}
-
-bool Session::GetNeedBackgroundAfterConnect() const
-{
-    return needBackgroundAfterConnect_;
-}
-
-void Session::SetNeedBackgroundAfterConnect(bool isNeed)
-{
-    TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d, need background after connect:%{public}d",
-        GetPersistentId(), isNeed);
-    needBackgroundAfterConnect_ = isNeed;
 }
 
 void Session::RecordLifecycleSessionStateError(SessionState expectState, SessionState currentState) const
@@ -1166,6 +1156,14 @@ void Session::SetCallingUid(int32_t id)
     callingUid_ = id;
 }
 
+void Session::SetPendingAppHookDisplayInfo(const HookInfo& hookInfo, bool enable)
+{
+    std::lock_guard<std::mutex> lock(pendingAppHookDisplayInfoMutex_);
+    pendingAppHookDisplayInfo_ = hookInfo;
+    pendingAppHookDisplayInfoEnable_ = enable;
+    hasPendingAppHookDisplayInfo_ = true;
+}
+
 int32_t Session::GetCallingPid() const
 {
     return callingPid_;
@@ -1546,7 +1544,7 @@ WSError Session::UpdateRectWithLayoutInfo(const WSRect& rect, SizeChangeReason r
         updateRect.width_, updateRect.height_);
 
     // Window Layout Global Coordinate System
-    auto globalDisplayRect = SessionCoordinateHelper::RelativeToGlobalDisplayRect(GetScreenId(), updateRect);
+    auto globalDisplayRect = WindowCoordinateHelper::ConvertToGlobalDisplayRect(GetScreenId(), updateRect);
     UpdateGlobalDisplayRect(globalDisplayRect, reason);
 
     if (sessionStage_ != nullptr) {
@@ -1685,6 +1683,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     InitSessionPropertyWhenConnect(property);
     SetCallingPid(pid);
     callingUid_ = uid;
+    NotifyPendingAppHookDisplayInfo();
     UpdateSessionState(SessionState::STATE_CONNECT);
 
     // Window Layout
@@ -1794,6 +1793,13 @@ void Session::InitSessionPropertyWhenConnect(const sptr<WindowSessionProperty>& 
     }
     SetSessionProperty(property);
     GetSessionProperty()->SetIsNeedUpdateWindowMode(false);
+    DisplayId screenId = GetSessionProperty()->GetDisplayId();
+    if (screenId == DEFAULT_DISPLAY_ID && PcFoldScreenManager::GetInstance().IsHalfFolded(screenId)) {
+        property->SetDisplayId(GetClientDisplayId());
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "win=[%{public}d, %{public}s], screenId=%{public}" PRIu64 ", clientScreenId=%{public}" PRIu64,
+        GetWindowId(), GetWindowName().c_str(), screenId, property->GetDisplayId());
 }
 
 void Session::InitSystemSessionDragEnable(const sptr<WindowSessionProperty>& property)
@@ -1833,6 +1839,7 @@ WSError Session::Reconnect(const sptr<ISessionStage>& sessionStage, const sptr<I
     persistentId_ = property->GetPersistentId();
     SetCallingPid(pid);
     callingUid_ = uid;
+    NotifyPendingAppHookDisplayInfo();
     bufferAvailable_ = true;
     auto windowRect = property->GetWindowRect();
     layoutRect_ = { windowRect.posX_, windowRect.posY_,
@@ -1859,7 +1866,6 @@ WSError Session::Foreground(sptr<WindowSessionProperty> property, bool isFromCli
     if (state != SessionState::STATE_CONNECT && state != SessionState::STATE_BACKGROUND &&
         state != SessionState::STATE_INACTIVE) {
         TLOGE(WmsLogTag::WMS_LIFE, "Foreground state invalid! state:%{public}u", state);
-        SetNeedBackgroundAfterConnect(false);
         return WSError::WS_ERROR_INVALID_SESSION;
     }
 
@@ -1945,9 +1951,6 @@ WSError Session::Background(bool isFromClient, const std::string& identityToken,
     if (state != SessionState::STATE_INACTIVE) {
         TLOGW(WmsLogTag::WMS_LIFE, "[id: %{public}d] Background state invalid! state: %{public}u",
             GetPersistentId(), state);
-        if (state == SessionState::STATE_DISCONNECT && systemConfig_.IsPcWindow()) {
-            SetNeedBackgroundAfterConnect(true);
-        }
         return WSError::WS_ERROR_INVALID_SESSION;
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -1985,15 +1988,26 @@ WSError Session::Disconnect(bool isFromClient, const std::string& identityToken,
     if (mainHandler_ && !IsSystemSession()) {
         std::shared_ptr<RSSurfaceNode> surfaceNode;
         std::shared_ptr<RSSurfaceNode> shadowSurfaceNode;
+        std::shared_ptr<RSSurfaceNode> leashWinSurfaceNode;
+        std::shared_ptr<RSSurfaceNode> leashWinShadowSurfaceNode;
         {
             std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
             surfaceNode_.swap(surfaceNode);
             shadowSurfaceNode.swap(shadowSurfaceNode_);
         }
+        {
+            std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
+            leashWinSurfaceNode.swap(leashWinSurfaceNode_);
+            leashWinShadowSurfaceNode.swap(leashWinShadowSurfaceNode_);
+        }
         mainHandler_->PostTask([surfaceNode = std::move(surfaceNode),
-                                shadowSurfaceNode = std::move(shadowSurfaceNode)]() mutable {
+                                shadowSurfaceNode = std::move(shadowSurfaceNode),
+                                leashWinSurfaceNode = std::move(leashWinSurfaceNode),
+                                leashWinShadowSurfaceNode = std::move(leashWinShadowSurfaceNode)]() mutable {
             surfaceNode.reset();
             shadowSurfaceNode.reset();
+            leashWinSurfaceNode.reset();
+            leashWinShadowSurfaceNode.reset();
         });
     }
     UpdateSessionState(SessionState::STATE_BACKGROUND);
@@ -2637,11 +2651,10 @@ void Session::SetPendingSessionToForegroundListener(NotifyPendingSessionToForegr
     }, __func__);
 }
 
-WSError Session::PendingSessionToForeground()
+WSError Session::PendingSessionToForeground(SessionInfo& info)
 {
     TLOGI(WmsLogTag::WMS_LIFE, "id: %{public}d", GetPersistentId());
     if (pendingSessionActivationFunc_) {
-        SessionInfo info = GetSessionInfo();
         pendingSessionActivationFunc_(info);
     }
     return WSError::WS_OK;
@@ -3217,7 +3230,7 @@ std::shared_ptr<Media::PixelMap> Session::Snapshot(const SnapshotOptions& option
         .scaleY = scaleValue,
         .useDma = true,
         .useCurWindow = options.useCurWindow,
-        .windowSync = options.windowSync,
+        .windowSync = false,
         .backGroundColor = GetBackgroundColor(),
         .needErrorCode = true,
     };
@@ -5025,6 +5038,25 @@ void Session::SetSystemConfig(const SystemSessionConfig& systemConfig)
     systemConfig_ = systemConfig;
 }
 
+void Session::UpdateSupportMultiWindowScreenSet(const std::set<ScreenId>& supportMultiWindowScreenSet)
+{
+    systemConfig_.supportMultiWindowScreenSet_ = supportMultiWindowScreenSet;
+}
+
+WSError Session::UpdateScreenSupportMultiWindowToClient()
+{
+    if (!IsSessionValid()) {
+        TLOGW(WmsLogTag::WMS_LAYOUT_PC, "Session is invalid, id: %{public}d state: %{public}u",
+            GetPersistentId(), GetSessionState());
+        return WSError::WS_ERROR_INVALID_SESSION;
+    }
+    if (!sessionStage_) {
+        TLOGE(WmsLogTag::WMS_LAYOUT_PC, "sessionStage_ is null");
+        return WSError::WS_ERROR_NULLPTR;
+    }
+    return sessionStage_->UpdateScreenSupportMultiWindow(systemConfig_.supportMultiWindowScreenSet_);
+}
+
 SystemSessionConfig Session::GetSystemConfig() const
 {
     return systemConfig_;
@@ -5900,7 +5932,7 @@ void Session::SetTouchHotAreas(const std::vector<Rect>& touchHotAreas)
     for (const auto& rect : touchHotAreas) {
         rectStr = rectStr + " " + rect.ToString();
     }
-    GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
+    property->SetTouchHotAreas(touchHotAreas);
 }
 
 std::shared_ptr<Media::PixelMap> Session::GetSnapshotPixelMap(const float oriScale, const float newScale)
@@ -6311,7 +6343,7 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
                 caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         }
     }
-    if (rsUIContext_ == nullptr && GetSessionType() == SessionType::SceneSession) {
+    if (rsUIContext_ == nullptr) {
         TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
             caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         // extensionSession use
@@ -6372,7 +6404,7 @@ PrelayoutContext Session::GetPrelayoutContext()
 
     // Enable prelayout only for game prelaunch to improve launch experience.
     ctx.enable = sessionInfo_.isGamePrelaunch_;
-    if (!ctx.enable) {
+    if (!ctx.enable && !sessionInfo_.isPrelaunch_) {
         return ctx;
     }
 
@@ -6385,8 +6417,18 @@ PrelayoutContext Session::GetPrelayoutContext()
         static_cast<int32_t>(preCalc.height)
     };
 
+    if (sessionInfo_.isPrelaunch_ && !ctx.enable) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, only initialize winRect, ctx: %{public}s",
+            GetPersistentId(), ctx.ToString().c_str());
+        return ctx;
+    }
+    auto sessionProperty = GetSessionProperty();
+    if (sessionProperty == nullptr) {
+        return ctx;
+    }
+    const auto displayId = sessionProperty->GetDisplayId();
     auto screenSession = ScreenSessionManagerClient::GetInstance()
-        .GetScreenSession(GetSessionProperty()->GetDisplayId());
+        .GetScreenSession(displayId);
     const float density = screenSession ?
         screenSession->GetScreenProperty().GetDensity() : 1.0f; // 1.0: default density
 
@@ -6409,9 +6451,29 @@ void Session::HandleInitialRect(const PrelayoutContext& ctx)
     }
 
     const std::optional<WSRect> rect =
-        ctx.enable ? std::make_optional(ctx.winRect) : std::nullopt;
+        (ctx.enable || GetSessionInfo().isPrelaunch_) ? std::make_optional(ctx.winRect) : std::nullopt;
 
     NotifyClientToUpdateRect("Connect", rect, nullptr);
+}
+
+void Session::NotifyPendingAppHookDisplayInfo()
+{
+    HookInfo pendingHookInfo;
+    bool pendingEnable = false;
+    bool hasPending = false;
+    {
+        std::lock_guard<std::mutex> lock(pendingAppHookDisplayInfoMutex_);
+        hasPending = hasPendingAppHookDisplayInfo_;
+        if (hasPending) {
+            hasPendingAppHookDisplayInfo_ = false;
+            pendingHookInfo = pendingAppHookDisplayInfo_;
+            pendingEnable = pendingAppHookDisplayInfoEnable_;
+        }
+    }
+    if (hasPending && updateAppHookDisplayInfoFunc_) {
+        TLOGI(WmsLogTag::WMS_COMPAT, "Id: %{public}d", persistentId_);
+        updateAppHookDisplayInfoFunc_(callingUid_, pendingHookInfo, pendingEnable);
+    }
 }
 
 void Session::HandleHookDisplay(const PrelayoutContext& ctx)
@@ -6445,5 +6507,10 @@ WSError Session::UpdateLSStateInfo(bool isLSState)
         return WSError::WS_DO_NOTHING;
     }
     return sessionStage_->UpdateLSState(isLSState);
+}
+
+bool Session::IsSuperMultiFoldOuterScreen() const
+{
+    return FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice() && GetDisplayId() == SCREEN_ID_MAIN;
 }
 } // namespace OHOS::Rosen

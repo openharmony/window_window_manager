@@ -168,15 +168,40 @@ void RootScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason re
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent_ is nullptr: reason=%{public}u", reason);
         return;
     }
+    auto density = GetDisplayDensity();
     Ace::ViewportConfig config;
     config.SetSize(rect.width_, rect.height_);
     config.SetPosition(rect.posX_, rect.posY_);
-    config.SetDensity(density_);
+    config.SetDensity(density);
     config.SetOrientation(orientation_);
     config.SetDisplayId(GetDisplayId());
     uiContent_->UpdateViewportConfig(config, reason);
     TLOGI(WmsLogTag::WMS_ATTRIBUTE, "reason=%{public}u, dpi=%{public}f, rect=%{public}s, displayId=%{public}" PRIu64,
-        reason, density_, rect.ToString().c_str(), GetDisplayId());
+        reason, density, rect.ToString().c_str(), GetDisplayId());
+}
+
+void RootScene::SetDisplayDensity(float density, DisplayId displayId)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "root: dpi=%{public}f, display=%{public}" PRIu64, density, displayId);
+    std::unique_lock<std::shared_mutex> lock(displayDpiMapMutex_);
+    displayDpiMap_[displayId] = density;
+}
+
+float RootScene::GetDisplayDensity(DisplayId displayId)
+{
+    float density = 1.0f;
+    bool found = false;
+    {
+        std::shared_lock<std::shared_mutex> lock(displayDpiMapMutex_);
+        auto it = displayDpiMap_.find(displayId);
+        if (it != displayDpiMap_.end()) {
+            density = it->second;
+            found = true;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "root: found=%{public}d, dpi=%{public}f, display=%{public}" PRIu64,
+        found, density, displayId);
+    return density;
 }
 
 void RootScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)
@@ -390,9 +415,9 @@ void RootScene::SetFrameLayoutFinishCallback(std::function<void()>&& callback)
     TLOGI(WmsLogTag::WMS_LAYOUT, "end");
 }
 
-void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void RootScene::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
-    vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch);
+    vsyncStation_->SetUiDvsyncSwitch(dvsyncSwitch, fromWhom);
 }
 
 void RootScene::SetTouchEvent(int32_t touchType)
@@ -603,6 +628,10 @@ void RootScene::AddRootScene(DisplayId displayId, wptr<Window> window)
 
 void RootScene::RemoveRootScene(DisplayId displayId)
 {
+    {
+        std::unique_lock<std::shared_mutex> lock(displayDpiMapMutex_);
+        displayDpiMap_.erase(displayId);
+    }
     std::lock_guard<std::mutex> lock(rootSceneMapMutex_);
     TLOGI(WmsLogTag::WMS_FOCUS, "displayId: %{public}" PRIu64, displayId);
     auto iter = rootSceneMap_.find(displayId);

@@ -203,7 +203,7 @@ enum class WindowType : uint32_t {
 
     WINDOW_TYPE_UI_EXTENSION = 3000
 };
- 
+
 /**
  * @struct RealTimeSwitchInfo.
  *
@@ -676,7 +676,7 @@ enum class WindowSizeChangeReason : uint32_t {
     SPLIT_ENABLE_CHANGE,
     FULL_SCREEN_IN_FORCE_SPLIT,
     HOOK_INFO_CHANGE,
-    SWITCH_WINDOW_DISPLAY,
+    SWITCH_WINDOW_DISPLAY = 43,
     END,
 };
 
@@ -1937,8 +1937,14 @@ enum class PiPTemplateType : uint32_t {
     VIDEO_MEETING = 2,
     VIDEO_LIVE = 3,
     VIDEO_DRIVE = 4,
+    VIDEO_NAVIGATION = 5,
     END,
 };
+
+inline bool IsSystemOnlyPiPTemplateType(PiPTemplateType type)
+{
+    return type == PiPTemplateType::VIDEO_DRIVE || type == PiPTemplateType::VIDEO_NAVIGATION;
+}
 
 struct PiPGroupConfig {
     uint32_t groupId = 0;
@@ -2206,6 +2212,29 @@ struct PiPTemplateInfo : public Parcelable {
         return true;
     }
 
+    void SetPiPControlStatus(PiPControlType controlType, PiPControlStatus status)
+    {
+        if (static_cast<int32_t>(status) < -1) {
+            for (auto& controlEnableInfo : pipControlEnableInfoList) {
+                if (controlType == controlEnableInfo.controlType) {
+                    controlEnableInfo.enabled = status;
+                    return;
+                }
+            }
+            PiPControlEnableInfo newPiPControlEnableInfo {controlType, status};
+            pipControlEnableInfoList.push_back(newPiPControlEnableInfo);
+        } else {
+            for (auto& controlStatusInfo : pipControlStatusInfoList) {
+                if (controlType == controlStatusInfo.controlType) {
+                    controlStatusInfo.status = status;
+                    return;
+                }
+            }
+            PiPControlStatusInfo newPiPControlStatusInfo {controlType, status};
+            pipControlStatusInfoList.push_back(newPiPControlStatusInfo);
+        }
+    }
+
     static bool ReadPiPTemplateBaseInfo(Parcel& parcel, PiPTemplateInfo* pipTemplateInfo, uint32_t& controlStatusSize)
     {
         if (!parcel.ReadUint32(pipTemplateInfo->pipTemplateType) || !parcel.ReadUint32(pipTemplateInfo->priority)) {
@@ -2232,7 +2261,6 @@ struct PiPTemplateInfo : public Parcelable {
             info.status = static_cast<PiPControlStatus>(status);
             pipTemplateInfo->pipControlStatusInfoList.emplace_back(info);
         }
-        return true;
         uint32_t controlEnableSize = 0;
         if (!parcel.ReadUint32(controlEnableSize) || controlEnableSize > MAX_SIZE_PIP_CONTROL) {
             return false;
@@ -2396,7 +2424,7 @@ enum class FloatingBallState : uint32_t {
     STOPPED = 2,
     ERROR = 3,
 };
- 
+
 /**
  * @brief Enumerates floating ball template.
  */
@@ -3336,7 +3364,7 @@ struct KeyboardLayoutParams : public Parcelable {
         return LandscapeKeyboardRect_.IsUninitializedRect() && PortraitKeyboardRect_.IsUninitializedRect() &&
                LandscapePanelRect_.IsUninitializedRect() && PortraitPanelRect_.IsUninitializedRect();
     }
-    
+
     bool isValidAvoidHeight() const
     {
         return landscapeAvoidHeight_ >= 0 && portraitAvoidHeight_ >= 0;
@@ -3735,6 +3763,7 @@ enum DefaultSpecificZIndex {
     MUTISCREEN_COLLABORATION = 930,
     SUPER_PRIVACY_ANIMATION = 1100,
     BANNER_LIVE_SHARE = 2210,
+    VIRTUAL_TOUCH_PAD = 8010,
 };
 
 /**
@@ -4331,6 +4360,8 @@ enum class CompatibleStyleMode : uint32_t {
     LANDSCAPE_4_3 = 21,
     // 16:9 aspect ratio
     LANDSCAPE_16_9 = 22,
+    // keep vertical aspect ratio and scale to landscape
+    LANDSCAPE_VERTICAL_FULL_SCALE = 23,
 };
 
 enum class WindowManagerAgentType : uint32_t {
@@ -4411,5 +4442,15 @@ struct StartMovingOptions {
 
 bool IsMultiInstanceEnabled();
 }
+
+#ifndef VSYNC_TYPE_H
+#define VSYNC_TYPE_H
+enum class FromWhom : uint8_t {
+    INNER = 0,
+    API = 1,
+};
+
+constexpr FromWhom DEFAULT_FROMWHOM = FromWhom::INNER;
+#endif
 }
 #endif // OHOS_ROSEN_WM_COMMON_H
