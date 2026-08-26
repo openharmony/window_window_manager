@@ -349,6 +349,12 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
     return WSError::WS_OK;
 }
 
+
+WSError KeyboardSession::NavigateChange(const std::string& fromPage, const std::string& toPage)
+{
+    return WSError::WS_OK;
+}
+
 sptr<SceneSession> KeyboardSession::GetSceneSession(uint32_t persistentId)
 {
     if (keyboardCallback_ == nullptr || keyboardCallback_->onGetSceneSession == nullptr) {
