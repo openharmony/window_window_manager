@@ -8820,7 +8820,6 @@ void SceneSessionManager::NotifyNewSessionDpiHookScale(const sptr<SceneSession>&
     }, __func__);
 }
 
-// TODO: call this function in UpdateRogWindowConfig
 void SceneSessionManager::NotifyAllSessionDpiHookScale()
 {
     taskScheduler_->PostAsyncTask([this, where = __func__] {
@@ -20775,6 +20774,7 @@ WMError SceneSessionManager::UpdateRogWindowConfig(const RogWindowConfig& window
     if (callback) {
         callback(windowConfig);
     }
+    NotifyAllSessionDpiHookScale();
     return WMError::WM_OK;
 }
 
