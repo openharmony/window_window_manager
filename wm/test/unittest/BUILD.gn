@@ -69,6 +69,7 @@ group("unittest") {
       ":wm_window_manager_agent_proxy_test",
       ":wm_window_manager_lite_test",
       ":wm_window_manager_test",
+      ":wm_all_users_window_manager_test",
       ":wm_window_manager_agent_lite_test",
       ":wm_window_scene_effect_test",
       ":wm_window_scene_session_impl_test",
@@ -111,6 +112,24 @@ ohos_unittest("wm_window_manager_test") {
 
   include_dirs = [ "${window_base_path}/wm/src" ]
   sources = [ "window_manager_test.cpp", "window_manager_test2.cpp" ]
+
+  deps = [
+    ":wm_unittest_common",
+    "${window_base_path}/window_scene/interfaces/innerkits:libwsutils",
+  ]
+
+  external_deps = test_external_deps
+}
+
+ohos_unittest("wm_all_users_window_manager_test") {
+  module_out_path = module_out_path
+
+  include_dirs = [
+    "${window_base_path}/wm/src",
+    "${window_base_path}/interfaces/innerkits/wm",
+  ]
+
+  sources = [ "all_users_window_manager_test.cpp" ]
 
   deps = [
     ":wm_unittest_common",
