@@ -14,6 +14,7 @@
  */
 
 #include "typec_port_info.h"
+#include "typec_parse_int.h"
 
 #include <dirent.h>
 #include <fstream>
@@ -38,28 +39,6 @@ static std::vector<std::string> GetDirList()
     }
     closedir(dir);
     return allPath;
-}
-
-static bool IsStringNumeric(const char* buffer)
-{
-    if (buffer == nullptr || *buffer == '\0') {
-        return false;
-    }
-    auto begin = buffer;
-    if (*begin == '-') {
-        begin++;
-        if (*begin == '\0') {
-            return false;
-        }
-    }
-
-    while (*begin) {
-        if (!std::isdigit(*begin)) {
-            return false;
-        }
-        begin++;
-    }
-    return true;
 }
 
 static bool GetTypeCFileNode(const std::vector<std::string>& allDirName, std::string& typeCMappingPath)
@@ -111,10 +90,9 @@ bool TypeCPortInfo::GetTypeCThermal(int32_t& thermal)
     constexpr int bufferSize = 20;
     char buffer[bufferSize] = {0};
     typeCThermalFile.getline(buffer, bufferSize);
-    if (!IsStringNumeric(buffer)) {
+    if (!ParseNumericInt(buffer, thermal)) {
         return false;
     }
-    thermal = std::stoi(buffer);
     return true;
 }
 } // namespace OHOS::Rosen
