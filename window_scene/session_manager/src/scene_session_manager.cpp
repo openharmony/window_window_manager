@@ -10883,7 +10883,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
 {
     privacyBundles[displayId] = std::unordered_set<std::string>();
     notifyPrivacyBundleList[displayId] = std::unordered_set<std::string>();
-    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)){
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)) {
         privacyBundles[VIRTUAL_DISPLAY_ID] = std::unordered_set<std::string>();
         notifyPrivacyBundleList[VIRTUAL_DISPLAY_ID] = std::unordered_set<std::string>();
     }
