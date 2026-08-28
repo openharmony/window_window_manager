@@ -21487,7 +21487,7 @@ void SceneSessionManager::NotifyWindowPropertyChangeByWindowInfoKey(
             TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: session is null", where);
             return;
         }
-        uint32_t propertyDirtyFlags = sceneSession->GetPropertyDirtyFlags() | static_cast<uint32_t>(winInfoKey);
+        uint32_t propertyDirtyFlags = session->GetPropertyDirtyFlags() | static_cast<uint32_t>(winInfoKey);
         TLOGND(WmsLogTag::WMS_ATTRIBUTE,
             "%{public}s: win=[%{public}d, %{public}s], dirtyFlags=%{public}u, interestedFlags=%{public}u",
             where, session->GetWindowId(), session->GetWindowName().c_str(), propertyDirtyFlags, interestedFlags_);

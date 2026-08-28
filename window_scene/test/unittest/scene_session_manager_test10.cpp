@@ -1247,6 +1247,7 @@ HWTEST_F(SceneSessionManagerTest10, NotifySessionPropertyChangeFromSession01, Te
     sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
     ASSERT_NE(nullptr, sceneSession);
     ssm_->sceneSessionMap_.emplace(persistentId, sceneSession);
+    EXPECT_NE(WSError::WS_DO_NOTHING, ssm_->NotifySessionPropertyChangeFromSession(-100, WindowInfoKey::WINDOW_MODE));
 
     windowManagerAgent->propertyDirtyFlags_ = 0;
     windowManagerAgent->windowInfoListSize_ = 0;
