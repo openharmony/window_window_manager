@@ -789,7 +789,7 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     displayInfo->SetVirtualPixelRatio(virtualPixelRatio);
     displayInfo->SetDensityInCurResolution(virtualPixelRatio);
     displayInfo->SetDisplayId(defaultDisplayId);
-    system::SetParameter("const.product.has_buildin_screen", "0");
+    system::SetBoolParameter("persist.sceneboard.ispcmode", true);
 
     ProcessVirtualPixelRatioChangeFunc func = [](const sptr<DisplayInfo>& displayInfo) {};
     ssm_->SetVirtualPixelRatioChangeListener(func);
@@ -798,6 +798,9 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     auto shouldProcess =
         ssm_->ShouldProcessVirtualPixelRatioChange(DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE, displayInfo);
     EXPECT_TRUE(shouldProcess);
+    std::map<DisplayId, sptr<DisplayInfo>> displayInfoMap;
+    ssm_->ProcessVirtualPixelRatioChange(defaultDisplayId, displayInfo, displayInfoMap,
+        DisplayStateChangeType::VIRTUAL_PIXEL_RATIO_CHANGE);
     ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
 }
 } // namespace
