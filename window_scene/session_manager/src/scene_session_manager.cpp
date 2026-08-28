@@ -10865,9 +10865,14 @@ void SceneSessionManager::UpdatePrivateStateAndNotifyForAllScreens()
     for (const auto& iter : privacyBundleList) {
         privacyBundleDisplayId[iter.first] = !iter.second.empty() || specialExtWindowHasPrivacyMode_.load();
     }
+    std::unordered_map<DisplayId, std::vector<std::string>> displayPrivacyBundlesMap;
+    for (const auto& iter : notifyPrivacyBundleList) {
+        displayPrivacyBundlesMap[iter.first] = std::vector<std::string>(iter.second.begin(), iter.second.end());
+    }
     TLOGW(WmsLogTag::WMS_ATTRIBUTE, "isEmptyPrivateBundles=%{public}d, uecPrivace=%{public}d",
         privacyBundleDisplayId.empty(), specialExtWindowHasPrivacyMode_.load());
     ScreenSessionManagerClient::GetInstance().SetPrivacyStateByDisplayId(privacyBundleDisplayId);
+    ScreenSessionManagerClient::GetInstance().SetScreenPrivacyWindowList(displayPrivacyBundlesMap);
     std::unique_lock<std::mutex> lock(privacyBundleMapMutex_);
     privacyBundleMap_ = notifyPrivacyBundleList;
 }
@@ -10878,6 +10883,10 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
 {
     privacyBundles[displayId] = std::unordered_set<std::string>();
     notifyPrivacyBundleList[displayId] = std::unordered_set<std::string>();
+    if (PcFoldScreenManager::GetInstance().IsHalfFolded(displayId)){
+        privacyBundles[VIRTUAL_DISPLAY_ID] = std::unordered_set<std::string>();
+        notifyPrivacyBundleList[VIRTUAL_DISPLAY_ID] = std::unordered_set<std::string>();
+    }
     std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
     for (const auto& [persistentId, sceneSession] : sceneSessionMap_) {
         if (sceneSession == nullptr) {
@@ -10897,8 +10906,7 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
             std::string bundleName = sceneSession->GetSessionInfo().bundleName_;
             if (bundleName.empty()) {
                 bundleName = sceneSession->GetWindowName();
-                TLOGI(WmsLogTag::WMS_ATTRIBUTE, "bundle name is empty, win=[%{public}d, %{public}s]",
-                    persistentId, bundleName.c_str());
+                TLOGI(WmsLogTag::WMS_ATTRIBUTE, "empty bundle win=%{public}d", persistentId);
             }
             bool isHalfFold = PcFoldScreenManager::GetInstance().IsHalfFolded(displayId) &&
                 !PcFoldScreenManager::GetInstance().HasSystemKeyboard();
@@ -10908,14 +10916,12 @@ void SceneSessionManager::GetSceneSessionPrivacyModeBundles(DisplayId displayId,
                 notifyPrivacyBundleList[displayId].insert(bundleName);
             }
             if (IsScreenLocked() && !(sceneSession->GetRSVisible() || IsSystemWindowVisible)) {
-                TLOGI(WmsLogTag::WMS_ATTRIBUTE,
-                    "screen locked: win=[%{public}d, %{public}s], isHalfFold=%{public}d, display=%{public}" PRIu64,
-                    sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), isHalfFold, displayId);
+                TLOGI(WmsLogTag::WMS_ATTRIBUTE, "screen locked: win=[%{public}d, %{public}s], display=%{public}" PRIu64,
+                    sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), displayId);
                 continue;
             }
-            TLOGW(WmsLogTag::WMS_ATTRIBUTE,
-                "found privacy win=[%{public}d, %{public}s], isHalfFold=%{public}d, display=%{public}" PRIu64,
-                sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), isHalfFold, displayId);
+            TLOGW(WmsLogTag::WMS_ATTRIBUTE, "found privacy win=[%{public}d, %{public}s], display=%{public}" PRIu64,
+                sceneSession->GetWindowId(), sceneSession->GetWindowName().c_str(), displayId);
             if (isHalfFold) {
                 UpdateSessionPrivacyForSuperFold(sceneSession, displayId, privacyBundles);
                 continue;
@@ -21461,11 +21467,10 @@ WSError SceneSessionManager::RegisterSessionPropertyChangeNotifyManagerFunc(cons
 
 WSError SceneSessionManager::NotifySessionPropertyChangeFromSession(int32_t persistentId, WindowInfoKey windowInfoKey)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "persistentId: %{public}d, windowInfoKey: %{public}u",
-        persistentId, static_cast<uint32_t>(windowInfoKey));
     sptr<SceneSession> sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sceneSession nullptr");
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "sceneSession nullptr, persistentId=%{public}d, winInfoKey=%{public}u",
+            persistentId, static_cast<uint32_t>(windowInfoKey));
         return WSError::WS_ERROR_NULLPTR;
     }
     NotifyWindowPropertyChangeByWindowInfoKey(sceneSession, windowInfoKey);
@@ -21475,19 +21480,30 @@ WSError SceneSessionManager::NotifySessionPropertyChangeFromSession(int32_t pers
 void SceneSessionManager::NotifyWindowPropertyChangeByWindowInfoKey(
     const sptr<SceneSession>& sceneSession, WindowInfoKey windowInfoKey)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "windowInfoKey: %{public}u", static_cast<uint32_t>(windowInfoKey));
-    WindowInfoList windowInfoList;
-    std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
-    PackWindowPropertyChangeInfo(sceneSession, windowPropertyChangeInfo);
-    windowInfoList.push_back(windowPropertyChangeInfo);
-    SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(
-        static_cast<uint32_t>(windowInfoKey), windowInfoList);
+    const char* const where = __func__;
+    taskScheduler_->PostAsyncTask([this, weakSession = wptr(sceneSession), winInfoKey = windowInfoKey, where]() {
+        sptr<SceneSession> session = weakSession.promote();
+        if (session == nullptr) {
+            TLOGNE(WmsLogTag::WMS_ATTRIBUTE, "%{public}s: session is null", where);
+            return;
+        }
+        uint32_t propertyDirtyFlags = sceneSession->GetPropertyDirtyFlags() | static_cast<uint32_t>(winInfoKey);
+        TLOGND(WmsLogTag::WMS_ATTRIBUTE,
+            "%{public}s: win=[%{public}d, %{public}s], dirtyFlags=%{public}u, interestedFlags=%{public}u",
+            where, session->GetWindowId(), session->GetWindowName().c_str(), propertyDirtyFlags, interestedFlags_);
+        WindowInfoList windowInfoList;
+        std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
+        PackWindowPropertyChangeInfo(session, windowPropertyChangeInfo);
+        session->SetPropertyDirtyFlags(0);
+        windowInfoList.push_back(windowPropertyChangeInfo);
+        SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    }, where);
 }
 
 void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
 {
-    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "ObservedFlags: %{public}u, interestedFlags: %{public}u",
-        observedFlags_, interestedFlags_);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "observedFlags=%{public}u, interestedFlags=%{public}u, screenId=%{public}" PRIu64,
+        observedFlags_, interestedFlags_, screenId);
     WindowInfoList windowInfoList;
     uint32_t propertyDirtyFlags = 0;
     {
@@ -21511,7 +21527,9 @@ void SceneSessionManager::NotifyWindowPropertyChange(ScreenId screenId)
             sceneSession->SetPropertyDirtyFlags(0);
         }
     }
-    SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    if (!windowInfoList.empty()) {
+        SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
+    }
 }
 
 void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>& sceneSession,
@@ -21533,14 +21551,12 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
         windowPropertyChangeInfo[WindowInfoKey::VISIBILITY_STATE] = sceneSession->GetVisibilityState();
     }
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID)) {
-        if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(
-            sceneSession->GetSessionProperty()->GetDisplayId())) {
-            WSRect sessionGlobalRect = sceneSession->GetSessionGlobalRect();
-            windowPropertyChangeInfo[WindowInfoKey::DISPLAY_ID] =
-                sceneSession->TransformGlobalRectToRelativeRect(sessionGlobalRect);
-        } else {
-            windowPropertyChangeInfo[WindowInfoKey::DISPLAY_ID] = sceneSession->GetSessionProperty()->GetDisplayId();
+        auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
+        if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId)) {
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}d use client displayId", sceneSession->GetWindowId());
+            displayId = sceneSession->GetClientDisplayId();
         }
+        windowPropertyChangeInfo[WindowInfoKey::DISPLAY_ID] = displayId;
     }
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT)) {
         WSRect wsrect = sceneSession->GetSessionRect();
