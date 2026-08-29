@@ -487,6 +487,7 @@ public:
     void OnScreenshot(DisplayId displayId);
     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
     void SetVirtualPixelRatioChangeListener(const ProcessVirtualPixelRatioChangeFunc& func);
+    bool ShouldUpdateDisplayDpi(sptr<DisplayInfo> displayInfo);
     bool ShouldProcessVirtualPixelRatioChange(DisplayStateChangeType type, sptr<DisplayInfo> displayInfo);
     void SetUpdateDisplayDpiChangeCallback(const UpdateDisplayDpiChangeFunc& func);
     void ProcessVirtualPixelRatioChange(DisplayId defaultDisplayId, sptr<DisplayInfo> displayInfo,
