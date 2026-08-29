@@ -21553,8 +21553,9 @@ void SceneSessionManager::PackWindowPropertyChangeInfo(const sptr<SceneSession>&
     if (interestedFlags_ & static_cast<uint32_t>(SessionPropertyFlag::DISPLAY_ID)) {
         auto displayId = sceneSession->GetSessionProperty()->GetDisplayId();
         if (PcFoldScreenManager::GetInstance().IsHalfFoldedOnMainDisplay(displayId)) {
-            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}d use client displayId", sceneSession->GetWindowId());
             displayId = sceneSession->GetClientDisplayId();
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE, "win=%{public}d, clientDisplayId=%{public}" PRIu64,
+                sceneSession->GetWindowId(), displayId);
         }
         windowPropertyChangeInfo[WindowInfoKey::DISPLAY_ID] = displayId;
     }
