@@ -797,9 +797,8 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     ssm_->SetVirtualPixelRatioChangeListener(func);
 
     ASSERT_NE(nullptr, ssm_);
-    auto shouldProcess =
-        ssm_->ShouldProcessVirtualPixelRatioChange(DisplayStateChangeType::FREEZE, displayInfo);
-    EXPECT_FALSE(shouldProcess);;
+    auto shouldProcess = ssm_->ShouldProcessVirtualPixelRatioChange(DisplayStateChangeType::FREEZE, displayInfo);
+    EXPECT_FALSE(shouldProcess);
     ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
 }
 } // namespace
