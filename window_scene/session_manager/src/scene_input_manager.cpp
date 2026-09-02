@@ -370,10 +370,13 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
         };
         DisplayGroupId displayGroupId = screenSession->GetDisplayGroupId();
         if (displayGroupMap.count(displayGroupId) == 0) {
+            DisplayGroupType groupType = screenSession->GetGroupType();
             MMI::DisplayGroupInfo displayGroupInfo = {
                 .id = displayGroupId,
                 .name = "displayGroup" + std::to_string(displayGroupId),
-                .type = displayGroupId == 0 ? MMI::GROUP_DEFAULT : MMI::GROUP_SPECIAL,
+                .type = groupType == DisplayGroupType::INVALID
+                            ? (displayGroupId == 0 ? MMI::GroupType::GROUP_DEFAULT : MMI::GroupType::GROUP_SPECIAL)
+                            : static_cast<MMI::GroupType>(groupType),
                 .mainDisplayId = screenProperty.GetMainDisplayIdOfGroup(),
             };
             displayGroupMap[displayGroupId] = displayGroupInfo;
