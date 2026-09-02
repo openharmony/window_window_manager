@@ -1361,7 +1361,7 @@ private:
     LowTempMode lowTemp_ {LowTempMode::UNKNOWN};
     std::mutex lowTempMutex_;
     std::mutex pcModeSwitchMutex_;
-    std::atomic<DisplayGroupId> displayGroupNum_ { 1 };
+    std::atomic<DisplayGroupId> displayGroupNum_ { DISPLAY_GROUP_ID_SECONDARY + 1 };
     std::unordered_map<FoldDisplayMode, int32_t> rotationCorrectionMap_;
     std::shared_mutex ssmRotationCorrectionMutex_;
     std::atomic<bool> firstSCBConnect_ = false;
