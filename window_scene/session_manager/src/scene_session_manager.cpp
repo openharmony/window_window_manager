@@ -195,6 +195,7 @@ const std::string STARTUP_PHASE_KEY = "ohos.ability.startupPhase";
 const std::string STARTUP_PHASE_PRE_WINDOW = "pre_window";
 const std::string STARTUP_PHASE_PRE_FOREGROUND = "pre_foreground";
 const std::string TRUE_VALUE = "true";
+const std::string ENABLE_OPTIONAL_STARTING_WINDOW_KEY = "enable.optional.starting.window";
 constexpr int32_t MAIN_WINDOW_CREATE = 3;
 constexpr int32_t MAIN_WINDOW_DESTORY = 4;
 const bool SUPPORT_DPI_SCALING = system::GetBoolParameter("const.desktop.is_support_scale_with_dpi", false);
@@ -471,6 +472,18 @@ void IntersectAttachedLimits(const WindowSessionProperty& prop, WindowLimits& px
         pxLimits = result.pxLimits;
         vpLimits = result.vpLimits;
     }
+}
+
+bool GetEnableOptionalStartingWindowFromBMS(const AppExecFwk::AbilityInfo& abilityInfo)
+{
+    for (const auto& item : abilityInfo.metadata) {
+        if (item.name == ENABLE_OPTIONAL_STARTING_WINDOW_KEY) {
+            TLOGD(WmsLogTag::WMS_PATTERN, "result: %{public}s", item.value.c_str());
+            return item.value == TRUE_VALUE;
+        }
+    }
+    TLOGD(WmsLogTag::WMS_PATTERN, "default false");
+    return false;
 }
 } // namespace
 
@@ -4689,7 +4702,7 @@ WSError SceneSessionManager::RequestSceneSessionBackground(const sptr<SceneSessi
         if (sceneSession->GetSessionInfo().isGamePrelaunch_) {
             TLOGNI(WmsLogTag::WMS_LIFE, "[gameprelaunch]Reset scene session isGamePrelaunch_ to false, id: %{public}d",
                 sceneSession->GetPersistentId());
-            sceneSession->EditSessionInfo().isGamePrelaunch_ = false;
+            sceneSession->SetIsGamePrelaunch(false);
         }
 
         sceneSession->BackgroundTask(isSaveSnapshot, reason);
@@ -7152,6 +7165,7 @@ void SceneSessionManager::GetBundleStartingWindowInfos(bool isDark, const AppExe
             if (!GetStartupPageFromResource(abilityInfo, startingWindowInfo, colorMode)) {
                 continue;
             }
+            PostProcessStartingWindowInfo(abilityInfo, startingWindowInfo);
             outValues.emplace_back(std::make_pair(itemKey, startingWindowInfo));
         }
     }
@@ -7208,7 +7222,8 @@ void SceneSessionManager::UpdateAllStartingWindowRdb()
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_ONLY_WITH_LAUNCHER_ABILITY) |
-            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_EXCLUDE_EXT),
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_EXCLUDE_EXT) |
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA),
             bundleInfos, currentUserId_));
         if (ret != 0) {
             TLOGNE(WmsLogTag::WMS_PATTERN, "%{public}s GetBundleInfosV9 error:%{public}d", where, ret);
@@ -7246,6 +7261,19 @@ std::string SceneSessionManager::GetCallerSessionColorMode(const SessionInfo& se
     }
     auto colorMode = callerSession->GetAbilityColorMode();
     return colorMode;
+}
+
+void SceneSessionManager::PostProcessStartingWindowInfo(
+    const AppExecFwk::AbilityInfo& abilityInfo, StartingWindowInfo& startingWindowInfo)
+{
+    if (!GetEnableOptionalStartingWindowFromBMS(abilityInfo)) {
+        return;
+    }
+    if (GetPerformanceClass() == PERFORMANCE_CLASS_LOW_LEVEL) {
+        return;
+    }
+    TLOGI(WmsLogTag::WMS_PATTERN, "empty %{public}s starting window icon", abilityInfo.bundleName.c_str());
+    startingWindowInfo.iconPathEarlyVersion_ = "";
 }
 
 bool SceneSessionManager::GetStartWindowColorFollowApp(const SessionInfo& sessionInfo)
@@ -7312,7 +7340,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
         }
     } else {
         if (!bundleMgr_->QueryAbilityInfo(
-            want, AppExecFwk::GET_ABILITY_INFO_DEFAULT | AppExecFwk::GET_ABILITY_INFO_EXCLUDE_EXT,
+            want, AppExecFwk::GET_ABILITY_INFO_WITH_METADATA | AppExecFwk::GET_ABILITY_INFO_EXCLUDE_EXT,
             AppExecFwk::Constants::ANY_USERID, abilityInfo)) {
             TLOGE(WmsLogTag::WMS_PATTERN, "Get ability info from BMS failed!");
             return;
@@ -7322,6 +7350,7 @@ void SceneSessionManager::GetStartupPage(const SessionInfo& sessionInfo, Startin
     if (GetStartupPageFromResource(abilityInfo, startingWindowInfo, Global::Resource::ColorMode::COLOR_MODE_NOT_SET,
                                    isAppDark != isSystemDark, appColorMode)) {
         isDark = GetStartWindowColorFollowApp(sessionInfo) ? isAppDark : isSystemDark;
+        PostProcessStartingWindowInfo(abilityInfo, startingWindowInfo);
         CacheStartingWindowInfo(
             sessionInfo.bundleName_, sessionInfo.moduleName_, sessionInfo.abilityName_, startingWindowInfo, isDark);
         if (startingWindowRdbMgr_ != nullptr) {
@@ -7591,7 +7620,8 @@ void SceneSessionManager::OnBundleUpdated(const std::string& bundleName, int use
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) |
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
             static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
-            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_EXCLUDE_EXT),
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_EXCLUDE_EXT) |
+            static_cast<uint32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA),
             bundleInfo, currentUserId_);
         if (ret == 0) {
             std::vector<std::pair<StartingWindowRdbItemKey, StartingWindowInfo>> inputValues;
@@ -9406,7 +9436,7 @@ WSError SceneSessionManager::RequestSessionFocusImmediately(int32_t persistentId
         if (!sceneSession->IsLifecycleForeground()) {
             focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
         }
-    } else if (!sceneSession->GetSessionInfo().isSystem_ && !IsSessionVisibleForeground(sceneSession)) {
+    } else if (!sceneSession->GetSessionInfo().isSystem_ && !sceneSession->IsLifecycleForeground()) {
         focusGroup->SetNeedBlockNotifyFocusStatusUntilForeground(true);
     }
     ShiftFocus(displayId, sceneSession, false, reason);
@@ -11249,17 +11279,22 @@ void SceneSessionManager::ProcessFocusWhenForegroundScbCore(sptr<SceneSession>& 
         TLOGD(WmsLogTag::WMS_FOCUS, "session is nullptr");
         return;
     }
-    if (sceneSession->IsFocusableOnShow()) {
-        if (IsSessionVisibleForeground(sceneSession)) {
-            RequestSessionFocus(sceneSession->GetPersistentId(), true, FocusChangeReason::APP_FOREGROUND);
-        } else {
-            PostProcessFocusState state = {true, true, true, FocusChangeReason::APP_FOREGROUND};
-            sceneSession->SetPostProcessFocusState(state);
-        }
-    } else {
+    if (!sceneSession->IsFocusableOnShow()) {
         TLOGD(WmsLogTag::WMS_FOCUS, "win: %{public}d ignore request focus when foreground",
             sceneSession->GetPersistentId());
+        return;
     }
+    if (IsSessionVisibleForeground(sceneSession)) {
+        RequestSessionFocus(sceneSession->GetPersistentId(), true, FocusChangeReason::APP_FOREGROUND);
+        return;
+    }
+    PostProcessFocusState state = sceneSession->GetPostProcessFocusState();
+    if (state.enabled_ && state.reason_ == FocusChangeReason::SCB_START_APP) {
+        TLOGD(WmsLogTag::WMS_FOCUS, "%{public}d has start request focus", sceneSession->GetPersistentId());
+        return;
+    }
+    PostProcessFocusState newState = {true, true, true, FocusChangeReason::APP_FOREGROUND};
+    sceneSession->SetPostProcessFocusState(newState);
 }
 
 void SceneSessionManager::ProcessWindowModeType()
@@ -16679,9 +16714,6 @@ std::vector<sptr<SceneSession>> SceneSessionManager::CollectProcessingSessions()
             if (!state.enabled_) {
                 continue;
             }
-            if (state.isFocused_ && !session->IsVisible()) {
-                continue;
-            }
             processingSessions.push_back(session);
         }
     }
@@ -20306,36 +20338,50 @@ WMError SceneSessionManager::IsWindowRectAutoSave(const std::string& key, bool& 
 
 WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId)
 {
+    std::string errMsg;
+    return SetImageForRecent(imgResourceId, imageFit, persistentId, errMsg);
+}
+
+WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit,
+    int32_t persistentId, std::string& errMsg)
+{
+    errMsg.clear();
     TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
+        errMsg = "sceneSession is null";
         return WMError::WM_ERROR_NULLPTR;
     }
 
     if (sceneSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sessionState is invalid");
+        errMsg = "sessionState is invalid";
         return WMError::WM_ERROR_NULLPTR;
     }
     auto abilityInfo = sceneSession->GetSessionInfoAbilityInfo();
     if (abilityInfo == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "abilityInfo is null");
+        errMsg = "abilityInfo is null";
         return WMError::WM_ERROR_NULLPTR;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_RECENT_SNAPSHOT) &&
         !SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_PATTERN, "permission not allowed");
+        errMsg = "permission not allowed";
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     bool isCropped;
     std::shared_ptr<Media::PixelMap> pixelMap = GetPixelMap(imgResourceId, abilityInfo, false, isCropped);
     if (!pixelMap) {
         TLOGE(WmsLogTag::WMS_PATTERN, "get pixelMap failed");
+        errMsg = "get pixelMap failed";
         return WMError::WM_ERROR_NULLPTR;
     }
     auto scenePersistence = sceneSession->GetScenePersistence();
     if (scenePersistence == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
+        errMsg = "scenePersistence is null";
         return WMError::WM_ERROR_NULLPTR;
     }
     sceneSession->SaveSnapshot(true, true, pixelMap);
@@ -20349,28 +20395,41 @@ WMError SceneSessionManager::SetImageForRecent(uint32_t imgResourceId, ImageFit 
 WMError SceneSessionManager::SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
     ImageFit imageFit, int32_t persistentId)
 {
+    std::string errMsg;
+    return SetImageForRecentPixelMap(pixelMap, imageFit, persistentId, errMsg);
+}
+
+WMError SceneSessionManager::SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    ImageFit imageFit, int32_t persistentId, std::string& errMsg)
+{
+    errMsg.clear();
     TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
+        errMsg = "sceneSession is null";
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     auto scenePersistence = sceneSession->GetScenePersistence();
     if (scenePersistence == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "scenePersistence is null");
+        errMsg = "scenePersistence is null";
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_RECENT_SNAPSHOT) &&
         !SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_PATTERN, "permission not allowed");
+        errMsg = "permission not allowed";
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (sceneSession->GetSessionState() == SessionState::STATE_BACKGROUND) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sessionState is invalid");
+        errMsg = "sessionState is invalid";
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (pixelMap == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "get pixelMap failed");
+        errMsg = "get pixelMap failed";
         return WMError::WM_ERROR_NULLPTR;
     }
     sceneSession->SaveSnapshot(true, true, pixelMap);
@@ -20383,15 +20442,24 @@ WMError SceneSessionManager::SetImageForRecentPixelMap(const std::shared_ptr<Med
 
 WMError SceneSessionManager::RemoveImageForRecent(int32_t persistentId)
 {
+    std::string errMsg;
+    return RemoveImageForRecent(persistentId, errMsg);
+}
+
+WMError SceneSessionManager::RemoveImageForRecent(int32_t persistentId, std::string& errMsg)
+{
+    errMsg.clear();
     TLOGI(WmsLogTag::WMS_PATTERN, "%{public}d", persistentId);
     auto sceneSession = GetSceneSession(persistentId);
     if (sceneSession == nullptr) {
         TLOGE(WmsLogTag::WMS_PATTERN, "sceneSession %{public}d is null", persistentId);
+        errMsg = "sceneSession is null";
         return WMError::WM_ERROR_SYSTEM_ABNORMALLY;
     }
     if (!SessionPermission::VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_RECENT_SNAPSHOT) &&
         !SessionPermission::IsSystemCalling()) {
         TLOGE(WmsLogTag::WMS_PATTERN, "permission not allowed");
+        errMsg = "permission not allowed";
         return WMError::WM_ERROR_INVALID_PERMISSION;
     }
     if (sceneSession->IsLifecycleForeground()) {
@@ -20531,19 +20599,30 @@ void SceneSessionManager::SetIsWindowRectAutoSave(const std::string& key, bool e
 WMError SceneSessionManager::SetStartWindowBackgroundColor(
     const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid)
 {
+    std::string errMsg;
+    return SetStartWindowBackgroundColor(moduleName, abilityName, color, uid, errMsg);
+}
+
+WMError SceneSessionManager::SetStartWindowBackgroundColor(
+    const std::string& moduleName, const std::string& abilityName, uint32_t color, int32_t uid, std::string& errMsg)
+{
+    errMsg.clear();
     if (!bundleMgr_) {
         TLOGE(WmsLogTag::WMS_PATTERN, "bundleMgr is nullptr");
+        errMsg = "bundleMgr is nullptr";
         return WMError::WM_ERROR_NO_MEM;
     }
     std::string bundleName;
     if (!bundleMgr_->GetBundleNameForUid(uid, bundleName)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "get bundle name failed");
+        errMsg = "get bundle name failed";
         return WMError::WM_ERROR_NO_MEM;
     }
     AppExecFwk::AbilityInfo abilityInfo;
     if (!bundleMgr_->GetAbilityInfo(bundleName, moduleName, abilityName, abilityInfo)) {
         TLOGE(WmsLogTag::WMS_PATTERN, "ability not found %{public}s %{public}s %{public}s",
             bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+        errMsg = "ability not found";
         return WMError::WM_ERROR_NO_MEM;
     }
     auto key = moduleName + abilityName;
