@@ -324,7 +324,7 @@ struct WindowCreateParams : public Parcelable {
                 }
                 target = std::make_shared<bool>(value);
             } else {
-                target.reset();
+                target = nullptr;
             }
             return true;
         };
