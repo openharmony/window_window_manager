@@ -974,6 +974,8 @@ public:
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
+    WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
+        uint32_t color, int32_t uid, std::string& errMsg) override;
     void ConfigSupportSnapshotAllSessionStatus();
     void ConfigSupportCacheLockedSessionSnapshot();
     void ConfigSupportPreloadStartingWindow();
@@ -1135,6 +1137,8 @@ private:
      * @return Returns true if the config is valid and applied; returns false otherwise.
      */
     bool ConfigDisplayIsolation(const WindowSceneConfig::ConfigItem& displayIsolationConfig);
+    bool ConfigWindowLimitsThreshold(const WindowSceneConfig::ConfigItem& limitsThresholdConfig);
+    bool ConfigWindowLimitsPercentage(const WindowSceneConfig::ConfigItem& limitsThresholdPercentageConfig);
 
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
@@ -2110,6 +2114,8 @@ private:
         const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool darkMode);
+    void PostProcessStartingWindowInfo(const AppExecFwk::AbilityInfo& abilityInfo,
+        StartingWindowInfo& startingWindowInfo);
     bool GetStartWindowColorFollowApp(const SessionInfo& sessionInfo);
     void ClearStartWindowColorFollowApp(const std::string& bundleName);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
@@ -2132,9 +2138,14 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId,
+        std::string& errMsg) override;
     WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
         int32_t persistentId) override;
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId, std::string& errMsg) override;
     WMError RemoveImageForRecent(int32_t persistentId) override;
+    WMError RemoveImageForRecent(int32_t persistentId, std::string& errMsg) override;
     bool GetCropInfoByDisplaySize(const Media::ImageInfo& imageInfo, Media::DecodeOptions& decodeOpts);
     void InitSnapshotBlurConfig();
     float GetBlurRadiusFromParam(const std::string& blurRadiusColorStr) const;
