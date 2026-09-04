@@ -800,6 +800,36 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     EXPECT_TRUE(shouldProcess);
     ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
 }
+
+/**
+ * @tc.name: SetGlobalBlackList
+ * @tc.desc: SetGlobalBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, SetGlobalBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<uint64_t> blackList;
+    ssm_->SetGlobalBlackList(blackList);
+    blackList.push_back(1);
+    blackList.push_back(2);
+    ssm_->SetGlobalBlackList(blackList);
+}
+
+/**
+ * @tc.name: RemoveGlobalBlackList
+ * @tc.desc: RemoveGlobalBlackList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, RemoveGlobalBlackList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<uint64_t> blackList;
+    ssm_->RemoveGlobalBlackList(blackList);
+    blackList.push_back(1);
+    blackList.push_back(2);
+    ssm_->RemoveGlobalBlackList(blackList);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
