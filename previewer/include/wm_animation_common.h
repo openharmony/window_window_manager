@@ -302,7 +302,7 @@ struct WindowCreateParams : public Parcelable {
             std::shared_ptr<StartAnimationOptions>(parcel.ReadParcelable<StartAnimationOptions>());
         windowCreateParams->animationSystemParams =
             std::shared_ptr<StartAnimationSystemOptions>(parcel.ReadParcelable<StartAnimationSystemOptions>());
-        
+
         auto readOptionalBool = [&parcel](std::shared_ptr<bool>& target) -> bool {
             bool hasValue = false;
             if (!parcel.ReadBool(hasValue)) {
