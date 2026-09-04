@@ -794,9 +794,9 @@ void Session::NotifyAddSnapshot(bool useFfrt, bool needPersist,
     }
 }
 
-void Session::NotifyRemoveSnapshot()
+void Session::NotifyRemoveSnapshot(bool forceRemove)
 {
-    if (GetAppLockControl()) {
+    if (!forceRemove && GetAppLockControl()) {
         TLOGI(WmsLogTag::WMS_PATTERN, "not allowed");
         return;
     }
@@ -1689,7 +1689,7 @@ __attribute__((no_sanitize("cfi"))) WSError Session::ConnectInner(const sptr<ISe
     // Window Layout
     const auto prelayoutContext = GetPrelayoutContext();
     HandleInitialRect(prelayoutContext);
-    HandleHookDisplay(prelayoutContext);
+    HandlePrelaunchDisplayHook(prelayoutContext);
 
     EditSessionInfo().disableDelegator = property->GetIsAbilityHookOff();
     NotifyConnect();
@@ -1975,6 +1975,28 @@ void Session::ResetIsActive()
     isActive_ = false;
 }
 
+void Session::SetIsGamePrelaunch(bool isGamePrelaunch)
+{
+    PostTask([weakThis = wptr(this), isGamePrelaunch, where = __func__]() {
+        auto session = weakThis.promote();
+        if (session == nullptr) {
+            TLOGNW(WmsLogTag::WMS_LIFE, "%{public}s: session is null", where);
+            return;
+        }
+
+        TLOGNI(WmsLogTag::WMS_LIFE, "%{public}s: id: %{public}d, isGamePrelaunch: %{public}d",
+               where, session->GetPersistentId(), isGamePrelaunch);
+        {
+            std::lock_guard<std::recursive_mutex> lock(session->sessionInfoMutex_);
+            session->sessionInfo_.isGamePrelaunch_ = isGamePrelaunch;
+        }
+
+        if (!isGamePrelaunch) {
+            session->ClearPrelaunchDisplayHook();
+        }
+    }, __func__);
+}
+
 WSError Session::Disconnect(bool isFromClient, const std::string& identityToken, bool isFromInnerkits)
 {
     auto state = GetSessionState();
@@ -2052,6 +2074,13 @@ WSError Session::DrawingCompleted()
 
 WSError Session::RemoveStartingWindow()
 {
+    std::string errMsg;
+    return RemoveStartingWindow(errMsg);
+}
+
+WSError Session::RemoveStartingWindow(std::string& errMsg)
+{
+    errMsg.clear();
     auto lifecycleListeners = GetListeners<ILifecycleListener>();
     for (auto& listener : lifecycleListeners) {
         if (auto listenerPtr = listener.lock()) {
@@ -6476,7 +6505,7 @@ void Session::NotifyPendingAppHookDisplayInfo()
     }
 }
 
-void Session::HandleHookDisplay(const PrelayoutContext& ctx)
+void Session::HandlePrelaunchDisplayHook(const PrelayoutContext& ctx)
 {
     if (!ctx.enable || !updateAppHookDisplayInfoFunc_) {
         return;
@@ -6497,6 +6526,27 @@ void Session::HandleHookDisplay(const PrelayoutContext& ctx)
               GetPersistentId(), callingUid_, ret);
         return;
     }
+    prelaunchDisplayHookEnabled_ = true;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Update prelaunch display hook successfully. id: %{public}d, uid: %{public}d",
+          GetPersistentId(), callingUid_);
+}
+
+void Session::ClearPrelaunchDisplayHook()
+{
+    if (!prelaunchDisplayHookEnabled_ || !updateAppHookDisplayInfoFunc_) {
+        return;
+    }
+
+    const auto ret = updateAppHookDisplayInfoFunc_(callingUid_, HookInfo {}, false);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::WMS_LAYOUT,
+            "Failed to clear prelaunch display hook. id: %{public}d, uid: %{public}d, ret: %{public}d",
+            GetPersistentId(), callingUid_, ret);
+        return;
+    }
+    prelaunchDisplayHookEnabled_ = false;
+    TLOGI(WmsLogTag::WMS_LAYOUT, "Clear prelaunch display hook successfully. id: %{public}d, uid: %{public}d",
+        GetPersistentId(), callingUid_);
 }
 
 WSError Session::UpdateLSStateInfo(bool isLSState)
