@@ -21573,7 +21573,6 @@ void SceneSessionManager::NotifyWindowPropertyChangeByWindowInfoKey(
         WindowInfoList windowInfoList;
         std::unordered_map<WindowInfoKey, WindowChangeInfoType> windowPropertyChangeInfo;
         PackWindowPropertyChangeInfo(session, windowPropertyChangeInfo);
-        session->SetPropertyDirtyFlags(0);
         windowInfoList.push_back(windowPropertyChangeInfo);
         SessionManagerAgentController::GetInstance().NotifyWindowPropertyChange(propertyDirtyFlags, windowInfoList);
     }, where);
