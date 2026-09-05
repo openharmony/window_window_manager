@@ -131,16 +131,19 @@ void RootScene::UpdateDisplayDpi(const sptr<DisplayInfo>& displayInfo, WindowSiz
     }
     auto displayId = displayInfo->GetDisplayId();
     wptr<Window> weakWindow(this);
+    bool found = false;
     {
         std::lock_guard<std::mutex> lock(rootSceneMapMutex_);
         auto iter = rootSceneMap_.find(displayId);
         if (iter != rootSceneMap_.end()) {
             weakWindow = iter->second;
+            found = true;
         }
     }
     auto window = weakWindow.promote();
-    if (window == nullptr) {
-        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no window: reason=%{public}u, displayId=%{public}" PRIu64, reason, displayId);
+    if (!found || window == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "no window: found=%{public}d, reason=%{public}u, displayId=%{public}" PRIu64,
+            found, reason, displayId);
         return;
     }
     auto dpi = displayInfo->GetVirtualPixelRatio();
