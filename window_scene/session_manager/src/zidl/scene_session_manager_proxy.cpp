@@ -54,34 +54,41 @@ WSErrorResult SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sp
     MessageParcel reply;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write InterfaceToken failed!");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Write InterfaceToken failed!"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to write interface token, "
+            "Please contact official support for assistance."};
     }
     if (!data.WriteRemoteObject(sessionStage->AsObject())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write ISessionStage failed!");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Write ISessionStage failed!"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to write the ISessionStage remote object, "
+            "Please contact official support for assistance."};
     }
     if (!data.WriteRemoteObject(eventChannel->AsObject())) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write IWindowEventChannel failed!");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Write IWindowEventChannel failed!"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to write IWindowEventChannel, "
+            "Please contact official support for assistance."};
     }
     if (!data.WriteUint64(nodeId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write nodeId failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Write nodeId failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to write node ID, "
+            "Please contact official support for assistance."};
     }
     if (!property || !data.WriteStrongParcelable(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write property failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Write property failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to write property, "
+            "Please contact official support for assistance."};
     }
     if (token != nullptr) {
         if (!data.WriteRemoteObject(token)) {
-            return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Write token failed"};
+            return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to write token, "
+                "Please contact official support for assistance."};
         }
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "remote is null"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "The remote binder object is null, "
+            "Please contact official support for assistance."};
     }
     int32_t errCode = ERR_NONE;
     std::string errMsg = "";
@@ -89,13 +96,15 @@ WSErrorResult SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sp
         SceneSessionManagerMessage::TRANS_ID_CREATE_AND_CONNECT_SPECIFIC_SESSION), data, reply, option) != ERR_NONE ||
         !reply.ReadInt32(errCode) || !reply.ReadString(errMsg)) {
         TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "SendRequest failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "IPC SendRequest invocation failed, "
+            "Please contact official support for assistance."};
     }
     persistentId = reply.ReadInt32();
     sptr<IRemoteObject> sessionObject = reply.ReadRemoteObject();
     if (sessionObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "ReadRemoteObject failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "ReadRemoteObject failed"};
+        TLOGE(WmsLogTag::WMS_LIFE, "Read RemoteObject failed");
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to read the session remote object, "
+            "Please contact official support for assistance."};
     }
     session = iface_cast<ISession>(sessionObject);
     sptr<SystemSessionConfig> config = reply.ReadParcelable<SystemSessionConfig>();
@@ -104,27 +113,31 @@ WSErrorResult SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sp
     }
     sptr<IRemoteObject> renderSessionObject = reply.ReadRemoteObject();
     if (renderSessionObject == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "ReadRemoteObject failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Read renderSessionObject failed"};
+        TLOGE(WmsLogTag::WMS_LIFE, "Read RemoteObject failed");
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to read the render session remote object, "
+            "Please contact official support for assistance."};
     }
     renderSession = renderSessionObject;
 
     surfaceNode = RSSurfaceNode::Unmarshalling(reply, false);
     if (!surfaceNode) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read surfaceNode failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Read surfaceNode failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to read the RSSurfaceNode parcel data, "
+            "Please contact official support for assistance."};
     }
 
     uint32_t level = 0;
     if (!reply.ReadUint32(level)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read level failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Read level failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to read the subwindow level value, "
+            "Please contact official support for assistance."};
     }
     property->SetSubWindowLevel(level);
     uint64_t displayId = 0;
     if (!reply.ReadUint64(displayId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read displayId failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Read displayId failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to read the display ID, "
+            "Please contact official support for assistance."};
     }
     if (property->GetDisplayId() != VIRTUAL_DISPLAY_ID) {
         property->SetDisplayId(displayId);
@@ -132,13 +145,15 @@ WSErrorResult SceneSessionManagerProxy::CreateAndConnectSpecificSession(const sp
     uint32_t windowType = 0;
     if (!reply.ReadUint32(windowType)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read windowType failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Read windowType failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to read the window type value, "
+            "Please contact official support for assistance."};
     }
     property->SetWindowType(static_cast<WindowType>(windowType));
     bool isSystemCalling = false;
     if (!reply.ReadBool(isSystemCalling)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Read isSystemCalling failed");
-        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Read isSystemCalling failed"};
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to read the system‑calling flag, "
+            "Please contact official support for assistance."};
     }
     property->SetSystemCalling(isSystemCalling);
     return WSErrorResult{static_cast<WSError>(errCode), errMsg};

@@ -435,7 +435,7 @@ static void AdjustPropertySessionInfo(const std::shared_ptr<AbilityRuntime::Cont
     }
 }
 
-WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
+WMErrorResult WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
@@ -474,7 +474,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             WMError wmError = SingletonContainer::Get<WindowAdapter>()
                 .GetCrossProcessWindowInfo(crossProcessWindowInfo);
             if (wmError != WMError::WM_OK) {
-                return wmError;
+                return WMErrorResult{wmError, ""}
             }
             property_->SetParentPersistentId(crossProcessWindowInfo.persistentId);
             property_->SetDisplayId(crossProcessWindowInfo.displayId);
@@ -487,7 +487,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             sptr<WindowSessionImpl> parentSession = nullptr;
             auto ret = WindowSceneSessionImpl::GetParentSessionAndVerify(hasToastFlag, parentSession);
             if (ret != WMError::WM_OK) {
-                return ret;
+                return WMErrorResult{ret, ""}
             }
             property_->SetDisplayId(parentSession->GetDisplayId());
             // set parent persistentId
@@ -509,7 +509,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
-            return createSystemWindowRet;
+            return WMErrorResult{createSystemWindowRet, ""}
         }
         auto parentSession = FindParentSessionByParentId(property_->GetParentPersistentId());
         if (parentSession != nullptr) {
@@ -526,17 +526,17 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             property_->GetWindowName().c_str());
         RecordLifeCycleExceptionEvent(WMError::WM_ERROR_NULLPTR,
             WMErrorReason::WM_REASON_SUB_WINDOW_IPC_CREATE_ERR, "sub window create failed when ipc");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMErrorResult{WMError::WM_ERROR_NULLPTR, result.errMsg};
     }
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "create specific failed, surfaceNode is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
-        return WMError::WM_ERROR_NULLPTR;
+        return WMErrorResult{WMError::WM_ERROR_NULLPTR, result.errMsg};
     }
     if (renderSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "create specific failed, renderSession is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
-        return WMError::WM_ERROR_NULLPTR;
+        return WMErrorResult{WMError::WM_ERROR_NULLPTR, result.errMsg};
     }
     PostInitSurfaceNode(renderSession);
     {
@@ -548,7 +548,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->GetWindowName().c_str(),
         property_->GetPersistentId(), property_->GetParentPersistentId(), GetType(),
         property_->GetTouchable(), property_->GetDisplayId(), result.errCode, result.errMsg.c_str());
-    return WMError::WM_OK;
+    return WMErrorResult{WMError::WM_OK, "success"};
 }
 
 WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
@@ -828,7 +828,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
         InitSubSessionDragEnable();
         isEnableDefaultDensityWhenCreate_ = windowOption_->IsDefaultDensityEnabled();
-        ret = CreateAndConnectSpecificSession();
+        WMErrorResult result = CreateAndConnectSpecificSession();
+        ret = result.errCode;
+        errMsg = result.errMsg;
     }
 
     if (ret == WMError::WM_OK) {
