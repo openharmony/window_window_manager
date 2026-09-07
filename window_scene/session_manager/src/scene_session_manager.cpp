@@ -5155,21 +5155,22 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
 {
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
-        return WSErrorResult{WSError::WS_ERROR_NOT_SYSTEM_APP, "create system window or modal subwindow permission denied!"};
+        return WSErrorResult{WSError::WS_ERROR_NOT_SYSTEM_APP,
+            "Permission denied for creating a system window or a modal subwindow."};
     }
 
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     WSError processCheckRet = CheckSubWindowCallingProcess(property, parentSession);
     if (processCheckRet != WSError::WS_OK) {
-        TLOGE(WmsLogTag::WMS_LIFE, "sub window calling process check failed!");
-        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "sub window calling process check failed"};
+        TLOGE(WmsLogTag::WMS_LIFE, "subwindow calling process check failed!");
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "Subwindow calling process verification failed."};
     }
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
         if (parentProperty->GetSubWindowLevel() >= MAX_SUB_WINDOW_LEVEL &&
             !WindowHelper::IsToastSubWindow(property->GetWindowType(), property->GetWindowFlags())) {
-            TLOGE(WmsLogTag::WMS_SUB, "sub window level exceeds limit");
-            return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "sub window level exceeds limit"};
+            TLOGE(WmsLogTag::WMS_SUB, "subwindow level exceeds limit");
+            return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "Subwindow level exceeds the maximum limit."};
         }
         property->SetSubWindowLevel(parentProperty->GetSubWindowLevel() + 1);
         if (parentSession->GetSessionInfo().isSystem_ && property->GetIsUIExtFirstSubWindow() &&
@@ -5191,7 +5192,7 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         auto infos = parentSession->GetExtInfoWithHideNonSecureWindowFlag();
         std::ostringstream oss;
-        oss << "It is not allowed to create non-secure window when secure extension exists. Maybe blocked by:";
+        oss << "It is not allowed to create a non-secure window when secure extension exists. Blocked by:";
         for(const auto& tokenInfo: infos) {
             AAFwk::UIExtensionSessionInfo extInfo;
             AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(tokenInfo.abilityToken, extInfo);
@@ -5202,34 +5203,35 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
     bool isPhoneOrPad = systemConfig_.IsPhoneWindow() || systemConfig_.IsPadWindow();
     if (!isPhoneOrPad && property->GetWindowType() == WindowType::WINDOW_TYPE_MUTISCREEN_COLLABORATION) {
         TLOGE(WmsLogTag::WMS_LIFE, "only phone or pad can create mutiScreen collaboration window");
-        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "only phone or pad can create mutiScreen collaboration window"};
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION,
+            "Only phone or tablet can create a multi-screen collaboration window."};
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
         WSError err = CheckSubSessionStartedByExtension(token, property);
         if (err != WSError::WS_OK) {
             return WSErrorResult{err,
-                "The extension ability type or the parent of extension subwindow is invalid!"};
+                "The extension ability type or the parent of the extension subwindow is invalid."};
         }
         SetExtensionSubSessionDisplayId(property, sessionStage);
     }
     // WINDOW_TYPE_SYSTEM_ALARM_WINDOW has been deprecated, will be deleted after 5 versions.
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW) {
         TLOGE(WmsLogTag::DEFAULT, "The alarm window has been deprecated!");
-        return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "The alarm window has been deprecated!"};
+        return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "The alarm window has been deprecated."};
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_FB) {
         auto ret = IsFloatingBallValid(parentSession);
         if (ret != WSError::WS_OK) {
-            return WSErrorResult{ret, "parent is null or state invalid when create float view"};
+            return WSErrorResult{ret, "Parent is null or state is invalid when creating the float view."};
         }
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_FV) {
         auto ret = CanCreateFloatView(parentSession);
         if (ret != WSError::WS_OK) {
-            return WSErrorResult{ret, "parent is null when create float view"};
+            return WSErrorResult{ret, "Parent is null when creating the float view."};
         }
     }
 
@@ -5244,7 +5246,7 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
                 &renderSession, pid, uid, isSystemCalling, initClientDisplayId, parentSession, tokenId]() -> WSErrorResult {
         if (property == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "property is nullptr");
-            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "property is nullptr"};
+            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "Property is null."};
         }
         const auto type = property->GetWindowType();
         if (type == WindowType::WINDOW_TYPE_PIP) {
@@ -5265,7 +5267,7 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
         sptr<SceneSession> newSession = RequestSceneSession(info, property);
         if (newSession == nullptr) {
             TLOGNE(WmsLogTag::WMS_LIFE, "session is nullptr");
-            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "session is nullptr"};
+            return WSErrorResult{WSError::WS_ERROR_NULLPTR, "Session is null."};
         }
         newSession->SetClientDisplayId(initClientDisplayId);
         property->SetSystemCalling(isSystemCalling);
@@ -5582,15 +5584,15 @@ WSErrorResult SceneSessionManager::CheckPiPCreateAndLog(const sptr<WindowSession
     if (!SessionPermission::IsSystemCalling() && IsSystemOnlyPiPTemplateType(pipTemplateType)) {
         TLOGI(WmsLogTag::WMS_PIP, "non-system app cannot create pip templateType %{public}u",
             property->GetPiPTemplateInfo().pipTemplateType);
-        return WSErrorResult{WSError::WS_DO_NOTHING, "pip template requires system app"};
+        return WSErrorResult{WSError::WS_DO_NOTHING, "Pip template requires system app."};
     }
     auto checkResult = CheckPiPCreate(property, type);
     if (checkResult == WSError::WS_ERROR_INVALID_PERMISSION) {
         TLOGNE(WmsLogTag::WMS_PIP, "forbid pip window creation.");
-        return WSErrorResult{WSError::WS_ERROR_INVALID_PERMISSION, "forbid pip window creation."};
+        return WSErrorResult{WSError::WS_ERROR_INVALID_PERMISSION, "Forbid pip window creation."};
     } else if (checkResult == WSError::WS_DO_NOTHING) {
         TLOGNE(WmsLogTag::WMS_PIP, "pip window is not enabled to create.");
-        return WSErrorResult{WSError::WS_DO_NOTHING, "pip window is not enabled to create."};
+        return WSErrorResult{WSError::WS_DO_NOTHING, "Pip window is not allowed to create."};
     }
     return WSErrorResult{WSError::WS_OK, "pip window check success"};
 }

@@ -473,7 +473,7 @@ public:
     bool CheckWindowCanInHoverState(const Rect& windowRect) override;
 
 protected:
-    WMError CreateAndConnectSpecificSession();
+    WMErrorResult CreateAndConnectSpecificSession();
     WMError CreateSystemWindow(WindowType type);
     sptr<WindowSessionImpl> FindParentSessionByParentId(uint32_t parentId);
     bool IsSessionMainWindow(uint32_t parentId);

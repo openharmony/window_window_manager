@@ -335,14 +335,15 @@ int SceneSessionManagerStub::HandleCreateAndConnectSpecificSession(MessageParcel
     if (sessionStage == nullptr || eventChannel == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read scene session stage object or event channel object!");
         reply.WriteInt32(static_cast<uint32_t>(WSError::WS_ERROR_IPC_FAILED));
-        reply.WriteString("Failed to read scene session stage object or event channel object!");
+        reply.WriteString("Failed to read scene session stage object or event channel object, "
+            "Please contact official support for assistance.");
         return ERR_INVALID_DATA;
     }
     sptr<WindowSessionProperty> property = data.ReadStrongParcelable<WindowSessionProperty>();
     if (property == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "property is nullptr");
         reply.WriteInt32(static_cast<uint32_t>(WSError::WS_ERROR_IPC_FAILED));
-        reply.WriteString("property is nullptr");
+        reply.WriteString("Property is null, Please contact official support for assistance.");
         return ERR_INVALID_DATA;
     }
 
