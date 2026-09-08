@@ -253,18 +253,19 @@ struct WindowCreateParams : public Parcelable {
         if (!parcel.WriteParcelable(animationParams.get())) {
             return false;
         }
+
         if (!parcel.WriteParcelable(animationSystemParams.get())) {
             return false;
         }
+
         bool hasNeedAnimation = (needAnimation != nullptr);
         if (!parcel.WriteBool(hasNeedAnimation)) {
             return false;
         }
-        if (hasNeedAnimation) {
-            if (!parcel.WriteBool(*needAnimation)) {
-                return false;
-            }
+        if (hasNeedAnimation && !parcel.WriteBool(*needAnimation)) {
+            return false;
         }
+
         if (!parcel.WriteBool(isWindowLimitsForcible)) {
             return false;
         }
@@ -277,20 +278,16 @@ struct WindowCreateParams : public Parcelable {
         if (!parcel.WriteBool(hasExcludeFromDock)) {
             return false;
         }
-        if (hasExcludeFromDock) {
-            if (!parcel.WriteBool(*excludeFromDock)) {
-                return false;
-            }
+        if (hasExcludeFromDock && !parcel.WriteBool(*excludeFromDock)) {
+            return false;
         }
 
         bool hasExcludeFromRecent = (excludeFromRecent != nullptr);
         if (!parcel.WriteBool(hasExcludeFromRecent)) {
             return false;
         }
-        if (hasExcludeFromRecent) {
-            if (!parcel.WriteBool(*excludeFromRecent)) {
-                return false;
-            }
+        if (hasExcludeFromRecent && !parcel.WriteBool(*excludeFromRecent)) {
+            return false;
         }
         return true;
     }
