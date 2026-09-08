@@ -23,6 +23,7 @@
 #include <atomic>
 #include <chrono>
 #include <climits>
+#include <sstream>
 #include "configuration.h"
 #include <hitrace_meter.h>
 #include <type_traits>
@@ -6374,6 +6375,13 @@ std::vector<Rect> SceneSession::GetTouchHotAreas() const
     auto property = GetSessionProperty();
     if (property) {
         property->GetTouchHotAreas(touchHotAreas);
+    }
+    if (!touchHotAreas.empty()) {
+        std::ostringstream oss;
+        for (const auto& rect : touchHotAreas) {
+            oss << "[" << rect.posX_ << "," << rect.posY_ << "," << rect.width_ << "," << rect.height_ << "]";
+        }
+        TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, hotAreas:%{public}s", GetPersistentId(), oss.str().c_str());
     }
     return touchHotAreas;
 }

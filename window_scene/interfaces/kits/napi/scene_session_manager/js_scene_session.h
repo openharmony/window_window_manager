@@ -191,6 +191,7 @@ private:
     static napi_value SetShowRecent(napi_env env, napi_callback_info info);
     static napi_value SetZOrder(napi_env env, napi_callback_info info);
     static napi_value SetTouchable(napi_env env, napi_callback_info info);
+    static napi_value GetTouchHotAreas(napi_env env, napi_callback_info info);
     static napi_value SetWindowInputType(napi_env env, napi_callback_info info);
     static napi_value SetExpandInputFlag(napi_env env, napi_callback_info info);
     static napi_value SetSystemActive(napi_env env, napi_callback_info info);
@@ -318,6 +319,7 @@ private:
     napi_value OnSetShowRecent(napi_env env, napi_callback_info info);
     napi_value OnSetZOrder(napi_env env, napi_callback_info info);
     napi_value OnSetTouchable(napi_env env, napi_callback_info info);
+    napi_value OnGetTouchHotAreas(napi_env env, napi_callback_info info);
     napi_value OnSetWindowInputType(napi_env env, napi_callback_info info);
     napi_value OnSetExpandInputFlag(napi_env env, napi_callback_info info);
     napi_value OnSetSystemActive(napi_env env, napi_callback_info info);
