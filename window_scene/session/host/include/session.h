@@ -1004,7 +1004,7 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
+    virtual std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
 
     /*
      * Window highligt outline

@@ -921,8 +921,22 @@ void WindowSessionImpl::PostInitSurfaceNode(sptr<IRemoteObject> renderSession)
     RSUIContextContainer::SetRenderSession(renderSession);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession, rsUIContext_);
     auto rsUIContext = rsUIDirector_->GetRSUIContext();
+    if (SysCapUtil::GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME &&
+        surfaceNode_->GetRSUIContext() != nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "sceneboard need a newSurfaceNode, %{public}s",
+            property_->GetWindowName().c_str());
+        MessageParcel parcel;
+        if (surfaceNode_->Marshalling(parcel)) {
+            auto newSurfaceNode = RSSurfaceNode::Unmarshalling(parcel, false);
+            if (newSurfaceNode) {
+                TLOGI(WmsLogTag::WMS_LIFE, "sceneboard use newSurfaceNode instead, %{public}s",
+                    property_->GetWindowName().c_str());
+                surfaceNode_ = newSurfaceNode;
+            }
+        }
+    }
     surfaceNode_->SetRSUIContext(rsUIContext);
-    RSUIContextContainer::SetRSUIContext(rsUIContext);
+    RSUIContextContainer::SetRSUIContext(GetPersistentId(), rsUIContext);
     TLOGI(WmsLogTag::WMS_LIFE, "post init surfaceNode success, name: %{public}s", property_->GetWindowName().c_str());
 }
 
@@ -1289,6 +1303,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d, reason:%{public}u, isFromInnerkits:%{public}d",
         GetPersistentId(), state_, needNotifyServer, needClearListener, reason, isFromInnerkits);
+    RSUIContextContainer::RemoveRSUIContext(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFW("session is invalid");
         ReleaseSurfaceNode();
