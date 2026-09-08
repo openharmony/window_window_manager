@@ -628,6 +628,7 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "getZOrder", moduleName, JsSceneSession::GetZOrder);
     BindNativeFunction(env, objValue, "getUid", moduleName, JsSceneSession::GetUid);
     BindNativeFunction(env, objValue, "setTouchable", moduleName, JsSceneSession::SetTouchable);
+    BindNativeFunction(env, objValue, "getTouchHotAreas", moduleName, JsSceneSession::GetTouchHotAreas);
     BindNativeFunction(env, objValue, "setWindowInputType", moduleName, JsSceneSession::SetWindowInputType);
     BindNativeFunction(env, objValue, "setExpandInputFlag", moduleName, JsSceneSession::SetExpandInputFlag);
     BindNativeFunction(env, objValue, "setSystemActive", moduleName, JsSceneSession::SetSystemActive);
@@ -2854,6 +2855,13 @@ napi_value JsSceneSession::SetTouchable(napi_env env, napi_callback_info info)
 {
     JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
     return (me != nullptr) ? me->OnSetTouchable(env, info): nullptr;
+}
+
+napi_value JsSceneSession::GetTouchHotAreas(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_EVENT, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnGetTouchHotAreas(env, info) : nullptr;
 }
 
 napi_value JsSceneSession::SetWindowInputType(napi_env env, napi_callback_info info)
@@ -6535,6 +6543,22 @@ napi_value JsSceneSession::OnSetTouchable(napi_env env, napi_callback_info info)
 
     session->SetSystemTouchable(touchable);
     return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::OnGetTouchHotAreas(napi_env env, napi_callback_info info)
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+    std::vector<Rect> touchHotAreas = session->GetTouchHotAreas();
+    napi_value array = nullptr;
+    napi_create_array_with_length(env, touchHotAreas.size(), &array);
+    for (size_t i = 0; i < touchHotAreas.size(); ++i) {
+        napi_set_element(env, array, i, CreateJsSessionRect(env, touchHotAreas[i]));
+    }
+    return array;
 }
 
 napi_value JsSceneSession::OnSetWindowInputType(napi_env env, napi_callback_info info)
