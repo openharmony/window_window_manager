@@ -635,6 +635,11 @@ public:
     // mirror screen
     bool HandleResolutionEffectChange();
     bool RecoveryResolutionEffect();
+    void RecoveryResolutionEffectOnOwnerExit(const std::vector<ScreenId>& screenIds);
+    // Complete the mirror-group teardown for a cast virtual screen whose mirror is ended by a
+    // non-ChangeScreenGroup path (multi-screen mode change); physical screens and non-members
+    // are deliberately untouched.
+    void RemoveScreenFromMirrorGroup(ScreenId screenId);
     bool HandleCastVirtualScreenMirrorRegion();
     bool IsFirstSCBConnect() const;
     void SetFirstSCBConnect(bool firstSCBConnect);
@@ -1417,10 +1422,12 @@ private:
     // mirror screen
     DMError SyncScreenPropertyChangedToServer(ScreenId screenId, const ScreenProperty& screenProperty) override;
     void HandleResolutionEffectChangeWhenRotate(ScreenPropertyChangeType type, int rotation, ScreenId screenId);
-    void CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
+    // Pure ratio calculation: returns whether the external ratio differs from the internal one
+    // (i.e. the soft resolution is actually needed). Does not touch the effect state.
+    bool CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
         const sptr<ScreenSession>& externalSession, const bool& effectFlag,
         uint32_t& targetWidth, uint32_t& targetHeight);
-    bool SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height);
+    bool SetResolutionEffect(ScreenId screenId, uint32_t width, uint32_t height, bool effectNeeded);
     void RegisterSettingOsSwitchStatusObserver();
     void HandleOsSwitchStatusChange();
     void HandleOsSwitchResolutionStatusChange(const std::string& status);
@@ -1431,7 +1438,22 @@ private:
     void SetInternalScreenResolutionEffect(const sptr<ScreenSession>& internalSession, DMRect& toRect);
     void SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& toRect);
     void GetCastVirtualMirrorSession(sptr<ScreenSession>& virtualSession);
+    void GetMirrorExternalSession(sptr<ScreenSession>& externalSession);
+    bool IsActiveMirrorTarget(const sptr<ScreenSession>& screenSession);
+    // Resolution-effect bookkeeping: the two members below form ONE logical state and must only
+    // be touched through the Mark*/Is*/Get* helpers, never directly.
+    // Invariant at rest: enabled == true  <=>  ownerId is the mirror target (physical external or
+    // cast virtual screen, sms id) the effect is currently keyed on;
+    //                    enabled == false <=>  ownerId == SCREEN_ID_INVALID.
+    // The owner id is compared against exiting screen ids on mirror-exit hooks instead of probing
+    // mirror state, which is spread across per-screen and group fields no single path maintains.
+    bool IsResolutionEffectActive() const;
+    ScreenId GetResolutionEffectOwner() const;
+    bool IsResolutionEffectOwnedByAnyOf(const std::vector<ScreenId>& screenIds) const;
+    void MarkResolutionEffectApplied(ScreenId ownerId);
+    void MarkResolutionEffectIdle();
     std::atomic<bool> curResolutionEffectEnable_ = false;
+    std::atomic<ScreenId> resolutionEffectOwnerId_ { SCREEN_ID_INVALID };
     void SetOptionConfig(ScreenId screenId, VirtualScreenOption option);
     void InitScreenActiveModeRectMap();
     void SetScreenSessionScale(const sptr<ScreenSession>& screenSession, float scaleX, float scaleY);

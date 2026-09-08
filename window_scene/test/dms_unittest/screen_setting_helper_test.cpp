@@ -1621,6 +1621,20 @@ HWTEST_F(ScreenSettingHelperTest, ParseJsonObjectToEnumMap, Function | SmallTest
     }
 
     /**
+     * @tc.name: GetResolutionEffectEmptySerialTest
+     * @tc.desc: Empty serialNumber skips the setting lookup and keeps enable unchanged
+     * @tc.type: FUNC
+     */
+    HWTEST_F(ScreenSettingHelperTest, GetResolutionEffectEmptySerialTest, Function | SmallTest | Level3)
+    {
+        ScreenSettingHelper screenSettingHelper = ScreenSettingHelper();
+        bool value = true;
+        auto ret = screenSettingHelper.GetResolutionEffect(value, "");
+        ASSERT_FALSE(ret);
+        ASSERT_TRUE(value);
+    }
+
+    /**
      * @tc.name: RegisterRotationCorrectionExemptionListObserver
      * @tc.desc: RegisterRotationCorrectionExemptionListObserver
      * @tc.type: FUNC
