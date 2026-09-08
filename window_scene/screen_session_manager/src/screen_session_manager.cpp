@@ -2891,7 +2891,9 @@ void ScreenSessionManager::HandlePhysicalMirrorDisconnect(sptr<ScreenSession> sc
     bool phyMirrorEnable)
 {
     if (phyMirrorEnable) {
-        RecoveryResolutionEffect();
+        // Owner-guarded: a physical mirror leaving must only recover the effect keyed on it;
+        // an ongoing cast-owned effect survives the physical mirror teardown.
+        RecoveryResolutionEffectOnOwnerExit({ screenSession->GetScreenId() });
         NotifyCastWhenScreenConnectChange(false);
         FreeDisplayMirrorNodeInner(screenSession);
         isPhyScreenConnected_ = false;
@@ -4508,9 +4510,40 @@ void ScreenSessionManager::HandleResolutionEffectChangeWhenRotate(ScreenProperty
 #endif
 }
 
+bool ScreenSessionManager::IsResolutionEffectActive() const
+{
+    return curResolutionEffectEnable_.load();
+}
+
+ScreenId ScreenSessionManager::GetResolutionEffectOwner() const
+{
+    return resolutionEffectOwnerId_.load();
+}
+
+bool ScreenSessionManager::IsResolutionEffectOwnedByAnyOf(const std::vector<ScreenId>& screenIds) const
+{
+    ScreenId ownerId = GetResolutionEffectOwner();
+    return std::find(screenIds.begin(), screenIds.end(), ownerId) != screenIds.end();
+}
+
+void ScreenSessionManager::MarkResolutionEffectApplied(ScreenId ownerId)
+{
+    // Owner first: readers gate on the enabled flag, so once enabled is observed the owner
+    // must already point at the new target.
+    resolutionEffectOwnerId_.store(ownerId);
+    curResolutionEffectEnable_.store(true);
+}
+
+void ScreenSessionManager::MarkResolutionEffectIdle()
+{
+    // Enabled first, symmetric rationale: an observed invalid owner implies the effect is off.
+    curResolutionEffectEnable_.store(false);
+    resolutionEffectOwnerId_.store(SCREEN_ID_INVALID);
+}
+
 bool ScreenSessionManager::HandleResolutionEffectChange()
 {
-    if (!g_isPcDevice) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         TLOGNFE(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -4518,8 +4551,11 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> externalSession = nullptr;
     GetInternalAndExternalSession(internalSession, externalSession);
+    GetMirrorExternalSession(externalSession);
     if (internalSession == nullptr || externalSession == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "internal or external Session null");
+        // No eligible mirror target remains, restore the full resolution if the effect is on.
+        RecoveryResolutionEffect();
         return false;
     }
     bool effectFlag = false;
@@ -4529,20 +4565,24 @@ bool ScreenSessionManager::HandleResolutionEffectChange()
         TLOGNFI(WmsLogTag::DMS, "SuperFoldDisplayDevice status not support");
         return false;
     }
-    if(!effectFlag || externalSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+    // A PC-mode-switchable device currently in pad mode must recover any effect left over
+    // from PC mode instead of re-applying it (restored from PR 17822).
+    bool osSwitchPadRecovery = IS_SUPPORT_PC_MODE && !g_isPcDevice && IS_OS_SWITCH_PAD_NEED_RECOVER;
+    if(!effectFlag || osSwitchPadRecovery || !IsActiveMirrorTarget(externalSession)) {
         RecoveryResolutionEffect();
         return false;
     }
     uint32_t targetWidth = 0;
     uint32_t targetHeight = 0;
-    CalculateTargetResolution(internalSession, externalSession, effectFlag, targetWidth, targetHeight);
+    bool effectNeeded = CalculateTargetResolution(internalSession, externalSession, effectFlag,
+        targetWidth, targetHeight);
     if (targetWidth != 0 && targetHeight != 0) {
-        SetResolutionEffect(internalSession->GetScreenId(), targetWidth, targetHeight);
+        SetResolutionEffect(internalSession->GetScreenId(), targetWidth, targetHeight, effectNeeded);
     }
     return true;
 }
 
-void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
+bool ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& internalSession,
     const sptr<ScreenSession>& externalSession, const bool& effectFlag,
     uint32_t& targetWidth, uint32_t& targetHeight)
 {
@@ -4550,13 +4590,22 @@ void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& 
     uint32_t innerHeight = internalSession->GetScreenProperty().GetScreenRealHeight();
     uint32_t externalWidth = externalSession->GetScreenProperty().GetScreenRealWidth();
     uint32_t externalHeight = externalSession->GetScreenProperty().GetScreenRealHeight();
-    if (IsVertical(internalSession->GetRotation()) != IsVertical(externalSession->GetRotation())) {
+    if (externalSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+        // Virtual screens never rotate (always ROTATION_0), so the rotation comparison used
+        // for physical screens is meaningless for them, and the cast engine may report the
+        // target dims either in landscape or in swapped order. Align the reported orientation
+        // with the internal screen's current orientation so the ratio is computed in the same
+        // space whichever convention the engine uses.
+        if ((externalWidth > externalHeight) != (innerWidth > innerHeight)) {
+            std::swap(externalWidth, externalHeight);
+        }
+    } else if (IsVertical(internalSession->GetRotation()) != IsVertical(externalSession->GetRotation())) {
         std::swap(externalWidth, externalHeight);
     }
     targetWidth = innerWidth;
     targetHeight = innerHeight;
     if (innerHeight == 0 || externalHeight == 0) {
-        return;
+        return false;
     }
     float innerResolution = static_cast<float>(innerWidth) / innerHeight;
     float externalResolution = static_cast<float>(externalWidth) / externalHeight;
@@ -4564,7 +4613,7 @@ void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& 
     TLOGNFI(WmsLogTag::DMS, "innerResolution:%{public}f, externalResolution %{public}f",
         innerResolution, externalResolution);
     if (externalResolution == 0) {
-        return;
+        return false;
     }
     if (effectFlag && std::fabs(diffResolution) >= FLT_EPSILON) {
         if (externalResolution > innerResolution ) {
@@ -4572,15 +4621,15 @@ void ScreenSessionManager::CalculateTargetResolution(const sptr<ScreenSession>& 
         } else {
             targetWidth = static_cast<uint32_t>(innerHeight * externalResolution);
         }
-        curResolutionEffectEnable_.store(true);
-    } else {
-        curResolutionEffectEnable_.store(false);
+        return true;
     }
+    return false;
 }
 
-bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t width, uint32_t height)
+bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId, uint32_t width, uint32_t height,
+    bool effectNeeded)
 {
-    if (!g_isPcDevice) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         TLOGNFW(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -4589,8 +4638,8 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
     sptr<ScreenSession> internalSession = nullptr;
     sptr<ScreenSession> externalSession = nullptr;
     GetInternalAndExternalSession(internalSession, externalSession);
-    if (externalSession == nullptr ||
-        externalSession->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+    GetMirrorExternalSession(externalSession);
+    if (externalSession == nullptr || !IsActiveMirrorTarget(externalSession)) {
         return false;
     }
     if (internalSession == nullptr || internalSession->GetScreenId() != screenId) {
@@ -4608,6 +4657,14 @@ bool ScreenSessionManager::SetResolutionEffect(ScreenId screenId,  uint32_t widt
     };
     TLOGNFI(WmsLogTag::DMS, "toRect %{public}d %{public}d %{public}d %{public}d",
         toRect.posX_, toRect.posY_, toRect.width_, toRect.height_);
+    // All checks passed, so the bookkeeping is transitioned before the setters below: they read
+    // the active flag to pick between the cropped and the full-rect configuration. A no-op apply
+    // (ratios already match) resets any previous crop and returns the state to idle.
+    if (effectNeeded) {
+        MarkResolutionEffectApplied(externalSession->GetScreenId());
+    } else {
+        MarkResolutionEffectIdle();
+    }
     SetInternalScreenResolutionEffect(internalSession, toRect);
     SetExternalScreenResolutionEffect(externalSession, toRect);
     HandleCastVirtualScreenMirrorRegion();
@@ -4621,10 +4678,15 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         TLOGNFW(WmsLogTag::DMS, "not support");
         return false;
     }
+    if (!IsResolutionEffectActive()) {
+        TLOGNFI(WmsLogTag::DMS, "resolution effect is not active, no need recovery");
+        return true;
+    }
     TLOGNFI(WmsLogTag::DMS, "recovery inner and external screen resolution");
-    sptr<ScreenSession> internalSession = nullptr;
-    sptr<ScreenSession> externalSession = nullptr;
-    GetInternalAndExternalSession(internalSession, externalSession);
+    // Only the internal screen is needed here; the external one is resolved through the owner
+    // below. Deliberately not gated on "current in use": the internal screen must be restorable
+    // even if it is momentarily not the active display.
+    sptr<ScreenSession> internalSession = GetInternalScreenSession();
     if (internalSession == nullptr) {
         TLOGNFE(WmsLogTag::DMS, "internalSession null");
         return false;
@@ -4634,13 +4696,19 @@ bool ScreenSessionManager::RecoveryResolutionEffect()
         internalProperty.GetScreenRealHeight()};
     TLOGNFI(WmsLogTag::DMS, "realResolutionRect %{public}d %{public}d %{public}d %{public}d",
         realResolutionRect.posX_, realResolutionRect.posY_, realResolutionRect.width_, realResolutionRect.height_);
-    curResolutionEffectEnable_.store(false);
+    // Capture the owner and settle the bookkeeping up front; its region is reset from the local
+    // copy below. The owner may be a physical mirror (not in any group) or a cast virtual screen.
+    // If it is already gone, HandleCastVirtualScreenMirrorRegion below still clears a remaining
+    // cast screen.
+    ScreenId ownerId = GetResolutionEffectOwner();
+    MarkResolutionEffectIdle();
     SetInternalScreenResolutionEffect(internalSession, realResolutionRect);
-    if (externalSession != nullptr) {
-        auto externalProperty = externalSession->GetScreenProperty();
-        DMRect externalRealRect = { 0, 0, externalProperty.GetScreenRealWidth(),
-            externalProperty.GetScreenRealHeight()};
-        SetExternalScreenResolutionEffect(externalSession, externalRealRect);
+    auto ownerSession = GetScreenSession(ownerId);
+    if (ownerSession != nullptr) {
+        auto ownerProperty = ownerSession->GetScreenProperty();
+        DMRect ownerRealRect = { 0, 0, ownerProperty.GetScreenRealWidth(),
+            ownerProperty.GetScreenRealHeight()};
+        SetExternalScreenResolutionEffect(ownerSession, ownerRealRect);
     }
     HandleCastVirtualScreenMirrorRegion();
     NotifyScreenModeChange();
@@ -4674,7 +4742,7 @@ void ScreenSessionManager::SetInternalScreenResolutionEffect(const sptr<ScreenSe
         TLOGNFE(WmsLogTag::DMS, "clientProxy_ is null");
         return;
     }
-    clientProxy->SetInternalClipToBounds(internalSession->GetScreenId(), curResolutionEffectEnable_.load());
+    clientProxy->SetInternalClipToBounds(internalSession->GetScreenId(), IsResolutionEffectActive());
 }
 
 void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSession>& externalSession, DMRect& targetRect)
@@ -4689,7 +4757,7 @@ void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSe
     }
     //all zero, means full screen mirror.
     DMRect mirrorRegion = targetRect;
-    if (!curResolutionEffectEnable_.load()) {
+    if (!IsResolutionEffectActive()) {
         mirrorRegion = {0, 0, 0, 0};
     }
     externalSession->SetMirrorScreenRegion(externalSession->GetScreenId(), mirrorRegion);
@@ -4706,7 +4774,7 @@ void ScreenSessionManager::SetExternalScreenResolutionEffect(const sptr<ScreenSe
 
 bool ScreenSessionManager::HandleCastVirtualScreenMirrorRegion()
 {
-    if (!g_isPcDevice) {
+    if (!IS_SUPPORT_RESOLUTION_EFFECT_CHANGE) {
         TLOGNFW(WmsLogTag::DMS, "not support");
         return false;
     }
@@ -4725,10 +4793,9 @@ bool ScreenSessionManager::HandleCastVirtualScreenMirrorRegion()
     }
     //all zero, means full screen mirror.
     DMRect mirrorRegion = DMRect::NONE();
-    if (curResolutionEffectEnable_.load()) {
+    if (IsResolutionEffectActive()) {
         auto property = internalSession->GetScreenProperty();
-        auto bounds = property.GetBounds();
-        mirrorRegion = DMRect{bounds.rect_.left_, bounds.rect_.top_,
+        mirrorRegion = DMRect{property.GetInputOffsetX(), property.GetInputOffsetY(),
             property.GetScreenAreaWidth(), property.GetScreenAreaHeight()};
     }
     virtualSession->SetMirrorScreenRegion(virtualSession->GetScreenId(), mirrorRegion);
@@ -4745,14 +4812,82 @@ void ScreenSessionManager::GetCastVirtualMirrorSession(sptr<ScreenSession>& virt
             TLOGNFE(WmsLogTag::DMS, "screenSession is nullptr!");
             continue;
         }
-        if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST &&
-            screenSession->GetMirrorScreenType() == MirrorScreenType::VIRTUAL_MIRROR) {
-            TLOGNFI(WmsLogTag::DMS, "virtual id: %{public}" PRIu64"", screenSession->GetScreenId());
+        if (screenSession->GetMirrorScreenType() != MirrorScreenType::VIRTUAL_MIRROR) {
+            continue;
+        }
+        // CAST-flagged screens are the cast-engine channel: identified by the flag alone
+        // (their mirror state is validated by the callers). Wireless mirror channels that
+        // create the virtual screen without any marking (e.g. PC-to-pad collaboration,
+        // flag DEFAULT + type UNKNOWN) are identified by actually being an active mirror
+        // target AND carrying a serial number. The serial is the per-screen key of the
+        // effect toggle, so only cast-channel screens have one; local virtual screens
+        // (screenshot / recording / HiCar / assistant views) never do, which keeps them
+        // out of both the mirror-region handling on the plain mirror-switch path and the
+        // effect's external-screen pick.
+        if (screenSession->GetVirtualScreenFlag() == VirtualScreenFlag::CAST ||
+            (IsActiveMirrorTarget(screenSession) && !screenSession->GetSerialNumber().empty())) {
+            TLOGNFI(WmsLogTag::DMS, "virtual id: %{public}" PRIu64", flag:%{public}u",
+                screenSession->GetScreenId(), static_cast<uint32_t>(screenSession->GetVirtualScreenFlag()));
             virtualSession = screenSession;
             return;
         }
     }
     TLOGNFI(WmsLogTag::DMS, "no virtual mirror screen");
+}
+
+bool ScreenSessionManager::IsActiveMirrorTarget(const sptr<ScreenSession>& screenSession)
+{
+    if (screenSession == nullptr) {
+        return false;
+    }
+    // Mirror state is maintained on disjoint fields depending on how the screen got there:
+    // - Group transitions (MakeMirror / MakeExpand via ChangeScreenGroup) keep the group's
+    //   combination and membership authoritative, but the per-screen combination is not
+    //   updated on every transition (stale SCREEN_MIRROR after MakeExpand).
+    // - The multi-screen mode-change path (SetMultiScreenMode -> CreateMirrorSession /
+    //   CreateExtendSession) switches the display node between MIRROR/EXPAND and keeps the
+    //   per-screen combination fresh, but never touches group state.
+    // - Physical external screens are switched to mirror by paths that never touch group
+    //   state (PhysicalScreenMirrorSwitch / multi-screen mode change) and keep the
+    //   per-screen combination fresh.
+    // So for a virtual screen: member of a group -> the group decides; not in any group
+    // -> the per-screen combination decides.
+    if (screenSession->GetScreenProperty().GetScreenType() == ScreenType::VIRTUAL) {
+        auto screenGroup = GetAbstractScreenGroup(screenSession->groupSmsId_);
+        if (screenGroup != nullptr && screenGroup->HasChild(screenSession->GetScreenId())) {
+            return screenGroup->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR;
+        }
+        return screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR;
+    }
+    return screenSession->GetScreenCombination() == ScreenCombination::SCREEN_MIRROR;
+}
+
+void ScreenSessionManager::GetMirrorExternalSession(sptr<ScreenSession>& externalSession)
+{
+    if (IsActiveMirrorTarget(externalSession)) {
+        return;
+    }
+    sptr<ScreenSession> castVirtualSession = nullptr;
+    GetCastVirtualMirrorSession(castVirtualSession);
+    if (IsActiveMirrorTarget(castVirtualSession)) {
+        externalSession = castVirtualSession;
+    }
+}
+
+void ScreenSessionManager::RecoveryResolutionEffectOnOwnerExit(const std::vector<ScreenId>& screenIds)
+{
+    if (!IsResolutionEffectActive()) {
+        return;
+    }
+    // The effect is keyed on a single external screen, so restore only when that screen is
+    // among the exiting ones: a cast screen leaving while the effect belongs to a physical
+    // mirror (or vice versa) must keep it. See IsResolutionEffectOwnedByAnyOf.
+    if (!IsResolutionEffectOwnedByAnyOf(screenIds)) {
+        TLOGNFI(WmsLogTag::DMS, "owner: %{public}" PRIu64 " not exiting, keep resolution effect",
+            GetResolutionEffectOwner());
+        return;
+    }
+    RecoveryResolutionEffect();
 }
 // LCOV_EXCL_START
 
@@ -9161,13 +9296,14 @@ DMError ScreenSessionManager::DestroyVirtualScreen(ScreenId screenId, bool isCal
     }
 
     TLOGNFW(WmsLogTag::DMS, "start");
+    auto screen = GetScreenSession(screenId);
+    RecoveryResolutionEffectOnOwnerExit({ screenId });
     OnVirtualScreenChange(screenId, ScreenEvent::DISCONNECTED);
     ScreenId rsScreenId = SCREEN_ID_INVALID;
     screenIdManager_.ConvertToRsScreenId(screenId, rsScreenId);
     RemoveScreenFromAgentMap(screenId);
 
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "ssm:DestroyVirtualScreen(%" PRIu64")", screenId);
-    auto screen = GetScreenSession(screenId);
     ProcessVirtualScreenDestroy(screenId, rsScreenId, screen);
 
     if (rsScreenId == SCREEN_ID_INVALID) {
@@ -9265,6 +9401,11 @@ DMError ScreenSessionManager::DoMakeMirror(ScreenId mainScreenId, std::vector<Sc
             screenSession->SetMainDisplayIdOfGroup(mainScreen->GetMainDisplayIdOfGroup());
         }
     }
+    // Re-evaluate the resolution effect after every mirror switch: it applies the effect
+    // when the toggle is on for the new target, re-keys it to a physical external that
+    // joins while the effect is active (e.g. physical mirror made during an ongoing
+    // wireless cast), and recovers when no eligible mirror target remains.
+    HandleResolutionEffectChange();
     RegisterCastObserver(allMirrorScreenIds);
     TLOGNFW(WmsLogTag::DMS, "make mirror notify scb end makeResult=%{public}d", makeResult);
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER, "dms:MakeMirror end");
@@ -9446,6 +9587,7 @@ DMError ScreenSessionManager::StopMirror(const std::vector<ScreenId>& mirrorScre
         TLOGNFE(WmsLogTag::DMS, "failed.");
         return ret;
     }
+    RecoveryResolutionEffectOnOwnerExit(allMirrorScreenIds);
     UnRegisterCastObserver(allMirrorScreenIds);
 #ifdef FOLD_ABILITY_ENABLE
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
@@ -9775,6 +9917,7 @@ DMError ScreenSessionManager::MakeExpand(std::vector<ScreenId> screenId,
     if (!OnMakeExpand(allExpandScreenIds, points)) {
         return DMError::DM_ERROR_NULLPTR;
     }
+    RecoveryResolutionEffectOnOwnerExit(allExpandScreenIds);
     auto screen = GetScreenSession(allExpandScreenIds[0]);
     if (screen == nullptr || GetAbstractScreenGroup(screen->groupSmsId_) == nullptr) {
         return DMError::DM_ERROR_NULLPTR;
@@ -10214,6 +10357,40 @@ bool ScreenSessionManager::RemoveChildFromGroup(sptr<ScreenSession> screen, sptr
         TLOGNFE(WmsLogTag::DMS, "screenSessionMap_ remove screen:%{public}" PRIu64, screenGroup->screenId_);
     }
     return true;
+}
+
+void ScreenSessionManager::RemoveScreenFromMirrorGroup(ScreenId screenId)
+{
+    sptr<ScreenSession> screenSession = GetScreenSession(screenId);
+    if (screenSession == nullptr) {
+        TLOGNFW(WmsLogTag::DMS, "screen:%{public}" PRIu64 " session not found", screenId);
+        return;
+    }
+    // Scope deliberately limited to virtual screens: only a cast virtual mirror channel can
+    // have its mirror established group-managed (MakeMirror) and then be torn down by this
+    // non-ChangeScreenGroup path. Physical screens never hit both paths in one flow, so they
+    // are left untouched to keep the mode-change behavior for them exactly as before.
+    if (screenSession->GetScreenProperty().GetScreenType() != ScreenType::VIRTUAL) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(screenSessionMapMutex_);
+    sptr<ScreenSessionGroup> screenGroup = GetAbstractScreenGroup(screenSession->groupSmsId_);
+    if (screenGroup == nullptr || !screenGroup->HasChild(screenId) ||
+        screenGroup->GetScreenCombination() != ScreenCombination::SCREEN_MIRROR) {
+        return;
+    }
+    TLOGNFI(WmsLogTag::DMS, "screen:%{public}" PRIu64 " exit mirror group:%{public}" PRIu64,
+        screenId, screenSession->groupSmsId_);
+    // Group-managed screens (mirror established through ChangeScreenGroup) must complete the
+    // group teardown when a non-ChangeScreenGroup path ends their mirror, otherwise the group
+    // keeps reporting mirror and consumers reading it (e.g. IsActiveMirrorTarget for virtual
+    // screens) see a stale active mirror target. RemoveChild releases the mirror display node;
+    // the caller reconfigures it, the same remove-then-reconfigure order ChangeScreenGroup
+    // uses when moving a screen out of a mirror group.
+    if (RemoveFromGroupLocked(screenSession) != nullptr) {
+        NotifyScreenGroupChanged(screenSession->ConvertToScreenInfo(),
+            ScreenGroupChangeEvent::REMOVE_FROM_GROUP);
+    }
 }
 
 DMError ScreenSessionManager::SetMirror(ScreenId screenId, std::vector<ScreenId> screens, DMRect mainScreenRegion,
