@@ -2426,7 +2426,7 @@ void SceneSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason r
         }
         SetSessionRequestRect(newRequestRect);
         NotifySessionRectChange(newRequestRect, reason, moveConfiguration.displayId);
-    } else if (reason == SizeChangeReason::RESIZE) {
+    } else if (reason == SizeChangeReason::RESIZE || reason == SizeChangeReason::RESIZE_BY_LIMIT) {
         if (rect.width_ > 0 && rect.height_ > 0) {
             newWinRect.width_ = rect.width_;
             newWinRect.height_ = rect.height_;

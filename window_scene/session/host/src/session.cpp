@@ -6505,10 +6505,18 @@ void Session::NotifyPendingAppHookDisplayInfo()
     }
 }
 
-void Session::HandlePrelaunchDisplayHook(const PrelayoutContext& ctx)
+bool Session::HandlePrelaunchDisplayHook(const PrelayoutContext& ctx)
 {
-    if (!ctx.enable || !updateAppHookDisplayInfoFunc_) {
-        return;
+    const auto windowId = GetWindowId();
+    if (!ctx.enable) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Prelaunch display hook is not required. id: %{public}d", windowId);
+        return false;
+    }
+    if (!updateAppHookDisplayInfoFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "Failed to set prelaunch display hook: func is null. id: %{public}d, uid: %{public}d",
+              windowId, callingUid_);
+        return false;
     }
 
     const HookInfo hookInfo = {
@@ -6523,30 +6531,40 @@ void Session::HandlePrelaunchDisplayHook(const PrelayoutContext& ctx)
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
               "Failed to update app hook display info. id: %{public}d, uid: %{public}d, ret: %{public}d",
-              GetPersistentId(), callingUid_, ret);
-        return;
+              windowId, callingUid_, ret);
+        return false;
     }
     prelaunchDisplayHookEnabled_ = true;
     TLOGI(WmsLogTag::WMS_LAYOUT, "Update prelaunch display hook successfully. id: %{public}d, uid: %{public}d",
-          GetPersistentId(), callingUid_);
+          windowId, callingUid_);
+    return true;
 }
 
-void Session::ClearPrelaunchDisplayHook()
+bool Session::ClearPrelaunchDisplayHook()
 {
-    if (!prelaunchDisplayHookEnabled_ || !updateAppHookDisplayInfoFunc_) {
-        return;
+    auto windowId = GetWindowId();
+    if (!prelaunchDisplayHookEnabled_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Prelaunch display hook is not enabled. id: %{public}d", windowId);
+        return false;
+    }
+    if (!updateAppHookDisplayInfoFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "Failed to clear prelaunch display hook: func is null. id: %{public}d, uid: %{public}d",
+              windowId, callingUid_);
+        return false;
     }
 
     const auto ret = updateAppHookDisplayInfoFunc_(callingUid_, HookInfo {}, false);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
-            "Failed to clear prelaunch display hook. id: %{public}d, uid: %{public}d, ret: %{public}d",
-            GetPersistentId(), callingUid_, ret);
-        return;
+              "Failed to clear prelaunch display hook. id: %{public}d, uid: %{public}d, ret: %{public}d",
+              windowId, callingUid_, ret);
+        return false;
     }
     prelaunchDisplayHookEnabled_ = false;
     TLOGI(WmsLogTag::WMS_LAYOUT, "Clear prelaunch display hook successfully. id: %{public}d, uid: %{public}d",
-        GetPersistentId(), callingUid_);
+          windowId, callingUid_);
+    return true;
 }
 
 WSError Session::UpdateLSStateInfo(bool isLSState)

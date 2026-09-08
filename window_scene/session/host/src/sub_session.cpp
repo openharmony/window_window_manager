@@ -117,12 +117,16 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
     if (moveConfiguration.displayId != DISPLAY_ID_INVALID) {
         SetShouldFollowParentWhenShow(false);
     }
+    const bool isMoveReason = reason == SizeChangeReason::MOVE;
+    const bool isResizeReason = reason == SizeChangeReason::RESIZE ||
+                                reason == SizeChangeReason::RESIZE_BY_LIMIT;
+
     if (IsNeedCrossDisplayRendering()) {
         auto newRequestRect = GetSessionRequestRect();
-        if (reason == SizeChangeReason::MOVE) {
+        if (isMoveReason) {
             newRequestRect.posX_ = rect.posX_;
             newRequestRect.posY_ = rect.posY_;
-        } else if (reason == SizeChangeReason::RESIZE && rect.width_ > 0 && rect.height_ > 0) {
+        } else if (isResizeReason && rect.width_ > 0 && rect.height_ > 0) {
             newRequestRect.width_ = rect.width_;
             newRequestRect.height_ = rect.height_;
         }
@@ -146,13 +150,13 @@ void SubSession::UpdateSessionRectInner(const WSRect& rect, SizeChangeReason rea
         return;
     }
 
-    if (IsLifecycleForeground() && (reason == SizeChangeReason::MOVE || reason == SizeChangeReason::RESIZE)) {
+    if (IsLifecycleForeground() && (isMoveReason || isResizeReason)) {
         SetOriPosYBeforeRaisedByKeyboard(0);
         const WSRect& winRect = GetSessionRect();
-        if (reason == SizeChangeReason::MOVE && (rect.posX_ != winRect.posX_ || rect.posY_ != winRect.posY_)) {
+        if (isMoveReason && (rect.posX_ != winRect.posX_ || rect.posY_ != winRect.posY_)) {
             isSubWindowResizingOrMoving_ = true;
         }
-        if (reason == SizeChangeReason::RESIZE && (rect.width_ != winRect.width_ || rect.height_ != winRect.height_)) {
+        if (isResizeReason && (rect.width_ != winRect.width_ || rect.height_ != winRect.height_)) {
             isSubWindowResizingOrMoving_ = true;
         }
     }
