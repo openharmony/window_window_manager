@@ -2001,9 +2001,28 @@ HWTEST_F(WindowSessionTest4, TestHandlePrelaunchDisplayHookDisabled, TestSize.Le
         return WMError::WM_OK;
     });
 
-    session_->HandlePrelaunchDisplayHook(ctx);
+    bool result = session_->HandlePrelaunchDisplayHook(ctx);
 
     EXPECT_FALSE(called);
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(session_->prelaunchDisplayHookEnabled_);
+}
+
+/**
+ * @tc.name: TestHandlePrelaunchDisplayHookWithoutCallback
+ * @tc.desc: Verify HandlePrelaunchDisplayHook returns false when the callback is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestHandlePrelaunchDisplayHookWithoutCallback, TestSize.Level1)
+{
+    PrelayoutContext ctx;
+    ctx.enable = true;
+    session_->SetUpdateAppHookDisplayInfoFunc(nullptr);
+
+    bool result = session_->HandlePrelaunchDisplayHook(ctx);
+
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(session_->prelaunchDisplayHookEnabled_);
 }
 
 /**
@@ -2021,9 +2040,10 @@ HWTEST_F(WindowSessionTest4, TestHandlePrelaunchDisplayHookFailed, TestSize.Leve
         return WMError::WM_ERROR_INVALID_PARAM;
     });
 
-    session_->HandlePrelaunchDisplayHook(ctx);
+    bool result = session_->HandlePrelaunchDisplayHook(ctx);
 
     EXPECT_TRUE(called);
+    EXPECT_FALSE(result);
     EXPECT_FALSE(session_->prelaunchDisplayHookEnabled_);
 }
 
@@ -2056,9 +2076,10 @@ HWTEST_F(WindowSessionTest4, TestHandlePrelaunchDisplayHookNormal, TestSize.Leve
         return WMError::WM_OK;
     });
 
-    session_->HandlePrelaunchDisplayHook(ctx);
+    bool result = session_->HandlePrelaunchDisplayHook(ctx);
 
     EXPECT_TRUE(called);
+    EXPECT_TRUE(result);
     EXPECT_EQ(capturedUid, session_->callingUid_);
     EXPECT_EQ(capturedInfo.width_, ctx.display.width);
     EXPECT_EQ(capturedInfo.height_, ctx.display.height);
@@ -2098,9 +2119,9 @@ HWTEST_F(WindowSessionTest4, TestClearPrelaunchDisplayHook, TestSize.Level1)
         return WMError::WM_OK;
     });
 
-    session_->HandlePrelaunchDisplayHook(ctx);
-    session_->ClearPrelaunchDisplayHook();
-    session_->ClearPrelaunchDisplayHook();
+    EXPECT_TRUE(session_->HandlePrelaunchDisplayHook(ctx));
+    EXPECT_TRUE(session_->ClearPrelaunchDisplayHook());
+    EXPECT_FALSE(session_->ClearPrelaunchDisplayHook());
 
     EXPECT_EQ(enableCount, 1);
     EXPECT_EQ(disableCount, 1);
@@ -2119,9 +2140,43 @@ HWTEST_F(WindowSessionTest4, TestClearPrelaunchDisplayHookFailed, TestSize.Level
         return WMError::WM_ERROR_INVALID_PARAM;
     });
 
-    session_->ClearPrelaunchDisplayHook();
+    EXPECT_FALSE(session_->ClearPrelaunchDisplayHook());
 
     EXPECT_TRUE(session_->prelaunchDisplayHookEnabled_);
+}
+
+/**
+ * @tc.name: TestClearPrelaunchDisplayHookDisabled
+ * @tc.desc: Verify ClearPrelaunchDisplayHook returns false when the hook is not enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestClearPrelaunchDisplayHookDisabled, TestSize.Level1)
+{
+    bool called = false;
+    session_->prelaunchDisplayHookEnabled_ = false;
+    session_->SetUpdateAppHookDisplayInfoFunc([&](int32_t, const HookInfo&, bool) {
+        called = true;
+        return WMError::WM_OK;
+    });
+    bool result = session_->ClearPrelaunchDisplayHook();
+
+    EXPECT_FALSE(called);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: TestClearPrelaunchDisplayHookWithoutCallback
+ * @tc.desc: Verify ClearPrelaunchDisplayHook returns false and keeps the hook pending when the callback is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestClearPrelaunchDisplayHookWithoutCallback, TestSize.Level1)
+{
+    session_->prelaunchDisplayHookEnabled_ = true;
+    session_->SetUpdateAppHookDisplayInfoFunc(nullptr);
+    bool result = session_->ClearPrelaunchDisplayHook();
+
+    EXPECT_TRUE(session_->prelaunchDisplayHookEnabled_);
+    EXPECT_FALSE(result);
 }
 
 /**
