@@ -5192,7 +5192,7 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
         TLOGE(WmsLogTag::WMS_UIEXT, "create non-secure window permission denied!");
         auto infos = parentSession->GetExtInfoWithHideNonSecureWindowFlag();
         std::ostringstream oss;
-        oss << "It is not allowed to create a non-secure window when secure extension exists. Blocked by:";
+        oss << "It is not allowed to create non-secure window when secure extension exists. Maybe blocked by:";
         for(const auto& tokenInfo: infos) {
             AAFwk::UIExtensionSessionInfo extInfo;
             AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(tokenInfo.abilityToken, extInfo);
