@@ -316,7 +316,6 @@ struct WindowCreateParams : public Parcelable {
             }
             return true;
         };
-
         if (!readOptionalBool(windowCreateParams->needAnimation)) {
             return nullptr;
         }
