@@ -748,12 +748,13 @@ int MockSessionManagerService::DumpSessionInfoByUserId(int32_t userId,
     }
     auto sceneSessionManagerProxy = iface_cast<ISceneSessionManager>(sceneSessionManagerRemote);
     if (sceneSessionManagerProxy == nullptr) {
-        WLOGFW("sessionManagerServiceProxy is nullptr");
+        TLOGE(WmsLogTag::DEFAULT, "sceneSessionManagerProxy is nullptr, userId: %{public}d", userId);
         return -1;
     }
     WSError ret = sceneSessionManagerProxy->GetSessionDumpInfo(args, dumpInfo);
     if (ret != WSError::WS_OK) {
-        WLOGFD("sessionManagerService set success!");
+        TLOGE(WmsLogTag::DEFAULT, "GetSessionDumpInfo failed, userId: %{public}d, ret: %{public}d",
+            userId, static_cast<int32_t>(ret));
         return -1;
     }
     return 0;
