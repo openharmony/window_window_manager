@@ -2481,30 +2481,47 @@ napi_value JsSceneSessionManager::OnKioskModeChange(napi_env env, napi_callback_
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = {nullptr};
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < ARGC_THREE) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
 
     bool isKioskMode = false;
-    if (!ConvertFromJsValue(env, argv[0], isKioskMode)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isKiosMode.");
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], isKioskMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isKioskMode.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid"));
         return NapiGetUndefined(env);
     }
 
     int32_t persistentId = 0;
-    if (!ConvertFromJsValue(env, argv[1], persistentId)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], persistentId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to persistentId.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().KioskModeChange(isKioskMode, persistentId);
+
+    int32_t kioskTypeValue = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], kioskTypeValue)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to kioskTypeValue.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+    if (kioskTypeValue < static_cast<int32_t>(KioskType::DEFAULT) ||
+        kioskTypeValue >= static_cast<int32_t>(KioskType::END)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid kioskType");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().KioskModeChange(
+        isKioskMode, persistentId, static_cast<KioskType>(kioskTypeValue));
     return NapiGetUndefined(env);
 }
 
@@ -6594,9 +6611,9 @@ void JsSceneSessionManager::OnUpdateKioskAppListCallback(const std::vector<std::
         }, __func__);
 }
 
-void JsSceneSessionManager::OnKioskModeChangeCallback(bool isKioskMode, int32_t persistentId)
+void JsSceneSessionManager::OnKioskModeChangeCallback(bool isKioskMode, int32_t persistentId, KioskType kioskType)
 {
-    taskScheduler_->PostMainThreadTask([this, isKioskMode, persistentId,
+    taskScheduler_->PostMainThreadTask([this, isKioskMode, persistentId, kioskType,
         jsCallBack = GetJSCallback(KIOSK_MODE_CHANGE_CB), env = env_] {
             if (jsCallBack == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
@@ -6604,7 +6621,8 @@ void JsSceneSessionManager::OnKioskModeChangeCallback(bool isKioskMode, int32_t 
             }
             napi_value isKioskModeValue = CreateJsValue(env, isKioskMode);
             napi_value persistentIdValue = CreateJsValue(env, persistentId);
-            napi_value argv[] = { isKioskModeValue, persistentIdValue };
+            napi_value kioskTypeValue = CreateJsValue(env, static_cast<int32_t>(kioskType));
+            napi_value argv[] = { isKioskModeValue, persistentIdValue, kioskTypeValue };
             napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         }, __func__);
 }
@@ -6636,7 +6654,9 @@ void JsSceneSessionManager::RegisterKioskModeChangeCallback()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     SceneSessionManager::GetInstance().RegisterKioskModeChangeCallback(
-        [this](bool isKioskMode, int32_t persistentId) { this->OnKioskModeChangeCallback(isKioskMode, persistentId); });
+        [this](bool isKioskMode, int32_t persistentId, KioskType kioskType) {
+            this->OnKioskModeChangeCallback(isKioskMode, persistentId, kioskType);
+        });
 }
 
 napi_value JsSceneSessionManager::SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info)

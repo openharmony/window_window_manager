@@ -495,9 +495,9 @@ WMError SceneSessionManagerLite::UpdateKioskAppList(const std::vector<std::strin
     return SceneSessionManager::GetInstance().UpdateKioskAppList(kioskAppList);
 }
 
-WMError SceneSessionManagerLite::EnterKioskMode(const sptr<IRemoteObject>& token)
+WMError SceneSessionManagerLite::EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType)
 {
-    return SceneSessionManager::GetInstance().EnterKioskMode(token);
+    return SceneSessionManager::GetInstance().EnterKioskMode(token, kioskType);
 }
 
 WMError SceneSessionManagerLite::ExitKioskMode(const sptr<IRemoteObject>& token)

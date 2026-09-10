@@ -1896,7 +1896,18 @@ int SceneSessionManagerLiteStub::HandleEnterKioskMode(MessageParcel& data, Messa
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to read token");
         return ERR_INVALID_DATA;
     }
-    WMError ret = EnterKioskMode(token);
+    int32_t kioskTypeValue = 0;
+    if (!data.ReadInt32(kioskTypeValue)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "read kioskTypeValue failed");
+        return ERR_INVALID_DATA;
+    }
+    if (kioskTypeValue < static_cast<int32_t>(KioskType::DEFAULT) ||
+        kioskTypeValue >= static_cast<int32_t>(KioskType::END)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid kioskType");
+        return ERR_INVALID_DATA;
+    }
+    auto kioskType = static_cast<KioskType>(kioskTypeValue);
+    WMError ret = EnterKioskMode(token, kioskType);
     if (!reply.WriteInt32(static_cast<int32_t>(ret))) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write ret failed");
         return ERR_INVALID_DATA;

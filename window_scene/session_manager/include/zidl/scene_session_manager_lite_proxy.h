@@ -139,7 +139,7 @@ public:
     WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener) override;
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override;
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override;
-    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType = KioskType::DEFAULT) override;
     WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;
     WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
