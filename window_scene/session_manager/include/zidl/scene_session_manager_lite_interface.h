@@ -442,9 +442,11 @@ public:
      * @permission SA permission or SystemApp permission
      *
      * @param token the abilitytoken of the mission entered kiosk mode
+     * @param kioskType the type of kiosk mode
      * @return Successful call returns WMError: WM-OK, otherwise it indicates failure
      */
-    virtual WMError EnterKioskMode(const sptr<IRemoteObject>& token) { return WMError::WM_OK; }
+    virtual WMError EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType = KioskType::DEFAULT)
+        { return WMError::WM_OK; }
 
     /**
      * @brief Notify exit kiosk mode
