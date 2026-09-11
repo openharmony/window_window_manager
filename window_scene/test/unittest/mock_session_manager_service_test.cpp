@@ -989,6 +989,12 @@ HWTEST(MockSessionManagerServiceTest, DumpSessionInfoWithUser, TestSize.Level1)
     std::vector<std::string> args6 = {"-user", "100"};
     ret = mockMockSms.DumpSessionInfo(args6, info);
     EXPECT_EQ(-1, ret);
+
+    // branch 7: -user with user id not in foreground
+    std::vector<std::string> args7 = {"-user", "101", "-a"};
+    ret = mockMockSms.DumpSessionInfo(args7, info);
+    EXPECT_NE(0, ret);
+    EXPECT_NE(info.find("not in foreground"), std::string::npos);
 }
 
 /**
@@ -1025,24 +1031,25 @@ HWTEST(MockSessionManagerServiceTest, ParseUserArg, TestSize.Level1)
     MockMockSessionManagerService mockMockSms;
     std::vector<int32_t> targetUserIds;
     std::vector<std::string> dumpArgs;
+    std::string info;
     bool hasUserArg = false;
     int ret;
 
     // branch 1: -user without value
     std::vector<std::string> args1 = {"-user"};
-    ret = mockMockSms.ParseUserArg(args1, targetUserIds, dumpArgs, hasUserArg);
+    ret = mockMockSms.ParseUserArg(args1, targetUserIds, dumpArgs, hasUserArg, info);
     EXPECT_EQ(-1, ret);
 
     // branch 2: -user all with no active users
     mockMockSms.screenId2UserId_.clear();
     std::vector<std::string> args2 = {"-user", "all", "-a"};
-    ret = mockMockSms.ParseUserArg(args2, targetUserIds, dumpArgs, hasUserArg);
+    ret = mockMockSms.ParseUserArg(args2, targetUserIds, dumpArgs, hasUserArg, info);
     EXPECT_EQ(-1, ret);
 
     // branch 3: -user all with active users
     mockMockSms.screenId2UserId_[0] = 100;
     std::vector<std::string> args3 = {"-user", "all", "-a"};
-    ret = mockMockSms.ParseUserArg(args3, targetUserIds, dumpArgs, hasUserArg);
+    ret = mockMockSms.ParseUserArg(args3, targetUserIds, dumpArgs, hasUserArg, info);
     EXPECT_EQ(0, ret);
     EXPECT_TRUE(hasUserArg);
     EXPECT_EQ(dumpArgs.size(), 1u);
@@ -1053,7 +1060,7 @@ HWTEST(MockSessionManagerServiceTest, ParseUserArg, TestSize.Level1)
     targetUserIds.clear();
     dumpArgs.clear();
     hasUserArg = false;
-    ret = mockMockSms.ParseUserArg(args4, targetUserIds, dumpArgs, hasUserArg);
+    ret = mockMockSms.ParseUserArg(args4, targetUserIds, dumpArgs, hasUserArg, info);
     EXPECT_EQ(-1, ret);
 
     // branch 5: -user with valid id
@@ -1061,10 +1068,21 @@ HWTEST(MockSessionManagerServiceTest, ParseUserArg, TestSize.Level1)
     targetUserIds.clear();
     dumpArgs.clear();
     hasUserArg = false;
-    ret = mockMockSms.ParseUserArg(args5, targetUserIds, dumpArgs, hasUserArg);
+    ret = mockMockSms.ParseUserArg(args5, targetUserIds, dumpArgs, hasUserArg, info);
     EXPECT_EQ(0, ret);
     EXPECT_TRUE(hasUserArg);
     EXPECT_EQ(targetUserIds[0], 100);
+
+    // branch 6: -user with user id not in foreground
+    std::vector<std::string> args6 = {"-user", "101", "-a"};
+    targetUserIds.clear();
+    dumpArgs.clear();
+    info.clear();
+    hasUserArg = false;
+    ret = mockMockSms.ParseUserArg(args6, targetUserIds, dumpArgs, hasUserArg, info);
+    EXPECT_NE(0, ret);
+    EXPECT_TRUE(targetUserIds.empty());
+    EXPECT_NE(info.find("not in foreground"), std::string::npos);
 }
 
 /**

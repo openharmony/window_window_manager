@@ -61,6 +61,7 @@ const std::string ARG_DUMP_ALL = "-a";
 const std::string ARG_DUMP_WINDOW = "-w";
 const std::string ARG_DUMP_USER = "-user";
 const std::string ARG_DUMP_USER_ALL = "all";
+const int ERR_DUMP_USER_NOT_FOREGROUND = -2;
 const std::string KEY_SCENE_BOARD_TEST_ENABLE = "persist.scb.testmode.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string TEST_MODULE_NAME_SUFFIX = "_test";
@@ -208,7 +209,7 @@ int MockSessionManagerService::Dump(int fd, const std::vector<std::u16string>& a
         ShowHelpInfo(dumpInfo);
     } else {
         int errCode = DumpSessionInfo(params, dumpInfo);
-        if (errCode != 0) {
+        if (errCode != 0 && errCode != ERR_DUMP_USER_NOT_FOREGROUND) {
             ShowIllegalArgsInfo(dumpInfo);
         }
     }
@@ -664,7 +665,7 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
     bool hasUserArg = false;
 
     if (args[0] == ARG_DUMP_USER) {
-        int errCode = ParseUserArg(args, targetUserIds, dumpArgs, hasUserArg);
+        int errCode = ParseUserArg(args, targetUserIds, dumpArgs, hasUserArg, dumpInfo);
         if (errCode != 0) {
             return errCode;
         }
@@ -698,7 +699,8 @@ int MockSessionManagerService::DumpSessionInfo(const std::vector<std::string>& a
 }
 
 int MockSessionManagerService::ParseUserArg(const std::vector<std::string>& args,
-    std::vector<int32_t>& targetUserIds, std::vector<std::string>& dumpArgs, bool& hasUserArg)
+    std::vector<int32_t>& targetUserIds, std::vector<std::string>& dumpArgs, bool& hasUserArg,
+    std::string& dumpInfo)
 {
     const size_t userArgMinSize = 2;
     const size_t userArgValueIndex = 1;
@@ -725,6 +727,18 @@ int MockSessionManagerService::ParseUserArg(const std::vector<std::string>& args
         return -1;
     }
     int32_t userId = std::stoi(userValue);
+    std::vector<int32_t> foregroundUserIds;
+    if (GetActiveUserIds(foregroundUserIds) != ERR_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "GetActiveUserIds failed");
+        return -1;
+    }
+    if (std::find(foregroundUserIds.begin(), foregroundUserIds.end(), userId) ==
+        foregroundUserIds.end()) {
+        TLOGE(WmsLogTag::DEFAULT, "User %{public}d is not in foreground", userId);
+        dumpInfo.append("user " + std::to_string(userId) +
+            " is not in foreground or does not exist\n");
+        return ERR_DUMP_USER_NOT_FOREGROUND;
+    }
     targetUserIds.push_back(userId);
     dumpArgs.assign(args.begin() + userArgDumpOffset, args.end());
     return 0;
