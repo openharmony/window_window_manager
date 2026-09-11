@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,19 +21,6 @@
 
 namespace OHOS {
 namespace Rosen {
-
-#define CHECK_SINGLE_INSTANCE_QUERY(methodName, outputParam) \
-    if (!IsMultiInstanceEnabled()) { \
-        TLOGD(WmsLogTag::WMS_MULTI_USER, "%{public}s: single instance mode", #methodName); \
-        return WindowManagerLite::GetInstance().methodName(outputParam); \
-    }
-
-#define CHECK_SINGLE_INSTANCE_LISTENER(methodName, listener) \
-    if (!IsMultiInstanceEnabled()) { \
-        TLOGD(WmsLogTag::WMS_MULTI_USER, "%{public}s: single instance mode", #methodName); \
-        return WindowManagerLite::GetInstance().methodName(listener); \
-    }
-
 class AllUsersWindowManagerLite::Impl {
 public:
     template<typename T>
@@ -75,7 +62,10 @@ std::unordered_set<int32_t> AllUsersWindowManagerLite::GetActiveUserIds() const
 
 WMError AllUsersWindowManagerLite::GetVisibilityWindowInfo(std::vector<sptr<WindowVisibilityInfo>>& infos) const
 {
-    CHECK_SINGLE_INSTANCE_QUERY(GetVisibilityWindowInfo, infos);
+    if (!IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "GetVisibilityWindowInfo: single instance mode");
+        return WindowManagerLite::GetInstance().GetVisibilityWindowInfo(infos);
+    }
     auto activeUserIds = GetActiveUserIds();
     std::vector<int32_t> activeUsers(activeUserIds.begin(), activeUserIds.end());
     TLOGD(WmsLogTag::WMS_MULTI_USER, "GetVisibilityWindowInfo users: %{public}zu", activeUsers.size());
@@ -100,7 +90,10 @@ WMError AllUsersWindowManagerLite::GetVisibilityWindowInfo(std::vector<sptr<Wind
 WMError AllUsersWindowManagerLite::GetAccessibilityWindowInfo(
     std::vector<sptr<AccessibilityWindowInfo>>& infos) const
 {
-    CHECK_SINGLE_INSTANCE_QUERY(GetAccessibilityWindowInfo, infos);
+    if (!IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "GetAccessibilityWindowInfo: single instance mode");
+        return WindowManagerLite::GetInstance().GetAccessibilityWindowInfo(infos);
+    }
     auto activeUserIds = GetActiveUserIds();
     std::vector<int32_t> activeUsers(activeUserIds.begin(), activeUserIds.end());
     TLOGD(WmsLogTag::WMS_MULTI_USER, "GetAccessibilityWindowInfo users: %{public}zu", activeUsers.size());
@@ -124,7 +117,10 @@ WMError AllUsersWindowManagerLite::GetAccessibilityWindowInfo(
 
 WMError AllUsersWindowManagerLite::RegisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
 {
-    CHECK_SINGLE_INSTANCE_LISTENER(RegisterFocusChangedListener, listener);
+    if (!IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "RegisterFocusChangedListener: single instance mode");
+        return WindowManagerLite::GetInstance().RegisterFocusChangedListener(listener);
+    }
     RegisterUserChangeListeners();
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "RegisterFocusChangedListener listener is null");
@@ -152,7 +148,10 @@ WMError AllUsersWindowManagerLite::RegisterFocusChangedListener(const sptr<IFocu
 
 WMError AllUsersWindowManagerLite::UnregisterFocusChangedListener(const sptr<IFocusChangedListener>& listener)
 {
-    CHECK_SINGLE_INSTANCE_LISTENER(UnregisterFocusChangedListener, listener);
+    if (!IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "UnregisterFocusChangedListener: single instance mode");
+        return WindowManagerLite::GetInstance().UnregisterFocusChangedListener(listener);
+    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "UnregisterFocusChangedListener listener is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -178,7 +177,10 @@ WMError AllUsersWindowManagerLite::UnregisterFocusChangedListener(const sptr<IFo
 WMError AllUsersWindowManagerLite::RegisterVisibilityChangedListener(
     const sptr<IVisibilityChangedListener>& listener)
 {
-    CHECK_SINGLE_INSTANCE_LISTENER(RegisterVisibilityChangedListener, listener);
+    if (!IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "RegisterVisibilityChangedListener: single instance mode");
+        return WindowManagerLite::GetInstance().RegisterVisibilityChangedListener(listener);
+    }
     RegisterUserChangeListeners();
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "RegisterVisibilityChangedListener listener is null");
@@ -207,7 +209,10 @@ WMError AllUsersWindowManagerLite::RegisterVisibilityChangedListener(
 WMError AllUsersWindowManagerLite::UnregisterVisibilityChangedListener(
     const sptr<IVisibilityChangedListener>& listener)
 {
-    CHECK_SINGLE_INSTANCE_LISTENER(UnregisterVisibilityChangedListener, listener);
+    if (!IsMultiInstanceEnabled()) {
+        TLOGD(WmsLogTag::WMS_MULTI_USER, "UnregisterVisibilityChangedListener: single instance mode");
+        return WindowManagerLite::GetInstance().UnregisterVisibilityChangedListener(listener);
+    }
     if (listener == nullptr) {
         TLOGE(WmsLogTag::WMS_MULTI_USER, "UnregisterVisibilityChangedListener listener is null");
         return WMError::WM_ERROR_NULLPTR;
@@ -277,8 +282,6 @@ void AllUsersWindowManagerLite::OnUserAdded(int32_t userId)
     }
 }
 
-// TODO: OnUserRemoved should unregister global listeners from WindowManagerLite(userId) before
-// removing the instance, to prevent ghost agents on the server side.
 void AllUsersWindowManagerLite::OnUserRemoved(int32_t userId)
 {
     TLOGD(WmsLogTag::WMS_MULTI_USER, "User %{public}d removed", userId);

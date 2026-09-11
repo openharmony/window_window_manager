@@ -152,7 +152,7 @@ private:
     const int32_t userId_;
     static std::unordered_map<int32_t, sptr<SessionManager>> sessionManagerMap_;
     static std::mutex sessionManagerMapMutex_;
-    
+
     static std::unordered_set<int32_t> activeUserIds_;
     static std::mutex activeUserIdsMutex_;
     static bool activeUserIdsInitialized_;
@@ -162,7 +162,7 @@ private:
         int32_t screenId;
         int32_t pid;
     };
-    
+
     UserSwitchCallbackFunc userSwitchCallbackFunc_ = nullptr;
     std::mutex userSwitchCallbackFuncMutex_;
 

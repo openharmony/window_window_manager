@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,6 @@ class IVisibilityChangedListener;
 /**
  * @brief AllUsersWindowManager is a singleton class that aggregates window information
  *        from all active users. It provides unified query interfaces for multi-user scenarios.
- * 
  * @attention This class is designed for multi-user scenarios (e.g., automotive systems).
  *            It aggregates data from all active users by calling WindowManager instances
  *            of each user.
