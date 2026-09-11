@@ -2683,7 +2683,7 @@ WMError SceneSessionManager::RemoveSessionBlackListForSession(int32_t persistent
     return RemoveSessionBlackList(sceneSessionList, privacyWindowTags);
 }
 
-void SceneSessionManager::SetGlobalBlackList(const std::vector<uint64_t>& blackList)
+void SceneSessionManager::SetGlobalSkipList(const std::vector<uint64_t>& skipList)
 {
 #ifdef GLOBAL_BLACK_LIST_SUPPORT_MULTI_USER
     auto rootSceneSession = GetRootSceneSession();
@@ -2701,13 +2701,13 @@ void SceneSessionManager::SetGlobalBlackList(const std::vector<uint64_t>& blackL
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
         return;
     }
-    rsRenderInterface->SetGlobalBlackList(blackList);
+    rsRenderInterface->SetGlobalBlackList(skipList);
 #else
-    rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, blackList);
+    rsInterface_.SetVirtualScreenBlackList(INVALID_SCREEN_ID, skipList);
 #endif
 }
 
-void SceneSessionManager::RemoveGlobalBlackList(const std::vector<uint64_t>& blackList)
+void SceneSessionManager::RemoveGlobalSkipList(const std::vector<uint64_t>& skipList)
 {
 #ifdef GLOBAL_BLACK_LIST_SUPPORT_MULTI_USER
     auto rootSceneSession = GetRootSceneSession();
@@ -2725,9 +2725,9 @@ void SceneSessionManager::RemoveGlobalBlackList(const std::vector<uint64_t>& bla
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rsInterface is null");
         return;
     }
-    rsRenderInterface->RemoveGlobalBlackList(blackList);
+    rsRenderInterface->RemoveGlobalBlackList(skipList);
 #else
-    rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, blackList);
+    rsInterface_.RemoveVirtualScreenBlackList(INVALID_SCREEN_ID, skipList);
 #endif
 }
 
@@ -2748,7 +2748,7 @@ void SceneSessionManager::SetSkipSelfWhenShowOnVirtualScreen(uint64_t surfaceNod
             return;
         }
     }
-    SetGlobalBlackList(skipSurfaceNodeIds_);
+    SetGlobalSkipList(skipSurfaceNodeIds_);
 }
 
 WMError SceneSessionManager::AddSkipSelfWhenShowOnVirtualScreenList(const std::vector<int32_t>& persistentIds)
@@ -2782,7 +2782,7 @@ WMError SceneSessionManager::AddSkipSelfWhenShowOnVirtualScreenList(const std::v
             SetSkipEventOnCastPlusInner(persistentId, true);
         }
         if (!isUserBackground_) {
-            SetGlobalBlackList(skipSurfaceNodeIds_);
+            SetGlobalSkipList(skipSurfaceNodeIds_);
         }
         return WMError::WM_OK;
     };
@@ -2822,7 +2822,7 @@ WMError SceneSessionManager::RemoveSkipSelfWhenShowOnVirtualScreenList(const std
             SetSkipEventOnCastPlusInner(persistentId, false);
         }
         if (!isUserBackground_) {
-            SetGlobalBlackList(skipSurfaceNodeIds_);
+            SetGlobalSkipList(skipSurfaceNodeIds_);
         }
         return WMError::WM_OK;
     };
@@ -6946,7 +6946,7 @@ void SceneSessionManager::HandleUserSwitching(bool isUserActive)
         FlushWindowInfoToMMI(true);
         StartDelayedFlushWindowInfoToMMITask();
         NotifyAllAccessibilityInfo();
-        SetGlobalBlackList(skipSurfaceNodeIds_);
+        SetGlobalSkipList(skipSurfaceNodeIds_);
         UpdatePrivateStateAndNotifyForAllScreens();
     } else { // switch to another user
         StopDelayedFlushWindowInfoToMMITask();
@@ -6963,7 +6963,7 @@ void SceneSessionManager::HandleUserSwitched(bool isUserActive)
         // start UI abilities only after the user has switched and become active
         ProcessUIAbilityOnUserSwitch(isUserActive);
     } else {
-        RemoveGlobalBlackList(skipSurfaceNodeIds_);
+        RemoveGlobalSkipList(skipSurfaceNodeIds_);
     }
 }
 
