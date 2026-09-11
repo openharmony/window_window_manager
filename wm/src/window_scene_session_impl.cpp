@@ -522,7 +522,7 @@ WMErrorResult WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     }
     property_->SetPersistentId(persistentId);
     if (session == nullptr) {
-        TLOGI(WmsLogTag::WMS_LIFE, "create specific failed, session is nullptr, name: %{public}s",
+        TLOGE(WmsLogTag::WMS_LIFE, "create specific failed, session is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
         RecordLifeCycleExceptionEvent(WMError::WM_ERROR_NULLPTR,
             WMErrorReason::WM_REASON_SUB_WINDOW_IPC_CREATE_ERR, "sub window create failed when ipc");
