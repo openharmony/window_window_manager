@@ -85,6 +85,7 @@ const std::string RAISE_MAIN_WINDOW_ABOVE_TARGET_CB = "raiseMainWindowAboveTarge
 const std::string FORCE_HIDE_CHANGE_CB = "sessionForceHideChange";
 const std::string WINDOW_DRAG_HOT_AREA_CB = "windowDragHotArea";
 const std::string TOUCH_OUTSIDE_CB = "touchOutside";
+const std::string TOUCH_HOT_AREAS_CHANGE_CB = "touchHotAreasChange";
 const std::string SESSIONINFO_LOCKEDSTATE_CHANGE_CB = "sessionInfoLockedStateChange";
 const std::string PREPARE_CLOSE_PIP_SESSION = "prepareClosePiPSession";
 const std::string LANDSCAPE_MULTI_WINDOW_CB = "landscapeMultiWindow";
@@ -192,6 +193,7 @@ const std::map<std::string, ListenerFuncType> ListenerFuncMap {
     {FORCE_HIDE_CHANGE_CB,                  ListenerFuncType::FORCE_HIDE_CHANGE_CB},
     {WINDOW_DRAG_HOT_AREA_CB,               ListenerFuncType::WINDOW_DRAG_HOT_AREA_CB},
     {TOUCH_OUTSIDE_CB,                      ListenerFuncType::TOUCH_OUTSIDE_CB},
+    {TOUCH_HOT_AREAS_CHANGE_CB,             ListenerFuncType::TOUCH_HOT_AREAS_CHANGE_CB},
     {SESSIONINFO_LOCKEDSTATE_CHANGE_CB,     ListenerFuncType::SESSIONINFO_LOCKEDSTATE_CHANGE_CB},
     {PREPARE_CLOSE_PIP_SESSION,             ListenerFuncType::PREPARE_CLOSE_PIP_SESSION},
     {LANDSCAPE_MULTI_WINDOW_CB,             ListenerFuncType::LANDSCAPE_MULTI_WINDOW_CB},
@@ -2533,6 +2535,44 @@ void JsSceneSession::OnTouchOutside()
     taskScheduler_->PostMainThreadTask(task);
 }
 
+void JsSceneSession::ProcessTouchHotAreasChangeRegister()
+{
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
+        return;
+    }
+    session->RegisterTouchHotAreasChangeCallback([weakThis = wptr(this)] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            return;
+        }
+        jsSceneSession->OnTouchHotAreasChange();
+    });
+}
+
+void JsSceneSession::OnTouchHotAreasChange()
+{
+    TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+        auto jsSceneSession = weakThis.promote();
+        if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnTouchHotAreasChange jsSceneSession id:%{public}d has been destroyed",
+                persistentId);
+            return;
+        }
+        auto jsCallBack = jsSceneSession->GetJSCallback(TOUCH_HOT_AREAS_CHANGE_CB);
+        if (!jsCallBack) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = {};
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+    };
+    taskScheduler_->PostMainThreadTask(task);
+}
+
 void JsSceneSession::ProcessFrameLayoutFinishRegister()
 {
     NotifyFrameLayoutFinishFunc func = [weakThis = wptr(this)]() {
@@ -3571,6 +3611,9 @@ void JsSceneSession::ProcessRegisterCallback(ListenerFuncType listenerFuncType)
             break;
         case static_cast<uint32_t>(ListenerFuncType::TOUCH_OUTSIDE_CB):
             ProcessTouchOutsideRegister();
+            break;
+        case static_cast<uint32_t>(ListenerFuncType::TOUCH_HOT_AREAS_CHANGE_CB):
+            ProcessTouchHotAreasChangeRegister();
             break;
         case static_cast<uint32_t>(ListenerFuncType::SESSIONINFO_LOCKEDSTATE_CHANGE_CB):
             ProcessSessionInfoLockedStateChangeRegister();
