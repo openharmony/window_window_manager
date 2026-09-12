@@ -277,7 +277,7 @@ bool ClawWindowShellCommand::ParseWindowIdOption(const std::string& idStr, int32
         return true;
     }
     WmToolErrorInfo errorInfo = { ERR_INVALID_INPUT, "Invalid input parameters.",
-        "Invalid value for " OPTION_WINDOW_ID " option: " + idStr, { INVALID_PARAM_SOLUTION } };
+        "Invalid value for " + OPTION_WINDOW_ID + " option: " + idStr, { INVALID_PARAM_SOLUTION } };
     PrintError(errorInfo);
     return false;
 }
@@ -289,7 +289,7 @@ bool ClawWindowShellCommand::ParseDisplayIdOption(const std::string& idStr, Disp
         return true;
     }
     WmToolErrorInfo errorInfo = { ERR_INVALID_INPUT, "Invalid input parameters.",
-        "Invalid value for " OPTION_DISPLAY_ID " option: " + idStr, { INVALID_PARAM_SOLUTION } };
+        "Invalid value for " + OPTION_DISPLAY_ID + " option: " + idStr, { INVALID_PARAM_SOLUTION } };
     PrintError(errorInfo);
     return false;
 }
@@ -305,7 +305,7 @@ bool ClawWindowShellCommand::ParseWindowInfoFilterOption(const std::string& valS
         filterOption = filterOption | WindowInfoFilterOption::FOREGROUND;
     } else {
         WmToolErrorInfo errorInfo = { ERR_INVALID_INPUT, "Invalid input parameters.",
-            "Invalid value for " OPTION_FILTER " option: " + valStr, { INVALID_PARAM_SOLUTION } };
+            "Invalid value for " + OPTION_FILTER + " option: " + valStr, { INVALID_PARAM_SOLUTION } };
         PrintError(errorInfo);
         return false;
     }
@@ -324,7 +324,7 @@ bool ClawWindowShellCommand::ParseWindowInfoTypeOption(const std::string& valStr
         typeOption = typeOption | WindowInfoTypeOption::WINDOW_META_INFO;
     } else {
         WmToolErrorInfo errorInfo = { ERR_INVALID_INPUT, "Invalid input parameters.",
-            "Invalid value for " OPTION_TYPE " option: " + valStr, { INVALID_PARAM_SOLUTION } };
+            "Invalid value for " + OPTION_TYPE + " option: " + valStr, { INVALID_PARAM_SOLUTION } };
         PrintError(errorInfo);
         return false;
     }
@@ -348,7 +348,6 @@ void ClawWindowShellCommand::BuildListWindowInfoResultJson(const std::vector<spt
         }
         if (IsChosenWindowOption(typeOption, WindowInfoTypeOption::WINDOW_DISPLAY_INFO)) {
             window["displayInfo"]["displayId"] = info->windowDisplayInfo.displayId;
-            window["displayInfo"]["displayName"] = info->windowDisplayInfo.displayName;
         }
         if (IsChosenWindowOption(typeOption, WindowInfoTypeOption::WINDOW_LAYOUT_INFO)) {
             window["layoutInfo"]["rect"] = {

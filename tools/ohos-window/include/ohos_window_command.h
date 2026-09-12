@@ -103,7 +103,8 @@ private:
     bool ParseDisplayIdOption(const std::string& idStr, DisplayId& displayId);
     bool ParseWindowInfoFilterOption(const std::string& valStr, WindowInfoFilterOption& filterOption);
     bool ParseWindowInfoTypeOption(const std::string& valStr, WindowInfoTypeOption& typeOption);
-    void BuildListWindowInfoResultJson(const std::vector<sptr<WindowInfo>>& infos, const WindowInfoTypeOption& typeOption);
+    void BuildListWindowInfoResultJson(const std::vector<sptr<WindowInfo>>& infos,
+        const WindowInfoTypeOption& typeOption);
     void FillWindowMetaInfoJson(const WindowMetaInfo& metaInfo, nlohmann::json& windowJson);
 
     std::map<int32_t, WmToolErrorInfo> errorInfoMap_;
