@@ -155,7 +155,68 @@
                             "windows": {
                                 "type": "array",
                                 "items": {
-                                    "type": "object"
+                                    "type": "object",
+                                    "properties": {
+                                        "uiInfo": {
+                                            "type": "object",
+                                            "properties": {
+                                                "visibilityState": { "type": "integer" }
+                                            }
+                                        },
+                                        "displayInfo": {
+                                            "type": "object",
+                                            "properties": {
+                                                "displayId": { "type": "integer" },
+                                                "displayName": { "type": "string" }
+                                            }
+                                        },
+                                        "layoutInfo": {
+                                            "type": "object",
+                                            "properties": {
+                                                "rect": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "posX": { "type": "integer" },
+                                                        "posY": { "type": "integer" },
+                                                        "width": { "type": "integer" },
+                                                        "height": { "type": "integer" }
+                                                    }
+                                                },
+                                                "zOrder": { "type": "integer" },
+                                                "windowAlpha": { "type": "number" }
+                                            }
+                                        },
+                                        "metaInfo": {
+                                            "type": "object",
+                                            "properties": {
+                                                "windowId": { "type": "integer" },
+                                                "windowName": { "type": "string" },
+                                                "bundleName": { "type": "string" },
+                                                "abilityName": { "type": "string" },
+                                                "appIndex": { "type": "integer" },
+                                                "pid": { "type": "integer" },
+                                                "windowType": { "type": "integer" },
+                                                "parentWindowId": { "type": "integer" },
+                                                "surfaceNodeId": { "type": "integer" },
+                                                "leashWinSurfaceNodeId": { "type": "integer" },
+                                                "isPrivacyMode": { "type": "boolean" },
+                                                "windowMode": { "type": "integer" },
+                                                "windowModeInfo": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "windowMode": { "type": "integer" },
+                                                        "splitStyle": { "type": "integer" },
+                                                        "splitIndex": { "type": "integer" }
+                                                    }
+                                                },
+                                                "isMidScene": { "type": "boolean" },
+                                                "isFocused": { "type": "boolean" },
+                                                "isTouchable": { "type": "boolean" },
+                                                "mainWindowPersistentId": { "type": "integer" },
+                                                "controlAppType": { "type": "integer" }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
