@@ -176,7 +176,7 @@ using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
 using RequestVsyncByRootSceneWhenModeChangeFunc =
     std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using UpdateKioskAppListFunc = std::function<void(const std::vector<std::string>& kioskAppList)>;
-using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persistentId)>;
+using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persistentId, KioskType kioskType)>;
 using NotifySessionRecoverStateChangeFunc = std::function<void(const SessionRecoverState& state,
     const sptr<WindowSessionProperty>& property)>;
 using NotifyRecoverStateChangeFunc = std::function<void(const RecoverState& state)>;
@@ -941,9 +941,9 @@ public:
         int32_t requestId, int32_t persistentId);
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId, bool shouldBackToCaller = true);
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
-    WMError EnterKioskMode(const sptr<IRemoteObject>& token);
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType = KioskType::DEFAULT);
     WMError ExitKioskMode();
-    void KioskModeChange(bool isKioskMode, int32_t persistentId);
+    void KioskModeChange(bool isKioskMode, int32_t persistentId, KioskType kioskType);
     void ConfigSupportCreateFloatWindow();
     void RegisterGetStartWindowConfigCallback(const sptr<SceneSession>& sceneSession);
     void RegisterUpdateKioskAppListCallback(UpdateKioskAppListFunc&& func);
@@ -2089,6 +2089,7 @@ private:
     KioskModeChangeFunc kioskModeChangeFunc_;
     std::vector<std::string> kioskAppListCache_;
     bool isKioskMode_ = false;
+    KioskType kioskType_ = KioskType::DEFAULT;
     int32_t kioskAppPersistentId_ = INVALID_SESSION_ID;
     std::set<sptr<SceneSession>> foregroundSessionFloatWindowV1Set_;
     std::shared_mutex foregroundSessionFloatWindowV1SetMutex_;
