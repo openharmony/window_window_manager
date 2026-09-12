@@ -166,8 +166,7 @@
                                         "displayInfo": {
                                             "type": "object",
                                             "properties": {
-                                                "displayId": { "type": "integer" },
-                                                "displayName": { "type": "string" }
+                                                "displayId": { "type": "integer" }
                                             }
                                         },
                                         "layoutInfo": {
