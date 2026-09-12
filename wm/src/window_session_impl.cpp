@@ -58,6 +58,7 @@
 #include "window_inspector.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "window_limits_threshold.h"
 #include "color_parser.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
@@ -1380,8 +1381,25 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WMS::WindowRectUpdate::ClientRecv::UpdateRect id=%d rect=%s reason=%u",
         GetPersistentId(), wmRect.ToString().c_str(), wmReason);
+    UpdateRectByReason(wmRect, preRect, wmReason, config, avoidAreas);
+
+    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
+        layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
+    }
+    NotifyFirstValidLayoutUpdate(preRect, wmRect);
+    UpdateHoverState(wmRect, DisplayManager::GetInstance().GetFoldStatus());
+    return WSError::WS_OK;
+}
+
+void WindowSessionImpl::UpdateRectByReason(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
     if (handler_ != nullptr && (wmReason == WindowSizeChangeReason::ROTATION ||
         wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
+        if (WindowLimitsThreshold::LimitsThresholdEnabled()) {
+            UpdateDensity();
+        }
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config, avoidAreas);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::PAGE_ROTATION) {
@@ -1391,13 +1409,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     } else {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_, avoidAreas);
     }
-
-    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
-        layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
-    }
-    NotifyFirstValidLayoutUpdate(preRect, wmRect);
-    UpdateHoverState(wmRect, DisplayManager::GetInstance().GetFoldStatus());
-    return WSError::WS_OK;
 }
 
 /** @note @window.layout */
