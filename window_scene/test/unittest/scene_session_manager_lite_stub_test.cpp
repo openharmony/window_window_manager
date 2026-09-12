@@ -338,7 +338,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
-    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType = KioskType::DEFAULT) override
     {
         return WMError::WM_OK;
     }
@@ -1674,6 +1674,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleEnterKioskMode, Function | Small
     MessageParcel reply;
     const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     data.WriteRemoteObject(token);
+    data.WriteInt32(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleEnterKioskMode(data, reply);
     EXPECT_EQ(ERR_NONE, res);
