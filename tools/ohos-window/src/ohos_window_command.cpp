@@ -230,6 +230,7 @@ bool ClawWindowShellCommand::ParseListWindowInfoOption(WindowInfoOption& infoOpt
     size_t i = 0;
     std::unordered_set<std::string> expectValueOptions {
         OPTION_WINDOW_ID, OPTION_DISPLAY_ID, OPTION_FILTER, OPTION_TYPE };
+    bool needResetTypeOptValue = true;
     while (i < argList_.size()) {
         const auto& opt = argList_[i];
         if (opt == OPTION_HELP) {
@@ -261,6 +262,10 @@ bool ClawWindowShellCommand::ParseListWindowInfoOption(WindowInfoOption& infoOpt
                 return false;
             }
         } else if (opt == OPTION_TYPE) {
+            if (needResetTypeOptValue) {
+                infoOption.windowInfoTypeOption = static_cast<WindowInfoTypeOption>(0);
+                needResetTypeOptValue = false;
+            }
             if (!ParseWindowInfoTypeOption(argList_[i + 1], infoOption.windowInfoTypeOption)) {
                 return false;
             }
