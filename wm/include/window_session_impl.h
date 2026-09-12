@@ -1135,6 +1135,9 @@ protected:
     WindowVisibilityState lastVisibilityState_ = WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
     std::unordered_set<std::string> containerColorList_;
     float lastSystemDensity_ = UNDEFINED_DENSITY;
+    uint32_t lastDisplayWidth_ = 0;
+    uint32_t lastDisplayHeight_ = 0;
+    Rotation lastDisplayRotation_ = Rotation::ROTATION_0;
     std::atomic<bool> isDefaultDensityEnabled_ = false;
     std::atomic<bool> defaultDensityEnabledStageConfig_ = false;
     WSError NotifySystemDensityChange(float density);
@@ -1321,6 +1324,8 @@ private:
     RSAnimationTimingCurve updateConfigCurve(const WindowAnimationCurve& configCurve,
         const std::array<float, ANIMATION_PARAM_SIZE> param);
     void UpdateRectForRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
+        const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
+    void UpdateRectByReason(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
     void UpdateRectForPageRotation(const Rect& wmRect, const Rect& preRect, WindowSizeChangeReason wmReason,
         const SceneAnimationConfig& config, const std::map<AvoidAreaType, AvoidArea>& avoidAreas = {});
