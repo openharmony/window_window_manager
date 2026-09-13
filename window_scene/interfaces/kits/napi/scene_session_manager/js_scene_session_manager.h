@@ -399,7 +399,7 @@ private:
     void OnMinimizeByWindowId(const std::vector<int32_t>& windowIds);
     void OnUpdateKioskAppListCallback(const std::vector<std::string>& kioskAppList);
     void RegisterUpdateKioskAppListCallback();
-    void OnKioskModeChangeCallback(bool isKioskMode, int32_t persistentId);
+    void OnKioskModeChangeCallback(bool isKioskMode, int32_t persistentId, KioskType kioskType);
     void RegisterKioskModeChangeCallback();
 
     /*
