@@ -110,6 +110,7 @@
 | ABI 导出、SA 和运行配置 | 公共库、服务或配置改动 | `*.map`, `sa_profile/*.json`, `etc/`, `bundle.json` |
 | 沉浸式窗口 | `docs/knowledge` | `immersive-avoid-area-layout-timing.md`, `immersive-avoid-area.md`, `immersive-debugging-and-tests.md`, `immersive-system-bars.md`, `immersive-window-overview.md` |
 | 画中画 | `docs/knowledge` | `floating_ball.md`, `floating_view.md`, `picture_in_picture.md` |
+| 应用拉应用窗口动效（拉起入口、启动窗、转场、首帧衔接） | `wm/`, `window_scene/session/host/`, `window_scene/session_manager/`；转场动画执行在关联仓 `window_scene_board`，启动窗绘制在关联仓 `arkui_ace_engine`，本仓勿找 | `docs/knowledge/app-launch-app-animation.md` |
 
 ### 开始编辑前
 
