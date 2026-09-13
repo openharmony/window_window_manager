@@ -4,8 +4,6 @@
 
 本文专项说明统一架构（`window_scene/`）下“应用拉应用”场景的窗口动效全链路。应用A处于前台，通过 `startAbility` 拉起应用B，典型表现是：B 显示启动窗（冷启动）或直接转场（热启动）、A 退场、B 打开到位。
 
-术语约定：Ability Manager Service 指 ability_runtime 子系统的元能力管理服务（`AbilityManagerService`）；由于业界通用缩写 AMS 通常指 Android 的 Activity Manager Service，为避免歧义，本文一律使用全称、不使用该缩写。Window Manager Service（WMS）指本仓窗口管理服务；SceneBoard（SCB）指关联仓 `window_scene_board`。首帧（first frame）指应用窗口首个内容 buffer 就绪，相关通知链路见“结论先行”第 7 条与“阶段四”。
-
 本文回答：
 
 - Ability Manager Service 把拉起请求送到 WMS 的哪个 IPC 入口，caller（谁拉起谁）记录在哪里；
@@ -314,7 +312,7 @@ WMS `Session::SetBufferAvailable(bool, bool startWindowInvisible)`（`session.cp
 
 1. `setSessionAliveStatus` 更新存活状态；
 2. 执行并清空 `bufferAvailableCallbackList`（依赖首帧的动画回调，如通话 fadeIn）；
-3. 首个 `bufferAvailableChange` 事件时应用 systemBarProperty（`_isSystemBarPropertyApplied` 置位后不再重复）；
+3. 第一个 `bufferAvailableChange` 事件时应用 systemBarProperty（`_isSystemBarPropertyApplied` 置位后不再重复）；
 4. `startWindowInvisible` 为 true 时 `notifyApplicationLoadedWhenStartWindowInvisible`（phone 的 mission processor
    为空实现，PC 侧打点）。
 
