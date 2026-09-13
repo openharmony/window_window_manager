@@ -1746,6 +1746,15 @@ enum class SidebarBlurType : uint32_t {
     END,
 };
 
+/**
+ * @brief Type of kiosk mode
+ */
+enum class KioskType : int32_t {
+    DEFAULT = 0,
+    EXAM_MODE = 1,
+    END,
+};
+
 struct PreWindowProperty {
     uint32_t rotation = 0;
     uint32_t width = 0;
