@@ -4,7 +4,7 @@
 
 本文专项说明统一架构（`window_scene/`）下“应用拉应用”场景的窗口动效全链路。应用A处于前台，通过 `startAbility` 拉起应用B，典型表现是：B 显示启动窗（冷启动）或直接转场（热启动）、A 退场、B 打开到位。
 
-术语约定：Ability Manager Service 指 ability_runtime 子系统的元能力管理服务（`AbilityManagerService`）；由于业界通用缩写 AMS 通常指 Android 的 Activity Manager Service，为避免歧义，本文一律使用全称、不使用该缩写。Window Manager Service（WMS）指本仓窗口管理服务；SceneBoard（SCB）指关联仓 `window_scene_board`。
+术语约定：Ability Manager Service 指 ability_runtime 子系统的元能力管理服务（`AbilityManagerService`）；由于业界通用缩写 AMS 通常指 Android 的 Activity Manager Service，为避免歧义，本文一律使用全称、不使用该缩写。Window Manager Service（WMS）指本仓窗口管理服务；SceneBoard（SCB）指关联仓 `window_scene_board`。首帧（first frame）指应用窗口首个内容 buffer 就绪，相关通知链路见“结论先行”第 7 条与“阶段四”。
 
 本文回答：
 
@@ -74,7 +74,7 @@
 判断“动画到底谁执行”的直接证据：no-op 接口（`scene_session_manager_interface.h:369-391`）说明统一架构没有远程动画 IPC；
 `window_scene_board` 全仓检索启动窗绘制（illustration/branding/REQUIRED_SHOW 等）零命中，仅有 NAPI 消费面
 （`setStartingWindowExitAnimationFlag`、`supportPreloadStartingWindow` 等）；本仓 `RSSurfaceNodeType::STARTING_WINDOW_NODE`
-只存在于 `wmserver/`（分离架构）。`libscene_session.map` 导出 `SceneSession`/`ScenePersistence` 符号供进程内其他库链接，
+只存在于 `wmserver/`（分离架构）。`libscene_session.map` 导出 `SceneSession`/`ScenePersistence` 符号供进程内其它库链接，
 是 ace_engine 在同进程直接消费 Session 能力的佐证，见 `window_scene/session/libscene_session.map`。
 
 ## 全链路时序（冷启动）
@@ -208,7 +208,7 @@ A 的退后台由 SCB 在动画开始前发起（见“阶段三”），WMS 侧
 
 启动页资源（`StartingWindowInfo`，`ws_common.h:1290-1301`：背景色/图标/插画/品牌/背景图）由
 `SceneSessionManager::GetStartupPage`（`:7364-7434`）按“桌面图标 want 参数 → 内存 `startingWindowMap_` → RDB → Bundle Manager Service 资源”
-四级查找，首次成功后回写缓存与 RDB。深浅色分别缓存。
+四级查找；内存缓存与 RDB 均未命中时才经 Bundle Manager Service 查询并解析应用资源，成功后回写内存缓存与 RDB（深浅色分别缓存）。
 
 PC/PC 模式下 `SetSessionInfoStartWindowType`（`:7786-7804`）从 RDB 读取字符串配置回写 sessionInfo；
 `RETAIN_AND_INVISIBLE` 且 `STATE_DISCONNECT` 时置 `SetHidingStartingWindow(true)`，该标志会：
@@ -314,7 +314,7 @@ WMS `Session::SetBufferAvailable(bool, bool startWindowInvisible)`（`session.cp
 
 1. `setSessionAliveStatus` 更新存活状态；
 2. 执行并清空 `bufferAvailableCallbackList`（依赖首帧的动画回调，如通话 fadeIn）；
-3. 首次 buffer 后应用 systemBarProperty；
+3. 首个 `bufferAvailableChange` 事件时应用 systemBarProperty（`_isSystemBarPropertyApplied` 置位后不再重复）；
 4. `startWindowInvisible` 为 true 时 `notifyApplicationLoadedWhenStartWindowInvisible`（phone 的 mission processor
    为空实现，PC 侧打点）。
 
