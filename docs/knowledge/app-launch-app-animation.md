@@ -2,9 +2,13 @@
 
 ## 文档定位
 
-本文专项说明统一架构（`window_scene/`）下“应用拉应用”场景的窗口动效全链路。应用A处于前台，通过 `startAbility` 拉起应用B，典型表现是：B 显示启动窗（冷启动）或直接转场（热启动）、A 退场、B 打开到位。本文回答：
+本文专项说明统一架构（`window_scene/`）下“应用拉应用”场景的窗口动效全链路。应用A处于前台，通过 `startAbility` 拉起应用B，典型表现是：B 显示启动窗（冷启动）或直接转场（热启动）、A 退场、B 打开到位。
 
-- AMS 把拉起请求送到 WMS 的哪个 IPC 入口，caller（谁拉起谁）记录在哪里；
+术语约定：Ability Manager Service 指 ability_runtime 子系统的元能力管理服务（`AbilityManagerService`）；由于业界通用缩写 AMS 通常指 Android 的 Activity Manager Service，为避免歧义，本文一律使用全称、不使用该缩写。Window Manager Service（WMS）指本仓窗口管理服务；SceneBoard（SCB）指关联仓 `window_scene_board`。
+
+本文回答：
+
+- Ability Manager Service 把拉起请求送到 WMS 的哪个 IPC 入口，caller（谁拉起谁）记录在哪里；
 - 冷启动与热启动在哪个函数分流，`StartUIAbilityBySCB` 的 sceneFlag 是什么；
 - 统一架构下 open/close 转场动画由谁执行、动画参数是什么、作用于什么节点；
 - 启动窗的类型决策（start_window.json / RDB / preload）与移除链路，退出动画开关在哪里；
@@ -33,11 +37,11 @@
    `NotifyWindowTransition`、`GetWindowAnimationTargets` 在 `SceneSessionManagerStub` 基类中是 no-op 默认实现，见
    `window_scene/session_manager/include/zidl/scene_session_manager_interface.h:369-391`。应用拉应用的转场动画由同进程的
    SceneBoard ArkTS（`window_scene_board` 仓）执行，WMS 只负责事件与状态机。
-2. 拉起的 IPC 入口是 `ISession::TRANS_ID_ACTIVE_PENDING_SESSION`（AMS → root session 或前台A的 session），不是
+2. 拉起的 IPC 入口是 `ISession::TRANS_ID_ACTIVE_PENDING_SESSION`（Ability Manager Service → root session 或前台A的 session），不是
    `ISceneSessionManager` 的 manager 接口。热启动/mission 前台化才走
    `ISceneSessionManagerLite::PendingSessionToForeground`，见 `window_scene/session_manager/src/scene_session_manager.cpp:14682-14708`。
 3. 冷/热启动分流在 `RequestSceneSessionActivationInner`：session 已存在且已连接（典型：A 拉起后台的B）时直接
-   `NotifySessionForeground(1, true)`（1 是 `KEYGUARD` 枚举值，非 `ABILITY_CALL`），否则经 `StartUIAbilityBySCB` 让 AMS
+   `NotifySessionForeground(1, true)`（1 是 `KEYGUARD` 枚举值，非 `ABILITY_CALL`），否则经 `StartUIAbilityBySCB` 让 Ability Manager Service
    真正拉起进程，sceneFlag 恒为 `WindowStateChangeReason::ABILITY_CALL`，带 XCollie 5 秒超时监控，见
    `window_scene/session_manager/src/scene_session_manager.cpp:4368-4381`、`:4211-4241`。
 4. 应用拉应用的默认动画是 `SCBScenePanelAnimator.sceneContainerAppTransitionChange`：B 从右缘水平推入（600ms
@@ -62,7 +66,7 @@
 
 | 层 | 职责 | 稳定入口 |
 |---|---|---|
-| AMS（ability_runtime，外部） | startAbility 调度、进程拉起、经 `ISession`/`ISceneSessionManagerLite` 通知 WMS | `SessionProxy::PendingSessionActivation`（`window_scene/session/host/src/zidl/session_proxy.cpp:564`） |
+| Ability Manager Service（ability_runtime，外部） | startAbility 调度、进程拉起、经 `ISession`/`ISceneSessionManagerLite` 通知 WMS | `SessionProxy::PendingSessionActivation`（`window_scene/session/host/src/zidl/session_proxy.cpp:564`） |
 | WMS native（本仓 `window_scene/`） | session 创建与状态机、启动窗数据决策与缓存、快照存取、移除通知、焦点后处理 | `SceneSessionManager`、`Session`/`SceneSession` |
 | SCB ArkTS（`window_scene_board`） | 转场动画编排与执行、事件消费、动画完成后状态推进、按需回调 WMS NAPI | `SCBScenePanelViewModel`/`SCBScenePanelAnimator` |
 | ace_engine `WindowScene` 组件（未本地核验） | 应用 surface 宿主、启动窗 UI 绘制、`ILifecycleListener` 实现（含 `OnAppRemoveStartingWindow` 消费与退出动画） | 关联仓 `arkui_ace_engine` |
@@ -76,8 +80,8 @@
 ## 全链路时序（冷启动）
 
 ```text
-App A --startAbility--> AMS
-AMS --TRANS_ID_ACTIVE_PENDING_SESSION(TF_ASYNC)--> root/A 的 SceneSession
+App A --startAbility--> Ability Manager Service
+Ability Manager Service --TRANS_ID_ACTIVE_PENDING_SESSION(TF_ASYNC)--> root/A 的 SceneSession
   -> SceneSession::PendingSessionActivation            (scene_session.cpp:6899)
      startMethod = START_CALL; MakeSessionInfoDuringPendingActivation (6726, caller字段)
      CalculateStartWindowType (6840, 仅PC同bundle)
@@ -94,7 +98,7 @@ SCB ArkTS 消费
 WMS 激活分流
   -> SceneSessionManager::RequestSceneSessionActivation (SSM.cpp:4105, hitrace ssm:RequestSceneSessionActivation)
   -> RequestSceneSessionActivationInner (4280)
-     冷启动: StartUIAbilityBySCBTimeoutCheck -> AMS StartUIAbilityBySCB(sceneFlag=ABILITY_CALL) (4360/4376)
+     冷启动: StartUIAbilityBySCBTimeoutCheck -> Ability Manager Service StartUIAbilityBySCB(sceneFlag=ABILITY_CALL) (4360/4376)
      热启动(session已连接): NotifySessionForeground(1, true) 直连 App (4379-4380)
 App B 进程
   -> CreateAndConnectSpecificSession -> ConnectInner -> STATE_CONNECT
@@ -120,28 +124,28 @@ App B 首帧
 
 热启动差异：B 的 session 已存在且连接时，`RequestSceneSessionActivationInner` 走 `NotifySessionForeground(1, true)`
 直接通知 App B `window->Show(reason, withAnimation)`（`wm/src/window_scene_session_impl.cpp:7486-7501`），无
-`StartUIAbilityBySCB`；另有 mission 前台化路径由 AMS 调 `PendingSessionToForeground`（lite stub），WMS 把事件投给当前聚焦
+`StartUIAbilityBySCB`；另有 mission 前台化路径由 Ability Manager Service 调 `PendingSessionToForeground`（lite stub），WMS 把事件投给当前聚焦
 主窗口 session 或目标 session 的 JS 监听（`SSM.cpp:14698-14703`）。
 
-## 阶段一：拉起入口（AMS → WMS → SCB）
+## 阶段一：拉起入口（Ability Manager Service → WMS → SCB）
 
 ### IPC 入口与 caller 记录
 
-AMS 持有 root session 的 token（`RegisterRootSceneSession` 时经 `SetRootSceneSession` 交给 AMS），拉起时调
+Ability Manager Service 持有 root session 的 token（`RegisterRootSceneSession` 时经 `SetRootSceneSession` 交给 Ability Manager Service），拉起时调
 `SessionProxy::PendingSessionActivation`（TF_ASYNC，`session_proxy.cpp:564-578`），IPC code
 `TRANS_ID_ACTIVE_PENDING_SESSION`（`session_ipc_interface_code.h:30`）。事件会落在 root session 或前台A的 session 上，
 两者都注册了监听。
 
 `SceneSession::PendingSessionActivation`（`scene_session.cpp:6899-6955`）要点：
 
-- 校验 `PERMISSION_MANAGE_MISSION`，仅 AMS 等系统调用者可入；
+- 校验 `PERMISSION_MANAGE_MISSION`，仅 Ability Manager Service 等系统调用者可入；
 - `sessionInfo_.startMethod = StartMethod::START_CALL`（`:6923`）标记本次是“拉起”；
 - `MakeSessionInfoDuringPendingActivation`（`:6726-6800`）从 `AAFwk::SessionInfo` 提取 caller 信息：
   `callerToken_`、`requestCode`、`callingTokenId_`（`:6744-6747`），`callerBundleName_`/`callerAbilityName_` 来自 want 的
   `PARAM_RESV_CALLER_BUNDLE_NAME/ABILITY_NAME`（`:6738-6739`）；注意 `callerPersistentId_` 此处填的是接收 IPC 的
   session（root 或A）自己的 id（`:6737`），真实拉起者的修正见下；
 - `CalculateStartWindowType(info, hideStartWindow)`（`:6796`，实现 `:6840-6855`）仅在 PC/PC 模式且同 bundle 时按
-  `OPTIONAL_SHOW` + AMS 的 `hideStartWindow` 决定 `RETAIN_AND_INVISIBLE`；
+  `OPTIONAL_SHOW` + Ability Manager Service 的 `hideStartWindow` 决定 `RETAIN_AND_INVISIBLE`；
 - 最后 `pendingSessionActivationFunc_(info)`（`:6949-6950`）把事件交给 NAPI 桥。
 
 ### NAPI 桥与“真实拉起者”
@@ -203,7 +207,7 @@ A 的退后台由 SCB 在动画开始前发起（见“阶段三”），WMS 侧
 `REQUIRED_HIDE` / `OPTIONAL_SHOW`）经 `CONVERT_STRING_TO_START_WINDOW_TYPE_MAP` 映射（`SSM.cpp:230-234`）。
 
 启动页资源（`StartingWindowInfo`，`ws_common.h:1290-1301`：背景色/图标/插画/品牌/背景图）由
-`SceneSessionManager::GetStartupPage`（`:7364-7434`）按“桌面图标 want 参数 → 内存 `startingWindowMap_` → RDB → BMS 资源”
+`SceneSessionManager::GetStartupPage`（`:7364-7434`）按“桌面图标 want 参数 → 内存 `startingWindowMap_` → RDB → Bundle Manager Service 资源”
 四级查找，首次成功后回写缓存与 RDB。深浅色分别缓存。
 
 PC/PC 模式下 `SetSessionInfoStartWindowType`（`:7786-7804`）从 RDB 读取字符串配置回写 sessionInfo；
@@ -343,7 +347,7 @@ WMS `Session::SetBufferAvailable(bool, bool startWindowInvisible)`（`session.cp
 
 | 阶段 | Hilog/Trace 关键字 | 位置 |
 |---|---|---|
-| AMS 拉起 IPC | `set reuseDelegatorWindow`（WMS_LIFE） | scene_session.cpp:6925 |
+| Ability Manager Service 拉起 IPC | `set reuseDelegatorWindow`（WMS_LIFE） | scene_session.cpp:6925 |
 | caller 修正 | `isNeedBackToOther`（WMS_LIFE） | js_root_scene_session.cpp:429 |
 | 建 session | `Create MainSession, id:`（WMS_MAIN） | SSM.cpp:3384（经 GenSceneSession → RequestSceneSession） |
 | pending 激活（SCB） | `onPendingSceneSessionActivation sceneInfo.persistentId:` | SCBRootSceneSession.ts:117 |
@@ -353,7 +357,7 @@ WMS `Session::SetBufferAvailable(bool, bool startWindowInvisible)`（`session.cp
 | 激活请求（SCB） | `[SCBMain][id:..]requestSceneSessionActivation.` | SCBSceneSessionManager.ts:4797 |
 | 冷启动分流 | `Begin StartUIAbility` / `Background switch on, isNewActive..` | SSM.cpp:4352/4364 |
 | 热启动分流 | `NotifySessionForeground: %{public}d` | SSM.cpp:4379 |
-| AMS 拉起 | `StartUIAbilityBySCB: persistentId:..` / `StartUIAbility sceneFlag:.. retCode:..` / `Timeout, currentUserId:` | SSM.cpp:4214/4230/4235 |
+| Ability Manager Service 拉起 | `StartUIAbilityBySCB: persistentId:..` / `StartUIAbility sceneFlag:.. retCode:..` / `Timeout, currentUserId:` | SSM.cpp:4214/4230/4235 |
 | 前台化 | `[id:..] state:.., isTerminating:..`（WMS_LIFE） | session.cpp:1859 |
 | 转场动画开始 | `sceneContainerAppTransitionChange from .. to ..`（WMSMain） | SCBScenePanelAnimator.ets:223 |
 | 自定义动画 | `startAnimationOptions:` / `Start fadeInOut animation`（WMSAnimation） | SCBScenePanelAnimator.ets:229/318 |
@@ -382,7 +386,7 @@ HiTrace（`HITRACE_TAG_WINDOW_MANAGER`）：`ssm:RequestSceneSession(%d )`（SSM
 - 把 `callerPersistentId_` 当可靠拉起者——只有 want 带 `PARAM_BACK_TO_OTHER_MISSION_STACK` 时才填真实拉起者，
   否则是 `INVALID_SESSION_ID`；拉起者身份看 `callerBundleName_`/`callerToken_`。
 - 把 `NotifySessionForeground(1, true)` 的 1 读成 `ABILITY_CALL`——1 是 `KEYGUARD`；`ABILITY_CALL(4)` 只出现在
-  SCB→AMS 的 sceneFlag 上。
+  SCB→Ability Manager Service 的 sceneFlag 上。
 - 期望 A 的 Background 晚于动画结束——实际请求在动画开始前发出，快照保存与动画并行。
 - 以为 `withAnimation` 参数控制主窗口转场——它只影响系统窗的动画 flag 属性，主窗口转场由 SCB 编排决定。
 - 把 `bufferAvailableChange` 第二参数当成“启动窗已移除”——它只触发内容加载通知，节点移除在 native 侧独立完成。
