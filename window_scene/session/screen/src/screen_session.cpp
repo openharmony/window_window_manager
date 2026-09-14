@@ -1091,7 +1091,6 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
     // back server for post processs of screen change
     screenProperty.SetSuperFoldStatusChangeEvent(changeEvent);
     screenProperty.SetIsDestroyDisplay(eventPara.GetIsFakeInUse());
-    screenProperty.SetPropertyChangeReason(eventPara.GetPropertyChangeReason());
 
     switch (changeEvent) {
         case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
@@ -3515,6 +3514,7 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenBoundsRect.width_, screenBoundsRect.height_,
         eventBoundsRect.width_, eventBoundsRect.height_);
 
+    screenProperty.SetPropertyChangeReason(eventPara.GetPropertyChangeReason());
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         ProcPropertyChangedForSuperFold(screenProperty, eventPara);
         
