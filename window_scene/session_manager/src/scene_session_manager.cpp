@@ -164,6 +164,8 @@ const std::string ARG_DUMP_PIPLINE = "-p";
 const std::string ARG_DUMP_SCB = "-b";
 const std::string ARG_DUMP_DETAIL = "-c";
 const std::string ARG_DUMP_RECORD = "-v";
+const std::string ARG_MOTION = "-motion";
+const std::string ARG_SMART_MOTION = "-smartmotion";
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const int32_t LOGICAL_DISPLACEMENT_32 = 32;
 constexpr int32_t GET_TOP_WINDOW_DELAY = 100;
@@ -6161,6 +6163,12 @@ void SceneSessionManager::SetRecoverSceneSessionListener(const NotifyRecoverScen
     recoverSceneSessionFunc_ = func;
 }
 
+void SceneSessionManager::SetRestoreSessionToForegroundListener(const NotifyRestoreSessionToForegroundFunc& func)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "in");
+    restoreSessionToForegroundFunc_ = func;
+}
+
 void SceneSessionManager::SetCreateSystemSessionListener(const NotifyCreateSystemSessionFunc& func)
 {
     createSystemSessionFunc_ = func;
@@ -9178,6 +9186,12 @@ WSError SceneSessionManager::GetSessionDumpInfo(const std::vector<std::string>& 
         resetParams.assign(params.begin() + 1, params.end());
         SessionChangeRecorder::GetInstance().GetSceneSessionNeedDumpInfo(resetParams, dumpInfo);
         return WSError::WS_OK;
+    }
+    if (params.size() >= 2 && params[0] == ARG_MOTION) { // 2: params num
+        return MotionManager::GetInstance().SetMotionValueByDump(params, dumpInfo);
+    }
+    if (params.size() >= 2 && params[0] == ARG_SMART_MOTION) { // 2: params num
+        return MotionManager::GetInstance().SetSmartMotionValueByDump(params, dumpInfo);
     }
     return WSError::WS_ERROR_INVALID_OPERATION;
 }
@@ -14691,6 +14705,41 @@ WSError SceneSessionManager::PendingSessionToForeground(const sptr<IRemoteObject
         TLOGNE(WmsLogTag::DEFAULT, "PendingForeground: fail to find token");
         return WSError::WS_ERROR_INVALID_PARAM;
     }, __func__);
+}
+
+WSErrorResult SceneSessionManager::RestoreSessionToForeground(int32_t persistentId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId: %{public}d", persistentId);
+    if (!SessionPermission::IsSACalling() &&
+        !SessionPermission::VerifyCallingPermission("ohos.permission.CONTROL_DEVICE")) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Permission denied for restoring session to foreground!");
+        return WSErrorResult{WSError::WS_ERROR_INVALID_PERMISSION,
+            "Permission denied for restoring session to foreground!"};
+    }
+    if (!systemConfig_.IsSupportPCMode()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "device not support");
+        return WSErrorResult{WSError::WS_ERROR_DEVICE_NOT_SUPPORT, "device not support"};
+    }
+    if (IsScreenLocked()) {
+        TLOGE(WmsLogTag::WMS_LIFE, "screen is locked, cannot restore session to foreground");
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION,
+            "screen is locked, cannot restore session to foreground"};
+    }
+    auto session = GetMainSessionByPersistentId(persistentId);
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "RestoreSessionToForeground: fail to find main window");
+        return WSErrorResult{WSError::WS_ERROR_INVALID_PARAM, "fail to find main window"};
+    }
+    if (!restoreSessionToForegroundFunc_) {
+        TLOGE(WmsLogTag::WMS_LIFE, "RestoreSessionToForeground: listener is null");
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "listener is null"};
+    }
+    auto func = restoreSessionToForegroundFunc_;
+    auto screenId = session->GetScreenId();
+    taskScheduler_->PostTask([func = std::move(func), persistentId, screenId]() {
+        func(persistentId, screenId);
+    }, __func__);
+    return WSErrorResult{WSError::WS_OK, ""};
 }
 
 WSError SceneSessionManager::PendingSessionToBackground(const sptr<IRemoteObject>& token,
