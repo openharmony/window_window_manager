@@ -1312,7 +1312,7 @@ void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportCo
             lastSystemDensity_ - AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio()))) {
             auto systemDpi = displayInfo->GetVirtualPixelRatio();
             auto density = AdaptToHookedDensity(systemDpi);
-            TLOGD(WmsLogTag::WMS_UIEXT,
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE,
                 "id=%{public}u, lastDensity=%{public}f, systemDpi=%{public}f, hookedDpi=%{public}f",
                 GetWindowId(), lastSystemDensity_, systemDpi, density);
             lastSystemDensity_ = density;
@@ -1575,7 +1575,7 @@ float WindowExtensionSessionImpl::GetDefaultDensity(const sptr<DisplayInfo>& dis
     }
     auto dpi = displayInfo->GetVirtualPixelRatio();
     auto hookedDpi = AdaptToHookedDensity(dpi);
-    TLOGD(WmsLogTag::WMS_UIEXT,
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE,
         "id=%{public}u, type=%{public}u, systemDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
         GetWindowId(), GetType(), dpi, hookedDpi, displayInfo->GetDisplayId());
     return hookedDpi;
