@@ -19,6 +19,9 @@
 #undef private
 #undef protected
 
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <algorithm>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -28,6 +31,7 @@
 #include "mock_accesstoken_kit.h"
 #include "scene_session_manager.h"
 #include "scene_session_manager_lite.h"
+#include "session_manager/include/zidl/scene_session_manager_proxy.h"
 #include "session_manager_service_proxy.h"
 #include "wm_common.h"
 
@@ -62,6 +66,19 @@ public:
                       int32_t fromUserId,
                       int32_t fromPid,
                       const sptr<IRemoteObject>& sessionManagerService));
+};
+
+class LocalInterfaceRemoteMocker : public IRemoteObjectMocker {
+public:
+    explicit LocalInterfaceRemoteMocker(const sptr<IRemoteBroker>& broker) : broker_(broker) {}
+
+    sptr<IRemoteBroker> QueryLocalInterface(const std::u16string& descriptor) override
+    {
+        return broker_;
+    }
+
+private:
+    sptr<IRemoteBroker> broker_;
 };
 
 namespace {
@@ -995,6 +1012,96 @@ HWTEST(MockSessionManagerServiceTest, DumpSessionInfoWithUser, TestSize.Level1)
     ret = mockMockSms.DumpSessionInfo(args7, info);
     EXPECT_NE(0, ret);
     EXPECT_NE(info.find("not in foreground"), std::string::npos);
+
+    // branch 8: -user with foreground user id, dump success with user header
+    auto innerRemote = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(innerRemote);
+    auto remoteWithLocalInterface = sptr<LocalInterfaceRemoteMocker>::MakeSptr(ssmProxy);
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
+        .WillOnce(Return(remoteWithLocalInterface));
+    std::vector<std::string> args8 = {"-user", "100", "-a"};
+    info.clear();
+    ret = mockMockSms.DumpSessionInfo(args8, info);
+    EXPECT_EQ(0, ret);
+    EXPECT_NE(info.find("user ID: 100"), std::string::npos);
+}
+
+/**
+ * @tc.name: Dump
+ * @tc.desc: test the function of Dump with all branches
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, Dump, TestSize.Level1)
+{
+    MockMockSessionManagerService mockMockSms;
+    int fd = open("/dev/null", O_WRONLY);
+    ASSERT_GE(fd, 0);
+    int ret;
+
+    // case 1: invalid fd
+    ret = mockMockSms.Dump(-1, {u"-a"});
+    EXPECT_EQ(-1, ret);
+
+    // case 2: empty params, show help info
+    ret = mockMockSms.Dump(fd, {});
+    EXPECT_EQ(0, ret);
+
+    // case 3: -h, show help info
+    ret = mockMockSms.Dump(fd, {u"-h"});
+    EXPECT_EQ(0, ret);
+
+    // case 4: illegal args, errCode == -1 arm
+    ret = mockMockSms.Dump(fd, {u"-user", u"abc", u"-a"});
+    EXPECT_EQ(0, ret);
+
+    // case 5: user not in foreground, errCode == -2 arm
+    mockMockSms.screenId2UserId_[0] = 100;
+    ret = mockMockSms.Dump(fd, {u"-user", u"101", u"-a"});
+    EXPECT_EQ(0, ret);
+
+    // case 6: dump success, errCode == 0 arm
+    auto innerRemote = sptr<IRemoteObjectMocker>::MakeSptr();
+    auto ssmProxy = sptr<SceneSessionManagerProxy>::MakeSptr(innerRemote);
+    auto remoteWithLocalInterface = sptr<LocalInterfaceRemoteMocker>::MakeSptr(ssmProxy);
+    EXPECT_CALL(mockMockSms, GetSceneSessionManagerByUserId(_))
+        .WillOnce(Return(remoteWithLocalInterface));
+    ret = mockMockSms.Dump(fd, {u"-user", u"100", u"-a"});
+    EXPECT_EQ(0, ret);
+
+    close(fd);
+}
+
+/**
+ * @tc.name: ShowHelpInfo
+ * @tc.desc: test the function of ShowHelpInfo
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, ShowHelpInfo, TestSize.Level1)
+{
+    MockMockSessionManagerService mockMockSms;
+    std::string info;
+    mockMockSms.ShowHelpInfo(info);
+    EXPECT_NE(info.find("Usage:"), std::string::npos);
+    EXPECT_NE(info.find(" -h"), std::string::npos);
+    EXPECT_NE(info.find(" -a"), std::string::npos);
+    EXPECT_NE(info.find(" -w {window id}"), std::string::npos);
+    EXPECT_NE(info.find(" -user {all|id}"), std::string::npos);
+    EXPECT_NE(info.find("-user all -a"), std::string::npos);
+    EXPECT_NE(info.find("-user 100 -a"), std::string::npos);
+}
+
+/**
+ * @tc.name: ShowIllegalArgsInfo
+ * @tc.desc: test the function of ShowIllegalArgsInfo
+ * @tc.type: FUNC
+ */
+HWTEST(MockSessionManagerServiceTest, ShowIllegalArgsInfo, TestSize.Level1)
+{
+    MockMockSessionManagerService mockMockSms;
+    std::string info;
+    mockMockSms.ShowIllegalArgsInfo(info);
+    EXPECT_NE(info.find("The arguments are illegal"), std::string::npos);
+    EXPECT_NE(info.find("'-h'"), std::string::npos);
 }
 
 /**
