@@ -94,6 +94,7 @@
 #include "fold_screen_base_controller.h"
 #include "product_ext_wrapper.h"
 #include "screen_manager/rs_surface_region_config.h"
+#include "screen_manager/screen_types.h"
 
 namespace OHOS::Rosen {
 namespace {
@@ -1692,7 +1693,8 @@ ScreenId ScreenSessionManager::GenerateSmsScreenId(ScreenId rsScreenId)
 void ScreenSessionManager::SetRogToRs(ScreenId screenId, const RogResolution& rogSize)
 {
     if (screenId == SCREEN_ID_DEFAULT && rogSize.isSupportRog) {
-        auto res = RSInterfaces::GetInstance().SetRogScreenResolution(screenId, rogSize.width, rogSize.height);
+        auto res = RSInterfaces::GetInstance().SetRogScreenResolution(screenId, rogSize.width, rogSize.height,
+        static_cast<ScreenSamplingMode>(rogSize.rogMode));
         if (res != 0) {
             TLOGNFE(WmsLogTag::DMS, "Failed to SetRogScreenResolution, errorCode::%{public}d", res);
         } else {
@@ -4289,7 +4291,8 @@ DMError ScreenSessionManager::SetResolution(ScreenId screenId, uint32_t width, u
         return DMError::DM_ERROR_NULLPTR;
     }
     screenSession->FreezeScreen(true);
-    if (rsInterface_.SetRogScreenResolution(screenId, width, height) != 0) {
+    if (rsInterface_.SetRogScreenResolution(screenId, width, height, static_cast<ScreenSamplingMode>(rogSize.rogMode, 
+        static_cast<ScreenSamplingMode>(rogSize.rogMode))) != 0) {
         TLOGNFE(WmsLogTag::DMS, "Failed to SetRogScreenResolution");
         screenSession->FreezeScreen(false);
         rsInterface_.ForceRefreshOneFrameWithNextVSync();
