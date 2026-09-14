@@ -357,6 +357,7 @@
             OHOS::Rosen::ScreenSessionGroup::AddChild*;
             OHOS::Rosen::ScreenSessionGroup::ConvertToScreenGroupInfo*;
             OHOS::Rosen::ScreenSessionGroup::GetChildCount*;
+            OHOS::Rosen::ScreenSessionGroup::GetScreenCombination*;
             OHOS::Rosen::ScreenSessionGroup::HasChild*;
             OHOS::Rosen::ScreenSessionGroup::RemoveChild*;
             OHOS::Rosen::ScreenSessionGroup::ScreenSessionGroup*;
