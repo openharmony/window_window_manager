@@ -2059,7 +2059,7 @@ void WindowManager::UpdateFocusChangeInfo(const sptr<FocusChangeInfo>& focusChan
         WLOGFE("focusChangeInfo is nullptr.");
         return;
     }
-    TLOGD(WmsLogTag::WMS_FOCUS, "window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
+    TLOGI(WmsLogTag::WMS_FOCUS, "window focus change: %{public}d, id: %{public}u", focused, focusChangeInfo->windowId_);
     if (focused) {
         pImpl_->NotifyFocused(focusChangeInfo);
     } else {
@@ -2735,9 +2735,17 @@ WMError WindowManager::NotifyScreenshotEvent(ScreenshotEventType type)
 WMError WindowManager::SetStartWindowBackgroundColor(
     const std::string& moduleName, const std::string& abilityName, uint32_t color)
 {
+    std::string errMsg;
+    return SetStartWindowBackgroundColor(moduleName, abilityName, color, errMsg);
+}
+
+WMError WindowManager::SetStartWindowBackgroundColor(
+    const std::string& moduleName, const std::string& abilityName, uint32_t color, std::string& errMsg)
+{
+    errMsg.clear();
     int32_t uid = static_cast<int32_t>(getuid());
     WMError ret = WindowAdapter::GetInstance(userId_).SetStartWindowBackgroundColor(
-        moduleName, abilityName, color, uid);
+        moduleName, abilityName, color, uid, errMsg);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_PATTERN, "failed");
     }

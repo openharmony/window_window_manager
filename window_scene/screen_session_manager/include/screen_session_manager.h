@@ -383,6 +383,8 @@ public:
     void TriggerDisplayModeUpdate(FoldDisplayMode targetDisplayMode);
     void CallRsSetScreenPowerStatusSync(ScreenId screenId, ScreenPowerStatus status,
         PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN, bool isApAod = false);
+    void CallRsSetScreenPowerStatusSyncWithFallback(ScreenId screenId, ScreenPowerStatus status,
+        PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN, bool isApAod = false);
     void CallRsSetScreenPowerStatusSyncForFold(ScreenPowerStatus status, bool isApAod = false);
     void TryToRecoverFoldDisplayMode(ScreenPowerStatus status);
     bool GetScreenLcdStatus(ScreenId screenId, PanelPowerStatus& status);
@@ -654,6 +656,7 @@ public:
     void RemoveUserByPid(int32_t pid);
     bool CheckPidInDeathPidVector(int32_t pid) const;
     void NotifyRSCoordination(bool isEnterCoordination) const;
+    void NotifyRSCoordination(ScreenId id, bool isEnterCoordination) const;
     void CalculateStartWhenTransferState(sptr<ScreenSession> staticSession, sptr<ScreenSession> dynamicSession,
         uint32_t borderingAreaPercent);
     void AdjustTheBorderingAreaPercent(uint32_t adjacentPercent, uint32_t length, uint32_t& adjacentStart);
@@ -1230,6 +1233,10 @@ private:
     bool dozeNotifyFinish_ = false;
     bool pictureFrameReady_ = false;
     bool pictureFrameBreak_ = false;
+    // Set when a wake-up power event could not be dispatched because screenSessionMap_
+    // was empty (race with screen hot-plug on PC). Checked by OneScreenConnect so the
+    // dropped event can be replayed after the physical screen takes over SCREEN_ID_DEFAULT.
+    std::atomic<bool> wakeupPowerEventDropped_ {false};
 
     std::mutex scbBufferAvailableMutex_;
     std::condition_variable scbBufferAvailableCV_;
@@ -1315,6 +1322,7 @@ private:
     void CallRsSetScreenPowerStatusSyncForExtend(
         const std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
         PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN);
+    bool isNeedSkipPowerOn(ScreenId screenId);
     void SetRsSetScreenPowerStatusSync(std::vector<ScreenId>& screenIds, ScreenPowerStatus status,
         PowerStateChangeReason reason = PowerStateChangeReason::STATE_CHANGE_REASON_UNKNOWN, bool isApAod = false);
     DisplayState lastDisplayState_ { DisplayState::UNKNOWN };

@@ -28,7 +28,7 @@ public:
     virtual ~SessionProxy() = default;
 
     WSError Foreground(sptr<WindowSessionProperty> property, bool isFromClient = false,
-        const std::string& identityToken = "") override;
+        const std::string& identityToken = "", bool isAlreadyShown = false) override;
     WSError Background(bool isFromClient = false, const std::string& identityToken = "",
         bool isFromInnerkits = false) override;
     WSError Disconnect(bool isFromClient = false, const std::string& identityToken = "",
@@ -92,7 +92,7 @@ public:
     WSError RaiseMainWindowAboveTarget(int32_t targetId) override;
     WSError RaiseAppMainWindowToTop() override;
     WSError SetSessionLabelAndIcon(const std::string& label,
-        const std::shared_ptr<Media::PixelMap>& icon) override;
+        const std::shared_ptr<Media::PixelMap>& icon, const std::string& groupId = "") override;
     WSError SetSubWindowSource(SubWindowSource source) override;
     WSError WriteOneSessionInfo(MessageParcel& data, const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
     WSError WriteOneSessionInfoPart(MessageParcel& data, const sptr<AAFwk::SessionInfo>& abilitySessionInfo);
@@ -168,6 +168,7 @@ public:
      * Starting Window
      */
     WSError RemoveStartingWindow() override;
+    WSError RemoveStartingWindow(std::string& errMsg) override;
 
     /*
      * Window Property

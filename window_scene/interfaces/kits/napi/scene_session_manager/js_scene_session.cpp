@@ -743,6 +743,8 @@ void JsSceneSession::BindNativeMethod(napi_env env, napi_value objValue, const c
     BindNativeFunction(env, objValue, "syncFvWindowInfo", moduleName, JsSceneSession::SyncFvWindowInfo);
     BindNativeFunction(env, objValue, "updateSceneLastUsedPosition", moduleName,
         JsSceneSession::UpdateSceneLastUsedPosition);
+    BindNativeFunction(env, objValue, "updateCallerPersistentId", moduleName,
+        JsSceneSession::UpdateCallerPersistentId);
 }
 
 void JsSceneSession::BindNativeMethodForKeyboard(napi_env env, napi_value objValue, const char* moduleName)
@@ -6307,7 +6309,7 @@ napi_value JsSceneSession::OnSetIsGamePrelaunch(napi_env env, napi_callback_info
         TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->EditSessionInfo().isGamePrelaunch_ = isGamePrelaunch;
+    session->SetIsGamePrelaunch(isGamePrelaunch);
     TLOGI(WmsLogTag::WMS_LIFE, "[gameprelaunch]id: %{public}d, isGamePrelaunch: %{public}d",
         session->GetPersistentId(), isGamePrelaunch);
     return NapiGetUndefined(env);
@@ -8667,23 +8669,23 @@ void JsSceneSession::ProcessUpdateSessionLabelAndIconRegister()
     }
     const char* const where = __func__;
     session->SetUpdateSessionLabelAndIconListener([weakThis = wptr(this), where](const std::string& label,
-        const std::shared_ptr<Media::PixelMap>& icon, const std::string& updatedIconPath) {
+        const std::shared_ptr<Media::PixelMap>& icon, const std::string& updatedIconPath, const std::string& groupId) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s jsSceneSession is null", where);
             return;
         }
-        jsSceneSession->UpdateSessionLabelAndIcon(label, icon, updatedIconPath);
+        jsSceneSession->UpdateSessionLabelAndIcon(label, icon, updatedIconPath, groupId);
     });
     TLOGD(WmsLogTag::WMS_MAIN, "success");
 }
 
 void JsSceneSession::UpdateSessionLabelAndIcon(const std::string& label, const std::shared_ptr<Media::PixelMap>& icon,
-    const std::string& updatedIconPath)
+    const std::string& updatedIconPath, const std::string& groupId)
 {
     TLOGI(WmsLogTag::WMS_MAIN, "in");
     const char* const where = __func__;
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, label, icon, updatedIconPath, env = env_, where] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, label, icon, updatedIconPath, groupId, env = env_, where] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s jsSceneSession id:%{public}d has been destroyed",
@@ -8710,8 +8712,28 @@ void JsSceneSession::UpdateSessionLabelAndIcon(const std::string& label, const s
             TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s updatedIconPath is nullptr", where);
             return;
         }
-        napi_value argv[] = {jsLabel, jsIcon, jsUpdatedIconPath};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
+
+        // 判断 groupId 是否为空
+        napi_value jsGroupId = nullptr;
+        if (!groupId.empty()) {
+            jsGroupId = CreateJsValue(env, groupId);
+            if (jsGroupId == nullptr) {
+                TLOGNE(WmsLogTag::WMS_MAIN, "%{public}s groupId is nullptr", where);
+                return;
+            }
+        }
+
+        // 根据 groupId 是否为空，决定传递参数个数
+        napi_value argv[4];
+        size_t argc = 0;
+        argv[argc++] = jsLabel;
+        argv[argc++] = jsIcon;
+        argv[argc++] = jsUpdatedIconPath;
+        if (jsGroupId != nullptr && !groupId.empty()) {
+            argv[argc++] = jsGroupId;
+        }
+
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), argc, argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task, __func__);
 }
@@ -10085,6 +10107,44 @@ napi_value JsSceneSession::OnUpdateSceneLastUsedPosition(napi_env env, napi_call
     }
     session->SetSceneLastUsedPosition(position);
     TLOGD(WmsLogTag::WMS_LIFE, "position: %{public}s", position.c_str());
+    return NapiGetUndefined(env);
+}
+
+napi_value JsSceneSession::UpdateCallerPersistentId(napi_env env, napi_callback_info info)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "[NAPI]");
+    JsSceneSession* me = CheckParamsAndGetThis<JsSceneSession>(env, info);
+    return (me != nullptr) ? me->OnUpdateCallerPersistentId(env, info) : nullptr;
+}
+
+napi_value JsSceneSession::OnUpdateCallerPersistentId(napi_env env, napi_callback_info info)
+{
+    size_t argc = ARG_COUNT_1;
+    napi_value argv[ARG_COUNT_1] = { nullptr };
+    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    if (argc != ARG_COUNT_1) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Argc is invalid: %{public}zu", argc);
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input Parameter is missing or invalid"));
+        return NapiGetUndefined(env);
+    }
+
+    int32_t callerPersistentId = INVALID_SESSION_ID;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], callerPersistentId)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to callerPersistentId");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Failed to convert parameter to callerPersistentId"));
+        return NapiGetUndefined(env);
+    }
+
+    auto session = weakSession_.promote();
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "session is null, id:%{public}d", persistentId_);
+        return NapiGetUndefined(env);
+    }
+
+    TLOGD(WmsLogTag::WMS_LIFE, "id:%{public}d, callerPersistentId:%{public}d", persistentId_, callerPersistentId);
+    session->UpdateCallerPersistentId(callerPersistentId);
     return NapiGetUndefined(env);
 }
 

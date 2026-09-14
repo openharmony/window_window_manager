@@ -259,6 +259,8 @@ std::map<int32_t, std::vector<sptr<IWindowRotationChangeListener>>> WindowSessio
 std::map<int32_t, std::vector<sptr<IFreeWindowModeChangeListener>>> WindowSessionImpl::freeWindowModeChangeListeners_;
 std::map<int32_t, std::vector<sptr<IParentLifecycleEventListener>>> WindowSessionImpl::parentLifecycleEventListeners_;
 std::recursive_mutex WindowSessionImpl::lifeCycleListenerMutex_;
+std::recursive_mutex WindowSessionImpl::focusStateChangedListenerMutex_;
+std::map<int32_t, std::vector<sptr<IFocusStateChangedListener>>> WindowSessionImpl::focusStateChangedListeners_;
 std::recursive_mutex WindowSessionImpl::windowStageLifeCycleListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowChangeListenerMutex_;
 std::recursive_mutex WindowSessionImpl::windowCrossAxisListenerMutex_;
@@ -2056,7 +2058,7 @@ void WindowSessionImpl::ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNot
 {
     auto notifyTime = focusNotifyInfo->timeStamp_;
     if (focusNotifyInfo->isSameCallingPid_ && !focusNotifyInfo->isSyncNotify_) {
-        UpdateFocusState(isFocused);
+        UpdateFocusState(isFocused, focusNotifyInfo);
         updateFocusTimeStamp_.store(notifyTime);
         return;
     }
@@ -2077,7 +2079,7 @@ void WindowSessionImpl::ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNot
     }
     auto otherWindowId = isFocused ? focusNotifyInfo->unfocusWindowId_ : focusNotifyInfo->focusWindowId_;
     if (!focusNotifyInfo->isSyncNotify_ || otherWindowId == INVALID_SESSION_ID) {
-        UpdateFocusState(isFocused);
+        UpdateFocusState(isFocused, focusNotifyInfo);
         if (!focusNotifyInfo->isSameCallingPid_) {
             WindowManager::GetInstance().NotifyApplicationFocusChangedResult(isFocused);
         }
@@ -2086,13 +2088,13 @@ void WindowSessionImpl::ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNot
     auto otherWindow = GetWindowWithId(otherWindowId);
     if (isFocused) {
         if (otherWindow != nullptr) {
-            otherWindow->UpdateFocusState(!isFocused);
+            otherWindow->UpdateFocusState(!isFocused, focusNotifyInfo);
         }
-        UpdateFocusState(isFocused);
+        UpdateFocusState(isFocused, focusNotifyInfo);
     } else {
-        UpdateFocusState(isFocused);
+        UpdateFocusState(isFocused, focusNotifyInfo);
         if (otherWindow != nullptr) {
-            otherWindow->UpdateFocusState(!isFocused);
+            otherWindow->UpdateFocusState(!isFocused, focusNotifyInfo);
         }
     }
     if (!focusNotifyInfo->isSameCallingPid_) {
@@ -2100,7 +2102,7 @@ void WindowSessionImpl::ProcessUpdateFocus(const sptr<FocusNotifyInfo>& focusNot
     }
 }
 
-void WindowSessionImpl::UpdateFocusState(bool isFocused)
+void WindowSessionImpl::UpdateFocusState(bool isFocused, const sptr<FocusNotifyInfo>& focusNotifyInfo)
 {
     TLOGI(WmsLogTag::WMS_FOCUS, "focus: %{public}u, id: %{public}d", isFocused, GetPersistentId());
     isFocused_ = isFocused;
@@ -2119,6 +2121,21 @@ void WindowSessionImpl::UpdateFocusState(bool isFocused)
     } else {
         NotifyAfterUnfocused();
     }
+
+    WindowFocusChangeReason reason = WindowFocusChangeReason::DEFAULT;
+    int32_t nextFocusedWindowId = INVALID_WINDOW_ID;
+    int32_t prevFocusedWindowId = INVALID_WINDOW_ID;
+    if (focusNotifyInfo != nullptr) {
+        reason = focusNotifyInfo->reason_;
+        if (focusNotifyInfo->isSameCallingPid_) {
+            if (!isFocused) {
+                nextFocusedWindowId = focusNotifyInfo->focusWindowId_;
+            } else {
+                prevFocusedWindowId = focusNotifyInfo->unfocusWindowId_;
+            }
+        }
+    }
+    NotifyFocusStateChanged(isFocused, reason, nextFocusedWindowId, prevFocusedWindowId);
 }
 
 bool WindowSessionImpl::IsFocused() const
@@ -2327,9 +2344,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
             if (!IsFloatNavigationAvoidAreaEnabled(type)) {
                 continue;
             }
-            if ((lastAvoidAreaMap_.find(type) == lastAvoidAreaMap_.end() && type != AvoidAreaType::TYPE_CUTOUT) ||
-                lastAvoidAreaMap_[type] != avoidArea) {
-                lastAvoidAreaMap_[type] = avoidArea;
+            if (UpdateLastAvoidAreaIfChanged(type, avoidArea)) {
                 NotifyAvoidAreaChange(new AvoidArea(avoidArea), type);
             }
         }
@@ -2412,7 +2427,7 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     if (reason == WindowSizeChangeReason::OCCUPIED_AREA_CHANGE && !avoidAreas.empty()) {
         uiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreas, occupiedAreaInfo_);
     } else {
-        uiContent->UpdateViewportConfig(config, reason, rsTransaction, lastAvoidAreaMap_, occupiedAreaInfo_);
+        uiContent->UpdateViewportConfig(config, reason, rsTransaction, GetLastAvoidAreaMapCopy(), occupiedAreaInfo_);
     }
     if (WindowHelper::IsUIExtensionWindow(GetType())) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "Id: %{public}d, reason: %{public}d, viewportRect: %{public}s, "
@@ -2862,6 +2877,12 @@ WSError WindowSessionImpl::SetStageKeyFramePolicy(const KeyFramePolicy& keyFrame
 
 WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy)
 {
+     std::string errMsg;
+     return SetDragKeyFramePolicy(keyFramePolicy, errMsg);
+}
+
+WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFramePolicy, std::string& errMsg)
+{
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_WindowSessionImpl::SetDragKeyFramePolicy");
     TLOGD(WmsLogTag::WMS_LAYOUT_PC, "in");
     if (!IsPhonePadOrPcWindow()) {
@@ -2869,6 +2890,7 @@ WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFrameP
     }
     if (!WindowHelper::IsMainWindow(GetType())) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "only main window is valid");
+        errMsg = "only main window is valid";
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     if (IsWindowSessionInvalid()) {
@@ -2879,6 +2901,7 @@ WMError WindowSessionImpl::SetDragKeyFramePolicy(const KeyFramePolicy& keyFrameP
 
     if (!IsPcWindow()) {
         TLOGI(WmsLogTag::WMS_LAYOUT_PC, "ignore not pc window type");
+        errMsg = "ignore not pc window type";
         return WMError::WM_OK;
     }
     WSError errorCode = hostSession->SetDragKeyFramePolicy(keyFramePolicy);
@@ -3275,10 +3298,18 @@ Rect WindowSessionImpl::GetGlobalDisplayRect(bool useHookedSize) const
 
 WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Position& outPosition) const
 {
+    std::string errMsg;
+    return ClientToGlobalDisplay(inPosition, outPosition, errMsg);
+}
+
+WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Position& outPosition,
+    std::string& errMsg) const
+{
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_WindowSessionImpl::ClientToGlobalDisplay");
     const auto windowId = GetWindowId();
     const auto transform = GetCurrentTransform();
     if (WindowHelper::IsScaled(transform)) {
+        errMsg = "Scaled window is not supported";
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
             windowId, transform.scaleX_, transform.scaleY_);
@@ -3287,6 +3318,7 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
     const auto globalDisplayRect = GetGlobalDisplayRect();
     const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
     if (!inPosition.SafeAdd(basePosition, outPosition)) {
+        errMsg = "Position overflow";
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
             windowId, inPosition.ToString().c_str(), basePosition.ToString().c_str());
@@ -3301,10 +3333,18 @@ WMError WindowSessionImpl::ClientToGlobalDisplay(const Position& inPosition, Pos
 
 WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Position& outPosition) const
 {
+    std::string errMsg;
+    return GlobalDisplayToClient(inPosition, outPosition, errMsg);
+}
+
+WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Position& outPosition,
+    std::string& errMsg) const
+{
     HITRACE_METER_NAME(HITRACE_TAG_WINDOW_MANAGER, "CUSTOM_ANIMATOR_WindowSessionImpl::GlobalDisplayToClient");
     const auto windowId = GetWindowId();
     const auto transform = GetCurrentTransform();
     if (WindowHelper::IsScaled(transform)) {
+        errMsg = "Scaled window is not supported";
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Scaled window is not supported, windowId: %{public}u, scaleX: %{public}f, scaleY: %{public}f",
             windowId, transform.scaleX_, transform.scaleY_);
@@ -3313,6 +3353,7 @@ WMError WindowSessionImpl::GlobalDisplayToClient(const Position& inPosition, Pos
     const auto globalDisplayRect = GetGlobalDisplayRect();
     const Position& basePosition = {globalDisplayRect.posX_, globalDisplayRect.posY_};
     if (!inPosition.SafeSub(basePosition, outPosition)) {
+        errMsg = "Position overflow";
         TLOGW(WmsLogTag::WMS_LAYOUT,
             "Position overflow, windowId: %{public}u, inPosition: %{public}s, basePosition: %{public}s",
             windowId, inPosition.ToString().c_str(), basePosition.ToString().c_str());
@@ -3687,9 +3728,17 @@ bool WindowSessionImpl::IsWindowDelayRaiseEnabled() const
 
 WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
 {
+    std::string errMsg;
+    return SetResizeByDragEnabled(dragEnabled, errMsg);
+}
+
+WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled, std::string& errMsg)
+{
+    errMsg.clear();
     TLOGD(WmsLogTag::WMS_LAYOUT, "%{public}d", dragEnabled);
     if (IsWindowSessionInvalid()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "Session is invalid");
+        errMsg = "Session is invalid";
         return WMError::WM_ERROR_INVALID_WINDOW;
     }
     if (WindowHelper::IsMainWindow(GetType()) ||
@@ -3698,6 +3747,7 @@ WMError WindowSessionImpl::SetResizeByDragEnabled(bool dragEnabled)
         hasSetEnableDrag_.store(true);
     } else {
         TLOGE(WmsLogTag::WMS_LAYOUT, "This is not main window or decor enabled sub window.");
+        errMsg = "This is not main window or decor enabled sub window";
         return WMError::WM_ERROR_INVALID_TYPE;
     }
     return UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_DRAGENABLED);
@@ -4215,13 +4265,22 @@ bool WindowSessionImpl::CheckCanDragWindowType()
  */
 WMError WindowSessionImpl::EnableDrag(bool enableDrag)
 {
+    std::string errMsg;
+    return EnableDrag(enableDrag, errMsg);
+}
+
+WMError WindowSessionImpl::EnableDrag(bool enableDrag, std::string& errMsg)
+{
+    errMsg.clear();
     if (!IsWindowShouldDrag()) {
         TLOGE(WmsLogTag::WMS_LAYOUT, "The device is not supported");
+        errMsg = "The device is not supported";
         return WMError::WM_ERROR_DEVICE_NOT_SUPPORT;
     }
     if (!CheckCanDragWindowType()) {
         TLOGI(WmsLogTag::WMS_LAYOUT, "Id:%{public}d, invalid window type:%{public}u",
             GetPersistentId(), GetType());
+        errMsg = "invalid window type";
         return WMError::WM_ERROR_INVALID_CALLING;
     }
     property_->SetDragEnabled(enableDrag);
@@ -4374,6 +4433,21 @@ WMError WindowSessionImpl::UnregisterLifeCycleListener(const sptr<IWindowLifeCyc
     std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
     return UnregisterListenerInMap(lifecycleListeners_, GetPersistentId(), listener);
 }
+
+WMError WindowSessionImpl::RegisterFocusStateChangedListener(const sptr<IFocusStateChangedListener>& listener)
+{
+    WLOGFD("in");
+    std::lock_guard<std::recursive_mutex> lockListener(focusStateChangedListenerMutex_);
+    return RegisterListener(focusStateChangedListeners_[GetPersistentId()], listener);
+}
+
+WMError WindowSessionImpl::UnregisterFocusStateChangedListener(const sptr<IFocusStateChangedListener>& listener)
+{
+    WLOGFD("in");
+    std::lock_guard<std::recursive_mutex> lockListener(focusStateChangedListenerMutex_);
+    return UnregisterListenerInMap(focusStateChangedListeners_, GetPersistentId(), listener);
+}
+
 
 WMError WindowSessionImpl::RegisterWindowChangeListener(const sptr<IWindowChangeListener>& listener)
 {
@@ -5563,6 +5637,22 @@ EnableIfSame<T, IWindowLifeCycle, std::vector<sptr<IWindowLifeCycle>>> WindowSes
 }
 
 template<typename T>
+EnableIfSame<T, IFocusStateChangedListener, std::vector<sptr<IFocusStateChangedListener>>>
+    WindowSessionImpl::GetListeners()
+{
+    std::lock_guard<std::recursive_mutex> lockListener(focusStateChangedListenerMutex_);
+    auto iter = focusStateChangedListeners_.find(GetPersistentId());
+    if (iter == focusStateChangedListeners_.end()) {
+        return std::vector<sptr<IFocusStateChangedListener>>();
+    }
+    std::vector<sptr<IFocusStateChangedListener>> listeners;
+    for (auto& listener : iter->second) {
+        listeners.push_back(listener);
+    }
+    return listeners;
+}
+
+template<typename T>
 EnableIfSame<T, IWindowStageLifeCycle, std::vector<sptr<IWindowStageLifeCycle>>> WindowSessionImpl::GetListeners()
 {
     std::lock_guard<std::recursive_mutex> lockListener(windowStageLifeCycleListenerMutex_);
@@ -5872,6 +5962,10 @@ void WindowSessionImpl::ClearListenersById(int32_t persistentId)
     {
         std::lock_guard<std::recursive_mutex> lockListener(lifeCycleListenerMutex_);
         ClearUselessListeners(lifecycleListeners_, persistentId);
+    }
+    {
+        std::lock_guard<std::recursive_mutex> lockListener(focusStateChangedListenerMutex_);
+        ClearUselessListeners(focusStateChangedListeners_, persistentId);
     }
     {
         std::lock_guard<std::recursive_mutex> lockListener(windowChangeListenerMutex_);
@@ -6494,6 +6588,22 @@ void WindowSessionImpl::NotifyWindowAfterUnfocused()
     auto lifecycleListeners = GetListeners<IWindowLifeCycle>();
     // use needNotifyUinContent to separate ui content callbacks
     CALL_LIFECYCLE_LISTENER(AfterUnfocused, lifecycleListeners, isGamePreLaunch_);
+}
+
+void WindowSessionImpl::NotifyFocusStateChanged(bool isFocused, WindowFocusChangeReason reason,
+        int32_t nextFocusedWindowId, int32_t prevFocusedWindowId)
+{
+    std::lock_guard<std::recursive_mutex> lockListener(focusStateChangedListenerMutex_);
+    auto listeners = GetListeners<IFocusStateChangedListener>();
+    TLOGI(WmsLogTag::WMS_FOCUS, "windowId: %{public}d, isFocused: %{public}d, reason: %{public}d, "
+        "nextFocusedWindowId: %{public}d, prevFocusedWindowId: %{public}d, listenerCnt: %{public}zu",
+        GetPersistentId(), isFocused, static_cast<int32_t>(reason), nextFocusedWindowId,
+        prevFocusedWindowId, listeners.size());
+    for (auto& listener : listeners) {
+        if (listener != nullptr) {
+            listener->OnFocusStateChanged(isFocused, reason, nextFocusedWindowId, prevFocusedWindowId);
+        }
+    }
 }
 
 void WindowSessionImpl::NotifyUIContentHighlightStatus(bool isHighlighted)
@@ -7292,20 +7402,39 @@ WSErrorCode WindowSessionImpl::NotifyTransferComponentDataSync(const AAFwk::Want
     return WSErrorCode::WS_OK;
 }
 
+bool WindowSessionImpl::UpdateLastAvoidAreaIfChanged(AvoidAreaType type, const AvoidArea& avoidArea)
+{
+    std::lock_guard<std::mutex> lock(lastAvoidAreaMapMutex_);
+    auto iter = lastAvoidAreaMap_.find(type);
+    if ((iter != lastAvoidAreaMap_.end() && iter->second == avoidArea) ||
+        (iter == lastAvoidAreaMap_.end() && type == AvoidAreaType::TYPE_CUTOUT && avoidArea.isEmptyAvoidArea())) {
+        return false;
+    }
+    lastAvoidAreaMap_[type] = avoidArea;
+    return true;
+}
+
+std::map<AvoidAreaType, AvoidArea> WindowSessionImpl::GetLastAvoidAreaMapCopy() const
+{
+    std::map<AvoidAreaType, AvoidArea> lastAvoidAreaMapCopy;
+    {
+        std::lock_guard<std::mutex> lock(lastAvoidAreaMapMutex_);
+        lastAvoidAreaMapCopy = lastAvoidAreaMap_;
+    }
+    return lastAvoidAreaMapCopy;
+}
+
 WSError WindowSessionImpl::UpdateAvoidArea(const sptr<AvoidArea>& avoidArea, AvoidAreaType type)
 {
     auto task = [weak = wptr(this), avoidArea, type] {
         auto window = weak.promote();
-        if (!window) {
+        if (!window || !avoidArea) {
             return;
         }
         if (!window->IsFloatNavigationAvoidAreaEnabled(type)) {
             return;
         }
-        if ((window->lastAvoidAreaMap_.find(type) == window->lastAvoidAreaMap_.end() &&
-             type != AvoidAreaType::TYPE_CUTOUT) ||
-            window->lastAvoidAreaMap_[type] != *avoidArea) {
-            window->lastAvoidAreaMap_[type] = *avoidArea;
+        if (window->UpdateLastAvoidAreaIfChanged(type, *avoidArea)) {
             window->NotifyAvoidAreaChange(avoidArea, type);
             window->UpdateViewportConfig(window->GetRect(), WindowSizeChangeReason::AVOID_AREA_CHANGE);
         }

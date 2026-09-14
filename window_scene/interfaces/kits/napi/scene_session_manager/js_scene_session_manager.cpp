@@ -72,6 +72,7 @@ const std::string SET_SPECIFIC_SESSION_ZINDEX_CB = "setSpecificWindowZIndex";
 const std::string MOVE_MAIN_WINDOW_TO_TARGET_DISPLAY_CB = "moveMainWindowToTargetDisplay";
 const std::string CREATE_KEYBOARD_SESSION_CB = "createKeyboardSession";
 const std::string RECOVER_SCENE_SESSION_CB = "recoverSceneSession";
+const std::string RESTORE_SESSION_TO_FOREGROUND_CB = "restoreSessionToForeground";
 const std::string STATUS_BAR_ENABLED_CHANGE_CB = "statusBarEnabledChange";
 const std::string GESTURE_NAVIGATION_ENABLED_CHANGE_CB = "gestureNavigationEnabledChange";
 const std::string OUTSIDE_DOWN_EVENT_CB = "outsideDownEvent";
@@ -105,6 +106,7 @@ const std::map<std::string, ListenerFunctionType> ListenerFunctionTypeMap {
     {CREATE_SYSTEM_SESSION_CB,     ListenerFunctionType::CREATE_SYSTEM_SESSION_CB},
     {CREATE_KEYBOARD_SESSION_CB,   ListenerFunctionType::CREATE_KEYBOARD_SESSION_CB},
     {RECOVER_SCENE_SESSION_CB,     ListenerFunctionType::RECOVER_SCENE_SESSION_CB},
+    {RESTORE_SESSION_TO_FOREGROUND_CB, ListenerFunctionType::RESTORE_SESSION_TO_FOREGROUND_CB},
     {STATUS_BAR_ENABLED_CHANGE_CB, ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB},
     {OUTSIDE_DOWN_EVENT_CB,        ListenerFunctionType::OUTSIDE_DOWN_EVENT_CB},
     {SHIFT_FOCUS_CB,               ListenerFunctionType::SHIFT_FOCUS_CB},
@@ -812,6 +814,36 @@ void JsSceneSessionManager::ProcessRecoverSceneSessionRegister()
         this->OnRecoverSceneSession(session, sessionInfo);
     };
     SceneSessionManager::GetInstance().SetRecoverSceneSessionListener(func);
+}
+
+void JsSceneSessionManager::ProcessRestoreSessionToForegroundRegister()
+{
+    NotifyRestoreSessionToForegroundFunc func = [this](int32_t persistentId, DisplayId screenId) {
+        this->OnRestoreSessionToForeground(persistentId, screenId);
+    };
+    SceneSessionManager::GetInstance().SetRestoreSessionToForegroundListener(func);
+}
+
+void JsSceneSessionManager::OnRestoreSessionToForeground(int32_t persistentId, DisplayId screenId)
+{
+    TLOGI(WmsLogTag::WMS_LIFE, "persistentId: %{public}d, screenId: %{public}" PRIu64,
+        persistentId, screenId);
+    auto task = [persistentId, screenId,
+        jsCallBack = GetJSCallback(RESTORE_SESSION_TO_FOREGROUND_CB), env = env_]() {
+        if (jsCallBack == nullptr) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "restoreSessionToForeground jsCallBack is nullptr");
+            return;
+        }
+        napi_value argv[] = { CreateJsValue(env, persistentId),
+                              CreateJsValue(env, static_cast<int64_t>(screenId)) };
+        napi_status ret = napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(),
+            ArraySize(argv), argv, nullptr);
+        if (ret != napi_ok) {
+            TLOGNE(WmsLogTag::WMS_LIFE, "OnRestoreSessionToForeground:napi call exception ret: %{public}d", ret);
+            return;
+        }
+    };
+    taskScheduler_->PostMainThreadTask(task, "OnRestoreSessionToForeground" + std::to_string(persistentId));
 }
 
 void JsSceneSessionManager::ProcessStatusBarEnabledChangeListener()
@@ -1933,6 +1965,9 @@ void JsSceneSessionManager::ProcessRegisterCallback(ListenerFunctionType listene
         case ListenerFunctionType::RECOVER_SCENE_SESSION_CB:
             ProcessRecoverSceneSessionRegister();
             break;
+        case ListenerFunctionType::RESTORE_SESSION_TO_FOREGROUND_CB:
+            ProcessRestoreSessionToForegroundRegister();
+            break;
         case ListenerFunctionType::STATUS_BAR_ENABLED_CHANGE_CB:
             ProcessStatusBarEnabledChangeListener();
             break;
@@ -2481,30 +2516,47 @@ napi_value JsSceneSessionManager::OnKioskModeChange(napi_env env, napi_callback_
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     WSErrorCode errCode = WSErrorCode::WS_OK;
-    size_t argc = ARGC_TWO;
-    napi_value argv[ARGC_TWO] = {nullptr};
+    size_t argc = ARGC_THREE;
+    napi_value argv[ARGC_THREE] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc < ARGC_TWO) {
+    if (argc < ARGC_THREE) {
         WLOGFE("Argc is invalid: %{public}zu", argc);
         errCode = WSErrorCode::WS_ERROR_INVALID_PARAM;
     }
 
     bool isKioskMode = false;
-    if (!ConvertFromJsValue(env, argv[0], isKioskMode)) {
-        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isKiosMode.");
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ZERO], isKioskMode)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to isKioskMode.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid"));
         return NapiGetUndefined(env);
     }
 
     int32_t persistentId = 0;
-    if (!ConvertFromJsValue(env, argv[1], persistentId)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_ONE], persistentId)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to persistentId.");
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input parameter is invalid"));
         return NapiGetUndefined(env);
     }
-    SceneSessionManager::GetInstance().KioskModeChange(isKioskMode, persistentId);
+
+    int32_t kioskTypeValue = 0;
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_TWO], kioskTypeValue)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Failed to convert parameter to kioskTypeValue.");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+    if (kioskTypeValue < static_cast<int32_t>(KioskType::DEFAULT) ||
+        kioskTypeValue >= static_cast<int32_t>(KioskType::END)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Invalid kioskType");
+        napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
+            "Input parameter is invalid."));
+        return NapiGetUndefined(env);
+    }
+
+    SceneSessionManager::GetInstance().KioskModeChange(
+        isKioskMode, persistentId, static_cast<KioskType>(kioskTypeValue));
     return NapiGetUndefined(env);
 }
 
@@ -6594,9 +6646,9 @@ void JsSceneSessionManager::OnUpdateKioskAppListCallback(const std::vector<std::
         }, __func__);
 }
 
-void JsSceneSessionManager::OnKioskModeChangeCallback(bool isKioskMode, int32_t persistentId)
+void JsSceneSessionManager::OnKioskModeChangeCallback(bool isKioskMode, int32_t persistentId, KioskType kioskType)
 {
-    taskScheduler_->PostMainThreadTask([this, isKioskMode, persistentId,
+    taskScheduler_->PostMainThreadTask([this, isKioskMode, persistentId, kioskType,
         jsCallBack = GetJSCallback(KIOSK_MODE_CHANGE_CB), env = env_] {
             if (jsCallBack == nullptr) {
                 TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
@@ -6604,7 +6656,8 @@ void JsSceneSessionManager::OnKioskModeChangeCallback(bool isKioskMode, int32_t 
             }
             napi_value isKioskModeValue = CreateJsValue(env, isKioskMode);
             napi_value persistentIdValue = CreateJsValue(env, persistentId);
-            napi_value argv[] = { isKioskModeValue, persistentIdValue };
+            napi_value kioskTypeValue = CreateJsValue(env, static_cast<int32_t>(kioskType));
+            napi_value argv[] = { isKioskModeValue, persistentIdValue, kioskTypeValue };
             napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), ArraySize(argv), argv, nullptr);
         }, __func__);
 }
@@ -6636,7 +6689,9 @@ void JsSceneSessionManager::RegisterKioskModeChangeCallback()
 {
     TLOGI(WmsLogTag::WMS_LIFE, "in");
     SceneSessionManager::GetInstance().RegisterKioskModeChangeCallback(
-        [this](bool isKioskMode, int32_t persistentId) { this->OnKioskModeChangeCallback(isKioskMode, persistentId); });
+        [this](bool isKioskMode, int32_t persistentId, KioskType kioskType) {
+            this->OnKioskModeChangeCallback(isKioskMode, persistentId, kioskType);
+        });
 }
 
 napi_value JsSceneSessionManager::SetPiPSettingSwitchStatus(napi_env env, napi_callback_info info)

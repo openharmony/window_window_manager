@@ -130,6 +130,8 @@ using NotifyCreateKeyboardSessionFunc = std::function<void(const sptr<SceneSessi
 using NotifyCreateSubSessionFunc = std::function<void(const sptr<SceneSession>& session, bool isBoundedSystemTray)>;
 using NotifyRecoverSceneSessionFunc =
     std::function<void(const sptr<SceneSession>& session, const SessionInfo& sessionInfo)>;
+using NotifyRestoreSessionToForegroundFunc =
+    std::function<void(int32_t persistentId, DisplayId screenId)>;
 using ProcessStatusBarEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName)>;
 using ProcessGestureNavigationEnabledChangeFunc = std::function<void(bool enable, const std::string& bundleName,
     GestureBackType type)>;
@@ -174,7 +176,7 @@ using HasRootSceneRequestedVsyncFunc = std::function<bool()>;
 using RequestVsyncByRootSceneWhenModeChangeFunc =
     std::function<void(const std::shared_ptr<VsyncCallback>& vsyncCallback)>;
 using UpdateKioskAppListFunc = std::function<void(const std::vector<std::string>& kioskAppList)>;
-using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persistentId)>;
+using KioskModeChangeFunc = std::function<void(bool isKioskMode, int32_t persistentId, KioskType kioskType)>;
 using NotifySessionRecoverStateChangeFunc = std::function<void(const SessionRecoverState& state,
     const sptr<WindowSessionProperty>& property)>;
 using NotifyRecoverStateChangeFunc = std::function<void(const RecoverState& state)>;
@@ -295,6 +297,7 @@ public:
     WSError GetBatchAbilityInfos(const std::vector<std::string>& bundleNames, int32_t userId,
         std::vector<SCBAbilityInfo>& scbAbilityInfos);
     void SetRecoverSceneSessionListener(const NotifyRecoverSceneSessionFunc& func);
+    void SetRestoreSessionToForegroundListener(const NotifyRestoreSessionToForegroundFunc& func);
     void UpdateRecoveredSessionInfo(const std::vector<int32_t>& recoveredPersistentIds);
     void NotifyRecoveringFinished();
     bool IsInputEventEnabled() const;
@@ -874,6 +877,7 @@ public:
     void RemoveLifeCycleTaskByPersistentId(int32_t persistentId, const LifeCycleTaskType taskType);
     WSError PendingSessionToForeground(const sptr<IRemoteObject>& token,
         int32_t windowMode = DEFAULT_INVALID_WINDOW_MODE) override;
+    WSErrorResult RestoreSessionToForeground(int32_t persistentId);
     WSError PendingSessionToBackground(const sptr<IRemoteObject>& token, const BackgroundParams& params);
     WSError PendingSessionToBackgroundForDelegator(const sptr<IRemoteObject>& token,
         bool shouldBackToCaller = true, int32_t reason = 0) override;
@@ -937,9 +941,9 @@ public:
         int32_t requestId, int32_t persistentId);
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId, bool shouldBackToCaller = true);
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList);
-    WMError EnterKioskMode(const sptr<IRemoteObject>& token);
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType = KioskType::DEFAULT);
     WMError ExitKioskMode();
-    void KioskModeChange(bool isKioskMode, int32_t persistentId);
+    void KioskModeChange(bool isKioskMode, int32_t persistentId, KioskType kioskType);
     void ConfigSupportCreateFloatWindow();
     void RegisterGetStartWindowConfigCallback(const sptr<SceneSession>& sceneSession);
     void RegisterUpdateKioskAppListCallback(UpdateKioskAppListFunc&& func);
@@ -974,6 +978,8 @@ public:
         std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo);
     WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
         uint32_t color, int32_t uid) override;
+    WMError SetStartWindowBackgroundColor(const std::string& moduleName, const std::string& abilityName,
+        uint32_t color, int32_t uid, std::string& errMsg) override;
     void ConfigSupportSnapshotAllSessionStatus();
     void ConfigSupportCacheLockedSessionSnapshot();
     void ConfigSupportPreloadStartingWindow();
@@ -1135,6 +1141,8 @@ private:
      * @return Returns true if the config is valid and applied; returns false otherwise.
      */
     bool ConfigDisplayIsolation(const WindowSceneConfig::ConfigItem& displayIsolationConfig);
+    bool ConfigWindowLimitsThreshold(const WindowSceneConfig::ConfigItem& limitsThresholdConfig);
+    bool ConfigWindowLimitsPercentage(const WindowSceneConfig::ConfigItem& limitsThresholdPercentageConfig);
 
     void ConfigWindowSizeLimits();
     void ConfigMainWindowSizeLimits(const WindowSceneConfig::ConfigItem& mainWindowSizeConifg);
@@ -1281,7 +1289,8 @@ private:
         const sptr<FocusNotifyInfo>& focusNotifyInfo);
     void NotifyFocusStatus(const sptr<SceneSession>& sceneSession, bool isFocused, const sptr<FocusGroup>& focusGroup,
         const sptr<FocusNotifyInfo>& focusNotifyInfo);
-    sptr<FocusNotifyInfo> GetFocusNotifyInfo(DisplayId displayId, const sptr<SceneSession>& nextSession);
+    sptr<FocusNotifyInfo> GetFocusNotifyInfo(DisplayId displayId, const sptr<SceneSession>& nextSession,
+        FocusChangeReason reason = FocusChangeReason::DEFAULT);
     void NotifyRssThawApp(const int32_t uid, const std::string& bundleName, const std::string& reason);
     void NotifyFocusStatusByMission(const sptr<SceneSession>& prevSession, const sptr<SceneSession>& currSession);
     void NotifyUnFocusedByMission(const sptr<SceneSession>& sceneSession);
@@ -1585,6 +1594,7 @@ private:
      */
     bool recoveringFinished_ = false;
     NotifyRecoverSceneSessionFunc recoverSceneSessionFunc_;
+    NotifyRestoreSessionToForegroundFunc restoreSessionToForegroundFunc_;
     std::set<int32_t> failRecoveredPersistentIdSet_;
 
     /*
@@ -2082,6 +2092,7 @@ private:
     KioskModeChangeFunc kioskModeChangeFunc_;
     std::vector<std::string> kioskAppListCache_;
     bool isKioskMode_ = false;
+    KioskType kioskType_ = KioskType::DEFAULT;
     int32_t kioskAppPersistentId_ = INVALID_SESSION_ID;
     std::set<sptr<SceneSession>> foregroundSessionFloatWindowV1Set_;
     std::shared_mutex foregroundSessionFloatWindowV1SetMutex_;
@@ -2113,6 +2124,8 @@ private:
         const std::string& abilityName, StartingWindowInfo& startingWindowInfo);
     bool GetStartingWindowInfoFromRdb(const SessionInfo& sessionInfo, StartingWindowInfo& startingWindowInfo,
         bool darkMode);
+    void PostProcessStartingWindowInfo(const AppExecFwk::AbilityInfo& abilityInfo,
+        StartingWindowInfo& startingWindowInfo);
     bool GetStartWindowColorFollowApp(const SessionInfo& sessionInfo);
     void ClearStartWindowColorFollowApp(const std::string& bundleName);
     bool GetPathInfoFromResource(const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr,
@@ -2135,9 +2148,14 @@ private:
     bool needCloseSync_ = false;
     std::function<void()> closeSyncFunc_ = nullptr;
     WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId) override;
+    WMError SetImageForRecent(uint32_t imgResourceId, ImageFit imageFit, int32_t persistentId,
+        std::string& errMsg) override;
     WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
         int32_t persistentId) override;
+    WMError SetImageForRecentPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, ImageFit imageFit,
+        int32_t persistentId, std::string& errMsg) override;
     WMError RemoveImageForRecent(int32_t persistentId) override;
+    WMError RemoveImageForRecent(int32_t persistentId, std::string& errMsg) override;
     bool GetCropInfoByDisplaySize(const Media::ImageInfo& imageInfo, Media::DecodeOptions& decodeOpts);
     void InitSnapshotBlurConfig();
     float GetBlurRadiusFromParam(const std::string& blurRadiusColorStr) const;

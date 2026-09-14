@@ -2766,6 +2766,36 @@ WSError SceneSessionManagerLiteProxy::PendingSessionToBackgroundByPersistentId(c
     return static_cast<WSError>(ret);
 }
 
+WSErrorResult SceneSessionManagerLiteProxy::RestoreSessionToForeground(int32_t persistentId)
+{
+    TLOGD(WmsLogTag::WMS_LIFE, "in");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_MAIN, "WriteInterfaceToken failed");
+        return WSErrorResult{WSError::WS_ERROR_INVALID_PARAM, "WriteInterfaceToken failed"};
+    }
+    if (!data.WriteInt32(persistentId)) {
+        TLOGE(WmsLogTag::WMS_MAIN, "Failed to write persistentId");
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "Failed to write persistentId"};
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_LIFE, "remote is null");
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "remote is null"};
+    }
+    int32_t errCode = 0;
+    std::string errMsg = "";
+    if (remote->SendRequest(static_cast<uint32_t>(
+        SceneSessionManagerLiteMessage::TRANS_ID_RESTORE_SESSION_TO_FOREGROUND),
+        data, reply, option) != ERR_NONE || !reply.ReadInt32(errCode) || !reply.ReadString(errMsg)) {
+        TLOGE(WmsLogTag::WMS_LIFE, "SendRequest failed");
+        return WSErrorResult{WSError::WS_ERROR_IPC_FAILED, "SendRequest failed"};
+    }
+    return WSErrorResult{static_cast<WSError>(errCode), errMsg};
+}
+
 WMError SceneSessionManagerLiteProxy::CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
@@ -2955,7 +2985,7 @@ WMError SceneSessionManagerLiteProxy::UpdateKioskAppList(const std::vector<std::
     return static_cast<WMError>(ret);
 }
 
-WMError SceneSessionManagerLiteProxy::EnterKioskMode(const sptr<IRemoteObject>& token)
+WMError SceneSessionManagerLiteProxy::EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType)
 {
     TLOGD(WmsLogTag::WMS_LIFE, "in");
     MessageParcel data;
@@ -2967,6 +2997,10 @@ WMError SceneSessionManagerLiteProxy::EnterKioskMode(const sptr<IRemoteObject>& 
     }
     if (!data.WriteRemoteObject(token)) {
         TLOGE(WmsLogTag::WMS_LIFE, "Write token failed");
+        return WMError::WM_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(kioskType))) {
+        TLOGE(WmsLogTag::WMS_LIFE, "Write kioskType failed");
         return WMError::WM_ERROR_IPC_FAILED;
     }
     sptr<IRemoteObject> remote = Remote();

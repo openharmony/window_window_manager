@@ -493,7 +493,7 @@ void SceneSession::CloseExtensionSync(const UIExtensionTokenInfo& tokenInfo)
 }
 
 WSError SceneSession::Foreground(
-    sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken)
+    sptr<WindowSessionProperty> property, bool isFromClient, const std::string& identityToken, bool isAlreadyShown)
 {
     if (!CheckPermissionWithPropertyAnimation(property)) {
         return WSError::WS_ERROR_NOT_SYSTEM_APP;
@@ -532,16 +532,20 @@ WSError SceneSession::Foreground(
             return WSError::WS_OK;
         }
     }
-    return ForegroundTask(property);
+    return ForegroundTask(property, isAlreadyShown);
 }
 
-WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property)
+WSError SceneSession::ForegroundTask(const sptr<WindowSessionProperty>& property, bool isAlreadyShown)
 {
-    PostTask([weakThis = wptr(this), property, where = __func__] {
+    PostTask([weakThis = wptr(this), property, isAlreadyShown, where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
             TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
             return WSError::WS_ERROR_DESTROYED_OBJECT;
+        }
+        if (isAlreadyShown && !session->IsForegroundPreState()) {
+            TLOGI(WmsLogTag::WMS_LIFE, "%{public}s Current state is not a pre-state of foreground, skip", where);
+            return WSError::WS_OK;
         }
         auto sessionProperty = session->GetSessionProperty();
         if (property && sessionProperty) {
@@ -4307,7 +4311,7 @@ WSError SceneSession::TransferPointerEventInner(const std::shared_ptr<MMI::Point
                 ReportDragEndDirection(GetSessionInfo().bundleName_, moveDragController_->GetResizeAreaType());
             }
             PresentFocusIfNeed(pointerEvent->GetPointerAction());
-            if (isSubWindow) {
+            if (isPointDown && isSubWindow) {
                 RaiseToAppTopForPointDown();
             }
             pointerEvent->MarkProcessed();
@@ -6803,6 +6807,14 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
             info.windowCreateParams = std::make_shared<WindowCreateParams>();
         }
         info.windowCreateParams->needAnimation = std::make_shared<bool>(withAnimation);
+    }
+
+    if (!session->IsPcWindow()) {
+        if (info.windowCreateParams) {
+            info.windowCreateParams->minimizeOnStart = false;
+            info.windowCreateParams->excludeFromDock = false;
+            info.windowCreateParams->excludeFromRecent = false;
+        }
     }
 
     if (abilitySessionInfo->want.HasParameter(WANT_PARAM_GAME_PRELAUNCH)) {
@@ -9880,6 +9892,7 @@ bool SceneSession::UpdateVisibilityInner(bool visibility)
     }
     TLOGI(WmsLogTag::WMS_PIPELINE, "id: %{public}d, visibility: %{public}u -> %{public}u",
         GetPersistentId(), isVisible_.load(), visibility);
+    CheckRemoveSnapshotForUseControl(visibility);
     if (visibilityChangedDetectFunc_) {
         visibilityChangedDetectFunc_(GetCallingPid(), isVisible_.load(), visibility);
     }
@@ -9923,6 +9936,22 @@ void SceneSession::NotifyAddOrRemoveSnapshotWindow(bool interactive)
             }
             interactive ? session->NotifyRemoveSnapshot() : session->NotifyAddSnapshot(false, false, false);
         }, __func__);
+    }
+}
+
+void SceneSession::CheckRemoveSnapshotForUseControl(bool visibility)
+{
+    if (!visibility) {
+        return;
+    }
+    ControlInfo controlInfo;
+    bool isAppControl = GetAppControlInfo(ControlAppType::APP_LOCK, controlInfo);
+    bool isAppUseControl = controlInfo.isNeedControl && !controlInfo.isControlRecentOnly;
+    TLOGD(WmsLogTag::WMS_PATTERN, "id: %{public}d, [%{public}d,%{public}d,%{public}d]", GetPersistentId(),
+        isAppControl, controlInfo.isNeedControl, controlInfo.isControlRecentOnly);
+    if (controlInfo.isControlRecentOnly) {
+        TLOGI(WmsLogTag::WMS_PATTERN, "id: %{public}d", GetPersistentId());
+        NotifyRemoveSnapshot(true);
     }
 }
 

@@ -1873,6 +1873,114 @@ HWTEST_F(WindowSessionTest4, TestHandleInitialRect_NoPrelaunch, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestHandleInitialRect_PrelaunchSetLayoutRect
+ * @tc.desc: With isPrelaunch_ and frameNum_ == 0, HandleInitialRect sets layoutRect_ to ctx.winRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestHandleInitialRect_PrelaunchSetLayoutRect, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleInitialRectPrelaunchSetLayoutRect";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+    session->sessionInfo_.isGamePrelaunch_ = false;
+    session->sessionInfo_.isPrelaunch_ = true;
+    session->sessionInfo_.frameNum_ = 0;
+
+    PrelayoutContext ctx;
+    ctx.enable = false;
+    ctx.winRect = { 10, 20, 300, 400 };
+    session->layoutRect_ = { 0, 0, 1, 1 };
+    EXPECT_CALL(*session, NotifyClientToUpdateRect(testing::StrEq("Connect"),
+        testing::Eq(std::optional<WSRect>(ctx.winRect)), testing::_)).Times(1);
+    session->HandleInitialRect(ctx);
+    // New branch (isPrelaunch_ && frameNum_ == 0) is true -> layoutRect_ is set to ctx.winRect.
+    EXPECT_EQ(ctx.winRect, session->layoutRect_);
+}
+
+/**
+ * @tc.name: TestHandleInitialRect_PrelaunchWithFrameNum
+ * @tc.desc: With isPrelaunch_ but frameNum_ > 0, HandleInitialRect keeps layoutRect_ unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestHandleInitialRect_PrelaunchWithFrameNum, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleInitialRectPrelaunchWithFrameNum";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+    session->sessionInfo_.isGamePrelaunch_ = false;
+    session->sessionInfo_.isPrelaunch_ = true;
+    session->sessionInfo_.frameNum_ = 1;
+
+    PrelayoutContext ctx;
+    ctx.enable = false;
+    ctx.winRect = { 10, 20, 300, 400 };
+    const WSRect oldLayoutRect = { 0, 0, 1, 1 };
+    session->layoutRect_ = oldLayoutRect;
+    EXPECT_CALL(*session, NotifyClientToUpdateRect(testing::StrEq("Connect"),
+        testing::Eq(std::optional<WSRect>(ctx.winRect)), testing::_)).Times(1);
+    session->HandleInitialRect(ctx);
+    // New branch (isPrelaunch_ && frameNum_ == 0) is false -> layoutRect_ keeps old value.
+    EXPECT_EQ(oldLayoutRect, session->layoutRect_);
+}
+
+/**
+ * @tc.name: TestHandleInitialRect_PrelaunchNegativeFrameNum
+ * @tc.desc: With isPrelaunch_ but negative frameNum_, HandleInitialRect keeps layoutRect_
+ *           unchanged: the branch requires frameNum_ == 0 exactly, not frameNum_ <= 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestHandleInitialRect_PrelaunchNegativeFrameNum, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleInitialRectPrelaunchNegativeFrameNum";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+    session->sessionInfo_.isGamePrelaunch_ = false;
+    session->sessionInfo_.isPrelaunch_ = true;
+    session->sessionInfo_.frameNum_ = -1;
+
+    PrelayoutContext ctx;
+    ctx.enable = false;
+    ctx.winRect = { 10, 20, 300, 400 };
+    const WSRect oldLayoutRect = { 0, 0, 1, 1 };
+    session->layoutRect_ = oldLayoutRect;
+    EXPECT_CALL(*session, NotifyClientToUpdateRect(testing::StrEq("Connect"),
+        testing::Eq(std::optional<WSRect>(ctx.winRect)), testing::_)).Times(1);
+    session->HandleInitialRect(ctx);
+    // New branch (isPrelaunch_ && frameNum_ == 0) is false for negative frameNum_ -> keeps old value.
+    EXPECT_EQ(oldLayoutRect, session->layoutRect_);
+}
+
+/**
+ * @tc.name: TestHandleInitialRect_NoPrelaunchKeepLayoutRect
+ * @tc.desc: Without isPrelaunch_ and frameNum_ == 0, HandleInitialRect keeps layoutRect_ unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestHandleInitialRect_NoPrelaunchKeepLayoutRect, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "HandleInitialRectNoPrelaunchKeepLayoutRect";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+    session->sessionInfo_.isGamePrelaunch_ = false;
+    session->sessionInfo_.isPrelaunch_ = false;
+    session->sessionInfo_.frameNum_ = 0;
+
+    PrelayoutContext ctx;
+    ctx.enable = false;
+    ctx.winRect = { 10, 20, 300, 400 };
+    const WSRect oldLayoutRect = { 0, 0, 1, 1 };
+    session->layoutRect_ = oldLayoutRect;
+    EXPECT_CALL(*session, NotifyClientToUpdateRect(testing::StrEq("Connect"),
+        testing::Eq(std::optional<WSRect>{}), testing::_)).Times(1);
+    session->HandleInitialRect(ctx);
+    // New branch (isPrelaunch_ && frameNum_ == 0) is false -> layoutRect_ keeps old value.
+    EXPECT_EQ(oldLayoutRect, session->layoutRect_);
+}
+
+/**
  * @tc.name: CheckEmptyKeyboardAvoidAreaIfNeeded 01
  * @tc.desc: Test Case CheckEmptyKeyboardAvoidAreaIfNeeded 01
  * @tc.type: FUNC
@@ -1987,11 +2095,11 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestHandleHookDisplayDisabled
+ * @tc.name: TestHandlePrelaunchDisplayHookDisabled
  * @tc.desc: Verify that callback is not invoked when prelayout is disabled.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, TestHandleHookDisplayDisabled, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, TestHandlePrelaunchDisplayHookDisabled, TestSize.Level1)
 {
     PrelayoutContext ctx;
     ctx.enable = false;
@@ -2001,17 +2109,17 @@ HWTEST_F(WindowSessionTest4, TestHandleHookDisplayDisabled, TestSize.Level1)
         return WMError::WM_OK;
     });
 
-    session_->HandleHookDisplay(ctx);
+    session_->HandlePrelaunchDisplayHook(ctx);
 
     EXPECT_FALSE(called);
 }
 
 /**
- * @tc.name: TestHandleHookDisplayFailed
- * @tc.desc: Verify HandleHookDisplay when callback returns error
+ * @tc.name: TestHandlePrelaunchDisplayHookFailed
+ * @tc.desc: Verify HandlePrelaunchDisplayHook when callback returns error
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, TestHandleHookDisplayFailed, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, TestHandlePrelaunchDisplayHookFailed, TestSize.Level1)
 {
     PrelayoutContext ctx;
     ctx.enable = true;
@@ -2021,17 +2129,18 @@ HWTEST_F(WindowSessionTest4, TestHandleHookDisplayFailed, TestSize.Level1)
         return WMError::WM_ERROR_INVALID_PARAM;
     });
 
-    session_->HandleHookDisplay(ctx);
+    session_->HandlePrelaunchDisplayHook(ctx);
 
     EXPECT_TRUE(called);
+    EXPECT_FALSE(session_->prelaunchDisplayHookEnabled_);
 }
 
 /**
- * @tc.name: TestHandleHookDisplayNormal
+ * @tc.name: TestHandlePrelaunchDisplayHookNormal
  * @tc.desc: Verify that callback is invoked with correct HookInfo when prelayout is enabled.
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSessionTest4, TestHandleHookDisplayNormal, TestSize.Level1)
+HWTEST_F(WindowSessionTest4, TestHandlePrelaunchDisplayHookNormal, TestSize.Level1)
 {
     PrelayoutContext ctx {
         .enable = true,
@@ -2055,7 +2164,7 @@ HWTEST_F(WindowSessionTest4, TestHandleHookDisplayNormal, TestSize.Level1)
         return WMError::WM_OK;
     });
 
-    session_->HandleHookDisplay(ctx);
+    session_->HandlePrelaunchDisplayHook(ctx);
 
     EXPECT_TRUE(called);
     EXPECT_EQ(capturedUid, session_->callingUid_);
@@ -2065,6 +2174,113 @@ HWTEST_F(WindowSessionTest4, TestHandleHookDisplayNormal, TestSize.Level1)
     EXPECT_EQ(capturedInfo.rotation_, ctx.display.rotation);
     EXPECT_TRUE(capturedInfo.enableHookRotation_);
     EXPECT_TRUE(capturedEnable);
+    EXPECT_TRUE(session_->prelaunchDisplayHookEnabled_);
+}
+
+/**
+ * @tc.name: TestClearPrelaunchDisplayHook
+ * @tc.desc: Verify that a successful prelaunch display hook is cleared only once.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestClearPrelaunchDisplayHook, TestSize.Level1)
+{
+    PrelayoutContext ctx {
+        .enable = true,
+        .display = {
+            .width = 100,
+            .height = 200,
+            .density = 2.0f,
+            .rotation = 0
+        }
+    };
+    int32_t enableCount = 0;
+    int32_t disableCount = 0;
+    session_->callingUid_ = 100;
+    session_->SetUpdateAppHookDisplayInfoFunc([&](int32_t uid, const HookInfo&, bool enable) {
+        EXPECT_EQ(uid, session_->callingUid_);
+        if (enable) {
+            ++enableCount;
+        } else {
+            ++disableCount;
+        }
+        return WMError::WM_OK;
+    });
+
+    session_->HandlePrelaunchDisplayHook(ctx);
+    session_->ClearPrelaunchDisplayHook();
+    session_->ClearPrelaunchDisplayHook();
+
+    EXPECT_EQ(enableCount, 1);
+    EXPECT_EQ(disableCount, 1);
+    EXPECT_FALSE(session_->prelaunchDisplayHookEnabled_);
+}
+
+/**
+ * @tc.name: TestClearPrelaunchDisplayHookFailed
+ * @tc.desc: Verify that a failed clear remains pending so a later lifecycle event can retry it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestClearPrelaunchDisplayHookFailed, TestSize.Level1)
+{
+    session_->prelaunchDisplayHookEnabled_ = true;
+    session_->SetUpdateAppHookDisplayInfoFunc([](int32_t, const HookInfo&, bool) {
+        return WMError::WM_ERROR_INVALID_PARAM;
+    });
+
+    session_->ClearPrelaunchDisplayHook();
+
+    EXPECT_TRUE(session_->prelaunchDisplayHookEnabled_);
+}
+
+/**
+ * @tc.name: TestSetIsGamePrelaunchTrueKeepsDisplayHook
+ * @tc.desc: Verify that enabling game prelaunch keeps the display hook.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestSetIsGamePrelaunchTrueKeepsDisplayHook, TestSize.Level1)
+{
+    int32_t disableCount = 0;
+    session_->prelaunchDisplayHookEnabled_ = true;
+    session_->SetUpdateAppHookDisplayInfoFunc([&](int32_t, const HookInfo&, bool enable) {
+        if (!enable) {
+            ++disableCount;
+        }
+        return WMError::WM_OK;
+    });
+    // Make PostTask execute in place
+    session_->handler_ = nullptr;
+
+    session_->SetIsGamePrelaunch(true);
+
+    EXPECT_EQ(disableCount, 0);
+    EXPECT_TRUE(session_->GetSessionInfo().isGamePrelaunch_);
+    EXPECT_TRUE(session_->prelaunchDisplayHookEnabled_);
+}
+
+/**
+ * @tc.name: TestSetIsGamePrelaunchFalseClearsDisplayHook
+ * @tc.desc: Verify that disabling game prelaunch clears the display hook.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestSetIsGamePrelaunchFalseClearsDisplayHook, TestSize.Level1)
+{
+    int32_t disableCount = 0;
+    session_->prelaunchDisplayHookEnabled_ = true;
+    session_->sessionInfo_.isGamePrelaunch_ = true;
+    session_->SetUpdateAppHookDisplayInfoFunc([&](int32_t, const HookInfo&, bool enable) {
+        if (!enable) {
+            ++disableCount;
+        }
+        return WMError::WM_OK;
+    });
+    // Make PostTask execute in place
+    session_->handler_ = nullptr;
+
+    session_->SetIsGamePrelaunch(false);
+
+    EXPECT_EQ(disableCount, 1);
+    EXPECT_FALSE(session_->GetSessionInfo().isGamePrelaunch_);
+    EXPECT_FALSE(session_->prelaunchDisplayHookEnabled_);
 }
 
 /**
