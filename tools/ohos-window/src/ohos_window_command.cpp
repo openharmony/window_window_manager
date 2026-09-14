@@ -227,12 +227,13 @@ int32_t ClawWindowShellCommand::RunAsListWindowInfo()
 
 bool ClawWindowShellCommand::ParseListWindowInfoOption(WindowInfoOption& infoOption)
 {
-    size_t indexOfArg = 0;
+    size_t i = 0;
+    const size_t nextOptStep = 2;
     std::unordered_set<std::string> expectValueOptions {
         OPTION_WINDOW_ID, OPTION_DISPLAY_ID, OPTION_FILTER, OPTION_TYPE };
     bool needResetTypeOptValue = true;
-    while (indexOfArg < argList_.size()) {
-        const auto& opt = argList_[indexOfArg];
+    while (i < argList_.size()) {
+        const auto& opt = argList_[i];
         if (opt == OPTION_HELP) {
             std::cout << HELP_MSG_LIST_WINDOWS << std::endl;
             return false;
@@ -243,22 +244,22 @@ bool ClawWindowShellCommand::ParseListWindowInfoOption(WindowInfoOption& infoOpt
             PrintError(errorInfo);
             return false;
         }
-        if (indexOfArg >= argList_.size() - 1) {
+        if (i >= argList_.size() - 1) {
             WmToolErrorInfo errorInfo = { ERR_INVALID_INPUT, "Invalid input parameters.",
                 "Missing value for option: " + opt, { INVALID_PARAM_SOLUTION, HELP_MSG_LIST_WINDOWS } };
             PrintError(errorInfo);
             return false;
         }
         if (opt == OPTION_WINDOW_ID) {
-            if (!ParseWindowIdOption(argList_[indexOfArg + 1], infoOption.windowId)) {
+            if (!ParseWindowIdOption(argList_[i + 1], infoOption.windowId)) {
                 return false;
             }
         } else if (opt == OPTION_DISPLAY_ID) {
-            if (!ParseDisplayIdOption(argList_[indexOfArg + 1], infoOption.displayId)) {
+            if (!ParseDisplayIdOption(argList_[i + 1], infoOption.displayId)) {
                 return false;
             }
         } else if (opt == OPTION_FILTER) {
-            if (!ParseWindowInfoFilterOption(argList_[indexOfArg + 1], infoOption.windowInfoFilterOption)) {
+            if (!ParseWindowInfoFilterOption(argList_[i + 1], infoOption.windowInfoFilterOption)) {
                 return false;
             }
         } else if (opt == OPTION_TYPE) {
@@ -266,11 +267,11 @@ bool ClawWindowShellCommand::ParseListWindowInfoOption(WindowInfoOption& infoOpt
                 infoOption.windowInfoTypeOption = static_cast<WindowInfoTypeOption>(0);
                 needResetTypeOptValue = false;
             }
-            if (!ParseWindowInfoTypeOption(argList_[indexOfArg + 1], infoOption.windowInfoTypeOption)) {
+            if (!ParseWindowInfoTypeOption(argList_[i + 1], infoOption.windowInfoTypeOption)) {
                 return false;
             }
         }
-        indexOfArg += 2;
+        i += nextOptStep;
     }
     return true;
 }
