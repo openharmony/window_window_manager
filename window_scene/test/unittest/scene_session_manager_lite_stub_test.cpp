@@ -338,7 +338,7 @@ class MockSceneSessionManagerLiteStub : public SceneSessionManagerLiteStub {
     {
         return WMError::WM_OK;
     }
-    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType = KioskType::DEFAULT) override
     {
         return WMError::WM_OK;
     }
@@ -1674,6 +1674,7 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleEnterKioskMode, Function | Small
     MessageParcel reply;
     const sptr<IRemoteObject> token = sptr<MockIRemoteObject>::MakeSptr();
     data.WriteRemoteObject(token);
+    data.WriteInt32(0);
     auto res = sceneSessionManagerLiteStub_->
         SceneSessionManagerLiteStub::HandleEnterKioskMode(data, reply);
     EXPECT_EQ(ERR_NONE, res);
@@ -2077,6 +2078,33 @@ HWTEST_F(SceneSessionManagerLiteStubTest, HandleUpdateRogWindowConfig03, TestSiz
     EXPECT_EQ(res, ERR_NONE);
     int32_t ret = 0;
     EXPECT_TRUE(reply.ReadInt32(ret));
+}
+
+/**
+ * @tc.name: HandleRestoreSessionToForeground
+ * @tc.desc: test function : HandleRestoreSessionToForeground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRestoreSessionToForeground, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(100);
+    int res = sceneSessionManagerLiteStub_->HandleRestoreSessionToForeground(data, reply);
+    EXPECT_EQ(res, ERR_NONE);
+}
+
+/**
+ * @tc.name: HandleRestoreSessionToForeground_ReadFailed
+ * @tc.desc: test function : HandleRestoreSessionToForeground when read persistentId failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerLiteStubTest, HandleRestoreSessionToForeground_ReadFailed, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    int res = sceneSessionManagerLiteStub_->HandleRestoreSessionToForeground(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_DATA);
 }
 } // namespace
 } // namespace Rosen

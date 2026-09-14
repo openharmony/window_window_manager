@@ -131,6 +131,7 @@ public:
     WMError GetRouterStackInfo(int32_t persistentId, const sptr<ISessionRouterStackListener>& listener) override;
     WSError PendingSessionToBackgroundByPersistentId(const int32_t persistentId,
         bool shouldBackToCaller = true) override;
+    WSErrorResult RestoreSessionToForeground(int32_t persistentId) override;
     WMError CreateNewInstanceKey(const std::string& bundleName, std::string& instanceKey) override;
     WMError RemoveInstanceKey(const std::string& bundleName, const std::string& instanceKey) override;
     WMError TransferSessionToTargetScreen(const TransferSessionInfo& info) override;
@@ -139,7 +140,7 @@ public:
     WMError RegisterPipChgListenerByScreenId(int32_t screenId, const sptr<IPipChangeListener>& listener) override;
     WMError UnregisterPipChgListenerByScreenId(int32_t screenId) override;
     WMError UpdateKioskAppList(const std::vector<std::string>& kioskAppList) override;
-    WMError EnterKioskMode(const sptr<IRemoteObject>& token) override;
+    WMError EnterKioskMode(const sptr<IRemoteObject>& token, KioskType kioskType = KioskType::DEFAULT) override;
     WMError ExitKioskMode(const sptr<IRemoteObject>& token) override;
     WSError SendPointerEventForHover(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     WMError GetDisplayIdByWindowId(const std::vector<uint64_t>& windowIds,
