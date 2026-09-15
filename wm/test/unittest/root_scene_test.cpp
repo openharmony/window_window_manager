@@ -23,6 +23,7 @@
 #include "screen_scene.h"
 
 #include "app_mgr_client.h"
+#include "configuration.h"
 #include "mock_uicontent.h"
 #include "singleton.h"
 #include "singleton_container.h"
