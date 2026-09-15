@@ -200,7 +200,10 @@ ohos_static_library("scene_session_manager_static") {
   }
 
   if (target_platform == "car") {
-    defines += [ "POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN" ]
+    defines += [ 
+      "POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN",
+      "GLOBAL_BLACK_LIST_SUPPORT_MULTI_USER",
+    ]
   }
 
   if (defined(global_parts_info) &&
@@ -298,7 +301,10 @@ ohos_shared_library("scene_session_manager") {
   }
 
   if (target_platform == "car") {
-    defines += [ "POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN" ]
+    defines += [ 
+      "POWER_MANAGER_LOCK_SUPPORT_MULTI_SCREEN",
+      "GLOBAL_BLACK_LIST_SUPPORT_MULTI_USER",
+    ]
   }
 
   if (defined(global_parts_info) &&
