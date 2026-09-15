@@ -6812,8 +6812,8 @@ static SessionInfo MakeSessionInfoDuringPendingActivation(const sptr<AAFwk::Sess
     if (!session->IsPcWindow()) {
         if (info.windowCreateParams) {
             info.windowCreateParams->minimizeOnStart = false;
-            info.windowCreateParams->excludeFromDock = false;
-            info.windowCreateParams->excludeFromRecent = false;
+            info.windowCreateParams->excludeFromDock = nullptr;
+            info.windowCreateParams->excludeFromRecent = nullptr;
         }
     }
 
