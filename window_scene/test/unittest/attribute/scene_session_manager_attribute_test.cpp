@@ -800,6 +800,36 @@ HWTEST_F(SceneSessionManagerAttributeTest, ShouldProcessVirtualPixelRatioChange0
     EXPECT_TRUE(shouldProcess);
     ssm_->processVirtualPixelRatioChangeFunc_ = nullptr;
 }
+
+/**
+ * @tc.name: SetGlobalSkipList
+ * @tc.desc: SetGlobalSkipList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, SetGlobalSkipList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<uint64_t> skipList;
+    ssm_->SetGlobalSkipList(skipList);
+    skipList.push_back(1);
+    skipList.push_back(2);
+    ssm_->SetGlobalSkipList(skipList);
+}
+
+/**
+ * @tc.name: RemoveGlobalSkipList
+ * @tc.desc: RemoveGlobalSkipList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, RemoveGlobalSkipList, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    std::vector<uint64_t> skipList;
+    ssm_->RemoveGlobalSkipList(skipList);
+    skipList.push_back(1);
+    skipList.push_back(2);
+    ssm_->RemoveGlobalSkipList(skipList);
+}
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
