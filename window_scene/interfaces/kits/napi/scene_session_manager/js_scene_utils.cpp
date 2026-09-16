@@ -22,7 +22,9 @@
 #include <napi_common_want.h>
 
 #include "js_window_animation_utils.h"
+#include "pixel_map_napi.h"
 #include "process_options.h"
+#include "start_window_option.h"
 #include "property/rs_properties_def.h"
 #include "root_scene.h"
 #include "session/host/include/pc_fold_screen_manager.h"
@@ -2115,19 +2117,42 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
     napi_set_named_property(env, objValue, "isWindowLimitsForcible",
         CreateJsValue(env, isWindowLimitsForcible));
 
-    bool minimizeOnStart = sessionInfo.windowCreateParams ?
-        sessionInfo.windowCreateParams->minimizeOnStart : false;
-    napi_set_named_property(env, objValue, "minimizeOnStart",
-        CreateJsValue(env, minimizeOnStart));
+    if (sessionInfo.windowCreateParams) {
+        napi_value windowCreateParamsObj = nullptr;
+        napi_create_object(env, &windowCreateParamsObj);
+        if (windowCreateParamsObj) {
+            napi_set_named_property(env, windowCreateParamsObj, "minimizeOnStart",
+                CreateJsValue(env, sessionInfo.windowCreateParams->minimizeOnStart));
 
-    if (sessionInfo.windowCreateParams && sessionInfo.windowCreateParams->excludeFromDock) {
-        napi_set_named_property(env, objValue, "excludeFromDock",
-            CreateJsValue(env, *(sessionInfo.windowCreateParams->excludeFromDock)));
+            if (sessionInfo.windowCreateParams->excludeFromDock) {
+                napi_set_named_property(env, windowCreateParamsObj, "excludeFromDock",
+                    CreateJsValue(env, *(sessionInfo.windowCreateParams->excludeFromDock)));
+            }
+
+            if (sessionInfo.windowCreateParams->excludeFromRecent) {
+                napi_set_named_property(env, windowCreateParamsObj, "excludeFromRecent",
+                    CreateJsValue(env, *(sessionInfo.windowCreateParams->excludeFromRecent)));
+            }
+        }
+        napi_set_named_property(env, objValue, "windowCreateParams", windowCreateParamsObj);
     }
 
-    if (sessionInfo.windowCreateParams && sessionInfo.windowCreateParams->excludeFromRecent) {
-        napi_set_named_property(env, objValue, "excludeFromRecent",
-            CreateJsValue(env, *(sessionInfo.windowCreateParams->excludeFromRecent)));
+    if (sessionInfo.startWindowOption) {
+        napi_value startWindowObj = nullptr;
+        napi_create_object(env, &startWindowObj);
+        if (startWindowObj) {
+            napi_set_named_property(env, startWindowObj, "startWindowBackgroundColor",
+                CreateJsValue(env, sessionInfo.startWindowOption->startWindowBackgroundColor));
+
+            if (sessionInfo.startWindowOption->startWindowIcon) {
+                napi_value jsIcon = Media::PixelMapNapi::CreatePixelMap(env,
+                    sessionInfo.startWindowOption->startWindowIcon);
+                if (jsIcon) {
+                    napi_set_named_property(env, startWindowObj, "startWindowIcon", jsIcon);
+                }
+            }
+        }
+        napi_set_named_property(env, objValue, "startWindowOption", startWindowObj);
     }
 
     napi_set_named_property(env, objValue, "atomicServiceInfo",
