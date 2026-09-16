@@ -2051,7 +2051,6 @@ napi_value CreateJsWindowCreateParamsObj(napi_env env,
 void SetJsSessionWindowAnimationProperties(napi_env env, napi_value objValue,
     const std::shared_ptr<WindowCreateParams>& windowCreateParams)
 {
-
     if (windowCreateParams->animationParams) {
         napi_status status = napi_set_named_property(env, objValue, "startAnimationOptions",
             ConvertStartAnimationOptionsToJsValue(env, windowCreateParams->animationParams));
