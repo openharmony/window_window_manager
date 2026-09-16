@@ -3557,6 +3557,237 @@ HWTEST_F(WindowSceneSessionImplLayoutTest, UpdateDensityInner_PXWorkArea02, Func
     WindowLimits baseline = window->GetProperty()->GetLimitsForAttachedWindows();
 }
 
+/**
+ * @tc.name: IsExceedingWorkAreaCap01
+ * @tc.desc: Threshold disabled or null display, no refresh needed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, IsExceedingWorkAreaCap01, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("IsExceedingWorkAreaCap01");
+    SaveWorkAreaThresholdConfig(false, WORK_AREA_TEST_PERCENTAGE);
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+
+    // Disabled: false regardless of limits
+    WindowLimits limits = { 3840, 1920, 1800, 900, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(limits);
+    EXPECT_FALSE(window->IsExceedingWorkAreaCap(display));
+    // Null display: false
+    SaveWorkAreaThresholdConfig(true, WORK_AREA_TEST_PERCENTAGE);
+    EXPECT_FALSE(window->IsExceedingWorkAreaCap(nullptr));
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: IsExceedingWorkAreaCap02
+ * @tc.desc: Exceeds caps returns true, within caps returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, IsExceedingWorkAreaCap02, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("IsExceedingWorkAreaCap02");
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+
+    // min 1800x900 exceeds caps 1620x810
+    WindowLimits overLimits = { 3840, 1920, 1800, 900, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(overLimits);
+    EXPECT_TRUE(window->IsExceedingWorkAreaCap(display));
+
+    // min 1600x800 within caps
+    WindowLimits inLimits = { 3840, 1920, 1600, 800, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(inLimits);
+    EXPECT_FALSE(window->IsExceedingWorkAreaCap(display));
+
+    // only width exceeds
+    WindowLimits widthOver = { 3840, 1920, 1700, 800, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(widthOver);
+    EXPECT_TRUE(window->IsExceedingWorkAreaCap(display));
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: IsExceedingWorkAreaCap03
+ * @tc.desc: Work area fetch failed returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, IsExceedingWorkAreaCap03, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("IsExceedingWorkAreaCap03");
+
+    using DisplayMocker = SingletonMocker<DisplayManagerAdapter, MockDisplayManagerAdapter>;
+    auto displayMocker = std::make_unique<DisplayMocker>();
+    EXPECT_CALL(displayMocker->Mock(), GetDisplayInfo(_, _))
+        .WillRepeatedly(Return(CreateWorkAreaTestDisplayInfo()));
+    EXPECT_CALL(displayMocker->Mock(), GetAvailableArea(_, _))
+        .WillRepeatedly(Return(DMError::DM_ERROR_NULLPTR));
+
+    auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(0);
+    WindowLimits overLimits = { 3840, 1920, 1800, 900, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(overLimits);
+    EXPECT_FALSE(window->IsExceedingWorkAreaCap(display));
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: RefreshLimitsOnGeometryChange01
+ * @tc.desc: Threshold disabled, returns false without touching records
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, RefreshLimitsOnGeometryChange01, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("RefreshLimitsOnGeometryChange01");
+    SaveWorkAreaThresholdConfig(false, WORK_AREA_TEST_PERCENTAGE);
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+
+    // Records keep initial values (0): disabled path returns false before any detection
+    EXPECT_FALSE(window->RefreshLimitsOnGeometryChange());
+    EXPECT_EQ(window->lastDisplayWidth_, 0u);
+    EXPECT_EQ(window->lastDisplayHeight_, 0u);
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: RefreshLimitsOnGeometryChange02
+ * @tc.desc: Geometry unchanged, returns false without refresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, RefreshLimitsOnGeometryChange02, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("RefreshLimitsOnGeometryChange02");
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+
+    // Records preset to the actual geometry (2000x1000, ROTATION_0): no change
+    window->lastDisplayWidth_ = 2000;
+    window->lastDisplayHeight_ = 1000;
+    window->lastDisplayRotation_ = Rotation::ROTATION_0;
+    EXPECT_FALSE(window->RefreshLimitsOnGeometryChange());
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: RefreshLimitsOnGeometryChange03
+ * @tc.desc: Geometry changed and limits exceed new caps, returns true and updates records
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, RefreshLimitsOnGeometryChange03, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("RefreshLimitsOnGeometryChange03");
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+
+    // Records preset to landscape (1000x2000), actual mock display is portrait 2000x1000: changed
+    window->lastDisplayWidth_ = 1000;
+    window->lastDisplayHeight_ = 2000;
+    window->lastDisplayRotation_ = Rotation::ROTATION_0;
+    // Limits exceed caps 1620x810
+    WindowLimits overLimits = { 3840, 1920, 1800, 900, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(overLimits);
+
+    EXPECT_TRUE(window->RefreshLimitsOnGeometryChange());
+    // Records updated to the actual geometry
+    EXPECT_EQ(window->lastDisplayWidth_, 2000u);
+    EXPECT_EQ(window->lastDisplayHeight_, 1000u);
+    // Second call: geometry unchanged now, no refresh needed (dedup)
+    EXPECT_FALSE(window->RefreshLimitsOnGeometryChange());
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: RefreshLimitsOnGeometryChange04
+ * @tc.desc: Geometry changed but limits within caps, returns false while records still update
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, RefreshLimitsOnGeometryChange04, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("RefreshLimitsOnGeometryChange04");
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+
+    window->lastDisplayWidth_ = 1000;
+    window->lastDisplayHeight_ = 2000;
+    window->lastDisplayRotation_ = Rotation::ROTATION_90;
+    // Limits within caps
+    WindowLimits inLimits = { 3840, 1920, 1600, 800, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(inLimits);
+
+    // No refresh needed (within caps), but the change is absorbed into records
+    EXPECT_FALSE(window->RefreshLimitsOnGeometryChange());
+    EXPECT_EQ(window->lastDisplayWidth_, 2000u);
+    EXPECT_EQ(window->lastDisplayHeight_, 1000u);
+    EXPECT_EQ(window->lastDisplayRotation_, Rotation::ROTATION_0);
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: RecalcPxLimitsOnDensity01
+ * @tc.desc: vpr fetch failed, limits keep unchanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, RecalcPxLimitsOnDensity01, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("RecalcPxLimitsOnDensity01");
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+
+    WindowLimits limits = { 3840, 1920, 1800, 900, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(limits);
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::Return(WMError::WM_ERROR_NULLPTR));
+
+    window->RecalcPxLimitsOnDensity();
+
+    // vpr failed: early return, stored limits unchanged
+    WindowLimits result = window->GetProperty()->GetWindowLimits();
+    EXPECT_EQ(result.minWidth_, 1800u);
+    EXPECT_EQ(result.minHeight_, 900u);
+    EXPECT_EQ(false, window->isMinLimitsAdjusted_.load());
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
+/**
+ * @tc.name: RecalcPxLimitsOnDensity02
+ * @tc.desc: Oversized PX min capped by work area rule, VP view refreshed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneSessionImplLayoutTest, RecalcPxLimitsOnDensity02, Function | SmallTest | Level1)
+{
+    const auto originalConfig = WindowLimitsThreshold::LoadLimitsThresholdConfig();
+    sptr<MockWindowSceneSessionImpl> window = CreateWorkAreaTestWindow("RecalcPxLimitsOnDensity02");
+    auto displayMocker = SetUpWorkAreaDisplayMock();
+
+    WindowLimits limits = { 3840, 1920, 1800, 900, 0.0f, 0.0f, WORK_AREA_TEST_VPR, PixelUnit::PX };
+    window->GetProperty()->SetWindowLimits(limits);
+    EXPECT_CALL(*window, GetVirtualPixelRatio(::testing::An<float&>()))
+        .WillOnce(::testing::DoAll(::testing::SetArgReferee<0>(2.0f), ::testing::Return(WMError::WM_OK)));
+
+    window->RecalcPxLimitsOnDensity();
+
+    WindowLimits resultPx = window->GetProperty()->GetWindowLimits();
+    WindowLimits resultVp = window->GetProperty()->GetWindowLimitsVP();
+    EXPECT_EQ(resultPx.minWidth_, WORK_AREA_TEST_CAP_W);
+    EXPECT_EQ(resultPx.minHeight_, WORK_AREA_TEST_CAP_H);
+    EXPECT_EQ(resultVp.minWidth_, 810u);  // round(1620 / 2.0)
+    EXPECT_EQ(resultVp.minHeight_, 405u); // round(810 / 2.0)
+    EXPECT_EQ(true, window->isMinLimitsAdjusted_.load());
+
+    WindowLimitsThreshold::SaveLimitsThresholdConfig(originalConfig);
+}
+
 } // namespace
 } // namespace Rosen
 } // namespace OHOS
