@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -8434,7 +8434,8 @@ void WindowSessionImpl::NotifyConsumeResultToFloatWindow
     (const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed)
 {
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
-         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && !GetWatchGestureConsumed() &&
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER ||
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_WRIST_TURN) && !GetWatchGestureConsumed() &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
         TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, isConsumed:%{public}d", GetWindowId(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
