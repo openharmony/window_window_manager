@@ -13037,7 +13037,7 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             }
             if (startUIAbilityErrorFunc_ && static_cast<WSError>(result) == WSError::WS_ERROR_EDM_CONTROLLED) {
                 startUIAbilityErrorFunc_(
-                    static_cast<unit32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
+                    static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
             }
             auto sceneSession = GetSceneSession(sessionInfo.persistentId_);
             RecordLifeCycleExceptionEvent(sceneSession, result,
