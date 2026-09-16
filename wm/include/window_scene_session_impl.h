@@ -526,6 +526,35 @@ protected:
     bool AdjustMinLimitsByWorkArea(WindowLimits& newLimits, WindowLimits& newLimitsVP, float vpr);
 
     /**
+     * @brief Check whether current effective min limits exceed the work-area caps.
+     * Used to decide whether a limits refresh is needed on display geometry change:
+     * when limits fit the (new) work area, recalculation is a no-op that only risks
+     * unit round-trip drift, so it is skipped.
+     * @param display Actual display of the window; nullptr returns false.
+     * @return Returns true when refresh is needed (exceeds caps or checks unavailable).
+     */
+    bool IsExceedingWorkAreaCap(const sptr<Display>& display);
+
+    /**
+     * @brief Detect display geometry change beyond density and report whether limits
+     * refresh is needed (work-area capping enabled only).
+     *
+     * Force-fetches the actual display info (notifications may arrive before the DM
+     * cache picks up the new geometry), updates the last-display records, and returns
+     * whether current limits exceed the new work-area caps.
+     * @return Returns true when the caller should recalculate window limits.
+     */
+    bool RefreshLimitsOnGeometryChange();
+
+    /**
+     * @brief PX-unit limits recalculation on density change.
+     *
+     * Keeps the stored PX values (vpr-independent), re-applies work-area capping and
+     * attached intersection with the new vpr, and refreshes the VP view.
+     */
+    void RecalcPxLimitsOnDensity();
+
+    /**
      * @brief Cap min limits by work area caps, respecting the aspect ratio rules.
      * Rule 1/2/3: cap width and height independently when no ratio;
      * Rule 4/4.1/4.2: cap height, derive width by ratio, cap takes priority.
