@@ -2078,7 +2078,7 @@ void SetJsSessionWindowAnimationProperties(napi_env env, napi_value objValue,
 }
 
 napi_value CreateJsStartWindowOptionObj(napi_env env,
-    const std::shared_ptr<WindowCreateParams>& windowCreateParams)
+    const std::shared_ptr<AAFwk::StartWindowOption>& startWindowOption)
 {
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
