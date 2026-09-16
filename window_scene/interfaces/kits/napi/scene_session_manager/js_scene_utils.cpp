@@ -2048,7 +2048,7 @@ napi_value CreateJsWindowCreateParamsObj(napi_env env,
     return objValue;
 }
 
-napi_value SetJsSessionWindowAnimationProperties(napi_env env, napi_value objValue,
+void SetJsSessionWindowAnimationProperties(napi_env env, napi_value objValue,
     const std::shared_ptr<WindowCreateParams>& windowCreateParams)
 {
 
