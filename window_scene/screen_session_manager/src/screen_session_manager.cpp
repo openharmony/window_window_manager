@@ -5234,6 +5234,10 @@ void ScreenSessionManager::CreateScreenProperty(ScreenId screenId, ScreenPropert
         mainDisplayId = screenId;
         screenIdManager_.ConvertToSmsScreenId(screenId, mainDisplayId);
     }
+    if (FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice() && screenId == SCREEN_ID_MAIN) {
+        groupId = DISPLAY_GROUP_ID_SECONDARY;
+        mainDisplayId = SCREEN_ID_MAIN;
+    }
     if (property.GetDisplayGroupId() == DISPLAY_GROUP_ID_INVALID) {
         property.SetDisplayGroupId(groupId);
     }
