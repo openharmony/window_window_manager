@@ -11080,5 +11080,24 @@ void WindowSessionImpl::FoldStatusListener::OnFoldStatusChanged(FoldStatus foldS
     }
     windowSessionimpl_->UpdateHoverState(windowSessionimpl_->property_->GetWindowRect(), foldStatus);
 }
+
+int32_t WindowSessionImpl::GetMainWindowHeight()
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    if (windowSessionMap_.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "windowSessionMap_ is empty!");
+        return 0;
+    }
+
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            return win->GetRect().height_;
+        }
+    }
+
+    TLOGE(WmsLogTag::DEFAULT, "GetMainWindow Failed!");
+    return 0;
+}
 } // namespace Rosen
 } // namespace OHOS
