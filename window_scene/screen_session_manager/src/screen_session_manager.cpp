@@ -7831,6 +7831,30 @@ ScreenPowerState ScreenSessionManager::GetScreenPower(ScreenId screenId)
     return state;
 }
 
+ScreenPowerState ScreenSessionManager::GetFoldScreenPowerState()
+{
+    ScreenPowerState state = ScreenPowerState::INVALID_STATE;
+    {
+        std::lock_guard<std::recursive_mutex> lock_phy(phyScreenPropMapMutex_);
+        if (phyScreenPropMap_.empty()) {
+            TLOGNFI(WmsLogTag::DMS, "phyScreenPropMap_ is empty");
+            return ScreenPowerState::POWER_ON;
+        }
+        for (const auto& screen : phyScreenPropMap_) {
+            state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance().GetScreenPowerStatus(screen.first));
+            TLOGNFI(WmsLogTag::DMS, "screenId: %{public}" PRIu64", state: %{public}u",
+                screen.first, static_cast<uint32_t>(state));
+            if (state == ScreenPowerState::POWER_ON) {
+                break;
+            }
+        }
+    }
+    if (state == ScreenPowerState::POWER_BUTT) {
+        state = ScreenPowerState::POWER_ON;
+    }
+    return state;
+}
+
 ScreenPowerState ScreenSessionManager::GetScreenPower()
 {
     if (!SessionPermission::IsSystemCalling() && !SessionPermission::IsStartByHdcd()) {
@@ -7850,25 +7874,7 @@ ScreenPowerState ScreenSessionManager::GetScreenPower()
                 .GetScreenPowerStatus(GetDefaultScreenId()));
         }
     } else {
-        uint32_t retryTimes = 0;
-        bool res = false;
-        while (retryTimes < MAX_RETRY_NUM) {
-            if (foldScreenController_->GetCurrentScreenId() != SCREEN_ID_INVALID) {
-                TLOGNFI(WmsLogTag::DMS, "current screenId is %{public}" PRIu64"",
-                    foldScreenController_->GetCurrentScreenId());
-                res = true;
-                break;
-            }
-            retryTimes++;
-            TLOGNFI(WmsLogTag::DMS, "not find screen, retry %{public}u times", retryTimes);
-            std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_WAIT_MS));
-        }
-        if (retryTimes >= MAX_RETRY_NUM || !res) {
-            TLOGNFE(WmsLogTag::DMS, "retryTimes overflow, failed!");
-            return ScreenPowerState::INVALID_STATE;
-        }
-        state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance()
-            .GetScreenPowerStatus(foldScreenController_->GetCurrentScreenId()));
+            state = GetFoldScreenPowerState();
     }
 #else
     state = static_cast<ScreenPowerState>(RSInterfaces::GetInstance()
