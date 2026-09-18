@@ -1768,7 +1768,7 @@ void SceneSession::RegisterTouchHotAreasChangeCallback(NotifyTouchHotAreasChange
     PostTask([weakThis = wptr(this), callback = std::move(callback), where = __func__] {
         auto session = weakThis.promote();
         if (!session) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "%{public}s session is null", where);
+            TLOGNE(WmsLogTag::WMS_EVENT, "%{public}s session is null", where);
             return;
         }
         session->onTouchHotAreasChange_ = std::move(callback);
@@ -7795,7 +7795,7 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
     if (onTouchHotAreasChange_) {
         TLOGI(WmsLogTag::WMS_ATTRIBUTE, "touchHotAreasChange, id=%{public}d", GetPersistentId());
         // Notify the touchHotAreasChange callback registered from the ts side.
-        onTouchHotAreasChange_();
+        onTouchHotAreasChange_(touchHotAreas);
     }
     if (specificCallback_ != nullptr && specificCallback_->onWindowInfoUpdate_ != nullptr) {
         TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}d", GetPersistentId());

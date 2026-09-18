@@ -583,7 +583,7 @@ private:
     void OnForceHideChange(bool hide);
     void OnWindowDragHotArea(uint32_t type, SizeChangeReason reason, DisplayId displayId);
     void OnTouchOutside();
-    void OnTouchHotAreasChange();
+    void OnTouchHotAreasChange(const std::vector<Rect>& touchHotAreas);
     void OnSessionInfoLockedStateChange(bool lockedState);
     void OnPrepareClosePiPSession();
     void OnContextTransparent();
