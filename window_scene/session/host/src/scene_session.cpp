@@ -6393,7 +6393,7 @@ std::vector<Rect> SceneSession::GetTouchHotAreas() const
         for (const auto& rect : touchHotAreas) {
             oss << "[" << rect.posX_ << "," << rect.posY_ << "," << rect.width_ << "," << rect.height_ << "]";
         }
-        TLOGD(WmsLogTag::WMS_EVENT, "id:%{public}d, hotAreas:%{public}s", GetPersistentId(), oss.str().c_str());
+        TLOGD(WmsLogTag::WMS_EVENT, "id=%{public}d, hotAreas:%{public}s", GetPersistentId(), oss.str().c_str());
     }
     return touchHotAreas;
 }
@@ -7793,7 +7793,7 @@ WMError SceneSession::HandleActionUpdateTouchHotArea(const sptr<WindowSessionPro
     GetSessionProperty()->SetTouchHotAreas(touchHotAreas);
 
     if (onTouchHotAreasChange_) {
-        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "Notify touchHotAreasChange, id=%{public}d", GetPersistentId());
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "touchHotAreasChange, id=%{public}d", GetPersistentId());
         // Notify the touchHotAreasChange callback registered from the ts side.
         onTouchHotAreasChange_();
     }
