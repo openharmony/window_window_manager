@@ -2542,24 +2542,23 @@ void JsSceneSession::ProcessTouchHotAreasChangeRegister()
         TLOGE(WmsLogTag::WMS_EVENT, "session is null");
         return;
     }
-    session->RegisterTouchHotAreasChangeCallback([weakThis = wptr(this)] {
+    session->RegisterTouchHotAreasChangeCallback([weakThis = wptr(this)](const std::vector<Rect>& touchHotAreas) {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
             TLOGNE(WmsLogTag::WMS_EVENT, "jsSceneSession is null");
             return;
         }
-        jsSceneSession->OnTouchHotAreasChange();
+        jsSceneSession->OnTouchHotAreasChange(touchHotAreas);
     });
 }
 
-void JsSceneSession::OnTouchHotAreasChange()
+void JsSceneSession::OnTouchHotAreasChange(const std::vector<Rect>& touchHotAreas)
 {
     TLOGD(WmsLogTag::DEFAULT, "[NAPI]");
-    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
+    auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_, touchHotAreas] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_EVENT, "OnTouchHotAreasChange jsSceneSession id:%{public}d has been destroyed",
-                persistentId);
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsSceneSession id:%{public}d has been destroyed", persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(TOUCH_HOT_AREAS_CHANGE_CB);
@@ -2567,8 +2566,13 @@ void JsSceneSession::OnTouchHotAreasChange()
             TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is null");
             return;
         }
-        napi_value argv[] = {};
-        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 0, argv, nullptr);
+        napi_value array = nullptr;
+        napi_create_array_with_length(env, touchHotAreas.size(), &array);
+        for (size_t i = 0; i < touchHotAreas.size(); ++i) {
+            napi_set_element(env, array, i, CreateJsSessionRect(env, touchHotAreas[i]));
+        }
+        napi_value argv[] = { array };
+        napi_call_function(env, NapiGetUndefined(env), jsCallBack->GetNapiValue(), 1, argv, nullptr);
     };
     taskScheduler_->PostMainThreadTask(task);
 }
