@@ -2539,13 +2539,13 @@ void JsSceneSession::ProcessTouchHotAreasChangeRegister()
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_LIFE, "session is nullptr");
+        TLOGE(WmsLogTag::WMS_EVENT, "session is null");
         return;
     }
     session->RegisterTouchHotAreasChangeCallback([weakThis = wptr(this)] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsSceneSession is null");
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsSceneSession is null");
             return;
         }
         jsSceneSession->OnTouchHotAreasChange();
@@ -2558,13 +2558,13 @@ void JsSceneSession::OnTouchHotAreasChange()
     auto task = [weakThis = wptr(this), persistentId = persistentId_, env = env_] {
         auto jsSceneSession = weakThis.promote();
         if (!jsSceneSession || jsSceneSessionMap_.find(persistentId) == jsSceneSessionMap_.end()) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "OnTouchHotAreasChange jsSceneSession id:%{public}d has been destroyed",
+            TLOGNE(WmsLogTag::WMS_EVENT, "OnTouchHotAreasChange jsSceneSession id:%{public}d has been destroyed",
                 persistentId);
             return;
         }
         auto jsCallBack = jsSceneSession->GetJSCallback(TOUCH_HOT_AREAS_CHANGE_CB);
         if (!jsCallBack) {
-            TLOGNE(WmsLogTag::WMS_LIFE, "jsCallBack is nullptr");
+            TLOGNE(WmsLogTag::WMS_EVENT, "jsCallBack is null");
             return;
         }
         napi_value argv[] = {};
@@ -6592,7 +6592,7 @@ napi_value JsSceneSession::OnGetTouchHotAreas(napi_env env, napi_callback_info i
 {
     auto session = weakSession_.promote();
     if (session == nullptr) {
-        TLOGE(WmsLogTag::WMS_EVENT, "session is nullptr, id:%{public}d", persistentId_);
+        TLOGE(WmsLogTag::WMS_EVENT, "session is null, id=%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
     std::vector<Rect> touchHotAreas = session->GetTouchHotAreas();
