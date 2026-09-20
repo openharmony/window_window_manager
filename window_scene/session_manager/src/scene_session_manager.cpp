@@ -5212,7 +5212,7 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
         WSErrorResult result = CheckSubSessionStartedByExtension(token, property);
         if (result.errCode != WSError::WS_OK) {
-            return result
+            return result;
         }
         SetExtensionSubSessionDisplayId(property, sessionStage);
     }

@@ -156,7 +156,7 @@ HWTEST_F(SceneSessionManagerExtensionTest, CheckSubSessionStartedByExtension, Te
     EXPECT_EQ(ssm_->CheckSubSessionStartedByExtension(token, property).errCode, WSError::WS_ERROR_INVALID_WINDOW);
     extensionSessionInfo.persistentId = INVALID_SESSION_ID;
     AAFwk::MockAbilityManagerClient::SetUIExtensionSessionInfo(extensionSessionInfo);
-    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtension(token, property), WSError::WS_ERROR_INVALID_WINDOW);
+    EXPECT_EQ(ssm_->CheckSubSessionStartedByExtension(token, property).errCode, WSError::WS_ERROR_INVALID_WINDOW);
 
     MockUIExtSessionPermission::SetIsSystemCallingFlag(true);
     EXPECT_EQ(ssm_->CheckSubSessionStartedByExtension(token, property).errCode, WSError::WS_OK);
