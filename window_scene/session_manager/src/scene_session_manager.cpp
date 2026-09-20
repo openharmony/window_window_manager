@@ -13030,17 +13030,20 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
         TLOGNI(WmsLogTag::WMS_LIFE, "start specified ability by SCB result: %{public}d", result);
         if (result == ERR_OK) {
             return;
-        } else if (result == ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK) {
-            TLOGNI(WmsLogTag::WMS_LIFE,
+        } else {
+            if (result == ERR_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK) {
+                TLOGNI(WmsLogTag::WMS_LIFE,
                    "start specified ability by SCB failed, errReason: %{public}s",
                    ERR_REASON_BLOCK_START_FIRST_BOOT_SCREEN_UNLOCK.c_str());
-        } else if (startUIAbilityErrorFunc_ && static_cast<WSError>(result) == WSError::WS_ERROR_EDM_CONTROLLED) {
-            startUIAbilityErrorFunc_(
-                static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
+            }
+            if (startUIAbilityErrorFunc_ && static_cast<WSError>(result) == WSError::WS_ERROR_EDM_CONTROLLED) {
+                startUIAbilityErrorFunc_(
+                    static_cast<uint32_t>(WS_JS_TO_ERROR_CODE_MAP.at(WSError::WS_ERROR_EDM_CONTROLLED)));
+            }
+            auto sceneSession = GetSceneSession(sessionInfo.persistentId_);
+            RecordLifeCycleExceptionEvent(
+                sceneSession, result, WSErrorReason::WS_REASON_WINDOW_SPECIFIED_ERR, "start specified failed");
         }
-        auto sceneSession = GetSceneSession(sessionInfo.persistentId_);
-        RecordLifeCycleExceptionEvent(
-            sceneSession, result, WSErrorReason::WS_REASON_WINDOW_SPECIFIED_ERR, "start specified failed");
 
         auto task = [bundleName = sessionInfo.bundleName_, appInstanceKey] {
             MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
