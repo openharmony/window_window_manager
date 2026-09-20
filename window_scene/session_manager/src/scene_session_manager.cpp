@@ -5163,7 +5163,8 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
     WSError processCheckRet = CheckSubWindowCallingProcess(property, parentSession);
     if (processCheckRet != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "subwindow calling process check failed!");
-        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "Subwindow calling process verification failed."};
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "The parent window and the subwindow are not "
+            "created by the same process."};
     }
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
