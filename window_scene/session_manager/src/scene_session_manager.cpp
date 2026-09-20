@@ -5155,8 +5155,9 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
 {
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
-        std::string message = WindowHelper::IsSystemWindow(property->GetWindowType())?
-            "Permission denied for creating a system window ." : "Permission denied for creating a modal subwindow.";
+        std::string message = WindowHelper::IsSystemWindow(property->GetWindowType())
+            ? "Cannot create a system window."
+            : "Only system applications are allowed to create modal topmost subwindows.";
         return WSErrorResult{WSError::WS_ERROR_NOT_SYSTEM_APP, message};
     }
 
@@ -5322,7 +5323,8 @@ WSErrorResult SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<
     if (extensionParentSession->GetSessionInfo().isSystem_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "extensionParentSession is SCBSystemSession: %{public}d",
             property->GetParentPersistentId());
-        return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "System window cannot create a subwindow."};
+        return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "The parent of the extension cannot be used to "
+            "create a subwindow."};
     }
     AAFwk::UIExtensionSessionInfo info;
     AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
