@@ -5155,7 +5155,7 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
 {
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
-        std::string message = WindowHelper::IsSystemWindow(type)?
+        std::string message = WindowHelper::IsSystemWindow(property->GetWindowType())?
             "Permission denied for creating a system window ." : "Permission denied for creating a modal subwindow.";
         return WSErrorResult{WSError::WS_ERROR_NOT_SYSTEM_APP, message};
     }
