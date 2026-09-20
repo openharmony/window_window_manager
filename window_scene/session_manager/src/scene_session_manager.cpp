@@ -13043,7 +13043,6 @@ void SceneSessionManager::StartAbilityBySpecified(const SessionInfo& sessionInfo
             RecordLifeCycleExceptionEvent(sceneSession, result,
                 WSErrorReason::WS_REASON_WINDOW_SPECIFIED_ERR, "start specified failed");
         }
-
         auto task = [bundleName = sessionInfo.bundleName_, appInstanceKey] {
             MultiInstanceManager::GetInstance().DecreaseInstanceKeyRefCountByBundleNameAndInstanceKey(
                 bundleName, appInstanceKey);
