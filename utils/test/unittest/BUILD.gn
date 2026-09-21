@@ -346,6 +346,7 @@ ohos_unittest("utils_rs_adapter_test") {
   deps = [ ":utils_unittest_common" ]
 
   external_deps = test_external_deps
+  external_deps += [ "ipc:ipc_single" ]
 }
 
 ohos_unittest("utils_dm_virtual_screen_option_test") {

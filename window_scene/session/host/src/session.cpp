@@ -244,15 +244,21 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode(bool isUpdateContextBeforeGet)
 {
+    std::shared_ptr<RSUIContext> rsUIContext;
+    if (isUpdateContextBeforeGet) {
+        // ExtensionSession::GetRSUIContext() may acquire surfaceNodeMutex_.
+        rsUIContext = GetRSUIContext();
+    }
+
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     if (isUpdateContextBeforeGet) {
         TLOGI(WmsLogTag::WMS_SCB,
               "id: %{public}d, surfaceNode: %{public}s, original: %{public}s",
               GetPersistentId(),
               RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(),
-              RSAdapterUtil::RSUIContextToStr(GetRSUIContext()).c_str());
+              RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
         if (surfaceNode_) {
-            RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
+            RSAdapterUtil::SetRSUIContext(surfaceNode_, rsUIContext, true);
         }
     }
     return surfaceNode_;
@@ -6388,10 +6394,6 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     auto screenId = GetScreenId();
     std::lock_guard<std::mutex> lock(rsUIContextMutex_);
     if (screenIdOfRSUIContext_ != screenId || screenIdOfRSUIContext_ == SCREEN_ID_INVALID) {
-        // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
-        // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
-        // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
-        // as ArkUI knows the host window for this type of window.
         rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         if (rsUIContext_ != nullptr) {
             screenIdOfRSUIContext_ = screenId;
@@ -6400,19 +6402,13 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
                 caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         }
     }
-    if (rsUIContext_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
-            caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
-        // extensionSession use
-        rsUIContext_ = RSUIContextContainer::GetRSUIContext();
-    }
     return rsUIContext_;
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSShadowContext()
 {
-    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         if (!shadowSurfaceNode_) {
             TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
             return nullptr;
@@ -6424,8 +6420,8 @@ std::shared_ptr<RSUIContext> Session::GetRSShadowContext()
 
 std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext()
 {
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
         if (!leashWinShadowSurfaceNode_) {
             TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
             return nullptr;
