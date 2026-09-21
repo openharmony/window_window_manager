@@ -47,7 +47,7 @@ void AniFbController::Finalizer(ani_env* env, ani_long nativeObj)
         if (!typeCallbackListenerMap_.empty()) {
             for (auto& [listenerType, innerMap] : typeCallbackListenerMap_) {
                 for (auto& [ref, listener] : innerMap) {
-                    env->GlobalReference_Delete(ref);
+                    aniFbController->UnRegisterListener(listenerType, listener);
                 }
             }
             typeCallbackListenerMap_.clear();
