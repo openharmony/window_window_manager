@@ -49,6 +49,8 @@ constexpr float DIRECTION90 = 90.0F;
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
 
+// Used
+
 bool operator!=(const MMI::Rect& a, const MMI::Rect& b)
 {
     if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
