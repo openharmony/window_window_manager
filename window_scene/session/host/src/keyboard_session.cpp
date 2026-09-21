@@ -312,14 +312,14 @@ WSError KeyboardSession::AdjustKeyboardLayout(const KeyboardLayoutParams& params
         auto sessionProperty = session->GetSessionProperty();
         const KeyboardLayoutParams lastParams = sessionProperty->GetKeyboardLayoutParams();
         sessionProperty->SetKeyboardLayoutParams(params);
+        sptr<SceneSession> callingSession = session->GetSceneSession(session->GetCallingSessionId());
+        if (callingSession) {
+            callingSession->SetOriPosYBeforeRaisedByKeyboard(0);
+        }
         // handle keyboard gravity change
         if (params.gravity_ == WindowGravity::WINDOW_GRAVITY_FLOAT) {
             session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_FLOAT);
             session->SetWindowAnimationFlag(false);
-            sptr<SceneSession> callingSession = session->GetSceneSession(session->GetCallingSessionId());
-            if (callingSession) {
-                callingSession->SetOriPosYBeforeRaisedByKeyboard(0);
-            }
         } else {
             if (session->IsLifecycleForeground()) {
                 session->NotifySystemKeyboardAvoidChange(SystemKeyboardAvoidChangeReason::KEYBOARD_GRAVITY_BOTTOM);
