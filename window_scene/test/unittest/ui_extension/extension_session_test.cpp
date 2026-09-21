@@ -17,12 +17,14 @@
 
 #include "extension_session.h"
 #include "accessibility_event_info.h"
+#include "rs_adapter.h"
 #include "session_info.h"
 #include "interfaces/include/ws_common.h"
 #include "key_event.h"
 #include "mock/mock_session_stage.h"
 #include "mock/mock_window_event_channel.h"
 #include "extension_data_handler_mock.h"
+#include "ui/rs_surface_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -79,9 +81,11 @@ namespace {
  */
 HWTEST_F(ExtensionSessionTest, Connect, TestSize.Level0)
 {
+    constexpr int32_t HOST_WINDOW_ID = 100;
     SystemSessionConfig sessionConfig;
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
     sptr<WindowSessionProperty> property = sptr<WindowSessionProperty>::MakeSptr();
+    property->SetParentPersistentId(HOST_WINDOW_ID);
     sptr<IRemoteObject> renderSession;
     std::shared_ptr<RSSurfaceNode> surfaceNode;
     sptr<IRemoteObject> token;
@@ -89,10 +93,17 @@ HWTEST_F(ExtensionSessionTest, Connect, TestSize.Level0)
     auto res = extensionSession_->Connect(mockSessionStage_, mockEventChannel_, nodeId, sessionConfig,
         renderSession, surfaceNode, property, token, "");
     ASSERT_EQ(res, WSError::WS_OK);
+    ASSERT_NE(extensionSession_->GetSessionProperty(), nullptr);
+    EXPECT_EQ(extensionSession_->GetSessionProperty()->GetParentPersistentId(), HOST_WINDOW_ID);
 
     extensionSession_->state_ = SessionState::STATE_DISCONNECT;
     res = extensionSession_->Connect(mockSessionStage_, nullptr, nodeId, sessionConfig, renderSession,
         surfaceNode, property, token, "");
+    ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
+
+    extensionSession_->state_ = SessionState::STATE_DISCONNECT;
+    res = extensionSession_->Connect(mockSessionStage_, mockEventChannel_, nodeId, sessionConfig,
+        renderSession, surfaceNode, nullptr, token, "");
     ASSERT_EQ(res, WSError::WS_ERROR_NULLPTR);
 }
 
@@ -126,6 +137,94 @@ HWTEST_F(ExtensionSessionTest, RegisterExtensionSessionEventCallback, TestSize.L
 {
     extensionSession_->RegisterExtensionSessionEventCallback(extSessionEventCallback_);
     ASSERT_NE(nullptr, extensionSession_->GetExtensionSessionEventCallback());
+}
+
+/**
+ * @tc.name: GetRSUIContext
+ * @tc.desc: Verify ExtensionSession gets the host window RSUIContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, GetRSUIContext, TestSize.Level1)
+{
+    if (!RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        GTEST_SKIP() << "Skip test when RS client multi-instance is disabled.";
+    }
+
+    constexpr int32_t HOST_WINDOW_ID = 100;
+    auto rsUIDirector = RSUIDirector::Create(nullptr);
+    ASSERT_NE(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    ASSERT_NE(rsUIContext, nullptr);
+    RSUIContextContainer::SetRSUIContext(HOST_WINDOW_ID, rsUIContext);
+    extensionSession_->GetSessionProperty()->SetParentPersistentId(HOST_WINDOW_ID);
+
+    sptr<Session> session = extensionSession_;
+    EXPECT_EQ(session->GetRSUIContext(), rsUIContext);
+
+    RSUIContextContainer::RemoveRSUIContext(HOST_WINDOW_ID);
+}
+
+/**
+ * @tc.name: GetRSUIContextFallback
+ * @tc.desc: Verify ExtensionSession reuses the cached fallback RSUIDirector.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, GetRSUIContextFallback, TestSize.Level1)
+{
+    if (!RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        GTEST_SKIP() << "Skip test when RS client multi-instance is disabled.";
+    }
+
+    constexpr int32_t HOST_WINDOW_ID = 101;
+    RSUIContextContainer::RemoveRSUIContext(HOST_WINDOW_ID);
+    ASSERT_EQ(RSUIContextContainer::GetRSUIContext(HOST_WINDOW_ID), nullptr);
+
+    auto rsUIDirector = RSUIDirector::Create(nullptr);
+    ASSERT_NE(rsUIDirector, nullptr);
+    auto fallbackRSUIContext = rsUIDirector->GetRSUIContext();
+    ASSERT_NE(fallbackRSUIContext, nullptr);
+
+    extensionSession_->GetSessionProperty()->SetParentPersistentId(HOST_WINDOW_ID);
+    extensionSession_->fallbackRSUIDirector_ = rsUIDirector;
+
+    sptr<Session> session = extensionSession_;
+    EXPECT_EQ(session->GetRSUIContext(__func__), fallbackRSUIContext);
+}
+
+/**
+ * @tc.name: GetRSUIContextFromSurfaceNode
+ * @tc.desc: Verify surface node context takes precedence and can be refreshed without deadlock.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionSessionTest, GetRSUIContextFromSurfaceNode, TestSize.Level1)
+{
+    if (!RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        GTEST_SKIP() << "Skip test when RS client multi-instance is disabled.";
+    }
+
+    constexpr int32_t HOST_WINDOW_ID = 102;
+    auto hostRSUIDirector = RSUIDirector::Create(nullptr);
+    ASSERT_NE(hostRSUIDirector, nullptr);
+    auto hostRSUIContext = hostRSUIDirector->GetRSUIContext();
+    ASSERT_NE(hostRSUIContext, nullptr);
+
+    auto surfaceRSUIDirector = RSUIDirector::Create(nullptr);
+    ASSERT_NE(surfaceRSUIDirector, nullptr);
+    auto surfaceRSUIContext = surfaceRSUIDirector->GetRSUIContext();
+    ASSERT_NE(surfaceRSUIContext, nullptr);
+    struct RSSurfaceNodeConfig config;
+    auto surfaceNode = RSSurfaceNode::Create(config, true, surfaceRSUIContext);
+    ASSERT_NE(surfaceNode, nullptr);
+
+    RSUIContextContainer::SetRSUIContext(HOST_WINDOW_ID, hostRSUIContext);
+    extensionSession_->GetSessionProperty()->SetParentPersistentId(HOST_WINDOW_ID);
+    extensionSession_->surfaceNode_ = surfaceNode;
+
+    sptr<Session> session = extensionSession_;
+    EXPECT_EQ(session->GetRSUIContext(__func__), surfaceRSUIContext);
+    EXPECT_EQ(extensionSession_->GetSurfaceNode(true), surfaceNode);
+
+    RSUIContextContainer::RemoveRSUIContext(HOST_WINDOW_ID);
 }
 
 /**

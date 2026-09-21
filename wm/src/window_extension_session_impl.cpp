@@ -77,6 +77,7 @@ constexpr const char* UIEXTENSION_CONFIG_WINDOW_MODE = "ohos.system.window.mode"
 WindowExtensionSessionImpl::WindowExtensionSessionImpl(
     const sptr<WindowOption>& option) : WindowSessionImpl(option, nullptr)
 {
+    property_->SetParentPersistentId(option->GetParentId());
     if (property_->GetUIExtensionUsage() == UIExtensionUsage::MODAL ||
         SessionHelper::IsSecureUIExtension(property_->GetUIExtensionUsage())) {
         startModalExtensionTimeStamp_ = option->GetStartModalExtensionTimeStamp();
