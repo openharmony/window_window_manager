@@ -10048,6 +10048,7 @@ bool SceneSession::NotifyServerToUpdateRect(const SessionUIParam& uiParam, SizeC
         GetPersistentId(), GetSessionRect().ToString().c_str(), rect.ToString().c_str(),
         globalRect.ToString().c_str(), GetClientRect().ToString().c_str(), static_cast<uint32_t>(reason));
     layoutController_->SetSessionRect(rect);
+    AddPropertyDirtyFlags(static_cast<uint32_t>(SessionPropertyFlag::WINDOW_RECT));
     RectCheckProcess();
     return true;
 }
