@@ -2406,11 +2406,9 @@ void JsSceneSessionManager::RegisterDumpRootSceneElementInfoListener()
 
 void JsSceneSessionManager::RegisterVirtualPixelRatioChangeListener()
 {
-    ProcessVirtualPixelRatioChangeFunc func = [this](float density, const Rect& rect) {
-        WLOGFI("VirtualPixelRatioChangeListener %{public}d,%{public}d,%{public}d,%{public}d; %{public}f",
-            rect.posX_, rect.posY_, rect.width_, rect.height_, density);
-        RootScene::staticRootScene_->SetDisplayDensity(density);
-        RootScene::staticRootScene_->UpdateViewportConfig(rect, WindowSizeChangeReason::UNDEFINED);
+    ProcessVirtualPixelRatioChangeFunc func = [this](const sptr<DisplayInfo>& displayInfo) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "VirtualPixelRatioChangeListener in");
+        RootScene::staticRootScene_->UpdateDisplayDpi(displayInfo, WindowSizeChangeReason::UNDEFINED);
     };
     SceneSessionManager::GetInstance().SetVirtualPixelRatioChangeListener(func);
 }

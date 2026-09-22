@@ -195,6 +195,9 @@
             OHOS::Rosen::RootScene::SetTopWindowBoundaryByID*;
             OHOS::Rosen::RootScene::staticRootScene_;
             OHOS::Rosen::RootScene::UpdateViewportConfig*;
+            OHOS::Rosen::RootScene::UpdateDisplayDpi*;
+            OHOS::Rosen::RootScene::UpdateRootDisplayDpi*;
+            OHOS::Rosen::ScreenScene::UpdateRootDisplayDpi*;
             OHOS::Rosen::ScreenScene::LoadContent*;
             OHOS::Rosen::ScreenScene::ScreenScene*;
             OHOS::Rosen::ScreenScene::SetDisplayDensity*;
@@ -202,6 +205,7 @@
             OHOS::Rosen::ScreenScene::SetDisplayOrientation*;
             OHOS::Rosen::ScreenScene::UpdateViewportConfig*;
             OHOS::Rosen::WebPictureInPictureController::WebPictureInPictureController*;
+            OHOS::Rosen::Window::UpdateRootDisplayDpi*;
             OHOS::Rosen::Window::Create*;
             OHOS::Rosen::Window::Find*;
             OHOS::Rosen::Window::GetAndVerifyWindowTypeForArkUI*;
