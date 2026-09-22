@@ -4487,6 +4487,19 @@ public:
     virtual float GetVirtualPixelRatio() { return 1.0f; }
 
     /**
+     * @brief Update the dpi of the root window.
+     *
+     * @param dpi the density of window.
+     * @param rect target rect.
+     * @param reason change reason.
+     * @return WM_OK means set success, others means failed.
+     */
+    virtual WMError UpdateRootDisplayDpi(float dpi, const Rect& rect, WindowSizeChangeReason reason)
+    {
+        return WMError::WM_DO_NOTHING;
+    }
+
+    /**
      * @brief Hide None Secure Windows.
      *
      * @param shouldHide bool.
