@@ -6467,12 +6467,20 @@ PrelayoutContext Session::GetPrelayoutContext()
     const auto preCalc = PreCalcWindowProperty();
 
     // Use pre-calculated size and position as initial window rect.
-    ctx.winRect = {
-        preCalc.posX,
-        preCalc.posY,
-        static_cast<int32_t>(preCalc.width),
-        static_cast<int32_t>(preCalc.height)
-    };
+    if (windowCreateParams != nullptr && windowCreateParams->minimizeOnStart) {
+        ctx.winRect = {
+            preCalc.posX,
+            preCalc.posY,
+            static_cast<int32_t>(preCalc.width),
+            static_cast<int32_t>(preCalc.height)
+        };
+    } else {
+        ctx.winRect = {
+            0, 0,
+            static_cast<int32_t>(preCalc.width),
+            static_cast<int32_t>(preCalc.height)
+        };
+    }
 
     if (
         (sessionInfo_.isPrelaunch_ && !ctx.enable) ||
