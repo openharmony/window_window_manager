@@ -3054,6 +3054,8 @@ bool WindowManager::IsModuleHookOff(bool isModuleAbilityHookEnd, const std::stri
 
 void WindowManager::NotifyWindowPropertyChange(uint32_t propertyDirtyFlags, const WindowInfoList& windowInfoList)
 {
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "dirtyFlags=%{public}u, infoSize=%{public}u",
+        propertyDirtyFlags, static_cast<uint32_t>(windowInfoList.size()));
     if (propertyDirtyFlags & static_cast<int32_t>(WindowInfoKey::WINDOW_RECT)) {
         pImpl_->NotifyWindowRectChange(windowInfoList);
     }
