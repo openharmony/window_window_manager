@@ -132,6 +132,11 @@ private:
         int32_t pid, bool isLite);
 
     int DumpSessionInfo(const std::vector<std::string>& args, std::string& dumpInfo);
+    int DumpSessionInfoByUserId(int32_t userId, const std::vector<std::string>& args, std::string& dumpInfo);
+    int ParseUserArg(const std::vector<std::string>& args,
+        std::vector<int32_t>& targetUserIds, std::vector<std::string>& dumpArgs, bool& hasUserArg,
+        std::string& dumpInfo);
+    bool IsDigitString(const std::string& str) const;
     void ShowHelpInfo(std::string& dumpInfo);
     void ShowAceDumpHelp(std::string& dumpInfo);
     void ShowIllegalArgsInfo(std::string& dumpInfo);

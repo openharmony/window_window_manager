@@ -244,15 +244,21 @@ std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode() const
 
 std::shared_ptr<RSSurfaceNode> Session::GetSurfaceNode(bool isUpdateContextBeforeGet)
 {
+    std::shared_ptr<RSUIContext> rsUIContext;
+    if (isUpdateContextBeforeGet) {
+        // ExtensionSession::GetRSUIContext() may acquire surfaceNodeMutex_.
+        rsUIContext = GetRSUIContext();
+    }
+
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     if (isUpdateContextBeforeGet) {
         TLOGI(WmsLogTag::WMS_SCB,
               "id: %{public}d, surfaceNode: %{public}s, original: %{public}s",
               GetPersistentId(),
               RSAdapterUtil::RSNodeToStr(surfaceNode_).c_str(),
-              RSAdapterUtil::RSUIContextToStr(GetRSUIContext()).c_str());
+              RSAdapterUtil::RSUIContextToStr(rsUIContext).c_str());
         if (surfaceNode_) {
-            RSAdapterUtil::SetRSUIContext(surfaceNode_, GetRSUIContext(), true);
+            RSAdapterUtil::SetRSUIContext(surfaceNode_, rsUIContext, true);
         }
     }
     return surfaceNode_;
@@ -6388,10 +6394,6 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
     auto screenId = GetScreenId();
     std::lock_guard<std::mutex> lock(rsUIContextMutex_);
     if (screenIdOfRSUIContext_ != screenId || screenIdOfRSUIContext_ == SCREEN_ID_INVALID) {
-        // Note: For the window corresponding to UIExtAbility, RSUIContext cannot be obtained
-        // directly here because its server side is not SceneBoard. The acquisition of RSUIContext
-        // is deferred to the UIExtensionPattern::OnConnect(ui_extension_pattern.cpp) method,
-        // as ArkUI knows the host window for this type of window.
         rsUIContext_ = ScreenSessionManagerClient::GetInstance().GetRSUIContext(screenId);
         if (rsUIContext_ != nullptr) {
             screenIdOfRSUIContext_ = screenId;
@@ -6400,19 +6402,13 @@ std::shared_ptr<RSUIContext> Session::GetRSUIContext(const char* caller)
                 caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
         }
     }
-    if (rsUIContext_ == nullptr) {
-        TLOGI(WmsLogTag::WMS_SCB, "%{public}s: %{public}s, sessionId: %{public}d, screenId:%{public}" PRIu64,
-            caller, RSAdapterUtil::RSUIContextToStr(rsUIContext_).c_str(), GetPersistentId(), screenId);
-        // extensionSession use
-        rsUIContext_ = RSUIContextContainer::GetRSUIContext();
-    }
     return rsUIContext_;
 }
 
 std::shared_ptr<RSUIContext> Session::GetRSShadowContext()
 {
-    std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         if (!shadowSurfaceNode_) {
             TLOGE(WmsLogTag::WMS_SCB, "Shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
             return nullptr;
@@ -6424,8 +6420,8 @@ std::shared_ptr<RSUIContext> Session::GetRSShadowContext()
 
 std::shared_ptr<RSUIContext> Session::GetRSLeashWinShadowContext()
 {
-    std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
     if (RSAdapterUtil::IsClientMultiInstanceEnabled()) {
+        std::lock_guard<std::mutex> lock(leashWinSurfaceNodeMutex_);
         if (!leashWinShadowSurfaceNode_) {
             TLOGE(WmsLogTag::WMS_SCB, "Leash win shadow surface node is nullptr, id: %{public}d.", GetPersistentId());
             return nullptr;
@@ -6537,10 +6533,18 @@ void Session::NotifyPendingAppHookDisplayInfo()
     }
 }
 
-void Session::HandlePrelaunchDisplayHook(const PrelayoutContext& ctx)
+bool Session::HandlePrelaunchDisplayHook(const PrelayoutContext& ctx)
 {
-    if (!ctx.enable || !updateAppHookDisplayInfoFunc_) {
-        return;
+    const auto windowId = GetWindowId();
+    if (!ctx.enable) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Prelaunch display hook is not required. id: %{public}d", windowId);
+        return false;
+    }
+    if (!updateAppHookDisplayInfoFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "Failed to set prelaunch display hook: func is null. id: %{public}d, uid: %{public}d",
+              windowId, callingUid_);
+        return false;
     }
 
     const HookInfo hookInfo = {
@@ -6555,30 +6559,40 @@ void Session::HandlePrelaunchDisplayHook(const PrelayoutContext& ctx)
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
               "Failed to update app hook display info. id: %{public}d, uid: %{public}d, ret: %{public}d",
-              GetPersistentId(), callingUid_, ret);
-        return;
+              windowId, callingUid_, ret);
+        return false;
     }
     prelaunchDisplayHookEnabled_ = true;
     TLOGI(WmsLogTag::WMS_LAYOUT, "Update prelaunch display hook successfully. id: %{public}d, uid: %{public}d",
-          GetPersistentId(), callingUid_);
+          windowId, callingUid_);
+    return true;
 }
 
-void Session::ClearPrelaunchDisplayHook()
+bool Session::ClearPrelaunchDisplayHook()
 {
-    if (!prelaunchDisplayHookEnabled_ || !updateAppHookDisplayInfoFunc_) {
-        return;
+    auto windowId = GetWindowId();
+    if (!prelaunchDisplayHookEnabled_) {
+        TLOGD(WmsLogTag::WMS_LAYOUT, "Prelaunch display hook is not enabled. id: %{public}d", windowId);
+        return false;
+    }
+    if (!updateAppHookDisplayInfoFunc_) {
+        TLOGW(WmsLogTag::WMS_LAYOUT,
+              "Failed to clear prelaunch display hook: func is null. id: %{public}d, uid: %{public}d",
+              windowId, callingUid_);
+        return false;
     }
 
     const auto ret = updateAppHookDisplayInfoFunc_(callingUid_, HookInfo {}, false);
     if (ret != WMError::WM_OK) {
         TLOGE(WmsLogTag::WMS_LAYOUT,
-            "Failed to clear prelaunch display hook. id: %{public}d, uid: %{public}d, ret: %{public}d",
-            GetPersistentId(), callingUid_, ret);
-        return;
+              "Failed to clear prelaunch display hook. id: %{public}d, uid: %{public}d, ret: %{public}d",
+              windowId, callingUid_, ret);
+        return false;
     }
     prelaunchDisplayHookEnabled_ = false;
     TLOGI(WmsLogTag::WMS_LAYOUT, "Clear prelaunch display hook successfully. id: %{public}d, uid: %{public}d",
-        GetPersistentId(), callingUid_);
+          windowId, callingUid_);
+    return true;
 }
 
 WSError Session::UpdateLSStateInfo(bool isLSState)

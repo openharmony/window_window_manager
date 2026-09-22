@@ -497,8 +497,18 @@ DMError SuperFoldPolicy::ChangeScreenDisplayModeInner(FoldDisplayMode displayMod
     SetCurrentDisplayMode(displayMode);
     SetdisplayModeChangeStatus(false);
     ScreenSessionManager::GetInstance().NotifyDisplayModeChanged(displayMode);
+    UpdateOuterScreenGroupType(displayMode);
     OnScreenPropertyChangeNotifyClient();
     return DMError::DM_OK;
+}
+
+void SuperFoldPolicy::UpdateOuterScreenGroupType(FoldDisplayMode displayMode)
+{
+    sptr<ScreenSession> outerSession = ScreenSessionManager::GetInstance().GetScreenSession(SCREEN_ID_MAIN);
+    if (outerSession != nullptr) {
+        outerSession->SetGroupType(displayMode == FoldDisplayMode::MAIN
+            ? DisplayGroupType::DEFAULT : DisplayGroupType::SPECIAL);
+    }
 }
 
 void SuperFoldPolicy::OnScreenPropertyChangeNotifyClient()

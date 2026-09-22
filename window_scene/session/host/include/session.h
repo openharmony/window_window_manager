@@ -1006,7 +1006,7 @@ public:
     /*
      * RS Client Multi Instance
      */
-    std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
+    virtual std::shared_ptr<RSUIContext> GetRSUIContext(const char* caller = "");
 
     /*
      * Window highligt outline
@@ -1444,16 +1444,19 @@ private:
      * recorded so the hook can be cleared when game prelaunch ends.
      *
      * @param ctx Prelayout context containing display info.
+     * @return true if the display hook is enabled successfully; otherwise false.
      */
-    void HandlePrelaunchDisplayHook(const PrelayoutContext& ctx);
+    bool HandlePrelaunchDisplayHook(const PrelayoutContext& ctx);
 
     /**
      * @brief Clear the display hook installed for game prelaunch.
      *
      * Disables the display hook for the application UID so subsequent display
      * queries return the real display information.
+     *
+     * @return true if the display hook is cleared successfully; otherwise false.
      */
-    void ClearPrelaunchDisplayHook();
+    bool ClearPrelaunchDisplayHook();
 
     void NotifyPendingAppHookDisplayInfo();
 

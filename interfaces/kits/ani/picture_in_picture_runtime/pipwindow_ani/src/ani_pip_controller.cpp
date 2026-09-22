@@ -40,13 +40,13 @@ AniPipController::~AniPipController()
     TLOGI(WmsLogTag::WMS_PIP, "~AniPipController");
 }
 
-void AniPipController::DelListener(ani_env* env)
+void AniPipController::DelListener(ani_env* env, AniPipController* aniPipController)
 {
     std::lock_guard<std::mutex> lock(mtxListener_);
     if (!typeCallbackListenerMap_.empty()) {
         for (auto& [listenerType, innerMap] : typeCallbackListenerMap_) {
             for (auto& [ref, listener] : innerMap) {
-                env->GlobalReference_Delete(ref);
+                aniPipController->ClearListener(listenerType, listener);
             }
         }
         typeCallbackListenerMap_.clear();

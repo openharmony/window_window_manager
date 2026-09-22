@@ -102,13 +102,17 @@ namespace {
  */
 HWTEST_F(WindowExtensionSessionImplTest, WindowExtensionSessionImpl, TestSize.Level1)
 {
+    constexpr int32_t HOST_WINDOW_ID = 100;
     sptr<WindowOption> option = sptr<WindowOption>::MakeSptr();
     ASSERT_NE(nullptr, option);
     option->SetWindowType(WindowType::WINDOW_TYPE_UI_EXTENSION);
+    option->SetParentId(HOST_WINDOW_ID);
     option->uiExtensionUsage_ = static_cast<uint32_t>(UIExtensionUsage::CONSTRAINED_EMBEDDED);
     option->SetWindowName("WindowExtensionSessionImplTest");
     sptr<WindowExtensionSessionImpl> window = sptr<WindowExtensionSessionImpl>::MakeSptr(option);
     ASSERT_NE(nullptr, window);
+    ASSERT_NE(nullptr, window->GetProperty());
+    EXPECT_EQ(HOST_WINDOW_ID, window->GetProperty()->GetParentPersistentId());
     window = nullptr;
 }
 

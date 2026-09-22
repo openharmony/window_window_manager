@@ -2073,6 +2073,31 @@ HWTEST_F(SceneSessionTest4, SetWinRectWhenUpdateRectTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSessionRectInnerByLimitTest
+ * @tc.desc: UpdateSessionRectInner preserves position and updates size when resizing by limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionTest4, UpdateSessionRectInnerByLimitTest, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionRectInnerByLimitTest";
+    info.bundleName_ = "UpdateSessionRectInnerByLimitTest";
+    sptr<SceneSession> sceneSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    ASSERT_NE(sceneSession, nullptr);
+    sceneSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    sceneSession->SetSessionRect({ 10, 20, 100, 100 });
+    sceneSession->SetSessionRequestRect({ 30, 40, 120, 120 });
+
+    bool isScbCoreEnabled = Session::IsScbCoreEnabled();
+    Session::SetScbCoreEnabled(false);
+    sceneSession->UpdateSessionRectInner({ 50, 60, 300, 200 }, SizeChangeReason::RESIZE_BY_LIMIT, {});
+    Session::SetScbCoreEnabled(isScbCoreEnabled);
+
+    EXPECT_EQ(sceneSession->GetSessionRect(), (WSRect { 10, 20, 300, 200 }));
+    EXPECT_EQ(sceneSession->GetSessionRequestRect(), (WSRect { 30, 40, 300, 200 }));
+}
+
+/**
  * @tc.name: SetPipParentWindowIdTest
  * @tc.desc: SetPipParentWindowId function test
  * @tc.type: FUNC

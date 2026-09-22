@@ -532,18 +532,23 @@ public:
             return false;
         }
 
-        int32_t i = 0;
-        if (allowNeg && str.at(i) == '-') {
+        size_t i = 0;
+        if (allowNeg && str[0] == '-') {
             i++;
         }
-
-        for (; i < static_cast<int32_t>(str.size()); i++) {
-            if ((str.at(i) < '0' || str.at(i) > '9') &&
-                (str.at(i) != '.' || std::count(str.begin(), str.end(), '.') > 1)) {
+        bool hasDigit = false;
+        bool hasDot   = false;
+        for (; i < str.size(); i++) {
+            char c = str[i];
+            if (c >= '0' && c <= '9') {
+                hasDigit = true;
+            } else if (c == '.' && !hasDot) {
+                hasDot = true;
+            } else {
                 return false;
             }
         }
-        return true;
+        return hasDigit;
     }
 
     static std::vector<std::string> Split(std::string str, std::string pattern)

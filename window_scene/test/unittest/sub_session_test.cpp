@@ -570,6 +570,59 @@ HWTEST_F(SubSessionTest, UpdateSessionRectInner04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSessionRectInnerByLimitWhenFollowingParent
+ * @tc.desc: UpdateSessionRectInner handles resize by limit when the sub window follows its parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, UpdateSessionRectInnerByLimitWhenFollowingParent, TestSize.Level1)
+{
+    constexpr DisplayId START_DISPLAY_ID = 0;
+    constexpr DisplayId TARGET_DISPLAY_ID = 1;
+    subSession_->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    subSession_->GetSessionProperty()->SetDisplayId(START_DISPLAY_ID);
+    subSession_->NotifyFollowParentMultiScreenPolicy(true);
+    subSession_->SetSessionRequestRect({ 10, 20, 100, 100 });
+
+    SessionInfo info;
+    info.abilityName_ = "UpdateSessionRectInnerByLimitWhenFollowingParent";
+    info.bundleName_ = "UpdateSessionRectInnerByLimitWhenFollowingParent";
+    sptr<SceneSession> parentSession = sptr<SceneSession>::MakeSptr(info, nullptr);
+    parentSession->GetSessionProperty()->SetWindowType(WindowType::WINDOW_TYPE_APP_MAIN_WINDOW);
+    parentSession->moveDragController_ = sptr<MoveDragController>::MakeSptr(wptr(parentSession));
+    parentSession->moveDragController_->isStartMove_ = true;
+    subSession_->SetParentSession(parentSession);
+
+    MoveConfiguration config;
+    config.displayId = TARGET_DISPLAY_ID;
+    WSRect resizeRect = { 50, 60, 300, 200 };
+    subSession_->UpdateSessionRectInner(resizeRect, SizeChangeReason::RESIZE_BY_LIMIT, config);
+
+    EXPECT_EQ(subSession_->GetSessionProperty()->GetDisplayId(), TARGET_DISPLAY_ID);
+    EXPECT_EQ(subSession_->GetRequestRectWhenFollowParent(), (WSRect { 10, 20, 300, 200 }));
+    EXPECT_EQ(subSession_->GetSizeChangeReason(), SizeChangeReason::RESIZE_BY_LIMIT);
+}
+
+/**
+ * @tc.name: UpdateSessionRectInnerByLimitInForeground
+ * @tc.desc: UpdateSessionRectInner marks a foreground sub window as resizing when resized by limit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubSessionTest, UpdateSessionRectInnerByLimitInForeground, TestSize.Level1)
+{
+    subSession_->SetSessionState(SessionState::STATE_FOREGROUND);
+    subSession_->GetLayoutController()->SetSessionRect({ 10, 20, 100, 100 });
+    subSession_->SetOriPosYBeforeRaisedByKeyboard(50);
+    subSession_->isSubWindowResizingOrMoving_ = false;
+
+    MoveConfiguration config;
+    WSRect resizeRect = { 50, 60, 300, 200 };
+    subSession_->UpdateSessionRectInner(resizeRect, SizeChangeReason::RESIZE_BY_LIMIT, config);
+
+    EXPECT_TRUE(subSession_->isSubWindowResizingOrMoving_);
+    EXPECT_EQ(subSession_->GetOriPosYBeforeRaisedByKeyboard(), 0);
+}
+
+/**
  * @tc.name: UpdateSessionRectInner03
  * @tc.desc: UpdateSessionRectInner Test
  * @tc.type: FUNC

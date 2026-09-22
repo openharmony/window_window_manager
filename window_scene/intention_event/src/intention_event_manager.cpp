@@ -228,7 +228,8 @@ void IntentionEventManager::InputEventListener::SendKeyEventConsumedResultToSCB(
     const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed) const
 {
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
-        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) &&
+         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER ||
+         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_WRIST_TURN) &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
         TLOGD(WmsLogTag::WMS_EVENT, "isConsumed:%{public}d", isConsumed);
         SceneSessionManager::GetInstance().NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);

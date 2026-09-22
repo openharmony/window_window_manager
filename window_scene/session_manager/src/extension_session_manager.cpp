@@ -119,7 +119,7 @@ sptr<ExtensionSession> ExtensionSessionManager::RequestExtensionSession(const Se
 }
 
 WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<ExtensionSession>& extensionSession,
-    uint32_t hostWindowId, std::function<void(WSError)>&& resultCallback)
+    uint32_t hostWindowId, std::function<void(WSError, int32_t)>&& resultCallback)
 {
     auto abilitySessionInfo = SetAbilitySessionInfo(extensionSession);
     wptr<ExtensionSession> weakExtSession(extensionSession);
@@ -158,7 +158,7 @@ WSError ExtensionSessionManager::RequestExtensionSessionActivation(const sptr<Ex
         }
         if (callback) {
             auto ret = errorCode == ERR_OK ? WSError::WS_OK : WSError::WS_ERROR_START_UI_EXTENSION_ABILITY_FAILED;
-            callback(ret);
+            callback(ret, errorCode);
             return ret;
         }
         return WSError::WS_OK;

@@ -1285,11 +1285,11 @@ WMErrorResult WindowAdapter::CreateAndConnectSpecificSession(const sptr<ISession
     SystemSessionConfig& systemConfig, sptr<IRemoteObject>& renderSession,
     std::shared_ptr<RSSurfaceNode>& surfaceNode, sptr<IRemoteObject> token)
 {
-    WMErrorResult result{WMError::WM_DO_NOTHING, "init proxy failed"};
+    WMErrorResult result{WMError::WM_DO_NOTHING, "Internal task error, init proxy failed."};
     INIT_PROXY_CHECK_RETURN(result);
 
     auto wmsProxy = GetWindowManagerServiceProxy();
-    result.errMsg = "window manager proxy is nullptr";
+    result.errMsg = "Internal task error, Window manager proxy is null.";
     CHECK_PROXY_RETURN_ERROR_IF_NULL(wmsProxy, result);
     WSErrorResult wsResult = wmsProxy->CreateAndConnectSpecificSession(sessionStage, eventChannel, nodeId,
         property, persistentId, session, systemConfig, renderSession, surfaceNode, token);

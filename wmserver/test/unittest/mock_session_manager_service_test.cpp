@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "mock_session_manager_service.h"
 #include "display_manager.h"
+#include "string_ex.h"
 #include "window_agent.h"
 #include "window_impl.h"
 #include "window_manager_hilog.h"
@@ -175,6 +176,37 @@ HWTEST_F(MockSessionManagerServiceTest, Dump, TestSize.Level1)
     WLOGI("onStart");
     std::vector<std::u16string> args;
     ASSERT_EQ(-1, mService->Dump(-2, args));
+}
+
+/**
+ * @tc.name: DumpWithUserArg
+ * @tc.desc: Dump with -user argument
+ * @tc.type: FUNC
+ */
+HWTEST_F(MockSessionManagerServiceTest, DumpWithUserArg, TestSize.Level1)
+{
+    MockSessionManagerService* mService = new MockSessionManagerService();
+    std::vector<std::u16string> args;
+    args.push_back(Str8ToStr16("-user"));
+    ASSERT_NE(0, mService->Dump(1, args));
+
+    args.clear();
+    args.push_back(Str8ToStr16("-user"));
+    args.push_back(Str8ToStr16("abc"));
+    args.push_back(Str8ToStr16("-a"));
+    ASSERT_NE(0, mService->Dump(1, args));
+
+    args.clear();
+    args.push_back(Str8ToStr16("-user"));
+    args.push_back(Str8ToStr16("all"));
+    args.push_back(Str8ToStr16("-a"));
+    ASSERT_NE(0, mService->Dump(1, args));
+
+    args.clear();
+    args.push_back(Str8ToStr16("-a"));
+    ASSERT_NE(0, mService->Dump(1, args));
+
+    delete mService;
 }
 
 /**

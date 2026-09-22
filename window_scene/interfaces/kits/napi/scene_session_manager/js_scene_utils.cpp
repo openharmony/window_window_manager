@@ -2120,15 +2120,15 @@ napi_value CreateJsSessionInfo(napi_env env, const SessionInfo& sessionInfo,
     napi_set_named_property(env, objValue, "minimizeOnStart",
         CreateJsValue(env, minimizeOnStart));
 
-    bool excludeFromDock = sessionInfo.windowCreateParams ?
-        sessionInfo.windowCreateParams->excludeFromDock : false;
-    napi_set_named_property(env, objValue, "excludeFromDock",
-        CreateJsValue(env, excludeFromDock));
+    if (sessionInfo.windowCreateParams && sessionInfo.windowCreateParams->excludeFromDock) {
+        napi_set_named_property(env, objValue, "excludeFromDock",
+            CreateJsValue(env, *(sessionInfo.windowCreateParams->excludeFromDock)));
+    }
 
-    bool excludeFromRecent = sessionInfo.windowCreateParams ?
-        sessionInfo.windowCreateParams->excludeFromRecent : false;
-    napi_set_named_property(env, objValue, "excludeFromRecent",
-        CreateJsValue(env, excludeFromRecent));
+    if (sessionInfo.windowCreateParams && sessionInfo.windowCreateParams->excludeFromRecent) {
+        napi_set_named_property(env, objValue, "excludeFromRecent",
+            CreateJsValue(env, *(sessionInfo.windowCreateParams->excludeFromRecent)));
+    }
 
     napi_set_named_property(env, objValue, "atomicServiceInfo",
         CreateJsAtomicServiceInfo(env, sessionInfo.atomicServiceInfo_));

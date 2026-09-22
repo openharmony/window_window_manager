@@ -67,6 +67,7 @@ private:
     bool ChangeScreenStatusMainHasExternalScreen(ScreenId screenIdOn, ScreenId screenIdOff);
     void SetScreenIsInUse(ScreenId screenId, bool isInUse);
     void SetScreenPowerState(ScreenId screenId, DisplayState displayState);
+    void UpdateOuterScreenGroupType(FoldDisplayMode displayMode);
     void OnScreenPropertyChangeNotifyClient();
     void NotifyRefreshRateEvent(bool isEventStatus);
     void CloseCoordination();

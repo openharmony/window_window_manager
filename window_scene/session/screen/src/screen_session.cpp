@@ -1091,7 +1091,6 @@ void ScreenSession::ProcPropertyChangedForSuperFold(ScreenProperty& screenProper
     // back server for post processs of screen change
     screenProperty.SetSuperFoldStatusChangeEvent(changeEvent);
     screenProperty.SetIsDestroyDisplay(eventPara.GetIsFakeInUse());
-    screenProperty.SetPropertyChangeReason(eventPara.GetPropertyChangeReason());
 
     switch (changeEvent) {
         case SuperFoldStatusChangeEvents::ANGLE_CHANGE_HALF_FOLDED: {
@@ -3398,6 +3397,26 @@ ScreenId ScreenSession::GetMainDisplayIdOfGroup() const
     return property_.GetMainDisplayIdOfGroup();
 }
 
+DisplayGroupType ScreenSession::GetGroupType() const
+{
+    if (!FoldScreenStateInternel::IsSuperFoldMultiDisplayDevice()) {
+        return DisplayGroupType::INVALID;
+    }
+    // Read from property so that the value synced from server side is visible here.
+    DisplayGroupType groupType = property_.GetDisplayGroupType();
+    if (groupType != DisplayGroupType::INVALID) {
+        return groupType;
+    }
+    return property_.GetDisplayGroupId() == DISPLAY_GROUP_ID_DEFAULT
+        ? DisplayGroupType::DEFAULT : DisplayGroupType::SPECIAL;
+}
+
+void ScreenSession::SetGroupType(DisplayGroupType groupType)
+{
+    // Write into property so that OnScreenPropertyChangeNotifyClient can sync it to client side.
+    property_.SetDisplayGroupType(groupType);
+}
+
 void ScreenSession::SetScreenAreaOffsetX(uint32_t screenAreaOffsetX)
 {
     property_.SetScreenAreaOffsetX(screenAreaOffsetX);
@@ -3515,6 +3534,7 @@ void ScreenSession::ProcPropertyChange(ScreenProperty& screenProperty, const Scr
         screenBoundsRect.width_, screenBoundsRect.height_,
         eventBoundsRect.width_, eventBoundsRect.height_);
 
+    screenProperty.SetPropertyChangeReason(eventPara.GetPropertyChangeReason());
     if (FoldScreenStateInternel::IsSuperFoldDisplayDevice()) {
         ProcPropertyChangedForSuperFold(screenProperty, eventPara);
         

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@
 #include "window_inspector.h"
 #include "window_manager_hilog.h"
 #include "window_helper.h"
+#include "window_limits_threshold.h"
 #include "color_parser.h"
 #include "singleton_container.h"
 #include "perform_reporter.h"
@@ -923,8 +924,22 @@ void WindowSessionImpl::PostInitSurfaceNode(sptr<IRemoteObject> renderSession)
     RSUIContextContainer::SetRenderSession(renderSession);
     RSAdapterUtil::InitRSUIDirector(rsUIDirector_, renderSession, rsUIContext_);
     auto rsUIContext = rsUIDirector_->GetRSUIContext();
+    if (SysCapUtil::GetBundleName() == AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME &&
+        surfaceNode_->GetRSUIContext() != nullptr) {
+        TLOGI(WmsLogTag::WMS_LIFE, "sceneboard need a newSurfaceNode, %{public}s",
+            property_->GetWindowName().c_str());
+        MessageParcel parcel;
+        if (surfaceNode_->Marshalling(parcel)) {
+            auto newSurfaceNode = RSSurfaceNode::Unmarshalling(parcel, false);
+            if (newSurfaceNode) {
+                TLOGI(WmsLogTag::WMS_LIFE, "sceneboard use newSurfaceNode instead, %{public}s",
+                    property_->GetWindowName().c_str());
+                surfaceNode_ = newSurfaceNode;
+            }
+        }
+    }
     surfaceNode_->SetRSUIContext(rsUIContext);
-    RSUIContextContainer::SetRSUIContext(rsUIContext);
+    RSUIContextContainer::SetRSUIContext(GetPersistentId(), rsUIContext);
     TLOGI(WmsLogTag::WMS_LIFE, "post init surfaceNode success, name: %{public}s", property_->GetWindowName().c_str());
 }
 
@@ -1291,6 +1306,7 @@ WMError WindowSessionImpl::Destroy(bool needNotifyServer, bool needClearListener
     TLOGI(WmsLogTag::WMS_LIFE, "id:%{public}d Destroy, state:%{public}u, needNotifyServer:%{public}d, "
         "needClearListener:%{public}d, reason:%{public}u, isFromInnerkits:%{public}d",
         GetPersistentId(), state_, needNotifyServer, needClearListener, reason, isFromInnerkits);
+    RSUIContextContainer::RemoveRSUIContext(GetPersistentId());
     if (IsWindowSessionInvalid()) {
         WLOGFW("session is invalid");
         ReleaseSurfaceNode();
@@ -1382,8 +1398,25 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     HITRACE_METER_FMT(HITRACE_TAG_WINDOW_MANAGER,
         "WMS::WindowRectUpdate::ClientRecv::UpdateRect id=%d rect=%s reason=%u",
         GetPersistentId(), wmRect.ToString().c_str(), wmReason);
+    UpdateRectByReason(wmRect, preRect, wmReason, config, avoidAreas);
+
+    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
+        layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
+    }
+    NotifyFirstValidLayoutUpdate(preRect, wmRect);
+    UpdateHoverState(wmRect, DisplayManager::GetInstance().GetFoldStatus());
+    return WSError::WS_OK;
+}
+
+void WindowSessionImpl::UpdateRectByReason(const Rect& wmRect, const Rect& preRect,
+    WindowSizeChangeReason wmReason, const SceneAnimationConfig& config,
+    const std::map<AvoidAreaType, AvoidArea>& avoidAreas)
+{
     if (handler_ != nullptr && (wmReason == WindowSizeChangeReason::ROTATION ||
         wmReason == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
+        if (WindowLimitsThreshold::LimitsThresholdEnabled()) {
+            UpdateDensity();
+        }
         postTaskDone_ = false;
         UpdateRectForRotation(wmRect, preRect, wmReason, config, avoidAreas);
     } else if (handler_ != nullptr && wmReason == WindowSizeChangeReason::PAGE_ROTATION) {
@@ -1393,13 +1426,6 @@ WSError WindowSessionImpl::UpdateRect(const WSRect& rect, SizeChangeReason reaso
     } else {
         UpdateRectForOtherReason(wmRect, preRect, wmReason, config.rsTransaction_, avoidAreas);
     }
-
-    if (wmReason == WindowSizeChangeReason::MOVE || wmReason == WindowSizeChangeReason::RESIZE) {
-        layoutCallback_->OnUpdateSessionRect(wmRect, wmReason, GetPersistentId());
-    }
-    NotifyFirstValidLayoutUpdate(preRect, wmRect);
-    UpdateHoverState(wmRect, DisplayManager::GetInstance().GetFoldStatus());
-    return WSError::WS_OK;
 }
 
 /** @note @window.layout */
@@ -8454,7 +8480,8 @@ void WindowSessionImpl::NotifyConsumeResultToFloatWindow
     (const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isConsumed)
 {
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
-         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && !GetWatchGestureConsumed() &&
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER ||
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_WRIST_TURN) && !GetWatchGestureConsumed() &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
         TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, isConsumed:%{public}d", GetWindowId(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
@@ -11098,6 +11125,25 @@ void WindowSessionImpl::FoldStatusListener::OnFoldStatusChanged(FoldStatus foldS
         return;
     }
     windowSessionimpl_->UpdateHoverState(windowSessionimpl_->property_->GetWindowRect(), foldStatus);
+}
+
+int32_t WindowSessionImpl::GetMainWindowHeight()
+{
+    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
+    if (windowSessionMap_.empty()) {
+        TLOGE(WmsLogTag::DEFAULT, "windowSessionMap_ is empty!");
+        return 0;
+    }
+
+    for (const auto& winPair : windowSessionMap_) {
+        auto win = winPair.second.second;
+        if (win && win->GetType() == WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+            return win->GetRect().height_;
+        }
+    }
+
+    TLOGE(WmsLogTag::DEFAULT, "GetMainWindow Failed!");
+    return 0;
 }
 } // namespace Rosen
 } // namespace OHOS
