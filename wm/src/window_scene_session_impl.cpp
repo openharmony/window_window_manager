@@ -7888,13 +7888,23 @@ float WindowSceneSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& disp
         return INVALID_DEFAULT_DENSITY;
     }
     if (IsDefaultDensityEnabled()) {
-        return displayInfo->GetDefaultVirtualPixelRatio();
+        auto dpi = displayInfo->GetDefaultVirtualPixelRatio();
+        auto hookedDpi = AdaptToHookedDensity(dpi, true);
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+            "id=%{public}u, type=%{public}u, defaultDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
+            GetWindowId(), GetType(), dpi, hookedDpi, displayInfo->GetDisplayId());
+        return hookedDpi;
     }
     if (useUniqueDensity_) {
         return virtualPixelRatio_;
     }
     auto vpr = GetMainWindowCustomDensity();
-    return vpr >= MINIMUM_CUSTOM_DENSITY && vpr <= MAXIMUM_CUSTOM_DENSITY ? vpr : displayInfo->GetVirtualPixelRatio();
+    auto hookedDpi = (vpr >= MINIMUM_CUSTOM_DENSITY && vpr <= MAXIMUM_CUSTOM_DENSITY ?
+        vpr : AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio()));
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+        "id=%{public}u, type=%{public}u, customDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
+        GetWindowId(), GetType(), vpr, hookedDpi, displayInfo->GetDisplayId());
+    return hookedDpi;
 }
 
 WMError WindowSceneSessionImpl::HideNonSecureWindows(bool shouldHide)
@@ -8372,8 +8382,8 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
     }
     bool isGeometryChanged = false;
     if (IsSystemDensityChanged(displayInfo)) {
-        lastSystemDensity_ = displayInfo->GetVirtualPixelRatio();
-        NotifySystemDensityChange(displayInfo->GetVirtualPixelRatio());
+        lastSystemDensity_ = AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio());
+        NotifySystemDensityChange(lastSystemDensity_);
         isGeometryChanged = true;
     }
     // |= keeps both checks executed (RefreshLimitsOnGeometryChange updates records as a side effect)
@@ -8958,12 +8968,17 @@ void WindowSceneSessionImpl::ReportCompatibleTitleOperate(const std::string& bun
 
 bool WindowSceneSessionImpl::IsSystemDensityChanged(const sptr<DisplayInfo>& displayInfo)
 {
-    if (MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
-        TLOGD(WmsLogTag::WMS_ATTRIBUTE, "System density not change");
+    auto systemDpi = displayInfo->GetVirtualPixelRatio();
+    auto hookedDpi = AdaptToHookedDensity(systemDpi);
+    if (MathHelper::NearZero(lastSystemDensity_ - hookedDpi)) {
+        TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+            "System density not change, id=%{public}u, systemDpi=%{public}f, hookedDpi=%{public}f",
+            GetWindowId(), systemDpi, hookedDpi);
         return false;
     }
-    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "windowId: %{public}d, lastDensity: %{public}f, currDensity: %{public}f",
-        GetPersistentId(), lastSystemDensity_, displayInfo->GetVirtualPixelRatio());
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "id=%{public}u, lastDensity=%{public}f, systemDpi=%{public}f, hookedDpi=%{public}f",
+        GetWindowId(), lastSystemDensity_, systemDpi, hookedDpi);
     return true;
 }
 
@@ -9235,15 +9250,15 @@ WMError WindowSceneSessionImpl::GetWindowDensityInfo(WindowDensityInfo& densityI
         TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is null, winId=%{public}u", GetWindowId());
         return WMError::WM_ERROR_NULLPTR;
     }
-    densityInfo.systemDensity = displayInfo->GetVirtualPixelRatio();
-    densityInfo.defaultDensity = displayInfo->GetDefaultVirtualPixelRatio();
+    densityInfo.systemDensity = AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio());
+    densityInfo.defaultDensity = AdaptToHookedDensity(displayInfo->GetDefaultVirtualPixelRatio(), true);
     auto customDensity = UNDEFINED_DENSITY;
     if (IsDefaultDensityEnabled()) {
-        customDensity = displayInfo->GetDefaultVirtualPixelRatio();
+        customDensity = densityInfo.defaultDensity;
     } else {
         customDensity = GetCustomDensity();
-        customDensity = MathHelper::NearZero(customDensity - UNDEFINED_DENSITY) ? displayInfo->GetVirtualPixelRatio()
-                                                                                : customDensity;
+        customDensity = (MathHelper::NearZero(customDensity - UNDEFINED_DENSITY) ?
+            densityInfo.systemDensity : customDensity);
     }
     densityInfo.customDensity = customDensity;
     return WMError::WM_OK;

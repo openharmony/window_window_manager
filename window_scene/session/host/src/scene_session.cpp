@@ -10617,6 +10617,26 @@ WSError SceneSession::GetTopNavDestinationName(std::string& topNavDestName)
     return sessionStage_->GetTopNavDestinationName(topNavDestName);
 }
 
+void SceneSession::NotifyDpiHookScale(float scale)
+{
+    if (!sessionStage_) {
+        TLOGW(WmsLogTag::WMS_ATTRIBUTE, "stage is null: win=[%{public}d, %{public}s], winType=%{public}u",
+            GetWindowId(), GetWindowName().c_str(), GetWindowType());
+        return;
+    }
+    if (MathHelper::NearZero(scale - GetDpiHookScale())) {
+        TLOGI(WmsLogTag::WMS_ATTRIBUTE, "not changed: win=[%{public}d, %{public}s], scale=%{public}f",
+            GetWindowId(), GetWindowName().c_str(), scale);
+        return;
+    }
+    auto ret = sessionStage_->NotifyDpiHookScale(scale);
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "win=[%{public}d, %{public}s], scale=%{public}f, ret=%{public}u",
+        GetWindowId(), GetWindowName().c_str(), scale, ret);
+    if (ret == WSError::WS_OK) {
+        SetDpiHookScale(scale);
+    }
+}
+
 void SceneSession::UpdateSubWindowLevel(uint32_t subWindowLevel)
 {
     GetSessionProperty()->SetSubWindowLevel(subWindowLevel);
