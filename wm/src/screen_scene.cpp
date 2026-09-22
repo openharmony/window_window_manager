@@ -143,6 +143,13 @@ void ScreenScene::RegisterInputEventListener()
     InputTransferStation::GetInstance().MarkRegisterToMMI();
 }
 
+WMError ScreenScene::UpdateRootDisplayDpi(float dpi, const Rect& rect, WindowSizeChangeReason reason)
+{
+    SetDisplayDensity(dpi);
+    UpdateViewportConfig(rect, reason);
+    return WMError::WM_OK;
+}
+
 void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason)
 {
     if (g_ssIsDestroyed) {
@@ -151,7 +158,7 @@ void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason 
     }
     std::lock_guard<std::mutex> lock(mutex_);
     if (uiContent_ == nullptr) {
-        TLOGE(WmsLogTag::DMS, "uiContent_ is nullptr!");
+        TLOGE(WmsLogTag::DMS, "screen uiContent_ is nullptr: reason=%{public}u", reason);
         return;
     }
     Ace::ViewportConfig config;
@@ -161,6 +168,8 @@ void ScreenScene::UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason 
     config.SetOrientation(orientation_);
     config.SetDisplayId(GetDisplayId());
     uiContent_->UpdateViewportConfig(config, reason);
+    TLOGI(WmsLogTag::DMS, "screen reason=%{public}u, dpi=%{public}f, rect=%{public}s, displayId=%{public}" PRIu64,
+        reason, density_, rect.ToString().c_str(), GetDisplayId());
 }
 
 void ScreenScene::UpdateConfiguration(const std::shared_ptr<AppExecFwk::Configuration>& configuration)

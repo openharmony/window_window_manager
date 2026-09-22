@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "display_info.h"
 #include "vsync_station.h"
 #include "window.h"
 #include "window_helper.h"
@@ -51,6 +52,8 @@ public:
 
     void LoadContent(const std::string& contentUrl, napi_env env, napi_value storage,
         AbilityRuntime::Context* context);
+    void UpdateDisplayDpi(const sptr<DisplayInfo>& displayInfo, WindowSizeChangeReason reason);
+    WMError UpdateRootDisplayDpi(float dpi, const Rect& rect, WindowSizeChangeReason reason) override;
     void UpdateViewportConfig(const Rect& rect, WindowSizeChangeReason reason);
     static void UpdateConfigurationForAll(const std::shared_ptr<AppExecFwk::Configuration>& configuration,
         const std::vector<std::shared_ptr<AbilityRuntime::Context>>& ignoreWindowContexts = {});
