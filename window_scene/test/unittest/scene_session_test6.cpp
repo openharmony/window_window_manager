@@ -2121,7 +2121,7 @@ HWTEST_F(SceneSessionTest6, PreWindowPropertyConstructors, Function | SmallTest 
     EXPECT_EQ(defaultProp.width, 0u);
     EXPECT_EQ(defaultProp.height, 0u);
 
-    PreWindowProperty paramProp(90, 100, 200,1920, 1080);
+    PreWindowProperty paramProp(90, 100, 200, 1920, 1080);
     EXPECT_EQ(paramProp.rotation, 90u);
     EXPECT_EQ(paramProp.posX, 100);
     EXPECT_EQ(paramProp.posY, 200);
