@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-本仓库对应 OpenHarmony `foundation/window/window_manager`，为系统提供窗口生命周期、布局、焦点、输入窗口信息、显示/屏幕管理、截图和多屏协同能力。优先按这些目录定位问题：
+本仓库对应 OpenHarmony `foundation/window/window_manager`，为系统提供窗口生命周期、布局、焦点、输入窗口信息、显示/屏幕管理、截图和多屏协同能力。文件夹功能请参考：
 
 - `wm/`、`dm/`、`dm_lite/`：窗口与显示管理客户端、IPC 适配和 Lite 接口实现。
 - `wmserver/`、`dmserver/`：分离架构下的窗口管理服务与显示管理服务。
@@ -15,10 +15,10 @@
 
 窗口管理支持两套编译时架构，由 OpenHarmony 构建系统提供的 `window_manager_use_sceneboard` 决定：
 
-| 配置值 | 架构 | 窗口服务实现 | 屏幕服务实现 |
-| --- | --- | --- | --- |
-| `false` | 分离架构 | `wmserver/` | `dmserver/` |
-| `true` | 合一架构 | `window_scene/session/`、`window_scene/session_manager/` | `window_scene/screen_session_manager/` |
+| 配置值 | 架构 | 窗口服务实现 | 屏幕服务实现 | 说明 |
+| --- | --- | --- | --- | --- |
+| `false` | 分离架构 | `wmserver/` | `dmserver/` | 桌面、SystemUI&锁屏、壁纸是相互独立的应用，每个应用都是独立进程，每个进程拥有独立窗口。这种架构难以实现多个窗口的联动动效。
+| `true` | 合一架构 | `window_scene/session/`、`window_scene/session_manager/` | `window_scene/screen_session_manager/` | 基于窗口控件化技术，将桌面、SystemUI&锁屏、壁纸从窗口变成控件。在一个应用进程里统一渲染，实现多窗的动效能力。
 
 两套架构应保持对外 API 和可观察行为一致。修改公共窗口语义时，不要只验证当前启用的一条路径。
 
@@ -46,30 +46,9 @@
 
 ### 嵌套指引
 
-本仓库没有目录级别的嵌套 `AGENTS.md`。根目录 `README_zh.md`、`docs/CodeStyle.md` 和 `docs/Testing.md` 是主要补充资料；修改前还应阅读目标目录的 `BUILD.gn` 和相邻测试。
+本仓库没有目录级别的嵌套 `AGENTS.md`。根目录 `README_zh.md`、`docs/CodeStyle.md` 和 `docs/knowledge`下的文件， 是主要补充资料；修改前还应阅读目标目录的 `BUILD.gn` 和相邻测试。
 
-## 构建和验证
-
-构建命令从 OpenHarmony 源码根目录执行，不在本子目录执行。完整部件可按产品构建：
-
-```sh
-./build.sh --product-name rk3568 --build-target window_manager --ccache
-```
-
-优先构建改动模块及其测试。常用 GN 测试标签如下：
-
-| 模块 | 测试标签 |
-| --- | --- |
-| 窗口客户端 | `//foundation/window/window_manager/wm:test` |
-| 分离架构窗口服务 | `//foundation/window/window_manager/wmserver:test` |
-| 显示客户端 | `//foundation/window/window_manager/dm:test` |
-| 分离架构显示服务 | `//foundation/window/window_manager/dmserver:test` |
-| Lite 显示客户端 | `//foundation/window/window_manager/dm_lite:test` |
-| 合一架构窗口/屏幕服务 | `//foundation/window/window_manager/window_scene:test` |
-| 截图工具 | `//foundation/window/window_manager/snapshot:test` |
-| WindowExtension | `//foundation/window/window_manager/extension/window_extension:test` |
-| 公共工具 | `//foundation/window/window_manager/utils:test` |
-| fuzz 目标 | `//foundation/window/window_manager/test:fuzztest` |
+## 验证
 
 单个 `ohos_unittest` 目标名以相应 `test/**/BUILD.gn` 为准。测试文件使用 `*_test.cpp`，采用 `HWTEST_F`，并保持在 `OHOS::Rosen` 命名空间。非致命检查使用 `EXPECT_*`，后续代码依赖该条件时使用 `ASSERT_*`。
 
@@ -77,8 +56,8 @@
 
 任务被认为完成，当且仅当：
 
-1. **改动范围完整** - 客户端、服务端、双架构、绑定层或 IPC 对端中受影响的部分已同步处理
-2. **本地构建通过** - 至少构建受影响模块；公共接口或公共数据结构改动需构建所有直接消费者
+1. **改动范围完整** - 客户端、服务端、双架构或 IPC 对端中修改部分已同步处理
+2. **本地构建通过** - 至少构建受影响模块；公共接口或公共数据结构改动需全量构建
 3. **相关测试通过** - 对应单元测试通过，解析 IPC/外部输入的改动补充或运行 fuzz 测试
 4. **板侧验证（如适用）** - 涉及窗口布局、焦点、动画、输入分发、屏幕、折叠、多屏、电源或截图的改动需提供验证证据
 5. **文档和接口同步（如适用）** - 公共 API、错误码、配置项或系统能力修改需同步声明、注释和文档
@@ -100,22 +79,21 @@
 
 | 场景 | 修改目录 | 先读资料 |
 | --- | --- | --- |
-| 子系统职责、Client-Server 分层、双架构 | `wm/`, `dm/`, `wmserver/`, `dmserver/`, `window_scene/` | `README_zh.md`, `scene_board_enable.gni` |
+| 子系统职责、双架构 | `wm/`, `dm/`, `wmserver/`, `dmserver/`, `window_scene/` | `README_zh.md`, `scene_board_enable.gni` |
 | 编译特性、可选依赖、产品差异 | 任意 `BUILD.gn` 或条件编译代码 | `windowmanager_aafwk.gni`, `bundle.json`, 目标目录 `BUILD.gn` |
 | 代码格式、命名、日志、错误处理 | 所有 C++ 改动 | `docs/CodeStyle.md`, 相邻实现 |
 | 单元测试、测试目标和断言风格 | 各模块 `test/` | `docs/Testing.md`, 对应 `test/**/BUILD.gn` |
 | 窗口/显示公共 API 与错误码 | `interfaces/innerkits/`, `interfaces/kits/` | `wm_common.h`, `dm_common.h`, 对应 API 头文件和绑定实现 |
-| 合一架构 Session/Screen 协议 | `window_scene/` | `window_scene/interfaces/include/ws_common.h`, 对应 `include/zidl/` 与 `src/zidl/` |
 | 权限、调用者身份、多用户 | `wmserver/`, `dmserver/`, `window_scene/` | `utils/include/permission.h`, `window_scene/common/include/session_permission.h`, 相邻 IPC 入口 |
-| ABI 导出、SA 和运行配置 | 公共库、服务或配置改动 | `*.map`, `sa_profile/*.json`, `etc/`, `bundle.json` |
 | 沉浸式窗口 | `docs/knowledge` | `immersive-avoid-area-layout-timing.md`, `immersive-avoid-area.md`, `immersive-debugging-and-tests.md`, `immersive-system-bars.md`, `immersive-window-overview.md` |
 | 画中画 | `docs/knowledge` | `floating_ball.md`, `floating_view.md`, `picture_in_picture.md` |
+| 应用拉应用窗口动效（拉起入口、启动窗、转场、首帧衔接） | `wm/`, `window_scene/session/host/`, `window_scene/session_manager/`；转场动画执行在关联仓 `window_scene_board`，启动窗绘制在关联仓 `arkui_ace_engine`，本仓勿找 | `docs/knowledge/app-launch-app-animation.md` |
 
 ### 开始编辑前
 
 在修改代码前，按以下顺序确认：
 
-1. 确认任务属于窗口还是显示链路，以及客户端、服务端、绑定层和 IPC 对端
+1. 确认任务属于窗口还是显示链路，以及属于客户端、服务端还是 IPC 对端
 2. 确认是否同时影响分离架构与合一架构，并定位两套实现
 3. 根据上表阅读资料和相邻测试，确认实际 GN 条件与产品特性
 4. 根据“项目约束”确认不违反 API、IPC、权限、线程或设备边界
@@ -125,7 +103,7 @@
 
 ### 性能约束
 
-- 窗口信息刷新、焦点/输入分发、拖拽、布局、旋转和 VSync 相关逻辑是高频路径，不要在每帧或每次事件中增加全量容器扫描、同步 IPC、磁盘访问、字符串拼接或 INFO 日志。
+- 窗口信息刷新、焦点/输入分发、拖拽、布局和旋转的相关逻辑是高频路径，不要在每帧或每次事件中增加全量容器扫描、同步 IPC、磁盘访问、字符串拼接或 INFO 日志。
 - 不要在持有窗口树、session map、screen map 或 listener 容器锁时调用不受控的外部回调或跨进程接口；需要跨线程执行时复用附近的 task scheduler、event handler 或 FFRT 队列。
 - 保持现有锁顺序和线程归属。新增异步任务时明确对象生命周期，使用 `sptr`/`wptr` 或安全快照，避免捕获悬空裸指针。
 - 图形事务、窗口信息和输入区域更新应保持既有批处理与时序，避免把异步路径改为阻塞路径。
@@ -140,8 +118,7 @@
 
 ### 编码约定
 
-- C++ 代码遵循：4 空格缩进、120 列、指针左对齐，并保持 `OHOS::Rosen` 命名空间。
-- 优先沿用相邻代码的命名；当前 Native C++ 类和函数通常使用 PascalCase，成员变量使用 lowerCamelCase 加尾随 `_`，文件使用 snake_case。
+- 优先沿用相邻代码的命名。
 - 复用所在模块的 `TLOG*`、`WLOG*`、`WLOGF*` 和 `WmsLogTag`，不要在高频路径新增无节流日志。
 - 窗口接口返回 `WMError`/`WmErrorCode`，显示接口返回 `DMError`/`DmErrorCode`，Session 接口返回 `WSError`/`WSErrorCode`；不要混用错误域或吞掉原始错误。
 - IPC 对象使用 `sptr<T>`，弱引用使用 `wptr<T>`；优先 RAII，避免新增裸 `new`/`delete`。
@@ -159,7 +136,7 @@
 
 - 新增公共 API、系统能力或导出符号
 - 修改公共结构体布局、可序列化字段或跨语言绑定行为
-- 只在某一种语言绑定或某一种架构中暴露新能力
+- 只在某一种架构中暴露新能力
 
 ### 安全与权限边界
 
@@ -173,7 +150,7 @@
 **Ask before（修改前必须确认）：**
 
 - 修改系统窗口、截屏、录屏/虚拟屏、跨设备、多用户或输入重定向相关权限
-- 修改 IPC 调用者身份切换、token 传递、用户隔离或窗口归属校验
+- 修改 IPC 调用者身份、token 传递、用户隔离或窗口归属校验
 - 新增可读取窗口内容、窗口列表、焦点应用或屏幕状态的接口
 
 ### 协议与数据格式兼容性
@@ -191,14 +168,16 @@
 - 修改客户端重连、死亡通知、服务恢复或多用户切换协议
 - 修改窗口信息同步给 MMI、RenderService、AbilityManager 或 SceneBoard 的数据语义
 
+### 历史经验
+- 判断横竖屏显示的代码逻辑不能仅依赖设备屏幕的宽高，还需考虑整机形态（某些设备存在宽高相等的情况）基于产品自然方向进行定义，并在TDD中增加完整测试用例。
+- 导航条的显示与隐藏时机需要和resize时机强制保序。
+
 ### 生成代码边界
 
-- 不要直接修改 `out/.../gen` 中由 IDL/GN 生成的文件；修改 `IDisplayManager.idl`、`IDisplayManagerLite.idl` 等源定义并重新生成。
+- 不要直接修改 `out/.../gen` 中由 IDL/GN 生成的文件。
 - 仓库内受版本控制的 `include/zidl/`、`src/zidl/` 并不都属于构建产物。修改这些手写 IPC 文件时，必须同步 interface/proxy/stub、transaction code、Parcel 顺序和测试。
-- 不要把 mock、fuzz 或 previewer 生成替代物复制进生产接口实现。
 
 ### 设备操作约束
 
 - 涉及屏幕电源、亮度、旋转、折叠状态、分辨率、多屏模式、虚拟屏或截图时，不执行会破坏用户会话或设备可用性的操作。
-- 真实设备验证需记录产品、架构开关和关键配置，并提供 `hdc`/HiLog/HiDumper 输出、截图或录屏等证据。
 - 截图和窗口快照可能包含隐私信息；仅采集完成验证所需的最小内容，并避免写入仓库或日志。

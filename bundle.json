@@ -505,6 +505,16 @@
           },
           {
             "type": "so",
+            "name": "//foundation/window/window_manager/wm:libwm_ndk",
+            "header": {
+              "header_files": [
+                "oh_window_pip.h"
+              ],
+              "header_base": "//foundation/window/window_manager/interfaces/kits/ndk/wm"
+            }
+          },
+          {
+            "type": "so",
             "name": "//foundation/window/window_manager/wm:libpip_ndk",
             "header": {
               "header_files": [

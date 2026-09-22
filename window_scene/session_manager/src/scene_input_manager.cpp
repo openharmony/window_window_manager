@@ -49,6 +49,12 @@ constexpr float DIRECTION90 = 90.0F;
 bool IsEqualUiExtentionWindowInfo(const std::vector<MMI::WindowInfo>& a, const std::vector<MMI::WindowInfo>& b);
 constexpr unsigned int TRANSFORM_DATA_LEN = 9;
 
+// Used for converting display group type when constructing display group infos for MMI.
+const std::map<DisplayGroupType, MMI::GroupType> GROUP_TYPE_MAP = {
+    { DisplayGroupType::DEFAULT, MMI::GroupType::GROUP_DEFAULT },
+    { DisplayGroupType::SPECIAL, MMI::GroupType::GROUP_SPECIAL },
+};
+
 bool operator!=(const MMI::Rect& a, const MMI::Rect& b)
 {
     if (a.x != b.x || a.y != b.y || a.width != b.width || a.height != b.height) {
@@ -368,12 +374,26 @@ void SceneInputManager::ConstructDisplayGroupInfos(std::map<ScreenId, ScreenProp
             .deviceRotation = ConvertDegreeToMMIRotation(deviceRotation * DIRECTION90),
             .rotationCorrection = ConvertDegreeToMMIRotation(rotationCorrection * DIRECTION90)
         };
+
+        // Get display group type from DMS and map to MMI GroupType.
+        MMI::GroupType mmiGroupType;
         DisplayGroupId displayGroupId = screenSession->GetDisplayGroupId();
+        DisplayGroupType groupType = screenSession->GetGroupType();
+        if (auto it = GROUP_TYPE_MAP.find(groupType); it != GROUP_TYPE_MAP.end()) {
+            mmiGroupType = it->second;
+        } else {
+            // groupType is invalid.
+            mmiGroupType = (displayGroupId == 0) ? MMI::GROUP_DEFAULT : MMI::GROUP_SPECIAL;
+        }
+        TLOGI(WmsLogTag::WMS_EVENT,
+              "displayGroupId=%{public}" PRIu64 ", groupType=%{public}" PRIu32 ", mmiGroupType=%{public}d",
+              displayGroupId, groupType, mmiGroupType);
+ 
         if (displayGroupMap.count(displayGroupId) == 0) {
             MMI::DisplayGroupInfo displayGroupInfo = {
                 .id = displayGroupId,
                 .name = "displayGroup" + std::to_string(displayGroupId),
-                .type = displayGroupId == 0 ? MMI::GROUP_DEFAULT : MMI::GROUP_SPECIAL,
+                .type = mmiGroupType,
                 .mainDisplayId = screenProperty.GetMainDisplayIdOfGroup(),
             };
             displayGroupMap[displayGroupId] = displayGroupInfo;

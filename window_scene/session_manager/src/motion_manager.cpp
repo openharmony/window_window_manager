@@ -72,7 +72,7 @@ bool MotionManager::SubscribeMotionSensorInternal(MotionType motionType)
 {
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     if (subscribedMotionTypes_[motionType]) {
-        TLOGI(WmsLogTag::WMS_ROTATION, "Motion type %{public}d already subscribed", motionType);
+        TLOGW(WmsLogTag::WMS_ROTATION, "Motion type %{public}d already subscribed", motionType);
         return true;
     }
 
@@ -92,7 +92,7 @@ bool MotionManager::SubscribeMotionSensorInternal(MotionType motionType)
     }
     
     subscribedMotionTypes_[motionType] = true;
-    TLOGI(WmsLogTag::WMS_ROTATION, "Successfully subscribed motion type: %{public}d", motionType);
+    TLOGW(WmsLogTag::WMS_ROTATION, "Successfully subscribed motion type: %{public}d", motionType);
     return true;
 #else
     TLOGW(WmsLogTag::WMS_ROTATION, "WM_SUBSCRIBE_MOTION_ENABLE not defined");
@@ -104,7 +104,7 @@ bool MotionManager::UnsubscribeMotionSensorInternal(MotionType motionType)
 {
 #ifdef WM_SUBSCRIBE_MOTION_ENABLE
     if (!subscribedMotionTypes_[motionType]) {
-        TLOGI(WmsLogTag::WMS_ROTATION, "Motion type %{public}d not subscribed", motionType);
+        TLOGW(WmsLogTag::WMS_ROTATION, "Motion type %{public}d not subscribed", motionType);
         return true;
     }
     
@@ -124,7 +124,7 @@ bool MotionManager::UnsubscribeMotionSensorInternal(MotionType motionType)
     }
     
     subscribedMotionTypes_[motionType] = false;
-    TLOGI(WmsLogTag::WMS_ROTATION, "Successfully unsubscribed motion type: %{public}d", motionType);
+    TLOGW(WmsLogTag::WMS_ROTATION, "Successfully unsubscribed motion type: %{public}d", motionType);
     return true;
 #else
     TLOGW(WmsLogTag::WMS_ROTATION, "WM_SUBSCRIBE_MOTION_ENABLE not defined");

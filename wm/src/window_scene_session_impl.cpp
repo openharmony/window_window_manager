@@ -436,7 +436,7 @@ static void AdjustPropertySessionInfo(const std::shared_ptr<AbilityRuntime::Cont
     }
 }
 
-WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
+WMErrorResult WindowSceneSessionImpl::CreateAndConnectSpecificSession()
 {
     sptr<ISessionStage> iSessionStage(this);
     sptr<IWindowEventChannel> eventChannel = sptr<WindowEventChannel>::MakeSptr(iSessionStage);
@@ -475,7 +475,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             WMError wmError = SingletonContainer::Get<WindowAdapter>()
                 .GetCrossProcessWindowInfo(crossProcessWindowInfo);
             if (wmError != WMError::WM_OK) {
-                return wmError;
+                return WMErrorResult{wmError};
             }
             property_->SetParentPersistentId(crossProcessWindowInfo.persistentId);
             property_->SetDisplayId(crossProcessWindowInfo.displayId);
@@ -488,7 +488,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
             sptr<WindowSessionImpl> parentSession = nullptr;
             auto ret = WindowSceneSessionImpl::GetParentSessionAndVerify(hasToastFlag, parentSession);
             if (ret != WMError::WM_OK) {
-                return ret;
+                return WMErrorResult{ret};
             }
             property_->SetDisplayId(parentSession->GetDisplayId());
             // set parent persistentId
@@ -510,7 +510,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     } else { // system window
         WMError createSystemWindowRet = CreateSystemWindow(type);
         if (createSystemWindowRet != WMError::WM_OK) {
-            return createSystemWindowRet;
+            return WMErrorResult{createSystemWindowRet};
         }
         auto parentSession = FindParentSessionByParentId(property_->GetParentPersistentId());
         if (parentSession != nullptr) {
@@ -523,21 +523,21 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
     }
     property_->SetPersistentId(persistentId);
     if (session == nullptr) {
-        TLOGI(WmsLogTag::WMS_LIFE, "create specific failed, session is nullptr, name: %{public}s",
+        TLOGE(WmsLogTag::WMS_LIFE, "create specific failed, session is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
         RecordLifeCycleExceptionEvent(WMError::WM_ERROR_NULLPTR,
             WMErrorReason::WM_REASON_SUB_WINDOW_IPC_CREATE_ERR, "sub window create failed when ipc");
-        return WMError::WM_ERROR_NULLPTR;
+        return WMErrorResult{WMError::WM_ERROR_NULLPTR, WindowHelper::IsSubWindow(type)? result.errMsg : ""};
     }
     if (surfaceNode_ == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "create specific failed, surfaceNode is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
-        return WMError::WM_ERROR_NULLPTR;
+        return WMErrorResult{WMError::WM_ERROR_NULLPTR, WindowHelper::IsSubWindow(type)? result.errMsg : ""};
     }
     if (renderSession == nullptr) {
         TLOGE(WmsLogTag::WMS_LIFE, "create specific failed, renderSession is nullptr, name: %{public}s",
             property_->GetWindowName().c_str());
-        return WMError::WM_ERROR_NULLPTR;
+        return WMErrorResult{WMError::WM_ERROR_NULLPTR, WindowHelper::IsSubWindow(type)? result.errMsg : ""};
     }
     PostInitSurfaceNode(renderSession);
     {
@@ -549,7 +549,7 @@ WMError WindowSceneSessionImpl::CreateAndConnectSpecificSession()
         property_->GetWindowName().c_str(),
         property_->GetPersistentId(), property_->GetParentPersistentId(), GetType(),
         property_->GetTouchable(), property_->GetDisplayId(), result.errCode, result.errMsg.c_str());
-    return WMError::WM_OK;
+    return WMErrorResult{WMError::WM_OK};
 }
 
 WMError WindowSceneSessionImpl::CreateSystemWindow(WindowType type)
@@ -829,7 +829,9 @@ WMError WindowSceneSessionImpl::Create(const std::shared_ptr<AbilityRuntime::Con
         }
         InitSubSessionDragEnable();
         isEnableDefaultDensityWhenCreate_ = windowOption_->IsDefaultDensityEnabled();
-        ret = CreateAndConnectSpecificSession();
+        WMErrorResult result = CreateAndConnectSpecificSession();
+        ret = result.errCode;
+        errMsg = result.errMsg;
     }
 
     if (ret == WMError::WM_OK) {
@@ -1453,7 +1455,8 @@ bool WindowSceneSessionImpl::PreNotifyKeyEvent(const std::shared_ptr<MMI::KeyEve
     }
     RefreshNoInteractionTimeoutMonitor();
     if ((keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_TAB ||
-         keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER) && isConsumed &&
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_ENTER ||
+        keyEvent->GetKeyCode() == MMI::KeyEvent::KEYCODE_WRIST_TURN) && isConsumed &&
         keyEvent->GetKeyAction() == MMI::KeyEvent::KEY_ACTION_DOWN) {
         TLOGD(WmsLogTag::WMS_EVENT, "wid:%{public}u, isConsumed:%{public}d", GetWindowId(), isConsumed);
         NotifyWatchGestureConsumeResult(keyEvent->GetKeyCode(), isConsumed);
@@ -2010,6 +2013,27 @@ bool WindowSceneSessionImpl::AdjustMinLimitsByWorkArea(WindowLimits& newLimits,
         preMinWidth, preMinHeight, newLimits.minWidth_, newLimits.minHeight_);
     RecalculateVpLimitsByPx(newLimits, newLimitsVP, vpr);
     return true;
+}
+
+/** @note @window.layout */
+bool WindowSceneSessionImpl::IsExceedingWorkAreaCap(const sptr<Display>& display)
+{
+    if (!WindowLimitsThreshold::LimitsThresholdEnabled()) {
+        return false;
+    }
+    float ratioOfWorkArea = WindowLimitsThreshold::LoadLimitsThresholdConfig().limitsThresholdPercentage / 100.0f;
+    if (ratioOfWorkArea <= 0.0f || ratioOfWorkArea >= 1.0f || display == nullptr) {
+        return false;
+    }
+    DMRect workArea = { 0, 0, 0, 0 };
+    if (display->GetAvailableArea(workArea) != DMError::DM_OK ||
+        workArea.width_ == 0 || workArea.height_ == 0) {
+        return false;
+    }
+    uint32_t capWidth = static_cast<uint32_t>(workArea.width_ * ratioOfWorkArea);
+    uint32_t capHeight = static_cast<uint32_t>(workArea.height_ * ratioOfWorkArea);
+    const WindowLimits& limits = property_->GetWindowLimits();
+    return limits.minWidth_ > capWidth || limits.minHeight_ > capHeight;
 }
 
 /** @note @window.layout */
@@ -3221,7 +3245,21 @@ void WindowSceneSessionImpl::LimitWindowSize(uint32_t& width, uint32_t& height)
     // Float camera window has special limits
     LimitCameraFloatWindowMininumSize(width, height, vpr);
 
-    if (!MathHelper::NearZero(vpr) || !MathHelper::NearZero(property_->GetLastLimitsVpr() - vpr)) {
+    // Work-area capping enabled: when vpr is unchanged and the effective limits fit the
+    // caps, skip the funnel re-run. The funnel recalculates from the raw user limits, so
+    // a no-op re-run would regress capped results to uncapped values when the cap is
+    // loose (e.g. rotation to a larger cap). Disabled devices keep the original behavior.
+    bool skipLimitsRecalc = false;
+    if (WindowLimitsThreshold::LimitsThresholdEnabled() && !MathHelper::NearZero(vpr) &&
+        MathHelper::NearZero(property_->GetLastLimitsVpr() - vpr)) {
+        auto display = SingletonContainer::IsDestroyed() ? nullptr :
+            SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId());
+        if (!IsExceedingWorkAreaCap(display)) {
+            skipLimitsRecalc = true;
+        }
+    }
+    if (!skipLimitsRecalc &&
+        (!MathHelper::NearZero(vpr) || !MathHelper::NearZero(property_->GetLastLimitsVpr() - vpr))) {
         isMinLimitsAdjusted_ = false;
         UpdateWindowSizeLimits();
         if (isMinLimitsAdjusted_) {
@@ -8131,33 +8169,23 @@ void WindowSceneSessionImpl::UpdateDensity()
 
 void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
 {
+    if (WindowLimitsThreshold::LimitsThresholdEnabled()) {
+        float vpr = 1.0f;
+        if (GetVirtualPixelRatio(vpr) == WMError::WM_OK &&
+            MathHelper::NearZero(property_->GetLastLimitsVpr() - vpr)) {
+            auto display = SingletonContainer::IsDestroyed() ? nullptr :
+                SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId(), true);
+            if (!IsExceedingWorkAreaCap(display)) {
+                TLOGI(WmsLogTag::WMS_LAYOUT, "id:%{public}d, skip no-op limits refresh", GetPersistentId());
+                return;
+            }
+        }
+    }
     if (property_->GetUserWindowLimits().pixelUnit_ == PixelUnit::VP) {
         UpdateWindowSizeLimits();
         UpdateNewSize();
     } else {
-        float vpr = 1.0f;
-        WMError ret = GetVirtualPixelRatio(vpr);
-        if (ret != WMError::WM_OK) {
-            TLOGE(WmsLogTag::DEFAULT, "Id:%{public}d, get vpr failed", GetPersistentId());
-            return;
-        }
-        bool hasIntersectedLimits = HasIntersectedAttachLimits();
-        WindowLimits limitsPx = hasIntersectedLimits ?
-            property_->GetLimitsForAttachedWindows() : property_->GetWindowLimits();
-        WindowLimits limitsVp = WindowLimits::DEFAULT_VP_LIMITS();
-        RecalculateVpLimitsByPx(limitsPx, limitsVp, vpr);
-        limitsPx.vpRatio_ = vpr;
-        limitsVp.vpRatio_ = vpr;
-        isMinLimitsAdjusted_ = AdjustMinLimitsByWorkArea(limitsPx, limitsVp, vpr);
-        if (hasIntersectedLimits) {
-            CalculateAttachedWindowLimitsIntersection(limitsPx, limitsVp, vpr);
-        }
-        property_->SetWindowLimits(limitsPx);
-        property_->SetWindowLimitsVP(limitsVp);
-        property_->SetLastLimitsVpr(vpr);
-        if (hasIntersectedLimits || isMinLimitsAdjusted_) {
-            UpdateNewSize();
-        }
+        RecalcPxLimitsOnDensity();
     }
     WMError ret = UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     if (ret != WMError::WM_OK) {
@@ -8171,6 +8199,34 @@ void WindowSceneSessionImpl::UpdateDensityInner(const sptr<DisplayInfo>& info)
     UpdateViewportConfig(preRect, WindowSizeChangeReason::UNDEFINED, nullptr, info);
     TLOGD(WmsLogTag::DEFAULT, "[%{public}d, %{public}d, %{public}u, %{public}u]",
         preRect.posX_, preRect.posY_, preRect.width_, preRect.height_);
+}
+
+/** @note @window.layout */
+void WindowSceneSessionImpl::RecalcPxLimitsOnDensity()
+{
+    float vpr = 1.0f;
+    WMError ret = GetVirtualPixelRatio(vpr);
+    if (ret != WMError::WM_OK) {
+        TLOGE(WmsLogTag::DEFAULT, "Id:%{public}d, get vpr failed", GetPersistentId());
+        return;
+    }
+    bool hasIntersectedLimits = HasIntersectedAttachLimits();
+    WindowLimits limitsPx = hasIntersectedLimits ?
+        property_->GetLimitsForAttachedWindows() : property_->GetWindowLimits();
+    WindowLimits limitsVp = WindowLimits::DEFAULT_VP_LIMITS();
+    RecalculateVpLimitsByPx(limitsPx, limitsVp, vpr);
+    limitsPx.vpRatio_ = vpr;
+    limitsVp.vpRatio_ = vpr;
+    isMinLimitsAdjusted_ = AdjustMinLimitsByWorkArea(limitsPx, limitsVp, vpr);
+    if (hasIntersectedLimits) {
+        CalculateAttachedWindowLimitsIntersection(limitsPx, limitsVp, vpr);
+    }
+    property_->SetWindowLimits(limitsPx);
+    property_->SetWindowLimitsVP(limitsVp);
+    property_->SetLastLimitsVpr(vpr);
+    if (hasIntersectedLimits || isMinLimitsAdjusted_) {
+        UpdateNewSize();
+    }
 }
 
 WMError WindowSceneSessionImpl::RegisterKeyboardPanelInfoChangeListener(
@@ -8324,9 +8380,18 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
         TLOGE(WmsLogTag::DMS, "get display info %{public}" PRIu64 " failed.", displayId);
         return;
     }
+    bool isGeometryChanged = false;
     if (IsSystemDensityChanged(displayInfo)) {
         lastSystemDensity_ = AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio());
         NotifySystemDensityChange(lastSystemDensity_);
+        isGeometryChanged = true;
+    }
+    // |= keeps both checks executed (RefreshLimitsOnGeometryChange updates records as a side effect)
+    isGeometryChanged |= RefreshLimitsOnGeometryChange();
+    if (isGeometryChanged) {
+        UpdateWindowSizeLimits();
+        UpdateNewSize();
+        UpdateProperty(WSPropertyChangeAction::ACTION_UPDATE_WINDOW_LIMITS);
     }
     float density = GetVirtualPixelRatio(displayInfo);
     DisplayOrientation orientation = displayInfo->GetDisplayOrientation();
@@ -8343,6 +8408,30 @@ void WindowSceneSessionImpl::NotifyDisplayInfoChange(const sptr<DisplayInfo>& in
         return;
     }
     SingletonContainer::Get<WindowManager>().NotifyDisplayInfoChange(token, displayId, density, orientation);
+}
+
+/** @note @window.layout */
+bool WindowSceneSessionImpl::RefreshLimitsOnGeometryChange()
+{
+    if (!WindowLimitsThreshold::LimitsThresholdEnabled()) {
+        return false;
+    }
+    auto display = SingletonContainer::IsDestroyed() ? nullptr :
+        SingletonContainer::Get<DisplayManager>().GetDisplayById(property_->GetDisplayId(), true);
+    if (display == nullptr || display->GetDisplayInfo() == nullptr) {
+        return false;
+    }
+    const sptr<DisplayInfo>& actualInfo = display->GetDisplayInfo();
+    // Records are always updated so the next comparison uses the latest state.
+    if (actualInfo->GetWidth() == static_cast<int32_t>(lastDisplayWidth_) &&
+        actualInfo->GetHeight() == static_cast<int32_t>(lastDisplayHeight_) &&
+        actualInfo->GetRotation() == lastDisplayRotation_) {
+        return false;
+    }
+    lastDisplayWidth_ = static_cast<uint32_t>(actualInfo->GetWidth());
+    lastDisplayHeight_ = static_cast<uint32_t>(actualInfo->GetHeight());
+    lastDisplayRotation_ = actualInfo->GetRotation();
+    return IsExceedingWorkAreaCap(display);
 }
 
 bool WindowSceneSessionImpl::IsLandscape(uint64_t displayId)
