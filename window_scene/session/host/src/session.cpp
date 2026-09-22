@@ -6458,10 +6458,9 @@ PrelayoutContext Session::GetPrelayoutContext()
     // Enable prelayout only for game prelaunch to improve launch experience.
     ctx.enable = sessionInfo_.isGamePrelaunch_;
     auto windowCreateParams = GetSessionInfo().windowCreateParams;
-    if (windowCreateParams == nullptr || (windowCreateParams != nullptr && !windowCreateParams->minimizeOnStart)) {
-        if (!ctx.enable && !sessionInfo_.isPrelaunch_) {
-            return ctx;
-        }
+    bool isMinimizeOnStart = windowCreateParams != nullptr ? windowCreateParams->minimizeOnStart : false;
+    if (!ctx.enable && !sessionInfo_.isPrelaunch_ && !isMinimizeOnStart) {
+        return ctx;
     }
 
     const auto preCalc = PreCalcWindowProperty();
@@ -6475,10 +6474,7 @@ PrelayoutContext Session::GetPrelayoutContext()
         static_cast<int32_t>(preCalc.height)
     };
 
-    if (
-        (sessionInfo_.isPrelaunch_ && !ctx.enable) ||
-        (windowCreateParams != nullptr && windowCreateParams->minimizeOnStart)
-    ) {
+    if ((sessionInfo_.isPrelaunch_ && !ctx.enable) || minimizeOnStart) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, only initialize winRect, ctx: %{public}s",
             GetPersistentId(), ctx.ToString().c_str());
         return ctx;
@@ -6512,11 +6508,10 @@ void Session::HandleInitialRect(const PrelayoutContext& ctx)
     }
 
     auto windowCreateParams = GetSessionInfo().windowCreateParams;
-    const std::optional<WSRect> rect =
-        (ctx.enable || sessionInfo_.isPrelaunch_ ||
-            (windowCreateParams != nullptr && windowCreateParams->minimizeOnStart))
-            ? std::make_optional(ctx.winRect)
-            : std::nullopt;
+    bool minimizeOnStart = (windowCreateParams != nullptr && windowCreateParams->minimizeOnStart);
+    const std::optional<WSRect> rect = (ctx.enable || sessionInfo_.isPrelaunch_ || minimizeOnStart)
+        ? std::make_optional(ctx.winRect)
+        : std::nullopt;
 
     NotifyClientToUpdateRect("Connect", rect, nullptr);
 
