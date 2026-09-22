@@ -1836,10 +1836,10 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_WindowParamsNotMinimize_Ena
 {
     SessionInfo info;
     info.abilityName_ = "WindowParamsNotMinimizeEnable";
-    sptr session = sptr::MakeSptr(info);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
     ASSERT_NE(nullptr, session);
 
-    auto params = std::make_shared();
+    auto params = std::make_shared<WindowCreateParams>();
     params->minimizeOnStart = false;
     session->sessionInfo_.windowCreateParams = params;
     session->sessionInfo_.isGamePrelaunch_ = true;
@@ -1847,7 +1847,8 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_WindowParamsNotMinimize_Ena
 
     const uint32_t preWidth = 720;
     const uint32_t preHeight = 1280;
-    ON_CALL(*session, PreCalcWindowProperty()).WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
 
     auto ctx = session->GetPrelayoutContext();
     // enable follows isGamePrelaunch_
@@ -1874,10 +1875,10 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_WindowParamsNotMinimize_Pre
 {
     SessionInfo info;
     info.abilityName_ = "WindowParamsNotMinimizePrelaunch";
-    sptr session = sptr::MakeSptr(info);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
     ASSERT_NE(nullptr, session);
 
-    auto params = std::make_shared();
+    auto params = std::make_shared<WindowCreateParams>();
     params->minimizeOnStart = false;
     session->sessionInfo_.windowCreateParams = params;
     session->sessionInfo_.isGamePrelaunch_ = false;
@@ -1885,7 +1886,8 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_WindowParamsNotMinimize_Pre
 
     const uint32_t preWidth = 720;
     const uint32_t preHeight = 1280;
-    ON_CALL(*session, PreCalcWindowProperty()).WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
 
     auto ctx = session->GetPrelayoutContext();
     // enable follows isGamePrelaunch_; non-game keeps it disabled.
@@ -1911,10 +1913,10 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_MinimizeOnStart_True, TestS
 {
     SessionInfo info;
     info.abilityName_ = "MinimizeOnStartTrue";
-    sptr session = sptr::MakeSptr(info);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
     ASSERT_NE(nullptr, session);
 
-    auto params = std::make_shared();
+    auto params = std::make_shared<WindowCreateParams>();
     params->minimizeOnStart = true;
     session->sessionInfo_.windowCreateParams = params;
     session->sessionInfo_.isGamePrelaunch_ = false;
@@ -1951,10 +1953,10 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_SessionPropertyNull, TestSi
 {
     SessionInfo info;
     info.abilityName_ = "SessionPropertyNull";
-    sptr session = sptr::MakeSptr(info);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
     ASSERT_NE(nullptr, session);
 
-    auto params = std::make_shared();
+    auto params = std::make_shared<WindowCreateParams>();
     params->minimizeOnStart = false;
     session->sessionInfo_.windowCreateParams = params;
     session->sessionInfo_.isGamePrelaunch_ = true;
@@ -1962,7 +1964,8 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_SessionPropertyNull, TestSi
 
     const uint32_t preWidth = 720;
     const uint32_t preHeight = 1280;
-    ON_CALL(*session, PreCalcWindowProperty()).WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
 
     // Set property_ to nullptr to trigger the null-property early return.
     session->property_ = nullptr;
@@ -1992,10 +1995,10 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_MinimizeOnStart_WithGamePre
 {
     SessionInfo info;
     info.abilityName_ = "MinimizeOnStartGamePrelaunch";
-    sptr session = sptr::MakeSptr(info);
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
     ASSERT_NE(nullptr, session);
 
-    auto params = std::make_shared();
+    auto params = std::make_shared<WindowCreateParams>();
     params->minimizeOnStart = true;
     session->sessionInfo_.windowCreateParams = params;
     session->sessionInfo_.isGamePrelaunch_ = true;
