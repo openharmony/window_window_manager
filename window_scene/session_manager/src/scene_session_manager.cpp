@@ -8928,6 +8928,55 @@ bool SceneSessionManager::IsSessionVisibleAndRealForeground(const sptr<SceneSess
     return false;
 }
 
+void SceneSessionManager::NotifySpecificSessionDpiHookScale(const sptr<SceneSession>& session)
+{
+    if (session == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "session is null");
+        return;
+    }
+    float scale = 0.0f;
+    bool needNotify = session->GetDpiHookScale() > 0.0f;
+    bool found = false;
+    auto bundleName = session->GetSessionInfo().bundleName_;
+    {
+        std::lock_guard<std::mutex> lock(rogWindowConfigMutex_);
+        if (std::find(rogWindowConfig_.xhdpiAppList.begin(), rogWindowConfig_.xhdpiAppList.end(),
+            bundleName) != rogWindowConfig_.xhdpiAppList.end()) {
+            scale = rogWindowConfig_.scale;
+            needNotify = true;
+            found = true;
+        }
+    }
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE,
+        "win=[%{public}d, %{public}s], needNotify=%{public}d, found=%{public}d, scale=%{public}f, bundle=%{public}s",
+        session->GetWindowId(), session->GetWindowName().c_str(), needNotify, found, scale, bundleName.c_str());
+    if (needNotify) {
+        session->NotifyDpiHookScale(scale);
+    }
+}
+
+void SceneSessionManager::NotifyNewSessionDpiHookScale(const sptr<SceneSession>& session)
+{
+    taskScheduler_->PostAsyncTask([this, weakSession = wptr(session), where = __func__] {
+        sptr<SceneSession> sceneSession = weakSession.promote();
+        NotifySpecificSessionDpiHookScale(sceneSession);
+    }, __func__);
+}
+
+void SceneSessionManager::NotifyAllSessionDpiHookScale()
+{
+    taskScheduler_->PostAsyncTask([this, where = __func__] {
+        std::map<int32_t, sptr<SceneSession>> sceneSessionMapCopy;
+        {
+            std::shared_lock<std::shared_mutex> lock(sceneSessionMapMutex_);
+            sceneSessionMapCopy = sceneSessionMap_;
+        }
+        for (const auto& [_, sceneSession] : sceneSessionMapCopy) {
+            NotifySpecificSessionDpiHookScale(sceneSession);
+        }
+    }, __func__);
+}
+
 void SceneSessionManager::DumpSessionInfo(const sptr<SceneSession>& session, std::ostringstream& oss)
 {
     if (session == nullptr) {
@@ -11347,6 +11396,7 @@ __attribute__((no_sanitize("cfi"))) void SceneSessionManager::OnSessionStateChan
             }
             break;
         case SessionState::STATE_CONNECT:
+            NotifyNewSessionDpiHookScale(sceneSession);
             SetSessionSnapshotSkipForAppProcess(sceneSession);
             SetSessionSnapshotSkipForAppBundleName(sceneSession);
             SetSessionWatermarkForAppProcess(sceneSession);
@@ -20966,6 +21016,7 @@ WMError SceneSessionManager::UpdateRogWindowConfig(const RogWindowConfig& window
     if (callback) {
         callback(windowConfig);
     }
+    NotifyAllSessionDpiHookScale();
     return WMError::WM_OK;
 }
 

@@ -1045,6 +1045,35 @@ WSError SessionStageProxy::GetTopNavDestinationName(std::string& topNavDestName)
     return static_cast<WSError>(errCode);
 }
 
+WSError SessionStageProxy::NotifyDpiHookScale(float scale)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write interfaceToken failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    if (!data.WriteFloat(scale)) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "write scale failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    auto errCode = remote->SendRequest(
+        static_cast<uint32_t>(SessionStageInterfaceCode::TRANS_ID_NOTIFY_DPI_HOOK_SCALE),
+        data, reply, option);
+    if (errCode != ERR_NONE) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
+        return WSError::WS_ERROR_IPC_FAILED;
+    }
+    int32_t ret = reply.ReadInt32();
+    return static_cast<WSError>(ret);
+}
+
 WSError SessionStageProxy::NotifyLayoutFinishAfterWindowModeChange(WindowMode mode)
 {
     TLOGD(WmsLogTag::WMS_LAYOUT, "in");

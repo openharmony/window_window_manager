@@ -2270,6 +2270,27 @@ WSError WindowSessionImpl::UpdateWindowMode(const WindowModeInfo& windowModeInfo
     return WSError::WS_OK;
 }
 
+WSError WindowSessionImpl::NotifyDpiHookScale(float scale)
+{
+    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "wid=%{public}d, oldScale=%{public}f, scale=%{public}f",
+        GetPersistentId(), dpiHookScale_, scale);
+    if (!MathHelper::NearZero(dpiHookScale_ - scale)) {
+        dpiHookScale_ = scale;
+        UpdateDensity();
+    }
+    return WSError::WS_OK;
+}
+
+float WindowSessionImpl::AdaptToHookedDensity(float density, bool needHook)
+{
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE, "id=%{public}u, density=%{public}f, needHook=%{public}d, hookScale=%{public}f",
+        GetWindowId(), density, needHook, dpiHookScale_);
+    if (!needHook || dpiHookScale_ <= 0.0f) {
+        return density;
+    }
+    return density / dpiHookScale_;
+}
+
 /** @note @window.layout */
 float WindowSessionImpl::GetVirtualPixelRatio()
 {
@@ -2283,7 +2304,16 @@ float WindowSessionImpl::GetVirtualPixelRatio(const sptr<DisplayInfo>& displayIn
     if (useUniqueDensity_) {
         return virtualPixelRatio_;
     }
-    return displayInfo->GetVirtualPixelRatio();
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr, vpr=%{public}f", virtualPixelRatio_);
+        return virtualPixelRatio_;
+    }
+    auto dpi = displayInfo->GetVirtualPixelRatio();
+    auto hookDpi = AdaptToHookedDensity(dpi);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+        "id=%{public}u, type=%{public}u, systemDpi=%{public}f, hookDpi=%{public}f, displayId=%{public}" PRIu64,
+        GetWindowId(), GetType(), dpi, hookDpi, displayInfo->GetDisplayId());
+    return hookDpi;
 }
 
 void WindowSessionImpl::NotifyGlobalScaledRectChange(const Rect& globalScaledRect)
@@ -2433,8 +2463,9 @@ void WindowSessionImpl::UpdateViewportConfig(const Rect& rect, WindowSizeChangeR
     } else {
         TLOGI_LMT(TEN_SECONDS, RECORD_100_TIMES, WmsLogTag::WMS_LAYOUT,
             "Id: %{public}d, reason: %{public}d, viewportRect: %{public}s, displayOrientation: %{public}d, "
-            "config[%{public}u, %{public}u, %{public}u, %{public}f]", GetPersistentId(), reason,
-            viewportRect.ToString().c_str(), orientation, rotation, deviceRotation, transformHint, virtualPixelRatio_);
+            "config[%{public}u, %{public}u, %{public}u, %{public}f], displayId: %{public}" PRIu64,
+            GetPersistentId(), reason, viewportRect.ToString().c_str(), orientation, rotation, deviceRotation,
+            transformHint, virtualPixelRatio_, GetDisplayId());
     }
 }
 

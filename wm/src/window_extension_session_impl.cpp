@@ -1309,8 +1309,13 @@ void WindowExtensionSessionImpl::NotifyDisplayInfoChange(const SessionViewportCo
     auto display = SingletonContainer::Get<DisplayManager>().GetDisplayById(config.displayId_);
     if (display != nullptr) {
         auto displayInfo = display->GetDisplayInfo();
-        if (displayInfo != nullptr && !MathHelper::NearZero(lastSystemDensity_ - displayInfo->GetVirtualPixelRatio())) {
-            auto density = displayInfo->GetVirtualPixelRatio();
+        if (displayInfo != nullptr && !MathHelper::NearZero(
+            lastSystemDensity_ - AdaptToHookedDensity(displayInfo->GetVirtualPixelRatio()))) {
+            auto systemDpi = displayInfo->GetVirtualPixelRatio();
+            auto density = AdaptToHookedDensity(systemDpi);
+            TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+                "id=%{public}u, lastDensity=%{public}f, systemDpi=%{public}f, hookedDpi=%{public}f",
+                GetWindowId(), lastSystemDensity_, systemDpi, density);
             lastSystemDensity_ = density;
             NotifySystemDensityChange(density);
         }
@@ -1569,7 +1574,12 @@ float WindowExtensionSessionImpl::GetDefaultDensity(const sptr<DisplayInfo>& dis
         TLOGE(WmsLogTag::WMS_UIEXT, "displayInfo is nullptr");
         return vpr;
     }
-    return displayInfo->GetVirtualPixelRatio();
+    auto dpi = displayInfo->GetVirtualPixelRatio();
+    auto hookedDpi = AdaptToHookedDensity(dpi);
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+        "id=%{public}u, type=%{public}u, systemDpi=%{public}f, hookedDpi=%{public}f, displayId=%{public}" PRIu64,
+        GetWindowId(), GetType(), dpi, hookedDpi, displayInfo->GetDisplayId());
+    return hookedDpi;
 }
 
 WMError WindowExtensionSessionImpl::CheckHideNonSecureWindowsPermission(bool shouldHide)
