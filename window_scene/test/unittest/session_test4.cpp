@@ -1774,7 +1774,7 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_PrelaunchOnly, TestSize.Lev
     const uint32_t preWidth = 720;
     const uint32_t preHeight = 1280;
     ON_CALL(*session, PreCalcWindowProperty())
-        .WillByDefault(Return(PreWindowProperty(0, preWidth, preHeight)));
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
     session->sessionInfo_.isGamePrelaunch_ = false;
     session->sessionInfo_.isPrelaunch_ = true;
 
