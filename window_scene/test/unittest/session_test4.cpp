@@ -1605,8 +1605,8 @@ HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_002, TestSize.Leve
 
     session->SetMockLayoutController(layoutController);
     session_->UpdateSizeChangeReason(SizeChangeReason::DRAG_MOVE);
-    WSRect expectedRect = { 0, 0, 50, 50 };
-    WSRect winRect = { 0, 0, 50, 50 };
+    WSRect expectedRect = { 0, 0, 50, 50};
+    WSRect winRect = { 0, 0, 50, 50};
     session->SetSessionRect(winRect);
 
     EXPECT_CALL(*layoutController, ConvertGlobalRectToRelative(_, _)).Times(1).WillOnce(Return(expectedRect));
