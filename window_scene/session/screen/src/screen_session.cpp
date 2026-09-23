@@ -3053,6 +3053,9 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(
         RSSurfaceCaptureConfig config = {
             .scaleX = scaleX,
             .scaleY = scaleY,
+            .useDma = true,
+            .isHdrCapture = true,
+            .displayIntent = DisplayIntent::LOCAL,
         };
         SetScreenSnapshotRect(config);
         auto rsUIContext = GetRSUIContext();
@@ -3072,14 +3075,17 @@ std::shared_ptr<Media::PixelMap> ScreenSession::GetScreenSnapshotWithAllWindows(
             return nullptr;
         }
     }
-    auto pixelMap = callback->GetResult(SNAPSHOT_TIMEOUT_MS);
-    if (pixelMap != nullptr) {
-        TLOGD(WmsLogTag::DMS, "get pixelMap WxH = %{public}dx%{public}d, NeedCheckDrmAndSurfaceLock is %{public}d",
-            pixelMap->GetWidth(), pixelMap->GetHeight(), isNeedCheckDrmAndSurfaceLock);
-    } else {
-        TLOGW(WmsLogTag::DMS, "null pixelMap, may have drm or surface lock, NeedCheckDrmAndSurfaceLock is %{public}d",
+    auto pixelMaps = callback->GetHDRResult(SNAPSHOT_TIMEOUT_MS);
+    if (pixelMaps.size() <= 0) {
+        TLOGE(WmsLogTag::DMS, "null pixelMap, may have drm or surface lock, NeedCheckDrmAndSurfaceLock is %{public}d",
             isNeedCheckDrmAndSurfaceLock);
+        return nullptr;
     }
+    bool hasHdrPixelMap = pixelMaps.size() > 1 && pixelMaps[1] != nullptr;
+    auto pixelMap = hasHdrPixelMap ? pixelMaps[1] : pixelMaps[0]; // 0: common pixelmap, 1: hdr pixelmap
+    TLOGD(WmsLogTag::DMS, "pixelMap WxH: %{public}dx%{public}d, checkDrmAndSurfaceLock: %{public}d, isHdr: %{public}d",
+        pixelMap == nullptr ? 0 : pixelMap->GetWidth(), pixelMap == nullptr ? 0 : pixelMap->GetHeight(),
+        isNeedCheckDrmAndSurfaceLock, hasHdrPixelMap);
     return pixelMap;
 }
 
