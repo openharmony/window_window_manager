@@ -667,7 +667,7 @@ HWTEST_F(ScreenSessionManagerTest, UpdateSessionByActiveModeChange001, TestSize.
     sptr<ScreenSession> screenSession = nullptr;
     RSScreenModeInfo screenMode;
     ssm_->UpdateSessionByActiveModeChange(screenSession, screenMode);
-    EXPECT_FALSE(g_errLog.find("screenSession is nullptr") != std::string::npos);
+    EXPECT_FALSE(g_errLog.find("screenSession is null") != std::string::npos);
     g_errLog.clear();
 }
 
