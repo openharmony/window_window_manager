@@ -1577,7 +1577,7 @@ HWTEST_F(WindowSessionTest4, TestNotifyClientToUpdateGlobalDisplayRect, TestSize
 HWTEST_F(WindowSessionTest4, TestGetSessionScreenRelativeRect_001, TestSize.Level1)
 {
     session_->UpdateSizeChangeReason(SizeChangeReason::RESIZE);
-    WSRect expectedRect = { 0, 0, 100, 100};
+    WSRect expectedRect = { 0, 0, 100, 100 };
     session_->SetSessionRect(expectedRect);
 
     WSRect result = session_->GetSessionScreenRelativeRect();
@@ -1774,7 +1774,7 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_PrelaunchOnly, TestSize.Lev
     const uint32_t preWidth = 720;
     const uint32_t preHeight = 1280;
     ON_CALL(*session, PreCalcWindowProperty())
-        .WillByDefault(Return(PreWindowProperty(0, preWidth, preHeight)));
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
     session->sessionInfo_.isGamePrelaunch_ = false;
     session->sessionInfo_.isPrelaunch_ = true;
 
@@ -1807,7 +1807,7 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_GamePrelaunchAndPrelaunch, 
     const uint32_t preWidth = 720;
     const uint32_t preHeight = 1280;
     ON_CALL(*session, PreCalcWindowProperty())
-        .WillByDefault(Return(PreWindowProperty(0, preWidth, preHeight)));
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
     session->sessionInfo_.isGamePrelaunch_ = true;
     session->sessionInfo_.isPrelaunch_ = true;
 
@@ -1823,6 +1823,206 @@ HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_GamePrelaunchAndPrelaunch, 
     // populated from preCalc. (density depends on the screen session in the test env.)
     EXPECT_EQ(ctx.display.width, preWidth);
     EXPECT_EQ(ctx.display.height, preHeight);
+    EXPECT_EQ(ctx.display.rotation, 0u);
+}
+
+/**
+ * @tc.name: TestGetPrelayoutContext_WindowParamsNotMinimize_Enable
+ * @tc.desc: windowCreateParams non-null with minimizeOnStart=false and gamePrelaunch=true: skips
+ * early return, runs full path with winRect at origin and display populated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_WindowParamsNotMinimize_Enable, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "WindowParamsNotMinimizeEnable";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+
+    auto params = std::make_shared<WindowCreateParams>();
+    params->minimizeOnStart = false;
+    session->sessionInfo_.windowCreateParams = params;
+    session->sessionInfo_.isGamePrelaunch_ = true;
+    session->sessionInfo_.isPrelaunch_ = false;
+
+    const uint32_t preWidth = 720;
+    const uint32_t preHeight = 1280;
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
+
+    auto ctx = session->GetPrelayoutContext();
+    // enable follows isGamePrelaunch_
+    EXPECT_TRUE(ctx.enable);
+    // Passed the first guard (minimizeOnStart=false enters the outer if), skipped the early return
+    // because enable=true. Position is (0,0) because minimizeOnStart=false.
+    EXPECT_EQ(ctx.winRect.posX_, 0);
+    EXPECT_EQ(ctx.winRect.posY_, 0);
+    EXPECT_EQ(ctx.winRect.width_, static_cast<int32_t>(preWidth));
+    EXPECT_EQ(ctx.winRect.height_, static_cast<int32_t>(preHeight));
+    // property_ is non-null by default, so full path runs and display is populated.
+    EXPECT_EQ(ctx.display.width, preWidth);
+    EXPECT_EQ(ctx.display.height, preHeight);
+    EXPECT_EQ(ctx.display.rotation, 0u);
+}
+
+/**
+ * @tc.name: TestGetPrelayoutContext_WindowParamsNotMinimize_PrelaunchOnly
+ * @tc.desc: windowCreateParams non-null with minimizeOnStart=false, gamePrelaunch=false but prelaunch=true:
+ * passes first guard, returns at the prelaunch-only early return with winRect filled but display default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_WindowParamsNotMinimize_PrelaunchOnly, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "WindowParamsNotMinimizePrelaunch";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+
+    auto params = std::make_shared<WindowCreateParams>();
+    params->minimizeOnStart = false;
+    session->sessionInfo_.windowCreateParams = params;
+    session->sessionInfo_.isGamePrelaunch_ = false;
+    session->sessionInfo_.isPrelaunch_ = true;
+
+    const uint32_t preWidth = 720;
+    const uint32_t preHeight = 1280;
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
+
+    auto ctx = session->GetPrelayoutContext();
+    // enable follows isGamePrelaunch_; non-game keeps it disabled.
+    EXPECT_FALSE(ctx.enable);
+    // Passed the first guard, prelaunch-only early return at L6565. winRect is filled.
+    EXPECT_EQ(ctx.winRect.posX_, 0);
+    EXPECT_EQ(ctx.winRect.posY_, 0);
+    EXPECT_EQ(ctx.winRect.width_, static_cast<int32_t>(preWidth));
+    EXPECT_EQ(ctx.winRect.height_, static_cast<int32_t>(preHeight));
+    // Returns before GetSessionProperty, so display stays at its defaults.
+    EXPECT_EQ(ctx.display.width, 0u);
+    EXPECT_EQ(ctx.display.height, 0u);
+    EXPECT_FLOAT_EQ(ctx.display.density, 1.0f);
+    EXPECT_EQ(ctx.display.rotation, 0u);
+}
+
+/**
+ * @tc.name: TestGetPrelayoutContext_MinimizeOnStart_True
+ * @tc.desc: minimizeOnStart=true: outer if skipped, winRect uses preCalc position, returns at L6562.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_MinimizeOnStart_True, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "MinimizeOnStartTrue";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+
+    auto params = std::make_shared<WindowCreateParams>();
+    params->minimizeOnStart = true;
+    session->sessionInfo_.windowCreateParams = params;
+    session->sessionInfo_.isGamePrelaunch_ = false;
+    session->sessionInfo_.isPrelaunch_ = false;
+
+    const uint32_t preWidth = 720;
+    const uint32_t preHeight = 1280;
+    const int32_t prePosX = 100;
+    const int32_t prePosY = 200;
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, prePosX, prePosY, preWidth, preHeight)));
+
+    auto ctx = session->GetPrelayoutContext();
+    // enable is false, outer if (L6542) condition is false (minimizeOnStart=true), so no early return there.
+    EXPECT_FALSE(ctx.enable);
+    // winRect uses preCalc position because minimizeOnStart=true.
+    EXPECT_EQ(ctx.winRect.posX_, prePosX);
+    EXPECT_EQ(ctx.winRect.posY_, prePosY);
+    EXPECT_EQ(ctx.winRect.width_, static_cast<int32_t>(preWidth));
+    EXPECT_EQ(ctx.winRect.height_, static_cast<int32_t>(preHeight));
+    // Returns at L6562 because minimizeOnStart=true.
+    EXPECT_EQ(ctx.display.width, 0u);
+    EXPECT_EQ(ctx.display.height, 0u);
+    EXPECT_FLOAT_EQ(ctx.display.density, 1.0f);
+    EXPECT_EQ(ctx.display.rotation, 0u);
+}
+
+/**
+ * @tc.name: TestGetPrelayoutContext_SessionPropertyNull
+ * @tc.desc: When property_ is nullptr, GetPrelayoutContext returns ctx at L6569 before accessing display info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_SessionPropertyNull, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "SessionPropertyNull";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+
+    auto params = std::make_shared<WindowCreateParams>();
+    params->minimizeOnStart = false;
+    session->sessionInfo_.windowCreateParams = params;
+    session->sessionInfo_.isGamePrelaunch_ = true;
+    session->sessionInfo_.isPrelaunch_ = false;
+
+    const uint32_t preWidth = 720;
+    const uint32_t preHeight = 1280;
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, 0, 0, preWidth, preHeight)));
+
+    // Set property_ to nullptr to trigger the null-property early return.
+    session->property_ = nullptr;
+
+    auto ctx = session->GetPrelayoutContext();
+    // enable follows isGamePrelaunch_
+    EXPECT_TRUE(ctx.enable);
+    // winRect is populated from PreCalcWindowProperty.
+    EXPECT_EQ(ctx.winRect.posX_, 0);
+    EXPECT_EQ(ctx.winRect.posY_, 0);
+    EXPECT_EQ(ctx.winRect.width_, static_cast<int32_t>(preWidth));
+    EXPECT_EQ(ctx.winRect.height_, static_cast<int32_t>(preHeight));
+    // Returns at L6569 because sessionProperty is nullptr; display stays at defaults.
+    EXPECT_EQ(ctx.display.width, 0u);
+    EXPECT_EQ(ctx.display.height, 0u);
+    EXPECT_FLOAT_EQ(ctx.display.density, 1.0f);
+    EXPECT_EQ(ctx.display.rotation, 0u);
+}
+
+/**
+ * @tc.name: TestGetPrelayoutContext_MinimizeOnStart_WithGamePrelaunch
+ * @tc.desc: minimizeOnStart=true with gamePrelaunch=true: winRect uses preCalc position,
+ * returns at L6562 because minimizeOnStart takes effect before display population.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSessionTest4, TestGetPrelayoutContext_MinimizeOnStart_WithGamePrelaunch, TestSize.Level1)
+{
+    SessionInfo info;
+    info.abilityName_ = "MinimizeOnStartGamePrelaunch";
+    sptr<SessionMocker> session = sptr<SessionMocker>::MakeSptr(info);
+    ASSERT_NE(nullptr, session);
+
+    auto params = std::make_shared<WindowCreateParams>();
+    params->minimizeOnStart = true;
+    session->sessionInfo_.windowCreateParams = params;
+    session->sessionInfo_.isGamePrelaunch_ = true;
+    session->sessionInfo_.isPrelaunch_ = true;
+
+    const uint32_t preWidth = 720;
+    const uint32_t preHeight = 1280;
+    const int32_t prePosX = 100;
+    const int32_t prePosY = 200;
+    ON_CALL(*session, PreCalcWindowProperty())
+        .WillByDefault(Return(PreWindowProperty(0, prePosX, prePosY, preWidth, preHeight)));
+
+    auto ctx = session->GetPrelayoutContext();
+    // enable follows isGamePrelaunch_
+    EXPECT_TRUE(ctx.enable);
+    // winRect uses preCalc position because minimizeOnStart=true.
+    EXPECT_EQ(ctx.winRect.posX_, prePosX);
+    EXPECT_EQ(ctx.winRect.posY_, prePosY);
+    EXPECT_EQ(ctx.winRect.width_, static_cast<int32_t>(preWidth));
+    EXPECT_EQ(ctx.winRect.height_, static_cast<int32_t>(preHeight));
+    // Returns at L6562 because minimizeOnStart=true, so display stays at defaults.
+    EXPECT_EQ(ctx.display.width, 0u);
+    EXPECT_EQ(ctx.display.height, 0u);
+    EXPECT_FLOAT_EQ(ctx.display.density, 1.0f);
     EXPECT_EQ(ctx.display.rotation, 0u);
 }
 
