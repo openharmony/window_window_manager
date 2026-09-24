@@ -15152,6 +15152,26 @@ void SceneSessionManager::SetUpdateDisplayDpiChangeCallback(const UpdateDisplayD
     updateDisplayDpiChangeFunc_ = func;
 }
 
+bool SceneSessionManager::ShouldUpdateDisplayDpi(sptr<DisplayInfo> displayInfo) {
+    if (displayInfo == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "displayInfo is nullptr");
+        return false;
+    }
+    auto rootSceneSession = GetRootSceneSession();
+    if (rootSceneSession == nullptr) {
+        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "rootSceneSession is nullptr");
+        return false;
+    }
+    auto result = updateDisplayDpiChangeFunc_ != nullptr && displayInfo->GetDisplayId() != rootSceneSession->GetDisplayId();
+    TLOGD(WmsLogTag::WMS_ATTRIBUTE,
+        "result=%{public}d rootDisplayId=%{public}" PRIu64
+        " inputDisplayId=%{public}" PRIu64,
+        result,
+        rootSceneSession->GetDisplayId(),
+        displayInfo->GetDisplayId());
+    return result;
+}
+
 bool SceneSessionManager::ShouldProcessVirtualPixelRatioChange(
     DisplayStateChangeType type, sptr<DisplayInfo> displayInfo)
 {
@@ -15189,7 +15209,7 @@ void SceneSessionManager::ProcessVirtualPixelRatioChange(DisplayId defaultDispla
         return;
     }
     taskScheduler_->PostSyncTask([this, displayInfo, type, where = __func__]() {
-        if (updateDisplayDpiChangeFunc_ != nullptr) {
+        if (ShouldUpdateDisplayDpi(displayInfo)) {
             TLOGNI(WmsLogTag::WMS_ATTRIBUTE, "%{public}s in", where);
             updateDisplayDpiChangeFunc_(displayInfo->GetDisplayId(), displayInfo->GetVirtualPixelRatio());
         }

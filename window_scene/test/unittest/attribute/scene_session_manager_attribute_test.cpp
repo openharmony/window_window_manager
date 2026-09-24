@@ -693,6 +693,57 @@ HWTEST_F(SceneSessionManagerAttributeTest, ProcessVirtualPixelRatioChange, TestS
 }
 
 /**
+ * @tc.name: ShouldUpdateDisplayDpi
+ * @tc.desc: ShouldUpdateDisplayDpi when displayInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, ShouldUpdateDisplayDpi, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    auto shouldProcess = ssm_->ShouldUpdateDisplayDpi(nullptr);
+    EXPECT_FALSE(shouldProcess);
+}
+/**
+ * @tc.name: ShouldUpdateDisplayDpi001
+ * @tc.desc: ShouldUpdateDisplayDpi when rootSceneSession_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, ShouldUpdateDisplayDpi001, TestSize.Level1)
+{
+    ASSERT_NE(nullptr, ssm_);
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    auto oldRootSceneSession = ssm_->rootSceneSession_;
+    ssm_->rootSceneSession_ = nullptr;
+    auto shouldProcess = ssm_->ShouldUpdateDisplayDpi(displayInfo);
+    EXPECT_FALSE(shouldProcess);
+    ssm_->rootSceneSession_ = oldRootSceneSession;
+}
+
+/**
+ * @tc.name: ShouldUpdateDisplayDpi002
+ * @tc.desc: ShouldUpdateDisplayDpi when type VIRTUAL_PIXEL_RATIO_CHANGE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SceneSessionManagerAttributeTest, ShouldUpdateDisplayDpi002, TestSize.Level1)
+{
+    DisplayId defaultDisplayId = 1;
+    sptr<DisplayInfo> displayInfo = sptr<DisplayInfo>::MakeSptr();
+    constexpr float virtualPixelRatio = 2.0f;
+    displayInfo->SetVirtualPixelRatio(virtualPixelRatio);
+    displayInfo->SetDensityInCurResolution(virtualPixelRatio);
+    displayInfo->SetDisplayId(defaultDisplayId);
+    system::SetParameter("const.product.has_buildin_screen", "0");
+
+    UpdateDisplayDpiChangeFunc func = [](DisplayId displayId, float density) {};
+    ssm_->SetUpdateDisplayDpiChangeCallback(func);
+
+    ASSERT_NE(nullptr, ssm_);
+    auto shouldProcess = ssm_->ShouldUpdateDisplayDpi(displayInfo);
+    EXPECT_TRUE(shouldProcess);
+    ssm_->updateDisplayDpiChangeFunc_ = nullptr;
+}
+
+/**
  * @tc.name: ShouldProcessVirtualPixelRatioChange
  * @tc.desc: ShouldProcessVirtualPixelRatioChange when displayInfo is nullptr
  * @tc.type: FUNC
