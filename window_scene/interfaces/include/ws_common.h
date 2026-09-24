@@ -1757,14 +1757,18 @@ enum class KioskType : int32_t {
 
 struct PreWindowProperty {
     uint32_t rotation = 0;
+    int32_t posX = 0;
+    int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
 
     PreWindowProperty() {}
 
-    PreWindowProperty(uint32_t rotation, uint32_t width, uint32_t height)
+    PreWindowProperty(uint32_t rotation, int32_t posX, int32_t posY, uint32_t width, uint32_t height)
     {
         this->rotation = rotation;
+        this->posX = posX;
+        this->posY = posY;
         this->width = width;
         this->height = height;
     }

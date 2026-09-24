@@ -6457,20 +6457,24 @@ PrelayoutContext Session::GetPrelayoutContext()
 
     // Enable prelayout only for game prelaunch to improve launch experience.
     ctx.enable = sessionInfo_.isGamePrelaunch_;
-    if (!ctx.enable && !sessionInfo_.isPrelaunch_) {
+    auto windowCreateParams = GetSessionInfo().windowCreateParams;
+    bool isMinimizeOnStart = windowCreateParams != nullptr ? windowCreateParams->minimizeOnStart : false;
+    if (!ctx.enable && !sessionInfo_.isPrelaunch_ && !isMinimizeOnStart) {
         return ctx;
     }
 
     const auto preCalc = PreCalcWindowProperty();
 
-    // Use pre-calculated size as initial window rect (position defaults to origin).
+    // Use pre-calculated size as initial window rect. Position is applied only for minimizeOnStart.
+    bool minimizeOnStart = (windowCreateParams != nullptr && windowCreateParams->minimizeOnStart);
     ctx.winRect = {
-        0, 0,
+        minimizeOnStart ? preCalc.posX : 0,
+        minimizeOnStart ? preCalc.posY : 0,
         static_cast<int32_t>(preCalc.width),
         static_cast<int32_t>(preCalc.height)
     };
 
-    if (sessionInfo_.isPrelaunch_ && !ctx.enable) {
+    if ((sessionInfo_.isPrelaunch_ && !ctx.enable) || minimizeOnStart) {
         TLOGD(WmsLogTag::WMS_LAYOUT, "id: %{public}d, only initialize winRect, ctx: %{public}s",
             GetPersistentId(), ctx.ToString().c_str());
         return ctx;
@@ -6503,8 +6507,11 @@ void Session::HandleInitialRect(const PrelayoutContext& ctx)
         return;
     }
 
-    const std::optional<WSRect> rect =
-        (ctx.enable || sessionInfo_.isPrelaunch_) ? std::make_optional(ctx.winRect) : std::nullopt;
+    auto windowCreateParams = GetSessionInfo().windowCreateParams;
+    bool minimizeOnStart = (windowCreateParams != nullptr && windowCreateParams->minimizeOnStart);
+    const std::optional<WSRect> rect = (ctx.enable || sessionInfo_.isPrelaunch_ || minimizeOnStart)
+        ? std::make_optional(ctx.winRect)
+        : std::nullopt;
 
     NotifyClientToUpdateRect("Connect", rect, nullptr);
 

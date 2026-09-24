@@ -10071,38 +10071,48 @@ napi_value JsSceneSession::NotifyPreCalcWindowProperty(napi_env env, napi_callba
 
 napi_value JsSceneSession::OnNotifyPreCalcWindowProperty(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGC_FOUR;
-    napi_value argv[ARGC_FOUR] = { nullptr };
+    size_t argc = ARGC_FIVE;
+    napi_value argv[ARGC_FIVE] = { nullptr };
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
-    if (argc != ARGC_THREE) {
+    if (argc != ARGC_FIVE) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Argc count is invalid: %{public}zu", argc);
         napi_throw(env, CreateJsError(env, static_cast<int32_t>(WSErrorCode::WS_ERROR_INVALID_PARAM),
             "Input Parameter is missing or invalid"));
         return NapiGetUndefined(env);
     }
     uint32_t rotation = 0;
+    int32_t posX = 0;
+    int32_t posY = 0;
     uint32_t width = 0;
     uint32_t height = 0;
-    if (!ConvertFromJsValue(env, argv[0], rotation)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_0], rotation)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: rotation");
         return NapiGetUndefined(env);
     }
-    if (!ConvertFromJsValue(env, argv[ARGC_ONE], width)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_1], posX)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: posX");
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_2], posY)) {
+        TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: posY");
+        return NapiGetUndefined(env);
+    }
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_3], width)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: width");
         return NapiGetUndefined(env);
     }
-    if (!ConvertFromJsValue(env, argv[ARGC_TWO], height)) {
+    if (!ConvertFromJsValue(env, argv[ARG_INDEX_4], height)) {
         TLOGE(WmsLogTag::WMS_ROTATION, "Failed to convert parameter to callbackType: height");
         return NapiGetUndefined(env);
     }
-    TLOGI(WmsLogTag::WMS_ROTATION, "[%{public}u, %{public}u, %{public}u]",
-        rotation, width, height);
+    TLOGI(WmsLogTag::WMS_ROTATION, "[%{public}u, %{public}d, %{public}d, %{public}u, %{public}u]",
+        rotation, posX, posY, width, height);
     auto session = weakSession_.promote();
     if (session == nullptr) {
         TLOGE(WmsLogTag::WMS_ROTATION, "session is nullptr, id:%{public}d", persistentId_);
         return NapiGetUndefined(env);
     }
-    session->preWindowPropertyFuture_.SetValue(PreWindowProperty(rotation, width, height));
+    session->preWindowPropertyFuture_.SetValue(PreWindowProperty(rotation, posX, posY, width, height));
     return NapiGetUndefined(env);
 }
 
