@@ -1486,7 +1486,7 @@ private:
      * UIExtension
      */
     void DestroyUIServiceExtensionSubWindow(const sptr<SceneSession>& sceneSession);
-    WSError CheckSubSessionStartedByExtension(const sptr<IRemoteObject>& token,
+    WSErrorResult CheckSubSessionStartedByExtension(const sptr<IRemoteObject>& token,
         const sptr<WindowSessionProperty>& property);
     void SetExtensionSubSessionDisplayId(const sptr<WindowSessionProperty>& property,
         const sptr<ISessionStage>& sessionStage);
