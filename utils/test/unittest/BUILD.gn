@@ -103,6 +103,7 @@ ohos_unittest("utils_surface_reader_test") {
   deps = [ ":utils_unittest_common" ]
 
   external_deps = test_external_deps
+  external_deps += [ "graphic_surface:surface" ]
 }
 
 ohos_unittest("utils_display_info_test") {
