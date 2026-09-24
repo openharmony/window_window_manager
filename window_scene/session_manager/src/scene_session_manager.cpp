@@ -5260,15 +5260,18 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
 {
     if (!CheckSystemWindowPermission(property) || !CheckModalSubWindowPermission(property)) {
         TLOGE(WmsLogTag::WMS_LIFE, "create system window or modal subwindow permission denied!");
-        return WSErrorResult{WSError::WS_ERROR_NOT_SYSTEM_APP,
-            "Permission denied for creating a system window or a modal subwindow."};
+        std::string message = WindowHelper::IsSystemWindow(property->GetWindowType())
+            ? "Cannot create a system window."
+            : "Only system applications are allowed to create modal topmost subwindows.";
+        return WSErrorResult{WSError::WS_ERROR_NOT_SYSTEM_APP, message};
     }
 
     auto parentSession = GetSceneSession(property->GetParentPersistentId());
     WSError processCheckRet = CheckSubWindowCallingProcess(property, parentSession);
     if (processCheckRet != WSError::WS_OK) {
         TLOGE(WmsLogTag::WMS_LIFE, "subwindow calling process check failed!");
-        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "Subwindow calling process verification failed."};
+        return WSErrorResult{WSError::WS_ERROR_INVALID_OPERATION, "The parent window and the subwindow are not "
+            "created by the same process."};
     }
     if (parentSession) {
         auto parentProperty = parentSession->GetSessionProperty();
@@ -5313,10 +5316,9 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
     }
 
     if (property->GetWindowType() == WindowType::WINDOW_TYPE_APP_SUB_WINDOW && property->GetIsUIExtFirstSubWindow()) {
-        WSError err = CheckSubSessionStartedByExtension(token, property);
-        if (err != WSError::WS_OK) {
-            return WSErrorResult{err,
-                "The extension ability type or the parent of the extension subwindow is invalid."};
+        WSErrorResult result = CheckSubSessionStartedByExtension(token, property);
+        if (result.errCode != WSError::WS_OK) {
+            return result;
         }
         SetExtensionSubSessionDisplayId(property, sessionStage);
     }
@@ -5414,50 +5416,51 @@ WSErrorResult SceneSessionManager::CreateAndConnectSpecificSession(const sptr<IS
     return taskScheduler_->PostSyncTask(task, "CreateAndConnectSpecificSession");
 }
 
-WSError SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<IRemoteObject>& token,
+WSErrorResult SceneSessionManager::CheckSubSessionStartedByExtension(const sptr<IRemoteObject>& token,
     const sptr<WindowSessionProperty>& property)
 {
     sptr<SceneSession> extensionParentSession = GetSceneSession(property->GetParentPersistentId());
     if (extensionParentSession == nullptr) {
         TLOGE(WmsLogTag::WMS_UIEXT, "extensionParentSession is invalid with %{public}d",
             property->GetParentPersistentId());
-        return WSError::WS_ERROR_NULLPTR;
+        return WSErrorResult{WSError::WS_ERROR_NULLPTR, "Internal task error, extensionParentSession is null."};
     }
     if (extensionParentSession->GetSessionInfo().isSystem_) {
         TLOGE(WmsLogTag::WMS_UIEXT, "extensionParentSession is SCBSystemSession: %{public}d",
             property->GetParentPersistentId());
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "The parent of the extension cannot be used to "
+            "create a subwindow."};
     }
     AAFwk::UIExtensionSessionInfo info;
     AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionSessionInfo(token, info);
     // Check if session blocks subwindow
     if (info.isBlockSubwindow) {
         TLOGE(WmsLogTag::WMS_UIEXT, "create agent subwindow denied!");
-        return WSError::WS_ERROR_INVALID_WINDOW;
+        return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "An AgentUIExtensionAbility cannot create a subwindow."};
     }
     auto pid = IPCSkeleton::GetCallingRealPid();
     auto parentPid = extensionParentSession->GetCallingPid();
     if (pid == parentPid) { // Determine Whether to create a sub window in the same process.
         TLOGI(WmsLogTag::WMS_UIEXT, "pid == parentPid");
-        return WSError::WS_OK;
+        return WSErrorResult{WSError::WS_OK};
     }
     if (info.persistentId != INVALID_SESSION_ID && info.hostWindowId != INVALID_SESSION_ID) {
         int32_t parentId = static_cast<int32_t>(info.hostWindowId);
         // Check the parent ids are the same in cross-process scenarios.
         if (parentId == property->GetParentPersistentId()) {
             TLOGD(WmsLogTag::WMS_UIEXT, "parentId == property->GetParentPersistentId(parentId:%{public}d)", parentId);
-            return WSError::WS_OK;
+            return WSErrorResult{WSError::WS_OK};
         }
     }
     if (SessionPermission::IsSystemCalling()) {
         TLOGD(WmsLogTag::WMS_UIEXT, "is system app");
-        return WSError::WS_OK;
+        return WSErrorResult{WSError::WS_OK};
     }
 
     TLOGE(WmsLogTag::WMS_UIEXT,
         "can't create sub window: persistentId:%{public}d, parentPersistentId:%{public}d, hostWindowId:%{public}d",
         property->GetPersistentId(), property->GetParentPersistentId(), info.hostWindowId);
-    return WSError::WS_ERROR_INVALID_WINDOW;
+    return WSErrorResult{WSError::WS_ERROR_INVALID_WINDOW, "Internal task error"};
 }
 
 void SceneSessionManager::SetExtensionSubSessionDisplayId(const sptr<WindowSessionProperty>& property,
